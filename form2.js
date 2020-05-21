@@ -7,10 +7,10 @@ const getInnerHtml = (element, html) => {return document.getElementById(element)
 // function to process our form
 const showItem = (element, value) => {
     const voalue = idValue(value)
-    if (typeof voalue == 'string') {
+    if (typeof voalue == 'string') {       
         return document.getElementById(element).innerHTML = voalue.toUpperCase()
     } else {
-        return document.getElementById(element).innerHTML = `£ ${voalue}`
+        return document.getElementById(element).innerHTML = voalue
     }
 }
 
@@ -34,6 +34,14 @@ const processForm = () => {
     })
 
     console.log(localStorage.getItem('formData'))
+
+    const showAlert = (element) => {
+        alert(element)
+    }
+
+    document.querySelector('.myClick').addEventListener('click', ()=>alert('we are super fine Dude'))
+
+
 
 
 
