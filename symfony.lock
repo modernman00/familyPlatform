@@ -1,0 +1,135 @@
+{
+    "altorouter/altorouter": {
+        "version": "v1.2.0"
+    },
+    "composer/xdebug-handler": {
+        "version": "1.4.1"
+    },
+    "doctrine/inflector": {
+        "version": "1.4.3"
+    },
+    "dompdf/dompdf": {
+        "version": "v0.8.5"
+    },
+    "filp/whoops": {
+        "version": "2.7.2"
+    },
+    "illuminate/container": {
+        "version": "v5.8.36"
+    },
+    "illuminate/contracts": {
+        "version": "v5.8.36"
+    },
+    "illuminate/events": {
+        "version": "v5.8.36"
+    },
+    "illuminate/filesystem": {
+        "version": "v5.8.36"
+    },
+    "illuminate/support": {
+        "version": "v5.8.36"
+    },
+    "illuminate/view": {
+        "version": "v5.8.36"
+    },
+    "nesbot/carbon": {
+        "version": "2.35.0"
+    },
+    "pdepend/pdepend": {
+        "version": "2.7.1"
+    },
+    "phenx/php-font-lib": {
+        "version": "0.5.2"
+    },
+    "phenx/php-svg-lib": {
+        "version": "v0.3.3"
+    },
+    "philo/laravel-blade": {
+        "version": "v3.1"
+    },
+    "php": {
+        "version": "7.3"
+    },
+    "phpmailer/phpmailer": {
+        "version": "v6.1.6"
+    },
+    "phpmd/phpmd": {
+        "version": "2.8.2"
+    },
+    "phpoption/phpoption": {
+        "version": "1.7.3"
+    },
+    "psr/container": {
+        "version": "1.0.0"
+    },
+    "psr/log": {
+        "version": "1.1.3"
+    },
+    "psr/simple-cache": {
+        "version": "1.0.1"
+    },
+    "sabberworm/php-css-parser": {
+        "version": "8.3.1"
+    },
+    "symfony/config": {
+        "version": "v5.1.0"
+    },
+    "symfony/debug": {
+        "version": "v4.4.9"
+    },
+    "symfony/dependency-injection": {
+        "version": "v5.1.0"
+    },
+    "symfony/deprecation-contracts": {
+        "version": "v2.1.2"
+    },
+    "symfony/filesystem": {
+        "version": "v5.1.0"
+    },
+    "symfony/finder": {
+        "version": "v4.4.9"
+    },
+    "symfony/flex": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "1.0",
+            "ref": "c0eeb50665f0f77226616b6038a9b06c03752d8e"
+        },
+        "files": [
+            "./.env"
+        ]
+    },
+    "symfony/polyfill-ctype": {
+        "version": "v1.17.0"
+    },
+    "symfony/polyfill-mbstring": {
+        "version": "v1.17.0"
+    },
+    "symfony/polyfill-php80": {
+        "version": "v1.17.0"
+    },
+    "symfony/service-contracts": {
+        "version": "v2.1.2"
+    },
+    "symfony/translation": {
+        "version": "3.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.3",
+            "ref": "2ad9d2545bce8ca1a863e50e92141f0b9d87ffcd"
+        },
+        "files": [
+            "./config/packages/translation.yaml",
+            "./translations/.gitignore"
+        ]
+    },
+    "symfony/translation-contracts": {
+        "version": "v2.1.2"
+    },
+    "vlucas/phpdotenv": {
+        "version": "v3.6.5"
+    }
+}

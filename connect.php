@@ -4,25 +4,25 @@ session_start();
 
 class user{
 
-    protected $username = filter_input(INPUT_POST, 'username');
-    protected $password = filter_input(INPUT_POST, 'password');
-    protected $email = filter_input(INPUT_POST, 'email');
-    protected $fullname = filter_input(INPUT_POST, 'fullname');
-    protected $gender = filter_input(INPUT_POST, 'interests');
-    protected $parent1 = filter_input(INPUT_POST, 'parent1');
-    protected $parent = filter_input(INPUT_POST, 'parent');
-    protected $children = filter_input(INPUT_POST, 'children');
-    protected $_SESSION["user"] = $username;
-    protected $_SESSION["pass"] = $password;
-    protected $_SESSION["email"] = $email;
-    protected $_SESSION["fullname"] = $fullname;
+    // protected $username = filter_input(INPUT_POST, 'username');
+    // protected $password = filter_input(INPUT_POST, 'password');
+    // protected $email = filter_input(INPUT_POST, 'email');
+    // protected $fullname = filter_input(INPUT_POST, 'fullname');
+    // protected $gender = filter_input(INPUT_POST, 'interests');
+    // protected $parent1 = filter_input(INPUT_POST, 'parent1');
+    // protected $parent = filter_input(INPUT_POST, 'parent');
+    // protected $children = filter_input(INPUT_POST, 'children');
+    // protected $_SESSION["user"] = $username;
+    // protected $_SESSION["pass"] = $password;
+    // protected $_SESSION["email"] = $email;
+    // protected $_SESSION["fullname"] = $fullname;
     
-    protected $targetDir = "pictures/"
-    protected $fileName = basename($_FILES["file"]["name"]);)
-    protected $targetFilePath = "pictures/".$fileName;
-    protected $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+    // protected $targetDir = "pictures/"
+    // protected $fileName = basename($_FILES["file"]["name"]);)
+    // protected $targetFilePath = "pictures/".$fileName;
+    // protected $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
 
-    protected connection  = mysqli_connect ("localhost", "root", "", "family");
+    // protected connection  = mysqli_connect ("localhost", "root", "", "family");
 
     function login($username, $password){
         if(!empty($username)){

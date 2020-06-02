@@ -1,0 +1,40 @@
+{   "name": "lef/family",
+    "description": "family platform",
+    "authors" : [
+        {
+            "name": "Jumoke and Olutobi Olaogun",
+            "email": "modernman00@yahoo.com"
+        }
+    ],     
+
+	   "autoload": {
+        "psr-4": {
+             "App\\": "app/"
+
+        },
+
+        "files": ["app/function/helper.php",
+            "app/function/email/sendEmail.php"
+        ]
+    },
+
+	"require": {
+		"dompdf/dompdf": "^0.8.3",
+        "ext-gd": "*",
+         "vlucas/phpdotenv": "^3.6",
+        "altorouter/altorouter": "^1.2",
+        "philo/laravel-blade": "^3.1",
+        "symfony/flex":"^1.6.3",
+        "filp/whoops": "^2.7",
+        "phpmailer/phpmailer": "^6.1"
+
+    },
+    
+    "require-dev": {
+        "phpmd/phpmd" : "@stable"
+    },
+
+	 "config": {
+        "optimize-autoloader": true
+    }
+}
