@@ -1,0 +1,45 @@
+{
+  "name": "family",
+  "version": "1.0.0",
+  "description": "family app",
+  "main": "index",
+  "typings": "index",
+  "scripts": {
+    "compile:sass": "node-sass resources/asset/sass/main.scss public/css/index.css -w",
+    "dev": "npm run development",
+    "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "watch": "npm run development -- --watch",
+    "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "prod": "npm run production",
+    "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modernman00/js.git"
+  },
+  "author": "the olaoguns",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modernman00/js/issues"
+  },
+  "homepage": "https://github.com/modernman00/js#readme",
+  "devDependencies": {
+    "cross-env": "^6.0.3",
+    "laravel-mix": "^5.0.0",
+    "node-sass": "^4.13.1",
+    "resolve-url-loader": "^3.1.0",
+    "sass-loader": "^8.0.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.41.2"
+  },
+  "dependencies": {
+    "bulma": "^0.8.0",
+    "fibers": "^4.0.2",
+    "g": "^2.0.1",
+    "gauge-chart": "^0.5.3",
+    "jquery": "^3.4.1",
+    "npm": "^6.13.7",
+    "sass": "^1.23.1",
+    "svg-gauge": "^1.0.6"
+  }
+}

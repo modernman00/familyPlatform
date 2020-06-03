@@ -128,7 +128,7 @@ class Sanitise extends Insert
 
     public function getErr()
     {
-       return $this->error;
+        return $this->error;
     }
 
     /**
@@ -141,8 +141,7 @@ class Sanitise extends Insert
         try {
             $this->runFunctions();
 
-            if (count($this->error > 0 ))
-            {
+            if (count($this->error > 0)) {
                 return "Error";
             } else {
                 return $this->sanitisedData;
@@ -151,5 +150,4 @@ class Sanitise extends Insert
             echo $th->getMessage();
         }
     }
-        
 }
