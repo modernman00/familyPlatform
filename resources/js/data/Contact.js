@@ -22,10 +22,10 @@ export const Contact =  [
      },
 
       {
-        label : 'Region',
+        label : 'Country',
         attribute: 'region',
-        type: 'select',
-        options: ['England', 'Scotland', 'Wales']
+        placeholder: 'Your country of residence',
+        type: 'text'
      }
 
     ]
