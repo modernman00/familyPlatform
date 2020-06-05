@@ -7,7 +7,7 @@ class Register extends Base
 {
     private $cleanData;
 
-    public function Index ()
+    public function index ()
     {
         echo "welcome to the regiuster";
     }
