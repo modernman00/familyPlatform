@@ -7,6 +7,13 @@ class Register extends Base
 {
     private $cleanData;
 
+    public function Index ()
+    {
+        echo "welcome to the regiuster";
+    }
+
+
+
     public function processForm($array, $table, $data =null) 
     {
         $sanitise = new Sanitise($array, $data);
