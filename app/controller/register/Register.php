@@ -9,7 +9,7 @@ class Register extends Base
 
     public function index ()
     {
-        echo "welcome to the regiuster";
+        
     }
 
 

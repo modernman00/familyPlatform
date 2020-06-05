@@ -6,6 +6,6 @@ class About {
 
     public function index()
     {
-       
+       view('about');
     }
 }

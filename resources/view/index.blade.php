@@ -3,6 +3,6 @@
 @section('title', 'Home page')
 
 @section('content')
-<p> Welcome to the OLAOGUN FAMILY PLATFORM</p>
+<h1> Welcome to the OLAOGUN FAMILY PLATFORM</h1>
 
 @endsection
