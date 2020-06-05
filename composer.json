@@ -22,7 +22,7 @@
 		"dompdf/dompdf": "^0.8.3",
         "ext-gd": "*",
          "vlucas/phpdotenv": "^3.6",
-        "altorouter/altorouter": "^1.2",
+        "altorouter/altorouter": "^2.0",
         "philo/laravel-blade": "^3.1",
         "symfony/flex":"^1.6.3",
         "filp/whoops": "^2.7",

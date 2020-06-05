@@ -8,16 +8,23 @@ use App\classes\CheckToken;
 
 class Db extends CheckToken
 {
-    private $serverName = getenv('DB_HOST');
-    private $dbName = getenv('DB_NAME');
-    private $username = getenv('DB_USERNAME');
-    private $password = getenv("DB_PASSWORD");
+    private function dbVariables()
+    {
+        return $dbVar  = [
+            'host' => getenv('DB_HOST'),
+            'name'=> getenv('DB_NAME'),
+            'username'=>getenv('DB_USERNAME'),
+            'password'=>getenv("DB_PASSWORD")
+        ];
+
+    }
 
     function connect()
     {
         try {
+            $dbVar = $this->dbVariables();
             //create a new connection variable
-            $conn = new PDO("mysql:host=$this->serverName; dbname=$this->dbName", $this->username, $this->password);
+            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}", $dbVar['username'], $dbVar['password']);
 
             $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
