@@ -9,7 +9,7 @@ export const Login = [
         label : 'password',
         attribute: 'password',
         placeholder: 'SN55DE',
-        type: 'passwor'
+        type: 'password'
      }
      
 ]
