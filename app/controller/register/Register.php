@@ -9,7 +9,7 @@ class Register extends Base
 
     public function index ()
     {
-        
+        view('register');
     }
 
 

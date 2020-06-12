@@ -1,18 +1,12 @@
-@extends('baseBulma')
+@extends('base')
 
 @section('title','login')
 @section('content')
-<div class="field">
-  <label class="label">Name</label>
-  <div class="control">
-    <input class="input" type="text" placeholder="e.g Alex Smith">
-  </div>
-</div>
 
-<div class="field">
-  <label class="label">Email</label>
-  <div class="control">
-    <input class="input" type="email" placeholder="e.g. alexsmith@gmail.com">
-  </div>
+<h2> Login Page </h2>
+<div class="form-group" id="login">
+
+  <button type="button" id="submit" class="btn btn-primary">Submit</button>
+ 
 </div>
 @endsection
