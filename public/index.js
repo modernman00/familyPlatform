@@ -97,11 +97,22 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Input", function() { return Input; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Select", function() { return Select; });
+/**
+ * 
+ * @param {That is the obj name} objData 
+ * @param {* this is the div id} htmlId 
+ */
 var Input = function Input(objData, htmlId) {
-  objData.forEach(function (element) {
-    if (element.type != 'select') {
+  objData.map(function (element) {
+    if (element.type != 'select' && !element.options) {
       var renderHtml = "\n             <label for =".concat(element.attribute, "> ").concat(element.label, "</label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\" placeholder=\"").concat(element.placeholder, "\"/>\n            <small id =").concat(element.attribute, "-small></small><br>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
+    } else if (element.type === 'select') {
+      var _renderHtml = "<label for =".concat(element.attribute, "> ").concat(element.label, "</label>   \n          <select class=\"form-control\" id=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
+        return "<option>".concat(el, "</option>");
+      }), "             \n             \n          </select>     \n           <small id =").concat(element.attribute, "-small></small><br>\n          ");
+
+      document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
     }
   });
 };
@@ -252,15 +263,34 @@ __webpack_require__.r(__webpack_exports__);
 var Personal = [{
   label: 'What is your name?',
   attribute: 'firstName',
-  placeholder: 'James'
+  placeholder: 'James',
+  type: 'text'
 }, {
   label: 'What is your last name?',
   attribute: 'lastName',
-  placeholder: 'Edwards'
+  placeholder: 'Edwards',
+  type: 'text'
 }, {
   label: "Father's name?",
   attribute: 'fatherName',
-  placeholder: 'Your Father name and last name'
+  placeholder: 'Your Father name and last name',
+  type: 'text'
+}, {
+  label: "Mother's name?",
+  attribute: 'motherName',
+  placeholder: 'Your Mother name and last name',
+  type: 'text'
+}, {
+  label: "date?",
+  attribute: 'date',
+  placeholder: 'date',
+  type: 'date'
+}, {
+  label: "Kids",
+  attribute: 'kids',
+  placeholder: null,
+  type: 'select',
+  options: [0, 1, 2, 3, 4, 5, 6]
 }];
 
 /***/ }),
