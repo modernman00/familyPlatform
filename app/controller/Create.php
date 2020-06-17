@@ -1,15 +1,31 @@
-<?php 
+<?php
 
-namespace App\controller;
+namespace App\controller;;
 
-use App\classes\tables\Register;
+use App\classes\tables\{
+    Contact,
+    Personal,
+    Work,
+};
 
-class Create 
+use App\controller\Base;
+
+class Create
 {
-    function index()
+    public function index()
     {
-        $table = new Register;
-        $table->index();
+        $table = [
+            new Personal,
+            new Work,
+            new Contact
+        ];
+        
+        try {
+            for ($i = 0; $i < count($table); $i++) {
+                $table[$i]->index();
+            }
+        } catch (\Throwable $e) {
+            echo $e->getMessage();
+        }
     }
-
 }
