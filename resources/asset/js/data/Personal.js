@@ -44,7 +44,7 @@
         options: ['male','female']
       },
       {
-        label : "Number of siblinga",
+        label : "Number of siblings",
         attribute: 'noSiblings',
         placeholder: null,
         type : 'select',

@@ -24,12 +24,12 @@ import { type } from "jquery";
         attribute: 'workEmail',
         placeholder: 'enter your work email',
         type: 'text',
-      }
+      },
       {
         label : "Years with employer",
         attribute: 'employers',
         placeholder: null,
         type : 'select',
         options: [0, 1, 2, 3, 4, 5, 6]
-      },
+      }
 ]
