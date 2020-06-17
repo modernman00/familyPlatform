@@ -27,6 +27,11 @@ export const Input = (objData, htmlId) => {
           `
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
     }
+    else if(element.type === 'radio'){
+      const renderHtml = `<label for =${element.attribute}> ${element.label}</label> 
+      <input class="form-check-input" type="radio" name="element.attribute" id="element.attribute" value=" gyguuiuuiy  " >
+      `
+    }
 
   })
 
