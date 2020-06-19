@@ -22,7 +22,7 @@ class RouteDispatch
             }
         } else {
             
-            return view('error/error');
+            return view('error/genError');
         }
     }
 }

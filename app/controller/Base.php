@@ -1,9 +1,9 @@
 <?php
 
 namespace App\controller;
-use App\classes\Insert;
+use App\classes\AllFunctionalities;
 
-class Base extends Insert
+class Base extends Allfunctionalities
 {
 
 }

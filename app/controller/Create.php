@@ -7,9 +7,6 @@ use App\classes\tables\{
     Personal,
     Work,
 };
-
-use App\controller\Base;
-
 class Create
 {
     public function index()

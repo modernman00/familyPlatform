@@ -11,6 +11,7 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     
     <link rel="stylesheet" href="index.css">
+    <noscript><link rel="stylesheet" href="noscript.css" /></noscript>
     
   </head>
   <body>

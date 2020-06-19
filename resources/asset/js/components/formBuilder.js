@@ -14,7 +14,7 @@ export const Input = (objData, htmlId) => {
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
     } else if (element.type === 'select') {
       const renderHtml = `<label for =${element.attribute}> ${element.label}</label>   
-          <select class="form-control" id=${element.attribute}>
+          <select class="form-control" id=${element.attribute} name=${element.attribute}>
                 <option>SELECT</option> 
                 ${
                     element.options.map(el => {

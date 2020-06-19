@@ -1,3 +1,4 @@
+
 <?php
 
 $router = new AltoRouter;

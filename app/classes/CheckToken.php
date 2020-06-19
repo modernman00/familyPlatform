@@ -7,11 +7,12 @@ class CheckToken
 {
     protected function checkToken($tokenName)
     {
+      
         $sessionToken = $_SESSION[$tokenName];
         $postToken = $_POST[$tokenName];
     
          if($sessionToken != $postToken) {
-                throw new Exception("Error Processing Request", 1);      
+                throw new Exception("Hmmm -> Are you sure you are not a Robot?", 1);      
             }
     }
 }

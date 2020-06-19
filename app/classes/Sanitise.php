@@ -3,6 +3,7 @@
 namespace App\classes;
 
 use App\classes\Insert;
+use Exception;
 
 class Sanitise extends Insert
 {
@@ -21,7 +22,8 @@ class Sanitise extends Insert
      */
     public function __construct(array $array, array $data = null)
     {
-        unset($array['submit']);
+       try {
+         unset($array['submit']);
         $this->checkToken('token');
 
         $this->formData = $array;
@@ -29,7 +31,10 @@ class Sanitise extends Insert
         $this->key = array_keys($this->formData);
         $this->value = array_values($this->formData);
         $this->dataCount = count($this->value);
-        $this->dataLength = $data ?? null;
+        $this->dataLength = $data ?? null;  //code...
+       } catch (\Throwable $th) {
+            echo " Are you humna or robot";
+       } 
     }
 
     private function emailVal()
@@ -141,13 +146,14 @@ class Sanitise extends Insert
         try {
             $this->runFunctions();
 
-            if (count($this->error > 0)) {
-                return "Error";
-            } else {
-                return $this->sanitisedData;
-            }
+            if (count($this->error) > 0) return "Error";
+            
+            return $this->cleanData;
+            
         } catch (\Throwable $th) {
             echo $th->getMessage();
+        } catch ( Exception $e) {
+            echo $e->getMessage();
         }
     }
 }

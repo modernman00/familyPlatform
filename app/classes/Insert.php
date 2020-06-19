@@ -1,32 +1,43 @@
 <?php
 
 namespace App\classes;
+use Exception;
 
 class Insert extends Db
 {
-    public function submitForm($table, $array)
+    public function submitForm($table, $field)
     {
         try {
         
              // EXTRACT THE KEY FOR THE COL NAME
-            $key = array_keys($array);
+            $key = array_keys($field);
             $col = implode(', ', $key);
+
+          
+
             // extract values
-            $value = array_values($array);
-            $val = implode(', :', $value);
+            // $value = array_values($field);
+            $placeholder = implode(', :', $key);
 
             // prep statement using placeholder :name
-            $stmt = "INSERT INTO $table ($col) VALUES (:$val)";
+            $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
             $query = $this->connect()->prepare($stmt);
-            foreach($array as $key => $value){
-                $query->bindParam(":$key", $value);
+            if(!$query) throw new Exception("Not able to insert data", 1);
+            
+            foreach ($field as $keys => $values){
+              
+                $query->bindValue(":$keys", $values);
             }
-            return $query->execute();
+            $outcome = $query->execute();
+           
+            if(!$outcome) throw new Exception("Not able to execute data", 1);
+            
 
         } catch (\PDOException $e) {
             echo $e->getMessage();
+             echo $e->getLine();
         } catch (\Throwable $th) {
-           echo $e->getMessage();
+           echo $th->getMessage();
         }
        
        

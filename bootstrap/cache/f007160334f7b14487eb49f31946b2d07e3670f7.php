@@ -1,9 +1,14 @@
 <?php $__env->startSection('title','register'); ?>
 <?php $__env->startSection('content'); ?>
 
-<form action="">
+<form action="/register" method="POST">
 
-   <h2>Personal Details</h2> <br>
+<?php $token = urlencode(base64_encode((random_bytes(32))));
+$_SESSION['token'] = $token;
+?>
+
+
+    <h2>Personal Details</h2> <br>
     <div id="personal" class="form-group"></div>
 
     <h2>Contact</h2>
@@ -12,7 +17,9 @@
     <h2>Work details</h2>
     <div id="work" class="form-group"></div>
 
-      <button type="button" id="submit" class="btn btn-primary">Submit</button>
+    <input type="hidden" name="token" value= <?php echo e($token); ?>>
+
+      <button type="submit" id="submit" class="btn btn-primary">Submit</button>
 </form>
 
  

@@ -27,7 +27,7 @@ import { type } from "jquery";
       },
       {
         label : "Years with employer",
-        attribute: 'employers',
+        attribute: 'employer',
         placeholder: null,
         type : 'select',
         options: [0, 1, 2, 3, 4, 5, 6]

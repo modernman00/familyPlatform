@@ -10992,7 +10992,7 @@ var Input = function Input(objData, htmlId) {
       var renderHtml = "\n             <label for =".concat(element.attribute, "> ").concat(element.label, "</label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\" placeholder=\"").concat(element.placeholder, "\"/>\n            <small id =").concat(element.attribute, "-small></small><br>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
-      var _renderHtml = "<label for =".concat(element.attribute, "> ").concat(element.label, "</label>   \n          <select class=\"form-control\" id=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
+      var _renderHtml = "<label for =".concat(element.attribute, "> ").concat(element.label, "</label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
         return "<option>".concat(el, "</option>");
       }), "             \n             \n          </select>     \n           <small id =").concat(element.attribute, "-small></small><br>\n          ");
 
@@ -11236,7 +11236,7 @@ var Work = [{
   type: 'text'
 }, {
   label: "Years with employer",
-  attribute: 'employers',
+  attribute: 'employer',
   placeholder: null,
   type: 'select',
   options: [0, 1, 2, 3, 4, 5, 6]
