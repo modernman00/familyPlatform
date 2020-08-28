@@ -13,7 +13,7 @@ class Register extends Insert
 
     public function index()
     {
-        view('register');
+        view('registration/register');
     }
 
 /**

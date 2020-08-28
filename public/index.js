@@ -11296,7 +11296,7 @@ var Input = function Input(objData, htmlId) {
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
       var _renderHtml = "\n      <div class = form-group col>\n      <label for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
-        return "<option>".concat(el, "</option>");
+        return "<option value=".concat(el, ">").concat(el, "</option>");
       }), "             \n             \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
@@ -11404,6 +11404,29 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/register/modal/kids.js ***!
   \**************************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
+ // id('kids').addEventListener('onchange', (event) => {alert(event.target.value)
+// log(event.target.value)
+// }
+// )
+
+var show = function show(e) {
+  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help').innerHTML = e.target.value;
+};
+
+document.getElementById('kids').addEventListener('change', show); // id('kids').onchange = show
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/modal/siblings.js":
+/*!******************************************************************!*\
+  !*** ./resources/asset/js/components/register/modal/siblings.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -11649,7 +11672,7 @@ var Personal = [{
   type: 'date'
 }, {
   label: "Number of kids",
-  attribute: 'Kids',
+  attribute: 'kids',
   placeholder: null,
   type: 'select',
   options: [0, 1, 2, 3, 4, 5, 6]
@@ -11804,7 +11827,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_small_Input__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js");
 /* harmony import */ var _components_register_helperRegister__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/helperRegister */ "./resources/asset/js/components/register/helperRegister.js");
 /* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
-/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
+/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 

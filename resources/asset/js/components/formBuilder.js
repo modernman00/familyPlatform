@@ -24,7 +24,7 @@ export const Input = (objData, htmlId) => {
           <select class="form-control" id=${element.attribute} name=${element.attribute}>
                 <option value= 'select'>select</option> 
                 ${element.options.map(el => {
-        return `<option>${el}</option>`
+        return `<option value=${el}>${el}</option>`
       })
         }             
              

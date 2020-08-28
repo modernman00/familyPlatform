@@ -1,7 +1,5 @@
-@extends('base')
-
-@section('title','Register')
-@section('content')
+<?php $__env->startSection('title','Register'); ?>
+<?php $__env->startSection('content'); ?>
 
 
 <div class="styleForm">
@@ -38,10 +36,15 @@
         outlined in our <a href="/privacy"> PRIVACY POLICY</a></label>
     </div>
 
-    <input type="hidden" id="token" name="token" value={{ $token }}>
+    <!-- Button trigger modal -->
+
+
+    <input type="hidden" id="token" name="token" value=<?php echo e($token); ?>>
 
      <input class="btn btn-primary btn-lg submit" type="button" id="submit" name="submit"
         value="Submit Form">
+
+        
 
   </form>
 
@@ -50,4 +53,5 @@
 
 
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('base', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\familyPlatform\resources\view/registration/register.blade.php ENDPATH**/ ?>

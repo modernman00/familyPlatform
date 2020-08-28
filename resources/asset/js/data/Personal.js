@@ -51,7 +51,7 @@
          },
        {
         label : "Number of kids",
-        attribute: 'Kids',
+        attribute: 'kids',
         placeholder: null,
         type : 'select',
         options: [0, 1, 2, 3, 4, 5, 6]
