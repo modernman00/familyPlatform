@@ -6,7 +6,7 @@ import { type } from "jquery";
         attribute: 'employmentStatus',
         placeholder: null,
         options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
-        type: 'text',
+        type: 'select',
       },
       {
         label : 'Job title?',
@@ -17,7 +17,7 @@ import { type } from "jquery";
       {
         label : 'Occupation?',
         attribute: 'occupation',
-        placeholder: 'Accountant, Housewife, Business man etc',
+        placeholder: 'Accountant, Housewife, Student, Business man etc',
         type: 'text',
       },
        {

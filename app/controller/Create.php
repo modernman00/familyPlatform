@@ -1,6 +1,8 @@
 <?php
 
-namespace App\controller;;
+namespace App\controller;
+
+use App\classes\Db;
 
 use App\classes\tables\{
     Contact,
@@ -8,10 +10,11 @@ use App\classes\tables\{
     Work,
     siblings,
     kids,
-    Account
+    Account,
+    Interest
     
 };
-class Create
+class Create extends Db
 {
     public function index()
     {
@@ -21,7 +24,8 @@ class Create
             new Contact,
             new kids,
             new siblings,
-            new Account
+            new Account,
+            new Interest
         ];
         
         try {
@@ -32,4 +36,6 @@ class Create
             echo $e->getMessage();
         }
     }
+
+  
 }

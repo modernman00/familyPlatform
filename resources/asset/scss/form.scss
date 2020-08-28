@@ -2,3 +2,19 @@
     margin-left: 20%;
     margin-right: 20%;
 }
+
+.small {
+    font-size: 0.6em;
+    font-style: italic;
+    color: rgb(167, 9, 43);
+}
+
+.error {
+    color: red;
+     font-size: 1em;
+}
+
+input::placeholder{
+    font-size: 0.7em;
+    text-transform:uppercase;
+}

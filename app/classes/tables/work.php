@@ -15,6 +15,7 @@ class Work extends Insert
             $sql = "CREATE TABLE IF NOT EXISTS  `family`.`work` (  
                 `no` INT NOT NULL AUTO_INCREMENT , 
                 `id` VARCHAR(255) NOT NULL ,
+                `employmentStatus` TEXT NOT NULL , 
                 `jobTitle` TEXT NOT NULL , 
                 `occupation` TEXT NOT NULL ,
                 `employerName` TEXT NOT NULL,

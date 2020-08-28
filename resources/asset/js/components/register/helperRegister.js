@@ -1,19 +1,13 @@
 import FormHelper from '../FormHelper';
+import { id, log } from './../../global';
 import { dataToCheck } from "../../data/dataToCheck";
 
 const formInput = document.querySelectorAll('.register');
 const formInputArr = Array.from(formInput);
-const formData = new FormData(formInputArr);
+const formData = new FormHelper(formInputArr);
 
-//const id = x => document.getElementById(x)
-
-try {
 
 const process = () => {
-	// inject the help inner html
-	formData.injectData(dataToCheck.injectData.id,
-		dataToCheck.injectData.comment
-	);
 
 	// clear error from the form
 	formData.clearError()
@@ -26,62 +20,52 @@ const process = () => {
 
 
 	// check email and alert customer
-	formData.realTimeServer('email_id', '/search?hint', 'email_error')
+	// formData.realTimeServer('fatherName', '/search?hint', 'fatherName_error')
 
-	// autofill the username
-	formData.duplicate(dataToCheck.duplicate.email,
-		dataToCheck.duplicate.username
-	);
 
 	// check if password matches real time
 	formData.matchInput(dataToCheck.password.pwd,
 		dataToCheck.password.pwd2,
 		dataToCheck.password.err
 	);
-
-
-	// check if they have a referral code and unhide code
-	formData.isChecked(dataToCheck.referral.yes,
-		dataToCheck.referral.no,
-		dataToCheck.referral.hidden
-	)
-
 }
 
 process()
 
+id('submit').addEventListener('click', () => {
+	try {
 
-qSel('.submit').addEventListener('click', ()=>{
+		if (id('checkbox').checked) {
 
-	if(id('checkbox').checked) {
+			formData.emailVal() // sanitise email
 
-		formData.emailVal() // sanitise email
+			formData.massValidate();  // validate and sanitise data
+			log(formData.error)
+			if (formData.error.length <= 0) {
 
-		formData.massValidate();
+				id('submit').type = 'submit'
+				console.log('submitted')
 
-		if (formData.error.length <= 0 ) {
+			} else {
 
-			qSel('.submit').type ='submit'
-			console.log('submitted')
-
-		} else {
-
-			console.log(formData.error)
+				console.log(formData.error)
 				alert('The form cannot be submitted. Please check the errors')
 
 				process()
 
+			}
+
+		} else {
+
+			alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy')
 		}
 
-	} else {
 
-		alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy')
+	} catch (e) {
+
+		console.log(e)
+
 	}
 })
 
-} catch (e) {
-
-	console.log(e)
-
-}
 

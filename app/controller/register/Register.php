@@ -9,7 +9,7 @@ use Exception;
 class Register extends Insert 
 {
     private $cleanData;
-    private $table = ['personal', 'work', 'contact'];
+    private $table = ['personal', 'work', 'contact', 'interest', 'account'];
 
     public function index()
     {
@@ -39,8 +39,8 @@ class Register extends Insert
  
         $data = [
             'min' => [10, 4, 4, 4],
-            'max' => [14, 30, 20, 20],
-            'data'=> ['phoneNumber', 'jobTitle', 'firstName', 'lastName']
+            'max' => [15, 30, 20, 20],
+            'data'=> ['mobile', 'jobTitle', 'firstName', 'lastName']
         ];
 
            // sanitise
@@ -60,19 +60,24 @@ class Register extends Insert
             [
                 'firstName' => $this->cleanData['firstName'],
                 'lastName' => $this->cleanData['lastName'],
+                 'alias' => $this->cleanData['alias'],
+                'spouse' => $this->cleanData['spouse'],
                 'fatherName' => $this->cleanData['fatherName'],
                 'motherName' => $this->cleanData['motherName'],
+                 'motherMaiden' => $this->cleanData['motherMaiden'],
                 'birthDate' => $this->cleanData['birthDate'],
-                'noKids' => $this->cleanData['noKids'],
+                'kids' => $this->cleanData['kids'],
+                'gender' => $this->cleanData['gender'],
                 'noSiblings' => $this->cleanData['noSiblings'],
                 'id' => $this->cleanData['id'],
             ],
             [
+                'employmentStatus' => $this->cleanData['employmentStatus'],
                  'jobTitle' => $this->cleanData['jobTitle'],
                 'occupation' => $this->cleanData['occupation'],
                 'employerName' => $this->cleanData['employerName'],
                 'workEmail' => $this->cleanData['workEmail'],
-                'employers' => $this->cleanData['employer'], 
+               
                 'id' => $this->cleanData['id']      
             ],
              [
@@ -80,9 +85,21 @@ class Register extends Insert
                 'postcode' => $this->cleanData['postcode'],
                 'email' => $this->cleanData['email'],
                 'region' => $this->cleanData['region'],
-                'phoneNumber' => $this->cleanData['phoneNumber'],
+                'country' => $this->cleanData['country'],
+                'mobile' => $this->cleanData['mobile'],
                 'id' => $this->cleanData['id'],     
-            ]          
+            ],
+              [
+                 'favSport' => $this->cleanData['favSport'],
+                'footballTeam' => $this->cleanData['footballTeam'],
+                'passion' => $this->cleanData['passion'],               
+                'id' => $this->cleanData['id'],     
+            ],
+             [
+                 'password' => $this->cleanData['password'],
+                'secretWord' => $this->cleanData['secretWord'],           
+                'id' => $this->cleanData['id'],     
+            ]                         
         ];
 
   

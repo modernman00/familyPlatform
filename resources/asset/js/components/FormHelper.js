@@ -37,8 +37,8 @@ export default class FormHelper {
                 if (post.value === '' || post.value === 'select') {
 
                     let postName = post.name.replace('_', ' ')
-                    errMsg.innerHTML = `<li>${postName} cannot be left empty</li>`
-                    this.error.push(`<li>${postName} cannot be left empty</li>`)
+                    errMsg.innerHTML = `<li>Cannot be left empty</li>`
+                    this.error.push(`<li>Cannot be left empty</li>`)
 
                 } else if (post.value.match(reg) === null) {
 
@@ -61,7 +61,6 @@ export default class FormHelper {
         const email = this.id('email').value
         if(email.match(emailExp) === null) {
             this.id('email_error').innerHTML = msg
-            errMsg.innerHTML = msg
             this.error.push(msg)
         }
 
@@ -110,7 +109,7 @@ export default class FormHelper {
             if (theData)
                 theData.maxLength = parseInt(max + 1);
                 theData.addEventListener('keyup', () => {
-                    error.innerHTML = (theData.value.length > max ) ? `We expect a maximum ${max} characters ` : "";
+                    error.innerHTML = (theData.value.length > max ) ? `You have reach the maximum limit` : "";
                     this.id(`${input[i]}_help`).style.color = 'red'
                     this.id(`${input[i]}_help`).style.fontSize = '20px'
 
@@ -128,13 +127,13 @@ export default class FormHelper {
      * it will return an error message to the password_help input
      */
 
-    matchInput(first, second, err) {
+    matchInput(first, second) {
         let error, firstInput, secondInput
-        error = this.id(`${second}_help`)
+        error = this.id(`${second}_error`)
         firstInput = this.id(first)
         secondInput = this.id(second)
         secondInput.addEventListener('keyup', () => {           
-          error.innerHTML = (firstInput.value != secondInput.value) ? 'Your passwords do not match' : ""
+          error.innerHTML = (firstInput.value !== secondInput.value) ? 'Your passwords do not match' : ""
         })
     }
     /**

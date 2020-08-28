@@ -8,13 +8,19 @@
       {
         label : 'What is your last name',
         attribute: 'lastName',
-        placeholder: 'Edwards',
+        placeholder: 'OLAOGUN',
+        type : 'text'
+      },
+       {
+        label : 'What is your nickname',
+        attribute: 'alias',
+        placeholder: 'walenchy',
         type : 'text'
       },
       {
         label : "spouse's name",
         attribute: 'spouse',
-        placeholder: 'if unmarried - leave blank',
+        placeholder: 'full name please',
         type : 'text',
       },
        {
@@ -28,6 +34,13 @@
         attribute: 'motherName',
         placeholder: 'Your Mother name and last name',
         type : 'text',
+      },
+
+         {
+        label : "Mother's maiden name",
+        attribute: 'motherMaiden',
+        placeholder: 'Mother\'s surname before marriage',
+        type : 'text'
       },
         
        {

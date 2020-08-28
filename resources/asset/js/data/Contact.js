@@ -11,13 +11,15 @@ export const Contact =  [
         placeholder: 'SN5 5DE',
         type: 'text'
      },
-     
-       {
-        label : 'Personal Email',
-        attribute: 'email',
-        placeholder: 'olutobi@gmail.com',
-        type: 'email'
+        {
+        label : 'Region / State / District',
+        attribute: 'region',
+        placeholder: 'London / Lagos state / New York',
+        type: 'text'
      },
+     
+     
+   
 
       {
         label : 'Country',
@@ -29,9 +31,15 @@ export const Contact =  [
      {
       label : 'mobile number',
       attribute: 'mobile',
-      placeholder: 'include the area code - +234  or +1 ',
+      placeholder: 'include the area code - 234 or 1 or 44 ',
       type: 'text'
    },
+       {
+        label : 'Personal Email',
+        attribute: 'email',
+        placeholder: 'olutobi@gmail.com',
+        type: 'email'
+     },
 
 
     ]

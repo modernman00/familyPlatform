@@ -14,6 +14,7 @@ class Contact extends Insert {
                  `id` VARCHAR(255) NOT NULL , 
                 `address` TEXT NOT NULL ,
                 `postcode` VARCHAR(50) NOT NULL ,
+                `region` TEXT NOT NULL ,
                 `email` VARCHAR(50) NOT NULL ,
                 `country` VARCHAR(30) NOT NULL ,
                 `mobile` INT NOT NULL ,

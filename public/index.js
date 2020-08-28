@@ -11032,7 +11032,7 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
 
             // capture the error to a variable
-            var _errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
+            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
 
 
             if (post.type == 'submit' || post.name == 'token') {
@@ -11042,11 +11042,11 @@ var FormHelper = /*#__PURE__*/function () {
 
             if (post.value === '' || post.value === 'select') {
               var postName = post.name.replace('_', ' ');
-              _errMsg.innerHTML = "<li>".concat(postName, " cannot be left empty</li>");
+              errMsg.innerHTML = "<li>Cannot be left empty</li>";
 
-              _this.error.push("<li>".concat(postName, " cannot be left empty</li>"));
+              _this.error.push("<li>Cannot be left empty</li>");
             } else if (post.value.match(reg) === null) {
-              _errMsg.innerHTML = "<li> only letters and numbers are allowed<li>";
+              errMsg.innerHTML = "<li> only letters and numbers are allowed<li>";
 
               _this.error.push("<li> only letters and numbers are allowed<li>");
             } else {
@@ -11069,7 +11069,6 @@ var FormHelper = /*#__PURE__*/function () {
 
       if (email.match(emailExp) === null) {
         this.id('email_error').innerHTML = msg;
-        errMsg.innerHTML = msg;
         this.error.push(msg);
       }
     }
@@ -11135,7 +11134,7 @@ var FormHelper = /*#__PURE__*/function () {
 
         if (theData) theData.maxLength = parseInt(max + 1);
         theData.addEventListener('keyup', function () {
-          error.innerHTML = theData.value.length > max ? "We expect a maximum ".concat(max, " characters ") : "";
+          error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
           _this3.id("".concat(input[i], "_help")).style.color = 'red';
           _this3.id("".concat(input[i], "_help")).style.fontSize = '20px';
           setTimeout(function () {
@@ -11156,13 +11155,13 @@ var FormHelper = /*#__PURE__*/function () {
 
   }, {
     key: "matchInput",
-    value: function matchInput(first, second, err) {
+    value: function matchInput(first, second) {
       var error, firstInput, secondInput;
-      error = this.id("".concat(second, "_help"));
+      error = this.id("".concat(second, "_error"));
       firstInput = this.id(first);
       secondInput = this.id(second);
       secondInput.addEventListener('keyup', function () {
-        error.innerHTML = firstInput.value != secondInput.value ? 'Your passwords do not match' : "";
+        error.innerHTML = firstInput.value !== secondInput.value ? 'Your passwords do not match' : "";
       });
     }
     /**
@@ -11293,18 +11292,18 @@ __webpack_require__.r(__webpack_exports__);
 var Input = function Input(objData, htmlId) {
   objData.map(function (element) {
     if (element.type != 'select' && !element.options) {
-      var renderHtml = "\n      <div class = form-group col-sm-4>\n         <label class=' ' for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\" placeholder=\"").concat(element.placeholder, "\"/>\n            <small id =").concat(element.attribute, "_help></small><br>\n            <small id =").concat(element.attribute, "_error></small>\n      </div>\n          ");
+      var renderHtml = "\n      <div class = form-group col-sm-4>\n         <label class=' ' for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"/>\n            <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
-      var _renderHtml = "\n      <div class = form-group col>\n      <label for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
+      var _renderHtml = "\n      <div class = form-group col>\n      <label for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
         return "<option>".concat(el, "</option>");
-      }), "             \n             \n          </select>     \n           <small id =").concat(element.attribute, "_help></small><br>\n            <small id =").concat(element.attribute, "_error></small>\n           </div>\n          ");
+      }), "             \n             \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
     } else if (element.type === 'radio') {
       var _renderHtml2 = "\n      <div class='form-group col'>\n         <label for =".concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
         return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
-      }), " \n      </div>  \n      <small id =").concat(element.attribute, "_help></small><br>\n       <small id =").concat(element.attribute, "_error></small> \n      </div>\n     \n      ");
+      }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n     \n      ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
     }
@@ -11353,40 +11352,38 @@ try {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../../global */ "./resources/asset/js/global.js");
+/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+
 
 
 var formInput = document.querySelectorAll('.register');
 var formInputArr = Array.from(formInput);
-var formData = new FormData(formInputArr); //const id = x => document.getElementById(x)
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 
-try {
-  var process = function process() {
-    // inject the help inner html
-    formData.injectData(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].injectData.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].injectData.comment); // clear error from the form
+var process = function process() {
+  // clear error from the form
+  formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-    formData.clearError(); // set the maxlength, check the length of the value, raise error
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); // check email and alert customer
+  // formData.realTimeServer('fatherName', '/search?hint', 'fatherName_error')
+  // check if password matches real time
 
-    formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].maxLength.max); // check email and alert customer
+  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err);
+};
 
-    formData.realTimeServer('email_id', '/search?hint', 'email_error'); // autofill the username
-
-    formData.duplicate(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].duplicate.email, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].duplicate.username); // check if password matches real time
-
-    formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.err); // check if they have a referral code and unhide code
-
-    formData.isChecked(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.yes, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.no, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.hidden);
-  };
-
-  process();
-  qSel('.submit').addEventListener('click', function () {
-    if (id('checkbox').checked) {
+process();
+Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('click', function () {
+  try {
+    if (Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('checkbox').checked) {
       formData.emailVal(); // sanitise email
 
-      formData.massValidate();
+      formData.massValidate(); // validate and sanitise data
+
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
 
       if (formData.error.length <= 0) {
-        qSel('.submit').type = 'submit';
+        Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit';
         console.log('submitted');
       } else {
         console.log(formData.error);
@@ -11396,10 +11393,10 @@ try {
     } else {
       alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy');
     }
-  });
-} catch (e) {
-  console.log(e);
-}
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 /***/ }),
 
@@ -11448,10 +11445,18 @@ try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../global */ "./resources/asset/js/global.js");
 
-var fatherName = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('fatherName-small');
+var fatherName = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('fatherName_help');
 fatherName.innerHTML = "Please, include your father's first and last name";
-fatherName.style.color = 'blue';
-fatherName.style.fontSize = '0.5rem';
+var maiden = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('motherMaiden_help');
+maiden.innerHTML = "Good to identify your family from mum's side";
+var address = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('address_help');
+address.innerHTML = "Example: No 300, Goodnews street, Clifton";
+var mobile = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('mobile_help');
+mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
+var employerName = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('employerName_help');
+employerName.innerHTML = "if you are a student, please put the name of your school";
+var spouse = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_help');
+spouse.innerHTML = 'if single, put single or divorced';
 
 /***/ }),
 
@@ -11505,10 +11510,10 @@ var Contact = [{
   placeholder: 'SN5 5DE',
   type: 'text'
 }, {
-  label: 'Personal Email',
-  attribute: 'email',
-  placeholder: 'olutobi@gmail.com',
-  type: 'email'
+  label: 'Region / State / District',
+  attribute: 'region',
+  placeholder: 'London / Lagos state / New York',
+  type: 'text'
 }, {
   label: 'Country',
   attribute: 'country',
@@ -11517,8 +11522,13 @@ var Contact = [{
 }, {
   label: 'mobile number',
   attribute: 'mobile',
-  placeholder: 'include the area code - +234  or +1 ',
+  placeholder: 'include the area code - 234 or 1 or 44 ',
   type: 'text'
+}, {
+  label: 'Personal Email',
+  attribute: 'email',
+  placeholder: 'olutobi@gmail.com',
+  type: 'email'
 }];
 
 /***/ }),
@@ -11594,12 +11604,17 @@ var Personal = [{
 }, {
   label: 'What is your last name',
   attribute: 'lastName',
-  placeholder: 'Edwards',
+  placeholder: 'OLAOGUN',
+  type: 'text'
+}, {
+  label: 'What is your nickname',
+  attribute: 'alias',
+  placeholder: 'walenchy',
   type: 'text'
 }, {
   label: "spouse's name",
   attribute: 'spouse',
-  placeholder: 'if unmarried - leave blank',
+  placeholder: 'full name please',
   type: 'text'
 }, {
   label: "Father's name",
@@ -11610,6 +11625,11 @@ var Personal = [{
   label: "Mother's name",
   attribute: 'motherName',
   placeholder: 'Your Mother name and last name',
+  type: 'text'
+}, {
+  label: "Mother's maiden name",
+  attribute: 'motherMaiden',
+  placeholder: 'Mother\'s surname before marriage',
   type: 'text'
 }, {
   label: "Birth date",
@@ -11656,7 +11676,7 @@ var Work = [{
   attribute: 'employmentStatus',
   placeholder: null,
   options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
-  type: 'text'
+  type: 'select'
 }, {
   label: 'Job title?',
   attribute: 'jobTitle',
@@ -11665,7 +11685,7 @@ var Work = [{
 }, {
   label: 'Occupation?',
   attribute: 'occupation',
-  placeholder: 'Accountant, Housewife, Business man etc',
+  placeholder: 'Accountant, Housewife, Student, Business man etc',
   type: 'text'
 }, {
   label: "Employer's name?",
@@ -11693,22 +11713,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataToCheck", function() { return dataToCheck; });
 var dataToCheck = {
   maxLength: {
-    id: ['first_name', 'last_name', 'house_no', 'street_name', 'city', 'postcode', 'mobile', 'email', 'employer_name', 'work_address', 'monthly_income', 'bank_name', 'account_name', 'account_no', 'sort_code', 'password', 'confirm_password', 'job_title'],
-    max: [15, 15, 5, 30, 20, 7, 10, 30, 30, 50, 5, 10, 30, 8, 6, 50, 50, 15, 30] // min: [ 1, 1, 1, 1, 2, 2, 1, 5, 3, 5, 10, 7, 3, 10, 3, 3, 4, 8, 6, 7, 7]
+    id: ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'jobTitle', 'occupation', 'employerName'],
+    max: [15, 15, 15, 15, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 30, 20, 30] // min: [ 1, 1, 1, 1, 2, 2, 1, 5, 3, 5, 10, 7, 3, 10, 3, 3, 4, 8, 6, 7, 7]
 
   },
-  injectData: {
-    id: ['loan_calculator_help', 'mobile_help', 'work_address_help', 'monthly_income_help', 'income_and_expenses_help'],
-    comment: ['Our Representative Example: Loan amount £500 repayable over 6 months. Total amount repayable £800.00 in 6 payments of £133.33. Representative 173.8% APR * Illustrative and based on a 30 day month.', 'Please, do not include the 0. Use this format: 7819111111', 'Please, enter your full work address.', 'This income must match you have on your payslip', 'As part of our commitment to responsible lending, it is important for us to understand your regular out-goings when we assessing your application.	In case you share share any cost of the expenses below with any other individuals in your household, please only include your own personal contributions and responsibilities. We will verify the information you are provide in this section so please ensure they are accurate and can be verified. Any false or unverified information you provide will affect our decision to offer you the loan.']
-  },
   duplicate: {
-    email: 'email_id',
-    username: 'username_id'
+    email: 'email',
+    username: 'username'
   },
   password: {
-    pwd: 'password_id',
-    pwd2: 'confirm_password_id',
-    err: 'password_error'
+    pwd: 'password',
+    pwd2: 'confirm_password'
   },
   referral: {
     yes: 'referral_yes',
@@ -11723,7 +11738,7 @@ var dataToCheck = {
 /*!**************************************!*\
   !*** ./resources/asset/js/global.js ***!
   \**************************************/
-/*! exports provided: id, idValue, idInnerHTML, name, nameValue, nameInnerHTML, log, write */
+/*! exports provided: id, idValue, idInnerHTML, qSel, qSelValue, qSelInnerHTML, log, write */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11731,9 +11746,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "id", function() { return id; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "idValue", function() { return idValue; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "idInnerHTML", function() { return idInnerHTML; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "name", function() { return name; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nameValue", function() { return nameValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nameInnerHTML", function() { return nameInnerHTML; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "qSel", function() { return qSel; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "qSelValue", function() { return qSelValue; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "qSelInnerHTML", function() { return qSelInnerHTML; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "log", function() { return log; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "write", function() { return write; });
 var id = function id(_id) {
@@ -11745,14 +11760,14 @@ var idValue = function idValue(id) {
 var idInnerHTML = function idInnerHTML(id) {
   return id(id).innerHTML;
 };
-var name = function name(_name) {
-  return document.querySelector(_name);
+var qSel = function qSel(name) {
+  return document.querySelector(name);
 };
-var nameValue = function nameValue(name) {
-  return name(name).value;
+var qSelValue = function qSelValue(name) {
+  return qSel(name).value;
 };
-var nameInnerHTML = function nameInnerHTML(name) {
-  return name(name).innerHTML;
+var qSelInnerHTML = function qSelInnerHTML(name) {
+  return qSel(name).innerHTML;
 };
 var log = function log(id) {
   return console.log(id);

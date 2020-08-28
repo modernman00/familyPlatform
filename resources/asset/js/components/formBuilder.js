@@ -9,9 +9,9 @@ export const Input = (objData, htmlId) => {
       const renderHtml = `
       <div class = form-group col-sm-4>
          <label class=' ' for =${element.attribute}> <strong>${element.label.toUpperCase()}</strong></label>
-            <input type="${element.type}" class="form-control" id="${element.attribute}" name="${element.attribute}" placeholder="${element.placeholder}"/>
-            <small id =${element.attribute}_help></small><br>
-            <small id =${element.attribute}_error></small>
+            <input type="${element.type}" class="form-control" id="${element.attribute}" name="${element.attribute}"  placeholder="${element.placeholder}"/>
+            <small id ='${element.attribute}_help' class='small'></small><br>
+            <small id =${element.attribute}_error class='error'></small>
       </div>
           `
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
@@ -22,15 +22,15 @@ export const Input = (objData, htmlId) => {
       <div class = form-group col>
       <label for =${element.attribute}> <strong>${element.label.toUpperCase()}</strong> </label>   
           <select class="form-control" id=${element.attribute} name=${element.attribute}>
-                <option>SELECT</option> 
+                <option value= 'select'>select</option> 
                 ${element.options.map(el => {
         return `<option>${el}</option>`
       })
         }             
              
           </select>     
-           <small id =${element.attribute}_help></small><br>
-            <small id =${element.attribute}_error></small>
+             <small id ='${element.attribute}_help' class='small'></small><br>
+            <small id =${element.attribute}_error class='error'></small>
            </div>
           `
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
@@ -50,8 +50,8 @@ export const Input = (objData, htmlId) => {
       })
       } 
       </div>  
-      <small id =${element.attribute}_help></small><br>
-       <small id =${element.attribute}_error></small> 
+        <small id ='${element.attribute}_help' class='small'></small><br>
+            <small id =${element.attribute}_error class='error'></small>
       </div>
      
       `
