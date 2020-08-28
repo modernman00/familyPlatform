@@ -11400,6 +11400,17 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/modal/kids.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/register/modal/kids.js ***!
+  \**************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/register.js":
 /*!************************************************************!*\
   !*** ./resources/asset/js/components/register/register.js ***!
@@ -11792,6 +11803,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_login_login__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/login/login */ "./resources/asset/js/components/login/login.js");
 /* harmony import */ var _components_small_Input__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js");
 /* harmony import */ var _components_register_helperRegister__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/helperRegister */ "./resources/asset/js/components/register/helperRegister.js");
+/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
+/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__);
+
 
 
 

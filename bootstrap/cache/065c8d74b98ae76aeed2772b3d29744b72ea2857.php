@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="/style.css">
   <noscript>
     <link rel="stylesheet" href="noscript.css" /></noscript>
+      <link rel="icon" type="image/png" sizes="32x32" href=<?php echo e(getenv("IMG_CONTRACT")); ?>>
 
 </head>
 
