@@ -4,19 +4,17 @@ namespace App\classes\tables;
 use \PDOException;
 use App\classes\Insert;
 
-class Contact extends Insert {
+class Account extends Insert {
 
    public function index() 
     {   
         try {
-                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`contact`(
+                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`account`(
                  `no` INT NOT NULL AUTO_INCREMENT , 
                  `id` VARCHAR(255) NOT NULL , 
-                `address` TEXT NOT NULL ,
-                `postcode` VARCHAR(50) NOT NULL ,
-                `email` VARCHAR(50) NOT NULL ,
-                `country` VARCHAR(30) NOT NULL ,
-                `mobile` INT NOT NULL ,
+                `password` TEXT NOT NULL ,
+                `token` TEXT NOT NULL ,
+                `secretWord` TEXT NOT NULL ,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , 
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP ,
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP ,
@@ -34,7 +32,3 @@ class Contact extends Insert {
     }
 
 }
-
-
-
-

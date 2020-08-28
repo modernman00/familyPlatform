@@ -1,4 +1,3 @@
-
 export const Contact =  [
       {
         label : 'Home Address?',
@@ -7,14 +6,14 @@ export const Contact =  [
         type: 'text'
       },
       {
-        label : 'Postcode?',
+        label : 'Postcode /zip code/area code',
         attribute: 'postcode',
-        placeholder: 'SN55DE',
+        placeholder: 'SN5 5DE',
         type: 'text'
      },
      
        {
-        label : 'Email',
+        label : 'Personal Email',
         attribute: 'email',
         placeholder: 'olutobi@gmail.com',
         type: 'email'
@@ -22,15 +21,15 @@ export const Contact =  [
 
       {
         label : 'Country',
-        attribute: 'region',
+        attribute: 'country',
         placeholder: 'Your country of residence',
         type: 'text'
      },
 
      {
-      label : 'Phone number',
-      attribute: 'phoneNumber',
-      placeholder: 'Enter your phone number',
+      label : 'mobile number',
+      attribute: 'mobile',
+      placeholder: 'include the area code - +234  or +1 ',
       type: 'text'
    },
 

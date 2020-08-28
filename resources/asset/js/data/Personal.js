@@ -1,28 +1,35 @@
  export const Personal = [
       {
-        label : 'What is your name?',
+        label : 'What is your first name',
         attribute: 'firstName',
         placeholder: 'James',
         type : 'text'
       },
       {
-        label : 'What is your last name?',
+        label : 'What is your last name',
         attribute: 'lastName',
         placeholder: 'Edwards',
         type : 'text'
       },
+      {
+        label : "spouse's name",
+        attribute: 'spouse',
+        placeholder: 'if unmarried - leave blank',
+        type : 'text',
+      },
        {
-        label : "Father's name?",
+        label : "Father's name",
         attribute: 'fatherName',
         placeholder: 'Your Father name and last name',
         type : 'text',
       },
        {
-        label : "Mother's name?",
+        label : "Mother's name",
         attribute: 'motherName',
         placeholder: 'Your Mother name and last name',
         type : 'text',
       },
+        
        {
         label : "Birth date",
         attribute: 'birthDate',
@@ -31,7 +38,7 @@
          },
        {
         label : "Number of kids",
-        attribute: 'noKids',
+        attribute: 'Kids',
         placeholder: null,
         type : 'select',
         options: [0, 1, 2, 3, 4, 5, 6]
@@ -40,18 +47,17 @@
         label : "Gender",
         attribute: 'gender',
         placeholder: null,
-        type : 'radio',
-        options: ['male','female']
+        type : 'select',
+        options: ['Male','Female']
       },
       {
-        label : "Number of siblings",
+        label : "Number of siblings (Brothers/Sisters)",
         attribute: 'noSiblings',
         placeholder: null,
         type : 'select',
         options: [0, 1, 2, 3, 4, 5, 6]
       },
-
-      
+          
             
 
 ]

@@ -6,6 +6,10 @@ use App\classes\tables\{
     Contact,
     Personal,
     Work,
+    siblings,
+    kids,
+    Account
+    
 };
 class Create
 {
@@ -14,7 +18,10 @@ class Create
         $table = [
             new Personal,
             new Work,
-            new Contact
+            new Contact,
+            new kids,
+            new siblings,
+            new Account
         ];
         
         try {

@@ -10970,6 +10970,310 @@ return jQuery;
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/FormHelper.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/FormHelper.js ***!
+  \*****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return FormHelper; });
+
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var FormHelper = /*#__PURE__*/function () {
+  function FormHelper(data) {
+    _classCallCheck(this, FormHelper);
+
+    this.data = data;
+    this.error = [];
+    this.result = 0;
+  }
+
+  _createClass(FormHelper, [{
+    key: "id",
+    value: function id(x) {
+      return document.getElementById(x);
+    }
+    /**
+     * general validation; check empty status, at least a single input, mobile length, white space
+     */
+
+  }, {
+    key: "getData",
+    value: function getData() {
+      return this.data;
+    }
+  }, {
+    key: "massValidate",
+    value: function massValidate() {
+      var _this = this;
+
+      var reg = /[a-zA-Z0-9./@]/g;
+      this.data.forEach(function (et) {
+        var _iterator = _createForOfIteratorHelper(et),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var post = _step.value;
+
+            // capture the error to a variable
+            var _errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
+
+
+            if (post.type == 'submit' || post.name == 'token') {
+              continue;
+            } // check if there is no value
+
+
+            if (post.value === '' || post.value === 'select') {
+              var postName = post.name.replace('_', ' ');
+              _errMsg.innerHTML = "<li>".concat(postName, " cannot be left empty</li>");
+
+              _this.error.push("<li>".concat(postName, " cannot be left empty</li>"));
+            } else if (post.value.match(reg) === null) {
+              _errMsg.innerHTML = "<li> only letters and numbers are allowed<li>";
+
+              _this.error.push("<li> only letters and numbers are allowed<li>");
+            } else {
+              _this.result = 1;
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    }
+  }, {
+    key: "emailVal",
+    value: function emailVal() {
+      var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+      var msg = "<li> Please enter a valid email</li>";
+      var email = this.id('email').value;
+
+      if (email.match(emailExp) === null) {
+        this.id('email_error').innerHTML = msg;
+        errMsg.innerHTML = msg;
+        this.error.push(msg);
+      }
+    }
+  }, {
+    key: "clearError",
+    value: function clearError() {
+      var _this2 = this;
+
+      this.error = []; // empty the array 
+
+      this.data.forEach(function (el) {
+        var _iterator2 = _createForOfIteratorHelper(el),
+            _step2;
+
+        try {
+          var _loop = function _loop() {
+            var post = _step2.value;
+
+            if (post.id == 'submit' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
+              return "continue";
+            }
+
+            if (post.value != 'select') {
+              _this2.id(post.id).addEventListener('keyup', function () {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              });
+            } else {
+              _this2.id(post.id).addEventListener('change', function () {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              });
+            }
+          };
+
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var _ret = _loop();
+
+            if (_ret === "continue") continue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      });
+    }
+    /**
+     *
+     * @param {input is the id of the input/ this is an array [as, it, it]} input
+     * @param {* this is the max policy and it must be an integer} maxi
+     */
+
+  }, {
+    key: "realTimeCheckLen",
+    value: function realTimeCheckLen(input, maxi) {
+      var _this3 = this;
+
+      var _loop2 = function _loop2(i) {
+        var theData = _this3.id("".concat(input[i]));
+
+        var max = maxi[i];
+
+        var error = _this3.id("".concat(input[i], "_error"));
+
+        if (theData) theData.maxLength = parseInt(max + 1);
+        theData.addEventListener('keyup', function () {
+          error.innerHTML = theData.value.length > max ? "We expect a maximum ".concat(max, " characters ") : "";
+          _this3.id("".concat(input[i], "_help")).style.color = 'red';
+          _this3.id("".concat(input[i], "_help")).style.fontSize = '20px';
+          setTimeout(function () {
+            _this3.id("".concat(input[i], "_help")).style.display = 'none';
+          }, 5000);
+        });
+      };
+
+      for (var i = 0; i < input.length; i++) {
+        _loop2(i);
+      }
+    }
+    /**
+     * the id for the password error should be password_help
+     * the id for your confirm pasword should confirm_password
+     * it will return an error message to the password_help input
+     */
+
+  }, {
+    key: "matchInput",
+    value: function matchInput(first, second, err) {
+      var error, firstInput, secondInput;
+      error = this.id("".concat(second, "_help"));
+      firstInput = this.id(first);
+      secondInput = this.id(second);
+      secondInput.addEventListener('keyup', function () {
+        error.innerHTML = firstInput.value != secondInput.value ? 'Your passwords do not match' : "";
+      });
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
+
+  }, {
+    key: "injectData",
+    value: function injectData(idArray, html) {
+      var idData;
+
+      for (var i = 0; i < idArray.length; i++) {
+        idData = this.id(idArray[i]);
+        idData.innerHTML = html[i];
+      }
+    }
+    /**
+     *
+     * @param {this is an id and its value is for duplication} firstInput
+     * @param {* another id that accepts the value of the firstInput} takeFirstInput
+     */
+
+  }, {
+    key: "duplicate",
+    value: function duplicate(giveInput, takeInput) {
+      var giver, taker;
+      giver = this.id(giveInput);
+      taker = this.id(takeInput);
+      giver.addEventListener('keyup', function () {
+        taker.value = giver.value;
+      });
+    }
+    /**
+     *
+     * @param {current input that is being type to. the value is what will be checked realtime. the id is needed} input
+     * @param {* the url to get the info to . example is /search?hint} url
+     * @param {enter the id of the output element} output
+     */
+
+  }, {
+    key: "realTimeServer",
+    value: function realTimeServer(input, url, outputId) {
+      var theInput, inputVal, output;
+      theInput = this.id(input);
+      output = this.id(outputId);
+      theInput.addEventListener('keyup', function () {
+        inputVal = theInput.value;
+
+        if (inputVal == 0) {
+          output.innerHTML = "";
+          return;
+        } else {
+          var xmlhttp = new XMLHttpRequest();
+
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              output.innerHTML = this.responseText;
+            }
+          };
+
+          xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+          xmlhttp.send();
+        }
+      });
+    }
+  }, {
+    key: "isChecked",
+    value: function isChecked(yesId, noId, hiddenInput) {
+      var _this4 = this;
+
+      var checked = function checked() {
+        if (_this4.id(yesId).checked) {
+          _this4.id(hiddenInput).style.display = 'block';
+        } else if (_this4.id(noId).checked) {
+          _this4.id(hiddenInput).style.display = 'none';
+        }
+      };
+
+      this.id(yesId).addEventListener('click', checked);
+      this.id(noId).addEventListener('click', checked);
+    }
+  }, {
+    key: "previousAddress",
+    value: function previousAddress() {
+      var _this5 = this;
+
+      var timeAddy = this.id('time_at_address_id');
+      var prevAddy = this.id('previous_address_class');
+
+      var showPrev = function showPrev() {
+        if (timeAddy.value != '3 years+') {
+          prevAddy.style.display = 'block';
+          _this5.id('previous_address_help').innerHTML = "Please enter your full address: House No, Street Name, Town/City and Post Code";
+        } else {
+          prevAddy.style.display = 'none';
+        }
+      };
+
+      timeAddy.addEventListener('change', showPrev);
+    }
+  }]);
+
+  return FormHelper;
+}();
+
+
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/formBuilder.js":
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/formBuilder.js ***!
@@ -10989,16 +11293,20 @@ __webpack_require__.r(__webpack_exports__);
 var Input = function Input(objData, htmlId) {
   objData.map(function (element) {
     if (element.type != 'select' && !element.options) {
-      var renderHtml = "\n             <label for =".concat(element.attribute, "> ").concat(element.label, "</label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\" placeholder=\"").concat(element.placeholder, "\"/>\n            <small id =").concat(element.attribute, "-small></small><br>\n          ");
+      var renderHtml = "\n      <div class = form-group col-sm-4>\n         <label class=' ' for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\" placeholder=\"").concat(element.placeholder, "\"/>\n            <small id =").concat(element.attribute, "_help></small><br>\n            <small id =").concat(element.attribute, "_error></small>\n      </div>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
-      var _renderHtml = "<label for =".concat(element.attribute, "> ").concat(element.label, "</label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
+      var _renderHtml = "\n      <div class = form-group col>\n      <label for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option>SELECT</option> \n                ").concat(element.options.map(function (el) {
         return "<option>".concat(el, "</option>");
-      }), "             \n             \n          </select>     \n           <small id =").concat(element.attribute, "-small></small><br>\n          ");
+      }), "             \n             \n          </select>     \n           <small id =").concat(element.attribute, "_help></small><br>\n            <small id =").concat(element.attribute, "_error></small>\n           </div>\n          ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
     } else if (element.type === 'radio') {
-      var _renderHtml2 = "<label for =".concat(element.attribute, "> ").concat(element.label, "</label> \n      <input class=\"form-check-input\" type=\"radio\" name=\"element.attribute\" id=\"element.attribute\" value=\" gyguuiuuiy  \" >\n      ");
+      var _renderHtml2 = "\n      <div class='form-group col'>\n         <label for =".concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
+        return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
+      }), " \n      </div>  \n      <small id =").concat(element.attribute, "_help></small><br>\n       <small id =").concat(element.attribute, "_error></small> \n      </div>\n     \n      ");
+
+      document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
     }
   });
 };
@@ -11035,6 +11343,66 @@ try {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/helperRegister.js":
+/*!******************************************************************!*\
+  !*** ./resources/asset/js/components/register/helperRegister.js ***!
+  \******************************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+
+
+var formInput = document.querySelectorAll('.register');
+var formInputArr = Array.from(formInput);
+var formData = new FormData(formInputArr); //const id = x => document.getElementById(x)
+
+try {
+  var process = function process() {
+    // inject the help inner html
+    formData.injectData(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].injectData.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].injectData.comment); // clear error from the form
+
+    formData.clearError(); // set the maxlength, check the length of the value, raise error
+
+    formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].maxLength.max); // check email and alert customer
+
+    formData.realTimeServer('email_id', '/search?hint', 'email_error'); // autofill the username
+
+    formData.duplicate(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].duplicate.email, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].duplicate.username); // check if password matches real time
+
+    formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].password.err); // check if they have a referral code and unhide code
+
+    formData.isChecked(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.yes, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.no, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_1__["dataToCheck"].referral.hidden);
+  };
+
+  process();
+  qSel('.submit').addEventListener('click', function () {
+    if (id('checkbox').checked) {
+      formData.emailVal(); // sanitise email
+
+      formData.massValidate();
+
+      if (formData.error.length <= 0) {
+        qSel('.submit').type = 'submit';
+        console.log('submitted');
+      } else {
+        console.log(formData.error);
+        alert('The form cannot be submitted. Please check the errors');
+        process();
+      }
+    } else {
+      alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy');
+    }
+  });
+} catch (e) {
+  console.log(e);
+}
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/register.js":
 /*!************************************************************!*\
   !*** ./resources/asset/js/components/register/register.js ***!
@@ -11048,6 +11416,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _data_Contact_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../data/Contact.js */ "./resources/asset/js/data/Contact.js");
 /* harmony import */ var _data_Work_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/Work.js */ "./resources/asset/js/data/Work.js");
 /* harmony import */ var _formBuilder_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../formBuilder.js */ "./resources/asset/js/components/formBuilder.js");
+/* harmony import */ var _data_Interest__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../data/Interest */ "./resources/asset/js/data/Interest.js");
+/* harmony import */ var _data_Account__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../data/Account */ "./resources/asset/js/data/Account.js");
+
+
 
 
 
@@ -11057,6 +11429,8 @@ try {
   Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Contact_js__WEBPACK_IMPORTED_MODULE_1__["Contact"], 'contact');
   Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Personal_js__WEBPACK_IMPORTED_MODULE_0__["Personal"], 'personal');
   Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Work_js__WEBPACK_IMPORTED_MODULE_2__["Work"], 'work');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Interest__WEBPACK_IMPORTED_MODULE_4__["Interest"], 'interest');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Account__WEBPACK_IMPORTED_MODULE_5__["Account"], 'account');
 } catch (e) {
   console.log(e);
 }
@@ -11081,6 +11455,35 @@ fatherName.style.fontSize = '0.5rem';
 
 /***/ }),
 
+/***/ "./resources/asset/js/data/Account.js":
+/*!********************************************!*\
+  !*** ./resources/asset/js/data/Account.js ***!
+  \********************************************/
+/*! exports provided: Account */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Account", function() { return Account; });
+var Account = [{
+  label: 'password',
+  attribute: 'password',
+  placeholder: '',
+  type: 'password'
+}, {
+  label: 'confirm password',
+  attribute: 'confirm_password',
+  placeholder: '',
+  type: 'password'
+}, {
+  label: 'secret word',
+  attribute: 'secretWord',
+  placeholder: 'Secret word to retrieve your account',
+  type: 'text'
+}];
+
+/***/ }),
+
 /***/ "./resources/asset/js/data/Contact.js":
 /*!********************************************!*\
   !*** ./resources/asset/js/data/Contact.js ***!
@@ -11097,24 +11500,53 @@ var Contact = [{
   placeholder: 'Please, enter your first line of address',
   type: 'text'
 }, {
-  label: 'Postcode?',
+  label: 'Postcode /zip code/area code',
   attribute: 'postcode',
-  placeholder: 'SN55DE',
+  placeholder: 'SN5 5DE',
   type: 'text'
 }, {
-  label: 'Email',
+  label: 'Personal Email',
   attribute: 'email',
   placeholder: 'olutobi@gmail.com',
   type: 'email'
 }, {
   label: 'Country',
-  attribute: 'region',
+  attribute: 'country',
   placeholder: 'Your country of residence',
   type: 'text'
 }, {
-  label: 'Phone number',
-  attribute: 'phoneNumber',
-  placeholder: 'Enter your phone number',
+  label: 'mobile number',
+  attribute: 'mobile',
+  placeholder: 'include the area code - +234  or +1 ',
+  type: 'text'
+}];
+
+/***/ }),
+
+/***/ "./resources/asset/js/data/Interest.js":
+/*!*********************************************!*\
+  !*** ./resources/asset/js/data/Interest.js ***!
+  \*********************************************/
+/*! exports provided: Interest */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Interest", function() { return Interest; });
+var Interest = [{
+  label: 'Favourite sport',
+  attribute: 'favSport',
+  placeholder: 'football, tennis, F1',
+  type: 'text'
+}, {
+  label: 'Favourite football team',
+  attribute: 'footballTeam',
+  placeholder: 'Barcelona, Chelsea, Liverpool, Bayern Munich',
+  type: 'text'
+}, {
+  label: "what do you have passion for",
+  attribute: 'passion',
+  placeholder: 'singing or tech or travelling or solving problems, reading etc',
   type: 'text'
 }];
 
@@ -11155,22 +11587,27 @@ var Login = [{
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Personal", function() { return Personal; });
 var Personal = [{
-  label: 'What is your name?',
+  label: 'What is your first name',
   attribute: 'firstName',
   placeholder: 'James',
   type: 'text'
 }, {
-  label: 'What is your last name?',
+  label: 'What is your last name',
   attribute: 'lastName',
   placeholder: 'Edwards',
   type: 'text'
 }, {
-  label: "Father's name?",
+  label: "spouse's name",
+  attribute: 'spouse',
+  placeholder: 'if unmarried - leave blank',
+  type: 'text'
+}, {
+  label: "Father's name",
   attribute: 'fatherName',
   placeholder: 'Your Father name and last name',
   type: 'text'
 }, {
-  label: "Mother's name?",
+  label: "Mother's name",
   attribute: 'motherName',
   placeholder: 'Your Mother name and last name',
   type: 'text'
@@ -11181,7 +11618,7 @@ var Personal = [{
   type: 'date'
 }, {
   label: "Number of kids",
-  attribute: 'noKids',
+  attribute: 'Kids',
   placeholder: null,
   type: 'select',
   options: [0, 1, 2, 3, 4, 5, 6]
@@ -11189,10 +11626,10 @@ var Personal = [{
   label: "Gender",
   attribute: 'gender',
   placeholder: null,
-  type: 'radio',
-  options: ['male', 'female']
+  type: 'select',
+  options: ['Male', 'Female']
 }, {
-  label: "Number of siblings",
+  label: "Number of siblings (Brothers/Sisters)",
   attribute: 'noSiblings',
   placeholder: null,
   type: 'select',
@@ -11215,6 +11652,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
 
 var Work = [{
+  label: 'employment status',
+  attribute: 'employmentStatus',
+  placeholder: null,
+  options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
+  type: 'text'
+}, {
   label: 'Job title?',
   attribute: 'jobTitle',
   placeholder: 'What is your job title',
@@ -11234,13 +11677,45 @@ var Work = [{
   attribute: 'workEmail',
   placeholder: 'enter your work email',
   type: 'text'
-}, {
-  label: "Years with employer",
-  attribute: 'employer',
-  placeholder: null,
-  type: 'select',
-  options: [0, 1, 2, 3, 4, 5, 6]
 }];
+
+/***/ }),
+
+/***/ "./resources/asset/js/data/dataToCheck.js":
+/*!************************************************!*\
+  !*** ./resources/asset/js/data/dataToCheck.js ***!
+  \************************************************/
+/*! exports provided: dataToCheck */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataToCheck", function() { return dataToCheck; });
+var dataToCheck = {
+  maxLength: {
+    id: ['first_name', 'last_name', 'house_no', 'street_name', 'city', 'postcode', 'mobile', 'email', 'employer_name', 'work_address', 'monthly_income', 'bank_name', 'account_name', 'account_no', 'sort_code', 'password', 'confirm_password', 'job_title'],
+    max: [15, 15, 5, 30, 20, 7, 10, 30, 30, 50, 5, 10, 30, 8, 6, 50, 50, 15, 30] // min: [ 1, 1, 1, 1, 2, 2, 1, 5, 3, 5, 10, 7, 3, 10, 3, 3, 4, 8, 6, 7, 7]
+
+  },
+  injectData: {
+    id: ['loan_calculator_help', 'mobile_help', 'work_address_help', 'monthly_income_help', 'income_and_expenses_help'],
+    comment: ['Our Representative Example: Loan amount £500 repayable over 6 months. Total amount repayable £800.00 in 6 payments of £133.33. Representative 173.8% APR * Illustrative and based on a 30 day month.', 'Please, do not include the 0. Use this format: 7819111111', 'Please, enter your full work address.', 'This income must match you have on your payslip', 'As part of our commitment to responsible lending, it is important for us to understand your regular out-goings when we assessing your application.	In case you share share any cost of the expenses below with any other individuals in your household, please only include your own personal contributions and responsibilities. We will verify the information you are provide in this section so please ensure they are accurate and can be verified. Any false or unverified information you provide will affect our decision to offer you the loan.']
+  },
+  duplicate: {
+    email: 'email_id',
+    username: 'username_id'
+  },
+  password: {
+    pwd: 'password_id',
+    pwd2: 'confirm_password_id',
+    err: 'password_error'
+  },
+  referral: {
+    yes: 'referral_yes',
+    no: 'referral_no',
+    hidden: 'referral_admin'
+  }
+};
 
 /***/ }),
 
@@ -11301,6 +11776,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_register_register__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/register/register */ "./resources/asset/js/components/register/register.js");
 /* harmony import */ var _components_login_login__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/login/login */ "./resources/asset/js/components/login/login.js");
 /* harmony import */ var _components_small_Input__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js");
+/* harmony import */ var _components_register_helperRegister__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/helperRegister */ "./resources/asset/js/components/register/helperRegister.js");
+
 
 
 

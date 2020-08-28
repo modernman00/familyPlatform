@@ -5,7 +5,7 @@ namespace App\classes\tables;
 use \PDOException;
 use App\classes\Insert;
 
-class kids extends Insert {
+class Kids extends Insert {
 
    public function index() 
     {   
@@ -27,6 +27,7 @@ class kids extends Insert {
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, 
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP , 
                 PRIMARY KEY (`no`),
+                 FOREIGN KEY (`id`) REFERENCES personal(`id`),
                 INDEX `id` (`id`))";
     
                 $conn = $this->connect();

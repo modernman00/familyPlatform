@@ -1,6 +1,13 @@
 import { type } from "jquery";
 
  export const Work = [
+        {
+        label : 'employment status',
+        attribute: 'employmentStatus',
+        placeholder: null,
+        options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
+        type: 'text',
+      },
       {
         label : 'Job title?',
         attribute: 'jobTitle',
@@ -25,11 +32,5 @@ import { type } from "jquery";
         placeholder: 'enter your work email',
         type: 'text',
       },
-      {
-        label : "Years with employer",
-        attribute: 'employer',
-        placeholder: null,
-        type : 'select',
-        options: [0, 1, 2, 3, 4, 5, 6]
-      }
+      
 ]
