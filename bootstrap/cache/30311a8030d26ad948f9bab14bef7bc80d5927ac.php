@@ -3,7 +3,7 @@
 
 
 
-   <div class="jumbotron text-center">
+   <div class="header">
         <h1>The Olaoguns</h1>
         <i> We are set for greater height</i>
         <form class="form-inline">

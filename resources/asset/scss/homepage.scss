@@ -1,0 +1,19 @@
+// .header {
+//     background-image: linear-gradient(to right, 
+//     rgba(0, 255, 200, 0.664), 
+//     rgba(102, 255, 0, 0.377), 
+//     url('/images/pic01.jpg'));
+// }
+
+.header {
+      height: 100vh;
+  background-image: linear-gradient(
+      to bottom right,  
+    rgb(53, 85, 2), 
+    rgba(7, 1, 39, 0.904)),
+  url('/images/bg.jpg');
+  background-size: cover;
+  background-position: top;
+  position: relative;
+
+}

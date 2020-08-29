@@ -177,3 +177,11 @@ input::placeholder {
   text-transform: uppercase;
 }
 
+.header {
+  height: 100vh;
+  background-image: linear-gradient(to bottom right, #355502, rgba(7, 1, 39, 0.904)), url("/images/bg.jpg");
+  background-size: cover;
+  background-position: top;
+  position: relative;
+}
+
