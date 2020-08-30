@@ -177,11 +177,58 @@ input::placeholder {
   text-transform: uppercase;
 }
 
+.modal-content {
+  padding: 0 20px 0 20px;
+}
+
 .header {
   height: 100vh;
-  background-image: linear-gradient(to bottom right, #355502, rgba(7, 1, 39, 0.904)), url("/images/bg.jpg");
+  background-image: linear-gradient(to bottom right, rgba(53, 85, 2, 0.836), rgba(2, 39, 1, 0.815)), url("/img/gbemi_birthday/WhatsApp Image 2020-07-26 at 22.26.24.jpeg");
   background-size: cover;
   background-position: top;
   position: relative;
+}
+
+.subscribeForm {
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-top: 15%;
+}
+
+/* changed the paddings to 0 from 25 to reduce the height of the navbar */
+
+@media (min-width: 992px) {
+  .mainNav {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    transition: padding-top 0.3s, padding-bottom 0.3s;
+    border: none;
+    background-color: transparent;
+  }
+}
+
+/* When a screen is 992px or smaller, the background color will be pink */
+
+@media screen and (max-width: 576px) {
+  body {
+    font-size: 0.5em;
+  }
+
+  .subscribeForm {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 50%;
+  }
+
+  .homePageSubscribe {
+    font-size: 1.2em;
+    height: 50px;
+  }
+
+  .unhide {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 20px;
+  }
 }
 

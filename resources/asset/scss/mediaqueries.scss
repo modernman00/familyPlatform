@@ -1,0 +1,49 @@
+/* changed the paddings to 0 from 25 to reduce the height of the navbar */
+@media (min-width: 992px) {
+  .mainNav {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    -webkit-transition: padding-top 0.3s, padding-bottom 0.3s;
+    -moz-transition: padding-top 0.3s, padding-bottom 0.3s;
+    transition: padding-top 0.3s, padding-bottom 0.3s;
+    border: none;
+    background-color: transparent;
+  }
+}
+
+// @media (min-width: 576px) {
+//     .subscribeForm {
+//         margin-left: 0;
+//         margin-right: 0;
+//     }
+// }
+
+/* When a screen is 992px or smaller, the background color will be pink */
+@media screen and (max-width: 576px) {
+  body {
+    font-size: 0.5em;
+  }
+
+   .subscribeForm {
+        margin-left: 5px;
+        margin-right: 5px;
+        margin-top: 50%;
+    }
+
+   .homePageSubscribe {
+        font-size: 1.2em;
+        height: 50px;
+    }
+
+    .unhide {     
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-bottom: 20px;
+
+    }
+
+    
+}
+
+
+

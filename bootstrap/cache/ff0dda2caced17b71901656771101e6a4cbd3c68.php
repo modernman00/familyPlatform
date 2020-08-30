@@ -38,19 +38,22 @@
 
     <!-- Button trigger modal -->
 
-
     <input type="hidden" id="token" name="token" value=<?php echo e($token); ?>>
 
      <input class="btn btn-primary btn-lg submit" type="button" id="submit" name="submit"
         value="Submit Form">
 
-        
+
+        <br><br> 
+
 
   </form>
 
 </div>
 
 
+         <?php if ($__env->exists("registration.include.kidsModal")) echo $__env->make("registration.include.kidsModal", \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+        
 
 
 <?php $__env->stopSection(); ?>

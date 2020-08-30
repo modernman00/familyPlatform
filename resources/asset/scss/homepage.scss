@@ -7,13 +7,21 @@
 
 .header {
       height: 100vh;
-  background-image: linear-gradient(
+  background-image: 
+  linear-gradient(
       to bottom right,  
-    rgb(53, 85, 2), 
-    rgba(7, 1, 39, 0.904)),
-  url('/images/bg.jpg');
+    rgba(53, 85, 2, 0.836), 
+    rgba(2, 39, 1, 0.815)),
+  url('/img/gbemi_birthday/WhatsApp Image 2020-07-26 at 22.26.24.jpeg');
   background-size: cover;
   background-position: top;
   position: relative;
 
+}
+
+
+.subscribeForm{
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 15%;
 }

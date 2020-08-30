@@ -39,25 +39,23 @@
     </div>
 
     <!-- Button trigger modal -->
-{{-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-  Launch demo modal
-</button> --}}
 
     <input type="hidden" id="token" name="token" value={{ $token }}>
 
      <input class="btn btn-primary btn-lg submit" type="button" id="submit" name="submit"
         value="Submit Form">
 
-        {{-- @include('registration/include/kidsModal')
-        @include('registration/include/siblingsModal')
 
-        <br><br> --}}
+        <br><br> 
+
 
   </form>
 
 </div>
 
 
+         @includeIf("registration.include.kidsModal")
+        {{-- @include('registration/include/siblingsModal') --}}
 
 
 @endsection

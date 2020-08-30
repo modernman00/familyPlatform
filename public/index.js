@@ -11292,20 +11292,24 @@ __webpack_require__.r(__webpack_exports__);
 var Input = function Input(objData, htmlId) {
   objData.map(function (element) {
     if (element.type != 'select' && !element.options) {
-      var renderHtml = "\n      <div class = form-group col-sm-4>\n         <label class=' ' for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"/>\n            <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n          ");
+      var renderHtml = "\n      <div class = 'form-group' id=".concat(element.attribute, "_div>\n         <label class=' ' for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"/>\n            <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
-      var _renderHtml = "\n      <div class = form-group col>\n      <label for =".concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
+      var _renderHtml = "\n      <div class = 'form-group' id='".concat(element.attribute, "_div'>\n      <label for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
         return "<option value=".concat(el, ">").concat(el, "</option>");
-      }), "             \n             \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
+      }), "               \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
     } else if (element.type === 'radio') {
-      var _renderHtml2 = "\n      <div class='form-group col'>\n         <label for =".concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
+      var _renderHtml2 = "\n      <div class='form-group col' id='".concat(element.attribute, "_div'>\n         <label for =").concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
         return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
-      }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n     \n      ");
+      }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>     \n      ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
+    } else if (element.type === 'combined') {
+      var _renderHtml3 = "<div class='input-group' id='".concat(element.attribute, "_div'>\n       <div class=\"input-group-prepend\">\n       <span class=\"input-group-text\">").concat(element.attribute.toUpperCase(), ":</span>\n        </div>\n\n       <input class='form-control' type='").concat(element.inputType[0], "' aria-label=\"").concat(element.placeholder, "\"  name='").concat(element.attribute[0], "' id='").concat(element.attribute, "' value='").concat(element.value, "'> \n\n        <input class='form-control' type='").concat(element.inputType[1], "' aria-label=\"").concat(element.placeholder, "\"  name='").concat(element.attribute[1], "' id='").concat(element.attribute, "' value='").concat(element.value, "'> \n\n        <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>     \n      ");
+
+      document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml3);
     }
   });
 };
@@ -11410,16 +11414,41 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
- // id('kids').addEventListener('onchange', (event) => {alert(event.target.value)
-// log(event.target.value)
-// }
-// )
+/* harmony import */ var _formBuilder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../formBuilder */ "./resources/asset/js/components/formBuilder.js");
+
+
+
 
 var show = function show(e) {
-  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help').innerHTML = e.target.value;
+  var kidsNo = e.target.value; // I build a hidden input that will auto click on select change to trigger the modal 
+  // id('kids_help').innerHTML = `<input type ='hidden' id='but' class = 'btn btn-primary'  data-toggle="modal" data-target="#kidsModal">`;
+  // id('but').click() // it automatically clicks the button
+  // use the loop to generate the number of input
+
+  for (var i = 0; i < kidsNo; i++) {
+    var no = i + 1;
+    var kids = [{
+      label: ["name", "email"],
+      type: 'combined',
+      attribute: ["childName-".concat(no), "childEmail-".concat(no)],
+      inputType: ['text', 'email'],
+      placeholder: ['child\'s name', 'email'],
+      options: ''
+    }];
+    Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help').innerHTML = "Please, enter your child(ren)'s name(s) and email(s)";
+    var addKids = "\n            <div class=\"form-group row\">\n                <label for=\"childName-".concat(no, "\" class=\"col-sm-2 col-form-label\">Child Name-").concat(no, "</label>\n                <div class=\"col-sm-10\">\n                <input type=\"text\" placeholder = \"Enter child's name - ").concat(no, "\" name =childName-").concat(no, " class=\"form-control\" id=\"childName-").concat(no, "\">\n                </div>\n            </div>\n            <div class=\"form-group row\">\n                <label for=\"childEmail-").concat(no, "\" class=\"col-sm-2 col-form-label\">Child Email-").concat(no, "</label>\n                <div class=\"col-sm-10\">\n                <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=childEmail-").concat(no, " class=\"form-control\" id=\"childEmail-").concat(no, "\">\n                </div>\n            </div> \n        ");
+    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("childName-".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("childEmail-".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
+  }
+}; // this is to activate the onchange event
+
+
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids').addEventListener('change', show);
+
+var test = function test() {
+  alert('it worked');
 };
 
-document.getElementById('kids').addEventListener('change', show); // id('kids').onchange = show
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('childName-1').addEventListener('keyup', test);
 
 /***/ }),
 
@@ -11676,7 +11705,15 @@ var Personal = [{
   placeholder: null,
   type: 'select',
   options: [0, 1, 2, 3, 4, 5, 6]
-}, {
+}, // {
+//   label: "name and email",
+//   type: 'combined',
+//   content: [
+//     { attribute: 'name', type: 'text', placeholder: 'child\'s name', value: '' },
+//     { attribute: 'childEmail', type: 'text', placeholder: 'child\'s email', value: '' }
+//   ]
+// },
+{
   label: "Gender",
   attribute: 'gender',
   placeholder: null,
