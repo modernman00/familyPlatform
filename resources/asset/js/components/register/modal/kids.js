@@ -33,13 +33,13 @@ const show = (e) => {
 
         const addKids = `
             <div class="form-group row">
-                <label for="childName-${no}" class="col-sm-2 col-form-label">Child Name-${no}</label>
+                <label for="childName-${no}" class="col-sm-2 col-form-label">Child Name -${no}</label>
                 <div class="col-sm-10">
-                <input type="text" placeholder = "Enter child's name - ${no}" name =childName-${no} class="form-control" id="childName-${no}">
+                <input type="text" placeholder = "Enter child's full name - ${no}" name =childName-${no} class="form-control" id="childName-${no}">
                 </div>
             </div>
             <div class="form-group row">
-                <label for="childEmail-${no}" class="col-sm-2 col-form-label">Child Email-${no}</label>
+                <label for="childEmail -${no}" class="col-sm-2 col-form-label">Child Email -${no}</label>
                 <div class="col-sm-10">
                 <input type="email" placeholder = "Enter child's email - ${no}" name=childEmail-${no} class="form-control" id="childEmail-${no}">
                 </div>
