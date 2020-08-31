@@ -5,7 +5,7 @@ import { type } from "jquery";
         label : 'employment status',
         attribute: 'employmentStatus',
         placeholder: null,
-        options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
+        options: ['Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
         type: 'select',
       },
       {

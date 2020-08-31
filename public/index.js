@@ -11414,41 +11414,24 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
-/* harmony import */ var _formBuilder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../formBuilder */ "./resources/asset/js/components/formBuilder.js");
-
-
 
 
 var show = function show(e) {
-  var kidsNo = e.target.value; // I build a hidden input that will auto click on select change to trigger the modal 
-  // id('kids_help').innerHTML = `<input type ='hidden' id='but' class = 'btn btn-primary'  data-toggle="modal" data-target="#kidsModal">`;
-  // id('but').click() // it automatically clicks the button
-  // use the loop to generate the number of input
+  var kidsNo = e.target.value; // use the loop to generate the number of input
 
   for (var i = 0; i < kidsNo; i++) {
     var no = i + 1;
-    var kids = [{
-      label: ["name", "email"],
-      type: 'combined',
-      attribute: ["childName-".concat(no), "childEmail-".concat(no)],
-      inputType: ['text', 'email'],
-      placeholder: ['child\'s name', 'email'],
-      options: ''
-    }];
-    Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help').innerHTML = "Please, enter your child(ren)'s name(s) and email(s)";
-    var addKids = "\n            <div class=\"form-group row\">\n                <label for=\"childName-".concat(no, "\" class=\"col-sm-2 col-form-label\">Child Name -").concat(no, "</label>\n                <div class=\"col-sm-10\">\n                <input type=\"text\" placeholder = \"Enter child's full name - ").concat(no, "\" name =childName-").concat(no, " class=\"form-control\" id=\"childName-").concat(no, "\">\n                </div>\n            </div>\n            <div class=\"form-group row\">\n                <label for=\"childEmail -").concat(no, "\" class=\"col-sm-2 col-form-label\">Child Email -").concat(no, "</label>\n                <div class=\"col-sm-10\">\n                <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=childEmail-").concat(no, " class=\"form-control\" id=\"childEmail-").concat(no, "\">\n                </div>\n            </div> \n        ");
-    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("childName-".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("childEmail-".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
+    var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
+    var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help');
+    getSelectHelp.innerHTML = msg;
+    getSelectHelp.style.fontSize = '1rem';
+    var addKids = " <div class=\"row\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid").concat(no, " class=\"form-control\" id=\"kid").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kidEmail").concat(no, " class=\"form-control\" id=\"kidEmail").concat(no, "\">\n           </div>\n        </div><br>");
+    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kid".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kidEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
   }
 }; // this is to activate the onchange event
 
 
 Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids').addEventListener('change', show);
-
-var test = function test() {
-  alert('it worked');
-};
-
-Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('childName-1').addEventListener('keyup', test);
 
 /***/ }),
 
@@ -11456,10 +11439,30 @@ Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('childName-1').addEventListen
 /*!******************************************************************!*\
   !*** ./resources/asset/js/components/register/modal/siblings.js ***!
   \******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
 
 
+var show = function show(e) {
+  var kidsNo = e.target.value; // use the loop to generate the number of input
+
+  for (var i = 0; i < kidsNo; i++) {
+    var no = i + 1;
+    var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
+    var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help');
+    getSelectHelp.innerHTML = msg;
+    getSelectHelp.style.fontSize = '1rem';
+    var addKids = " <div class=\"row\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid").concat(no, " class=\"form-control\" id=\"kid").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kidEmail").concat(no, " class=\"form-control\" id=\"kidEmail").concat(no, "\">\n           </div>\n        </div><br>");
+    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kid".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kidEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
+  }
+}; // this is to activate the onchange event
+
+
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids').addEventListener('change', show);
 
 /***/ }),
 
@@ -11700,7 +11703,7 @@ var Personal = [{
   placeholder: 'Your date of birth',
   type: 'date'
 }, {
-  label: "Number of kids",
+  label: "Number of children",
   attribute: 'kids',
   placeholder: null,
   type: 'select',
@@ -11746,7 +11749,7 @@ var Work = [{
   label: 'employment status',
   attribute: 'employmentStatus',
   placeholder: null,
-  options: ['Self-employed', 'Unemployed', 'Full-time', 'Student'],
+  options: ['Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
   type: 'select'
 }, {
   label: 'Job title?',
@@ -11865,7 +11868,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_register_helperRegister__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/helperRegister */ "./resources/asset/js/components/register/helperRegister.js");
 /* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
 /* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
-/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__);
 
 
 

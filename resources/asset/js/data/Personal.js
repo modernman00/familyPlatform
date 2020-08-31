@@ -50,7 +50,7 @@ export const Personal = [
     type: 'date'
   },
   {
-    label: "Number of kids",
+    label: "Number of children",
     attribute: 'kids',
     placeholder: null,
     type: 'select',
