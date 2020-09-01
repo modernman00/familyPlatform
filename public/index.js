@@ -11369,9 +11369,11 @@ var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); // check email and alert customer
-  // formData.realTimeServer('fatherName', '/search?hint', 'fatherName_error')
-  // check if password matches real time
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //check spouse
+
+  formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error');
+  formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error');
+  formData.realTimeServer('motherName', '/search?attribute=motherName&hint', 'motherName_error'); // check if password matches real time
 
   formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err);
 };
@@ -11448,21 +11450,26 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var show = function show(e) {
-  var kidsNo = e.target.value; // use the loop to generate the number of input
+  var siblingNo = e.target.value; //    const checkAppend = qSel('.appendLabel')
+  //         if(checkAppend || id(`noSiblings${no}`) || id(`noSiblingsEmail${no}`)) {
+  //             checkAppend.remove()
+  //         }
+  // use the loop to generate the number of input
 
-  for (var i = 0; i < kidsNo; i++) {
+  for (var i = 0; i < siblingNo; i++) {
+    //    checkAppend && checkAppend.remove()
     var no = i + 1;
     var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
-    var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help');
+    var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings_help');
     getSelectHelp.innerHTML = msg;
     getSelectHelp.style.fontSize = '1rem';
-    var addKids = " <div class=\"row\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid").concat(no, " class=\"form-control\" id=\"kid").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kidEmail").concat(no, " class=\"form-control\" id=\"kidEmail").concat(no, "\">\n           </div>\n        </div><br>");
-    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kid".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kidEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
+    var addnoSiblings = " <div class=\"row appendLabel\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter sibling's full name - ".concat(no, "\" name =noSiblings").concat(no, " class=\"form-control\" id=\"noSiblings").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter sibling's email - ").concat(no, "\" name=noSiblingsEmail").concat(no, " class=\"form-control\" id=\"noSiblingsEmail").concat(no, "\">\n           </div>\n        </div><br>");
+    if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("noSiblings".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("noSiblingsEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings_div').insertAdjacentHTML('afterend', addnoSiblings);
   }
 }; // this is to activate the onchange event
 
 
-Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids').addEventListener('change', show);
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings').addEventListener('change', show);
 
 /***/ }),
 

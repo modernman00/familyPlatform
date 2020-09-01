@@ -19,8 +19,12 @@ const process = () => {
 	);
 
 
-	// check email and alert customer
-	// formData.realTimeServer('fatherName', '/search?hint', 'fatherName_error')
+	//check spouse
+	formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error')
+
+	formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error')
+
+	formData.realTimeServer('motherName', '/search?attribute=motherName&hint', 'motherName_error')
 
 
 	// check if password matches real time

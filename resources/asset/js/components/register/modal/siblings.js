@@ -1,37 +1,45 @@
-import { id } from "./../../../global";
+import { id, qSel } from "./../../../global";
 
 const show = (e) => {
-    const kidsNo = e.target.value;
+    const siblingNo = e.target.value;
+//    const checkAppend = qSel('.appendLabel')
 
+//         if(checkAppend || id(`noSiblings${no}`) || id(`noSiblingsEmail${no}`)) {
+//             checkAppend.remove()
+//         }
     // use the loop to generate the number of input
-    for (let i = 0; i < kidsNo; i++) {
+    for (let i = 0; i < siblingNo; i++) {
+
+     
+
+    //    checkAppend && checkAppend.remove()
 
         const no = i + 1  
         const msg = (no > 1 ) ? "Please, enter their names and emails": "Please, enter your child name and email" 
 
-        const getSelectHelp = id('kids_help')
+        const getSelectHelp = id('noSiblings_help')
 
         getSelectHelp.innerHTML = msg 
         getSelectHelp.style.fontSize = '1rem'     
 
-        const addKids = ` <div class="row">
+        const addnoSiblings = ` <div class="row appendLabel">
             <div class="col">
-            <input type="text" placeholder = "Enter child's full name - ${no}" name =kid${no} class="form-control" id="kid${no}">
+            <input type="text" placeholder = "Enter sibling's full name - ${no}" name =noSiblings${no} class="form-control" id="noSiblings${no}">
             </div>
             <div class="col">
-           <input type="email" placeholder = "Enter child's email - ${no}" name=kidEmail${no} class="form-control" id="kidEmail${no}">
+           <input type="email" placeholder = "Enter sibling's email - ${no}" name=noSiblingsEmail${no} class="form-control" id="noSiblingsEmail${no}">
            </div>
         </div><br>`
 
 
-        if (!id(`kid${no}`) || !id(`kidEmail${no}`))
+        if (!id(`noSiblings${no}`) || !id(`noSiblingsEmail${no}`))
             
-            id('kids_div').insertAdjacentHTML('afterend', addKids)
+            id('noSiblings_div').insertAdjacentHTML('afterend', addnoSiblings)
       
             
     }
 
 }
 // this is to activate the onchange event
-id('kids').addEventListener('change', show)
+id('noSiblings').addEventListener('change', show)
 

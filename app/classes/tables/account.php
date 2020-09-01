@@ -15,6 +15,7 @@ class Account extends Insert {
                 `password` TEXT NOT NULL ,
                 `token` TEXT NOT NULL ,
                 `secretWord` TEXT NOT NULL ,
+                `status` TEXT NOT NULL ,
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , 
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP ,
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP ,
