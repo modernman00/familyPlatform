@@ -16,10 +16,10 @@ const show = (e) => {
 
         const addKids = ` <div class="row">
             <div class="col">
-            <input type="text" placeholder = "Enter child's full name - ${no}" name =kid${no} class="form-control" id="kid${no}">
+            <input type="text" placeholder = "Enter child's full name - ${no}" name =kid_name${no} class="form-control" id="kid_name${no}">
             </div>
             <div class="col">
-           <input type="email" placeholder = "Enter child's email - ${no}" name=kidEmail${no} class="form-control" id="kidEmail${no}">
+           <input type="email" placeholder = "Enter child's email - ${no}" name=kid_email${no} class="form-control" id="kid_email${no}">
            </div>
         </div><br>`
 

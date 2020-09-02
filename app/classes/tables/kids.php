@@ -13,16 +13,11 @@ class Kids extends Insert {
                 $sql = "CREATE TABLE IF NOT EXISTS  `family`.`kids` ( 
                     `no` INT NOT NULL AUTO_INCREMENT , 
                     `id` VARCHAR(255) NOT NULL , 
-                `kid1` TEXT NOT NULL , 
-                `kid2` TEXT NOT NULL ,
-                `kid3` TEXT NOT NULL,
-                `kid4` TEXT NOT NULL,
-                `kid5` TEXT NOT NULL,
-                `kid6` TEXT NOT NULL,
-                `kid7` TEXT NOT NULL,
-                `kid8` TEXT NOT NULL,
-                `kid9` TEXT NOT NULL,
-                `kid10` TEXT NOT NULL,                    
+                `kid_name` TEXT NOT NULL , 
+                `kid_email` TEXT NOT NULL ,
+                `kid_linked` TEXT NOT NULL,
+              
+                                  
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , 
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, 
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP , 

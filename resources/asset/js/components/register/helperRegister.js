@@ -19,7 +19,7 @@ const process = () => {
 	);
 
 
-	//check spouse
+	//real time check 
 	formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error')
 
 	formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error')

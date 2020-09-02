@@ -24,10 +24,10 @@ const show = (e) => {
 
         const addnoSiblings = ` <div class="row appendLabel">
             <div class="col">
-            <input type="text" placeholder = "Enter sibling's full name - ${no}" name =noSiblings${no} class="form-control" id="noSiblings${no}">
+            <input type="text" placeholder = "Enter sibling's full name - ${no}" name ="sibling_name${no}" class="form-control" id="sibling_name${no}">
             </div>
             <div class="col">
-           <input type="email" placeholder = "Enter sibling's email - ${no}" name=noSiblingsEmail${no} class="form-control" id="noSiblingsEmail${no}">
+           <input type="email" placeholder = "Enter sibling's email - ${no}" name="sibling_email${no}" class="form-control" id="sibling_email${no}">
            </div>
         </div><br>`
 

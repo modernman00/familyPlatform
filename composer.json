@@ -13,8 +13,12 @@
 
         },
 
-        "files": ["app/function/helper.php",
-            "app/function/email/sendEmail.php"
+        "files": ["app/function/helper/index.php",
+        "app/function/helper/checkSanitise.php",
+        "app/function/helper/email.php",
+        "app/function/helper/security.php",
+        "app/function/helper/Validate.php",
+        "app/function/helper/pdfConversion.php"
         ]
     },
 
@@ -26,7 +30,7 @@
         "philo/laravel-blade": "^3.1",
         "symfony/flex":"^1.6.3",
         "filp/whoops": "^2.7",
-        "phpmailer/phpmailer": "^6.1"
+          "phpmailer/phpmailer": "^6.1"
 
     },
     

@@ -5,19 +5,19 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> @yield('title')</title>
+    <title> <?php echo $__env->yieldContent('title'); ?></title>
 
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
      
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
-     <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+     <link rel="icon" type="image/png" sizes="32x32" href=<?php echo e(getenv("IMG_CONTRACT")); ?>>
 
       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
            <link rel="stylesheet" href="/css/index.css">
 
-      {{-- <link rel="stylesheet" href="/css/allcss.css"> --}}
+      
 
       <style>
           table {
@@ -51,7 +51,7 @@
 
             <div class="navbar-brand">
                   <a class="navbar-item" href="/">
-                <img src={{ getenv("IMG_LOGO_BLACK") }} width="200" height="600">
+                <img src=<?php echo e(getenv("IMG_LOGO_BLACK")); ?> width="200" height="600">
             </a>
 
             <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
@@ -67,17 +67,17 @@
                     Dashboard
                 </a>
 
-                @php 
+                <?php 
 
                 $result = new \App\classes\AllFunctionalities;
                 $result = $result->select_count("account", "status", "new");
 
 
 
-                @endphp
+                ?>
 
                 <a href="/admin/newCustomers" class="navbar-item"  >
-                    Application(<span id='newApp'>{{ $result }}</span>)
+                    Application(<span id='newApp'><?php echo e($result); ?></span>)
                 </a>
 
                   <a href="/admin/profit" class="navbar-item">
@@ -123,14 +123,12 @@
 
             <div class="navbar-end">
                 <div class="navbar-item">
-                    {{-- <div class="buttons"> --}}
+                    
                         <a href="/admin/signout"class="button is-primary">
                             <strong>Sign Out</strong>
                         </a>
-                        {{-- <a href="/login" class="button is-light">
-                            Log in
-                        </a> --}}
-                    {{-- </div> --}}
+                        
+                    
                    <div class="field">
                     <p class="control  has-icons-right">
                         <input class="input" type="text" placeholder="Search">
@@ -148,13 +146,13 @@
         <br>
     <!-- END NAV -->
 
-    {{-- PAGE INFORMATION --}}
+    
 
        <section class="hero is-info welcome is-small">
                     <div class="hero-body">
                         <div class="container">
                             <h1 class="subtitle">
-                              <b>@yield('content-title')</b>  
+                              <b><?php echo $__env->yieldContent('content-title'); ?></b>  
                             </h1>
                         </div>
                     </div>
@@ -165,7 +163,7 @@
 
       <div class="container is-fluid ">
 
-         @yield('content')
+         <?php echo $__env->yieldContent('content'); ?>
       </div>
 
 
@@ -175,8 +173,8 @@
         <div class="content has-text-centered">
 
 
-        <img src={{ getenv("IMG_CONTRACT") }}  width="30" height="30"> <br>
-        <span class="copyright">Copyright &copy; {{ getenv("COPYRIGHT_YEAR") }} </span>
+        <img src=<?php echo e(getenv("IMG_CONTRACT")); ?>  width="30" height="30"> <br>
+        <span class="copyright">Copyright &copy; <?php echo e(getenv("COPYRIGHT_YEAR")); ?> </span>
 
         </div>
     </div>
@@ -199,3 +197,4 @@
 </body>
 
 </html>
+<?php /**PATH C:\xampp\htdocs\familyPlatform\resources\view/admin/base.blade.php ENDPATH**/ ?>
