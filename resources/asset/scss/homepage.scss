@@ -5,23 +5,87 @@
 //     url('/images/pic01.jpg'));
 // }
 
-.header {
-      height: 100vh;
-  background-image: 
-  linear-gradient(
-      to bottom right,  
-    rgba(53, 85, 2, 0.836), 
-    rgba(2, 39, 1, 0.815)),
-  url('/img/gbemi_birthday/WhatsApp Image 2020-07-26 at 22.26.24.jpeg');
-  background-size: cover;
-  background-position: top;
-  position: relative;
+// .header {
+//       height: 100vh;
+//   background-image: 
+//   linear-gradient(
+//       to bottom right,  
+//     rgba(53, 85, 2, 0.836), 
+//     rgba(2, 39, 1, 0.815)),
+//   url('/img/gbemi_birthday/WhatsApp Image 2020-07-26 at 22.26.24.jpeg');
+//   background-size: cover;
+//   background-position: top;
+//   position: relative;
 
+// }
+
+
+.subscribeForm {
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-top: 2rem;
+}
+
+header.masthead {
+  text-align: center;
+  color: white;
+  background-image: url('/img/homepage.jfif');
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-position: center center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+.opo:hover {
+  color: white;
 }
 
 
-.subscribeForm{
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-top: 15%;
+
+header.masthead .intro-text {
+  padding-top: 150px;
+  padding-bottom: 100px;
+}
+
+header.masthead .intro-text .intro-lead-in {
+  font-size: 22px;
+  font-style: italic;
+  color: #fec503;
+  line-height: 22px;
+  margin-bottom: 25px;
+  font-family: 'Droid Serif', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+header.masthead .intro-text .intro-heading {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 50px;
+  margin-bottom: 25px;
+  font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+@media (min-width: 768px) {
+  header.masthead .intro-text {
+    padding-top: 300px;
+    padding-bottom: 200px;
+  }
+
+  header.masthead .intro-text .intro-lead-in {
+    font-size: 40px;
+    font-style: italic;
+    line-height: 40px;
+    margin-bottom: 25px;
+    font-family: 'Droid Serif', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  header.masthead .intro-text .intro-heading {
+    font-size: 75px;
+    font-weight: 700;
+    line-height: 75px;
+    margin-bottom: 50px;
+    font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
 }

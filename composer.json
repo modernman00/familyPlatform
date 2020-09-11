@@ -13,7 +13,7 @@
 
         },
 
-        "files": ["app/function/helper/index.php",
+        "files": ["app/function/helper/helper.php",
         "app/function/helper/checkSanitise.php",
         "app/function/helper/email.php",
         "app/function/helper/security.php",

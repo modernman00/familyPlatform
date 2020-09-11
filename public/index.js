@@ -11369,7 +11369,7 @@ var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //check spouse
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
 
   formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error');
   formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error');
@@ -11427,7 +11427,7 @@ var show = function show(e) {
     var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_help');
     getSelectHelp.innerHTML = msg;
     getSelectHelp.style.fontSize = '1rem';
-    var addKids = " <div class=\"row\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid").concat(no, " class=\"form-control\" id=\"kid").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kidEmail").concat(no, " class=\"form-control\" id=\"kidEmail").concat(no, "\">\n           </div>\n        </div><br>");
+    var addKids = " <div class=\"row\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid_name").concat(no, " class=\"form-control\" id=\"kid_name").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kid_email").concat(no, " class=\"form-control\" id=\"kid_email").concat(no, "\">\n           </div>\n        </div><br>");
     if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kid".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("kidEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('kids_div').insertAdjacentHTML('afterend', addKids);
   }
 }; // this is to activate the onchange event
@@ -11463,7 +11463,7 @@ var show = function show(e) {
     var getSelectHelp = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings_help');
     getSelectHelp.innerHTML = msg;
     getSelectHelp.style.fontSize = '1rem';
-    var addnoSiblings = " <div class=\"row appendLabel\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter sibling's full name - ".concat(no, "\" name =noSiblings").concat(no, " class=\"form-control\" id=\"noSiblings").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter sibling's email - ").concat(no, "\" name=noSiblingsEmail").concat(no, " class=\"form-control\" id=\"noSiblingsEmail").concat(no, "\">\n           </div>\n        </div><br>");
+    var addnoSiblings = " <div class=\"row appendLabel\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter sibling's full name - ".concat(no, "\" name =\"sibling_name").concat(no, "\" class=\"form-control\" id=\"sibling_name").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter sibling's email - ").concat(no, "\" name=\"sibling_email").concat(no, "\" class=\"form-control\" id=\"sibling_email").concat(no, "\">\n           </div>\n        </div><br>");
     if (!Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("noSiblings".concat(no)) || !Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])("noSiblingsEmail".concat(no))) Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings_div').insertAdjacentHTML('afterend', addnoSiblings);
   }
 }; // this is to activate the onchange event
