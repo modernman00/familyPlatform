@@ -19,9 +19,9 @@ export const dataToCheck = {
 
 	},
 
-	referral: {
-		yes : 'referral_yes',
-		no: 'referral_no',
-		hidden: 'referral_admin'	
+	familyCheck: {
+		father : ["fatherYes", "fatherNo"],
+		mother: ["motherYes", "motherNo"],
+		spouse: ["spouseYes", "spouseNo"]	
 	}
 };

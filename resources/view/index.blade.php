@@ -29,20 +29,20 @@
         </form>
       </div>
 
-      <div class="row">
+      <div class="rowo">
 
-           <div class="col ">
+           <div class="colo ">
                    <a class="btn btn-warning btn-xl text-uppercase js-scroll-trigger opo" href="/message">Message</a>
           </div>
-          <div class="col">
+          <div class="colo">
                    <a class="btn btn-warning btn-xl text-uppercase js-scroll-trigger opo" href="/login">Login</a>
           </div>
 
-           <div class="col">
+           <div class="colo">
                    <a class="btn btn-warning btn-xl text-uppercase js-scroll-trigger opo" href="/about">About</a>
           </div>
 
-          <div class="col">
+          <div class="colo">
                    <a class="btn btn-warning btn-xl text-uppercase js-scroll-trigger opo" href="/register">Register</a>
           </div>
        

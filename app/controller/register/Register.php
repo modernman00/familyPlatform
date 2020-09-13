@@ -10,7 +10,7 @@ use Exception;
 class Register extends Insert 
 {
     private $cleanData;
-    private $table = ['personal', 'work', 'contact', 'interest', 'account'];
+    private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'siblings', 'kids'];
 
     public function index()
     {
@@ -63,10 +63,6 @@ class Register extends Insert
                 'firstName' => $this->cleanData['firstName'],
                 'lastName' => $this->cleanData['lastName'],
                  'alias' => $this->cleanData['alias'],
-                'spouse' => $this->cleanData['spouse'],
-                'fatherName' => $this->cleanData['fatherName'],
-                'motherName' => $this->cleanData['motherName'],
-                 'motherMaiden' => $this->cleanData['motherMaiden'],
                 'birthDate' => $this->cleanData['birthDate'],
                 'kids' => $this->cleanData['kids'],
                 'gender' => $this->cleanData['gender'],
@@ -78,7 +74,7 @@ class Register extends Insert
                  'jobTitle' => $this->cleanData['jobTitle'],
                 'occupation' => $this->cleanData['occupation'],
                 'employerName' => $this->cleanData['employerName'],
-                'workEmail' => $this->cleanData['workEmail'],
+                // 'workEmail' => $this->cleanData['workEmail'],
                
                 'id' => $this->cleanData['id']      
             ],
@@ -102,6 +98,28 @@ class Register extends Insert
                 'secretWord' => $this->cleanData['secretWord'], 
                 'status' => 'new',            
                 'id' => $this->cleanData['id'],     
+            ],
+            [
+                'spouse' => $this->cleanData['spouse'],
+                'spouseEmail' => $this->cleanData['spouseEmail'],
+                'fatherName' => $this->cleanData['fatherName'],
+                'fatherEmail' => $this->cleanData['fatherEmail'],
+                'motherName' => $this->cleanData['motherName'],
+                'motherEmail' => $this->cleanData['motherEmail'],
+                'motherMaiden' => $this->cleanData['motherMaiden'],
+                'id' => $this->cleanData['id']
+            ],
+            [
+                'sibling_name' => $this->cleanData['sibling_name'],
+                'sibling_email' => $this->cleanData['sibling_email'],
+                'sibling_linked' => $this->cleanData['sibling_linked'],
+                'id' => $this->cleanData['id']
+            ],
+             [
+                'kid_name' => $this->cleanData['kid_name'],
+                'kid_email' => $this->cleanData['kid_email'],
+                'kid_linked' => $this->cleanData['kid_linked'],
+                'id' => $this->cleanData['id']
             ]
         ];
 

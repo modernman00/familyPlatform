@@ -11,8 +11,8 @@ use App\classes\tables\{
     siblings,
     kids,
     Account,
-    Interest
-    
+    Interest,
+    otherFamily
 };
 class Create extends Db
 {
@@ -25,7 +25,8 @@ class Create extends Db
             new kids,
             new siblings,
             new Account,
-            new Interest
+            new Interest,
+            new otherFamily
         ];
         
         try {

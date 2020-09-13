@@ -2,10 +2,10 @@
 
 namespace App\classes;
 
-use App\classes\Insert;
+use App\classes\allFunctionalities;
 use Exception;
 
-class Sanitise extends Insert
+class Sanitise extends allFunctionalities
 {
     private $formData = array();
     private $key  = array();

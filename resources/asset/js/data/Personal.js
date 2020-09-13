@@ -24,16 +24,34 @@ export const Personal = [
     type: 'text',
   },
   {
+    label: "spouse's email",
+    attribute: 'spouseEmail',
+    placeholder: 'spouse@email.com',
+    type: 'email',
+  },
+  {
     label: "Father's name",
     attribute: 'fatherName',
     placeholder: 'Your Father name and last name',
     type: 'text',
+  },
+    {
+    label: "Father's email",
+    attribute: 'fatherEmail',
+    placeholder: 'father@email.com',
+    type: 'email',
   },
   {
     label: "Mother's name",
     attribute: 'motherName',
     placeholder: 'Your Mother name and last name',
     type: 'text',
+  },
+     {
+    label: "Mother's email",
+    attribute: 'motherEmail',
+    placeholder: 'mother@email.com',
+    type: 'email',
   },
 
   {

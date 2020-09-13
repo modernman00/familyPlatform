@@ -2,9 +2,9 @@
 
 namespace App\classes;
 
-use App\classes\Insert;
+use App\classes\allFunctionalities;
 
-class AlterTable extends Insert 
+class AlterTable extends allFunctionalities 
 {
 
     public $table;

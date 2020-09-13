@@ -26,11 +26,11 @@ import { type } from "jquery";
         placeholder: 'Guinness, Showal, Coca Cola',
         type: 'text',
       },
-      {
-        label : "Work email",
-        attribute: 'workEmail',
-        placeholder: 'enter your work email',
-        type: 'text',
-      },
+      // {
+      //   label : "Work email",
+      //   attribute: 'workEmail',
+      //   placeholder: 'enter your work email',
+      //   type: 'text',
+      // },
       
 ]

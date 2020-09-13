@@ -11236,9 +11236,10 @@ var FormHelper = /*#__PURE__*/function () {
 
       var checked = function checked() {
         if (_this4.id(yesId).checked) {
-          _this4.id(hiddenInput).style.display = 'block';
+          alert('check');
+          _this4.id(hiddenInput).innerHTML = 'checked';
         } else if (_this4.id(noId).checked) {
-          _this4.id(hiddenInput).style.display = 'none';
+          _this4.id(hiddenInput).innerHTML = 'checked';
         }
       };
 
@@ -11371,11 +11372,25 @@ var process = function process() {
 
   formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
 
-  formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error');
-  formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error');
-  formData.realTimeServer('motherName', '/search?attribute=motherName&hint', 'motherName_error'); // check if password matches real time
+  formData.realTimeServer('spouseEmail', "/search?attribute=spouseEmail&subject=spouse&hint", 'spouseEmail_error');
+  formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error');
+  formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error'); // check if password matches real time
 
-  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err);
+  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err); // check if they have a father yes
+  // formData.isChecked(dataToCheck.familyCheck.father[0],
+  // 	dataToCheck.familyCheck.father[1],
+  // 	'fatherEmail_error'
+  // )
+  // // check if they have a mother yes
+  // formData.isChecked(dataToCheck.familyCheck.mother[0],
+  // 	dataToCheck.familyCheck.mother[1],
+  // 	'motherEmail_error'
+  // )
+  // // check if they have a spouse yes
+  // formData.isChecked(dataToCheck.familyCheck.spouse[0],
+  // 	dataToCheck.familyCheck.spouse[1],
+  // 	'spouseEmail_error'
+  // )
 };
 
 process();
@@ -11690,15 +11705,30 @@ var Personal = [{
   placeholder: 'full name please',
   type: 'text'
 }, {
+  label: "spouse's email",
+  attribute: 'spouseEmail',
+  placeholder: 'spouse@email.com',
+  type: 'email'
+}, {
   label: "Father's name",
   attribute: 'fatherName',
   placeholder: 'Your Father name and last name',
   type: 'text'
 }, {
+  label: "Father's email",
+  attribute: 'fatherEmail',
+  placeholder: 'father@email.com',
+  type: 'email'
+}, {
   label: "Mother's name",
   attribute: 'motherName',
   placeholder: 'Your Mother name and last name',
   type: 'text'
+}, {
+  label: "Mother's email",
+  attribute: 'motherEmail',
+  placeholder: 'mother@email.com',
+  type: 'email'
 }, {
   label: "Mother's maiden name",
   attribute: 'motherMaiden',
@@ -11773,12 +11803,13 @@ var Work = [{
   attribute: 'employerName',
   placeholder: 'Guinness, Showal, Coca Cola',
   type: 'text'
-}, {
-  label: "Work email",
-  attribute: 'workEmail',
-  placeholder: 'enter your work email',
-  type: 'text'
-}];
+} // {
+//   label : "Work email",
+//   attribute: 'workEmail',
+//   placeholder: 'enter your work email',
+//   type: 'text',
+// },
+];
 
 /***/ }),
 
@@ -11806,10 +11837,10 @@ var dataToCheck = {
     pwd: 'password',
     pwd2: 'confirm_password'
   },
-  referral: {
-    yes: 'referral_yes',
-    no: 'referral_no',
-    hidden: 'referral_admin'
+  familyCheck: {
+    father: ["fatherYes", "fatherNo"],
+    mother: ["motherYes", "motherNo"],
+    spouse: ["spouseYes", "spouseNo"]
   }
 };
 

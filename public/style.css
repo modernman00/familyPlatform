@@ -1,7 +1,28 @@
+* {
+  margin: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
 body {
-  font: 400 15px Lato, sans-serif;
+  overflow-x: hidden;
+  font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   line-height: 1.8;
   color: #818181;
+}
+
+p {
+  line-height: 1.75;
+}
+
+a {
+  color: #fed136;
+}
+
+a:hover {
+  color: #fec503;
 }
 
 .jumbotron {
@@ -15,11 +36,11 @@ body {
 .jumbotron {
   background-color: #f4511e;
   color: #ffffff;
-  padding: 100px 25px;
+  padding: 10rem 2.5rem;
 }
 
 .container-fluid {
-  padding: 60px 50px;
+  padding: 6rem 5rem;
 }
 
 .bg-grey {
@@ -27,14 +48,14 @@ body {
 }
 
 .logo {
-  font-size: 200px;
+  font-size: 20rem;
   color: #f4511e;
 }
 
 @media screen and (max-width: 768px) {
   .col-sm-4 {
     text-align: center;
-    margin: 25px 0;
+    margin: 2.5rem 0;
   }
 }
 
@@ -112,7 +133,7 @@ body {
   border: 0;
   font-size: 12px !important;
   line-height: 1.42857143 !important;
-  letter-spacing: 4px;
+  letter-spacing: 0.4rem;
   border-radius: 0;
 }
 
@@ -132,13 +153,13 @@ body {
 }
 
 footer .glyphicon {
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 2rem;
+  margin-bottom: 2rem;
   color: #f4511e;
 }
 
 .footerLogo {
-  font-size: 20px;
+  font-size: 2rem;
 }
 
 .styleForm {
@@ -147,33 +168,33 @@ footer .glyphicon {
 }
 
 .small {
-  font-size: 0.6em;
+  font-size: 0.6rem;
   font-style: italic;
   color: #a7092b;
 }
 
 .error {
   color: red;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 input::-moz-placeholder {
-  font-size: 0.7em;
+  font-size: 0.7rem;
   text-transform: uppercase;
 }
 
 input:-ms-input-placeholder {
-  font-size: 0.7em;
+  font-size: 0.7rem;
   text-transform: uppercase;
 }
 
 input::-ms-input-placeholder {
-  font-size: 0.7em;
+  font-size: 0.7rem;
   text-transform: uppercase;
 }
 
 input::placeholder {
-  font-size: 0.7em;
+  font-size: 0.7rem;
   text-transform: uppercase;
 }
 
@@ -199,6 +220,13 @@ header.masthead {
 
 .opo:hover {
   color: white;
+}
+
+.rowo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  font-size: 4rem;
 }
 
 header.masthead .intro-text {
@@ -281,5 +309,13 @@ header.masthead .intro-text .intro-heading {
     margin-right: 0px;
     margin-bottom: 20px;
   }
+}
+
+.form__login__logo {
+  margin-left: 40%;
+}
+
+.styleForm > h4 {
+  font-weight: 200;
 }
 

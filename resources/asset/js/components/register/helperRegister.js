@@ -20,11 +20,12 @@ const process = () => {
 
 
 	//real time check 
-	formData.realTimeServer('spouse', '/search?attribute=spouse&hint', 'spouse_error')
 
-	formData.realTimeServer('fatherName', '/search?attribute=fatherName&hint', 'fatherName_error')
+	formData.realTimeServer('spouseEmail', `/search?attribute=spouseEmail&subject=spouse&hint`, 'spouseEmail_error')
 
-	formData.realTimeServer('motherName', '/search?attribute=motherName&hint', 'motherName_error')
+	formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error')
+
+	formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error')
 
 
 	// check if password matches real time
@@ -32,6 +33,24 @@ const process = () => {
 		dataToCheck.password.pwd2,
 		dataToCheck.password.err
 	);
+
+	// check if they have a father yes
+	// formData.isChecked(dataToCheck.familyCheck.father[0],
+	// 	dataToCheck.familyCheck.father[1],
+	// 	'fatherEmail_error'
+	// )
+
+	// // check if they have a mother yes
+	// formData.isChecked(dataToCheck.familyCheck.mother[0],
+	// 	dataToCheck.familyCheck.mother[1],
+	// 	'motherEmail_error'
+	// )
+
+	// // check if they have a spouse yes
+	// formData.isChecked(dataToCheck.familyCheck.spouse[0],
+	// 	dataToCheck.familyCheck.spouse[1],
+	// 	'spouseEmail_error'
+	// )
 }
 
 process()

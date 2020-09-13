@@ -1,51 +1,73 @@
+* {
+    margin: 0;
+}
+
+html {
+    font-size: 16px;
+}
+
 body {
-  font: 400 15px Lato, sans-serif;
-  line-height: 1.8;
-  color: #818181;
+    overflow-x: hidden;
+    font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    line-height: 1.8;
+    color: #818181;
 
 }
 
+p {
+    line-height: 1.75;
+}
+
+a {
+    color: #fed136;
+}
+
+a:hover {
+    color: #fec503;
+}
+
+
 .jumbotron {
-  font-family: Montserrat, sans-serif;
+    font-family: Montserrat, sans-serif;
 }
 
 .navbar {
-  font-family: Montserrat, sans-serif;
+    font-family: Montserrat, sans-serif;
 }
 
-.jumbotron{
+.jumbotron {
     background-color: #f4511e;
     color: #ffffff;
-    padding: 100px 25px;
+    padding: 10rem 2.5rem;
 
 }
 
 .container-fluid {
-    padding: 60px 50px;
+    padding: 6rem 5rem;
 }
 
-.bg-grey{
+.bg-grey {
     background-color: #f6f6f6
 }
 
-.logo{
-    font-size: 200px;
+.logo {
+    font-size: 20rem;
     color: #f4511e;
 }
 
 @media screen and (max-width: 768px) {
-    .col-sm-4{
-    text-align: center;
-    margin: 25px 0;
-}
+    .col-sm-4 {
+        text-align: center;
+        margin: 2.5rem 0;
+    }
 }
 
-.logo-small{
+.logo-small {
     color: #f4511e;
     font-size: 50px;
 }
 
-.thumbnail{
+.thumbnail {
     padding: 0 0 15px 0;
     border: none;
     border-radius: 0;
@@ -63,11 +85,11 @@ body {
     transition: box-shadow 0.5s;
 }
 
-.panel:hover{
+.panel:hover {
     box-shadow: 5px 0px 40px rgba($color: #a12121, $alpha: 2.0);
 }
 
-.panel-footer .btn:hover{
+.panel-footer .btn:hover {
     border: 1px solid #f4511e;
     background-color: #fff !important;
     color: #f4511e;
@@ -89,20 +111,20 @@ body {
     background-color: #fff !important;
 }
 
-.panel-footer h3{
+.panel-footer h3 {
     font-size: 32px;
 }
 
-.panel-footer h4{
+.panel-footer h4 {
     font-size: 14px;
     color: #aaa;
 }
 
-.panel-footer h3{
+.panel-footer h3 {
     font-size: 32px;
 }
 
-.panel-footer .btn{
+.panel-footer .btn {
     margin: 15px 0;
     background-color: #f4511e;
     color: #fff;
@@ -115,8 +137,8 @@ body {
     border: 0;
     font-size: 12px !important;
     line-height: 1.42857143 !important;
-    letter-spacing: 4px;
-    border-radius: 0;   
+    letter-spacing: 0.4rem;
+    border-radius: 0;
 
 }
 
@@ -124,23 +146,23 @@ body {
     color: #fff !important;
 }
 
-.navbar-nav li a:hover, .navbar-nav li.active a {
+.navbar-nav li a:hover,
+.navbar-nav li.active a {
     color: #f4511e !important;
     background-color: #fff !important;
 }
 
 .navbar-default .navbar-toggle {
-  border-color: transparent;
-  color: #fff !important;
+    border-color: transparent;
+    color: #fff !important;
 }
 
 footer .glyphicon {
-    font-size: 20px;
-    margin-bottom: 20px;
+    font-size: 2rem;
+    margin-bottom: 2rem;
     color: #f4511e;
 }
 
 .footerLogo {
-    font-size: 20px;
+    font-size: 2rem;
 }
-
