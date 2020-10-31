@@ -1,19 +1,27 @@
 <?php
 
 namespace App\classes;
-use Exception;
+
 
 class CheckToken
 {
-    protected function checkToken($tokenName)
+
+    public  $tokenCheck;
+    public  $postToken;
+
+
+    function tokenCheck($token, $redirect)
     {
-      
-        $sessionToken = $_SESSION[$tokenName];
-        $postToken = $_POST[$tokenName];
-    
-         if($sessionToken != $postToken) {
-                throw new Exception("Hmmm -> Are you sure you are not a Robot?", 1);      
+        try {
+            $this->tokenCheck = $_SESSION[$token] ?? 1;
+            $this->postToken = $_POST[$token] ?? 2;
+            // invalidate $token stored in session
+            unset($_SESSION[$token]);
+            if ($this->tokenCheck != $this->postToken) {
+                header("Location: $redirect");
             }
+        } catch (\Throwable $th) {
+            showError($th);
+        }
     }
 }
-

@@ -15,25 +15,19 @@ class EmailData
      */
     function __construct(string $sender)
     {    
-        if($sender === 'customer') {
+        if($sender === 'member') {
             $this->username = getenv("APP_USERNAME");
             $this->password = getenv("APP_PASSWORD");
             $this->senderName = getenv('APP_SENDER');
             $this->senderEmail = getenv("APP_EMAIL");
 
-        } elseif ( $sender === 'payment') {
+        } elseif ( $sender === 'admin') {
 
             $this->username = getenv("PAY_USERNAME");
             $this->password = getenv("PAY_PASSWORD");
             $this->senderName = getenv('PAY_SENDER');
             $this->senderEmail = getenv("PAY_EMAIL");
 
-        } elseif ($sender === 'referral') {
-
-            $this->username = getenv("REFER_USERNAME");
-            $this->password = getenv("REFER_PASSWORD");
-            $this->senderName = getenv('REFER_SENDER');
-            $this->senderEmail = getenv("REFER_EMAIL");
         }
       
             $this->username = getenv("APP_USERNAME");

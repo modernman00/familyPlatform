@@ -11661,9 +11661,9 @@ var Interest = [{
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Login", function() { return Login; });
 var Login = [{
-  label: 'Username',
-  attribute: 'username',
-  placeholder: 'Your username will be mainly your email',
+  label: 'email',
+  attribute: 'email',
+  placeholder: 'family@email.com',
   type: 'text'
 }, {
   label: 'password',

@@ -64,10 +64,10 @@ class VerifyPassword extends AllFunctionalities
         try {
             $data = [
                 'password' => $this->passwordHash,
-                'customerNo' => $this->id
+                'id' => $this->id
             ];
 
-            $outcome = $this->updateMultiplePOST($data, $this->table, 'customerNo', $this->id, 'customerNo');
+            $outcome = $this->updateMultiplePOST($data, $this->table, 'id', $this->id, 'id');
 
             return $outcome;
         } catch (PDOException $e) {

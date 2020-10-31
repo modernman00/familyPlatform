@@ -11,7 +11,7 @@ class Sanitise extends allFunctionalities
     private $key  = array();
     private $value = array();
     private $value2 = array();
-    private $error = array();
+    public $error = array();
     private $cleanData = array();
     private $dataLength;
     private $image;
@@ -24,7 +24,13 @@ class Sanitise extends allFunctionalities
     {
        try {
          unset($array['submit']);
-        $this->checkToken('token');
+
+          // rid it of token
+        if (isset($array['token'])) {
+            unset($array['token']);
+        }
+
+    
 
         $this->formData = $array;
 
@@ -131,10 +137,10 @@ class Sanitise extends allFunctionalities
         $this->setArrayData();
     }
 
-    public function getErr()
-    {
-        return $this->error;
-    }
+    // public function getErr()
+    // {
+    //     return $this->error;
+    // }
 
     /**
      * either returns an error which it will echo or the sanitised data in an array
@@ -146,7 +152,7 @@ class Sanitise extends allFunctionalities
         try {
             $this->runFunctions();
 
-            if (count($this->error) > 0) return "Error";
+            // if (count($this->error) > 0) return "Error";
             
             return $this->cleanData;
             

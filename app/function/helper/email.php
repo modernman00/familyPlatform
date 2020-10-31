@@ -2,10 +2,10 @@
 
 use App\model\EmailData;
 
-function sendEmailCustomer()
+function sendEmailMember()
 {
-    $notifyCustomer = new EmailData('customer');
-    return $notifyCustomer->getEmailData();
+    $notifyMember = new EmailData('member');
+    return $notifyMember->getEmailData();
 }
 
 function sendEmailPayment()
@@ -16,7 +16,7 @@ function sendEmailPayment()
 
 function sendEmailSelf()
 {
-    $notifyCustomer = new EmailData('self');
+    $notifyCustomer = new EmailData('admin');
     return $notifyCustomer->getEmailData();
 }
 

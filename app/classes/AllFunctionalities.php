@@ -1,7 +1,10 @@
 <?php
+
 namespace App\classes;
+
 use \PDO;
 use \PDOException;
+use Exception;
 use App\classes\Db;
 
 
@@ -9,6 +12,46 @@ class AllFunctionalities extends Db
 {
 
 	private $des = 'referral';
+
+	public function submitForm($table, $field)
+	{
+		try {
+
+			// EXTRACT THE KEY FOR THE COL NAME
+			$key = array_keys($field);
+			$col = implode(', ', $key);
+
+
+
+			// extract values
+			// $value = array_values($field);
+			$placeholder = implode(', :', $key);
+
+			// prep statement using placeholder :name
+			$stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
+			$query = $this->connect()->prepare($stmt);
+			if (!$query) throw new Exception("Not able to insert data", 1);
+
+			foreach ($field as $keys => $values) {
+
+				$query->bindValue(":$keys", $values);
+			}
+			$outcome = $query->execute();
+
+			if (!$outcome) throw new Exception("Not able to execute data", 1);
+		} catch (\PDOException $e) {
+			echo $e->getMessage();
+			echo $e->getLine();
+		} catch (\Throwable $th) {
+			echo $th->getMessage();
+		}
+
+
+		// 
+
+
+	}
+
 
 
 	// SELECT AND COUNT
@@ -37,7 +80,6 @@ class AllFunctionalities extends Db
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
 		}
-		
 	}
 
 	public function select_count($de, $dev, $from)
@@ -100,34 +142,35 @@ class AllFunctionalities extends Db
 		}
 	}
 
-	
-	public function deleteUpdate ($table, $datetime, $id, $id_ans, $redirect)
+
+	public function deleteUpdate($table, $datetime, $id, $id_ans, $redirect)
 	{
-	  try {
-		// $datetime = date('Y-m-d h:i:s');
-		$query = "UPDATE $table SET deleted_at =? , status ='deleted' WHERE $id = ? LIMIT 1";
-		$result = $this->connect()->prepare($query);
-		$outcome = $result->execute([$datetime, $id_ans]);
+		try {
+			// $datetime = date('Y-m-d h:i:s');
+			$query = "UPDATE $table SET deleted_at =? , status ='deleted' WHERE $id = ? LIMIT 1";
+			$result = $this->connect()->prepare($query);
+			$outcome = $result->execute([$datetime, $id_ans]);
 			if ($outcome) {
-			header("Location: $redirect");
+				header("Location: $redirect");
 			}
-	  } catch (PDOException $e) {
-		echo $e->getMessage(), PHP_EOL;
-	  }
+		} catch (PDOException $e) {
+			echo $e->getMessage(), PHP_EOL;
+		}
 	}
 	// be careful with this function -> didnt work on the last project -> check carefully before USE.
 
 	public function selectall_join($table, $table2, $para)
 	{
 
-        try{
-        	$query ="SELECT * FROM $table INNER JOIN $table2 ON $table2.$para = $table.$para";
-        	// $query ="SELECT $table.*, $table.* INNER JOIN $table2 ON $table.$para = $table2.$para";
-        $result = $this->connect()->prepare($query);
-        $result->execute();
-        $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-        return $outcome;
-    	}  catch (PDOException $e){echo $e->getMessage(), PHP_EOL;
+		try {
+			$query = "SELECT * FROM $table INNER JOIN $table2 ON $table2.$para = $table.$para";
+			// $query ="SELECT $table.*, $table.* INNER JOIN $table2 ON $table.$para = $table2.$para";
+			$result = $this->connect()->prepare($query);
+			$result->execute();
+			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
+			return $outcome;
+		} catch (PDOException $e) {
+			echo $e->getMessage(), PHP_EOL;
 		}
 	}
 
@@ -145,14 +188,16 @@ class AllFunctionalities extends Db
 		}
 	}
 
-	
-	public function selectCountAll($table){
 
-        try{
-        	$query ="SELECT COUNT(*) FROM $table";
-             $result = $this->connect()->query($query)->fetchColumn();
-        return $result;
-            }  catch (PDOException $e){echo $e->getMessage(), PHP_EOL;
+	public function selectCountAll($table)
+	{
+
+		try {
+			$query = "SELECT COUNT(*) FROM $table";
+			$result = $this->connect()->query($query)->fetchColumn();
+			return $result;
+		} catch (PDOException $e) {
+			echo $e->getMessage(), PHP_EOL;
 		}
 	}
 
@@ -210,18 +255,17 @@ class AllFunctionalities extends Db
 	{
 		try {
 			$sql = "SELECT * FROM $table";
-		$result = $this->connect()->query($sql);
-		if ($result->rowCount() > 0) { // rowCount is an inbuilt function
-			while ($row = $result->fetch()) {
-				$data[] = $row; //took all the record and put them into an empty $array('' => , );
-				;
+			$result = $this->connect()->query($sql);
+			if ($result->rowCount() > 0) { // rowCount is an inbuilt function
+				while ($row = $result->fetch()) {
+					$data[] = $row; //took all the record and put them into an empty $array('' => , );
+					;
+				}
+				return $data; //this is the data array
 			}
-			return $data; //this is the data array
-		}
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
-		  }
-		
+		}
 	}
 
 	public function select_from($de, $dev, $from)
@@ -232,34 +276,33 @@ class AllFunctionalities extends Db
 			$result->execute([$from]);
 			$outcome = $result->fetchAll();
 			return $outcome;
-		} catch(PDOException $e){
+		} catch (PDOException $e) {
 			echo $e->getMessage();
 		}
 	}
 
 	public function selectIsNot($de, $dev, $from)
 	{
-		try{
-			$sql = "SELECT * FROM $de WHERE $dev != ? ORDER BY id DESC";      
+		try {
+			$sql = "SELECT * FROM $de WHERE $dev != ? ORDER BY id DESC";
 			$result = $this->connect()->prepare($sql);
 			$result->execute([$from]);
 			$outcome = $result->fetchAll();
 			return $outcome;
-		} catch(PDOException $e){
+		} catch (PDOException $e) {
 			echo $e->getMessage();
-
 		}
 	}
 
 	public function selectFromIsNot($de, $dev, $from, $from2, $from3,  $limit, $offset)
 	{
-		try{
-			$sql = "SELECT * FROM $de WHERE $dev != ? AND $dev != ? AND $dev != ? ORDER BY id DESC LIMIT $limit OFFSET $offset ";      
+		try {
+			$sql = "SELECT * FROM $de WHERE $dev != ? AND $dev != ? AND $dev != ? ORDER BY id DESC LIMIT $limit OFFSET $offset ";
 			$result = $this->connect()->prepare($sql);
 			$result->execute([$from, $from2, $from3]);
 			$outcome = $result->fetchAll();
 			return $outcome;
-		} catch(PDOException $e){
+		} catch (PDOException $e) {
 			echo $e->getMessage();
 		}
 	}
@@ -275,58 +318,59 @@ class AllFunctionalities extends Db
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
 		}
-		
 	}
 
 	public function select_from_doubleAnd($de, $dev,  $from, $dev2, $from2)
 	{
-		try{
+		try {
 			$sql = "SELECT * FROM $de WHERE $dev > ? AND $dev2 = ?";
 			$result = $this->connect()->prepare($sql);
 			$result->execute([$from, $from2]);
 			$outcome = $result->fetchAll();
 			return $outcome;
-		}catch(PDOException $e){
+		} catch (PDOException $e) {
 			echo $e->getMessage();
 		}
 	}
 
 	public function select_from_doubleOr($de, $dev,  $from, $dev2, $from2)
 	{
-		try{$sql = "SELECT * FROM $de WHERE $dev > ? OR $dev2 = ?";
-		$result = $this->connect()->prepare($sql);
-		$result->execute([$from, $from2]);
-		$outcome = $result->fetchAll();
-		return $outcome;}catch(PDOException $e){
+		try {
+			$sql = "SELECT * FROM $de WHERE $dev > ? OR $dev2 = ?";
+			$result = $this->connect()->prepare($sql);
+			$result->execute([$from, $from2]);
+			$outcome = $result->fetchAll();
+			return $outcome;
+		} catch (PDOException $e) {
 			echo $e->getMessage();
-
 		}
 	}
 
 	public function select_Or($de, $from)
 	{
-		try{$sql = "SELECT * FROM $de WHERE email = ? OR username = ?";
-		$result = $this->connect()->prepare($sql);
-		$result->execute([$from, $from]);
-		$outcome = $result->fetchAll();
-		return $outcome;}catch(PDOException $e){
+		try {
+			$sql = "SELECT * FROM $de WHERE email = ? OR username = ?";
+			$result = $this->connect()->prepare($sql);
+			$result->execute([$from, $from]);
+			$outcome = $result->fetchAll();
+			return $outcome;
+		} catch (PDOException $e) {
 			echo $e->getMessage();
-
 		}
 	}
 
-	public function select_Or_Count($de, $from){
+	public function select_Or_Count($de, $from)
+	{
 		try {
 			$sql = "SELECT * FROM $de WHERE email = ? OR username = ?";
-		  $result = $this->connect()->prepare($sql);
-		  $result->execute([$from, $from]);
-		  $rowCount = $result->rowCount();
-		  return $rowCount;
-		  
+			$result = $this->connect()->prepare($sql);
+			$result->execute([$from, $from]);
+			$rowCount = $result->rowCount();
+			return $rowCount;
 		} catch (PDOException $e) {
-		  echo $e->getMessage(), PHP_EOL;
+			echo $e->getMessage(), PHP_EOL;
 		}
-	  }
+	}
 
 
 
@@ -357,37 +401,39 @@ class AllFunctionalities extends Db
 
 	public function editForm($id, $name, $city, $designation)
 	{
-		try{$sql = "UPDATE crud SET name=?, city=?, designation=? WHERE id = ?";
-		$stmt = $this->connect()->prepare($sql)->execute([$name, $city, $designation, $id]);
-		if ($stmt) {
-			header('Location: indextwo.php');
-		}}catch(PDOException $e){
+		try {
+			$sql = "UPDATE crud SET name=?, city=?, designation=? WHERE id = ?";
+			$stmt = $this->connect()->prepare($sql)->execute([$name, $city, $designation, $id]);
+			if ($stmt) {
+				header('Location: indextwo.php');
+			}
+		} catch (PDOException $e) {
 			echo $e->getMessage();
 		}
 	}
 
-	public function update ($table, $column, $column_ans, $identifier, $identifier_ans)
+	public function update($table, $column, $column_ans, $identifier, $identifier_ans)
 	{
-	  try {
-		$query = "UPDATE $table SET $column =? WHERE $identifier = ?";
-		$result = $this->connect()->prepare($query);
-		$result->execute([$column_ans, $identifier_ans]);
-		return $result;
-	  } catch (PDOException $e) {
-		echo $e->getMessage(), PHP_EOL;
-	  }
+		try {
+			$query = "UPDATE $table SET $column =? WHERE $identifier = ?";
+			$result = $this->connect()->prepare($query);
+			$result->execute([$column_ans, $identifier_ans]);
+			return $result;
+		} catch (PDOException $e) {
+			echo $e->getMessage(), PHP_EOL;
+		}
 	}
 
-	public function updateOr ($table, $column, $column_ans, $identifier1, $identifier2, $identifier_ans)
+	public function updateOr($table, $column, $column_ans, $identifier1, $identifier2, $identifier_ans)
 	{
-	  try {
-		$query = "UPDATE $table SET $column =? WHERE $identifier1 = ? OR $identifier2 = ?";
-		$result = $this->connect()->prepare($query);
-		$result->execute([$column_ans, $identifier_ans, $identifier_ans]);
-		return $result;
-	  } catch (PDOException $e) {
-		echo $e->getMessage(), PHP_EOL;
-	  }
+		try {
+			$query = "UPDATE $table SET $column =? WHERE $identifier1 = ? OR $identifier2 = ?";
+			$result = $this->connect()->prepare($query);
+			$result->execute([$column_ans, $identifier_ans, $identifier_ans]);
+			return $result;
+		} catch (PDOException $e) {
+			echo $e->getMessage(), PHP_EOL;
+		}
 	}
 
 
@@ -434,17 +480,16 @@ class AllFunctionalities extends Db
 	{
 		try {
 			$sql = "SELECT * FROM $de WHERE $id = ?";
-		$stmt = $this->connect()->prepare($sql);
-		$stmt->bind_param("s", $id_ans);
-		$stmt->execute();
-		$stmt->store_result();
-		if ($stmt->num_rows < 1) {
-			$this->insertData_NoRedirect($data, $de);
-		}
+			$stmt = $this->connect()->prepare($sql);
+			$stmt->bind_param("s", $id_ans);
+			$stmt->execute();
+			$stmt->store_result();
+			if ($stmt->num_rows < 1) {
+				$this->insertData_NoRedirect($data, $de);
+			}
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
 		}
-		
 	}
 
 
@@ -475,7 +520,6 @@ class AllFunctionalities extends Db
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
 		}
-		
 	}
 
 	/**
@@ -493,16 +537,16 @@ class AllFunctionalities extends Db
 			$ans = $data[$identifier]; // store $data['id]
 			unset($data[$identifier]); // unset id
 			$implodeKey = implode('=?, ', array_keys($data));
-		
+
 			$data[$identifier] = $ans;
 			$implodeValue = array_values($data);
-		
+
 			$sql = "UPDATE $dbtable SET $implodeKey=? WHERE $identifier =?";
 			// example - 'UPDATE register SET title=?, first_name=?, second_name=? WHERE id =?'			
-	
-			$stmt = $this->connect()->prepare($sql)->execute($implodeValue);	
-		
-			 return $stmt;
+
+			$stmt = $this->connect()->prepare($sql)->execute($implodeValue);
+
+			return $stmt;
 		} catch (PDOException $e) {
 			echo $e->getMessage(), PHP_EOL;
 		}

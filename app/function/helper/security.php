@@ -26,10 +26,10 @@ function notifyCustOfLogIn($data)
  */
 function generateSendTokenEmail($data)
 {
-        $deriveToken = generateUpdateTableWithToken($data['customerNo']);  
+        $deriveToken = generateUpdateTableWithToken($data['id']);  
         //TODO send text to the user with the code
         // ACCOMPANY EMAIL CONTENT             
         $emailData = ['token' => $deriveToken, 'email' => $data['email']];
-        $generateEmailArray = genEmailArray("customer/msg/token", $emailData, "LOANEASY - TOKEN", null,null);
+        $generateEmailArray = genEmailArray("customer/msg/token", $emailData, "FAMILY - TOKEN", null,null);
         return sendEmailWrapper($generateEmailArray, 'customer');      
 }

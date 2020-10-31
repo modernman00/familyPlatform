@@ -1,8 +1,8 @@
 export const Login = [
        {
-        label : 'Username',
-        attribute: 'username',
-        placeholder: 'Your username will be mainly your email',
+        label : 'email',
+        attribute: 'email',
+        placeholder: 'family@email.com',
         type: 'text'
       },
       {

@@ -40,8 +40,10 @@
 
     <input type="hidden" id="token" name="token" value=<?php echo e($token); ?>>
 
-     <input class="btn btn-primary btn-lg submit" type="button" id="submit" name="submit"
+     <input class="btn btn-primary btn-lg btn-block submit" type="button" id="submit" name="submit"
         value="Submit Form">
+
+     
 
 
         <br><br> 

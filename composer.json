@@ -14,6 +14,7 @@
         },
 
         "files": ["app/function/helper/helper.php",
+        "app/function/helper/email/sendEmail.php",
         "app/function/helper/checkSanitise.php",
         "app/function/helper/email.php",
         "app/function/helper/security.php",
@@ -28,9 +29,9 @@
          "vlucas/phpdotenv": "^3.6",
         "altorouter/altorouter": "^2.0",
         "philo/laravel-blade": "^3.1",
-        "symfony/flex":"^1.6.3",
         "filp/whoops": "^2.7",
           "phpmailer/phpmailer": "^6.1"
+
 
     },
     

@@ -12,6 +12,7 @@ class Account extends Insert {
                 $sql = "CREATE TABLE IF NOT EXISTS  `family`.`account`(
                  `no` INT NOT NULL AUTO_INCREMENT , 
                  `id` VARCHAR(255) NOT NULL , 
+                 `email` VARCHAR(50) NOT NULL ,
                 `password` TEXT NOT NULL ,
                 `token` TEXT NOT NULL ,
                 `secretWord` TEXT NOT NULL ,

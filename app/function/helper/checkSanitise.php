@@ -16,7 +16,7 @@ use App\classes\{
  */
 function checkPassword($inputData, $databaseData)
 {
-    $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['customerNo'], 'login');
+    $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
     $passSuccess = $passwordCheck->passMgt();
     if (!$passSuccess) {
         throw new Exception("Password could not be verified");
@@ -34,7 +34,7 @@ function checkPassword($inputData, $databaseData)
 function useEmailToFindData($inputData)
 {
        $select = new Select;
-            $data = $select->select_from('login', 'email', $inputData['email']);
+            $data = $select->select_from('account', 'email', $inputData['email']);
             if (!$data) {
                 throw new Exception("We cannot find your email");
             }
@@ -52,7 +52,7 @@ function useEmailToFindData($inputData)
 function getSanitisedInputData($inputData, $minMaxData=NULL)
 {
             $sanitise = new Sanitise($inputData, $minMaxData);
-            $sanitisedData = $sanitise->getSanitisedArray();
+            $sanitisedData = $sanitise->getData();
             $error = $sanitise->error;
             if ($error) {
                 throw new Exception('<b>There is a problem with your input.</b><br>' . implode(', <br>', $error));
@@ -78,14 +78,14 @@ function generateAuthToken()
  *
  * @return void
  */
-function generateUpdateTableWithToken($customerNo)
+function generateUpdateTableWithToken($customerId)
 {
     //5. generate code
     $token = generateAuthToken();   
     $_SESSION['2FA_token_ts'] = time();
         //6.  update login account table with the code
-    $updateCodeToCustomer = new Update('login');
-    $updateCodeToCustomer->updateTable('code', $token, 'customerNo', $customerNo);
+    $updateCodeToCustomer = new Update('account');
+    $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if(!$updateCodeToCustomer) throw new Exception("Error : Could not update token", 1);
     return $token;
     
