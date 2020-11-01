@@ -15,5 +15,10 @@ class Index extends Base
     {
         view('boot');
     }
+
+    function launch()
+    {
+        view('launch');
+    }
 }
 

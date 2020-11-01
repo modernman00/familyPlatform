@@ -6,9 +6,8 @@ $router->map('GET', '/login', 'App\controller\login\Login@index', 'login');
 $router->map('POST', '/login', 'App\controller\login\Login@login', 'Customer Login');
 
 $router->map('GET', '/lasu', 'App\controller\login\Login@showAdmin', 'Admin Login Page');
-$router->map('POST', '/lasu', 'App\controller\login\Login@login', 'Login');
 
-$router->map('POST', '/lasu', 'App\controller\login\Login@login', 'Process_Login');
+$router->map('POST', '/lasu', 'App\controller\login\Login@login', 'admin_Login');
 
 
 //admin SIGN OUT 

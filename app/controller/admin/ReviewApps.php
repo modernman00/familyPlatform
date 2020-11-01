@@ -15,12 +15,12 @@ class ReviewApps extends AllFunctionalities
     private $rand;
     private $custId;
 
-    // function __construct()
-    // {
+    function __construct()
+    {
 
-    //     $this->id = checkInput($_GET['id']);
-    //     $this->rand = rand(10, 900);
-    // }
+      
+        $this->rand = rand(10, 900);
+    }
 
     // get the new application page 
     function get()
@@ -30,20 +30,22 @@ class ReviewApps extends AllFunctionalities
         return view('admin/ReviewApps', ['result' => $result, 'no' => 1]);
     }
 
-    // // once the $GET IS clicked, use this to get the customers data and set customers id as well
-    // private function getCustomerData()
-    // {
-    //     $select = new Select;
-    //     $data = $select->joinManyCondition4('contact', 'personal', 'loaninfo', 'account', 'id', $this->id);
+    // once the $GET IS clicked, use this to get the customers data and set customers id as well
+    private function getCustomerData()
+    {
+        $this->id = checkInput($_GET['id']);
+        $select = new Select;
+        $data = $select->joinManyCondition4('contact', 'personal', 'interest', 'account', 'id', $this->id);
 
-    //     foreach ($data as $data2);
-    //     // Set the customer Id
-    //     $custNo = $data2['last_name'];
-    //     $custNo .= $this->rand;
-    //     $this->custId = $custNo;
-    //     $_SESSION['terms'] = $data2['terms'];
-    //     return $data2;
-    // }
+        foreach ($data as $data2);
+        // // Set the customer Id
+        // $custNo = $data2['last_name'];
+        // $custNo .= $this->rand;
+        // $this->custId = $custNo;
+        // $_SESSION['terms'] = $data2['terms'];
+       
+        return $data2;
+    }
 
 
     // // email functionality
@@ -75,10 +77,10 @@ class ReviewApps extends AllFunctionalities
     {
 
         try {
-           
-            $this->toSendEmail("admin/msg/ReviewApps/cancel", $data, "Loan approval for {$data['first_name']}", 'internal');
+            $data = $this->getCustomerData();
+            $this->toSendEmail("msg/admin/approve", $data, "Membership Approval for {$data['firstName']}", 'admin');
             $this->updateAccountStatus('approved');
-            header('Location: /admin/customer/manage');
+            header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -86,11 +88,11 @@ class ReviewApps extends AllFunctionalities
 
     function cancel()
     {
-        try {           
-           
-            $this->toSendEmail("admin/msg/ReviewApps/cancel", $data, "Loan application cancellation", 'customer');
+        try {
+            $data = $this->getCustomerData();
+            $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'customer');
             $this->updateAccountStatus('cancel');
-            header('Location: /admin/newCustomers');
+            header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -99,12 +101,12 @@ class ReviewApps extends AllFunctionalities
     function delete()
     {
         try {
-           
-           
+
+            $data = $this->getCustomerData();
             $data['email'] = 'application@loaneasyfinance.com';
-            $this->toSendEmail("admin/msg/ReviewApps/delete", $data, "Delete App", 'internal');
-             $this->updateAccountStatus('deleted');
-            header('Location: /admin/newCustomers');
+            $this->toSendEmail("msg/admin/delete", $data, "Delete App", 'internal');
+            $this->updateAccountStatus('deleted');
+            header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -112,11 +114,11 @@ class ReviewApps extends AllFunctionalities
 
     function decline()
     {
-        try {            
-           
-            $this->toSendEmail("admin/msg/ReviewApps/decline", $data, 'Decision', 'customer');
+        try {
+            $data = $this->getCustomerData();
+            $this->toSendEmail("msg/admin/decline", $data, 'Decision', 'customer');
             $this->updateAccountStatus('declined');
-            header('Location: /admin/newCustomers');
+            header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {
             showError($th);
         }

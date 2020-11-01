@@ -10,7 +10,7 @@
 
   <h4 class="text-center "> Please sign in </h4>
 
-  <form action="/login" method="POST">
+  <form action="{{ $_SESSION['loginTpe'] }}" method="POST">
     <div class="form-group" id="login">
 
       <?php $token = urlencode(base64_encode((random_bytes(32))));
@@ -18,6 +18,7 @@
     ?>
 
       <div class="checkbox mb-3">
+
         <label>
           <input type="checkbox" value="remember-me"> Remember me
         </label>
