@@ -1,4 +1,4 @@
-@extends ('layouts.email-noAccount')
+@extends ('email')
 @section('title', 'email')
 
 {{--  

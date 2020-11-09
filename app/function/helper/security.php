@@ -30,6 +30,6 @@ function generateSendTokenEmail($data)
         //TODO send text to the user with the code
         // ACCOMPANY EMAIL CONTENT             
         $emailData = ['token' => $deriveToken, 'email' => $data['email']];
-        $generateEmailArray = genEmailArray("customer/msg/token", $emailData, "FAMILY - TOKEN", null,null);
-        return sendEmailWrapper($generateEmailArray, 'customer');      
+        $generateEmailArray = genEmailArray("msg/customer/token", $emailData, "FAMILY - TOKEN", null,null);
+        return sendEmailWrapper($generateEmailArray, 'member');      
 }

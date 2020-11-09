@@ -18,7 +18,6 @@ class ReviewApps extends AllFunctionalities
     function __construct()
     {
 
-      
         $this->rand = rand(10, 900);
     }
 
@@ -38,12 +37,13 @@ class ReviewApps extends AllFunctionalities
         $data = $select->joinManyCondition4('contact', 'personal', 'interest', 'account', 'id', $this->id);
 
         foreach ($data as $data2);
+
         // // Set the customer Id
         // $custNo = $data2['last_name'];
         // $custNo .= $this->rand;
         // $this->custId = $custNo;
         // $_SESSION['terms'] = $data2['terms'];
-       
+
         return $data2;
     }
 
@@ -75,10 +75,10 @@ class ReviewApps extends AllFunctionalities
 
     function approve()
     {
-
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/approve", $data, "Membership Approval for {$data['firstName']}", 'admin');
+            $this->toSendEmail("msg/admin/approve", $data, "Membership Approval for {$data['firstName']}", 'member');
+
             $this->updateAccountStatus('approved');
             header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {
@@ -116,7 +116,7 @@ class ReviewApps extends AllFunctionalities
     {
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/decline", $data, 'Decision', 'customer');
+            $this->toSendEmail("msg/admin/decline", $data, 'Decision', 'member');
             $this->updateAccountStatus('declined');
             header('Location: /admin/reviewApps');
         } catch (\Throwable $th) {

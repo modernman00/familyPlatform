@@ -10,7 +10,7 @@ export const Input = (objData, htmlId) => {
       <div class = 'form-group' id=${element.attribute}_div>
          <label class=' ' for =${element.attribute}> <strong>${element.label.toUpperCase()}</strong></label>
             <input type="${element.type}" class="form-control" id="${element.attribute}" name="${element.attribute}"  placeholder="${element.placeholder}"/>
-            <small id ='${element.attribute}_help' class='small'></small><br>
+            <small id ='${element.attribute}_help' class='small'></small>
             <small id =${element.attribute}_error class='error'></small>
       </div>
           `
@@ -27,7 +27,7 @@ export const Input = (objData, htmlId) => {
       })
         }               
           </select>     
-             <small id ='${element.attribute}_help' class='small'></small><br>
+             <small id ='${element.attribute}_help' class='small'></small>
             <small id =${element.attribute}_error class='error'></small>
            </div>
           `
@@ -47,7 +47,7 @@ export const Input = (objData, htmlId) => {
       })
       } 
       </div>  
-        <small id ='${element.attribute}_help' class='small'></small><br>
+        <small id ='${element.attribute}_help' class='small'></small>
             <small id =${element.attribute}_error class='error'></small>
       </div>     
       `

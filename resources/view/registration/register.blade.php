@@ -8,7 +8,10 @@
 
   <form action="/register" method="POST" class="register">
 
-    <?php $token = urlencode(base64_encode((random_bytes(32))));
+    <?php 
+    
+    $token = urlencode(base64_encode((random_bytes(32))));
+
       $_SESSION['token'] = $token;
     ?>
 

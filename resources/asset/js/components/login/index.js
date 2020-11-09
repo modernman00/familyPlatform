@@ -1,5 +1,5 @@
 import {Login} from '../../data/Login';
-import { Input } from './../formBuilder'
+import { Input } from '../formBuilder'
 
 try {
   Input(Login, 'login')

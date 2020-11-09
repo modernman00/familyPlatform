@@ -46,7 +46,6 @@ export default class FormHelper {
                     this.error.push(`<li> only letters and numbers are allowed<li>`);
 
                 } else {
-
                     this.result = 1
                 }
             }

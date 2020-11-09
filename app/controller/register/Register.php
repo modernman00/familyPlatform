@@ -31,7 +31,7 @@ class Register extends AllFunctionalities
         // printArr($_POST);
         try {
 
-            $this->tokenCheck('token', '/register');
+           // $this->tokenCheck('token', '/register');
 
             $postDataWithId = $this->setId($_POST);
 
@@ -44,6 +44,8 @@ class Register extends AllFunctionalities
 
             $tableData = $this->tableData($cleanData);
             // db table
+
+
 
             // create session 
             $_SESSION['id'] = $cleanData['id'];
@@ -186,7 +188,7 @@ class Register extends AllFunctionalities
         // CREATE AN ID FOR THE APPLICATION
         $customerFirstName = "";
         if (isset($postData['firstName'])) {
-            $customerFirstName = checkInput($postData['first_name']);
+            $customerFirstName = checkInput($postData['firstName']);
         }
         $name = preg_replace('/[^A-Za-z ]/', '', $customerFirstName);
         $id = random_int(1000, 900000);

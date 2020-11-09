@@ -9,8 +9,8 @@
     style="margin-left:40%">
 
   <h4 class="text-center "> Please sign in </h4>
-
-  <form action="{{ $_SESSION['loginTpe'] }}" method="POST">
+  {{-- <h1>{{ $_SESSION['loginType'] }}</h1> --}}
+  <form action="{{ $_SESSION['loginType'] }}" method="POST">
     <div class="form-group" id="login">
 
       <?php $token = urlencode(base64_encode((random_bytes(32))));

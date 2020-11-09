@@ -32,8 +32,8 @@ function sendEmailSelf()
 
   function sendEmailWrapper($var, $recipientType)
   {
-       $notifyCustomer = new EmailData($recipientType);
-    $notifyCustomer->getEmailData();
+        $notifyCustomer = new EmailData($recipientType);
+        $notifyCustomer->getEmailData();
  
         $data = $var['data'];
         ob_start();

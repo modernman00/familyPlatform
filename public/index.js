@@ -11293,18 +11293,18 @@ __webpack_require__.r(__webpack_exports__);
 var Input = function Input(objData, htmlId) {
   objData.map(function (element) {
     if (element.type != 'select' && !element.options) {
-      var renderHtml = "\n      <div class = 'form-group' id=".concat(element.attribute, "_div>\n         <label class=' ' for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"/>\n            <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n          ");
+      var renderHtml = "\n      <div class = 'form-group' id=".concat(element.attribute, "_div>\n         <label class=' ' for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong></label>\n            <input type=\"").concat(element.type, "\" class=\"form-control\" id=\"").concat(element.attribute, "\" name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"/>\n            <small id ='").concat(element.attribute, "_help' class='small'></small>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>\n          ");
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
     } else if (element.type === 'select') {
       var _renderHtml = "\n      <div class = 'form-group' id='".concat(element.attribute, "_div'>\n      <label for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
         return "<option value=".concat(el, ">").concat(el, "</option>");
-      }), "               \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
+      }), "               \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small'></small>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n           </div>\n          ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
     } else if (element.type === 'radio') {
       var _renderHtml2 = "\n      <div class='form-group col' id='".concat(element.attribute, "_div'>\n         <label for =").concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
         return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
-      }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small'></small><br>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>     \n      ");
+      }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small'></small>\n            <small id =").concat(element.attribute, "_error class='error'></small>\n      </div>     \n      ");
 
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
     } else if (element.type === 'combined') {
@@ -11325,9 +11325,9 @@ var Select = function Select(arg, htmlId) {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/login/login.js":
+/***/ "./resources/asset/js/components/login/index.js":
 /*!******************************************************!*\
-  !*** ./resources/asset/js/components/login/login.js ***!
+  !*** ./resources/asset/js/components/login/index.js ***!
   \******************************************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -11335,7 +11335,7 @@ var Select = function Select(arg, htmlId) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _data_Login__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../data/Login */ "./resources/asset/js/data/Login.js");
-/* harmony import */ var _formBuilder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../formBuilder */ "./resources/asset/js/components/formBuilder.js");
+/* harmony import */ var _formBuilder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../formBuilder */ "./resources/asset/js/components/formBuilder.js");
 
 
 
@@ -11347,77 +11347,37 @@ try {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/helperRegister.js":
-/*!******************************************************************!*\
-  !*** ./resources/asset/js/components/register/helperRegister.js ***!
-  \******************************************************************/
+/***/ "./resources/asset/js/components/register/index.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/index.js ***!
+  \*********************************************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../../global */ "./resources/asset/js/global.js");
-/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+/* harmony import */ var _data_Personal_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../data/Personal.js */ "./resources/asset/js/data/Personal.js");
+/* harmony import */ var _data_Contact_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../data/Contact.js */ "./resources/asset/js/data/Contact.js");
+/* harmony import */ var _data_Work_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/Work.js */ "./resources/asset/js/data/Work.js");
+/* harmony import */ var _formBuilder_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../formBuilder.js */ "./resources/asset/js/components/formBuilder.js");
+/* harmony import */ var _data_Interest__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../data/Interest */ "./resources/asset/js/data/Interest.js");
+/* harmony import */ var _data_Account__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../data/Account */ "./resources/asset/js/data/Account.js");
 
 
 
-var formInput = document.querySelectorAll('.register');
-var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 
-var process = function process() {
-  // clear error from the form
-  formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
 
-  formData.realTimeServer('spouseEmail', "/search?attribute=spouseEmail&subject=spouse&hint", 'spouseEmail_error');
-  formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error');
-  formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error'); // check if password matches real time
 
-  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err); // check if they have a father yes
-  // formData.isChecked(dataToCheck.familyCheck.father[0],
-  // 	dataToCheck.familyCheck.father[1],
-  // 	'fatherEmail_error'
-  // )
-  // // check if they have a mother yes
-  // formData.isChecked(dataToCheck.familyCheck.mother[0],
-  // 	dataToCheck.familyCheck.mother[1],
-  // 	'motherEmail_error'
-  // )
-  // // check if they have a spouse yes
-  // formData.isChecked(dataToCheck.familyCheck.spouse[0],
-  // 	dataToCheck.familyCheck.spouse[1],
-  // 	'spouseEmail_error'
-  // )
-};
-
-process();
-Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('click', function () {
-  try {
-    if (Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('checkbox').checked) {
-      formData.emailVal(); // sanitise email
-
-      formData.massValidate(); // validate and sanitise data
-
-      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
-
-      if (formData.error.length <= 0) {
-        Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit';
-        console.log('submitted');
-      } else {
-        console.log(formData.error);
-        alert('The form cannot be submitted. Please check the errors');
-        process();
-      }
-    } else {
-      alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy');
-    }
-  } catch (e) {
-    console.log(e);
-  }
-});
+try {
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Contact_js__WEBPACK_IMPORTED_MODULE_1__["Contact"], 'contact');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Personal_js__WEBPACK_IMPORTED_MODULE_0__["Personal"], 'personal');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Work_js__WEBPACK_IMPORTED_MODULE_2__["Work"], 'work');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Interest__WEBPACK_IMPORTED_MODULE_4__["Interest"], 'interest');
+  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Account__WEBPACK_IMPORTED_MODULE_5__["Account"], 'account');
+} catch (e) {
+  console.log(e);
+}
 
 /***/ }),
 
@@ -11488,37 +11448,77 @@ Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('noSiblings').addEventListene
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/register.js":
-/*!************************************************************!*\
-  !*** ./resources/asset/js/components/register/register.js ***!
-  \************************************************************/
+/***/ "./resources/asset/js/components/register/processForm.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/register/processForm.js ***!
+  \***************************************************************/
 /*! no exports provided */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _data_Personal_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../data/Personal.js */ "./resources/asset/js/data/Personal.js");
-/* harmony import */ var _data_Contact_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../data/Contact.js */ "./resources/asset/js/data/Contact.js");
-/* harmony import */ var _data_Work_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/Work.js */ "./resources/asset/js/data/Work.js");
-/* harmony import */ var _formBuilder_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../formBuilder.js */ "./resources/asset/js/components/formBuilder.js");
-/* harmony import */ var _data_Interest__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../data/Interest */ "./resources/asset/js/data/Interest.js");
-/* harmony import */ var _data_Account__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../data/Account */ "./resources/asset/js/data/Account.js");
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
 
 
 
+var formInput = document.querySelectorAll('.register');
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 
+var process = function process() {
+  // clear error from the form
+  formData.clearError(); // set the maxlength, check the length of the value, raise error
 
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
 
+  formData.realTimeServer('spouseEmail', "/search?attribute=spouseEmail&subject=spouse&hint", 'spouseEmail_error');
+  formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error');
+  formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error'); // check if password matches real time
 
-try {
-  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Contact_js__WEBPACK_IMPORTED_MODULE_1__["Contact"], 'contact');
-  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Personal_js__WEBPACK_IMPORTED_MODULE_0__["Personal"], 'personal');
-  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Work_js__WEBPACK_IMPORTED_MODULE_2__["Work"], 'work');
-  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Interest__WEBPACK_IMPORTED_MODULE_4__["Interest"], 'interest');
-  Object(_formBuilder_js__WEBPACK_IMPORTED_MODULE_3__["Input"])(_data_Account__WEBPACK_IMPORTED_MODULE_5__["Account"], 'account');
-} catch (e) {
-  console.log(e);
-}
+  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err); // check if they have a father yes
+  // formData.isChecked(dataToCheck.familyCheck.father[0],
+  // 	dataToCheck.familyCheck.father[1],
+  // 	'fatherEmail_error'
+  // )
+  // // check if they have a mother yes
+  // formData.isChecked(dataToCheck.familyCheck.mother[0],
+  // 	dataToCheck.familyCheck.mother[1],
+  // 	'motherEmail_error'
+  // )
+  // // check if they have a spouse yes
+  // formData.isChecked(dataToCheck.familyCheck.spouse[0],
+  // 	dataToCheck.familyCheck.spouse[1],
+  // 	'spouseEmail_error'
+  // )
+};
+
+process();
+Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('click', function () {
+  try {
+    if (Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('checkbox').checked) {
+      formData.emailVal(); // sanitise email
+
+      formData.massValidate(); // validate and sanitise data
+
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+
+      if (formData.error.length <= 0) {
+        Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit';
+        console.log('submitted');
+      } else {
+        console.log(formData.error);
+        alert('The form cannot be submitted. Please check the errors');
+        process();
+      }
+    } else {
+      alert('To continue, you need to agree to the Olaoguns handling your information as outlined in our privacy policy');
+    }
+  } catch (e) {
+    console.log(e);
+  }
+});
 
 /***/ }),
 
@@ -11545,6 +11545,249 @@ var employerName = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('employerN
 employerName.innerHTML = "if you are a student, please put the name of your school";
 var spouse = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_help');
 spouse.innerHTML = 'if single, put single or divorced';
+
+/***/ }),
+
+/***/ "./resources/asset/js/cust/main.js":
+/*!*****************************************!*\
+  !*** ./resources/asset/js/cust/main.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+$(function () {
+  var i = "box",
+      n = {
+    init: function init() {
+      this.scroll_animate(), $("#b2top").click(function () {
+        $("html, body").stop().animate({
+          scrollTop: 0
+        });
+      }), $("#overview-aside-nav ul").navscroll({
+        sec: 1e3,
+        url_hash: !1,
+        head_hight: 0
+      }), $("#overview-mainnav").navscroll({
+        sec: 1e3,
+        url_hash: !1,
+        head_hight: 0
+      });
+    },
+    scroll_animate: function scroll_animate() {
+      $(window).scroll(function () {
+        for (var i = window.innerHeight, n = $(".anim").length, o = 0; o < n; o++) {
+          $(window).scrollTop() > $(".anim").eq(o).offset().top - i / 4 && $(".anim").eq(o).addClass("on");
+        }
+      });
+    }
+  };
+  n.init();
+});
+
+(function ($) {
+  /* --------------------------------------------------
+   Contact Pages
+  -------------------------------------------------- */
+  $('.show-map').on('click', function (e) {
+    e.preventDefault();
+    $('.contact-info-wrapper').toggleClass('map-open');
+    $('.show-info-link').toggleClass('info-open');
+  });
+  $('.show-info-link').on('click', function (e) {
+    e.preventDefault();
+    $('.contact-info-wrapper').toggleClass('map-open');
+    $(this).toggleClass('info-open');
+  });
+})(jQuery);
+/* --------------------------------------------------
+	Contact Form JS Validation & AJAX call 
+-------------------------------------------------- */
+
+
+$(function () {
+  //	Regular Expressions
+  var expEmail = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[_a-z0-9-]+(\.[_a-z0-9-]+)*(\.[a-z]{2,4})$/;
+  var expLettersOnly = /^[A-Za-z ]+$/; //	Checks if a field has the correct length
+
+  function validateLength(fieldValue, minLength) {
+    return $.trim(fieldValue).length > minLength;
+  } //	Validate form on typing
+
+
+  $('.form-ajax').on('keyup', 'input.validate-locally', function () {
+    validateField($(this));
+  }); //	AJAX call
+
+  $('.form-ajax').submit(function (e) {
+    e.preventDefault();
+    var $this = $(this),
+        action = $this.attr('action'); // The AJAX requrest
+
+    $.post(action, $this.serialize(), function (data) {
+      $('.ajax-message').html(data);
+    });
+  }); //	Validates the fileds
+
+  function validateField(field) {
+    var errorText = "",
+        error = false,
+        value = field.val(),
+        siblings = field.siblings(".alert-error"); // Test the name field
+
+    if (field.attr("name") === "name") {
+      if (!validateLength(value, 2)) {
+        error = true;
+        errorText += '<i class="fa fa-info-circle"></i> The name is too short!<br>';
+        $('input[name="name"]').addClass('input-error');
+      } else {
+        $('input[name="name"]').removeClass('input-error');
+      }
+
+      if (!expLettersOnly.test(value)) {
+        error = true;
+        errorText += '<i class="fa fa-info-circle"></i> The name can contain only letters and spaces!<br>';
+        $('input[name="name"]').addClass('input-error-2');
+      } else {
+        $('input[name="name"]').removeClass('input-error-2');
+      }
+    } // Test the email field
+
+
+    if (field.attr("name") === "email") {
+      if (!expEmail.test(value)) {
+        error = true;
+        errorText += '<i class="fa fa-info-circle"></i> Enter correct email address!<br>';
+        $('input[name="email"]').addClass('input-error');
+      } else {
+        $('input[name="email"]').removeClass('input-error');
+      }
+    } // Display the errors
+
+
+    siblings.html(errorText);
+  }
+}); // Google Map Custom js
+
+var marker;
+var image = 'images/map-marker.png';
+
+function initMap() {
+  var myLatLng = {
+    lat: 39.79,
+    lng: -86.14
+  }; // Specify features and elements to define styles.
+
+  var styleArray = [{
+    "featureType": "administrative",
+    "elementType": "all",
+    "stylers": [{
+      "saturation": "-100"
+    }]
+  }, {
+    "featureType": "administrative.province",
+    "elementType": "all",
+    "stylers": [{
+      "visibility": "off"
+    }]
+  }, {
+    "featureType": "landscape",
+    "elementType": "all",
+    "stylers": [{
+      "saturation": -100
+    }, {
+      "lightness": 40
+    }, {
+      "visibility": "on"
+    }]
+  }, {
+    "featureType": "poi",
+    "elementType": "all",
+    "stylers": [{
+      "saturation": -100
+    }, {
+      "lightness": "50"
+    }, {
+      "visibility": "simplified"
+    }]
+  }, {
+    "featureType": "road",
+    "elementType": "all",
+    "stylers": [{
+      "saturation": "-100"
+    }]
+  }, {
+    "featureType": "road.highway",
+    "elementType": "all",
+    "stylers": [{
+      "visibility": "simplified"
+    }]
+  }, {
+    "featureType": "road.arterial",
+    "elementType": "all",
+    "stylers": [{
+      "lightness": "30"
+    }]
+  }, {
+    "featureType": "road.local",
+    "elementType": "all",
+    "stylers": [{
+      "lightness": "40"
+    }]
+  }, {
+    "featureType": "transit",
+    "elementType": "all",
+    "stylers": [{
+      "saturation": -100
+    }, {
+      "visibility": "simplified"
+    }]
+  }, {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [{
+      "hue": "#ffff00"
+    }, {
+      "lightness": -20
+    }, {
+      "saturation": -97
+    }]
+  }, {
+    "featureType": "water",
+    "elementType": "labels",
+    "stylers": [{
+      "lightness": -25
+    }, {
+      "saturation": -100
+    }]
+  }];
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: myLatLng,
+    scrollwheel: false,
+    // Apply the map style array to the map.
+    styles: styleArray,
+    zoom: 9
+  });
+  var directionsDisplay = new google.maps.DirectionsRenderer({
+    map: map
+  }); // Create a marker and set its position.
+
+  marker = new google.maps.Marker({
+    map: map,
+    icon: image,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    position: myLatLng
+  });
+  marker.addListener('click', toggleBounce);
+}
+
+function toggleBounce() {
+  if (marker.getAnimation() !== null) {
+    marker.setAnimation(null);
+  } else {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+  }
+}
 
 /***/ }),
 
@@ -11900,12 +12143,15 @@ var write = function write(input) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./resources/asset/js/global.js");
-/* harmony import */ var _components_register_register__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/register/register */ "./resources/asset/js/components/register/register.js");
-/* harmony import */ var _components_login_login__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/login/login */ "./resources/asset/js/components/login/login.js");
+/* harmony import */ var _components_register_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/register/index */ "./resources/asset/js/components/register/index.js");
+/* harmony import */ var _components_login_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/login/index */ "./resources/asset/js/components/login/index.js");
 /* harmony import */ var _components_small_Input__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js");
-/* harmony import */ var _components_register_helperRegister__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/helperRegister */ "./resources/asset/js/components/register/helperRegister.js");
+/* harmony import */ var _components_register_processForm__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/processForm */ "./resources/asset/js/components/register/processForm.js");
 /* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
 /* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_7__);
+
 
 
 
@@ -11934,8 +12180,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\xampp\htdocs\familyPlatform\resources\asset\js\index.js */"./resources/asset/js/index.js");
-module.exports = __webpack_require__(/*! C:\xampp\htdocs\familyPlatform\resources\asset\scss\main.scss */"./resources/asset/scss/main.scss");
+__webpack_require__(/*! /Applications/MAMP/htdocs/familyPlatform/resources/asset/js/index.js */"./resources/asset/js/index.js");
+module.exports = __webpack_require__(/*! /Applications/MAMP/htdocs/familyPlatform/resources/asset/scss/main.scss */"./resources/asset/scss/main.scss");
 
 
 /***/ })

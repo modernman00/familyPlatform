@@ -1,5 +1,5 @@
 import FormHelper from '../FormHelper';
-import { id, log } from './../../global';
+import { id, log } from '../../global';
 import { dataToCheck } from "../../data/dataToCheck";
 
 const formInput = document.querySelectorAll('.register');
@@ -80,7 +80,7 @@ id('submit').addEventListener('click', () => {
 
 		} else {
 
-			alert('To continue, you need to agree to Loaneasy Finance handling your information as outlined in our privacy policy')
+			alert('To continue, you need to agree to the Olaoguns handling your information as outlined in our privacy policy')
 		}
 
 

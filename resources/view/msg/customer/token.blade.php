@@ -1,4 +1,4 @@
-@extends ('layouts.email')
+@extends ('email')
 @section('title', 'Token email')
 
 @section('subject', 'SUBJECT: LOGIN TOKEN')

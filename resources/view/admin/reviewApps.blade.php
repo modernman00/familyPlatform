@@ -44,7 +44,7 @@
                  <td> {{ $data['email'] }} </td>
 
                    <td>
-                    <a href="/admin/approval?id={{ $data['id'] }}"
+                    <a href="/admin/reviewApps/approval?id={{ $data['id'] }}"
                     data-toggle="tooltip"
                               onClick="javascript: return confirm('Are you sure you want to approve this application?');"
                               title="Approve">                               <i class="far fa-thumbs-up fa-lg" style="color:#264A0A">

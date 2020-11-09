@@ -7,7 +7,7 @@
 
 
 <hr class="my-2">
-<form action="/code" method="post" style="margin-left:20%; margin-right:20%;">
+<form action="/auth/code" method="post" style="margin-left:20%; margin-right:20%;">
     <div class="form-group">
         <br>
         <div class='row'>

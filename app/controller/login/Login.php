@@ -63,7 +63,9 @@ class Login extends Base
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
             $data = useEmailToFindData($sanitisedData);
+
             checkPassword($sanitisedData, $data);
+
             //4. control for admin login
             $detectIfAdminOrCustomer = $_SESSION['loginType'] ?? 0;
 
@@ -81,6 +83,11 @@ class Login extends Base
 
     private function customerLogin($data)
     {
+        $select = new Select;
+        $checkAccountIsApproved = $select->select_from_double('account', 'email', $data['email'], 'status', 'approved');
+        if(!$checkAccountIsApproved) {
+            throw new Exception("We do not recognise your account", 1);    
+        }
         generateSendTokenEmail($data);
         $_SESSION['identifyCust'] = $data['id'];
         $_SESSION['login'] = 1;

@@ -1,6 +1,6 @@
 <?php
 
-$router->map('GET', '/login', 'App\controller\login\Login@index', 'login');
+$router->map('GET', '/login', 'App\controller\login\Login@show', 'login');
 
 
 $router->map('POST', '/login', 'App\controller\login\Login@login', 'Customer Login');
