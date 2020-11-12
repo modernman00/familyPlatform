@@ -9,10 +9,11 @@ class ProfilePage extends AllFunctionalities
 {
     function index()
     {
-        $custId = checkInput($_SESSION['identifyCust']);
+        // printArr($_SESSION);
+        unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
+        $custId = checkInput($_SESSION['memberId']);
         $setData = new SingleCustomerData;
         $data = $setData->getCustomerData($custId);
-        //var_dump($data);
         view('cust/index', compact('data'));
     }
 }

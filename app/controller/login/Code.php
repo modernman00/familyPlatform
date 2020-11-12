@@ -12,7 +12,7 @@ class Code extends Pass
     public $table = 'login';
     public $email;
     public $next;
-    private $customerNo;
+    private $memberId;
 
     public function show()
     {
@@ -27,7 +27,7 @@ class Code extends Pass
         try {
             // new token('token', '/error/token');
         $code = checkInput($_POST["code"]);
-        $this->customerNo = checkInput($_SESSION['identifyCust']);
+        $this->memberId = checkInput($_SESSION['identifyCust']);
 
         // set time limit to use code
         if ((time() - $_SESSION['2FA_token_ts']) > 600) {
@@ -36,7 +36,7 @@ class Code extends Pass
         unset($_SESSION['2FA_token_ts']);
 
         // check if the code is stored in the database
-        $result = $this->select_count_double_dynamic($this->table, ['token', 'id'], [$code, $this->customerNo]);
+        $result = $this->select_count_double_dynamic($this->table, ['token', 'id'], [$code, $this->memberId]);
         if (!$result) {
             header('Location: /loginError');
         }
@@ -45,6 +45,7 @@ class Code extends Pass
         if (isset($_SESSION['login'])) {
             $_SESSION['loggedIn'] = true;
             session_regenerate_id();
+            $_SESSION['memberId'] = $this->memberId;
             header("Location: /customer/profilePage");
         } elseif ($_SESSION['changePW'] === 1) {
             // login if password is forgotten

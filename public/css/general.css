@@ -363,6 +363,8 @@ input, select, textarea {
 
 /* Button */
 
+
+
 	input[type="submit"],
 	input[type="reset"],
 	input[type="button"],
@@ -492,7 +494,7 @@ input, select, textarea {
 			opacity: 0.35;
 		}
 
-/* Form */
+/* Form */ 
 
 	form {
 		margin: 0 0 2em 0;
@@ -1694,10 +1696,10 @@ input, select, textarea {
 				visibility: visible;
 			}
 
-		body.is-preload #main .thumb {
+		/* body.is-preload #main .thumb {
 			pointer-events: none;
 			opacity: 0;
-		}
+		} */
 
 		#main .thumb {
 			-moz-transition-delay: 2.525s;
