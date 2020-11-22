@@ -14,6 +14,7 @@ class ProfilePage extends AllFunctionalities
         $custId = checkInput($_SESSION['memberId']);
         $setData = new SingleCustomerData;
         $data = $setData->getCustomerData($custId);
-        view('cust/index', compact('data'));
+        // view('cust/index', compact('data'));
+        view('cust/latestIndex', compact('data'));
     }
 }
