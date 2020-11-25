@@ -19,7 +19,7 @@ function checkPassword($inputData, $databaseData)
     $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
     $passSuccess = $passwordCheck->passMgt();
     if (!$passSuccess) {
-        throw new Exception("Password could not be verified");
+        throw new Exception("<h1>Password could not be verified</h1>");
     }
     return $passSuccess;
 }
@@ -33,13 +33,14 @@ function checkPassword($inputData, $databaseData)
  */
 function useEmailToFindData($inputData)
 {
-       $select = new Select;
-            $data = $select->select_from('account', 'email', $inputData['email']);
-            if (!$data) {
-                throw new Exception("We cannot find your email");
-            }
-             foreach ($data as $data);
-            return $data;
+    var_dump($inputData['email']);
+    $select = new Select;
+    $data = $select->select_from('account', 'email', $inputData['email']);
+    if (!$data) {
+        throw new Exception("<h1>We cannot find your email</h1>");
+    }
+    foreach ($data as $data);
+    return $data;
 }
 
 /**
@@ -49,16 +50,16 @@ function useEmailToFindData($inputData)
  * @return mixed 
  * @throws \Exception 
  */
-function getSanitisedInputData($inputData, $minMaxData=NULL)
+function getSanitisedInputData($inputData, $minMaxData = NULL)
 {
-            $sanitise = new Sanitise($inputData, $minMaxData);
-            $sanitisedData = $sanitise->getData();
-            $error = $sanitise->error;
-            if ($error) {
-                throw new Exception('<b>There is a problem with your input.</b><br>' . implode(', <br>', $error));
-            }
+    $sanitise = new Sanitise($inputData, $minMaxData);
+    $sanitisedData = $sanitise->getData();
+    $error = $sanitise->error;
+    if ($error) {
+        throw new Exception('<h1><b>There is a problem with your input.</b></h1><br>' . implode(', <br>', $error));
+    }
 
-            return $sanitisedData;
+    return $sanitisedData;
 }
 /**
  * to generate random byte - token
@@ -68,8 +69,8 @@ function getSanitisedInputData($inputData, $minMaxData=NULL)
 
 function generateAuthToken()
 {
-   $token = mb_strtoupper(bin2hex(random_bytes(4)));
-   return $token;
+    $token = mb_strtoupper(bin2hex(random_bytes(4)));
+    return $token;
 }
 /**
  * Helps to generate token, and it updates the login table as well
@@ -81,14 +82,11 @@ function generateAuthToken()
 function generateUpdateTableWithToken($customerId)
 {
     //5. generate code
-    $token = generateAuthToken();   
+    $token = generateAuthToken();
     $_SESSION['2FA_token_ts'] = time();
-        //6.  update login account table with the code
+    //6.  update login account table with the code
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
-    if(!$updateCodeToCustomer) throw new Exception("Error : Could not update token", 1);
+    if (!$updateCodeToCustomer) throw new Exception("<h1>Error : Could not update token</h1>E", 1);
     return $token;
-    
 }
-
-

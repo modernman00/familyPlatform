@@ -1,4 +1,4 @@
-@extends ('layouts.email')
+@extends ('email')
 @section('title', 'email')
 
 @section('subject', 'SUBJECT: YOUR ACCOUNT PASSWORD HAS JUST BEEN CHANGED')

@@ -167,6 +167,7 @@ class Register extends AllFunctionalities
                 'password' => $cleanPostData['password'],
                 'secretWord' => $cleanPostData['secretWord'],
                 'status' => 'new',
+                'type' => 'member',
                 'id' => $cleanPostData['id'],
             ],
             [

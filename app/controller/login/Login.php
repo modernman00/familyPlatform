@@ -13,8 +13,6 @@ use App\controller\Base;
 class Login extends Base
 {
     private $table;
-
-
     function index()
     {
         view('login');
@@ -48,7 +46,6 @@ class Login extends Base
         return view('login', compact('formAction'));
     }
 
-
     public function login()
     {
         try {
@@ -59,16 +56,12 @@ class Login extends Base
                 'min' => [5, 3],
                 'max' => [35, 65]
             ];
-
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
             $data = useEmailToFindData($sanitisedData);
-
             checkPassword($sanitisedData, $data);
-
             //4. control for admin login
             $detectIfAdminOrCustomer = $_SESSION['loginType'] ?? 0;
-
             if ($detectIfAdminOrCustomer === "/lasu") {
                 $this->adminLogin($sanitisedData);
             } else if ($detectIfAdminOrCustomer === "/login") {
@@ -85,14 +78,14 @@ class Login extends Base
     {
         $select = new Select;
         $checkAccountIsApproved = $select->select_from_double('account', 'email', $data['email'], 'status', 'approved');
-        if(!$checkAccountIsApproved) {
-            throw new Exception("We do not recognise your account", 1);    
+        if (!$checkAccountIsApproved) {
+            throw new Exception("We do not recognise your account", 1);
         }
         generateSendTokenEmail($data);
         $_SESSION['identifyCust'] = $data['id'];
         $_SESSION['login'] = 1;
         session_regenerate_id();
-        header('Location: /auth/code');
+        header('Location: /login/code');
     }
 
     private function adminLogin($sanitisedData)
@@ -106,7 +99,7 @@ class Login extends Base
         // setcookie('email', $data['email'], time() + (86400 * 30), "/");
         loggedDetection("http://olaogun.dev.com/lasu");
         session_regenerate_id();
-        header('Location: /admin/reviewApps');
+        header('Location: /admin/dashboard');
     }
 
     function adminSignOut()

@@ -9,7 +9,7 @@ use App\classes\{
 
 class Code extends Pass
 {
-    public $table = 'login';
+    public $table = 'account';
     public $email;
     public $next;
     private $memberId;
@@ -17,7 +17,6 @@ class Code extends Pass
     public function show()
     {
         // if ($_SESSION['loginType'] === "/login" || $_SESSION['loginType'] === "/lasu" ) {
-
         return view('login/code');
         // }
     }
@@ -25,12 +24,12 @@ class Code extends Pass
     public function verify()
     {
         try {
-            // new token('token', '/error/token');
+        new token('token', '/login/code');
         $code = checkInput($_POST["code"]);
         $this->memberId = checkInput($_SESSION['identifyCust']);
 
         // set time limit to use code
-        if ((time() - $_SESSION['2FA_token_ts']) > 600) {
+        if ((time() - $_SESSION['2FA_token_ts']) > 6000) {
             throw new \Exception("Invalid or expired Token", 1);
         }
         unset($_SESSION['2FA_token_ts']);
@@ -38,18 +37,25 @@ class Code extends Pass
         // check if the code is stored in the database
         $result = $this->select_count_double_dynamic($this->table, ['token', 'id'], [$code, $this->memberId]);
         if (!$result) {
-            header('Location: /loginError');
+            throw new \Exception("Please check your credentials", 1);  
+         //   header('Location: /loginError');
         }
-
         // for normal login redirection
         if (isset($_SESSION['login'])) {
             $_SESSION['loggedIn'] = true;
             session_regenerate_id();
             $_SESSION['memberId'] = $this->memberId;
-            header("Location: /customer/profilePage");
+            if($_SESSION['loginType'] = "/login"){
+                header("Location: /member/ProfilePage");
+               
+            } else {
+                header("Location: /admin/dashboard");
+            }
+
         } elseif ($_SESSION['changePW'] === 1) {
             // login if password is forgotten
-            header('Location: /changepw');
+             header('Location: /login/changePW');
+             unset($_SESSION['changePW']);
         }
         } catch (\Throwable $th) {
             showError($th);

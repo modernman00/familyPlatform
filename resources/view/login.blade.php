@@ -17,13 +17,17 @@
       $_SESSION['token'] = $token;
     ?>
 
-      <div class="checkbox mb-3">
+    <a href="/login/forgot"> Forgot password? Please click this link</a>
+    <br><br>
 
+      <div class="checkbox mb-3">
         <label>
           <input type="checkbox" value="remember-me"> Remember me
         </label>
       </div>
+
       <input type="hidden" id="token" name="token" value={{ $token }}>
+
       <button type="submit" id="submit" class="btn btn-lg btn-primary btn-block">Submit</button>
 
     </div>

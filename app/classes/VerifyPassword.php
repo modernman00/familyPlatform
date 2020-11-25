@@ -27,7 +27,7 @@ class VerifyPassword extends AllFunctionalities
         }
         if (password_verify($this->inputPass, $this->dbPass) === false) {
             $this->error = 'Your password is incorrect!';
-            throw new Exception("Your password is incorrect!");
+            throw new Exception("<h1>Your password is incorrect!</h1>");
         } 
             
             return $this->outcome = 1;
@@ -71,7 +71,7 @@ class VerifyPassword extends AllFunctionalities
 
             return $outcome;
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
 
         }
     }
@@ -88,10 +88,10 @@ class VerifyPassword extends AllFunctionalities
         }
 
       } catch (\Exception $e) {
-        echo $e->getMessage();
+        showError($e);
 
       } catch( PDOException $e) {
-        echo $e->getMessage();
+        showError($e);
 
       }
     }

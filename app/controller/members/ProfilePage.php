@@ -1,6 +1,6 @@
 <?php
 
-namespace App\controller\cust;
+namespace App\controller\members;
 use App\model\SingleCustomerData;
 
 use App\classes\AllFunctionalities;
@@ -14,7 +14,8 @@ class ProfilePage extends AllFunctionalities
         $custId = checkInput($_SESSION['memberId']);
         $setData = new SingleCustomerData;
         $data = $setData->getCustomerData($custId);
-        // view('cust/index', compact('data'));
-        view('cust/latestIndex', compact('data'));
+        // view('member/index', compact('data'));
+        // view('member/latestIndex', compact('data'));
+        view('member/profile3', compact('data'));
     }
 }
