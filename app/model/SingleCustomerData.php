@@ -21,7 +21,7 @@ class SingleCustomerData extends Select
 	public function getCustomerData($custNo)
 	{
 		try {
-			$query = $this->joinManyCondition4('personal', 'siblings', 'contact', 'otherFamily', 'id', $custNo);
+			$query = $this->joinManyCondition6('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'post', 'id', $custNo);
 			foreach ($query as $query);
 			unset($query['password']);
 			return $query;

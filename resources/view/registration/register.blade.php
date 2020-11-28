@@ -1,6 +1,7 @@
 @extends('base')
 
 @section('title','Register')
+@section('data-page-id', 'registration')
 @section('content')
 
 

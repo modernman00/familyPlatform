@@ -9,4 +9,4 @@ include __DIR__ . "/register.php";
 include __DIR__ . "/login.php";
 include __DIR__ . "/realtime.php";
 include __DIR__ . "/admin.php";
-include __DIR__ . "/cust.php";
+include __DIR__ . "/profile_page.php";
