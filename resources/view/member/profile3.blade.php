@@ -3,7 +3,7 @@
 @section('data-page-id', 'profilePage')
 @section('content')
 
-<h1>WELCOME TO THE PERSON PAGE</h1>
+<h1>WELCOME TO THE {{ $data['firstName'] }} PAGE</h1>
 
 
 <!-- Page Container -->
@@ -21,7 +21,7 @@
           <p class="w3-center"><img src="/img/Ore 6th.jpeg" class="w3-circle" style="height:106px;width:106px"
               alt="Avatar"></p>
           <hr>
-          <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> {{ $data['jobTitle'] }}</p>
+          <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> {{ $data['spouse'] }}</p>
           <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> {{ $data['country'] }}</p>
           <p><i class="fa fa-birthday-cake fa-fw w3-margin-right w3-text-theme"></i> {{ $data['birthDate'] }}</p>
         </div>
@@ -113,48 +113,58 @@
             <div class="w3-container w3-padding">
 
 
-              <form action="/member/profilePage/post" id='formPostMessage' method="post">
-
-                <input type="text" name="postMessage" id="postMessage"
-                  placeholder="What is on your mind {{ $data['firstName'] }}" class="w3-input w3-border w3-padding ">
 
 
-                <br>
+              <input type="text" id="postMsg" placeholder="What is on your mind {{ $data['firstName'] }}"
+                class="w3-input w3-border w3-padding ">
 
-                <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
-                    class="fa fa-pencil"></i>
-                   Post</button>
-              </form>
+
+              <br>
+
+              <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
+                  class="fa fa-pencil"></i>
+                 Post</button>
+
             </div>
           </div>
         </div>
       </div>
 
       @for ($x = 0; $x < count($allData); $x++) <div class="w3-container w3-card w3-white w3-round w3-margin"><br>
-        <img src="/public/img/seyi/seyi3.jpeg" alt="Avatar" class="w3-left w3-circle w3-margin-right"
-          style="width:60px">
-        
+        <img src="/img/seyi/seyi3.jpeg" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
+
         <span class="w3-right w3-opacity">{{ $allData[$x]['post_time']  }}</span>
 
-        {{-- <h4 id="fullName"> {{ $allData[$x]['fullName'] }}</h4><br> --}}
-        <canvas id="user-icon" width="125" height="125"></canvas>
+        <h4 id="fullName"> {{ $allData[$x]['fullName'] }}</h4>
+        {{-- 
+        <canvas id="user-icon" width="25" height="25"></canvas> --}}
 
         <hr class="w3-clear">
 
         <p> {{ $allData[$x]['postMessage'] }} </p>
-
+        {{-- PICTURES --}}
         <div class="w3-row-padding" style="margin:0 -16px">
           <div class="w3-half">
-            <img src="/w3images/lights.jpg" style="width:100%" alt="Northern Lights" class="w3-margin-bottom">
+            <img src="/img/seyi/seyi3.jpeg" style="width:100%" alt="images" class="w3-margin-bottom">
           </div>
           <div class="w3-half">
-            <img src="/w3images/nature.jpg" style="width:100%" alt="Nature" class="w3-margin-bottom">
+            <img src="/img/seyi/seyi3.jpeg" style="width:100%" alt="images" class="w3-margin-bottom">
           </div>
         </div>
+        {{-- like and comment --}}
         <button type="button" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>
            Like</button>
         <button type="button" class="w3-button w3-theme-d2 w3-margin-bottom"><i class="fa fa-comment"></i>
            Comment</button>
+        {{-- COMMENTS --}}
+      
+
+     
+
+        <input class="w3-input w3-border w3-round-large" type="text" placeholder="Write a comment"
+          id={{ $allData[$x]['post_id'] }} name='writeComment'>
+       
+        <br><br>
     </div>
 
     @endfor
@@ -221,26 +231,30 @@
       <img src="/img/seyi/seyi1.jpeg" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
     </div>
 
-    <form class="w3-container" action="/member/profilePage/post" id='formPostMessage' method="post">
+    <form class="w3-container" action="/member/profilePage/post" id='formPostMessageModal' method="post" enctype='multiple/form-data'>
       <div class="w3-section">
 
-        {{-- <input class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Username" name="usrname"
-          required> --}}
+        <textarea class="w3-input w3-border" style="resize:none" spellcheck="false" name="postMessage" id="postMessage"
+          cols="50" rows="10">Post here</textarea> <br>
 
-        <textarea name="postMessage" id="postMessage" cols="50" rows="10">Post here</textarea>
+
+        <button class='w3-button'>
+          <input class="w3-input" type="file" id="postPicture" name='postPicture[]' multiple="true">
+        </button>
 
         <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
             class="fa fa-pencil"></i>
            Post</button>
 
       </div>
+      <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+        <button onclick="document.getElementById('id01').style.display='none'" type="button"
+          class="w3-button w3-red">Cancel</button>
+
+      </div>
     </form>
 
-    <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-      <button onclick="document.getElementById('id01').style.display='none'" type="button"
-        class="w3-button w3-red">Cancel</button>
 
-    </div>
 
   </div>
 </div>
@@ -251,44 +265,70 @@
     const showModal = ()=> {
         return document.getElementById('id01').style.display = 'block'
     }
-    document.getElementById('postMessage').addEventListener('click', showModal)
+    document.getElementById('postMsg').addEventListener('click', showModal)
 } catch (e) {
     console.log(e.message)
 }
 
 // Avatar FOR NAMES 
 
-const colours = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d"];
+// const colours = ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085", "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d"];
 
-const name = "{{ $data['firstName'] }} {{ $data['lastName'] }}",
-    nameSplit = name.split(" "),
-    initials = nameSplit[0].charAt(0).toUpperCase() + nameSplit[1].charAt(0).toUpperCase();
+// const name = "{{ $data['firstName'] }} {{ $data['lastName'] }}",
+//     nameSplit = name.split(" "),
+//     initials = nameSplit[0].charAt(0).toUpperCase() + nameSplit[1].charAt(0).toUpperCase();
 
-const charIndex = initials.charCodeAt(0) - 65,
-    colourIndex = charIndex % 19;
+// const charIndex = initials.charCodeAt(0) - 65,
+//     colourIndex = charIndex % 19;
 
-const canvas = document.getElementById("user-icon");
-const context = canvas.getContext("2d");
+// const canvas = document.getElementById("user-icon");
+// const context = canvas.getContext("2d");
 
-const canvasWidth = $(canvas).attr("width"),
-    canvasHeight = $(canvas).attr("height"),
-    canvasCssWidth = canvasWidth,
-    canvasCssHeight = canvasHeight;
+// const canvasWidth = $(canvas).attr("width"),
+//     canvasHeight = $(canvas).attr("height"),
+//     canvasCssWidth = canvasWidth,
+//     canvasCssHeight = canvasHeight;
 
-if (window.devicePixelRatio) {
-    $(canvas).attr("width", canvasWidth * window.devicePixelRatio);
-    $(canvas).attr("height", canvasHeight * window.devicePixelRatio);
-    $(canvas).css("width", canvasCssWidth);
-    $(canvas).css("height", canvasCssHeight);
-    context.scale(window.devicePixelRatio, window.devicePixelRatio);
+// if (window.devicePixelRatio) {
+//     $(canvas).attr("width", canvasWidth * window.devicePixelRatio);
+//     $(canvas).attr("height", canvasHeight * window.devicePixelRatio);
+//     $(canvas).css("width", canvasCssWidth);
+//     $(canvas).css("height", canvasCssHeight);
+//     context.scale(window.devicePixelRatio, window.devicePixelRatio);
+// }
+
+// context.fillStyle = colours[colourIndex];
+// context.fillRect (0, 0, canvas.width, canvas.height);
+// context.font = "50px Arial";
+// context.textAlign = "center";
+// context.fillStyle = "#FFF";
+// context.fillText(initials, canvasCssWidth / 2, canvasCssHeight / 1.5);
+
+
+// insert comment  
+
+const checkTest= @php echo json_encode($allData) @endphp;
+
+console.log(checkTest)
+
+const processComment = (el) => {
+      const comment = document.getElementById(el.post_id).value
+      document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
-context.fillStyle = colours[colourIndex];
-context.fillRect (0, 0, canvas.width, canvas.height);
-context.font = "128px Arial";
-context.textAlign = "center";
-context.fillStyle = "#FFF";
-context.fillText(initials, canvasCssWidth / 2, canvasCssHeight / 1.5);
+checkTest.map(el => {
+  return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
+})
+
+
+
+ 
+
+
+
+
+
+
 
 
 
