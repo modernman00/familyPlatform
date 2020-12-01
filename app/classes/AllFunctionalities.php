@@ -178,7 +178,7 @@ class AllFunctionalities extends Db
 	{
 
 		try {
-			$query = "SELECT * FROM $table";
+			$query = "SELECT * FROM $table ORDER BY date_created DESC";
 			$result = $this->connect()->prepare($query);
 			$result->execute();
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
