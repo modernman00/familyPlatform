@@ -10,10 +10,6 @@
 
               <br>
 
-              <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
-                  class="fa fa-pencil"></i>
-                 Post</button>
-
             </div>
           </div>
         </div>

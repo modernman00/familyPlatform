@@ -258,13 +258,13 @@ function sendText($message, $numbers)
 function fileUploadMultiple($fileLocation, $formInputName)
 {
     // Count total files
-    $countFiles = count(basename($_FILES[$formInputName]['name']));
+    $countFiles = count($_FILES[$formInputName]['name']);
     // Looping all files
     for ($i = 0; $i < $countFiles; $i++) {
         $fileName = $_FILES[$formInputName]['name'][$i];
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        $fileLocation = $fileLocation . $fileName[$i];
+        $fileLocation = $fileLocation.$fileName;
         // sanitise the file
         $picError = "";
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -272,14 +272,21 @@ function fileUploadMultiple($fileLocation, $formInputName)
         if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif') {
             $picError .= 'Format must be PNG, JPG, or GIF';
         }
-        if ($fileSize > 512000) {
+        if ($fileSize > 5120000) {
             $picError .= 'File size must not exceed 500kb';
         }
         if (file_exists($fileName)) {
             $picError .= "File $fileName already uploaded";
         }
-        if (!$picError) {
-            move_uploaded_file($fileTemp, $fileLocation);
+        if($picError){
+            throw new Exception("Error Processing Request - post images - $picError", 1);
+        }
+        $uploadFile = move_uploaded_file($fileTemp, $fileLocation);
+
+        if($uploadFile) {
+            $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
+        }else{
+             $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
         }
     }
 }

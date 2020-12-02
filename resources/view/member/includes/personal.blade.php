@@ -9,6 +9,16 @@
             Profile</h4>
           <p class="w3-center"><img src="/img/Ore 6th.jpeg" class="w3-circle" style="height:106px;width:106px"
               alt="Avatar"></p>
+
+              <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' >
+              
+              <button class='w3-button'>
+              <input type="file" id="profileImage" name="profileImage[]" multiple=true>
+              <button class='w3-button'>
+
+              <button name='submit' type="submit">submit</button>
+              
+              </form>
           <hr>
           <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> {{ $data['spouse'] }}</p>
           <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> {{ $data['country'] }}</p>
