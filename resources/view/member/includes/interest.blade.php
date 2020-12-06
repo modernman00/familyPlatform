@@ -5,7 +5,7 @@
             <span class="w3-tag w3-small w3-theme-d5">{{ $data['favSport'] }}</span>
             <span class="w3-tag w3-small w3-theme-d4">{{ $data['footballTeam'] }}</span>
             <span class="w3-tag w3-small w3-theme-d3">{{ $data['passion'] }} </span>
-            <span class="w3-tag w3-small w3-theme-d2">Games</span>
+            <span class="w3-tag w3-small w3-theme-d2">Sport: {{ $data['favSport'] }}</span>
             <span class="w3-tag w3-small w3-theme-d1">Friends</span>
             <span class="w3-tag w3-small w3-theme">Games</span>
             <span class="w3-tag w3-small w3-theme-l1">Friends</span>

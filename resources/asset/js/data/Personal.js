@@ -96,7 +96,12 @@ export const Personal = [
     type: 'select',
     options: [0, 1, 2, 3, 4, 5, 6]
   },
-
+  {
+    label: "Please, upload your picture",
+    attribute: 'profileImage',
+    placeholder: null,
+    type: 'file'
+  }
 
 
 ]

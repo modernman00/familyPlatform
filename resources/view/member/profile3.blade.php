@@ -4,6 +4,9 @@
 @section('content')
 
 <h1>WELCOME TO THE {{ $data['firstName'] }} PAGE</h1>
+<span class="w3-right w3-opacity">
+      <button type="button"><a href="/signout">Sign out</a> </button>
+    </span>
 
 
 <!-- Page Container -->
@@ -69,6 +72,8 @@ const processComment = (el) => {
 checkTest.map(el => {
   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
 })
+
+
 
 
 

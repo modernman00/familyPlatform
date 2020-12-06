@@ -6,6 +6,7 @@ import "./components/register/processForm"
 import "./components/register/modal/kids"
 import "./components/register/modal/siblings"
 import "./cust/main"
+import "./components/profilePage"
 // import "./components/modal/profile"
 
 if (id('profilePage')) {

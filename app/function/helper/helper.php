@@ -272,8 +272,8 @@ function fileUploadMultiple($fileLocation, $formInputName)
         if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif') {
             $picError .= 'Format must be PNG, JPG, or GIF';
         }
-        if ($fileSize > 5120000) {
-            $picError .= 'File size must not exceed 500kb';
+        if ($fileSize > 10240000) {
+            $picError .= 'File size must not exceed 1024kb';
         }
         if (file_exists($fileName)) {
             $picError .= "File $fileName already uploaded";
@@ -302,25 +302,25 @@ function fileUpload($fileLocation, $formInputName)
     $fileTemp = $_FILES[$formInputName]['tmp_name'];    # the file temp name
     $size = $_FILES[$formInputName]['size'];  # the file size
 
-    $fileName_location = $fileLocation . $fileName;
+    $fileName_location = "$fileLocation$fileName";
 
     // sanitise the file
     $picError = "";
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); # use pathinfo to get the file extension
     $fileExtension = strtolower($fileExtension); #turn the extension to a lowercase
-    if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif') {
-        $picError .= 'Format must be PNG, JPG, or GIF';
+    if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
+        throw new \Exception("Format must be PNG, JPG, JPEG or GIF", 1);  
     }
-    if ($size > 512000) {
-        $picError .= 'File size must not exceed 500kb';
+    if ($size > 10240000) {
+        throw new \Exception("File size must not exceed 1024kb", 1);
     }
     if (file_exists($fileName)) {
-        $picError .= "File $fileName already uploaded";
+        throw new \Exception("File $fileName already uploaded", 1);
     }
 
-    if (!$picError) {
-        move_uploaded_file($fileTemp, $fileName_location);
-    }
+    if(!move_uploaded_file($fileTemp, $fileName_location)) {
+        throw new \Exception("Sorry, there was an error uploading your file.", 1);     
+    }   
 }
 
 // ADD COUNTRY CODE

@@ -3,36 +3,18 @@
 namespace App\model;
 
 use App\classes\AllFunctionalities;
-use App\classes\Sanitise;
-
 class Post extends AllFunctionalities
 {
 
-    function getPost()
+    function commentLink2Post($postNo)
     {
-        printArr($_FILES);
-        // printArr($_POST);
-        $image = $_POST['post_img'];
-        unset($_POST['post_img']);
-        $sanitise = new Sanitise($_POST, null);
-        $getSanitisePost = $sanitise->getData();
-        if (!$getSanitisePost) {
-            throw new \Exception("Error Processing Request - sanitised data", 1);
-        }
-        $_POST['post_img'] = $image;
-        // $id = checkInput($_SESSION['post_id']);
-        //upload picture function;
-        fileUploadMultiple("img/post/", 'post_img');
-
-        // create a file path name for the database
-        $getSanitisePost['post_img'] = ($_FILES['post_img']['name']);
-        return $getSanitisePost;
+         return $this->select_from('comment', 'post_no', $postNo);
+       
     }
 
-    function processPost()
+    function postLink2Id($id)
     {
-        $processData = $this->getPost();
-        return $processData;
+        return $this->select_from('post', 'id', $id);
     }
 
     function getAllPost()

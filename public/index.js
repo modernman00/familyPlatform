@@ -11462,6 +11462,22 @@ try {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/profilePage.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/profilePage.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var displayElement = function displayElement() {
+  return document.getElementById('formProfilePics').style.display = 'block';
+};
+
+document.getElementById('formProfilePics').style.display = 'none';
+document.getElementById('profilePics').addEventListener('click', displayElement);
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/index.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/index.js ***!
@@ -11589,7 +11605,7 @@ var process = function process() {
   formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
 
   formData.realTimeServer('spouseEmail', "/search?attribute=spouseEmail&subject=spouse&hint", 'spouseEmail_error');
-  formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error');
+  formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&attribute2=email&subject=father&hint', 'fatherEmail_error');
   formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error'); // check if password matches real time
 
   formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.err); // check if they have a father yes
@@ -12097,6 +12113,11 @@ var Personal = [{
   placeholder: null,
   type: 'select',
   options: [0, 1, 2, 3, 4, 5, 6]
+}, {
+  label: "Please, upload your picture",
+  attribute: 'profileImage',
+  placeholder: null,
+  type: 'file'
 }];
 
 /***/ }),
@@ -12239,9 +12260,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
 /* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
 /* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_7__);
 
 
  //import "./components/small-Input"
+
 
 
 

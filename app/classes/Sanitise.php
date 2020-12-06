@@ -157,9 +157,9 @@ class Sanitise extends allFunctionalities
             return $this->cleanData;
             
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            showError($th);
         } catch ( Exception $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 }

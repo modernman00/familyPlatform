@@ -23,7 +23,7 @@ const process = () => {
 
 	formData.realTimeServer('spouseEmail', `/search?attribute=spouseEmail&subject=spouse&hint`, 'spouseEmail_error')
 
-	formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&subject=father&hint', 'fatherEmail_error')
+	formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&attribute2=email&subject=father&hint', 'fatherEmail_error')
 
 	formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error')
 

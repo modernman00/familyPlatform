@@ -18,16 +18,6 @@ class Login extends Base
         view('login');
     }
 
-    // public function __construct()
-    // {
-    //     $this->table = "login";
-    //     // $this->tableAdmin = "admin";
-    // }
-
-    /**
-     * Login page for customers
-     */
-
     public function show()
     {
         $formAction = "/login";

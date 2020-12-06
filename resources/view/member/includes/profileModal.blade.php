@@ -4,20 +4,23 @@
     <div class="w3-center"><br>
       <span onclick="document.getElementById('id01').style.display='none'"
         class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
-      <img src="/img/seyi/seyi1.jpeg" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+     
+      @if ($data['img'])
+              <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+      @endif
+  
     </div>
 
     <form class="w3-container" action="/member/profilePage/post" id='formPostMessageModal' method="post" enctype='multipart/form-data'>
+
       <div class="w3-section">
 
         <textarea class="w3-input w3-border" style="resize:none" spellcheck="false" name="postMessage" id="postMessage"
           cols="50" rows="10">Post here</textarea> <br>
 
-        <button class='w3-button'>
-
-            
+        {{--  <button class='w3-button'>    --}}
           <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
-        </button>
+        {{--  </button>  --}}
 
         <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
             class="fa fa-pencil"></i>

@@ -27,9 +27,9 @@ class Select extends Db
             return $query->execute();
 
         } catch (\PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         } catch (\Throwable $th) {
-           echo $e->getMessage();
+           showError($e);
         }
        
        
@@ -49,7 +49,7 @@ class Select extends Db
 			foreach($outcome as $outcome);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -64,7 +64,7 @@ class Select extends Db
 			foreach($outcome as $outcome);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -79,7 +79,7 @@ class Select extends Db
 			foreach($outcome as $outcome);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -94,7 +94,7 @@ class Select extends Db
 			foreach($outcome as $outcome);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -109,7 +109,7 @@ class Select extends Db
 			$outcome = $result->fetchAll();
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -122,7 +122,7 @@ class Select extends Db
 			$outcome = $result->fetchAll();
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage();
+			showError($e);
 		}
 	}
 
@@ -137,7 +137,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -196,7 +196,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -211,7 +211,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -228,7 +228,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -246,7 +246,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -263,7 +263,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -280,7 +280,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -299,7 +299,7 @@ class Select extends Db
 	// 		$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 	// 		return $outcome;
 	// 	} catch (PDOException $e) {
-	// 		echo $e->getMessage(), PHP_EOL;
+	// 		showError($e);
 	// 	}
 	// }
 
@@ -319,7 +319,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -335,7 +335,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 	/**
@@ -356,7 +356,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -374,7 +374,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -393,7 +393,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -411,9 +411,10 @@ class Select extends Db
 			$result = $this->connect()->prepare($query);
 			$result->execute([$id, $id]);
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
+
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -521,7 +522,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 
@@ -535,7 +536,7 @@ class Select extends Db
 			$outcome = $result->fetchAll(PDO::FETCH_ASSOC);
 			return $outcome;
 		} catch (PDOException $e) {
-			echo $e->getMessage(), PHP_EOL;
+			showError($e);
 		}
 	}
 

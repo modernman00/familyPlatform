@@ -281,6 +281,19 @@ class AllFunctionalities extends Db
 		}
 	}
 
+		public function select_from_withLimit($de, $dev, $from, $orderBy, $direction,  $limit)
+	{
+		try {
+			$sql = "SELECT * FROM $de WHERE $dev = ? ORDER BY $orderBy $direction LIMIT $limit";
+			$result = $this->connect()->prepare($sql);
+			$result->execute([$from]);
+			$outcome = $result->fetchAll();
+			return $outcome;
+		} catch (PDOException $e) {
+			echo $e->getMessage();
+		}
+	}
+
 	public function selectIsNot($de, $dev, $from)
 	{
 		try {

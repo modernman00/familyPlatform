@@ -3,7 +3,7 @@
 namespace App\controller;
 
 use App\classes\{
-    AllFunctionalities,
+    AllFunctionalities, ProcessImg
     // Transaction as Transaction
 };
 use Exception;
@@ -11,7 +11,7 @@ use Exception;
 class Register extends AllFunctionalities
 {
 
-    private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily'];
+    private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
 
     public function index()
     {
@@ -31,10 +31,9 @@ class Register extends AllFunctionalities
         // printArr($_POST);
         try {
 
-           // $this->tokenCheck('token', '/register');
+           $this->tokenCheck('token', '/register');
 
             $postDataWithId = $this->setId($_POST);
-
 
             // sanitise
 
@@ -45,15 +44,14 @@ class Register extends AllFunctionalities
             $tableData = $this->tableData($cleanData);
             // db table
 
-
-
             // create session 
             $_SESSION['id'] = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
 
-            // $Transaction = new Transaction;
-            //begin transaction
-            // $Transaction->beginTransaction();
+            // process the image 
+            $profileImg = new ProcessImg;
+            $profileImg->processProfileImage();
+
             // submit using function from insert
             $countTable = count($this->table);
             for ($i = 0; $i < $countTable; $i++) {
@@ -179,8 +177,18 @@ class Register extends AllFunctionalities
                 'motherEmail' => $cleanPostData['motherEmail'],
                 'motherMaiden' => $cleanPostData['motherMaiden'],
                 'id' => $cleanPostData['id']
+            ],
+            [
+                'fullName' => $cleanPostData['firstName'],
+                'postMessage' => "Hey, welcome to your page",
+                'id' => $cleanPostData['id']
+            ],
+            [
+                'fullName' => $cleanPostData['firstName'],
+                'comment' => "Your comment will show here",
+                'post_no' => 1000,
+                'id' => $cleanPostData['id']
             ]
-
         ];
     }
 
@@ -206,4 +214,9 @@ class Register extends AllFunctionalities
 
         return $postData;
     }
+
+
+
+
+
 }

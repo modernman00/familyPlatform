@@ -13,7 +13,7 @@ function loggedDetection($filename)
 
 function notifyCustOfLogIn($data)
 {
-    $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOANEASY-LOGGED-IN DETECTION", null,null);
+    $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOGGED-IN DETECTION", null,null);
     return sendEmailWrapper($generateEmailArray, 'customer');   
 }
 

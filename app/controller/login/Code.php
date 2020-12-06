@@ -46,6 +46,7 @@ class Code extends Pass
             session_regenerate_id();
             $_SESSION['memberId'] = $this->memberId;
             if($_SESSION['loginType'] = "/login"){
+               
                 header("Location: /member/ProfilePage");
                
             } else {
