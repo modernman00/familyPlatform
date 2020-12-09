@@ -1,3 +1,4 @@
+"use strict";
 import FormHelper from '../FormHelper';
 import { id, log } from '../../global';
 import { dataToCheck } from "../../data/dataToCheck";
@@ -21,17 +22,21 @@ const process = () => {
 
 	//real time check 
 
-	formData.realTimeServer('spouseEmail', `/search?attribute=spouseEmail&subject=spouse&hint`, 'spouseEmail_error')
+	formData.realTimeServer('spouseMobile', 
+	`/search?attribute=spouseMobile&subject=spouse&hint`, 
+	'spouseMobile_error')
 
-	formData.realTimeServer('fatherEmail', '/search?attribute=fatherEmail&attribute2=email&subject=father&hint', 'fatherEmail_error')
+	formData.realTimeServer('fatherMobile', 
+	'/search?attribute=fatherMobile&subject=father&hint', 'fatherMobile_error')
 
-	formData.realTimeServer('motherEmail', '/search?attribute=motherEmail&subject=mother&hint', 'motherEmail_error')
+	formData.realTimeServer('motherMobile', 
+	'/search?attribute=motherMobile&subject=mother&hint', 'motherMobile_error')
 
 
 	// check if password matches real time
 	formData.matchInput(dataToCheck.password.pwd,
 		dataToCheck.password.pwd2,
-		dataToCheck.password.err
+		// dataToCheck.password.err
 	);
 
 	// check if they have a father yes

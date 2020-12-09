@@ -69,20 +69,13 @@ const processComment = (el) => {
       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
-checkTest.map(el => {
-  return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
+// checkTest.map(el => {
+//   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
+// })
+
+document.getElementById('profilePics').addEventListener('click', ()=> {
+  document.getElementById('formProfilePics').style.display ="block"
 })
-
-
-
-
-
- 
-
-
-
-
-
 
 
 

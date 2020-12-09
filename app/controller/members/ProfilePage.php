@@ -26,14 +26,13 @@ class ProfilePage extends ProcessImg
         unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
 
         // GET MEMBER'S DATA
-        if(!$_SESSION['memberId']) {
+        if (!$_SESSION['memberId']) {
             throw new \Exception("Error Processing ID request", 1);
         }
         $this->id = checkInput($_SESSION['memberId']);
 
         $setData = new SingleCustomerData;
-        $this->memberData = $setData->getCustomerData($this->id)
-        ;
+        $this->memberData = $setData->getCustomerData($this->id);
         //GET POST DATA 
         $instanceAllData = new Post;
 
@@ -48,9 +47,8 @@ class ProfilePage extends ProcessImg
         $this->post2Id = $instanceAllData->postLink2Id($this->id);
 
         // COMMENT AND POST NO 
-       // echo $this->allPostData['post_no'];
+        // echo $this->allPostData['post_no'];
         $this->comment2Post = $instanceAllData->commentLink2Post(21);
-
     }
 
     function index()
@@ -58,20 +56,17 @@ class ProfilePage extends ProcessImg
         try {
 
             //printArr($this->comment2Post);
-
             $_SESSION['id'] = $this->id;
             $_SESSION['fName'] = $this->memberData['firstName'];
             $_SESSION['lName'] = $this->memberData['lastName'];
             $_SESSION['currentTime'] = time();
-         
-
+            
             view('member/profile3', [
-                'data' =>$this->memberData, 'allData'=>$this->allPostData,
-                'comment'=> $this->allCommentData,
+                'data' => $this->memberData, 'allData' => $this->allPostData,
+                'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
                 'comment2Post' => $this->comment2Post
-                ]);
-
+            ]);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -128,7 +123,7 @@ class ProfilePage extends ProcessImg
 
             $this->insertData_NoRedirect($getPost, 'post');
 
-          header('Location: /member/ProfilePage');
+            header('Location: /member/ProfilePage');
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -145,6 +140,7 @@ class ProfilePage extends ProcessImg
             1
         );
         foreach ($result as $result);
+
         return $result['img'];
     }
 
@@ -152,7 +148,7 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getPost = $this->processPostData();
-           // printArr($getPost);
+            // printArr($getPost);
             $this->insertData_NoRedirect($getPost, 'comment');
 
             header('Location: /member/ProfilePage');
@@ -175,4 +171,6 @@ class ProfilePage extends ProcessImg
             showError($th);
         }
     }
+
+  
 }

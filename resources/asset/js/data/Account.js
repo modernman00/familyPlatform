@@ -1,24 +1,14 @@
- export const Account = [
-    
-      {
-        label : 'password',
-        attribute: 'password',
-        placeholder: '',
-        type : 'password'
-      },
-     
-       {
-        label : 'confirm password',
-        attribute: 'confirm_password',
-        placeholder: '',
-        type : 'password'
-      },
-         {
-        label : 'secret word',
-        attribute: 'secretWord',
-        placeholder: 'Secret word to retrieve your account',
-        type : 'text'
-      }  
-            
+"use strict";
+export const Account = [
 
+    {
+    form: '3-col',
+    label: 'Create an account:',
+    options: {
+      label: ['Password', 'Confirm password', 'Secret word'],
+      attribute: ['password', 'confirm_password', 'secretWord'],
+      placeholder: ['xxxx', 'xxxx', 'one time security code'],
+      type: ['password', 'password', 'password']
+    }
+  }
 ]

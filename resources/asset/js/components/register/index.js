@@ -1,4 +1,4 @@
-
+"use strict";
 import { Personal } from '../../data/Personal.js'
 import { Contact } from '../../data/Contact.js'
 import { Work } from '../../data/Work.js'
@@ -7,18 +7,13 @@ import { Interest } from "../../data/Interest";
 import { Account } from "../../data/Account";
 
 try {
-
-   Input(Contact, 'contact')
+    Input(Contact, 'contact')
     Input(Personal, 'personal')
     Input(Work, 'work')
     Input(Interest, 'interest')
     Input(Account, 'account')
-  
-    
 } catch (e) {
-
-    console.log(e)
-    
+    console.log(e.message, e.name)
 }
 
 

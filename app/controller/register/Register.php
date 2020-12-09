@@ -117,9 +117,9 @@ class Register extends AllFunctionalities
     private function dataToCheck()
     {
         return  $data = [
-            'min' => [2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            'max' => [15, 15, 15, 15, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 30, 20, 30],
-            'data' => ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'jobTitle', 'occupation', 'employerName',]
+            'min' => [2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            'max' => [15, 15, 30, 30, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20],
+            'data' => ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation']
         ];
     }
 
@@ -130,19 +130,17 @@ class Register extends AllFunctionalities
                 'firstName' => $cleanPostData['firstName'],
                 'lastName' => $cleanPostData['lastName'],
                 'alias' => $cleanPostData['alias'],
-                'birthDate' => $cleanPostData['birthDate'],
                 'kids' => $cleanPostData['kids'],
                 'gender' => $cleanPostData['gender'],
                 'noSiblings' => $cleanPostData['noSiblings'],
+                'day' => $cleanPostData['day'],
+                'month' => $cleanPostData['month'],
+                'year' => $cleanPostData['year'],
                 'id' => $cleanPostData['id'],
             ],
             [
                 'employmentStatus' => $cleanPostData['employmentStatus'],
-                'jobTitle' => $cleanPostData['jobTitle'],
                 'occupation' => $cleanPostData['occupation'],
-                'employerName' => $cleanPostData['employerName'],
-                // 'workEmail' => $cleanPostData['workEmail'],
-
                 'id' => $cleanPostData['id']
             ],
             [
@@ -170,11 +168,11 @@ class Register extends AllFunctionalities
             ],
             [
                 'spouse' => $cleanPostData['spouse'],
-                'spouseEmail' => $cleanPostData['spouseEmail'],
+                'spouseMobile' => $cleanPostData['spouseMobile'],
                 'fatherName' => $cleanPostData['fatherName'],
-                'fatherEmail' => $cleanPostData['fatherEmail'],
+                'fatherMobile' => $cleanPostData['fatherMobile'],
                 'motherName' => $cleanPostData['motherName'],
-                'motherEmail' => $cleanPostData['motherEmail'],
+                'motherMobile' => $cleanPostData['motherMobile'],
                 'motherMaiden' => $cleanPostData['motherMaiden'],
                 'id' => $cleanPostData['id']
             ],

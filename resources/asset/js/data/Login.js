@@ -1,15 +1,19 @@
+"use strict";
 export const Login = [
        {
+        form: 'Email address',
         label : 'email',
         attribute: 'email',
         placeholder: 'family@email.com',
-        type: 'text'
+        inputType: 'NORMAL_INPUT'
       },
       {
+        form: 'Password',
         label : 'password',
         attribute: 'password',
         placeholder: 'SN55DE',
-        type: 'password'
+        type: 'password',
+        inputType: 'NORMAL_INPUT'
      }
      
 ]

@@ -9,33 +9,38 @@
 
   <form action="/register" method="POST" class="register">
 
-    <?php 
-    
+    @php
     $token = urlencode(base64_encode((random_bytes(32))));
+    $_SESSION['token'] = $token;
+    @endphp
 
-      $_SESSION['token'] = $token;
-    ?>
+    {{--  <br><br><br>  --}}
 
+    {{--  <h2 class="text-center text-uppercase">Personal Details</h2>  --}}
     <br><br><br>
+    <div class="row" id="personal"></div><hr>
+      {{--  <div class="row" id="personal2"></div><hr>  --}}
+    {{--  <br><br>  --}}
 
-    <h2 class="text-center text-uppercase">Personal Details</h2>
-    <div class="row" id="personal">
-      
-    </div>
+    {{--  <h2 class="text-center text-uppercase">Contact Information</h2>  --}}
+  
+    <div id="contact"></div><hr>
 
-    <h2 class="text-center text-uppercase">Contact</h2>
-    <div id="contact"></div>
+    {{--  <br><br>  --}}
+    {{--  <h2 class="text-center text-uppercase">Work details</h2>  --}}
+  
+    <div id="work"></div><hr>
 
-    <h2 class="text-center text-uppercase">Work details</h2>
-    <div id="work"></div>
+   
+    {{--  <h2 class="text-center text-uppercase">Interests</h2>
+    <br>  --}}
+    <div id="interest"></div><hr>
+{{--  
+    {{--  <br><br>  --}}  
+    {{--  <h2 class="text-center text-uppercase">Create Account</h2><br>  --}}
+    <div id="account"></div><hr>
 
-    <h2 class="text-center text-uppercase">Interests</h2>
-    <div id="interest"></div>
-
-    <h2 class="text-center text-uppercase">Create Account</h2>
-    <div id="account"></div>
-
-
+    {{--  <br><br>  --}}
     <div class="form-group form-check">
       <input type="checkbox" class="form-check-input" id="checkbox">
       <label class="form-check-label" for="checkbox">By submitting this form, you agree handling your information as
@@ -46,13 +51,12 @@
 
     <input type="hidden" id="token" name="token" value={{ $token }}>
 
-     <input class="btn btn-primary btn-lg btn-block submit" type="button" id="submit" name="submit"
-        value="Submit Form">
-
-     
+    <input class="btn btn-primary btn-lg btn-block submit" type="button" id="submit" name="submit" value="Submit Form">
 
 
-        <br><br> 
+
+
+    {{--  <br><br>  --}}
 
 
   </form>
@@ -60,8 +64,8 @@
 </div>
 
 
-         @includeIf("registration.include.kidsModal")
-        {{-- @include('registration/include/siblingsModal') --}}
+@includeIf("registration.include.kidsModal")
+{{-- @include('registration/include/siblingsModal') --}}
 
 
 @endsection

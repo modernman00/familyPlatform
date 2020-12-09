@@ -12,22 +12,19 @@ class Search extends Base
             
             $hint =  checkInput($_REQUEST['hint']);  
             $attribute = checkInput($_GET['attribute']);
-            $attribute2 = checkInput($_GET['attribute2']);
             $subject = checkInput($_GET['subject']);
  
             $hint = strtolower($hint);
-            $msg1 = "Good news! We think your $subject is already registered on the platform";
+            $msg1 = "Good news! your $subject is already registered on the platform";
 
-            $msg2 = "<h4><i>Your $subject is not on the platform. Do you want us to send them an email to register</i>? </h4>". $this->checkBox($subject);
+            $msg2 = "<h4><i>Your $subject is not on the platform. Do you want us to send them a text to register to the platform</i>? </h4>". $this->checkBox($subject);
 
             $outcome = $this->select_count('otherFamily', $attribute, $hint); 
-            // if(!$outcome) {
-            //      $outcome = $this->select_count('account', $attribute2, $hint); 
-            // }
+
             $result = (!$outcome) ? $msg2 : $msg1 ;
             echo ($result);
         } catch (\Throwable $th) {
-            throw $th;
+            showError($th);
         }
     }
 

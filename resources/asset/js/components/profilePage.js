@@ -1,7 +1,8 @@
-const displayElement = ()=> {
-  return document.getElementById('formProfilePics').style.display = 'block';
-}
+// "use strict";
+// const displayElement = ()=> {
+//   return document.getElementById('formProfilePics').style.display = 'block';
+// }
 
-document.getElementById('formProfilePics').style.display = 'none';
+// document.getElementById('formProfilePics').style.display = 'none';
 
-document.getElementById('profilePics').addEventListener('click', displayElement)
+// document.getElementById('profilePics').addEventListener('click', displayElement)

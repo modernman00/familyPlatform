@@ -96,24 +96,30 @@ export default class FormHelper {
      */
 
     realTimeCheckLen(input, maxi) {
-        for (let i = 0;
-            i < input.length;
-            i++) {
-            const theData = this.id(`${input[i]}`);
-            const max = maxi[i];
-            const error = this.id(`${input[i]}_error`);
-            if (theData)
-                theData.maxLength = parseInt(max + 1);
-            theData.addEventListener('keyup', () => {
-                error.innerHTML = (theData.value.length > max) ? `You have reach the maximum limit` : "";
-                this.id(`${input[i]}_help`).style.color = 'red'
-                this.id(`${input[i]}_help`).style.fontSize = '20px'
+        try {
+            for (let i = 0;
+                i < input.length;
+                i++) {
+                const theData = this.id(`${input[i]}`);
+                if (theData == "") throw "empty dataInput";
+                const max = maxi[i];
+                const error = this.id(`${input[i]}_error`);
+                if (theData)
+                    theData.maxLength = parseInt(max + 1);
+                theData.addEventListener('keyup', () => {
+                    error.innerHTML = (theData.value.length > max) ? `You have reach the maximum limit` : "";
+                    this.id(`${input[i]}_help`).style.color = 'red'
+                    this.id(`${input[i]}_help`).style.fontSize = '10px'
 
-                setTimeout(() => {
-                    this.id(`${input[i]}_help`).style.display = 'none'
-                }, 5000);
-            })
+                    setTimeout(() => {
+                        this.id(`${input[i]}_help`).style.display = 'none'
+                    }, 5000);
+                })
 
+            }
+
+        } catch (error) {
+            console.log(error.message)
         }
     }
 

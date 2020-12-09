@@ -8,31 +8,23 @@
         {{ $data['firstName']  }} {{ $data['lastName'] }}</h5>
       <p class="w3-center">
 
-        @if (isset($data['img']))
-
         <a href="#profilePics" id="profilePics">
           <img src="/img/profile/{{ $data['img'] }}" class="w3-circle" style="height:106px;width:106px" alt="Avatar">
 
         </a>
 
-      
-      
-        @else
-        <img src="/img/profile/avatar" class="w3-circle" id = "profilePics1" style="height:106px;width:106px" alt="Avatar">
-
-        @endif
-
-
-
       </p>
 
-      <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' id="formProfilePics">
+      <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' id="formProfilePics" style="display: none;">
 
-        <button class='w3-button'>
-          <input type="file" id="profileImage" name="profileImage">
+
+          <label for="profileImage">Browse</label><br>
+
+          <input for="profileImage" type="file" id="profileImage" name="profileImage">
           <button class='w3-button'>
 
-            <button name='submit' type="submit">submit</button>
+            
+        <button class='w3-button' name='submit' type="submit">submit</button>
 
       </form>
       <hr>

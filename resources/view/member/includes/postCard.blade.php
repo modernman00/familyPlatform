@@ -5,11 +5,11 @@
 
   {{--  POST TIME  --}}
   <span class="w3-right w3-opacity">
-    {{ $allData['post_time']  }}
+   {{ humanTiming($allData['date_created'])  }} ago
   </span>
 
   {{--  POST NAME  --}}
-  <h4 id="fullName"> {{ $allData['fullName'] }}
+  <h4 id="fullName"> {{ $allData['fullName'] }} 
   </h4>
   {{-- 
         <canvas id="user-icon" width="25" height="25"></canvas> --}}
@@ -26,8 +26,6 @@
     </div>
     @endfor
 
-
-
   </div>
   <button type="button" name="likeButton" class="w3-button w3-theme-d1 w3-margin-bottom"><i class="fa fa-thumbs-up"></i>
      Like</button>
@@ -42,7 +40,7 @@
 @endforeach
  
 
-  <form action="/postCommentProfile" method="post" id="postCommentProfile">
+  <form action="/postCommentProfile" method="post" id="postCommentProfile{{ $allData['post_no'] }}">
     {{-- like and comment --}}
 
 
