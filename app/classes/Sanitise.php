@@ -90,7 +90,8 @@ class Sanitise extends allFunctionalities
                 if (strlen($dataPost) < $this->dataLength['min'][$x]) {
                     $this->error[]  = "Your response to '{$cleanNameKey}' question does not meet either the required minimum input limit\n";
                 } elseif (strlen($dataPost) > $this->dataLength['max'][$x]) {
-                    $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit\n";
+                    $length = $this->dataLength['max'][$x];
+                    $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit $length\n";
                 }
             };
     }

@@ -10,10 +10,11 @@
         inputType: 'SELECT'
       },
       {
-        form: "Occupation",
-        label : 'Occupation?',
+        form: "",
+        label : 'Occupation:',
         attribute: 'occupation',
         placeholder: 'Accountant, Housewife, Student, Business man etc',
+        type : 'text',
         inputType: 'NORMAL_INPUT'
       }
       

@@ -33,8 +33,9 @@ class ReviewApps extends AllFunctionalities
     private function getCustomerData()
     {
         $this->id = checkInput($_GET['id']);
+        printArr($_GET);
         $select = new Select;
-        $data = $select->joinManyCondition4('contact', 'personal', 'interest', 'account', 'id', $this->id);
+        $data = $select->joinManyCondition5('contact', 'personal', 'interest', 'otherFamily', 'account', 'id', $this->id);
 
         foreach ($data as $data2);
 

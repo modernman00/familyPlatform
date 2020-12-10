@@ -10,8 +10,8 @@ use Exception;
 
 class Register extends AllFunctionalities
 {
-
     private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
+    
 
     public function index()
     {
@@ -31,10 +31,10 @@ class Register extends AllFunctionalities
         // printArr($_POST);
         try {
 
-           $this->tokenCheck('token', '/register');
+          //$this->tokenCheck('token', '/register');
 
             $postDataWithId = $this->setId($_POST);
-
+        
             // sanitise
 
             $data = $this->dataToCheck();
@@ -51,6 +51,7 @@ class Register extends AllFunctionalities
             // process the image 
             $profileImg = new ProcessImg;
             $profileImg->processProfileImage();
+            $_SESSION['PROFILE_IMG'] = $profileImg->profileImg;
 
             // submit using function from insert
             $countTable = count($this->table);
@@ -117,9 +118,9 @@ class Register extends AllFunctionalities
     private function dataToCheck()
     {
         return  $data = [
-            'min' => [2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            'max' => [15, 15, 30, 30, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20],
-            'data' => ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation']
+            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30],
+            'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation']
         ];
     }
 
@@ -167,7 +168,7 @@ class Register extends AllFunctionalities
                 'id' => $cleanPostData['id'],
             ],
             [
-                'spouse' => $cleanPostData['spouse'],
+                'spouseName' => $cleanPostData['spouseName'],
                 'spouseMobile' => $cleanPostData['spouseMobile'],
                 'fatherName' => $cleanPostData['fatherName'],
                 'fatherMobile' => $cleanPostData['fatherMobile'],
@@ -179,11 +180,13 @@ class Register extends AllFunctionalities
             [
                 'fullName' => $cleanPostData['firstName'],
                 'postMessage' => "Hey, welcome to your page",
+                'profileImg' => $_SESSION['PROFILE_IMG'],
                 'id' => $cleanPostData['id']
             ],
             [
                 'fullName' => $cleanPostData['firstName'],
                 'comment' => "Your comment will show here",
+                'profileImg' => $_SESSION['PROFILE_IMG'],
                 'post_no' => 1000,
                 'id' => $cleanPostData['id']
             ]

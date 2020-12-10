@@ -533,8 +533,8 @@ var Input = function Input(objData, htmlId) {
     if (!objData) throw " data object is needed";
     if (htmlId == "") throw "html id is required";
     objData.map(function (element) {
-      if (element.type === 'NORMAL_INPUT') {
-        var renderHtml = "\n      <label> <strong>".concat(element.form.toUpperCase(), "</strong> </label>\n      <div class = 'form-group' id=").concat(element.attribute, "_div>\n         <label class='' for =").concat(element.attribute, "> \n         <strong>").concat(element.label.toUpperCase(), "</strong>\n         </label>\n         <input type=\"").concat(element.type, "\" class=\"form-control\" \n         id=\"").concat(element.attribute, "\" \n         name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"\n         />\n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>");
+      if (element.inputType === 'NORMAL_INPUT') {
+        var renderHtml = "\n      <label> <strong>".concat(element.form.toUpperCase(), "</strong> </label>\n      <div class = 'form-group' id=").concat(element.attribute, "_div>\n         <label class='' for =").concat(element.attribute, "> \n         <strong>").concat(element.label.toUpperCase(), "</strong>\n         </label>\n         <input type=\"").concat(element.type, "\" class=\"form-control\" \n         id=\"").concat(element.attribute, "\"\n         name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"\n         />\n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>");
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
       } else if (element.inputType === 'SELECT') {
         var _renderHtml = "\n      <div class = 'form-group' id='".concat(element.attribute, "_div'>\n      <label for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>select</option> \n                ").concat(element.options.map(function (el) {
@@ -1321,10 +1321,11 @@ var Work = [{
   options: ['Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
   inputType: 'SELECT'
 }, {
-  form: "Occupation",
-  label: 'Occupation?',
+  form: "",
+  label: 'Occupation:',
   attribute: 'occupation',
   placeholder: 'Accountant, Housewife, Student, Business man etc',
+  type: 'text',
   inputType: 'NORMAL_INPUT'
 }];
 

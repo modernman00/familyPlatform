@@ -6,7 +6,7 @@ use App\classes\AllFunctionalities;
 
 class ProcessImg extends AllFunctionalities
 {
-
+    public $profileImg;
     public function processProfileImage()
     {
         try {
@@ -16,9 +16,11 @@ class ProcessImg extends AllFunctionalities
 
             fileUpload("img/profile/", 'profileImage');
             // create a file path name for the database
+            $fileName = checkInputImage($_FILES['profileImage']['name']);
+            $this->profileImg = $fileName;
 
             $data = [
-                'img' => $_FILES['profileImage']['name'],
+                'img' => $fileName,
                 'id' => $_SESSION['id']
             ];
 
@@ -27,6 +29,7 @@ class ProcessImg extends AllFunctionalities
                 throw new \Exception("Error Processing PROFILE IMAGE", 1);
                 
             }
+            return $result;
         } catch (\Throwable $th) {
             showError($th);
         }

@@ -18,7 +18,6 @@
             <th>Spouse</th>
             <th>Father</th>
             <th>Mother</th>
-            <th>Birth Date</th>
             <th>Mobile</th>
             <th>Country</th>
             {{-- <th>Decision</th> --}}
@@ -33,12 +32,12 @@
              <td> {{ $data['id'] }} </td>
              {{-- application date --}}
               <td> {{ $data['created_at'] }} </td>
-               <td> {{ $data['firstName']}} {{ $data['lastName']}} </td>
+               <td> {{ $data['firstName']}} 
+               {{ $data['lastName'] }} </td>
                 <td> {{ $data['alias'] }} </td>
-                 <td> {{ $data['spouse'] }} </td>
+                 <td> {{ $data['spouseName'] }} </td>
                   <td> {{ $data['fatherName'] }} </td>
                    <td> {{ $data['motherName'] }} </td>
-                    <td> {{ $data['birthDate'] }} </td>
                      <td> {{ $data['mobile'] }} </td>
                       <td> {{ $data['country'] }} </td>
                  <td> {{ $data['email'] }} </td>

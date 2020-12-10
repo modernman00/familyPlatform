@@ -7,7 +7,7 @@
 
 <div class="styleForm">
 
-  <form action="/register" method="POST" class="register">
+  <form action="/register" method="POST" class="register" enctype="multipart/form-data">
 
     @php
     $token = urlencode(base64_encode((random_bytes(32))));

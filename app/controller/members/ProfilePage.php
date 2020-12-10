@@ -24,28 +24,20 @@ class ProfilePage extends ProcessImg
     function __construct()
     {
         unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
-
         // GET MEMBER'S DATA
         if (!$_SESSION['memberId']) {
             throw new \Exception("Error Processing ID request", 1);
         }
         $this->id = checkInput($_SESSION['memberId']);
-
         $setData = new SingleCustomerData;
         $this->memberData = $setData->getCustomerData($this->id);
         //GET POST DATA 
         $instanceAllData = new Post;
-
         $this->allPostData = $instanceAllData->getAllPost();
-
         //GET COMMENT DATA
-
         $this->allCommentData = $instanceAllData->getAllComments();
-
         // POST AND ID
-
         $this->post2Id = $instanceAllData->postLink2Id($this->id);
-
         // COMMENT AND POST NO 
         // echo $this->allPostData['post_no'];
         $this->comment2Post = $instanceAllData->commentLink2Post(21);
@@ -54,13 +46,12 @@ class ProfilePage extends ProcessImg
     function index()
     {
         try {
-
             //printArr($this->comment2Post);
             $_SESSION['id'] = $this->id;
             $_SESSION['fName'] = $this->memberData['firstName'];
             $_SESSION['lName'] = $this->memberData['lastName'];
             $_SESSION['currentTime'] = time();
-            
+
             view('member/profile3', [
                 'data' => $this->memberData, 'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
@@ -79,7 +70,6 @@ class ProfilePage extends ProcessImg
                 throw new \Exception("There was no data", 1);
             }
             // SANITISE THE POST 
-
             unset($_POST['post_img']);
             $sanitise = new Sanitise($_POST, null);
             $getSanitisePost = $sanitise->getData();
@@ -98,9 +88,7 @@ class ProfilePage extends ProcessImg
                 }
             }
 
-
             // get the other post variables id, fullname, time of post
-
             $getSanitisePost['id'] = $_SESSION['id'];
             $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
             $getSanitisePost['post_time'] = $_SESSION['currentTime'];
@@ -118,11 +106,8 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getPost = $this->processPostData();
-
             // printArr($getPost);
-
             $this->insertData_NoRedirect($getPost, 'post');
-
             header('Location: /member/ProfilePage');
         } catch (\Throwable $th) {
             showError($th);
@@ -140,7 +125,6 @@ class ProfilePage extends ProcessImg
             1
         );
         foreach ($result as $result);
-
         return $result['img'];
     }
 
@@ -150,7 +134,6 @@ class ProfilePage extends ProcessImg
             $getPost = $this->processPostData();
             // printArr($getPost);
             $this->insertData_NoRedirect($getPost, 'comment');
-
             header('Location: /member/ProfilePage');
         } catch (\Throwable $th) {
             showError($th);
@@ -160,17 +143,11 @@ class ProfilePage extends ProcessImg
     function profileImage()
     {
         try {
-
             // process the image 
-
             $this->processProfileImage();
-
-
             header('Location: /member/ProfilePage');
         } catch (\Throwable $th) {
             showError($th);
         }
     }
-
-  
 }

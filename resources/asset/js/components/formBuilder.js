@@ -13,7 +13,7 @@ export const Input = (objData, htmlId) => {
     if(htmlId == "") throw ("html id is required")
     
     objData.map((element) => {
-    if (element.type === 'NORMAL_INPUT') {
+    if (element.inputType === 'NORMAL_INPUT') {
       const renderHtml = `
       <label> <strong>${element.form.toUpperCase()}</strong> </label>
       <div class = 'form-group' id=${element.attribute}_div>
@@ -21,7 +21,7 @@ export const Input = (objData, htmlId) => {
          <strong>${element.label.toUpperCase()}</strong>
          </label>
          <input type="${element.type}" class="form-control" 
-         id="${element.attribute}" 
+         id="${element.attribute}"
          name="${element.attribute}"  placeholder="${element.placeholder}"
          />
         <small id ='${element.attribute}_help' class='small text-muted'></small>

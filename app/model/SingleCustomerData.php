@@ -19,31 +19,31 @@ class SingleCustomerData extends Select
 	}
 
 	public function getCustomerData($custNo)
-	{
+	{ 
 		try {
-			$query = $this->joinManyCondition7('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'post',  'profile_pics', 'id', $custNo);
+			$query = $this->joinManyCondition6('personal', 'interest', 'contact', 'otherFamily', 'post',  'profile_pics', 'id', $custNo);
 			echo 7;
-			// printArr($query);
+			 
 
 			if (!$query) {
 
-				$query = $this->joinManyCondition6('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'post', 'id', $custNo);
+				$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'post', 'id', $custNo);
 				echo 6;
-				// printArr($query);
+				 
 
 			}
 			if (!$query) {
 
-				$query = $this->joinManyCondition6('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'profile_pics', 'id', $custNo);
+				$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'profile_pics', 'id', $custNo);
 				echo 6.1;
-				// printArr($query);
+				 
 
 			}
 			if (!$query) {
 
-				$query = $this->joinManyCondition5('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'id', $custNo);
+				$query = $this->joinManyCondition4('personal', 'interest', 'contact', 'otherFamily', 'id', $custNo);
 				echo 5;
-				// printArr($query);
+				// 
 			}
 
 			if (!$query) {

@@ -14,6 +14,8 @@ class ReviewAppsData extends Db
 			--    INNER JOIN kids ON personal.id = kids.id
 			   INNER JOIN interest ON personal.id = interest.id
 			   INNER JOIN contact ON personal.id = contact.id
+			   INNER JOIN otherFamily ON personal.id = otherFamily.id
+			   
 			   INNER JOIN account ON personal.id = account.id
 			   WHERE account.status = ?";
 			$result = $this->connect()->prepare($query);

@@ -103,6 +103,17 @@ function checkInput($data)
     return $data;
 }
 
+function checkInputImage($data)
+{
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    $data = strip_tags($data);
+    $data = htmlentities($data);
+    $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
+    return $data;
+}
+
 function checkInput_email($data)
 {
 
