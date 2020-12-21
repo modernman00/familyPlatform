@@ -4,5 +4,5 @@ import { Input } from '../formBuilder'
 try {
   Input(Login, 'login')
 } catch (error) {
-    console.log(error)
+    console.log(error.message)
 }

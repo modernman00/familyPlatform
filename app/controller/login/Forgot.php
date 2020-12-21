@@ -19,8 +19,11 @@ class Forgot extends Pass
 
         //1.  token verified
        new CheckToken('token', '/login/forgot');
-        //2.  sanitise input    
-        $cleanData = getSanitisedInputData($_POST, null);  
+        //2.  sanitise input   
+        $postData = $_POST;
+       // printArr($postData);
+        $cleanData = getSanitisedInputData($postData, null);  
+        //printArr($cleanData);
         //3. get database data
         $getData = useEmailToFindData($cleanData);
         $_SESSION['identifyCust'] = $getData['id']; 

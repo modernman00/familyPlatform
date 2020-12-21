@@ -15,24 +15,19 @@
           <div id="Demo3" class="w3-hide w3-container">
             <div class="w3-row-padding">
               <br>
-              <div class="w3-half">
-                <img src="/w3images/lights.jpg" style="width:100%" class="w3-margin-bottom">
+
+             
+            @foreach($pics2Id as $images)
+            @for ($i = 0; $i < 6; $i++)
+              @if($images["post_img$i"])
+                <div class="w3-half">
+                <img src="/img/post/{{ $images["post_img$i"] }}" style="width:100%" class="w3-margin-bottom" alt="{{ $images["post_img$i"] }}">
               </div>
-              <div class="w3-half">
-                <img src="/w3images/nature.jpg" style="width:100%" class="w3-margin-bottom">
-              </div>
-              <div class="w3-half">
-                <img src="/w3images/mountains.jpg" style="width:100%" class="w3-margin-bottom">
-              </div>
-              <div class="w3-half">
-                <img src="/w3images/forest.jpg" style="width:100%" class="w3-margin-bottom">
-              </div>
-              <div class="w3-half">
-                <img src="/w3images/nature.jpg" style="width:100%" class="w3-margin-bottom">
-              </div>
-              <div class="w3-half">
-                <img src="/w3images/snow.jpg" style="width:100%" class="w3-margin-bottom">
-              </div>
+              @endif
+              
+            @endfor
+            @endforeach
+
             </div>
           </div>
         </div>

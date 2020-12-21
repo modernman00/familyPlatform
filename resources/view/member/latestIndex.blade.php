@@ -1,81 +1,56 @@
 <!DOCTYPE HTML>
-<!--
-	Forty by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 
 <head>
-    <title> Profile Page</title>
+    <title> {{ $data['fullName'] }}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <link rel="stylesheet" href="/css/forty.css" />
     <noscript>
         <link rel="stylesheet" href="/css/noscript40.css" /></noscript>
-        <!-- Material Design Bootstrap -->
-        <!-- Font Awesome -->
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
-<!-- Google Fonts -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
-{{-- <!-- Bootstrap core CSS -->
+    <!-- Material Design Bootstrap -->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+    {{-- <!-- Bootstrap core CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet"> --}}
-<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/css/mdb.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/css/mdb.min.css" rel="stylesheet">
 </head>
 
 <body class="is-preload">
 
     <!-- Wrapper -->
     <div id="wrapper">
-
-        <!-- Header -->
-        <header id="header" class="alt">
-            <a href="index.html" class="logo"><strong>Forty</strong> <span>by HTML5 UP</span></a>
-            <nav>
-                <a href="#menu">Menu</a>
-            </nav>
-        </header>
-
-        <!-- Menu -->
-        <nav id="menu">
-            <ul class="links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="landing.html">Landing</a></li>
-                <li><a href="generic.html">Generic</a></li>
-                <li><a href="elements.html">Elements</a></li>
-            </ul>
-            <ul class="actions stacked">
-                <li><a href="#" class="button primary fit">Get Started</a></li>
-                <li><a href="#" class="button fit">Log In</a></li>
-            </ul>
-        </nav>
-
         <!-- Banner -->
         <section id="banner" class="major">
             <div class="inner">
                 <header class="major">
-                    <h1>Hi, {{ $data['firstName'] }} {{ $data['lastName'] }}</h1>
+                    <h1>{{ $data['fullName'] }} </h1>
+                        <span class="image">
+                        <img src="/img/profile/{{ $data['img'] }}" alt="" />
+                    </span>
+                    
                 </header>
                 <div class="content">
                     <p>A responsive site template designed by HTML5 UP<br />
                         and released under the Creative Commons.</p>
-                        <input type="file" id="myfile" name="myfile">
+              
 
-                        {{-- FILE UPLOAD --}}
+                    {{-- FILE UPLOAD --}}
 
-                        <div class="input-group">
-  <div class="custom-file">
-    <input type="file" class="custom-file-input" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04">
-    <label class="custom-file-label" for="inputGroupFile04">Choose file</label>
-  </div>
-  <div class="input-group-append">
-    <button class="btn btn-outline-secondary" type="button" id="inputGroupFileAddon04">Button</button>
-  </div>
-</div>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="inputGroupFile04"
+                                aria-describedby="inputGroupFileAddon04">
+                            <label class="custom-file-label" for="inputGroupFile04">Choose file</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button"
+                                id="inputGroupFileAddon04">Button</button>
+                        </div>
+                    </div>
 
-                    <ul class="actions">
-                        <li><a href="#one" class="button next scrolly">Get Started</a></li>
-                    </ul>
                 </div>
             </div>
         </section>
@@ -88,7 +63,7 @@
                 <article>
                     <span class="image">
                         {{-- <img src="/img/general/fulls/pic01.jpg" alt="" /> --}}
-                            <img src="/img/seyi/seyi1.jpeg" alt="" />
+                        <img src="/img/seyi/seyi1.jpeg" alt="" />
                     </span>
                     <header class="major">
                         <h3><a href="landing.html" class="link">Aliquam</a></h3>
@@ -108,7 +83,7 @@
                 <article>
                     <span class="image">
                         {{-- <img src="/img/general/fulls/pic03.jpg" alt="" /> --}}
-                          <img src="/img/seyi/seyi3.jpeg" alt="" />
+                        <img src="/img/seyi/seyi3.jpeg" alt="" />
                     </span>
                     <header class="major">
                         <h3><a href="landing.html" class="link">Magna</a></h3>

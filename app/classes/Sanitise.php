@@ -31,7 +31,7 @@ class Sanitise extends allFunctionalities
         }
 
     
-
+        // printArr($array);
         $this->formData = $array;
 
         $this->key = array_keys($this->formData);

@@ -6,4 +6,6 @@ $router->map('POST', '/postCommentProfile', 'App\controller\members\ProfilePage@
 
 $router->map('POST', '/member/profilePage/profileImg', 'App\controller\members\ProfilePage@profileImage', 'profile_page_profileImg');
 
+$router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@postPics', 'MEMBERS_IMG_POST');
+
 

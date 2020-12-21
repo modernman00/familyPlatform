@@ -52,8 +52,10 @@ function useEmailToFindData($inputData)
  */
 function getSanitisedInputData($inputData, $minMaxData = NULL)
 {
+   // printArr($inputData);
     $sanitise = new Sanitise($inputData, $minMaxData);
     $sanitisedData = $sanitise->getData();
+    //printArr($sanitisedData);
     $error = $sanitise->error;
     if ($error) {
         throw new Exception('<h1><b>There is a problem with your input.</b></h1><br>' . implode(', <br>', $error));

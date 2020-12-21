@@ -27,8 +27,20 @@ input::placeholder{
     padding: 0 20px 0 20px;
 }
 
-// #profileImage {
-//     opacity: 0;
-//     position: absolute;
-//     z-index: -1;
+// .UploadImg {
+//     display: flex;
+//     justify-content: space-around;
 // }
+
+#postMessage_uploadPics {
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+}
+
+.custom-file-container {
+  max-width: 400px;
+  margin: 0 auto;
+      display: flex;
+    justify-content: space-around;
+}

@@ -22,30 +22,16 @@ class SingleCustomerData extends Select
 	{ 
 		try {
 			$query = $this->joinManyCondition6('personal', 'interest', 'contact', 'otherFamily', 'post',  'profile_pics', 'id', $custNo);
-			echo 7;
-			 
 
 			if (!$query) {
-
 				$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'post', 'id', $custNo);
-				echo 6;
-				 
-
 			}
 			if (!$query) {
-
 				$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'profile_pics', 'id', $custNo);
-				echo 6.1;
-				 
-
 			}
 			if (!$query) {
-
 				$query = $this->joinManyCondition4('personal', 'interest', 'contact', 'otherFamily', 'id', $custNo);
-				echo 5;
-				// 
 			}
-
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 1);
 			}
@@ -57,4 +43,5 @@ class SingleCustomerData extends Select
 			showError($e);
 		}
 	}
+
 }

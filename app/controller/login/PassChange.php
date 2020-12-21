@@ -29,7 +29,7 @@ class PassChange extends allFunctionalities
     function verify()
     {
         try {
-            new token('token', '/login/forgot');
+            new token('token', '/login/changePW');
             $reDirect = $_SESSION['loginType'];  // was set on the login page
             $cleanData = getSanitisedInputData($_POST, null);
             $email = checkInput($_SESSION['email']);

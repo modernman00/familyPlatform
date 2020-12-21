@@ -3,11 +3,6 @@
 @section('data-page-id', 'profilePage')
 @section('content')
 
-<h1>WELCOME TO THE {{ $data['firstName'] }} PAGE</h1>
-<span class="w3-right w3-opacity">
-      <button type="button"><a href="/signout">Sign out</a> </button>
-    </span>
-
 
 <!-- Page Container -->
 <div class="w3-container w3-content" style="max-width:1400px;margin-top:80px">

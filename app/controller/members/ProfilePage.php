@@ -39,8 +39,12 @@ class ProfilePage extends ProcessImg
         // POST AND ID
         $this->post2Id = $instanceAllData->postLink2Id($this->id);
         // COMMENT AND POST NO 
-        // echo $this->allPostData['post_no'];
-        $this->comment2Post = $instanceAllData->commentLink2Post(21);
+        //printArr($this->memberData);
+        //$postId = $this->allPostData['post_no'];
+      //  $this->comment2Post = $instanceAllData->commentLink2Post($postId);
+
+        $this->getAllPics = $instanceAllData->getAllPostPics($this->id);
+     
     }
 
     function index()
@@ -56,7 +60,8 @@ class ProfilePage extends ProcessImg
                 'data' => $this->memberData, 'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
-                'comment2Post' => $this->comment2Post
+                'pics2Id' => $this->getAllPics
+               // 'comment2Post' => $this->comment2Post
             ]);
         } catch (\Throwable $th) {
             showError($th);
@@ -149,5 +154,29 @@ class ProfilePage extends ProcessImg
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    function postPics()
+    {
+        if ($_FILES) {
+                if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
+                    fileUploadMultiple("img/photos/", 'photo');
+
+                    // create a file path name for the database
+                    $image = $_FILES['photo']['name'];
+                    $images = [];
+                    // create the post array for the post image
+                    for ($i = 0; $i < count($image); $i++) {
+                        $images["photo"] = $image[$i];
+                        $data = ['photo' => $image[$i],
+                        'id' => checkInput($_SESSION['id'])
+                        ];
+                        $this->insertData_NoRedirect($data, 'images');
+                    }
+                }
+
+                header('Location: /member/ProfilePage');
+            }
+
     }
 }

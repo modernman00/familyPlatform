@@ -22,6 +22,12 @@ class Post extends AllFunctionalities
         return $this->selectall('post');
     }
 
+    function getAllPostPics($custNo)
+    {
+        	return $this->select_from('post', 'id', $custNo);
+		
+    }
+
     function getAllComments()
     {
         return $this->selectall('comment');

@@ -2,14 +2,14 @@
 export const Login = [
        {
         form: 'Email address',
-        label : 'email',
+        label : '',
         attribute: 'email',
         placeholder: 'family@email.com',
         inputType: 'NORMAL_INPUT'
       },
       {
         form: 'Password',
-        label : 'password',
+        label : '',
         attribute: 'password',
         placeholder: 'SN55DE',
         type: 'password',

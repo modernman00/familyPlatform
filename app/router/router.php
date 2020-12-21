@@ -10,3 +10,4 @@ include __DIR__ . "/login.php";
 include __DIR__ . "/realtime.php";
 include __DIR__ . "/admin.php";
 include __DIR__ . "/profile_page.php";
+include __DIR__ . "/allMembersRoute.php";

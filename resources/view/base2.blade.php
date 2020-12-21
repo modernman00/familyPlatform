@@ -13,16 +13,19 @@
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   {{-- custom css --}}
   <link rel="stylesheet" href="/style.css">
+  	<link href="/css/style.css" rel="stylesheet">
   <noscript>
     <link rel="stylesheet" href="noscript.css" /></noscript>
       <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+          <!-- Bootstrap Core CSS -->
 
+      <link href="/owl-carousel/owl.carousel.css" rel="stylesheet">
 </head>
 
 <body id="myPage" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav">
-    <a class="navbar-brand" href="#">Navbar</a>
+    <a class="navbar-brand" href="#">Olaogun</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -34,15 +37,14 @@
           <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/about">About</a>
+          <a class="nav-link" href="/member/ProfilePage">My Page</a>
         </li>
-
-           <li class="nav-item">
-          <a class="nav-link" href="/policy">Policy</a>
+         <li class="nav-item">
+          <a class="nav-link" href="/allMembers">All</a>
         </li>
       
         <li class="nav-item">
-          <a class="nav-link disabled" href="#">Disabled</a>
+          <a class="nav-link" href="#">Family-Tree</a>
         </li>
       </ul>
 
@@ -50,10 +52,7 @@
 
       <form class="form-inline my-2 my-sm-0">
         <button class="btn btn-outline-success my-2 my-sm-0">
-          <a href="/register">Register</a>
-        </button>
-        <button class="btn btn-outline-success my-2 my-sm-0">
-          <a href="/login">Login</a>
+          <a href="/signout">Sign out</a>
         </button>
       </form>
     </div>
