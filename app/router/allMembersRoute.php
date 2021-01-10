@@ -6,6 +6,8 @@ $router->map('GET', '/setProfile', 'App\controller\members\AllMembersController@
 
 $router->map('GET', '/getProfile', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_GET');
 
+$router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
+
 
 
 

@@ -25,12 +25,12 @@
   "homepage": "https://github.com/modernman00/js#readme",
   "devDependencies": {
     "cross-env": "^6.0.3",
-    "laravel-mix": "^5.0.5",
+    "laravel-mix": "^5.0.9",
     "node-sass": "^4.13.1",
     "resolve-url-loader": "^3.1.2",
     "sass-loader": "^8.0.0",
-    "vue-template-compiler": "^2.6.10",
-    "webpack": "^4.41.2"
+    "vue-template-compiler": "^2.6.12",
+    "webpack": "^4.45.0"
   },
   "dependencies": {
     "bulma": "^0.8.0",
@@ -38,9 +38,10 @@
     "file-upload-with-preview": "^4.1.0",
     "g": "^2.0.1",
     "gauge-chart": "^0.5.3",
+    "google-charts": "^2.0.0",
     "jquery": "^3.4.1",
-    "npm": "^7.1.1",
-    "sass": "^1.23.1",
+    "npm": "^7.4.0",
+    "sass": "^1.32.2",
     "svg-gauge": "^1.0.6"
   }
 }

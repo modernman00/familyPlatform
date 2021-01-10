@@ -19,15 +19,18 @@
             width="200">
         <div class="card-body">
             <h4 class='card-title'>{{ $result['firstName'] }} {{ $result['lastName'] }}</h4>
-            <p class="card-text">Alias: {{ $result['alias'] }} 
-            <br> Father: {{ $result['fatherName'] }} 
-            <br> Mother: {{ $result['motherName'] }} 
+            <p class="card-text"><b>Alias:</b> {{ $result['alias'] }} 
+            <br> <b>Father:</b>  {{ $result['fatherName'] }} 
+            <br> <b>Mother:</b> {{ $result['motherName'] }} 
             @if($result['spouseName'])
-            <br> Spouse: {{ $result['spouseName'] }} 
+            <br> <b>Spouse:</b> {{ $result['spouseName'] }} 
             @endif
-            <br> Siblings: {{ $result['sibling_name'] }}
-            <br> contact: {{ $result['email'] }} | {{ $result['mobile'] }} </p>
+            <br> <b>Siblings:</b>  {{ $result['sibling_name'] }}
+            <br> <b>Contact:</b>  {{ $result['email'] }} | {{ $result['mobile'] }} </p>
+
             <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary stretched-link">See Profile</a>
+
+
         </div>
     </div>
 

@@ -8,6 +8,7 @@ import "./components/register/modal/siblings"
 import "./cust/main"
 import "./components/profilePage"
 import "./components/FilePreview"
+import "./components/organogram"
 // import "./components/modal/profile"
 
 if (id('profilePage')) {

@@ -25,6 +25,8 @@
                                         {{ $data['fullName'] }} {{ $data['id'] }}
                                     </h1>
 
+							<a href="/organogram?id={{ $data['id'] }}" class="btn btn-primary stretched-link"> Family tree</a>
+
                                 {{--  <div class="card-img-overlay text-info text-center">
                                     <h1 class="text-info bg-light text-center">
                                         {{ $data['fullName'] }}
@@ -61,9 +63,9 @@
 					<section class="box-content box-1 box-style-0">
 						<div class="no-gutter">
 
-                       
+                            {{-- @for ($i = 0; $data["post_img$i"]; $i++) --}}
+							 @foreach ($pictures as $photo)
 
-                            @for ($i = 0; $data["post_img$i"]; $i++)
                                 <div class="col-xs-4 social-box box-facebook">
 								
 									<div class="social-box-inner">
@@ -74,7 +76,7 @@
 								
 							</div>
                                 
-                            @endfor
+                            @endforeach
 
 							<div class="col-xs-4 social-box box-facebook">
 								<a class="" href="#">

@@ -1682,6 +1682,96 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/google-charts/dist/googleCharts.esm.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/google-charts/dist/googleCharts.esm.js ***!
+  \*************************************************************/
+/*! exports provided: default, GoogleCharts */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GoogleCharts", function() { return GoogleCharts; });
+/* googleCharts.js Version: 1.5.0 Built On: 2018-12-30 */
+const loadScript = Symbol('loadScript');
+const instance = Symbol('instance');
+let _instance;
+
+class GoogleChartsManager {
+    get [instance]() {
+        return _instance
+    }
+
+    set [instance](value) {
+        _instance = value;
+    }
+
+    constructor() {
+        if (this[instance]) {
+            return this[instance]
+        }
+
+        this[instance] = this;
+    }
+
+    reset() {
+        _instance = null;
+    }
+
+    [loadScript]() {
+        if (!this.scriptPromise) {
+            this.scriptPromise = new Promise(resolve => {
+                const body = document.getElementsByTagName('body')[0];
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.onload = function() {
+                    GoogleCharts.api = window.google;
+                    GoogleCharts.api.charts.load('current', {
+                        packages: ['corechart', 'table'],
+                    });
+                    GoogleCharts.api.charts.setOnLoadCallback(() => {
+                        resolve();
+                    });
+                };
+                script.src = 'https://www.gstatic.com/charts/loader.js';
+                body.appendChild(script);
+            });
+        }
+        return this.scriptPromise
+    }
+
+    load(callback, type) {
+        return this[loadScript]().then(() => {
+            if (type) {
+                let config = {};
+                if (type instanceof Object) {
+                    config = type;
+                } else if (Array.isArray(type)) {
+                    config = { packages: type };
+                } else {
+                    config = { packages: [type] };
+                }
+                this.api.charts.load('current', config);
+                this.api.charts.setOnLoadCallback(callback);
+            } else {
+                if(typeof callback != 'function') {
+                    throw('callback must be a function');
+                } else {
+                    callback();               
+                }
+            }
+        })
+    }
+}
+
+const GoogleCharts = new GoogleChartsManager();
+
+/* harmony default export */ __webpack_exports__["default"] = (GoogleChartsManager);
+
+
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -2604,6 +2694,46 @@ try {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/organogram.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/organogram.js ***!
+  \*****************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var google_charts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! google-charts */ "./node_modules/google-charts/dist/googleCharts.esm.js");
+
+google_charts__WEBPACK_IMPORTED_MODULE_0__["GoogleCharts"].load(drawChart);
+google_charts__WEBPACK_IMPORTED_MODULE_0__["GoogleCharts"].load('current', {
+  'packages': ['orgchart']
+});
+document.getElementById('checkTest').innerHTML = "<h1>It worked well and fine</h1>";
+
+var drawChart = function drawChart() {
+  var data = new google.visualization.DataTable();
+  data.addColumn('string', 'Name');
+  data.addColumn('string', 'Manager');
+  data.addColumn('string', 'ToolTip'); // For each orgchart box, provide the name, manager, and tooltip to show.
+
+  data.addRows([[{
+    'v': 'Mike',
+    'f': 'Mike<div style="color:red; font-style:italic">President</div>'
+  }, '', 'The President'], [{
+    'v': 'Jim',
+    'f': 'Jim<div style="color:red; font-style:italic">Vice President</div>'
+  }, 'Mike', 'VP'], ['Alice', 'Mike', ''], ['Bob', 'Jim', 'Bob Sponge'], ['Carol', 'Bob', '']]); // Create the chart.
+
+  var chart = new google.visualization.OrgChart(document.getElementById('chart_div')); // Draw the chart, setting the allowHtml option to true for the tooltips.
+
+  chart.draw(data, {
+    'allowHtml': true
+  });
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/profilePage.js":
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/profilePage.js ***!
@@ -3442,9 +3572,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
 /* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var _components_FilePreview__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/FilePreview */ "./resources/asset/js/components/FilePreview.js");
+/* harmony import */ var _components_organogram__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/organogram */ "./resources/asset/js/components/organogram.js");
 
 
  //import "./components/small-Input"
+
 
 
 
