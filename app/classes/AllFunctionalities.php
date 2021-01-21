@@ -6,13 +6,9 @@ use \PDO;
 use \PDOException;
 use Exception;
 use App\classes\Db;
-
-
 class AllFunctionalities extends Db
 {
-
 	private $des = 'referral';
-
 	public function submitForm($table, $field)
 	{
 		try {
@@ -20,24 +16,17 @@ class AllFunctionalities extends Db
 			// EXTRACT THE KEY FOR THE COL NAME
 			$key = array_keys($field);
 			$col = implode(', ', $key);
-
-
-
 			// extract values
 			// $value = array_values($field);
 			$placeholder = implode(', :', $key);
-
 			// prep statement using placeholder :name
 			$stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
 			$query = $this->connect()->prepare($stmt);
 			if (!$query) throw new Exception("Not able to insert data", 1);
-
 			foreach ($field as $keys => $values) {
-
 				$query->bindValue(":$keys", $values);
 			}
 			$outcome = $query->execute();
-
 			if (!$outcome) throw new Exception("Not able to execute data", 1);
 		} catch (\PDOException $e) {
 			echo $e->getMessage();
@@ -45,17 +34,10 @@ class AllFunctionalities extends Db
 		} catch (\Throwable $th) {
 			echo $th->getMessage();
 		}
-
-
 		// 
-
-
 	}
 
-
-
 	// SELECT AND COUNT
-
 	public function select_count_double($de, $dev, $from, $dev2, $from2)
 	{
 		try {
@@ -114,7 +96,6 @@ class AllFunctionalities extends Db
 
 	public function delete_column($de, $dev, $from)
 	{
-
 		try {
 			$query = "DELETE * FROM $de WHERE $dev = ? LIMIT 1";
 			$result = $this->connect()->prepare($query);

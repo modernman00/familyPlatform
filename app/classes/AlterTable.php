@@ -4,7 +4,7 @@ namespace App\classes;
 
 use App\classes\allFunctionalities;
 
-class AlterTable extends allFunctionalities 
+class AlterTable extends allFunctionalities
 {
 
     public $table;
@@ -17,37 +17,36 @@ class AlterTable extends allFunctionalities
     function __construct($table, $dataArr = null)
     {
         $this->table = $table;
-        $this->dataArray = $dataArr;        
+        $this->dataArray = $dataArr;
     }
 
-    public function addNewColArr($lastData) 
+    public function addNewColArr($lastData)
     {
-        for($x =0; $x < count($this->dataArray); $x++) {
-            $newColumn = $this->dataArray[$x];      
+        for ($x = 0; $x < count($this->dataArray); $x++) {
+            $newColumn = $this->dataArray[$x];
             $query =  "ALTER TABLE $this->table ADD $newColumn TEXT NULL AFTER $lastData";
             $lastData = $newColumn;
-             $result = $this->connect()->prepare($query);
-		    $result->execute();
+            $result = $this->connect()->prepare($query);
+            $result->execute();
             // return $outcome;
         }
-       // return $outcome;
+        // return $outcome;
     }
 
-    
-       public function addNewCol($colName, $dataType, $lastData) 
-    {    
+
+    public function addNewCol($colName, $dataType, $lastData)
+    {
         $query =  " ALTER TABLE $this->table ADD $colName $dataType NULL AFTER $lastData";
         $result = $this->connect()->prepare($query);
-		$outcome = $result->execute();
-		return $outcome;
+        $outcome = $result->execute();
+        return $outcome;
     }
 
-    public function alterAutoIncrement($start) 
-    {     
+    public function alterAutoIncrement($start)
+    {
         $query =  "ALTER TABLE `$this->table` AUTO_INCREMENT = $start";
         $result = $this->connect()->prepare($query);
-		$outcome = $result->execute();
-		return $outcome;
+        $outcome = $result->execute();
+        return $outcome;
     }
-
 }

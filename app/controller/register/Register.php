@@ -1,6 +1,6 @@
 <?php
 
-namespace App\controller;
+namespace App\controller\register;
 
 use App\classes\{
     AllFunctionalities, ProcessImg
