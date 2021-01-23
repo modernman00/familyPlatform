@@ -26,7 +26,7 @@ class Pass extends AllFunctionalities {
 
 
 
-            $message = "Please use this code $token to identify yourself in order change your Loaneasy login password<br><br> LEF IT Team";
+            $message = "Please use this code $token to identify yourself in order change your family social media software<br><br>";
             $subject = "LOGIN CODE";
             send_email($email, $name, $subject, $message);
             $_SESSION['email'] = $email;
