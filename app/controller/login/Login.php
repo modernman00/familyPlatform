@@ -5,6 +5,7 @@ namespace App\controller\login;
 use App\classes\{
     CheckToken,
     Select,
+    VerifyPassword,
 };
 
 use Exception;
@@ -49,9 +50,11 @@ class Login extends Base
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
             $data = useEmailToFindData($sanitisedData);
+
             checkPassword($sanitisedData, $data);
-            //4. control for admin login
+            // // //4. control for admin login
             $detectIfAdminOrCustomer = $_SESSION['loginType'] ?? 0;
+
             if ($detectIfAdminOrCustomer === "/lasu") {
                 $this->adminLogin($sanitisedData);
             } else if ($detectIfAdminOrCustomer === "/login") {

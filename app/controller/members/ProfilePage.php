@@ -72,7 +72,7 @@ class ProfilePage extends ProcessImg
     {
         try {
             if (!$_POST) {
-                throw new \Exception("There was no data", 1);
+                throw new \Exception("There was no post data", 1);
             }
             // SANITISE THE POST 
             unset($_POST['post_img']);

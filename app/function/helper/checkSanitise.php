@@ -16,12 +16,15 @@ use App\classes\{
  */
 function checkPassword($inputData, $databaseData)
 {
-    $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
+   $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
     $passSuccess = $passwordCheck->passMgt();
     if (!$passSuccess) {
         throw new Exception("<h1>Password could not be verified</h1>");
     }
     return $passSuccess;
+
+    // $pass = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
+    // return $pass->passMgt();
 }
 
 /**

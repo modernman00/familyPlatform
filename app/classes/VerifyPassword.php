@@ -2,6 +2,7 @@
 
 
 namespace App\classes;
+
 use App\classes\AllFunctionalities;
 use \PDOException;
 use Exception;
@@ -28,12 +29,9 @@ class VerifyPassword extends AllFunctionalities
         if (password_verify($this->inputPass, $this->dbPass) === false) {
             $this->error = 'Your password is incorrect!';
             throw new Exception("<h1>Your password is incorrect!</h1>");
-        } 
-            
-            return $this->outcome = 1;
-        
+        }
+      //  return $this->outcome = 1;
     }
-
 
     // hash the password once verified
     protected function hashPassword()
@@ -45,15 +43,14 @@ class VerifyPassword extends AllFunctionalities
             $currentHashAlgorithm,
             $currentHashOptions
         );
-
-     //   if ($passwordNeedsRehash === true) {
-            // Save new password hash (PASSWORD NEWLY HASHED)
-            $this->passwordHash = password_hash(
-               $this->inputPass,
-                $currentHashAlgorithm,
-                $currentHashOptions
-            );
-   //     }
+         if ($passwordNeedsRehash === true) {
+        // Save new password hash (PASSWORD NEWLY HASHED)
+        $this->passwordHash = password_hash(
+            $this->inputPass,
+            $currentHashAlgorithm,
+            $currentHashOptions
+        );
+        }
 
         return $this->passwordHash;
     }
@@ -72,27 +69,21 @@ class VerifyPassword extends AllFunctionalities
             return $outcome;
         } catch (PDOException $e) {
             showError($e);
-
         }
     }
 
 
     public function passMgt()
     {
-      try {
-
-        if ($this->outcome) {
-            $this->hashPassword($this->dbPass,$this->inputPass);
-            $result = $this->updateTableWithNewPsw($this->id, $this->table);
-            return $result;
+        try {
+                $this->hashPassword($this->dbPass, $this->inputPass);
+                $result = $this->updateTableWithNewPsw($this->id, $this->table);
+                return $result;
+    
+        } catch (\Exception $e) {
+            showError($e);
+        } catch (PDOException $e) {
+            showError($e);
         }
-
-      } catch (\Exception $e) {
-        showError($e);
-
-      } catch( PDOException $e) {
-        showError($e);
-
-      }
     }
 }

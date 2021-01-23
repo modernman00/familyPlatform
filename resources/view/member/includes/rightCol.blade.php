@@ -10,31 +10,36 @@
     </div>
     <br>
 
-    <div class="w3-card w3-round w3-white w3-center">
-      <div class="w3-container">
-        <p>Friend Request</p>
-        <img src="/w3images/avatar6.png" alt="Avatar" style="width:50%"><br>
-        <span>Jane Doe</span>
-        <div class="w3-row w3-opacity">
-          <div class="w3-half">
-            <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i></button>
-          </div>
-          <div class="w3-half">
-            <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
-          </div>
-        </div>
-      </div>
-    </div>
     <br>
 
-    <div class="w3-card w3-round w3-white w3-padding-16 w3-center">
-      <p>ADS</p>
-    </div>
-    <br>
+         <form action="/photos/postImages" method="POST" enctype="multipart/form-data">
+          <div class="custom-file-container" data-upload-id="myUniqueUploadId">
+            <label>Upload File <span class="material-icons">photo</span>
+              <a href="javascript:void(0)" class="custom-file-container__image-clear" title="Clear Image">&times;</a>
+            </label>
 
-    <div class="w3-card w3-round w3-white w3-padding-32 w3-center">
-      <p><i class="fa fa-bug w3-xxlarge"></i></p>
-    </div>
+            <label for="postMessage_uploadPics" class="custom-file-container__custom-file">
+              <input type="file" accept="image/*, image/heif, image/heic, video/*"
+                class="custom-file-container__custom-file__custom-file-input" aria-label="Choose File"
+                id="postMessage_uploadPics" name="photo[]" multiple />
+              {{-- <input type="hidden" name="MAX_FILE_SIZE" value="10485760" /> --}}
+              <span class="custom-file-container__custom-file__custom-file-control"></span>
+            </label>
+
+            <div class="custom-file-container__image-preview"></div>
+            <button class="w3-btn w3-round w3-red" name="uploadPhotos" id="uploadPhotos" style="width: 240px;">Upload
+              pictures </button>
+          </div>
+
+        </form>
+
 
     <!-- End Right Column -->
   </div>
+
+  <script src="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.js"></script>
+<script>
+  const upload = new FileUploadWithPreview("myUniqueUploadId", {
+                showDeleteButtonOnImages: true
+            });
+</script>
