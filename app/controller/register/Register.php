@@ -7,17 +7,14 @@ use App\classes\{
     // Transaction as Transaction
 };
 use Exception;
-
 class Register extends AllFunctionalities
 {
     private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
     
-
     public function index()
     {
         view('registration/register');
     }
-
     /**
      * 
      * @param mixed $array this is the POST Data 
@@ -25,7 +22,6 @@ class Register extends AllFunctionalities
      * @param mixed|null $data check len (max and min)
      * @return void 
      */
-
     public function processForm()
     {
         // printArr($_POST);
@@ -49,9 +45,14 @@ class Register extends AllFunctionalities
             $_SESSION['firstName'] = $cleanData['firstName'];
 
             // process the image 
-            $profileImg = new ProcessImg;
-            $profileImg->processProfileImage();
-            $_SESSION['PROFILE_IMG'] = $profileImg->profileImg;
+            $profileImage = new ProcessImg;
+            $profileImage->processProfileImage();
+
+            $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
+
+            if(!$_SESSION['PROFILE_IMG']) {
+                throw new Exception("Image not captured ", 1);    
+            }
 
             // submit using function from insert
             $countTable = count($this->table);
@@ -60,13 +61,11 @@ class Register extends AllFunctionalities
             }
 
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-
             $this->process_kid_siblings('kid', $cleanData['kids'], $cleanData);
 
             $this->process_kid_siblings('sibling', $cleanData['noSiblings'], $cleanData);
 
             // ACCOMPANY EMAIL CONTENT
-
             // generate the data to send the email
             $sendEmailArray = genEmailArray(
                 "msg/appSub",
@@ -75,11 +74,8 @@ class Register extends AllFunctionalities
                 null,
                 null
             );
-
             // send the email
             sendEmailWrapper($sendEmailArray, 'member');
-
-
             // $Transaction->commit();
             return view('registration/nextStep');
         } catch (\Throwable $th) {
@@ -117,7 +113,7 @@ class Register extends AllFunctionalities
 
     private function dataToCheck()
     {
-        return  $data = [
+        return [
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
             'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30],
             'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation']
@@ -204,7 +200,6 @@ class Register extends AllFunctionalities
         $id = random_int(1000, 900000);
         $id .= strtoupper($name);
 
-
         //check if the reference number exist
         $check_for_id = $this->select_count('personal', 'id', $id);
         if ($check_for_id >= 1) {
@@ -212,12 +207,7 @@ class Register extends AllFunctionalities
             $id .= strtoupper($name);
         }
         $postData['id'] = $id;
-
         return $postData;
     }
-
-
-
-
 
 }

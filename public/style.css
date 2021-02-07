@@ -202,11 +202,6 @@ input:-ms-input-placeholder {
   text-transform: uppercase;
 }
 
-input::-ms-input-placeholder {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-}
-
 input::placeholder {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -238,7 +233,7 @@ input::placeholder {
 header.masthead {
   text-align: center;
   color: white;
-  background-image: url("/img/homepage.jfif");
+  background-image: url("/img/indexpics.jpeg");
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-position: center center;

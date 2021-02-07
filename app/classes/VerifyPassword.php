@@ -43,14 +43,14 @@ class VerifyPassword extends AllFunctionalities
             $currentHashAlgorithm,
             $currentHashOptions
         );
-         if ($passwordNeedsRehash === true) {
+        // if ($passwordNeedsRehash === true) {
         // Save new password hash (PASSWORD NEWLY HASHED)
         $this->passwordHash = password_hash(
             $this->inputPass,
             $currentHashAlgorithm,
             $currentHashOptions
         );
-        }
+      //  }
 
         return $this->passwordHash;
     }

@@ -275,29 +275,29 @@ function fileUploadMultiple($fileLocation, $formInputName)
         $fileName = $_FILES[$formInputName]['name'][$i];
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        $fileLocation = $fileLocation.$fileName;
+        $fileLocation = $fileLocation . $fileName;
         // sanitise the file
         $picError = "";
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
         $fileExtension = strtolower($fileExtension);
-        if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif') {
+        if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
             $picError .= 'Format must be PNG, JPG, or GIF';
         }
-        if ($fileSize > 10240000) {
-            $picError .= 'File size must not exceed 1024kb';
+        if ($fileSize > 102400000) {
+            $picError .= 'File size must not exceed 10240kb';
         }
         if (file_exists($fileName)) {
             $picError .= "File $fileName already uploaded";
         }
-        if($picError){
+        if ($picError) {
             throw new Exception("Error Processing Request - post images - $picError", 1);
         }
         $uploadFile = move_uploaded_file($fileTemp, $fileLocation);
 
-        if($uploadFile) {
+        if ($uploadFile) {
             $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
-        }else{
-             $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
+        } else {
+            $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
         }
     }
 }
@@ -309,9 +309,23 @@ function fileUploadMultiple($fileLocation, $formInputName)
 function fileUpload($fileLocation, $formInputName)
 {
     // UPLOAD PICTURE
-    $fileName = basename($_FILES[$formInputName]['name']); #the fileName
-    $fileTemp = $_FILES[$formInputName]['tmp_name'];    # the file temp name
+    $fileName = basename($_FILES["$formInputName"]['name']); #the fileName
+
+    if (!$fileName) {
+        throw new Exception("No File Name ", 1);
+    }
+
+    $fileTemp = $_FILES[$formInputName]['tmp_name'];
+
+    if (!$fileTemp) {
+        throw new Exception("No Temp File", 1);
+    }
+
+    # the file temp name
     $size = $_FILES[$formInputName]['size'];  # the file size
+     if (!$size) {
+        throw new Exception("File has no size", 1);
+    }
 
     $fileName_location = "$fileLocation$fileName";
 
@@ -320,7 +334,7 @@ function fileUpload($fileLocation, $formInputName)
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); # use pathinfo to get the file extension
     $fileExtension = strtolower($fileExtension); #turn the extension to a lowercase
     if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
-        throw new \Exception("Format must be PNG, JPG, JPEG or GIF", 1);  
+        throw new \Exception("Format must be PNG, JPG, JPEG or GIF", 1);
     }
     if ($size > 10240000) {
         throw new \Exception("File size must not exceed 1024kb", 1);
@@ -328,10 +342,9 @@ function fileUpload($fileLocation, $formInputName)
     if (file_exists($fileName)) {
         throw new \Exception("File $fileName already uploaded", 1);
     }
-
-    if(!move_uploaded_file($fileTemp, $fileName_location)) {
-        throw new \Exception("Sorry, there was an error uploading your file.", 1);     
-    }   
+    if (!move_uploaded_file($fileTemp, $fileName_location)) {
+        throw new \Exception("Sorry, there was an error uploading your file.", 1);
+    }
 }
 
 // ADD COUNTRY CODE
@@ -392,29 +405,28 @@ function changeToJs($variableName, $variable)
  * @return string 
  */
 
- function humanTiming($time)
-    {
-        try {
-                $time = strtotime($time);
-                $time = time() - $time; // to get the time since that moment
-                $time = ($time < 1) ? 1 : $time;
-                $tokens = array(
-                    31536000 => 'year',
-                    2592000 => 'month',
-                    604800 => 'week',
-                    86400 => 'day',
-                    3600 => 'hour',
-                    60 => 'minute',
-                    1 => 'second'
-                );
+function humanTiming($time)
+{
+    try {
+        $time = strtotime($time);
+        $time = time() - $time; // to get the time since that moment
+        $time = ($time < 1) ? 1 : $time;
+        $tokens = array(
+            31536000 => 'year',
+            2592000 => 'month',
+            604800 => 'week',
+            86400 => 'day',
+            3600 => 'hour',
+            60 => 'minute',
+            1 => 'second'
+        );
 
-                foreach ($tokens as $unit => $text) {
-                    if ($time < $unit) continue;
-                    $numberOfUnits = floor($time / $unit);
-                    return $numberOfUnits . ' ' . $text . (($numberOfUnits > 1) ? 's' : '');
-                }
-       
-        } catch (\Throwable $th) {
-            showError($th);
+        foreach ($tokens as $unit => $text) {
+            if ($time < $unit) continue;
+            $numberOfUnits = floor($time / $unit);
+            return $numberOfUnits . ' ' . $text . (($numberOfUnits > 1) ? 's' : '');
         }
+    } catch (\Throwable $th) {
+        showError($th);
     }
+}

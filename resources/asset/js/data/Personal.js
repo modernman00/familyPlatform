@@ -16,7 +16,7 @@ export const Personal= [
     options: {
       label: ["Spouse's name", "Spouse's mobile"],
       attribute: ['spouseName', 'spouseMobile'],
-      placeholder: ['Toyin', '23480364168089'],
+      placeholder: ['Leave empty if you have no wife/husband', '23480364168089'],
       type: ['text', 'number']
     }
   },

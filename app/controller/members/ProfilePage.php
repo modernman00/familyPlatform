@@ -41,10 +41,9 @@ class ProfilePage extends ProcessImg
         // COMMENT AND POST NO 
         //printArr($this->memberData);
         //$postId = $this->allPostData['post_no'];
-      //  $this->comment2Post = $instanceAllData->commentLink2Post($postId);
+        //  $this->comment2Post = $instanceAllData->commentLink2Post($postId);
 
         $this->getAllPics = $instanceAllData->getAllPostPics($this->id);
-     
     }
 
     function index()
@@ -61,7 +60,7 @@ class ProfilePage extends ProcessImg
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
                 'pics2Id' => $this->getAllPics
-               // 'comment2Post' => $this->comment2Post
+                // 'comment2Post' => $this->comment2Post
             ]);
         } catch (\Throwable $th) {
             showError($th);
@@ -71,6 +70,7 @@ class ProfilePage extends ProcessImg
     private function processPostData()
     {
         try {
+            printArr($_POST);
             if (!$_POST) {
                 throw new \Exception("There was no post data", 1);
             }
@@ -159,24 +159,24 @@ class ProfilePage extends ProcessImg
     function postPics()
     {
         if ($_FILES) {
-                if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
-                    fileUploadMultiple("img/photos/", 'photo');
+            if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
+                fileUploadMultiple("img/photos/", 'photo');
 
-                    // create a file path name for the database
-                    $image = $_FILES['photo']['name'];
-                    $images = [];
-                    // create the post array for the post image
-                    for ($i = 0; $i < count($image); $i++) {
-                        $images["photo"] = $image[$i];
-                        $data = ['photo' => $image[$i],
+                // create a file path name for the database
+                $image = $_FILES['photo']['name'];
+                $images = [];
+                // create the post array for the post image
+                for ($i = 0; $i < count($image); $i++) {
+                    $images["photo"] = $image[$i];
+                    $data = [
+                        'photo' => $image[$i],
                         'id' => checkInput($_SESSION['id'])
-                        ];
-                        $this->insertData_NoRedirect($data, 'images');
-                    }
+                    ];
+                    $this->insertData_NoRedirect($data, 'images');
                 }
-
-                header('Location: /member/ProfilePage');
             }
 
+            header('Location: /member/ProfilePage');
+        }
     }
 }
