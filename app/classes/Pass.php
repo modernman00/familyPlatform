@@ -26,7 +26,7 @@ class Pass extends AllFunctionalities {
 
 
 
-            $message = "Please use this code $token to identify yourself in order change your Loaneasy login password<br><br> LEF IT Team";
+            $message = "Please use this code $token to identify yourself in order change your family social media software<br><br>";
             $subject = "LOGIN CODE";
             send_email($email, $name, $subject, $message);
             $_SESSION['email'] = $email;
@@ -36,10 +36,10 @@ class Pass extends AllFunctionalities {
   protected function change($password, $email, $table) 
   {
     if(!$password) {
-      throw new \Exception("We cannot find your password");
+      throw new \Exception(" cannot find your password");
     }
           $name = $name ?? 'customer'; 
-          $message = "Hello $name, <br><br> Your Account log-in password has just been changed. If this was not you, kindly contact us immediately. <br><br> Regards<br><br> LOANEASY IT Team";
+          $message = "Hello $name, <br><br> Your Account log-in password has just been changed. If this was not you, contact eniolaoguns@gmail.com <br><br> Regards<br>";
           $subject = "YOUR ACCOUNT PASSWORD HAS JUST BEEN CHANGED"; 
           //TODO : check if we can get the name from the database through sessions
           
