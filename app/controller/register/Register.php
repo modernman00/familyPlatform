@@ -26,20 +26,14 @@ class Register extends AllFunctionalities
     {
         // printArr($_POST);
         try {
-
-          //$this->tokenCheck('token', '/register');
-
+            // $this->tokenCheck('token', '/register');
             $postDataWithId = $this->setId($_POST);
-        
             // sanitise
-
             $data = $this->dataToCheck();
             //    TODO log the error and send to developer
             $cleanData = getSanitisedInputData($postDataWithId, $data);
-
             $tableData = $this->tableData($cleanData);
             // db table
-
             // create session 
             $_SESSION['id'] = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
@@ -47,13 +41,11 @@ class Register extends AllFunctionalities
             // process the image 
             $profileImage = new ProcessImg;
             $profileImage->processProfileImage();
-
             $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
-
             if(!$_SESSION['PROFILE_IMG']) {
                 throw new Exception("Image not captured ", 1);    
             }
-
+            
             // submit using function from insert
             $countTable = count($this->table);
             for ($i = 0; $i < $countTable; $i++) {
@@ -85,6 +77,7 @@ class Register extends AllFunctionalities
             showError($e);
         }
     }
+
     /**
      * 
      * @param mixed $type is it kids or siblings

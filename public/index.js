@@ -1,50 +1,6 @@
 /******/ (function(modules) { // webpackBootstrap
-/******/ 	// install a JSONP callback for chunk loading
-/******/ 	function webpackJsonpCallback(data) {
-/******/ 		var chunkIds = data[0];
-/******/ 		var moreModules = data[1];
-/******/
-/******/
-/******/ 		// add "moreModules" to the modules object,
-/******/ 		// then flag all "chunkIds" as loaded and fire callback
-/******/ 		var moduleId, chunkId, i = 0, resolves = [];
-/******/ 		for(;i < chunkIds.length; i++) {
-/******/ 			chunkId = chunkIds[i];
-/******/ 			if(Object.prototype.hasOwnProperty.call(installedChunks, chunkId) && installedChunks[chunkId]) {
-/******/ 				resolves.push(installedChunks[chunkId][0]);
-/******/ 			}
-/******/ 			installedChunks[chunkId] = 0;
-/******/ 		}
-/******/ 		for(moduleId in moreModules) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
-/******/ 				modules[moduleId] = moreModules[moduleId];
-/******/ 			}
-/******/ 		}
-/******/ 		if(parentJsonpFunction) parentJsonpFunction(data);
-/******/
-/******/ 		while(resolves.length) {
-/******/ 			resolves.shift()();
-/******/ 		}
-/******/
-/******/ 	};
-/******/
-/******/
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-/******/
-/******/ 	// object to store loaded and loading chunks
-/******/ 	// undefined = chunk not loaded, null = chunk preloaded/prefetched
-/******/ 	// Promise = chunk loading, 0 = chunk loaded
-/******/ 	var installedChunks = {
-/******/ 		"/index": 0
-/******/ 	};
-/******/
-/******/
-/******/
-/******/ 	// script path function
-/******/ 	function jsonpScriptSrc(chunkId) {
-/******/ 		return __webpack_require__.p + "" + ({}[chunkId]||chunkId) + ".js"
-/******/ 	}
 /******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
@@ -70,67 +26,6 @@
 /******/ 		return module.exports;
 /******/ 	}
 /******/
-/******/ 	// This file contains only the entry chunk.
-/******/ 	// The chunk loading function for additional chunks
-/******/ 	__webpack_require__.e = function requireEnsure(chunkId) {
-/******/ 		var promises = [];
-/******/
-/******/
-/******/ 		// JSONP chunk loading for javascript
-/******/
-/******/ 		var installedChunkData = installedChunks[chunkId];
-/******/ 		if(installedChunkData !== 0) { // 0 means "already installed".
-/******/
-/******/ 			// a Promise means "currently loading".
-/******/ 			if(installedChunkData) {
-/******/ 				promises.push(installedChunkData[2]);
-/******/ 			} else {
-/******/ 				// setup Promise in chunk cache
-/******/ 				var promise = new Promise(function(resolve, reject) {
-/******/ 					installedChunkData = installedChunks[chunkId] = [resolve, reject];
-/******/ 				});
-/******/ 				promises.push(installedChunkData[2] = promise);
-/******/
-/******/ 				// start chunk loading
-/******/ 				var script = document.createElement('script');
-/******/ 				var onScriptComplete;
-/******/
-/******/ 				script.charset = 'utf-8';
-/******/ 				script.timeout = 120;
-/******/ 				if (__webpack_require__.nc) {
-/******/ 					script.setAttribute("nonce", __webpack_require__.nc);
-/******/ 				}
-/******/ 				script.src = jsonpScriptSrc(chunkId);
-/******/
-/******/ 				// create error before stack unwound to get useful stacktrace later
-/******/ 				var error = new Error();
-/******/ 				onScriptComplete = function (event) {
-/******/ 					// avoid mem leaks in IE.
-/******/ 					script.onerror = script.onload = null;
-/******/ 					clearTimeout(timeout);
-/******/ 					var chunk = installedChunks[chunkId];
-/******/ 					if(chunk !== 0) {
-/******/ 						if(chunk) {
-/******/ 							var errorType = event && (event.type === 'load' ? 'missing' : event.type);
-/******/ 							var realSrc = event && event.target && event.target.src;
-/******/ 							error.message = 'Loading chunk ' + chunkId + ' failed.\n(' + errorType + ': ' + realSrc + ')';
-/******/ 							error.name = 'ChunkLoadError';
-/******/ 							error.type = errorType;
-/******/ 							error.request = realSrc;
-/******/ 							chunk[1](error);
-/******/ 						}
-/******/ 						installedChunks[chunkId] = undefined;
-/******/ 					}
-/******/ 				};
-/******/ 				var timeout = setTimeout(function(){
-/******/ 					onScriptComplete({ type: 'timeout', target: script });
-/******/ 				}, 120000);
-/******/ 				script.onerror = script.onload = onScriptComplete;
-/******/ 				document.head.appendChild(script);
-/******/ 			}
-/******/ 		}
-/******/ 		return Promise.all(promises);
-/******/ 	};
 /******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
@@ -183,16 +78,6 @@
 /******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "/";
-/******/
-/******/ 	// on error function for async loading
-/******/ 	__webpack_require__.oe = function(err) { console.error(err); throw err; };
-/******/
-/******/ 	var jsonpArray = window["webpackJsonp"] = window["webpackJsonp"] || [];
-/******/ 	var oldJsonpFunction = jsonpArray.push.bind(jsonpArray);
-/******/ 	jsonpArray.push = webpackJsonpCallback;
-/******/ 	jsonpArray = jsonpArray.slice();
-/******/ 	for(var i = 0; i < jsonpArray.length; i++) webpackJsonpCallback(jsonpArray[i]);
-/******/ 	var parentJsonpFunction = oldJsonpFunction;
 /******/
 /******/
 /******/ 	// Load entry module and return exports
@@ -2645,30 +2530,52 @@ var Input = function Input(objData, htmlId) {
         }), "               \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          ");
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
-      } else if (element.inputType === 'FILE') {
-        var _renderHtml2 = "\n      <div class = 'form-group input-group mb-3' id='".concat(element.attribute, "_div'>\n       <div class=\"custom-file\">\n          <input type=\"file\" name=\"").concat(element.attribute, "\" class=\"custom-file-input\" id=").concat(element.attribute, ">\n          <label class=\"custom-file-label\" for=").concat(element.attribute, ">").concat(element.label, "</label>\n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          </div>\n          ");
+      } else if (element.inputType === 'RADIO') {
+        var _renderHtml2 = "\n      <div class = 'form-group' id='".concat(element.attribute, "_div'>\n      <label for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
+          return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
+        }), " \n      </div>      \n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          ");
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
-      } else if (element.type === 'radio') {
-        var _renderHtml3 = "\n      <label> <strong>".concat(element.form.toUpperCase(), "</strong> </label>\n      <div class='form-group col' id='").concat(element.attribute, "_div'>\n         <label for =").concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
-          return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
-        }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>     \n      ");
+      } else if (element.inputType === 'FILE') {
+        var _renderHtml3 = "\n      <div class = 'form-group input-group mb-3' id='".concat(element.attribute, "_div'>\n       <div class=\"custom-file\">\n          <input type=\"file\" name=\"").concat(element.attribute, "\" class=\"custom-file-input\" id=").concat(element.attribute, ">\n          <label class=\"custom-file-label\" for=").concat(element.attribute, ">").concat(element.label, "</label>\n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          </div>\n          ");
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml3);
-      } else if (element.form === '3-col') {
-        var _renderHtml4 = "\n      <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n       <div class = 'form-row' id='").concat(element.form, "_div'>\n       \n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' name='").concat(element.options.attribute[0], "'\n            id='").concat(element.options.attribute[0], "' placeholder='").concat(element.options.placeholder[0], "'>\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control'  \n            id='").concat(element.options.attribute[1], "' name='").concat(element.options.attribute[1], "'\n            placeholder='").concat(element.options.placeholder[1], "'>\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[2], "'>").concat(element.options.label[2], "\n            </label>\n            <input type='").concat(element.options.type[2], "' class='form-control' \n            id='").concat(element.options.attribute[2], "' name='").concat(element.options.attribute[2], "' \n            placeholder='").concat(element.options.placeholder[2], "'>\n         <small id ='").concat(element.options.attribute[2], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[2], "_error class='error text-muted'></small>\n          </div>  \n      </div>");
+      } else if (element.inputType === 'RADIO') {
+        var _renderHtml4 = "\n      <label> <strong>".concat(element.form.toUpperCase(), "</strong> </label>\n      <div class='form-group col' id='").concat(element.attribute, "_div'>\n         <label for =").concat(element.attribute, "> ").concat(element.label.toUpperCase(), ": </label> \n\n      <div class = 'form-check form-check-inline'>\n      ").concat(element.options.map(function (el) {
+          return "\n       <input class='form-check-input' type='radio' name=".concat(element.attribute, " id=").concat(element.attribute, "_").concat(el, " value=").concat(el, ">\n        <label class= 'form-check-label' > ").concat(el, "\n      </label>");
+        }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>     \n      ");
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml4);
-      } else if (element.form === '2-col') {
-        var _renderHtml5 = "\n      <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n       <div class = 'form-row' id='").concat(element.form, "_div'>\n       \n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' \n            id='").concat(element.options.attribute[0], "' \n            placeholder='").concat(element.options.placeholder[0], "'\n            name='").concat(element.options.attribute[0], "'\n            >\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control' \n            id='").concat(element.options.attribute[1], "' \n            placeholder='").concat(element.options.placeholder[1], "'\n            name='").concat(element.options.attribute[1], "'\n            >\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n      </div>");
+      } else if (element.form === '3-col') {
+        var _renderHtml5 = "\n  \n      <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n          <div class = 'form-row ").concat(element.unique, "' id='").concat(element.unique, "_div'>\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' name='").concat(element.options.attribute[0], "'\n            id='").concat(element.options.attribute[0], "' placeholder='").concat(element.options.placeholder[0], "'>\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control'  \n            id='").concat(element.options.attribute[1], "' name='").concat(element.options.attribute[1], "'\n            placeholder='").concat(element.options.placeholder[1], "'>\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[2], "'>").concat(element.options.label[2], "\n            </label>\n            <input type='").concat(element.options.type[2], "' class='form-control' \n            id='").concat(element.options.attribute[2], "' name='").concat(element.options.attribute[2], "' \n            placeholder='").concat(element.options.placeholder[2], "'>\n         <small id ='").concat(element.options.attribute[2], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[2], "_error class='error text-muted'></small>\n          </div>  \n      </div>");
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml5);
+      } else if (element.form === '2-col') {
+        var _renderHtml6 = "\n    \n         <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n          <div class = 'form-row ").concat(element.unique, "' id='").concat(element.unique, "_div'>\n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' \n            id='").concat(element.options.attribute[0], "' \n            placeholder='").concat(element.options.placeholder[0], "'\n            name='").concat(element.options.attribute[0], "'\n            >\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control' \n            id='").concat(element.options.attribute[1], "' \n            placeholder='").concat(element.options.placeholder[1], "'\n            name='").concat(element.options.attribute[1], "'\n            >\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n      </div>");
+
+        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml6);
       }
     });
   } catch (e) {
     console.log(e);
   }
 };
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/hidden.js":
+/*!*************************************************!*\
+  !*** ./resources/asset/js/components/hidden.js ***!
+  \*************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/global.js");
+ // id('spouse_div').style.display="none";
+
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "none";
 
 /***/ }),
 
@@ -2691,6 +2598,32 @@ try {
 } catch (error) {
   console.log(error.message);
 }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/modal/profile.js":
+/*!********************************************************!*\
+  !*** ./resources/asset/js/components/modal/profile.js ***!
+  \********************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+
+
+try {
+  var showModal = function showModal() {
+    return Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('id01').style.display = 'block';
+  };
+
+  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('postMessage').addEventListener('click', showModal);
+} catch (e) {
+  console.log(e.message);
+}
+
+alert('helllllllo');
 
 /***/ }),
 
@@ -2935,6 +2868,28 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
     console.log(e);
   }
 });
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/small-Input.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/small-Input.js ***!
+  \******************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../global */ "./resources/asset/js/global.js");
+
+var maiden = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('motherMaiden_help');
+maiden.innerHTML = "Good to identify your family from mum's side";
+var mobile = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('mobile_help');
+mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809"; // const spouse = id('spouse_help')
+// spouse.innerHTML = 'if single, put single or divorced'
+
+var password = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('password_help');
+password.innerHTML = 'Must be 8-20 characters long.';
 
 /***/ }),
 
@@ -3366,12 +3321,20 @@ var Personal = [{
     type: ['text', 'text', 'text']
   }
 }, {
+  label: "Are you married?",
+  attribute: 'maritalStatus',
+  placeholder: null,
+  type: 'radio',
+  options: ["Yes", "No"],
+  inputType: 'RADIO'
+}, {
   form: '2-col',
+  unique: 'spouse',
   label: "Spouse's Details",
   options: {
     label: ["Spouse's name", "Spouse's mobile"],
     attribute: ['spouseName', 'spouseMobile'],
-    placeholder: ['Leave empty if you have no wife/husband', '23480364168089'],
+    placeholder: ['Leave empty if you have no wife/husband', '23480364168089 or leave empty'],
     type: ['text', 'number']
   }
 }, {
@@ -3564,36 +3527,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./resources/asset/js/global.js");
 /* harmony import */ var _components_register_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/register/index */ "./resources/asset/js/components/register/index.js");
 /* harmony import */ var _components_login_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/login/index */ "./resources/asset/js/components/login/index.js");
-/* harmony import */ var _components_register_processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/register/processForm */ "./resources/asset/js/components/register/processForm.js");
-/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
-/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
-/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
-/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
-/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _components_FilePreview__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/FilePreview */ "./resources/asset/js/components/FilePreview.js");
-/* harmony import */ var _components_organogram__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/organogram */ "./resources/asset/js/components/organogram.js");
-
-
- //import "./components/small-Input"
-
-
-
+/* harmony import */ var _components_small_Input__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js");
+/* harmony import */ var _components_register_processForm__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/processForm */ "./resources/asset/js/components/register/processForm.js");
+/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
+/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var _components_FilePreview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/FilePreview */ "./resources/asset/js/components/FilePreview.js");
+/* harmony import */ var _components_organogram__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/organogram */ "./resources/asset/js/components/organogram.js");
+/* harmony import */ var _components_modal_profile__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/modal/profile */ "./resources/asset/js/components/modal/profile.js");
+/* harmony import */ var _components_hidden__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/hidden */ "./resources/asset/js/components/hidden.js");
 
 
 
 
- // import "./components/modal/profile"
 
-if (Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('profilePage')) {
-  __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! ./components/modal/profile */ "./resources/asset/js/components/modal/profile.js")).then(function (result) {
-    return result;
-  });
-} else if (Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('registration')) {
-  __webpack_require__.e(/*! import() */ 1).then(__webpack_require__.bind(null, /*! ./components/small-Input */ "./resources/asset/js/components/small-Input.js")).then(function (result) {
-    return result;
-  });
-}
+
+
+
+
+
+
+
+ // if (id('profilePage')) {
+//     import("./components/modal/profile")
+//     .then(result => result);
+// } else if (id('registration')) {
+//     import ('./components/small-Input')
+//     .then(result => result)
+// }
 
 /***/ }),
 

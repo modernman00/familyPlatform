@@ -1,5 +1,5 @@
 "use strict";
-export const Personal= [
+export const Personal = [
   {
     form: '3-col',
     label: 'Personal Information:',
@@ -11,12 +11,21 @@ export const Personal= [
     }
   },
   {
+    label: "Are you married?",
+    attribute: 'maritalStatus',
+    placeholder: null,
+    type: 'radio',
+    options: ["Yes", "No"],
+    inputType: 'RADIO'
+  },
+  {
     form: '2-col',
+    unique: 'spouse',
     label: "Spouse's Details",
     options: {
       label: ["Spouse's name", "Spouse's mobile"],
       attribute: ['spouseName', 'spouseMobile'],
-      placeholder: ['Leave empty if you have no wife/husband', '23480364168089'],
+      placeholder: ['Leave empty if you have no wife/husband', '23480364168089 or leave empty'],
       type: ['text', 'number']
     }
   },
@@ -36,7 +45,7 @@ export const Personal= [
     options: {
       label: ["Mother's name", "Mother's mobile", "Mother's maiden name"],
       attribute: ['motherName', 'motherMobile', 'motherMaiden'],
-      placeholder: ['Toyin', '23480364168089',"surname before marriage"],
+      placeholder: ['Toyin', '23480364168089', "surname before marriage"],
       type: ['text', 'number', 'text']
     }
   },

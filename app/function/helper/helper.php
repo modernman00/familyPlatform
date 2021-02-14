@@ -309,7 +309,7 @@ function fileUploadMultiple($fileLocation, $formInputName)
 function fileUpload($fileLocation, $formInputName)
 {
     // UPLOAD PICTURE
-    $fileName = basename($_FILES["$formInputName"]['name']); #the fileName
+    $fileName = basename($_FILES[$formInputName]['name']); #the fileName
 
     if (!$fileName) {
         throw new Exception("No File Name ", 1);
@@ -337,7 +337,7 @@ function fileUpload($fileLocation, $formInputName)
         throw new \Exception("Format must be PNG, JPG, JPEG or GIF", 1);
     }
     if ($size > 10240000) {
-        throw new \Exception("File size must not exceed 1024kb", 1);
+        throw new \Exception("File size is bigger than the required size", 1);
     }
     if (file_exists($fileName)) {
         throw new \Exception("File $fileName already uploaded", 1);

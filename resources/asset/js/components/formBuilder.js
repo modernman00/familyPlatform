@@ -45,6 +45,24 @@ export const Input = (objData, htmlId) => {
            </div>
           `
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
+    } else if (element.inputType === 'RADIO') {
+      const renderHtml = `
+      <div class = 'form-group' id='${element.attribute}_div'>
+      <label for =${element.attribute}> <strong>${element.label.toUpperCase()}</strong> </label>   
+          <div class = 'form-check form-check-inline'>
+      ${element.options.map(el => {
+        return `
+       <input class='form-check-input' type='radio' name=${element.attribute} id=${element.attribute} value=${el}>
+        <label class= 'form-check-label' > ${el}
+      </label>`
+      })
+        } 
+      </div>      
+             <small id ='${element.attribute}_help' class='small text-muted'></small>
+            <small id =${element.attribute}_error class='error text-muted'></small>
+           </div>
+          `
+      document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
     } else if (element.inputType === 'FILE') {
       const renderHtml = `
       <div class = 'form-group input-group mb-3' id='${element.attribute}_div'>
@@ -57,7 +75,7 @@ export const Input = (objData, htmlId) => {
           </div>
           `
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
-    } else if (element.type === 'radio') {
+    } else if (element.inputType === 'RADIO') {
       const renderHtml = `
       <label> <strong>${element.form.toUpperCase()}</strong> </label>
       <div class='form-group col' id='${element.attribute}_div'>
@@ -66,7 +84,7 @@ export const Input = (objData, htmlId) => {
       <div class = 'form-check form-check-inline'>
       ${element.options.map(el => {
         return `
-       <input class='form-check-input' type='radio' name=${element.attribute} id=${element.attribute} value=${el}>
+       <input class='form-check-input' type='radio' name=${element.attribute} id=${element.attribute}_${el} value=${el}>
         <label class= 'form-check-label' > ${el}
       </label>`
       })
@@ -79,9 +97,9 @@ export const Input = (objData, htmlId) => {
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
     } else if (element.form === '3-col') {
       const renderHtml = `
+  
       <label> <strong>${element.label.toUpperCase()}</strong> </label>
-       <div class = 'form-row' id='${element.form}_div'>
-       
+          <div class = 'form-row ${element.unique}' id='${element.unique}_div'>
           <div class='form-group col-md-4'>
             <label for='${element.options.attribute[0]}'>
             ${element.options.label[0]}
@@ -117,9 +135,9 @@ export const Input = (objData, htmlId) => {
       document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
     } else if (element.form === '2-col') {
       const renderHtml = `
-      <label> <strong>${element.label.toUpperCase()}</strong> </label>
-       <div class = 'form-row' id='${element.form}_div'>
-       
+    
+         <label> <strong>${element.label.toUpperCase()}</strong> </label>
+          <div class = 'form-row ${element.unique}' id='${element.unique}_div'>
           <div class='form-group col-md-6'>
             <label for='${element.options.attribute[0]}'>
             ${element.options.label[0]}
