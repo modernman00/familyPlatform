@@ -9,10 +9,8 @@ const formData = new FormHelper(formInputArr);
 
 
 const process = () => {
-
 	// clear error from the form
 	formData.clearError()
-
 	// set the maxlength, check the length of the value, raise error
 	formData.realTimeCheckLen(
 		dataToCheck.maxLength.id,
@@ -91,7 +89,7 @@ id('submit').addEventListener('click', () => {
 
 	} catch (e) {
 
-		console.log(e)
+		console.log(e.message)
 
 	}
 })

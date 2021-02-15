@@ -14,8 +14,10 @@
   
   <link rel="stylesheet" href="/style.css">
   <noscript>
-    <link rel="stylesheet" href="noscript.css" /></noscript>
-      <link rel="icon" type="image/png" sizes="32x32" href=<?php echo e(getenv("IMG_CONTRACT")); ?>>
+    <link rel="stylesheet" href="noscript.css" />
+  </noscript>
+
+  <link rel="icon" type="image/png" sizes="32x32" href=<?php echo e(getenv("IMG_CONTRACT")); ?>>
 
 </head>
 
@@ -37,10 +39,10 @@
           <a class="nav-link" href="/about">About</a>
         </li>
 
-           <li class="nav-item">
+        <li class="nav-item">
           <a class="nav-link" href="/policy">Policy</a>
         </li>
-      
+
         <li class="nav-item">
           <a class="nav-link disabled" href="#">Disabled</a>
         </li>
@@ -62,23 +64,27 @@
 
 
 
-    <?php echo $__env->yieldContent('content'); ?>
+  <?php echo $__env->yieldContent('content'); ?>
 
-    <hr>
-    <footer class="container-fluid text-center">
+  <hr>
+  <footer class="container-fluid text-center">
 
-  <a href="#myPage" title="To Top">
-    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-bar-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd" d="M11.354 5.854a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L8 3.207l2.646 2.647a.5.5 0 0 0 .708 0z"/>
-  <path fill-rule="evenodd" d="M8 10a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-1 0v6.5a.5.5 0 0 0 .5.5zm-4.8 1.6c0-.22.18-.4.4-.4h8.8a.4.4 0 0 1 0 .8H3.6a.4.4 0 0 1-.4-.4z"/>
-</svg> back to top
-  </a>
-  <p>Website developed by Jumoke, Oluwatobi and Olawale Olaogun (daddy)</p>
-</footer>
-  
+    <a href="#myPage" title="To Top">
+      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-bar-up" fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M11.354 5.854a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L8 3.207l2.646 2.647a.5.5 0 0 0 .708 0z" />
+        <path fill-rule="evenodd"
+          d="M8 10a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-1 0v6.5a.5.5 0 0 0 .5.5zm-4.8 1.6c0-.22.18-.4.4-.4h8.8a.4.4 0 0 1 0 .8H3.6a.4.4 0 0 1-.4-.4z" />
+      </svg> back to top
+    </a>
+    <p>Website developed and maintained by Olawale Olaogun </p>
+  </footer>
 
+ 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+   
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
   </script>
@@ -88,7 +94,9 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
   </script>
-  <script src="/index.js"></script>
+
+    <script src="/index.js"></script>
+
 </body>
 
 </html><?php /**PATH /Applications/MAMP/htdocs/familyPlatform/resources/view/base.blade.php ENDPATH**/ ?>

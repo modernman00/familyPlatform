@@ -24,10 +24,19 @@ class Register extends AllFunctionalities
      */
     public function processForm()
     {
-        // printArr($_POST);
+         printArr($_POST);
+         printArr($_FILES);
+
+        // process the image 
+        $profileImage = new ProcessImg;
+        $profileImage->processProfileImage();
+        $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
+        printArr($_SESSION);
+        
         try {
             // $this->tokenCheck('token', '/register');
             $postDataWithId = $this->setId($_POST);
+            //echo $postDataWithId;
             // sanitise
             $data = $this->dataToCheck();
             //    TODO log the error and send to developer
@@ -37,11 +46,7 @@ class Register extends AllFunctionalities
             // create session 
             $_SESSION['id'] = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
-
-            // process the image 
-            $profileImage = new ProcessImg;
-            $profileImage->processProfileImage();
-            $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
+            
             if(!$_SESSION['PROFILE_IMG']) {
                 throw new Exception("Image not captured ", 1);    
             }

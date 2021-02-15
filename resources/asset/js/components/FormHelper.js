@@ -33,12 +33,16 @@ export default class FormHelper {
 
 
                 // check if there is no value
+    
+                let postName = post.name.replace('_', ' ')
+                if (postName == "spouseName" || postName == "spouseMobile") {
+                    post.value = "11"
+                }
 
                 if (post.value === '' || post.value === 'select') {
 
-                    let postName = post.name.replace('_', ' ')
-                    errMsg.innerHTML = `<li>Cannot be left empty</li>`
-                    this.error.push(`<li>Cannot be left empty</li>`)
+                    errMsg.innerHTML = `<li>${postName} cannot be left empty</li>`
+                    this.error.push(`<li>${postName} cannot be left empty</li>`)
 
                 } else if (post.value.match(reg) === null) {
 

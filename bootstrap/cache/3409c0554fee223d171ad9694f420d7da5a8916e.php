@@ -2,9 +2,7 @@
 <?php $__env->startSection('data-page-id', 'registration'); ?>
 <?php $__env->startSection('content'); ?>
 
-
 <div class="styleForm">
-
   <form action="/register" method="POST" class="register" enctype="multipart/form-data">
 
     <?php
@@ -12,28 +10,11 @@
     $_SESSION['token'] = $token;
     ?>
 
-    
-
-    
     <br><br><br>
     <div class="row" id="personal"></div><hr>
-      
-    
-
-    
-  
     <div id="contact"></div><hr>
-
-    
-    
-  
     <div id="work"></div><hr>
-
-   
-    
     <div id="interest"></div><hr>
-  
-    
     <div id="account"></div><hr>
 
     
@@ -42,7 +23,7 @@
       <label class="form-check-label" for="checkbox">By submitting this form, you agree handling your information as
         outlined in our <a href="/privacy"> PRIVACY POLICY</a></label>
     </div>
-
+    
     <!-- Button trigger modal -->
 
     <input type="hidden" id="token" name="token" value=<?php echo e($token); ?>>
@@ -65,4 +46,6 @@
 
 
 <?php $__env->stopSection(); ?>
+
+
 <?php echo $__env->make('base', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /Applications/MAMP/htdocs/familyPlatform/resources/view/registration/register.blade.php ENDPATH**/ ?>

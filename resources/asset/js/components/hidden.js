@@ -1,5 +1,12 @@
-import { id, qSel } from "../global"
+import { id, qSel, log } from "../global"
 
-// id('spouse_div').style.display="none";
+try {
+    // id('spouse_div').style.display="none";
 id('spouse_div').style.display = "none";
+
+alert("it worked")
+id("firstName_help").innerHTML = "checking"
+} catch (error) {
+    log(error.message)
+}
 

@@ -3,6 +3,7 @@ export const Personal = [
   {
     form: '3-col',
     label: 'Personal Information:',
+    unique: "personal",
     options: {
       label: ['First Name', 'Surname', 'Alias'],
       attribute: ['firstName', 'lastName', 'alias'],
@@ -13,10 +14,9 @@ export const Personal = [
   {
     label: "Are you married?",
     attribute: 'maritalStatus',
-    placeholder: null,
-    type: 'radio',
+    type: 'select',
     options: ["Yes", "No"],
-    inputType: 'RADIO'
+    inputType: 'SELECT'
   },
   {
     form: '2-col',
@@ -25,12 +25,13 @@ export const Personal = [
     options: {
       label: ["Spouse's name", "Spouse's mobile"],
       attribute: ['spouseName', 'spouseMobile'],
-      placeholder: ['Leave empty if you have no wife/husband', '23480364168089 or leave empty'],
+      placeholder: ["wife/husband's fullname", '23480364168089'],
       type: ['text', 'number']
     }
   },
   {
     form: '2-col',
+    unique: 'father',
     label: "Father's Details",
     options: {
       label: ["Father's name", "Father's mobile"],
@@ -42,6 +43,7 @@ export const Personal = [
   {
     form: '3-col',
     label: "Mother's Details",
+    unique: "mother",
     options: {
       label: ["Mother's name", "Mother's mobile", "Mother's maiden name"],
       attribute: ['motherName', 'motherMobile', 'motherMaiden'],
@@ -52,7 +54,6 @@ export const Personal = [
   {
     label: "Number of children",
     attribute: 'kids',
-    placeholder: null,
     type: 'select',
     options: [0, 1, 2, 3, 4, 5, 6],
     inputType: 'SELECT'
@@ -60,7 +61,6 @@ export const Personal = [
   {
     label: "Gender",
     attribute: 'gender',
-    placeholder: null,
     type: 'select',
     options: ['Male', 'Female'],
     inputType: 'SELECT'
@@ -68,7 +68,6 @@ export const Personal = [
   {
     label: "Number of siblings (Brothers/Sisters)",
     attribute: 'noSiblings',
-    placeholder: null,
     type: 'select',
     options: [0, 1, 2, 3, 4, 5, 6],
     inputType: 'SELECT'
@@ -76,7 +75,6 @@ export const Personal = [
   {
     label: "Please, upload your picture",
     attribute: 'profileImage',
-    placeholder: null,
     type: 'file',
     inputType: 'FILE'
 
@@ -84,6 +82,7 @@ export const Personal = [
   {
     form: '3-col',
     label: 'Date of Birth:',
+    unique: "birth",
     options: {
       label: ['Day', 'Month', 'Year'],
       attribute: ['day', 'month', 'year'],
@@ -91,19 +90,5 @@ export const Personal = [
       type: ['number', 'text', 'number']
     }
   }
-  // {
-  //   form: '3_col_select',
-  //   label: 'Other details:',
-  //   options: {
-  //     label: ['Gender', 'Siblings', 'Children'],
-  //     attribute: ['gender', 'noSiblings', 'kids'],
-  //     placeholder: ['15', 'July', '1982'],
-  //     selectOption1: ['male', 'female'],
-  //     selectOption2: [1, 2, 3, 4, 5, 6],
-  //     selectOption3: [1, 2, 3, 4, 5, 6],
-  //   }
-  // }
-
-
 ]
 

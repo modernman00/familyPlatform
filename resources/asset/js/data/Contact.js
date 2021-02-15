@@ -12,6 +12,7 @@ export const Contact = [
 
    {
       form: '2-col',
+      unique: 'region',
       label: "Area Code and Region",
       options: {
          label: ["Postcode /zip code/area code", "Region / State / District"],
@@ -22,6 +23,7 @@ export const Contact = [
    },
     {
       form: '2-col',
+      unique: "contact",
       label: "How to reach you",
       options: {
          label: ["Email", "Mobile Number"],
@@ -30,19 +32,6 @@ export const Contact = [
          type: ['email', 'number']
       }
    },
-
-   // {
-   //    label: 'Postcode /zip code/area code',
-   //    attribute: 'postcode',
-   //    placeholder: 'SN5 5DE',
-   //    type: 'text'
-   // },
-   // {
-   //    label: 'Region / State / District',
-   //    attribute: 'region',
-   //    placeholder: 'London / Lagos state / New York',
-   //    type: 'text'
-   // },
    {
       label: 'Country',
       attribute: 'country',
