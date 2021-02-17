@@ -72,13 +72,12 @@ class VerifyPassword extends AllFunctionalities
         }
     }
 
-
     public function passMgt()
     {
         try {
-                $this->hashPassword($this->dbPass, $this->inputPass);
-                $result = $this->updateTableWithNewPsw($this->id, $this->table);
-                return $result;
+            $this->hashPassword($this->dbPass, $this->inputPass);
+            $result = $this->updateTableWithNewPsw($this->id, $this->table);
+            return $result;
     
         } catch (\Exception $e) {
             showError($e);

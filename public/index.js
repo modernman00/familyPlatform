@@ -2254,25 +2254,27 @@ var FormHelper = /*#__PURE__*/function () {
             var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
 
 
-            if (post.type == 'submit' || post.name == 'token') {
+            if (post.type == 'submit' || post.name == 'token' || postName == "spouseName" || postName == "spouseMobile") {
               continue;
             } // check if there is no value
 
 
             var postName = post.name.replace('_', ' ');
 
-            if (postName == "spouseName" || postName == "spouseMobile") {
-              post.value = "11";
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile") {
+              if (post.value === "") {
+                post.value = "11";
+              }
             }
 
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "<li>".concat(postName, " cannot be left empty</li>");
+              errMsg.innerHTML = "<li style=color:'red';>".concat(postName, " cannot be left empty</li>");
 
-              _this.error.push("<li>".concat(postName, " cannot be left empty</li>"));
+              _this.error.push("<li style=color:'red';>".concat(postName, " cannot be left empty</li>"));
             } else if (post.value.match(reg) === null) {
-              errMsg.innerHTML = "<li> only letters and numbers are allowed<li>";
+              errMsg.innerHTML = "<li style=color:'red';> only letters and numbers are allowed<li>";
 
-              _this.error.push("<li> only letters and numbers are allowed<li>");
+              _this.error.push("<li style=color:'red';> only letters and numbers are allowed<li>");
             } else {
               _this.result = 1;
             }
@@ -2288,7 +2290,7 @@ var FormHelper = /*#__PURE__*/function () {
     key: "emailVal",
     value: function emailVal() {
       var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
-      var msg = "<li> Please enter a valid email</li>";
+      var msg = "<li style=color:'red';> Please enter a valid email</li>";
       var email = this.id('email').value;
 
       if (email.match(emailExp) === null) {
@@ -2886,7 +2888,7 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
       alert('To continue, you need to agree to the Olaoguns handling your information as outlined in our privacy policy');
     }
   } catch (e) {
-    console.log(e.message);
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["showError"])(e);
   }
 });
 

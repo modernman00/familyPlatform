@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log } from '../../global';
+import { id, log , showError} from '../../global';
 import { dataToCheck } from "../../data/dataToCheck";
 
 const formInput = document.querySelectorAll('.register');
@@ -89,7 +89,7 @@ id('submit').addEventListener('click', () => {
 
 	} catch (e) {
 
-		console.log(e.message)
+		showError(e)
 
 	}
 })

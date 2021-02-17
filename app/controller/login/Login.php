@@ -86,9 +86,10 @@ class Login extends Base
         $select = new Select;
         $getAdminCode = getenv('CODING');
         $outcome = $select->select_from_double('account', 'type', $getAdminCode, 'email', $sanitisedData['email']);
-
+        
         if (!$outcome) throw new Exception("Your input to code is not recognised");
-        // if ($outcome[0]['type'] !== '11') throw new Exception("Login failed - we do not recognise you");
+        
+        // if ($outcome[0]['type'] !== '11') throw new Exception("Login failed - we do not recognised you");
         // setcookie('email', $data['email'], time() + (86400 * 30), "/");
         loggedDetection("http://olaogun.dev.com/lasu");
         session_regenerate_id();

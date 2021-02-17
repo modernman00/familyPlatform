@@ -3,14 +3,16 @@
 namespace App\controller\register;
 
 use App\classes\{
-    AllFunctionalities, ProcessImg
+    AllFunctionalities,
+    ProcessImg
     // Transaction as Transaction
 };
 use Exception;
+
 class Register extends AllFunctionalities
 {
     private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
-    
+
     public function index()
     {
         view('registration/register');
@@ -24,17 +26,14 @@ class Register extends AllFunctionalities
      */
     public function processForm()
     {
-         printArr($_POST);
-         printArr($_FILES);
 
-        // process the image 
-        $profileImage = new ProcessImg;
-        $profileImage->processProfileImage();
-        $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
-        printArr($_SESSION);
-        
         try {
-            // $this->tokenCheck('token', '/register');
+            $this->tokenCheck('token', '/register');
+            // process the image 
+            $profileImage = new ProcessImg;
+            $profileImage->processProfileImage();
+            $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
+
             $postDataWithId = $this->setId($_POST);
             //echo $postDataWithId;
             // sanitise
@@ -46,11 +45,11 @@ class Register extends AllFunctionalities
             // create session 
             $_SESSION['id'] = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
-            
-            if(!$_SESSION['PROFILE_IMG']) {
-                throw new Exception("Image not captured ", 1);    
+
+            if (!$_SESSION['PROFILE_IMG']) {
+                throw new Exception("Image not captured ", 1);
             }
-            
+
             // submit using function from insert
             $countTable = count($this->table);
             for ($i = 0; $i < $countTable; $i++) {
@@ -93,7 +92,7 @@ class Register extends AllFunctionalities
     private function process_kid_siblings($type, $typeCount, $data)
     {
         try {
-            for ($i = 1; $i < $typeCount; $i++) {
+            for ($i = 1; $i <= $typeCount; $i++) {
                 $dataArr = [
                     "{$type}_name" => $data["{$type}_name$i"],
                     "{$type}_email" => $data["{$type}_email$i"],
@@ -207,5 +206,4 @@ class Register extends AllFunctionalities
         $postData['id'] = $id;
         return $postData;
     }
-
 }
