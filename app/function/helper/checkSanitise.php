@@ -4,7 +4,8 @@ use App\classes\{
     Sanitise,
     Select,
     VerifyPassword,
-    Update
+    Update,
+    AllFunctionalities
 };
 
 /**
@@ -16,18 +17,36 @@ use App\classes\{
  */
 function checkPassword($inputData, $databaseData)
 {
-   $passwordCheck = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
+    try {
+        $textPassword = $inputData['password'];
+        $dbPassword = $databaseData['password'];
+        $id = $databaseData['id'];
+        $options = array('cost' => 15);
 
-    $passSuccess = $passwordCheck->passMgt();
-    if (!$passSuccess) {
-        throw new Exception("<h1>Password could not be verified</h1>");
-    }
-    return $passSuccess;
+        if (password_verify($textPassword, $dbPassword) === false) {
+            $error = 'There is a problem with your credential!';
+            echo json_encode (['error'=> $error]);
+            throw new Exception("<h1>There is a problem with your login credential! $textPassword ---- $dbPassword</h1>");
 
-    // $pass = new VerifyPassword($inputData['password'], $databaseData['password'], $databaseData['id'], 'account');
-    // return $pass->passMgt();
+        } 
+            if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
+        // If so, create a new hash, and replace the old one
+            $newHash = password_hash( $textPassword, PASSWORD_DEFAULT, $options);
+
+             $data = ['password' => $newHash, 'id' => $id];
+            $passUpdate = new AllFunctionalities;
+            return $passUpdate->updateMultiplePOST($data, "account", 'id');
+            }
+
+           
+    
+    } catch (\Exception $e) {
+        showError($e);
+        } catch (\PDOException $e) {
+            showError($e);
+        }
 }
-
+ 
 /**
  * find email from login table and output data
  *

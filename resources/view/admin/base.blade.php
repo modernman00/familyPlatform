@@ -76,7 +76,7 @@
 
                 @endphp
 
-                <a href="/admin/newCustomers" class="navbar-item"  >
+                <a href="/admin/reviewApps" class="navbar-item"  >
                     Application(<span id='newApp'>{{ $result }}</span>)
                 </a>
 

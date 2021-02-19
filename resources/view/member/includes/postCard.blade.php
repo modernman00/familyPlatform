@@ -9,8 +9,8 @@
   </span>
 
   {{--  POST NAME  --}}
-  <h4 id="fullName"> {{ $allData['fullName'] }} 
-  </h4>
+  <h5 id="fullName"> {{ $allData['fullName'] }} 
+  </h5>
   {{-- 
         <canvas id="user-icon" width="25" height="25"></canvas> --}}
 
@@ -21,7 +21,9 @@
   <div class="w3-row-padding" style="margin:0 -16px">
 
     @for ($i = 0; $allData["post_img$i"]; $i++) <div class="w3-half">
+
       <img src="/img/post/{{ $allData["post_img$i"] }}" style="width:100%" alt="images{{ $i }}" class="w3-margin-bottom w3-hover-sepia" id="postImage{{ $i }}">
+      
     </div>
     @endfor
 <br>

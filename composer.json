@@ -31,7 +31,8 @@
         "altorouter/altorouter": "^2.0",
         "philo/laravel-blade": "^3.1",
         "filp/whoops": "^2.7",
-          "phpmailer/phpmailer": "^6.1"
+          "phpmailer/phpmailer": "^6.1",
+        "firebase/php-jwt": "^5.2"
 
 
     },

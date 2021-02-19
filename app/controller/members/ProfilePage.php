@@ -14,8 +14,6 @@ use App\classes\{
 
 class ProfilePage extends ProcessImg
 {
-    private $getCommentData;
-    private $setCommentData;
     private $data;
     private $allPostData;
     private $allCommentData;
@@ -55,6 +53,8 @@ class ProfilePage extends ProcessImg
             $_SESSION['lName'] = $this->memberData['lastName'];
             $_SESSION['currentTime'] = time();
 
+            // printArr($this->allPostData);
+
             view('member/profile3', [
                 'data' => $this->memberData, 'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
@@ -70,7 +70,7 @@ class ProfilePage extends ProcessImg
     private function processPostData()
     {
         try {
-            printArr($_POST);
+            // printArr($_POST);
             if (!$_POST) {
                 throw new \Exception("There was no post data", 1);
             }
@@ -82,6 +82,7 @@ class ProfilePage extends ProcessImg
             // check if there are images in the post
             if ($_FILES) {
                 if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
+
                     fileUploadMultiple("img/post/", 'post_img');
 
                     // create a file path name for the database

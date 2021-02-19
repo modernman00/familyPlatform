@@ -52,7 +52,7 @@ class Login extends Base
             $data = useEmailToFindData($sanitisedData);
 
             checkPassword($sanitisedData, $data);
-            // // //4. control for admin login
+            //4. control for admin login
             $detectIfAdminOrCustomer = $_SESSION['loginType'] ?? 0;
 
             if ($detectIfAdminOrCustomer === "/lasu") {

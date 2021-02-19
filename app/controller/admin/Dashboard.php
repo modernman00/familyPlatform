@@ -8,7 +8,7 @@ class Dashboard extends AllFunctionalities {
 
     function index ()
     {
-        view ('admin/dashboard');
+        view ('admin/base');
     }
 
 

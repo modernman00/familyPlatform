@@ -2,8 +2,6 @@
 
 use Philo\Blade\Blade;
 use voku\helper\Paginator;
-use App\model\EmailData;
-
 
 function view($path, array $data = [])
 {
@@ -11,7 +9,7 @@ function view($path, array $data = [])
     //2nd param array = any data that we want to pass to the view
     $view = __DIR__ . "/../../../resources/view";
     $cache = __DIR__ . "/../../../bootstrap/cache";
-    $blade = new Blade($view, $cache);
+    $blade = new Blade($cache, $view);
     // 2 parameters
     //requires a path to the view -> folder where views are located
     // 2nd is the path to a cache directory -> cache under bootstrap
@@ -260,8 +258,6 @@ function sendText($message, $numbers)
 
 // return email once logged in
 
-
-
 /**
  * fileLocation: where you want to save the file
  * formInputName : the input name of the $_file
@@ -270,12 +266,14 @@ function fileUploadMultiple($fileLocation, $formInputName)
 {
     // Count total files
     $countFiles = count($_FILES[$formInputName]['name']);
+
     // Looping all files
     for ($i = 0; $i < $countFiles; $i++) {
-        $fileName = $_FILES[$formInputName]['name'][$i];
+        $fileName = basename($_FILES[$formInputName]['name'][$i]);
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        $fileLocation = $fileLocation . $fileName;
+       // $fileLocation = $fileLocation . $fileName;
+
         // sanitise the file
         $picError = "";
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -283,16 +281,20 @@ function fileUploadMultiple($fileLocation, $formInputName)
         if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
             $picError .= 'Format must be PNG, JPG, or GIF';
         }
+
         if ($fileSize > 102400000) {
             $picError .= 'File size must not exceed 10240kb';
+            throw new Exception("Error Processing Request - post images - $picError", 1);
         }
         if (file_exists($fileName)) {
             $picError .= "File $fileName already uploaded";
+            throw new Exception("Error Processing Request - post images - $picError", 1);
         }
         if ($picError) {
             throw new Exception("Error Processing Request - post images - $picError", 1);
         }
-        $uploadFile = move_uploaded_file($fileTemp, $fileLocation);
+
+        $uploadFile = move_uploaded_file($fileTemp, $fileLocation .$fileName);
 
         if ($uploadFile) {
             $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
@@ -323,7 +325,7 @@ function fileUpload($fileLocation, $formInputName)
 
     # the file temp name
     $size = $_FILES[$formInputName]['size'];  # the file size
-     if (!$size) {
+    if (!$size) {
         throw new Exception("File has no size", 1);
     }
 

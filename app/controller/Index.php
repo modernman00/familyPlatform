@@ -20,5 +20,6 @@ class Index extends Base
     {
         view('launch');
     }
+
 }
 

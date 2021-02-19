@@ -13,8 +13,6 @@
 
   <br>
 
-
-
   {{-- POST MESSAGE --}}
    <div class="w3-col m7">
       @include('member/includes/postMessage')
