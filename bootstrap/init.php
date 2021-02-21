@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types =1);
+
 require __DIR__ ."/../app/config.php";
 if(!session_start()){
     session_start();

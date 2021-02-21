@@ -8,4 +8,9 @@ class About {
     {
        view('about');
     }
+
+    function testing()
+    {
+        echo "this testing worked";
+    }
 }
