@@ -13,7 +13,9 @@ class Search extends Base
             $hint =  checkInput($_REQUEST['hint']);  
             $attribute = checkInput($_GET['attribute']);
             $subject = checkInput($_GET['subject']);
- 
+            $d = 3;
+            $ans = $d + 4;
+            echo $ans;
             $hint = strtolower($hint);
             $msg1 = "Good news! your $subject is already registered on the platform";
 

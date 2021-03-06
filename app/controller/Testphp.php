@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use App\controller\Base;
-use App\controller\About;
+use App\controller\{Base, About};
 
 class Testphp extends Base
 {
 
-    function index()
+    public function index()
     {
-        // const BR = ;
-        define("BR", "<br>");
+    //     // const BR = ;
+       define("BR", "<br>");
         // php7
         $number = [1, 2, 3, 3, 4, 5, 6];
         $num = [10, 20, 30, 30, 40, 50, 60];
@@ -39,9 +38,9 @@ class Testphp extends Base
 
         // php8
 
-        // $even = array_filter(array: $number, func: $cBack);
+       // $even = array_filter(input: $number, callback: $cBack);
 
-        // echo $point;
+        echo $point;
 
         $combined = [...$number, ...$name, 23, "james"];
 
@@ -106,13 +105,12 @@ class Testphp extends Base
 
         echo namedArg( y:5, xi: 10);
 
-        // 
+    //     // 
 
         $_SESSION['NAME'] = "Olawale";
         $_SESSION['EMAIL']= "wale@yahoo.com";
 
         $_SESSION['DATE'] ??= "15TH JULY";
-        echo BR;
         echo $_SESSION['DATE'];
 
         echo \str_contains('we are doing well', 'well');
@@ -128,7 +126,14 @@ class Testphp extends Base
 
         print_r(\realpath_cache_size());
 
-        // echo phpinfo();
+        for($x = 0; $x < 4; $x++) {
+            echo " this is loop $x".BR;
+        }
+
+
+    // echo phpinfo();
+    // var_dump(php_ini_loaded_file(), php_ini_scanned_files());
+    //echo xdebug_info();
 
    
 
