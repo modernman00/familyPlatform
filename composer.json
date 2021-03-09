@@ -32,13 +32,13 @@
         "philo/laravel-blade": "^3.1",
         "filp/whoops": "^2.7",
           "phpmailer/phpmailer": "^6.1",
-        "firebase/php-jwt": "^5.2"
-
-
+        "firebase/php-jwt": "^5.2",
+        "roave/security-advisories": "dev-master"
     },
     
     "require-dev": {
-        "phpmd/phpmd" : "@stable"
+        "phpmd/phpmd" : "@stable",
+        "vimeo/psalm": "^4.6"
     },
 
 	 "config": {

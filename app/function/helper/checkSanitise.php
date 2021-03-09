@@ -47,14 +47,15 @@ function checkPassword($inputData, $databaseData)
         }
 }
  
-/**
- * find email from login table and output data
- *
- * @param [type] $inputData form data as a array $inputData['email']
- *
- * @return void
- */
-function useEmailToFindData($inputData)
+
+
+ /**
+  * 
+  * @param mixed $inputData form data as a array $inputData['email']
+  * @return mixed 
+  * @throws \Exception 
+  */
+function useEmailToFindData($inputData) : array
 {
     var_dump($inputData['email']);
     $select = new Select;

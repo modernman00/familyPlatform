@@ -63,8 +63,7 @@ class VerifyPassword extends AllFunctionalities
             'id' => $this->id
         ];
         // update the database
-        $outcome = $this->updateMultiplePOST($data, $this->table, 'id');
+        return $this->updateMultiplePOST($data, $this->table, 'id');
 
-        return $outcome;
     }
 }

@@ -48,22 +48,24 @@ function sendEmailSelf()
         sendEmail($email, $name, $var['subject'], $emailContent, $file, $filename);
   }
 
-  /**
-   * 
-   * @param mixed $viewPath 
-   * @param mixed $data 
-   * @param mixed $subject 
-   * @return void 
-   */
+/**
+ * 
+ * @param mixed $viewPath 
+ * @param mixed $data 
+ * @param mixed $subject 
+ * @param mixed $file 
+ * @param mixed $fileName 
+ * @return array 
+ */
 
-  function genEmailArray($viewPath, $data, $subject, $file, $fileName)
+  function genEmailArray($viewPath, $data, $subject, $file, $fileName) : array
   {
-      $genEmailData = [
+      return [
             'viewPath' => $viewPath, 
             'data'=> $data, 
             'subject'=> $subject,
             'file' => $file,
             'fileName' => $fileName
         ];
-        return $genEmailData;
+
   }

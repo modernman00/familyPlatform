@@ -40,7 +40,7 @@ class Forgot extends Pass
       }catch(\Throwable $th){
         showError($th);
       } catch (\Exception $e) {
-          showError($th);
+          showError($e);
       }
     }
 }

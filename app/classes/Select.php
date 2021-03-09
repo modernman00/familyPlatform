@@ -28,7 +28,7 @@ class Select extends Db
 
         } catch (\PDOException $e) {
             showError($e);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
            showError($e);
         }
        
