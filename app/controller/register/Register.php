@@ -34,12 +34,12 @@ class Register extends AllFunctionalities
             $profileImage->processProfileImage();
             $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
 
-            $postDataWithId = $this->setId($_POST);
-            //echo $postDataWithId;
+            $generateId = $this->setId($_POST, "firstName", 'account');
+            //echo $generateId;
             // sanitise
             $data = $this->dataToCheck();
             //    TODO log the error and send to developer
-            $cleanData = getSanitisedInputData($postDataWithId, $data);
+            $cleanData = getSanitisedInputData($generateId, $data);
             $tableData = $this->tableData($cleanData);
             // db table
             // create session 
@@ -76,9 +76,8 @@ class Register extends AllFunctionalities
             return view('registration/nextStep');
         } catch (\Throwable $th) {
             // $Transaction->rollback();
+            
             showError($th);
-        } catch (Exception $e) {
-            showError($e);
         }
     }
 
@@ -186,22 +185,20 @@ class Register extends AllFunctionalities
         ];
     }
 
-    private function setId($postData)
+    private function setId(array $postData, string|int $name, string $table)
     {
-        // CREATE AN ID FOR THE APPLICATION
-        $customerFirstName = "";
-        if (isset($postData['firstName'])) {
-            $customerFirstName = checkInput($postData['firstName']);
-        }
-        $name = preg_replace('/[^A-Za-z ]/', '', $customerFirstName);
+
+        $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Info not provided");
+
+        $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName);
         $id = random_int(1000, 900000);
-        $id .= strtoupper($name);
+        $id .= strtoupper($idName);
 
         //check if the reference number exist
-        $check_for_id = $this->select_count('personal', 'id', $id);
+        $check_for_id = $this->select_count($table, 'id', $id);
         if ($check_for_id >= 1) {
             $id = (random_int(900001, 999999));
-            $id .= strtoupper($name);
+            $id .= strtoupper($idName);
         }
         $postData['id'] = $id;
         return $postData;

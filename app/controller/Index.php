@@ -6,7 +6,7 @@ use App\controller\Base;
 
 class Index extends Base
 {
-    function index()
+    public function index()
     {
         view('index');
     }

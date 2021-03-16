@@ -1,5 +1,6 @@
 <?php
 
+use DateTime;
 use Philo\Blade\Blade;
 use voku\helper\Paginator;
 
@@ -53,29 +54,6 @@ function replace_whitespace($string)
     return $string;
 }
 
-// pagination function
-
-function pagination($recordNo, $recordTotal, $tableName, $model)
-{
-    // no of record we want to show
-    // argument
-    //
-    // create a new object
-    $categories = [];
-    $pages = new Paginator($recordNo, 'p');
-    $pages->set_total($recordTotal);
-    //if using a database you limit the records by placing $pages->get_limit() in your query, this will limit the number of records
-    $data = Capsule::select("SELECT * FROM $tableName ORDER BY created_at DESC" . $pages->get_limit());
-
-
-    // by default the page_links method created links starting with ? this can be changed by passing in a parameter to the method:
-    // The method also allows you to pass in extra data such as a series of GET's
-
-    $categories = $model->transform($data);
-
-
-    return [$categories, $pages->page_links()];
-}
 
 function number2word(int $number)
 {
@@ -88,40 +66,6 @@ function number2word(int $number)
     } catch (TypeError $e) {
         echo $e->getMessage() . "\n";
     }
-}
-
-function checkInput($data)
-{
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = strip_tags($data);
-    $data = htmlentities($data);
-    $data = preg_replace('/[^0-9A-Za-z.@-]/', ' ', $data);
-    return $data;
-}
-
-function checkInputImage($data)
-{
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = strip_tags($data);
-    $data = htmlentities($data);
-    $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
-    return $data;
-}
-
-function checkInput_email($data)
-{
-
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = strip_tags($data);
-    $data = htmlentities($data);
-    $data = filter_var($data, FILTER_SANITIZE_EMAIL);
-    return $data;
 }
 
 
@@ -226,6 +170,7 @@ function showError($th)
     echo "Error File- " . $th->getFile();
     echo "<br>";
     echo "<br>";
+    return json_encode(['Error_Message' => $th->getMessage()]);
 }
 
 

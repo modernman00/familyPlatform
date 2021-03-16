@@ -9,7 +9,7 @@ use App\classes\Db;
 
 class AllFunctionalities extends Db
 {
-    private $des = 'referral';
+
     public function submitForm($table, $field)
     {
         try {
@@ -28,12 +28,9 @@ class AllFunctionalities extends Db
             foreach ($field as $keys => $values) {
                 $query->bindValue(":$keys", $values);
             }
-            $outcome = $query->execute();
-            if (!$outcome) {
-                throw new Exception("Not able to execute data", 1);
-            }
+            return $query->execute();
         } catch (\PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
             echo $e->getLine();
         } catch (\Throwable $th) {
             echo $th->getMessage();
@@ -48,10 +45,9 @@ class AllFunctionalities extends Db
             $query = "SELECT * FROM $de WHERE $dev > ? AND $dev2 = ?";
             $result = $this->connect()->prepare($query);
             $result->execute([$from, $from2]);
-            $rowCount = $result->rowCount();
-            return $rowCount;
+            return $result->rowCount();
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -61,10 +57,9 @@ class AllFunctionalities extends Db
             $query = "SELECT * FROM $de WHERE $col[0] = ? AND $col[1] = ?";
             $result = $this->connect()->prepare($query);
             $result->execute([$value[0], $value[1]]);
-            $rowCount = $result->rowCount();
-            return $rowCount;
+            return $result->rowCount();
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -74,10 +69,9 @@ class AllFunctionalities extends Db
             $query = "SELECT * FROM $de WHERE $dev = ?";
             $result = $this->connect()->prepare($query);
             $result->execute([$from]);
-            $rowCount = $result->rowCount();
-            return $rowCount;
+            return $result->rowCount();
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -89,10 +83,10 @@ class AllFunctionalities extends Db
             $query = "SELECT DISTINCT $firstselect, $secondselect FROM $from";
             $result = $this->connect()->prepare($query);
             $result->execute();
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -103,10 +97,10 @@ class AllFunctionalities extends Db
         try {
             $query = "DELETE * FROM $de WHERE $dev = ? LIMIT 1";
             $result = $this->connect()->prepare($query);
-            $outcome = $result->execute([$from]);
-            return $outcome;
+            return $result->execute([$from]);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -119,11 +113,12 @@ class AllFunctionalities extends Db
             $query = "DELETE FROM $de WHERE $dev = ? LIMIT 1";
             $result = $this->connect()->prepare($query);
             $outcome = $result->execute([$from]);
+    
             if ($outcome) {
                 header("Location: $redirect");
             }
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -131,7 +126,6 @@ class AllFunctionalities extends Db
     public function deleteUpdate($table, $datetime, $id, $id_ans, $redirect)
     {
         try {
-            // $datetime = date('Y-m-d h:i:s');
             $query = "UPDATE $table SET deleted_at =? , status ='deleted' WHERE $id = ? LIMIT 1";
             $result = $this->connect()->prepare($query);
             $outcome = $result->execute([$datetime, $id_ans]);
@@ -139,7 +133,7 @@ class AllFunctionalities extends Db
                 header("Location: $redirect");
             }
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
     // be careful with this function -> didnt work on the last project -> check carefully before USE.
@@ -149,13 +143,12 @@ class AllFunctionalities extends Db
 
         try {
             $query = "SELECT * FROM $table INNER JOIN $table2 ON $table2.$para = $table.$para";
-            // $query ="SELECT $table.*, $table.* INNER JOIN $table2 ON $table.$para = $table2.$para";
             $result = $this->connect()->prepare($query);
             $result->execute();
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -166,10 +159,10 @@ class AllFunctionalities extends Db
             $query = "SELECT * FROM $table ORDER BY date_created DESC";
             $result = $this->connect()->prepare($query);
             $result->execute();
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -179,10 +172,9 @@ class AllFunctionalities extends Db
 
         try {
             $query = "SELECT COUNT(*) FROM $table";
-            $result = $this->connect()->query($query)->fetchColumn();
-            return $result;
+            return $this->connect()->query($query)->fetchColumn();
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -197,10 +189,10 @@ class AllFunctionalities extends Db
             $query = "SELECT $column FROM $table";
             $result = $this->connect()->prepare($query);
             $result->execute();
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -211,10 +203,10 @@ class AllFunctionalities extends Db
             $query = "SELECT * FROM $table INNER JOIN $table2 ON $table.$para = $table2.$para";
             $result = $this->connect()->prepare($query);
             $result->execute();
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -223,13 +215,11 @@ class AllFunctionalities extends Db
 
         try {
             $query = "SELECT * FROM $table INNER JOIN $table2 ON $table2.$para = $table.$para WHERE $table.$para = ?";
-            // $query ="SELECT $table.*, $table.* INNER JOIN $table2 ON $table.$para = $table2.$para";
             $result = $this->connect()->prepare($query);
             $result->execute([$ref]);
-            $outcome = $result->fetchAll(PDO::FETCH_ASSOC);
-            return $outcome;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -249,7 +239,7 @@ class AllFunctionalities extends Db
                 return $data; //this is the data array
             }
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -259,10 +249,9 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev = ?";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
@@ -272,10 +261,9 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev = ? ORDER BY $orderBy $direction LIMIT $limit";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
@@ -285,10 +273,10 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev != ? ORDER BY id DESC";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
+            
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
@@ -298,10 +286,10 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev != ? AND $dev != ? AND $dev != ? ORDER BY id DESC LIMIT $limit OFFSET $offset ";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from, $from2, $from3]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
+            
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
@@ -311,10 +299,10 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev > ?";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
+            
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -324,10 +312,10 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev > ? AND $dev2 = ?";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from, $from2]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
+            
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
@@ -337,88 +325,23 @@ class AllFunctionalities extends Db
             $sql = "SELECT * FROM $de WHERE $dev > ? OR $dev2 = ?";
             $result = $this->connect()->prepare($sql);
             $result->execute([$from, $from2]);
-            $outcome = $result->fetchAll();
-            return $outcome;
+            return $result->fetchAll();
+            
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 
-    public function select_Or($de, $from)
-    {
-        try {
-            $sql = "SELECT * FROM $de WHERE email = ? OR username = ?";
-            $result = $this->connect()->prepare($sql);
-            $result->execute([$from, $from]);
-            $outcome = $result->fetchAll();
-            return $outcome;
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-    }
-
-    public function select_Or_Count($de, $from)
-    {
-        try {
-            $sql = "SELECT * FROM $de WHERE email = ? OR username = ?";
-            $result = $this->connect()->prepare($sql);
-            $result->execute([$from, $from]);
-            $rowCount = $result->rowCount();
-            return $rowCount;
-        } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
-        }
-    }
-
-
-
-    public function select_from_double($de, $dev, $from, $dev2, $from2)
-    {
-        $sql = "SELECT * FROM $de WHERE $dev = ? OR code = ?";
-        $result = $this->connect()->prepare($sql);
-        $result->execute([$from, $from2]);
-        //$outcome = $result->fetchAll();
-        $columnCount = $result->fetchColumn();
-        return $columnCount;
-        // if($columnCount >0){
-        //   return "You have already registered";
-        // }
-        // else{
-
-        //   $sql = "SELECT * FROM $de WHERE $dev = ?";
-        // $result = $this->connect()->prepare($sql);
-        // $result->execute([$from]);
-        // $columnCount = $result->fetchColumn();
-        // if($columnCount >0){
-        //   return "You have already registered";
-        // }
-        // }
-        //return $outcome;
-    }
-
-
-    public function editForm($id, $name, $city, $designation)
-    {
-        try {
-            $sql = "UPDATE crud SET name=?, city=?, designation=? WHERE id = ?";
-            $stmt = $this->connect()->prepare($sql)->execute([$name, $city, $designation, $id]);
-            if ($stmt) {
-                header('Location: indextwo.php');
-            }
-        } catch (PDOException $e) {
-            echo $e->getMessage();
-        }
-    }
 
     public function update($table, $column, $column_ans, $identifier, $identifier_ans)
     {
         try {
             $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
             $result = $this->connect()->prepare($query);
-            $result->execute([$column_ans, $identifier_ans]);
-            return $result;
+            return $result->execute([$column_ans, $identifier_ans]);
+    
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -427,10 +350,10 @@ class AllFunctionalities extends Db
         try {
             $query = "UPDATE $table SET $column =? WHERE $identifier1 = ? OR $identifier2 = ?";
             $result = $this->connect()->prepare($query);
-            $result->execute([$column_ans, $identifier_ans, $identifier_ans]);
-            return $result;
+            return $result->execute([$column_ans, $identifier_ans, $identifier_ans]);
+    
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -453,7 +376,7 @@ class AllFunctionalities extends Db
             }
             return $stmtExec;
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -469,7 +392,7 @@ class AllFunctionalities extends Db
             }
             return $stmt->execute();
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -478,7 +401,7 @@ class AllFunctionalities extends Db
     {
         try {
             $sql = "SELECT * FROM $de WHERE $id = ?";
-            $stmt = $this->connect()->prepare($sql);
+            $stmt = $this->connectSql()->prepare($sql);
             $stmt->bind_param("s", $id_ans);
             $stmt->execute();
             $stmt->store_result();
@@ -486,37 +409,37 @@ class AllFunctionalities extends Db
                 $this->insertData_NoRedirect($data, $de);
             }
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
 
 
-    public function insert_direct($des, $field, $valuea, $arraycombine, $redirect)
+    public function insert_direct($des, $field, $value, $arrayCombined, $redirect)
     {
         try {
-            $sql = "INSERT INTO $des ($field) VALUES (:$valuea)";
+            $sql = "INSERT INTO $des ($field) VALUES (:$value)";
             $stmt = $this->connect()->prepare($sql);
-            $stmt->execute($arraycombine);
+            $stmt->execute($arrayCombined);
             $redirect;
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
     // UPDATE MULTIPLE PARAMETER DYNAMICALLY
 
-    public function updateMultiple(array $data, string $dbtable, string $identifier, $identifier_ans, string $idORref)
+    public function updateMultiple(array $data, string $table, string $identifier, string $ref)
     {
         try {
             $implodeKey = implode('=?, ', array_keys($data));
-            $implodeKey = rtrim($implodeKey, ", $idORref");
+            $implodeKey = rtrim($implodeKey, ", $ref");
             $implodeValue = array_values($data);
-            $sql = "UPDATE $dbtable SET $implodeKey WHERE $identifier =?";
-            $stmt = $this->connect()->prepare($sql)->execute($implodeValue);
-            return $stmt;
+            $sql = "UPDATE $table SET $implodeKey WHERE $identifier =?";
+            return $this->connect()->prepare($sql)->execute($implodeValue);
+        
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 
@@ -524,13 +447,13 @@ class AllFunctionalities extends Db
      * Undocumented function
      *
      * @param array $data - the array from the $_POST
-     * @param string $dbtable
+     * @param string $table
      * @param [type] $identifier this is either id or email or username
      * @return void
      */
 
     
-    public function updateMultiplePOST(array $data, string $dbtable, $identifier)
+    public function updateMultiplePOST(array $data, string $table, $identifier)
     {
         try {
             if (isset($data['submit'])) {
@@ -544,12 +467,12 @@ class AllFunctionalities extends Db
             $data[$identifier] = $id;
             $implodeValue = array_values($data);
 
-            $sql = "UPDATE $dbtable SET $implodeKey=? WHERE $identifier =?";
+            $sql = "UPDATE $table SET $implodeKey=? WHERE $identifier =?";
             // example - 'UPDATE register SET title=?, first_name=?, second_name=? WHERE id =?'
             return $this->connect()->prepare($sql)->execute($implodeValue);
 
         } catch (PDOException $e) {
-            echo $e->getMessage(), PHP_EOL;
+            showError($e);
         }
     }
 }

@@ -10,7 +10,7 @@ class Db extends CheckToken
 {
     private function dbVariables()
     {
-        return $dbVar  = [
+        return [
             'host' => getenv('DB_HOST'),
             'name'=> getenv('DB_NAME'),
             'username'=>getenv('DB_USERNAME'),
@@ -23,7 +23,6 @@ class Db extends CheckToken
     {
         try {
             $dbVar = $this->dbVariables();
-            //create a new connection variable
             $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}", $dbVar['username'], $dbVar['password']);
 
             $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -32,7 +31,6 @@ class Db extends CheckToken
             return $conn;
         } catch (PDOException $e) {
             $errorMsg = $e->getMessage();
-            //$errorLine = $e->getLine();
             echo "Connection Failed: $errorMsg ";
         }
     }
@@ -40,8 +38,7 @@ class Db extends CheckToken
     function connectSql()
     {
         try {
-            $conn = mysqli_connect($this->serverName, $this->username, $this->password, $this->dbName);
-            return $conn;
+            return mysqli_connect($this->serverName, $this->username, $this->password, $this->dbName);
         } catch (\Throwable $e) {
             echo "Connection Failed" . $e->getMessage();
         }

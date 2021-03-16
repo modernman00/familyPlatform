@@ -19,6 +19,7 @@
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
 
+
 </head>
 
 <body id="myPage" data-spy="scroll" data-target=".navbar" data-offset='60'>

@@ -11,10 +11,13 @@
 
 </div>
 
+
 <script>
     // variable 
 
-    const dataPull = <?php echo json_encode($data) ?>
+    // const dataPull = <?php echo json_encode($data) ?>
+    const dataPull = @json($data, JSON_PRETTY_PRINT);
+    
 
     google.charts.load('current', {packages:["orgchart"]});
       google.charts.setOnLoadCallback(drawChart);

@@ -9,7 +9,14 @@ class CheckToken
     public  $tokenCheck;
     public  $postToken;
 
-
+    /**
+     * Undocumented function
+     *
+     * @param [type] $token  this token is the same for session and post 
+     * @param [type] $redirect if verification failed, it redirects here
+     *
+     * @return void
+     */
     function tokenCheck($token, $redirect)
     {
         try {

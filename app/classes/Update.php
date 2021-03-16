@@ -2,17 +2,13 @@
 
 namespace App\classes;
 
-use App\classes\AllFunctionalities;
+use App\classes\Db;
 use \PDOException;
 
-class Update extends AllFunctionalities
+class Update extends Db
 {
 
-    private $table;
-
-    function __construct($table) {
-        $this->table = $table;
-    }
+    function __construct(public string $table) {}
 
     public function updateTable ($column, $column_ans, $identifier, $identifier_ans){
         try { $query = "UPDATE $this->table SET $column =? WHERE $identifier = ?";

@@ -1,4 +1,7 @@
 <?php
+
+use Dompdf\Dompdf;
+
 function htmlToPdf ($x)
 {
     try {
@@ -12,8 +15,8 @@ function htmlToPdf ($x)
       $document->render();
     //  $document->stream();
      $document->stream("Application.pdf", array("Attachment"=>0));
-      $fileUpload = $document->output();
-      return $fileUpload;
+      return $document->output();
+      
     } catch(Throwable $t){
         echo $t->getMessage();
     }
@@ -33,42 +36,9 @@ function htmlToPdf ($x)
   $document->render();
 
 //  $document->stream("Application.pdf", array("Attachment"=>0));
-  $fileupload = $document->output();
-  return $fileupload;
+  return $document->output();
+  
 };
-
-  function pdf_convert($file, $name) {
-
-      $filename = "$name contract.pdf";
-      ob_start();
-      require($file);
-      $pdf2 = ob_get_contents();
-      ob_end_clean();
-      $mpdf = new \Mpdf\Mpdf();
-      $mpdf->text_input_as_HTML = true;
-      $mpdf->simpleTables = true;
-      $html = mb_convert_encoding($pdf2, 'UTF-8', 'UTF-8');
-      $mpdf->WriteHTML($html);
-      $fileupload = $mpdf->Output($filename, 'S');
-      return $fileupload;
-  }
-
-  function pdf_convert2($file) {
-    $name = $_SESSION['first_name'];
-    $filename = "contract.pdf";
-    ob_start();
-    include($file);
-    $pdf2 = ob_get_contents();
-    ob_end_clean();
-    $mpdf = new \Mpdf\Mpdf();
-    $mpdf->text_input_as_HTML = true;
-    $mpdf->simpleTables = true;
-    $html = mb_convert_encoding($pdf2, 'UTF-8', 'UTF-8');
-    $mpdf->WriteHTML($html);
-    $fileupload = $mpdf->Output($filename, 'S');
-    return $fileupload;
-}
-
 
       function convertHtml($x){
         ob_start();
@@ -80,8 +50,8 @@ function htmlToPdf ($x)
         $document->setPaper('A4', 'portrait');
         $document->render();
         $document->stream("Application.pdf", array("Attachment"=>0));
-        $fileupload = $document->output();
-        return $fileupload;
+        return $document->output();
+        
   }
 
   function pdfConvertDom($x)
@@ -97,8 +67,8 @@ function htmlToPdf ($x)
     $document->setPaper('A4', 'portrait');
     $document->render();
     $document->stream("contract.pdf", array("Attachment" => 0));
-    $fileupload = $document->output();
-    return $fileupload;
+    return $document->output();
+    
 }
 ?>
 

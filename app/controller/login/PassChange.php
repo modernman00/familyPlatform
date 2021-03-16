@@ -32,7 +32,7 @@ class PassChange extends allFunctionalities
             new token('token', '/login/changePW');
             $reDirect = $_SESSION['loginType'];  // was set on the login page
             $cleanData = getSanitisedInputData($_POST, null);
-            $email = checkInput($_SESSION['email']);
+            $email = checkInputEmail($_SESSION['email']);
             $result = $this->update($this->table, 'password', $cleanData['password'], 'email', $email);
             if (!$result) {
                 throw new Exception("Password cannot be updated");

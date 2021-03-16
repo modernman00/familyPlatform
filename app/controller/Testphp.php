@@ -4,28 +4,40 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use App\controller\{Base, About};
+use App\controller\Base;
+use DateInterval;
+use DateTime;
 
 class Testphp extends Base
 {
+    public $time = 90;
 
     public function index()
     {
+
+       //echo phpinfo();
     //     // const BR = ;
-        define("BR", "<br>");
+       // define("BR", "<br>");
         // php7
+        // Null Coalescing Assignment Operator
+        $number = null;
+        echo $number ??= "Value not getting it";
+
         $number = [1, 2, 3, 3, 4, 5, 6];
         $num = [10, 20, 30, 30, 40, 50, 60];
         $name = ['olawale', 'james', 'emily'];
 
-        $cBack = fn ($x) => $x * 3;
+        $cBack = fn ($x) =>  $x * 3;
 
-        $even = \array_filter($number, $cBack);
+         \array_filter($number, $cBack);
+        
         $timer = 4;
 
-        $ten = array_map(function ($n) use ($timer) {
+        array_map(function ($n) use ($timer) {
             return $n * $timer;
         }, $num);
+
+
 
         $money = fn ($s) => $timer * $s * 4;
         echo "<br>";
@@ -134,9 +146,71 @@ class Testphp extends Base
             echo " this is an that loop $x" . BR;
         }
 
+        echo "it is well" .srand() .BR;
+
+       echo "<script>alert(it worked)</script>".BR;
+
         
-    // echo phpinfo();
+     //echo phpinfo();
     // var_dump(php_ini_loaded_file(), php_ini_scanned_files());
+
+    // DATE AND TIME
+
+    $raw = "22.11.2002";
+    $start = DateTime::createFromFormat('d. m. Y', $raw);
+    echo 'this is the time: '. $start->format('d-m-y') . BR;
+
+    $end = clone $start; // create a copy of the start 
+    $end->add(new DateInterval('P1M6D'));
+    $diff = $end->diff($start);
+    echo "Difference: {$diff->format('%m month, %d days (total: %a days')}.".BR;
+
+    echo \strpos("we are fine","f"). BR;
+    echo strlen("olwale").BR;
+    echo \mb_substr("Adeniji", 1);
+
+    //$email = \filter_var($_POST['email'], \FILTER_VALIDATE_EMAIL);
+
+// using MATCH 
+$email = "femi";
+
+$outcome = match($email) {
+    'Olawale' => "The email has been found",
+    null => "Nothing was found",
+    default => "unknown email"   
+};
+
+printMemory();
+echo $outcome;
+printMemory();
+
+// CHECK PASSWORD HASH AND COST 
+
+$time = 0.1;
+$cost = 11;
+// do {
+//     $cost++;
+//     $start = microtime(true);
+//     password_hash('heineken2', PASSWORD_DEFAULT, ['cost' => 5]);
+//     $end = microtime(true);
+// } while (($end - $start ) < $time);
+//     echo "Cost found : $cost";
+
+
+    // URL ENCODING 
+    $id = \urlencode("olawale");
+    $set = "olaogun.de.com?user=$id";
+    echo "<h1>this is the way</h1> ". $set;
+
+
+
+
+
     
     }
 }
+
+
+
+?>
+

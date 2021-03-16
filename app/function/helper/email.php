@@ -41,7 +41,7 @@ function sendEmailSelf()
         $emailContent = ob_get_contents();
         // $emailContent = ob_end_clean();
         ob_end_clean();
-        $email =  $data['email'];
+        $email =  checkInputEmail($data['email']);
         $name = $data['first_name'] ?? 'there';
         $file = $var['file'];
         $filename = $var['fileName'];

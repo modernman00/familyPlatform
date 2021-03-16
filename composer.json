@@ -19,7 +19,8 @@
         "app/function/helper/email.php",
         "app/function/helper/security.php",
         "app/function/helper/Validate.php",
-        "app/function/helper/pdfConversion.php"
+        "app/function/helper/pdfConversion.php",
+        "app/function/helper/optimiser.php"
         ]
     },
 
@@ -38,10 +39,14 @@
     
     "require-dev": {
         "phpmd/phpmd" : "@stable",
-        "vimeo/psalm": "^4.6"
+        "vimeo/psalm": "^4.6",
+        "psalm/attributes": "^0.1.0"
     },
+
+            "bin-dir": ["local-php-security-checker"],
 
 	 "config": {
         "optimize-autoloader": true
+
     }
 }

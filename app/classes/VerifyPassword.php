@@ -1,69 +1,47 @@
 <?php
 
-
 namespace App\classes;
 
 use App\classes\AllFunctionalities;
-use \PDOException;
 use Exception;
 
 class VerifyPassword extends AllFunctionalities
 {
     public $error;
-    private $passwordHash;
-    private $inputPass;
-    private $dbPass;
-    private $options = array('cost' => 15);
+    private $options = array('cost' => 12);
     private $hash = PASSWORD_DEFAULT;
 
     // if password is successfully verified or not
-    public function __construct($inputPass,  $dbPass, $customerId, $table)
-    {
-        $this->inputPass = $inputPass;
-        $this->dbPass = $dbPass;
-        $this->id = $customerId;
-        $this->table = $table;
-        
-    }
+    public function __construct($inputPass,  $dbPass, $id, $table)
+    {}
 
 
     // hash the password once verified
-    protected function hashPassword()
+    public function hashPassword() : mixed
     {
+    
         if (empty($this->inputPass)) {
+            echo json_encode (['error'=> "Empty password"]);
             throw new Exception("Empty password");
         }
+     
         if (password_verify($this->inputPass, $this->dbPass) === false) {
             $this->error = 'Your password is incorrect!';
+            echo json_encode (['psdError'=> $this->error]);
             throw new Exception("<h1>Your password is incorrect!</h1>");
         }
-
-        if(password_needs_rehash($this->dbPass,
-            $this->hash,
-            $this->options
-        )) {
-              $this->passwordHash = password_hash(
-                $this->inputPass,
-                $this->hash,
-                $this->options
-            );
-        } 
-   
-        return $this->passwordHash;
+        
+        // check if the password needs rehash.
+        if (password_needs_rehash($this->dbPass, PASSWORD_DEFAULT, $this->options)) : mixed {
+            $this->passwordHash = password_hash($this->inputPass, PASSWORD_DEFAULT, $this->options);
+            // create the data
+            $data = [
+                'password' => $this->passwordHash,
+                'id' => $this->id
+            ];
+            // update the database
+            return $this->updateMultiplePOST($data, $this->table, 'id');
+        }
     }
 
-    // update table with the new password
-    public function updateTableWithNewPass()
-    {
-        $this->hashPassword(); // hash the password
-
-        // create the data
-        $data = [
-            'password' => $this->passwordHash,
-            'id' => $this->id
-        ];
-        // update the database
-        return $this->updateMultiplePOST($data, $this->table, 'id');
-
-    }
 }

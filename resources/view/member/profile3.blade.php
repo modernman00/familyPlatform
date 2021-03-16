@@ -53,7 +53,8 @@
 
 // insert comment  
 
-const checkTest= @php echo json_encode($allData) @endphp;
+// const checkTest= @php echo json_encode($allData) @endphp;
+const checkTest= @json($allData);
 
 console.log(checkTest)
 

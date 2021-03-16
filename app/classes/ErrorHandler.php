@@ -16,7 +16,7 @@ class ErrorHandler {
 			set_exception_handler([$this,'exceptionHandler']);
 			set_error_handler([$this, 'handleErrors']);
 		} catch (\Throwable $th) {
-			$th->getMessage().'\n';
+			showError($th);
 		}		
 	}
 	

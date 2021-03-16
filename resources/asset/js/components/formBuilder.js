@@ -1,5 +1,6 @@
-import {showError} from '../global';
 "use strict";
+import {showError} from '../global';
+
 /**
  * 
  * @param {That is the obj name} objData 

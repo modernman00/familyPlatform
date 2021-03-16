@@ -11,7 +11,7 @@ function loggedDetection($filename)
     sendEmail('wale@loaneasyfinance.com','logged-in', 'LOGGED-IN DETECTION', $msg);
 }
 
-function notifyCustOfLogIn($data)
+function notifyCustOfLogIn($data) : mixed
 {
     $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOGGED-IN DETECTION", null,null);
     return sendEmailWrapper($generateEmailArray, 'customer');   
@@ -24,10 +24,10 @@ function notifyCustOfLogIn($data)
  * @throws \Exception 
  * @throws \PDOException 
  */
-function generateSendTokenEmail($data)
+function generateSendTokenEmail($data) : mixed
 {
         $id = $data['id'];
-        $email = $data['email'];
+        $email = checkInputEmail($data['email']);
         $deriveToken = generateUpdateTableWithToken($id);  
         //TODO send text to the user with the code
         // ACCOMPANY EMAIL CONTENT             
@@ -35,3 +35,38 @@ function generateSendTokenEmail($data)
         $generateEmailArray = genEmailArray("msg/customer/token", $emailData, "FAMILY - TOKEN", null,null);
         return sendEmailWrapper($generateEmailArray, 'member');      
 }
+
+
+function checkInput($data) : mixed
+{
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    $data = strip_tags($data);
+    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = preg_replace('/[^0-9A-Za-z.@-]/', ' ', $data);
+    return $data;
+}
+
+function checkInputImage($data)
+{
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    $data = strip_tags($data);
+    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
+    return $data;
+}
+
+function checkInputEmail($data): string
+{
+    $data = trim($data);
+    $data = stripslashes($data);
+    $data = htmlspecialchars($data);
+    $data = strip_tags($data);
+    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = filter_var($data, FILTER_SANITIZE_EMAIL);
+    return $data;
+}
+

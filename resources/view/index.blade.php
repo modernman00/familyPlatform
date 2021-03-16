@@ -73,10 +73,11 @@
 
     <footer class="mastfoot mt-auto">
       <div class="inner">
-        <p>The site is built and maintained by Wale Olaogun<a href="https://twitter.com/modernman">@modernman</a>.</p>
+        <p>The site is built and maintained by Wale Olaogun<a href="https://twitter.com/modernman">@modernman</a>. </p>
       </div>
     </footer>
   </div>
+
 </body>
 
 </html>

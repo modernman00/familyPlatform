@@ -3,7 +3,6 @@
 use App\classes\{
     Sanitise,
     Select,
-    VerifyPassword,
     Update,
     AllFunctionalities
 };
@@ -12,7 +11,7 @@ use App\classes\{
  * 
  * @param mixed $inputData  this is the form data 
  * @param mixed $databaseData this must be database data that already has the database password
- * @return void 
+ * @return mixed 
  * @throws \Exception 
  */
 function checkPassword($inputData, $databaseData)
@@ -21,41 +20,37 @@ function checkPassword($inputData, $databaseData)
         $textPassword = $inputData['password'];
         $dbPassword = $databaseData['password'];
         $id = $databaseData['id'];
-        $options = array('cost' => 15);
+        $table = "account";
+        $options = array('cost' => 12);
 
         if (password_verify($textPassword, $dbPassword) === false) {
             $error = 'There is a problem with your credential!';
-            echo json_encode (['error'=> $error]);
+            echo json_encode(['error' => $error]);
             throw new Exception("<h1>There is a problem with your login credential! $textPassword ---- $dbPassword</h1>");
-
-        } 
-            if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
-        // If so, create a new hash, and replace the old one
-            $newHash = password_hash( $textPassword, PASSWORD_DEFAULT, $options);
-
-             $data = ['password' => $newHash, 'id' => $id];
-            $passUpdate = new AllFunctionalities;
-            return $passUpdate->updateMultiplePOST($data, "account", 'id');
-            }
-
-           
-    
+        }
+        if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
+            // If so, create a new hash, and replace the old one
+            $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
+            $data = ['password' => $newHash, 'id' => $id];
+            $passUpdate = new AllFunctionalities();
+            return $passUpdate->updateMultiplePOST($data, $table, 'id');
+        }
     } catch (\Exception $e) {
         showError($e);
-        } catch (\PDOException $e) {
-            showError($e);
-        }
+    } catch (\PDOException $e) {
+        showError($e);
+    }
 }
- 
 
 
- /**
-  * 
-  * @param mixed $inputData form data as a array $inputData['email']
-  * @return mixed 
-  * @throws \Exception 
-  */
-function useEmailToFindData($inputData) : array
+
+/**
+ * 
+ * @param mixed $inputData form data as a array $inputData['email']
+ * @return mixed 
+ * @throws \Exception 
+ */
+function useEmailToFindData($inputData): array
 {
     var_dump($inputData['email']);
     $select = new Select;
@@ -76,7 +71,7 @@ function useEmailToFindData($inputData) : array
  */
 function getSanitisedInputData($inputData, $minMaxData = NULL)
 {
-   // printArr($inputData);
+    // printArr($inputData);
     $sanitise = new Sanitise($inputData, $minMaxData);
     $sanitisedData = $sanitise->getData();
     //printArr($sanitisedData);
@@ -95,15 +90,14 @@ function getSanitisedInputData($inputData, $minMaxData = NULL)
 
 function generateAuthToken()
 {
-    $token = mb_strtoupper(bin2hex(random_bytes(4)));
-    return $token;
+    return mb_strtoupper(bin2hex(random_bytes(4)));
+
 }
 /**
  * Helps to generate token, and it updates the login table as well
- *
- * @param [type] $customerNo - input the customer no
- *
- * @return void
+ * @param mixed $customerId 
+ * @return string|array|null|false 
+ * @throws \Exception 
  */
 function generateUpdateTableWithToken($customerId)
 {
@@ -113,6 +107,8 @@ function generateUpdateTableWithToken($customerId)
     //6.  update login account table with the code
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
-    if (!$updateCodeToCustomer) throw new Exception("<h1>Error : Could not update token</h1>E", 1);
+    if (!$updateCodeToCustomer) {
+        throw new Exception("<h1>Error : Could not update token</h1>E", 1);
+    }
     return $token;
 }

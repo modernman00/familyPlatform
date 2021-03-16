@@ -2,6 +2,7 @@
 
 $router->map('GET', '/', 'App\controller\Index@index', 'Home');
 
+// the launch page
 $router->map('GET', '/launch', 'App\controller\Index@launch', 'launch');
 
 // test for the webpage trialled

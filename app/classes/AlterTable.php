@@ -7,18 +7,13 @@ use App\classes\allFunctionalities;
 class AlterTable extends allFunctionalities
 {
 
-    public $table;
-    public $dataArray;
 
     /**
      * dataArr - this is array of the new column name to be updated ['payment', 'dob]
      */
 
-    function __construct($table, $dataArr = null)
-    {
-        $this->table = $table;
-        $this->dataArray = $dataArr;
-    }
+    function __construct(public string $table, public array $dataArray = null)
+    {}
 
     public function addNewColArr($lastData)
     {
@@ -38,15 +33,15 @@ class AlterTable extends allFunctionalities
     {
         $query =  " ALTER TABLE $this->table ADD $colName $dataType NULL AFTER $lastData";
         $result = $this->connect()->prepare($query);
-        $outcome = $result->execute();
-        return $outcome;
+        return $result->execute();
+      
     }
 
     public function alterAutoIncrement($start)
     {
         $query =  "ALTER TABLE `$this->table` AUTO_INCREMENT = $start";
         $result = $this->connect()->prepare($query);
-        $outcome = $result->execute();
-        return $outcome;
+        return $result->execute();
+        
     }
 }

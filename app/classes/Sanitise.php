@@ -7,59 +7,50 @@ use Exception;
 
 class Sanitise extends allFunctionalities
 {
-    private $formData = array();
     private $key  = array();
     private $value = array();
     private $value2 = array();
     public $error = array();
     private $cleanData = array();
-    private $dataLength;
-    private $image;
+
 
     /**
      * Class constructor.
      *  $data  = [min = [12, 12], max = [12, 12], data = [name, password]]
      */
-    public function __construct(array $array, array $data = null)
+    public function __construct(private array $formData, private mixed $dataLength = null)
     {
-       try {
-         unset($array['submit']);
+        try {
+            unset($this->formData['submit']);
 
-          // rid it of token
-        if (isset($array['token'])) {
-            unset($array['token']);
+            // rid it of token
+            if (isset($this->formData['token'])) {
+                unset($this->formData['token']);
+            }
+
+            $this->key = array_keys($this->formData);
+            $this->value = array_values($this->formData);
+            $this->dataCount = count($this->value);
+            // $this->dataLength = $data ?? null;  //code...
+        } catch (\Throwable $th) {
+            echo " Are you human or robot";
+            showError($th);
         }
-
-    
-        // printArr($array);
-        $this->formData = $array;
-
-        $this->key = array_keys($this->formData);
-        $this->value = array_values($this->formData);
-        $this->dataCount = count($this->value);
-        $this->dataLength = $data ?? null;  //code...
-       } catch (\Throwable $th) {
-            echo " Are you humna or robot";
-       } 
     }
 
     private function emailVal()
     {
-        if (isset($this->formData['email'])) {
-            if (!filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
-                $this->error[] = "Invalid Email Format \n";
-            }
+        if (isset($this->formData['email']) && !filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
+            $this->error[] = "Invalid Email Format \n";
         }
     }
 
     private function passVal()
     {
-        if (isset($this->formData['password']) && isset($this->formData['confirm_password'])) {
-            if ($this->formData['password'] !== $this->formData['confirm_password']) {
+        if (isset($this->formData['password']) && isset($this->formData['confirm_password']) && $this->formData['password'] !== $this->formData['confirm_password']) {
                 $this->error[] = " Your passwords do not match\n";
-                // unset($this->formData['confirm_password']);
-            }
         }
+        return $this;
     }
 
 
@@ -72,6 +63,7 @@ class Sanitise extends allFunctionalities
                 $this->error[]  = "The $cleanNameKey question is required\n";
             }
         }
+        return $this;
     }
 
     /**
@@ -82,7 +74,7 @@ class Sanitise extends allFunctionalities
      */
     private function checkLength()
     {
-        if ($this->dataLength)
+        if ($this->dataLength) {
             for ($x = 0; $x < count($this->dataLength['data']); $x++) {
                 $dataKey[] = $this->dataLength['data'][$x];
                 $dataPost = $_POST[$this->dataLength['data'][$x]];
@@ -93,7 +85,9 @@ class Sanitise extends allFunctionalities
                     $length = $this->dataLength['max'][$x];
                     $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit $length\n";
                 }
-            };
+            }
+        }
+        return $this;
     }
 
     protected function sanitise()
@@ -104,20 +98,22 @@ class Sanitise extends allFunctionalities
             $this->data = stripslashes($this->value[$x]);
             $this->data = htmlspecialchars($this->value[$x]);
             $this->data = strip_tags($this->value[$x]);
-            $this->data = htmlentities($this->value[$x]);
+            $this->data = htmlentities($this->value[$x], ENT_QUOTES | ENT_HTML5, "UTF-8");
             $this->data = preg_replace('/[^0-9A-Za-z@._]/', ' ', $this->value[$x]);
             $this->value2[] = $this->data;
         }
+        return $this;
     }
 
     private function setArrayData()
     {
+        $options = array('cost' => 15);
         $this->cleanData = array_combine($this->key, $this->value2);
         // if password and confirm password are given, hash password
         // if only password is given, do not hash password
 
         if (isset($this->cleanData['password']) && isset($this->cleanData['confirm_password'])) {
-            $this->cleanData['password'] = password_hash($this->cleanData['password'], PASSWORD_DEFAULT) ?? null;
+            $this->cleanData['password'] = password_hash($this->cleanData['password'], PASSWORD_DEFAULT, $options) ?? null;
             unset($this->cleanData['confirm_password']);
         }
 
@@ -138,29 +134,20 @@ class Sanitise extends allFunctionalities
         $this->setArrayData();
     }
 
-    // public function getErr()
-    // {
-    //     return $this->error;
-    // }
 
     /**
      * either returns an error which it will echo or the sanitised data in an array
      * @return mixed 
      */
 
-    public function getData()
+    public function getData(): array
     {
         try {
             $this->runFunctions();
 
-            // if (count($this->error) > 0) return "Error";
-            
             return $this->cleanData;
-            
         } catch (\Throwable $th) {
             showError($th);
-        } catch ( Exception $e) {
-            showError($e);
-        }
+        } 
     }
 }
