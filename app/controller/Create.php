@@ -3,7 +3,6 @@
 namespace App\controller;
 
 use App\classes\Db;
-
 use App\classes\tables\{
     Contact,
     Personal,
@@ -14,21 +13,22 @@ use App\classes\tables\{
     Interest,
     otherFamily
 };
+
 class Create extends Db
 {
     public function index()
     {
         $table = [
-            new Personal,
-            new Work,
-            new Contact,
-            new kids,
-            new siblings,
-            new Account,
-            new Interest,
-            new otherFamily
+            new Personal(),
+            new Work(),
+            new Contact(),
+            new kids(),
+            new siblings(),
+            new Account(),
+            new Interest(),
+            new otherFamily()
         ];
-        
+
         try {
             for ($i = 0; $i < count($table); $i++) {
                 $table[$i]->index();
@@ -37,6 +37,4 @@ class Create extends Db
             echo $e->getMessage();
         }
     }
-
-  
 }
