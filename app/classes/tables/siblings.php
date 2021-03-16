@@ -2,13 +2,14 @@
 
 namespace App\classes\tables;
 
-use \PDOException;
+use PDOException;
 use App\classes\Insert;
 
-class Siblings extends Insert {
+class Siblings extends Insert
+{
 
-   public function index() 
-    {   
+    public function index()
+    {
         try {
                 $sql = "CREATE TABLE IF NOT EXISTS  `family`.`siblings` ( 
                     `no` INT NOT NULL AUTO_INCREMENT , 
@@ -23,14 +24,12 @@ class Siblings extends Insert {
                 PRIMARY KEY (`no`),
                  FOREIGN KEY (`id`) REFERENCES personal(`id`),
                 INDEX `id` (`id`))";
-    
+
                 $conn = $this->connect();
                     // use exec() because no results are returned
                 $conn->exec($sql);
         } catch (PDOException $e) {
             echo $sql . "<br>" . $e->getMessage();
         }
-
     }
-
 }

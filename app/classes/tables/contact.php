@@ -1,15 +1,16 @@
 <?php
+
 namespace App\classes\tables;
 
-use \PDOException;
+use PDOException;
 use App\classes\Insert;
 
-class Contact extends Insert {
-
-   public function index() 
-    {   
+class Contact extends Insert
+{
+    public function index()
+    {
         try {
-                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`contact`(
+            $sql = "CREATE TABLE IF NOT EXISTS  `family`.`contact`(
                  `no` INT NOT NULL AUTO_INCREMENT , 
                  `id` VARCHAR(255) NOT NULL , 
                 `address` TEXT NOT NULL ,
@@ -24,18 +25,11 @@ class Contact extends Insert {
                 PRIMARY KEY (`no`),
                 FOREIGN KEY (`id`) REFERENCES personal(`id`),
                 INDEX `id` (`id`))";
-    
-                $conn = $this->connect();
-                    // use exec() because no results are returned
+            $conn = $this->connect();
+// use exec() because no results are returned
                 $conn->exec($sql);
         } catch (PDOException $e) {
-            echo $sql.`<br><br>`. $e->getMessage(). $e->getLine() ;
+            echo $sql . `<br><br>` . $e->getMessage() . $e->getLine() ;
         }
-
     }
-
 }
-
-
-
-

@@ -1,15 +1,16 @@
 <?php
+
 namespace App\classes\tables;
 
-use \PDOException;
+use PDOException;
 use App\classes\allFunctionalities;
 
-class Interest extends allFunctionalities {
-
-   public function index() 
-    {   
+class Interest extends allFunctionalities
+{
+    public function index()
+    {
         try {
-                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`interest`(
+            $sql = "CREATE TABLE IF NOT EXISTS  `family`.`interest`(
                  `no` INT NOT NULL AUTO_INCREMENT , 
                  `id` VARCHAR(255) NOT NULL , 
                 `favSport` TEXT NOT NULL ,
@@ -21,18 +22,11 @@ class Interest extends allFunctionalities {
                 PRIMARY KEY (`no`),
                 FOREIGN KEY (`id`) REFERENCES personal(`id`),
                 INDEX `id` (`id`))";
-    
-                $conn = $this->connect();
-                    // use exec() because no results are returned
+            $conn = $this->connect();
+// use exec() because no results are returned
                 $conn->exec($sql);
         } catch (PDOException $e) {
-            echo $sql.`<br><br>`. $e->getMessage(). $e->getLine() ;
+            echo $sql . `<br><br>` . $e->getMessage() . $e->getLine() ;
         }
-
     }
-
 }
-
-
-
-

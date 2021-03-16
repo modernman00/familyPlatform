@@ -2,7 +2,7 @@
 
 namespace App\classes\tables;
 
-use \PDOException;
+use PDOException;
 use App\classes\Insert;
 
 class Work extends Insert
@@ -11,7 +11,6 @@ class Work extends Insert
     public function index()
     {
         try {
-            
             $sql = "CREATE TABLE IF NOT EXISTS  `family`.`work` (  
                 `no` INT NOT NULL AUTO_INCREMENT , 
                 `id` VARCHAR(255) NOT NULL ,

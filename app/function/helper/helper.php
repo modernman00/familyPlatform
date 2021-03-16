@@ -1,8 +1,6 @@
 <?php
 
-use DateTime;
 use Philo\Blade\Blade;
-use voku\helper\Paginator;
 
 function view($path, array $data = [])
 {
