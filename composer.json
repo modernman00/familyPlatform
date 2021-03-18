@@ -40,7 +40,8 @@
     "require-dev": {
         "phpmd/phpmd" : "@stable",
         "vimeo/psalm": "^4.6",
-        "psalm/attributes": "^0.1.0"
+        "psalm/attributes": "^0.1.0",
+        "phpstan/phpstan": "^0.12.81"
     },
 
             "bin-dir": ["local-php-security-checker"],

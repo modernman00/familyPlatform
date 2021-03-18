@@ -216,7 +216,6 @@ class Testphp extends Base
      *
      * @return void
      */
-
     private function joinManyCondition(string $firstTable, string $para, array $table, mixed $id)
     {
         try {
