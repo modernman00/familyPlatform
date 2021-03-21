@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use App\controller\Base;
+use App\classes\Select;
 use DateInterval;
 use DateTime;
+use PDO;
+use PDOException;
 
-class Testphp extends Base
+class Testphp extends Select
 {
     public $time = 90;
 
@@ -202,31 +204,71 @@ class Testphp extends Base
         //             $set = "olaogun.de.com?user=$id";
         //             echo "<h1>this is the way</h1> " . $set;
 
-        $tabLine = ['personal',  'contact', 'interest'];
-
-        $this->joinManyCondition(table: $tabLine, firstTable: 'account', para: 'id', id: "432292OLAWALE");
+        $this->getGenerator3();
     }
 
-    /**
-     *
-     * @param string $firstTable the first table in the array
-     * @param string $para the id parameter
-     * @param array $table table name
-     * @param mixed $id id
-     *
-     * @return void
-     */
-    private function joinManyCondition(string $firstTable, string $para, array $table, mixed $id)
+
+    // GENERATOR 
+
+    public function getGenerator()
     {
-        try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
-            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
-            $query2 = "SELECT * FROM $firstTable  $innerQueryToString WHERE $firstTable.$para = ? OR $table[0].$para = ?";
-            $result = $this->connect()->prepare($query2);
-            $result->execute([$id, $id]);
-            return $result->fetchAll(\PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            showError($e);
+        function getRange($max = 10)
+        {
+            $array = [];
+
+            for ($i = 1; $i < $max; $i++) {
+                $array[] = $i;
+            }
+
+            return $array;
+        }
+
+        foreach (getRange(10) as $range) {
+            echo "Dataset {$range} <br>";
         }
     }
+
+    public function getGenerator2()
+    {
+        function getRange2($max = 10)
+        {
+            for ($i = 1; $i < $max; $i++)
+            {
+                yield $i;
+            }
+                
+        }
+
+        foreach (getRange2(PHP_INT_MAX) as $range) {
+            echo "Dataset2 {$range} <br>";
+        }
+    }
+    // generator as a key value pair
+    public function getGenerator3()
+    {
+        function getRange3($max = 10)
+        {
+            for ($i = 1; $i < $max; $i++) {
+                $value = $i * mt_rand();
+                yield $i => $value;
+            }
+        }
+
+        foreach (getRange3(13) as $range => $value) {
+            echo "Dataset {$range} has {$value} value<br>";
+        }
+    }
+    // sending values to generator 
+
+    public function getGenerator4()
+    {
+        function getRange4 ($max = 10) {
+            for ($i = 1; $i < $max; $i++) {
+                $injected = yield $i;
+
+                if ($injected === 'stop') return;
+            }
+        }
+    }
+
 }
