@@ -2,34 +2,40 @@
 
 namespace App\model;
 
-use App\classes\AllFunctionalities;
-class Post extends AllFunctionalities
+use App\classes\Select;
+class Post extends Select
 {
 
     function commentLink2Post($postNo)
     {
-         return $this->select_from('comment', 'post_no', $postNo);
+        $query = $this->formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "post_no");
+        return $this->selectFn(query: $query, bind: [$postNo]);
        
     }
 
     function postLink2Id($id)
     {
-        return $this->select_from('post', 'id', $id);
+          $query = $this->formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
+        return $this->selectFn(query: $query, bind:[ $id]);
+
     }
 
     function getAllPost()
     {
-        return $this->selectall('post');
+         $query = $this->formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
+        return $this->selectFn(query: $query);
     }
 
     function getAllPostPics($custNo)
     {
-        	return $this->select_from('post', 'id', $custNo);
+             $query = $this->formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
+        return $this->selectFn(query: $query, bind: [$custNo]);
 		
     }
 
     function getAllComments()
     {
-        return $this->selectall('comment');
+              $query = $this->formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
+        return $this->selectFn(query: $query);
     }
 }

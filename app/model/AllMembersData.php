@@ -2,17 +2,16 @@
 
 namespace App\model;
 
-use App\classes\Select;
+use App\classes\innerJoin;
 
-class AllMembersData extends Select
+class AllMembersData extends innerJoin
 {
     public function getAllMembers()
     {
-        
-        $memberData = $this->joinMany5('personal', 'otherFamily', 'profile_pics', 'contact', 'siblings', 'id');
-        if(!$memberData) throw new \Exception("Member Data Error", 1);
-    
-        return $memberData;
+        $firstTable = "personal";
+        $table = ['personal', 'otherFamily', 'profile_pics', 'contact', 'siblings'];
+        $memberData = $this->joinAll($firstTable, 'id', $table);
+        return $memberData??= throw new \Exception("Member Data Error", 1);
         
     }
 }

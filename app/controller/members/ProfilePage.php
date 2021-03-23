@@ -30,11 +30,13 @@ class ProfilePage extends ProcessImg
         $this->id = checkInput($_SESSION['memberId']);
         $setData = new SingleCustomerData;
         $this->memberData = $setData->getCustomerData($this->id);
+
         //GET POST DATA 
         $instanceAllData = new Post;
         $this->allPostData = $instanceAllData->getAllPost();
         //GET COMMENT DATA
         $this->allCommentData = $instanceAllData->getAllComments();
+       
         // POST AND ID
         $this->post2Id = $instanceAllData->postLink2Id($this->id);
         // COMMENT AND POST NO 

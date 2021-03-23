@@ -5,6 +5,7 @@ namespace App\controller\login;
 use App\classes\{
     CheckToken as token,
     Pass as pass,
+    Select
 };
 
 class Code extends Pass
@@ -35,7 +36,10 @@ class Code extends Pass
         unset($_SESSION['2FA_token_ts']);
 
         // check if the code is stored in the database
-        $result = $this->select_count_double_dynamic($this->table, ['token', 'id'], [$code, $this->memberId]);
+        $select = new Select();
+        $formCodeQuery = ['selection' => "SELECT_COUNT_TWO", 'table'=> 'account', 'identifier1'=> 'token', 'identifier2'=>'id', 'bind'=>[$code, $this->memberId]];
+        $result =$select->combineSelect($formCodeQuery, 'selectCountFn', 'TWO_IDENTIFIERS');
+        // $result = $this->select_count_double_dynamic($this->table, ['token', 'id'], [$code, $this->memberId]);
         if (!$result) {
             throw new \Exception("Please check your credentials", 1);  
          //   header('Location: /loginError');

@@ -20,14 +20,14 @@ class Select extends Db
      *@param [type] $limit (example) LIMIT 5; use if you want order
      * @return string
      */
-    function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $orderBy = null, $limit = null)
+    public function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $orderBy = null, $limit = null)
     {
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
             'SELECT_AND' => "SELECT * FROM $table WHERE $identifier1 =? AND $identifier2 = ? $orderBy $limit",
-             'SELECT_NOT' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 = ? $orderBy $limit",
-              'SELECT_NOT_AND' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 != ? $orderBy $limit",
-               'SELECT_NOT_OR' => "SELECT * FROM $table WHERE $identifier1 !=? OR $identifier2 != ? $orderBy $limit",
+            'SELECT_NOT' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 = ? $orderBy $limit",
+            'SELECT_NOT_AND' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 != ? $orderBy $limit",
+            'SELECT_NOT_OR' => "SELECT * FROM $table WHERE $identifier1 !=? OR $identifier2 != ? $orderBy $limit",
             'SELECT_ALL' => "SELECT * FROM $table $orderBy $limit",
             'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_COL' => "SELECT $column FROM $table $orderBy $limit",
@@ -84,7 +84,7 @@ class Select extends Db
         }
     }
 
-      public function selectCountAll($table)
+    public function selectCountAll($table)
     {
 
         try {
@@ -92,6 +92,29 @@ class Select extends Db
             return $this->connect()->query($query)->fetchColumn();
         } catch (PDOException $e) {
             showError($e);
+        }
+    }
+
+    /**
+     * 
+     * @param array $array [selection, table, identifier1, identifier2(null), bind]
+     * @param mixed $callback the Select function albeit in string example - selectCountFn, selectFn
+     * @param string $switch to switch between ONE_IDENTIFIER or TWO_IDENTIFIERS
+     * @return mixed 
+     */
+
+    public function combineSelect(array $array, $callback, string $switch)
+    {
+        try {
+
+            $query = match($switch) {
+                "ONE_IDENTIFIER" => $this->formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1']),
+                "TWO_IDENTIFIERS" => $this->formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1'], identifier2: $array['identifier2']),
+            };
+
+            return $this->$callback($query, $array['bind']);
+        } catch (\Throwable $th) {
+            showError($th);
         }
     }
 }

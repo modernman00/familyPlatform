@@ -1,14 +1,11 @@
 <?php 
 
 namespace App\controller\admin;
-use App\classes\AllFunctionalities;
-
-
-class Dashboard extends AllFunctionalities {
+class Dashboard {
 
     function index ()
     {
-        view ('admin/base');
+        view ('admin/ReviewApps');
     }
 
 

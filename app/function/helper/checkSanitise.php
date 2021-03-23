@@ -54,7 +54,9 @@ function useEmailToFindData($inputData): array
 {
     var_dump($inputData['email']);
     $select = new Select;
-    $data = $select->select_from('account', 'email', $inputData['email']);
+    $query = $select->formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
+    $data = $select->selectFn(query: $query, bind: [$inputData['email']]);
+
     if (!$data) {
         throw new Exception("<h1>We cannot find your email</h1>");
     }

@@ -17,14 +17,14 @@ class CheckToken
      *
      * @return void
      */
-    function tokenCheck($token, $redirect)
+    static function tokenCheck($token, $redirect)
     {
         try {
-            $this->tokenCheck = $_SESSION[$token] ?? 1;
-            $this->postToken = $_POST[$token] ?? 2;
+            self::$tokenCheck = $_SESSION[$token] ?? 1;
+            self::$postToken = $_POST[$token] ?? 2;
             // invalidate $token stored in session
             unset($_SESSION[$token]);
-            if ($this->tokenCheck != $this->postToken) {
+            if (self::$tokenCheck != self::$postToken) {
                 header("Location: $redirect");
             }
         } catch (\Throwable $th) {

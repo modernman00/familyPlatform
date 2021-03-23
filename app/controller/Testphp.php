@@ -7,27 +7,36 @@ namespace App\controller;
 use App\classes\Select;
 use DateInterval;
 use DateTime;
+use Iterator;
 use PDO;
 use PDOException;
 
-class Testphp extends Select
+class Testphp extends Select implements Iterator
 {
     public $time = 90;
 
     public function index()
     {
 
-        //        //echo phpinfo();
-        //     //     // const BR = ;
-        //        // define("BR", "<br>");
+        $time = null;
+        $sch = null;
+        $_SESSION['ID'] = "ID";
+
+        $check = $time??=$sch ??= $_SESSION['ID'];
+
+        echo $check;
         //         // php7
         //         // Null Coalescing Assignment Operator
-        //         $number = null;
-        //         echo $number ??= "Value not getting it";
+                define("BR", "<br>");
+                $number = 23;
+                echo $number ??= "Value not getting it";
 
-        //         $number = [1, 2, 3, 3, 4, 5, 6];
-        //         $num = [10, 20, 30, 30, 40, 50, 60];
-        //         $name = ['olawale', 'james', 'emily'];
+                $number = [1, 2, 3, 3, 4, 5, 6];
+                $num = [10, 20, 30, 30, 40, 50, 60];
+                $name = ['olawale', 'james', 'emily'];
+                echo BR;
+                var_dump($number2 ??= "fhhfhf");
+                echo BR;
 
         //         $cBack = fn ($x) =>  $x * 3;
 
@@ -48,7 +57,7 @@ class Testphp extends Select
 
         //         $square = array_map($cBack, $number);
 
-        //         $point = strpos("wale", 'l');
+                    echo strpos("wale", 'l') .BR;
 
         //         // php8
 
@@ -56,19 +65,19 @@ class Testphp extends Select
 
         //         echo $point;
 
-        //         $combined = [...$number, ...$name, 23, "james"];
+                    $combined = [...$number, ...$name, 23, "james", "age" => 23];
 
-        //          printArr($combined);
+                    printArr($combined);
 
         //         //printArr($square);
 
-        //         $data = null;
+                $data = null;
 
-        //         $checkData = $data ?? "Nothing";
+                $checkData = $data ?? "Nothing";
 
-        //         $checkData ??= "Nobody";
+                echo $checkData ??= "Nobody";
 
-        //         //  echo $checkData;
+                echo BR;
 
         //         // echo phpinfo();
         //         // union type
@@ -95,24 +104,24 @@ class Testphp extends Select
         //         echo foo2($ten, $olp);
 
 
-        //         function getInput(int | float ...$number)
-        //         {
-        //             return array_sum($number);
-        //         }
-        //         echo BR;
-        //         echo getInput(12, 23, 44, 45);
+                function getInput(int | float ...$number)
+                {
+                    return array_sum($number);
+                }
+                echo BR;
+                echo getInput(12, 23, 44, 45).BR;
 
-        //         function getInput2(...$arg)
-        //         {
-        //             printArr($arg);
-        //         }
-        //         $age = [12, 14];
-        //         $dob = ["ade", "son"];
-        //         $arguments = [$age, $dob];
-        //         echo BR;
-        //         echo get_debug_type($arguments);
+                function getInput2(...$arg)
+                {
+                    printArr($arg);
+                }
+                $age = [12, 14];
+                $dob = ["ade", "son"];
+                $arguments = [$age, $dob];
+                echo BR;
+                echo get_debug_type($arguments).BR;
 
-        //         echo getInput2($arguments[1]);
+        echo getInput2($arguments[1]);
 
         //         // named arguments
 
@@ -125,17 +134,17 @@ class Testphp extends Select
 
         //     //     //
 
-        //         $_SESSION['NAME'] = "Olawale";
-        //         $_SESSION['EMAIL'] = "wale@yahoo.com";
+                $_SESSION['NAME'] = "Olawale";
+                $_SESSION['EMAIL'] = "wale@yahoo.com";
 
-        //         $_SESSION['DATE'] ??= "15TH JULY";
-        //         echo $_SESSION['DATE'];
+                $_SESSION['DATE'] ??= "15TH JULY";
+                echo $_SESSION['DATE']." = USING THE ??=" .BR;
 
-        //         echo \str_contains('we are doing well', 'well');
-        //         echo BR;
-        //         echo str_start('wale', 'ola');
-        //         echo BR;
-        //         echo \str_starts_with('Olawale', 'Ol');
+                echo \str_contains('we are doing well', 'well'). " = USING THE str_contains function";
+                echo BR;
+                echo str_start('wale', 'ola');
+                echo BR;
+                echo \str_starts_with('Olawale', 'Ol');
 
         //         // null safe operators
         //         echo BR;
@@ -205,6 +214,8 @@ class Testphp extends Select
         //             echo "<h1>this is the way</h1> " . $set;
 
         $this->getGenerator3();
+        $this->printIterable(["a", "b", "c"]);
+        echo $this->current();
     }
 
 
@@ -232,11 +243,9 @@ class Testphp extends Select
     {
         function getRange2($max = 10)
         {
-            for ($i = 1; $i < $max; $i++)
-            {
+            for ($i = 1; $i < $max; $i++) {
                 yield $i;
             }
-                
         }
 
         foreach (getRange2(PHP_INT_MAX) as $range) {
@@ -262,13 +271,55 @@ class Testphp extends Select
 
     public function getGenerator4()
     {
-        function getRange4 ($max = 10) {
+        function getRange4($max = 10)
+        {
             for ($i = 1; $i < $max; $i++) {
                 $injected = yield $i;
 
-                if ($injected === 'stop') return;
+                if ($injected === 'stop') {
+                    return;
+                }
             }
         }
     }
 
+    function printIterable(iterable $myIterable)
+    {
+        foreach ($myIterable as $item) {
+            echo $item;
+        }
+    }
+
+    function current()
+    {
+        $arr = ["a", "b", "c", "d"];
+        $arrayValue = array_values($arr);
+        return $arrayValue[0];
+    }
+
+    public function key()
+    {
+        $pointer =0;
+        return $pointer;
+    }
+
+    public function next()
+    {
+        $pointer =0;
+        return $pointer++;
+    }
+
+    public function rewind()
+    {
+
+        return $pointer = 0;
+    }
+
+    public function valid()
+    {
+        // count() indicates how many items are in the list
+        $pointer =0;
+        $arr = ["a", "b", "c", "d"];
+        return $pointer < count($arr);
+    }
 }

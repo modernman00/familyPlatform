@@ -69,9 +69,15 @@
 
                 @php 
 
-                $result = new \App\classes\AllFunctionalities;
-                $result = $result->select_count("account", "status", "new");
-
+                $result = new \App\classes\Select;
+                $array = [
+                    'selection' => "SELECT_COUNT_ONE",
+                    'table' => 'account',
+                    'identifier1'=> 'status',
+                    'bind' => ['new']
+                ];
+                $callback = "selectCountFn";
+                $result = $result->combineSelect($array, $callback, "ONE_IDENTIFIER");
 
 
                 @endphp
