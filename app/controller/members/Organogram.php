@@ -8,18 +8,12 @@ use App\model\{
     SingleCustomerData
 };
 
-// use App\classes\{
-//     Sanitise,
-//     ProcessImg
-// };
-
 class Organogram extends SingleCustomerData
 {
     public function index()
     {
         $id =  checkInput($_GET['id']);
         $data = $this->getCustomerData($id);
-       // printArr($data);
         view('member/organogram', compact('data'));
     }
 }

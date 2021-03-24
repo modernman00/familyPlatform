@@ -1,10 +1,7 @@
 <?php
 
 namespace App\classes;
-
-use PDO;
 use PDOException;
-use Exception;
 use App\classes\Db;
 
 class AllFunctionalities extends Db

@@ -58,8 +58,9 @@ class ProfilePage extends ProcessImg
 
             // printArr($this->allPostData);
 
-            view('member/profile3', [
-                'data' => $this->memberData, 'allData' => $this->allPostData,
+            view('member/profilePage', [
+                'data' => $this->memberData, 
+                'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
                 'pics2Id' => $this->getAllPics

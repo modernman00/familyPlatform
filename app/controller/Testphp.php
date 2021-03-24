@@ -8,8 +8,7 @@ use App\classes\Select;
 use DateInterval;
 use DateTime;
 use Iterator;
-use PDO;
-use PDOException;
+
 
 class Testphp extends Select implements Iterator
 {
@@ -22,21 +21,21 @@ class Testphp extends Select implements Iterator
         $sch = null;
         $_SESSION['ID'] = "ID";
 
-        $check = $time??=$sch ??= $_SESSION['ID'];
+        $check = $time ??= $sch ??= $_SESSION['ID'];
 
         echo $check;
         //         // php7
         //         // Null Coalescing Assignment Operator
-                define("BR", "<br>");
-                $number = 23;
-                echo $number ??= "Value not getting it";
+        define("BR", "<br>");
+        $number = 23;
+        echo $number ??= "Value not getting it";
 
-                $number = [1, 2, 3, 3, 4, 5, 6];
-                $num = [10, 20, 30, 30, 40, 50, 60];
-                $name = ['olawale', 'james', 'emily'];
-                echo BR;
-                var_dump($number2 ??= "fhhfhf");
-                echo BR;
+        $number = [1, 2, 3, 3, 4, 5, 6];
+        $num = [10, 20, 30, 30, 40, 50, 60];
+        $name = ['olawale', 'james', 'emily'];
+        echo BR;
+        var_dump($number2 ??= "fhhfhf");
+        echo BR;
 
         //         $cBack = fn ($x) =>  $x * 3;
 
@@ -57,7 +56,7 @@ class Testphp extends Select implements Iterator
 
         //         $square = array_map($cBack, $number);
 
-                    echo strpos("wale", 'l') .BR;
+        echo strpos("wale", 'l') . BR;
 
         //         // php8
 
@@ -65,19 +64,19 @@ class Testphp extends Select implements Iterator
 
         //         echo $point;
 
-                    $combined = [...$number, ...$name, 23, "james", "age" => 23];
+        $combined = [...$number, ...$name, 23, "james", "age" => 23];
 
-                    printArr($combined);
+        printArr($combined);
 
         //         //printArr($square);
 
-                $data = null;
+        $data = null;
 
-                $checkData = $data ?? "Nothing";
+        $checkData = $data ?? "Nothing";
 
-                echo $checkData ??= "Nobody";
+        echo $checkData ??= "Nobody";
 
-                echo BR;
+        echo BR;
 
         //         // echo phpinfo();
         //         // union type
@@ -104,22 +103,22 @@ class Testphp extends Select implements Iterator
         //         echo foo2($ten, $olp);
 
 
-                function getInput(int | float ...$number)
-                {
-                    return array_sum($number);
-                }
-                echo BR;
-                echo getInput(12, 23, 44, 45).BR;
+        function getInput(int | float ...$number)
+        {
+            return array_sum($number);
+        }
+        echo BR;
+        echo getInput(12, 23, 44, 45) . BR;
 
-                function getInput2(...$arg)
-                {
-                    printArr($arg);
-                }
-                $age = [12, 14];
-                $dob = ["ade", "son"];
-                $arguments = [$age, $dob];
-                echo BR;
-                echo get_debug_type($arguments).BR;
+        function getInput2(...$arg)
+        {
+            printArr($arg);
+        }
+        $age = [12, 14];
+        $dob = ["ade", "son"];
+        $arguments = [$age, $dob];
+        echo BR;
+        echo get_debug_type($arguments) . BR;
 
         echo getInput2($arguments[1]);
 
@@ -134,17 +133,17 @@ class Testphp extends Select implements Iterator
 
         //     //     //
 
-                $_SESSION['NAME'] = "Olawale";
-                $_SESSION['EMAIL'] = "wale@yahoo.com";
+        $_SESSION['NAME'] = "Olawale";
+        $_SESSION['EMAIL'] = "wale@yahoo.com";
 
-                $_SESSION['DATE'] ??= "15TH JULY";
-                echo $_SESSION['DATE']." = USING THE ??=" .BR;
+        $_SESSION['DATE'] ??= "15TH JULY";
+        echo $_SESSION['DATE'] . " = USING THE ??=" . BR;
 
-                echo \str_contains('we are doing well', 'well'). " = USING THE str_contains function";
-                echo BR;
-                echo str_start('wale', 'ola');
-                echo BR;
-                echo \str_starts_with('Olawale', 'Ol');
+        echo \str_contains('we are doing well', 'well') . " = USING THE str_contains function";
+        echo BR;
+        echo str_start('wale', 'ola');
+        echo BR;
+        echo \str_starts_with('Olawale', 'Ol');
 
         //         // null safe operators
         //         echo BR;
@@ -215,7 +214,12 @@ class Testphp extends Select implements Iterator
 
         $this->getGenerator3();
         $this->printIterable(["a", "b", "c"]);
-        echo $this->current();
+        echo $this->current(); 
+        $_SESSION['TEST'] = "test";
+        echo BR;
+        $_SESSION['TEST'] ??= throw new \Exception("Error Processing Request", 1);
+
+
     }
 
 
@@ -299,13 +303,13 @@ class Testphp extends Select implements Iterator
 
     public function key()
     {
-        $pointer =0;
+        $pointer = 0;
         return $pointer;
     }
 
     public function next()
     {
-        $pointer =0;
+        $pointer = 0;
         return $pointer++;
     }
 
@@ -318,7 +322,7 @@ class Testphp extends Select implements Iterator
     public function valid()
     {
         // count() indicates how many items are in the list
-        $pointer =0;
+        $pointer = 0;
         $arr = ["a", "b", "c", "d"];
         return $pointer < count($arr);
     }

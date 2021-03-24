@@ -33,15 +33,15 @@
         "philo/laravel-blade": "^3.1",
         "filp/whoops": "^2.7",
           "phpmailer/phpmailer": "^6.1",
-        "firebase/php-jwt": "^5.2",
-        "roave/security-advisories": "dev-master"
+        "firebase/php-jwt": "^5.2"
     },
     
     "require-dev": {
         "phpmd/phpmd" : "@stable",
         "vimeo/psalm": "^4.6",
         "psalm/attributes": "^0.1.0",
-        "phpstan/phpstan": "^0.12.81"
+        "phpstan/phpstan": "^0.12.81",
+        "roave/security-advisories": "dev-latest"
     },
 
             "bin-dir": ["local-php-security-checker"],

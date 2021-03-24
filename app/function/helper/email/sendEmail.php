@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -32,8 +34,8 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 		$mail->Subject = $subject;
 		$mail->Body    = $message;
 		$mail->AltBody = BODY_TEXT;
-		$send = $mail->send();
-		return $send;	
+		return $mail->send();
+	
 	} catch (Exception $e) {
 		echo errorMsg($mail, $e);
 	}

@@ -27,13 +27,18 @@ function notifyCustOfLogIn($data) : mixed
 function generateSendTokenEmail($data) : mixed
 {
         $id = $data['id'];
+        // 1. check if email exists 
         $email = checkInputEmail($data['email']);
+
+        //2. generate token and update table
         $deriveToken = generateUpdateTableWithToken($id);  
         //TODO send text to the user with the code
-        // ACCOMPANY EMAIL CONTENT             
+
+        //3. ACCOMPANY EMAIL CONTENT             
         $emailData = ['token' => $deriveToken, 'email' => $email];
-        $generateEmailArray = genEmailArray("msg/customer/token", $emailData, "FAMILY - TOKEN", null,null);
-        return sendEmailWrapper($generateEmailArray, 'member');      
+        $generateEmailArray = genEmailArray(viewPath: "msg/customer/token", data: $emailData, subject: "TOKEN");
+
+        return sendEmailWrapper(var: $generateEmailArray, recipientType:'member');      
 }
 
 
@@ -65,7 +70,7 @@ function checkInputEmail($data): string
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     $data = strip_tags($data);
-    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = htmlentities($data);
     $data = filter_var($data, FILTER_SANITIZE_EMAIL);
     return $data;
 }

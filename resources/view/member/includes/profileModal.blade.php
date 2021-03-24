@@ -7,6 +7,9 @@
      
       @if ($data['img'])
               <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+      @else
+      <img src="" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+
       @endif
   
     </div>

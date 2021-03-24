@@ -1,24 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
     Select,
-    VerifyPassword,
 };
 
 use Exception;
-use App\controller\Base;
 
-class Login extends Base
+class Login extends Select
 {
     private const ACCOUNT = "account";
     private const ADMIN = "/lasu";
     private const LOGIN = "/login";
     private const LOGIN_TYPE = "/loginType";
 
-    function index()
+    public function index()
     {
         view('login');
     }
@@ -30,10 +30,6 @@ class Login extends Base
         return view('login', compact('formAction'));
     }
 
-    /**
-     * Login page for admin
-     */
-
     public function showAdmin()
     {
         $formAction = self::ADMIN;
@@ -44,7 +40,6 @@ class Login extends Base
     public function login()
     {
         try {
-            // printArr($_SESSION);
             CheckToken::tokenCheck('token', '/error/token');
 
             $minMaxData = [
@@ -52,15 +47,19 @@ class Login extends Base
                 'min' => [5, 3],
                 'max' => [35, 65]
             ];
-             
+            // sanitise the post data 
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
+            // check if email exist
             $data = useEmailToFindData($sanitisedData);
 
+            // check password 
             checkPassword($sanitisedData, $data);
-            //4. control for admin login
+
+            //4. control for login
             $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
+            // Login now 
             if ($detectIfAdminOrCustomer === self::ADMIN) {
                 $this->adminLogin($sanitisedData);
             } else if ($detectIfAdminOrCustomer === self::LOGIN) {
@@ -73,43 +72,48 @@ class Login extends Base
 
     private function customerLogin($data)
     {
-        $select = new Select;
 
-        $query = $select->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
+        $query = $this->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
 
-        $checkAccountIsApproved = $select->selectFn(query: $query, bind: [$data['email'], 'approved']);
+        $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
             throw new Exception("We do not recognise your account", 1);
         }
-        generateSendTokenEmail($data);
-        $_SESSION['identifyCust'] = $data['id'];
-        $_SESSION['login'] = 1;
-        session_regenerate_id();
-        header('Location: LOGIN/code');
+
+        if (generateSendTokenEmail($data)) {
+
+            $_SESSION['identifyCust'] = $data['id'];
+            $_SESSION['login'] = 1;
+
+            session_regenerate_id();
+
+            header('Location: /login/code');
+        }
     }
 
     private function adminLogin($sanitisedData)
     {
-        $select = new Select;
         $getAdminCode = getenv('CODING');
 
-        $query = $select->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
+        $query = $this->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
 
-        $outcome = $select->selectFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
+        $outcome = $this->selectFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
 
         if (!$outcome) {
             throw new Exception("Your input to code is not recognised");
-        } 
+        }
 
         loggedDetection("http://olaogun.dev.com/lasu");
+
         session_regenerate_id();
-       header('Location: /admin/reviewApps');
+
+        header('Location: /admin/reviewApps');
     }
 
     function adminSignOut()
     {
-        $url = $_SESSION[self::LOGIN_TYPE] ?? 'LOGIN';
+        $url = $_SESSION[self::LOGIN_TYPE] ?? '/';
         session_regenerate_id();
         session_destroy();
         setcookie('PHPSESSID', 0, time() - 3600);

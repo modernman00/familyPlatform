@@ -1,16 +1,16 @@
 <?php
+declare(strict_types =1);
 
 namespace App\controller\login;
 
 use Exception;
 
 use App\classes\{
-    CheckToken as token,
-    allFunctionalities
+    CheckToken, Pass
 };
 use Throwable;
 
-class PassChange extends allFunctionalities
+class PassChange extends Pass
 {
     public $table = 'account';
 
@@ -19,9 +19,8 @@ class PassChange extends allFunctionalities
         // unset unneeded sessions
         unset($_SESSION['changePW'], $_SESSION['loggedIn'], $_SESSION['memberId']);
 
-        if (!isset($_SESSION['email'])) {
-            throw new Exception("<h1>We cant find your credentials </h1> ", 1);
-        }
+        $_SESSION['email'] ??= throw new Exception("<h1>We cant find your credentials </h1> ", 1);
+
         return view('login/passChange');
     }
 
@@ -29,22 +28,30 @@ class PassChange extends allFunctionalities
     function verify()
     {
         try {
-            new token('token', '/login/changePW');
+            //1.  token verified
+            CheckToken::tokenCheck('token', '/login/changePW');
+
             $reDirect = $_SESSION['loginType'];  // was set on the login page
-            $cleanData = getSanitisedInputData($_POST, null);
+            // 2. sanitise Post Data
+            $cleanData = getSanitisedInputData(inputData: $_POST);
+
+            // 3. Check if email exists
             $email = checkInputEmail($_SESSION['email']);
             $result = $this->update($this->table, 'password', $cleanData['password'], 'email', $email);
             if (!$result) {
                 throw new Exception("Password cannot be updated");
             }
-            // set the email data - path, subject etc
-            $emailData = genEmailArray('msg/pwdChange', ['email' => $email], 'PASSWORD CHANGE', NULL, NULL);
-            // send 
-            sendEmailWrapper($emailData, 'member');
+
+            // 4. set the email data - path, subject etc
+            $emailData = genEmailArray(viewPath: 'msg/pwdChange', data: ['email' => $email], subject: 'PASSWORD CHANGE');
+            // 4.1 send 
+            sendEmailWrapper(var :$emailData, recipientType:'member');
+
             session_regenerate_id();
             header("Location: $reDirect");
             unset($_SESSION['loginType']);
-        } catch (\Throwable $e) {
+
+        } catch (Throwable $e) {
             showError($e);
         }
     }

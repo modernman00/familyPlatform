@@ -6,9 +6,6 @@ namespace App\classes;
 class CheckToken
 {
 
-    public  $tokenCheck;
-    public  $postToken;
-
     /**
      * Undocumented function
      *
@@ -20,11 +17,11 @@ class CheckToken
     static function tokenCheck($token, $redirect)
     {
         try {
-            self::$tokenCheck = $_SESSION[$token] ?? 1;
-            self::$postToken = $_POST[$token] ?? 2;
+            $tokenCheck = $_SESSION[$token] ?? "bad";
+            $postToken = $_POST[$token] ?? "bad";
             // invalidate $token stored in session
             unset($_SESSION[$token]);
-            if (self::$tokenCheck != self::$postToken) {
+            if ($tokenCheck != $postToken) {
                 header("Location: $redirect");
             }
         } catch (\Throwable $th) {

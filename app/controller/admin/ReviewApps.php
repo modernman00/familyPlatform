@@ -5,38 +5,26 @@ declare(strict_types=1);
 namespace App\controller\admin;
 
 use App\model\ReviewAppsData;
-use App\classes\Select;
 use Exception;
 use App\classes\AllFunctionalities;
 
-class ReviewApps extends AllFunctionalities
+class ReviewApps extends ReviewAppsData
 {
     private $id;
-    private $rand;
-    private $custId;
-
-    function __construct()
-    {
-
-        $this->rand = rand(10, 900);
-    }
+    private const REDIRECT = "Location: /admin/reviewApps";
 
     // get the new application page 
     function get()
     {
-        $select = new ReviewAppsData;
-        $result = $select->index();
+        $result = $this->index();
         return view('admin/ReviewApps', ['result' => $result, 'no' => 1]);
     }
 
     // once the $GET IS clicked, use this to get the customers data and set customers id as well
-    private function getCustomerData()
+    private function getCustomerData() : array
     {
         $this->id = checkInput($_GET['id']);
-        printArr($_GET);
-        $select = new Select;
-        $data = $select->joinManyCondition5('contact', 'personal', 'interest', 'otherFamily', 'account', 'id', $this->id);
-
+        $data = $this->getWithId($this->id);
         foreach ($data as $data2);
 
         // // Set the customer Id
@@ -56,22 +44,19 @@ class ReviewApps extends AllFunctionalities
         $sendEmailArray = genEmailArray(
             $viewPath,
             $data,
-            $subject,
-            null,
-            null
+            $subject
         );
 
         // send the email
-        return sendEmailWrapper($sendEmailArray, $emailRoute);
+        return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
     }
     // // update the account status in the decision table 
     private function updateAccountStatus($acctStatus)
     {
-        $checkUpdateStatus = $this->update('account', 'status', $acctStatus, 'id', $this->id);
+        $updateClass = new AllFunctionalities();
+        $checkUpdateStatus = $updateClass->update('account', 'status', $acctStatus, 'id', $this->id);
 
-        if (!$checkUpdateStatus) throw new Exception("Error Processing Request - account status");
-
-        return $checkUpdateStatus;
+       return $checkUpdateStatus ??= throw new Exception("Error Processing Request - account status");
     }
 
     function approve()
@@ -81,7 +66,7 @@ class ReviewApps extends AllFunctionalities
             $this->toSendEmail("msg/admin/approve", $data, "Membership Approval for {$data['firstName']}", 'member');
 
             $this->updateAccountStatus('approved');
-            header('Location: /admin/reviewApps');
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -93,7 +78,7 @@ class ReviewApps extends AllFunctionalities
             $data = $this->getCustomerData();
             $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'customer');
             $this->updateAccountStatus('cancel');
-            header('Location: /admin/reviewApps');
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -107,7 +92,7 @@ class ReviewApps extends AllFunctionalities
             $data['email'] = 'application@loaneasyfinance.com';
             $this->toSendEmail("msg/admin/delete", $data, "Delete App", 'internal');
             $this->updateAccountStatus('deleted');
-            header('Location: /admin/reviewApps');
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -119,7 +104,7 @@ class ReviewApps extends AllFunctionalities
             $data = $this->getCustomerData();
             $this->toSendEmail("msg/admin/decline", $data, 'Decision', 'member');
             $this->updateAccountStatus('declined');
-            header('Location: /admin/reviewApps');
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
