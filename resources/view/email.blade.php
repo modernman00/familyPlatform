@@ -236,13 +236,13 @@
 
                                            @yield('reference')
 
-                                        </p>
+                                        {{--  </p>
 
                                         <p style="line-height: 24px; margin-bottom:15px;"> Hello 
 
                                            @yield('name'),
 
-                                        </p>
+                                        </p>  --}}
                                         <p style="line-height: 24px;margin-bottom:15px;">
 
                                             @yield('content')

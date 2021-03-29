@@ -16,7 +16,7 @@ use App\classes\{
  */
 function checkPassword($inputData, $databaseData)
 {
-    try {
+  
         $textPassword = $inputData['password'];
         $dbPassword = $databaseData['password'];
         $id = $databaseData['id'];
@@ -26,7 +26,7 @@ function checkPassword($inputData, $databaseData)
         if (password_verify($textPassword, $dbPassword) === false) {
             $error = 'There is a problem with your credential!';
             echo json_encode(['error' => $error]);
-            throw new Exception("<h1>There is a problem with your login credential! $textPassword ---- $dbPassword</h1>");
+            throw new Exception("<h1>There is a problem with your login credential!</h1>");
         }
         if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
             // If so, create a new hash, and replace the old one
@@ -35,13 +35,8 @@ function checkPassword($inputData, $databaseData)
             $passUpdate = new AllFunctionalities();
             return $passUpdate->updateMultiplePOST($data, $table, 'id');
         }
-    } catch (\Exception $e) {
-        showError($e);
-    } catch (\PDOException $e) {
-        showError($e);
-    }
+    
 }
-
 
 
 /**
@@ -52,9 +47,8 @@ function checkPassword($inputData, $databaseData)
  */
 function useEmailToFindData($inputData): array
 {
-    var_dump($inputData['email']);
     $select = new Select;
-    $query = $select->formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
+    $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
     $data = $select->selectFn(query: $query, bind: [$inputData['email']]);
 
     if (!$data) {
@@ -93,7 +87,6 @@ function getSanitisedInputData($inputData, $minMaxData = NULL)
 function generateAuthToken()
 {
     return mb_strtoupper(bin2hex(random_bytes(4)));
-
 }
 /**
  * Helps to generate token, and it updates the login table as well

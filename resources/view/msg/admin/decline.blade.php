@@ -1,13 +1,8 @@
 @extends ('email')
 @section('title', 'email')
 
-{{--  
-<b> APPLICATION REF : {{ $data['id'] }} </b>
-<br />
-<br>  --}}
-
 @section('subject') 
-    MEMBERSHIP APPROVAL NOTIFICATION for {{ $data['firstName'] }} {{ $data['lastName'] }} 
+    MEMBERSHIP DECISION NOTIFICATION for {{ $data['firstName'] }} {{ $data['lastName'] }} 
 @endsection
 
 @section('reference') {{ $data['id'] }} @endsection
@@ -15,9 +10,9 @@
 @section('content')
 <p>
 
-Hello,<br><br>
-{{ $data['firstName'] }} {{ $data['lastName'] }}'s application has been cancelled .<br><br>
-            Therefore it can now be managed the customer account from admin page on the portal.  <br><br>Thanks.<br><br>
+ Hello
+    {{ $data['firstName'] }} {{ $data['lastName'] }}, <br><br> Your application for membership of the Olaogun family platform has
+    been declined.<br><br>Thanks.<br><br>
            
 
 @endsection

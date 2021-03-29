@@ -2,7 +2,6 @@
 
 namespace App\classes;
 
-use PDO;
 use PDOException;
 use App\classes\Db;
 
@@ -20,7 +19,7 @@ class Select extends Db
      *@param [type] $limit (example) LIMIT 5; use if you want order
      * @return string
      */
-    public function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $orderBy = null, $limit = null)
+    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $orderBy = null, $limit = null)
     {
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
@@ -29,7 +28,7 @@ class Select extends Db
             'SELECT_NOT_AND' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 != ? $orderBy $limit",
             'SELECT_NOT_OR' => "SELECT * FROM $table WHERE $identifier1 !=? OR $identifier2 != ? $orderBy $limit",
             'SELECT_ALL' => "SELECT * FROM $table $orderBy $limit",
-            'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy $limit",
+            'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy " .$limit,
             'SELECT_COL' => "SELECT $column FROM $table $orderBy $limit",
             'SELECT_GREATER' => "SELECT * FROM $table WHERE $identifier1 > ? $orderBy $limit",
             'SELECT_GREATER_EQUAL' => "SELECT * FROM $table WHERE $identifier1 > ? OR $identifier2 = ? $orderBy $limit",
@@ -57,6 +56,18 @@ class Select extends Db
         try {
             $sql = $query;
             $result = $this->connect()->prepare($sql);
+            $result->execute($bind);
+            return $result->fetchAll();
+        } catch (PDOException $e) {
+            showError($e);
+        }
+    }
+
+     public static function selectFn2(string $query, array $bind = null): string|array|int
+    {
+        try {
+            $sql = $query;
+            $result = self::connect2()->prepare($sql);
             $result->execute($bind);
             return $result->fetchAll();
         } catch (PDOException $e) {

@@ -59,7 +59,7 @@ class ReviewApps extends ReviewAppsData
        return $checkUpdateStatus ??= throw new Exception("Error Processing Request - account status");
     }
 
-    function approve()
+    public function approve()
     {
         try {
             $data = $this->getCustomerData();
@@ -72,11 +72,11 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    function cancel()
+    public function cancel()
     {
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'customer');
+            $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'member');
             $this->updateAccountStatus('cancel');
             header(self::REDIRECT);
         } catch (\Throwable $th) {
@@ -84,7 +84,7 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    function delete()
+    public function delete()
     {
         try {
 
@@ -98,7 +98,7 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    function decline()
+    public function decline()
     {
         try {
             $data = $this->getCustomerData();

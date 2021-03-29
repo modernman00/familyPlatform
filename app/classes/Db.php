@@ -8,22 +8,23 @@ use App\classes\CheckToken;
 
 class Db extends CheckToken
 {
-    private function dbVariables()
+    private static function dbVariables()
     {
         return [
             'host' => getenv('DB_HOST'),
-            'name'=> getenv('DB_NAME'),
-            'username'=>getenv('DB_USERNAME'),
-            'password'=>getenv("DB_PASSWORD")
+            'name' => getenv('DB_NAME'),
+            'username' => getenv('DB_USERNAME'),
+            'password' => getenv("DB_PASSWORD")
         ];
-
     }
 
-    function connect()
+    public function connect()
     {
         try {
-            $dbVar = $this->dbVariables();
-            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}", $dbVar['username'], $dbVar['password']);
+            $dbVar = self::dbVariables();
+            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}", $dbVar['username'], $dbVar['password'], array(
+                PDO::ATTR_PERSISTENT => true
+            ));
 
             $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -34,6 +35,25 @@ class Db extends CheckToken
             echo "Connection Failed: $errorMsg ";
         }
     }
+
+    public static function connect2()
+    {
+        try {
+            $dbVar = self::dbVariables();
+            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}", $dbVar['username'], $dbVar['password'], array(
+                PDO::ATTR_PERSISTENT => true
+            ));
+
+            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $conn;
+        } catch (PDOException $e) {
+            $errorMsg = $e->getMessage();
+            echo "Connection Failed: $errorMsg ";
+        }
+    }
+
+
 
     function connectSql()
     {

@@ -51,20 +51,20 @@
                             </a>
                         </td>
                           <td>
-                              <a href="/admin/decline?id={{ $data['id'] }}" data-toggle="tooltip"
+                              <a href="/admin/reviewApps/decline?id={{ $data['id'] }}" data-toggle="tooltip"
                               onClick="javascript: return confirm('Are you sure you want to decline this application?');"
                               title="Decline">
                             <i class="far fa-thumbs-up fa-lg fa-rotate-180" style="color:#A21016"></i>
                                 </a>
                         </td>
-                          <td><a href="/admin/cancel?id={{ $data['id'] }}"
+                          <td><a href="/admin/reviewApps/cancel?id={{ $data['id'] }}"
                           data-toggle="tooltip"
                               onClick="javascript: return confirm('Are you sure you want to cancel this application?');"
                               title="Cancel">
                           <i class="far fa-window-close fa-lg" style="color:#F00A0A"></i>
                           </a>
                         </td>
-                        <td><a href="/admin/delete?id={{ $data['id'] }}"
+                        <td><a href="/admin/reviewApps/delete?id={{ $data['id'] }}"
                         data-toggle="tooltip"
                               onClick="javascript: return confirm('Are you sure you want to delete this application?');"
                               title="Delete">

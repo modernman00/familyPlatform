@@ -50,20 +50,23 @@ class Login extends Select
             // sanitise the post data 
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
-            // check if email exist
+            // check if email exist and get the database password
             $data = useEmailToFindData($sanitisedData);
 
-            // check password 
-            checkPassword($sanitisedData, $data);
+            if ($data) {
 
-            //4. control for login
-            $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
+                // check password 
+                checkPassword(inputData:$sanitisedData, databaseData:$data);
 
-            // Login now 
-            if ($detectIfAdminOrCustomer === self::ADMIN) {
-                $this->adminLogin($sanitisedData);
-            } else if ($detectIfAdminOrCustomer === self::LOGIN) {
-                $this->customerLogin($data);
+                //4. control for login
+                $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
+
+                // Login now 
+                if ($detectIfAdminOrCustomer === self::ADMIN) {
+                    $this->adminLogin($sanitisedData);
+                } else if ($detectIfAdminOrCustomer === self::LOGIN) {
+                    $this->customerLogin($data);
+                }
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -73,7 +76,7 @@ class Login extends Select
     private function customerLogin($data)
     {
 
-        $query = $this->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
+        $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
 
         $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
@@ -96,7 +99,7 @@ class Login extends Select
     {
         $getAdminCode = getenv('CODING');
 
-        $query = $this->formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
+        $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
 
         $outcome = $this->selectFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
 
@@ -116,7 +119,7 @@ class Login extends Select
         $url = $_SESSION[self::LOGIN_TYPE] ?? '/';
         session_regenerate_id();
         session_destroy();
-        setcookie('PHPSESSID', 0, time() - 3600);
+        setcookie('PHPSESSID', "", time() - 3600);
         header("Location: $url");
     }
 }

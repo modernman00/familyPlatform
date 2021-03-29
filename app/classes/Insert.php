@@ -30,7 +30,7 @@ class Insert extends Db
             if (!$outcome) {
                 throw new Exception("Not able to execute data", 1);
             }
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             showError($e);
         } catch (\Throwable $th) {
             showError($e);

@@ -37,7 +37,7 @@ class BuildFormBulma extends AlterTable
      * title of section ( work_information => title)
      */
 
-    function __construct($array)
+    function __construct(array $array)
     {
         $this->question = $array;
         $this->token = urlencode(base64_encode((random_bytes(32))));
@@ -121,7 +121,7 @@ class BuildFormBulma extends AlterTable
 
     public function genForm()
     {
-        // set the array key
+        // set the array VALUE
         $this->setEntValue();
         // set the array key
         $this->setEntKey();

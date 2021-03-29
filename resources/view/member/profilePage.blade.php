@@ -15,11 +15,12 @@
 
   {{-- POST MESSAGE --}}
    <div class="w3-col m7">
+
       @include('member/includes/postMessage')
       {{-- DISPLAY POST --}}
-      {{-- @for ($x = 0; $x < count($allData); $x++)  --}}
+
       @foreach ($allData as $allData)
-          @include('member/includes/postCard')  
+          @include('member/includes/postCard') 
       @endforeach
          
       {{-- @endfor  --}}
