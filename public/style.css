@@ -162,6 +162,10 @@ footer .glyphicon {
   font-size: 2rem;
 }
 
+.small {
+  color: blue;
+}
+
 .allMember_card {
   display: flex;
 }

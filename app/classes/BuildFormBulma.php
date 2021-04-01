@@ -300,7 +300,7 @@ class BuildFormBulma extends AlterTable
             } elseif ($this->EntValue[$i] === 'button') {
                 echo "<div class='field'>
                     <p class='control'>
-                    <button name= 'submit' type = 'button' class='button is-warning submit'>
+                    <button name= 'submit' type = 'button' class='button is-warning button'>
                     Submit
                     </button>
                     </p>

@@ -2517,13 +2517,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Input", function() { return Input; });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/global.js");
 
-"use strict";
+
+
 /**
  * 
  * @param {That is the obj name} objData 
  * @param {* this is the div id} htmlId 
  */
-
 
 var Input = function Input(objData, htmlId) {
   try {
@@ -2615,6 +2615,59 @@ try {
 } catch (error) {
   Object(_global__WEBPACK_IMPORTED_MODULE_2__["showError"])(error);
 }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/login/submitFormLogin.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/login/submitFormLogin.js ***!
+  \****************************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+
+
+
+
+
+var formInput = document.querySelectorAll('.login');
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
+
+var process = function process() {
+  // clear error from the form
+  formData.clearError(); // set the maxlength, check the length of the value, raise error
+
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckLogin"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckLogin"].maxLength.max);
+};
+
+process();
+qSel('.button').addEventListener('click', function () {
+  try {
+    console.log('it worked');
+    formData.emailVal(); // sanitise email
+
+    formData.massValidate(); // validate and sanitise data
+
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])("it worked");
+
+    if (formData.error.length <= 0) {
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit'; //console.log('submitted')
+    } else {
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+      alert('The form cannot be submitted. Please check the errors');
+      process();
+    }
+  } catch (e) {
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["showError"])(e);
+  }
+});
 
 /***/ }),
 
@@ -2842,26 +2895,26 @@ var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].maxLength.max); //real time check 
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckRegister"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckRegister"].maxLength.max); //real time check 
 
   formData.realTimeServer('spouseMobile', "/search?attribute=spouseMobile&subject=spouse&hint", 'spouseMobile_error');
   formData.realTimeServer('fatherMobile', '/search?attribute=fatherMobile&subject=father&hint', 'fatherMobile_error');
   formData.realTimeServer('motherMobile', '/search?attribute=motherMobile&subject=mother&hint', 'motherMobile_error'); // check if password matches real time
 
-  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheck"].password.pwd2 // dataToCheck.password.err
+  formData.matchInput(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckRegister"].password.pwd, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckRegister"].password.pwd2 // dataToCheckRegister.password.err
   ); // check if they have a father yes
-  // formData.isChecked(dataToCheck.familyCheck.father[0],
-  // 	dataToCheck.familyCheck.father[1],
+  // formData.isChecked(dataToCheckRegister.familyCheck.father[0],
+  // 	dataToCheckRegister.familyCheck.father[1],
   // 	'fatherEmail_error'
   // )
   // // check if they have a mother yes
-  // formData.isChecked(dataToCheck.familyCheck.mother[0],
-  // 	dataToCheck.familyCheck.mother[1],
+  // formData.isChecked(dataToCheckRegister.familyCheck.mother[0],
+  // 	dataToCheckRegister.familyCheck.mother[1],
   // 	'motherEmail_error'
   // )
   // // check if they have a spouse yes
-  // formData.isChecked(dataToCheck.familyCheck.spouse[0],
-  // 	dataToCheck.familyCheck.spouse[1],
+  // formData.isChecked(dataToCheckRegister.familyCheck.spouse[0],
+  // 	dataToCheckRegister.familyCheck.spouse[1],
   // 	'spouseEmail_error'
   // )
 };
@@ -2873,14 +2926,12 @@ Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').addEventListener('c
       formData.emailVal(); // sanitise email
 
       formData.massValidate(); // validate and sanitise data
-
-      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+      //log(formData.error)
 
       if (formData.error.length <= 0) {
-        Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit';
-        console.log('submitted');
+        Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit'; //console.log('submitted')
       } else {
-        console.log(formData.error);
+        Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
         alert('The form cannot be submitted. Please check the errors');
         process();
       }
@@ -2907,6 +2958,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var maiden = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('motherMaiden_help');
 maiden.innerHTML = "Good to identify your family from mum's side";
+maiden.style.color = "blue";
 var mobile = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('mobile_help');
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
 var password = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('password_help');
@@ -3435,15 +3487,16 @@ var Work = [{
 /*!************************************************!*\
   !*** ./resources/asset/js/data/dataToCheck.js ***!
   \************************************************/
-/*! exports provided: dataToCheck */
+/*! exports provided: dataToCheckRegister, dataToCheckLogin */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataToCheck", function() { return dataToCheck; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataToCheckRegister", function() { return dataToCheckRegister; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dataToCheckLogin", function() { return dataToCheckLogin; });
 
 
-var dataToCheck = {
+var dataToCheckRegister = {
   maxLength: {
     id: ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
     max: [15, 15, 15, 15, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
@@ -3460,6 +3513,13 @@ var dataToCheck = {
     father: ["fatherYes", "fatherNo"],
     mother: ["motherYes", "motherNo"],
     spouse: ["spouseYes", "spouseNo"]
+  }
+};
+var dataToCheckLogin = {
+  maxLength: {
+    id: ['email', 'password'],
+    max: [20, 15],
+    min: [5, 2]
   }
 };
 
@@ -3549,6 +3609,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_organogram__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./components/organogram */ "./resources/asset/js/components/organogram.js");
 /* harmony import */ var _components_modal_profile__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./components/modal/profile */ "./resources/asset/js/components/modal/profile.js");
 /* harmony import */ var _components_hidden__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./components/hidden */ "./resources/asset/js/components/hidden.js");
+/* harmony import */ var _components_login_submitFormLogin__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./components/login/submitFormLogin */ "./resources/asset/js/components/login/submitFormLogin.js");
+
 
 
 

@@ -11,6 +11,7 @@ import "./components/FilePreview"
 import "./components/organogram"
 import "./components/modal/profile"
 import "./components/hidden"
+import "./components/login/submitFormLogin"
 
 // if (id('profilePage')) {
 //     import("./components/modal/profile")

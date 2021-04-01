@@ -3,6 +3,7 @@ import { id } from "./../global"
 
 const maiden = id('motherMaiden_help')
 maiden.innerHTML = "Good to identify your family from mum's side"
+maiden.style.color = "blue";
 
 
 const mobile = id('mobile_help')

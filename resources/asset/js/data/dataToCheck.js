@@ -1,5 +1,5 @@
 "use strict";
-export const dataToCheck = {
+export const dataToCheckRegister = {
 	maxLength: {
 		id: [
 		'firstName','lastName','alias','spouse', 'fatherName', 'motherName', 'motherMaiden','address','postcode','region','country','mobile','email','favSport','footballTeam','passion','occupation'
@@ -24,4 +24,14 @@ export const dataToCheck = {
 		mother: ["motherYes", "motherNo"],
 		spouse: ["spouseYes", "spouseNo"]	
 	}
+};
+
+export const dataToCheckLogin = {
+
+	maxLength: {
+		id: ['email','password'],
+		max: [20, 15],
+		min: [5, 2]
+	},
+
 };

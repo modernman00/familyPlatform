@@ -118,6 +118,7 @@ class Login extends Select
     {
         $url = $_SESSION[self::LOGIN_TYPE] ?? '/';
         session_regenerate_id();
+        \session_unset();
         session_destroy();
         setcookie('PHPSESSID', "", time() - 3600);
         header("Location: $url");
