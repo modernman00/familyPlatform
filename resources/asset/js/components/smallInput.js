@@ -1,9 +1,11 @@
-import { id } from "./../global"
+import { id } from "../global"
 
+export default () => {
 
 const maiden = id('motherMaiden_help')
 maiden.innerHTML = "Good to identify your family from mum's side"
-maiden.style.color = "blue";
+
+const amTesting = "It is going to be fine o"
 
 
 const mobile = id('mobile_help')
@@ -24,9 +26,12 @@ const showSpouse = (e) => {
 
 }
 
-
-
 id('maritalStatus').addEventListener('change', showSpouse)
+
+}
+
+
+
 
 
 

@@ -1,18 +1,16 @@
 @extends('baseBulma')
 
 @section('title', 'login')
+@section('data-page-id', 'login')
 @section('content')
 
 <div class="styleForm" style="margin-top: 2rem;">
 
   <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" width="72" height="72" style="margin-left:40%; margin-bottom:5rem;">
 
-
-
-  {{-- <h1>{{ $_SESSION['loginType'] }}</h1> --}}
   <form action="{{ $_SESSION['loginType'] }}" method="POST" class="login" style="margin-left:15%; margin-right:15%;">
   
-    <div class="form-group" id="login">
+    <div class="form-group">
 
      @php  
 
@@ -32,6 +30,12 @@
 
 </div>
 
+{{-- <script>
+
+  const testAlert = () => alert('it worked')
+
+  document.querySelector('.button').addEventListener('click', testAlert)
+</script> --}}
 
 
 @endsection

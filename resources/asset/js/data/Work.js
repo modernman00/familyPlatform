@@ -2,10 +2,10 @@
 
  export const Work = [
         {
-        form : "Work details",
+        // form : "Work details",
         label : 'employment status',
         attribute: 'employmentStatus',
-        placeholder: null,
+        // placeholder: null,
         options: ['Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
         inputType: 'SELECT'
       },

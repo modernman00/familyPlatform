@@ -4,8 +4,7 @@ try {
     // id('spouse_div').style.display="none";
 id('spouse_div').style.display = "none";
 
-alert("it worked")
-id("firstName_help").innerHTML = "checking"
+// id("firstName_help").innerHTML = 
 } catch (error) {
     log(error.message)
 }

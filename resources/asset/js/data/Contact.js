@@ -35,20 +35,9 @@ export const Contact = [
    {
       label: 'Country',
       attribute: 'country',
-      placeholder: null,
       type: 'select',
       options: ['Nigeria', 'UK', 'Canada', 'Europe', 'USA', 'China', 'Asia', 'Latin America'],
       inputType: 'SELECT'
    },
-
-   // {
-   //    label: 'mobile number',
-   //    attribute: 'mobile',
-   //    placeholder: 'include the area code - 234 or 1 or 44 ',
-   //    type: 'text'
-   // }
-
-
-
 ]
 

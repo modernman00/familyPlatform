@@ -1,4 +1,4 @@
-(window["webpackJsonp"] = window["webpackJsonp"] || []).push([[1],{
+(window["webpackJsonp"] = window["webpackJsonp"] || []).push([["small-inputt"],{
 
 /***/ "./resources/asset/js/components/small-Input.js":
 /*!******************************************************!*\
@@ -13,12 +13,22 @@ __webpack_require__.r(__webpack_exports__);
 
 var maiden = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('motherMaiden_help');
 maiden.innerHTML = "Good to identify your family from mum's side";
+var testing = "Olawale";
 var mobile = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('mobile_help');
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
-var spouse = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_help');
-spouse.innerHTML = 'if single, put single or divorced';
 var password = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('password_help');
 password.innerHTML = 'Must be 8-20 characters long.';
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "none";
+
+var showSpouse = function showSpouse(e) {
+  if (e.target.value === "Yes") {
+    Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "block";
+  } else {
+    Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "none";
+  }
+};
+
+Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('maritalStatus').addEventListener('change', showSpouse);
 
 /***/ })
 

@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log, showError } from '../../global'
+import { id, log, showError, qSel } from '../../global'
 import { dataToCheckLogin } from "../../data/dataToCheck";
 
 const formInput = document.querySelectorAll('.login');
@@ -22,7 +22,7 @@ const process = () => {
 
 process()
 
-qSel('.button').addEventListener('click', () => {
+const processFormSubmission = () => {
 	try {
 		console.log('it worked')
 			formData.emailVal() // sanitise email
@@ -46,7 +46,11 @@ qSel('.button').addEventListener('click', () => {
 	} catch (e) {
 		showError(e)
 	}
-})
+}
+
+ const testAlert = () => alert('it worked login')
+ 
+document.querySelector('.button').addEventListener('click', testAlert)
 
 
 

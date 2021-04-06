@@ -24,5 +24,6 @@
        @yield('content')
     </div>
   </section>
+  <script src="index.js"></script> 
   </body>
 </html>

@@ -19,7 +19,7 @@
 
 </head>
 
-<body id="myPage" data-spy="scroll" data-target=".navbar" data-offset='60'>
+<body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav">
     <a class="navbar-brand" href="#">Navbar</a>

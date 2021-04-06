@@ -7,8 +7,9 @@ import { Interest } from "../../data/Interest";
 import { Account } from "../../data/Account";
 
 try {
-    Input(Contact, 'contact')
+  
     Input(Personal, 'personal')
+    Input(Contact, 'contact')
     Input(Work, 'work')
     Input(Interest, 'interest')
     Input(Account, 'account')

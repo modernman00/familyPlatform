@@ -202,9 +202,7 @@ export default class FormHelper {
                 xmlhttp.open("GET", `${url}=${inputVal}`, true);
                 xmlhttp.send();
             }
-
         })
-
     }
 
     isChecked(yesId, noId, hiddenInput) {

@@ -10,19 +10,24 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  
   {{-- custom css --}}
   <link rel="stylesheet" href="/style.css">
+
   <noscript>
-    <link rel="stylesheet" href="noscript.css" />
+  <link rel="stylesheet" href="noscript.css" />
   </noscript>
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
 
+  <link rel = "prefetch" href = "/components/small-input.js" as="script">
+
 
 </head>
 
-<body id="myPage" data-spy="scroll" data-target=".navbar" data-offset='60'>
+<body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav">
     <a class="navbar-brand" href="#">Navbar</a>
@@ -96,7 +101,9 @@
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
   </script>
 
-    <script src="/index.js"></script>
+    <script src="/manifest.js"></script>
+     <script src="/vendor.js"></script>
+      <script src="/index.js"></script>
 
 </body>
 

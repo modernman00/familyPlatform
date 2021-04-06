@@ -10,8 +10,6 @@ try {
 }
 
 
-alert('helllllllo')
-
 
 
 

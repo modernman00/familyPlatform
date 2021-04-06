@@ -11,7 +11,4 @@ export const Interest = [
       type: ['text', 'text', 'text']
     }
   }
-
-
-
 ]

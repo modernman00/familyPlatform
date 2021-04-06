@@ -101,6 +101,7 @@ export const Input = (objData, htmlId) => {
          <small id ='${element.options.attribute[0]}_help' class='small text-muted'></small>
             <small id =${element.options.attribute[0]}_error class='error text-muted'></small>
           </div>
+
           <div class='form-group col-md-4'>
             <label for='${element.options.attribute[1]}'>${element.options.label[1]}
             </label>
@@ -112,6 +113,7 @@ export const Input = (objData, htmlId) => {
          <small id ='${element.options.attribute[1]}_help' class='small text-muted'></small>
             <small id =${element.options.attribute[1]}_error class='error text-muted'></small>
           </div> 
+
           <div class='form-group col-md-4'>
             <label for='${element.options.attribute[2]}'>${element.options.label[2]}
             </label>
@@ -121,9 +123,10 @@ export const Input = (objData, htmlId) => {
           }'>
          <small id ='${element.options.attribute[2]}_help' class='small text-muted'></small>
             <small id =${element.options.attribute[2]}_error class='error text-muted'></small>
-          </div>  
+          </div> 
+
       </div>`
-       if(renderHtml== "") throw 'empty 3-col -' + element.options.attribute[1];
+       if(renderHtml== "") {throw 'empty 3-col -' + element.options.attribute[1]}
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
       } else if (element.form === '2-col') {
         const renderHtml = `
@@ -141,6 +144,7 @@ export const Input = (objData, htmlId) => {
          <small id ='${element.options.attribute[0]}_help' class='small text-muted'></small>
             <small id =${element.options.attribute[0]}_error class='error text-muted'></small>
           </div>
+
           <div class='form-group col-md-6'>
             <label for='${element.options.attribute[1]}'>${element.options.label[1]}
             </label>
@@ -152,8 +156,9 @@ export const Input = (objData, htmlId) => {
          <small id ='${element.options.attribute[1]}_help' class='small text-muted'></small>
             <small id =${element.options.attribute[1]}_error class='error text-muted'></small>
           </div> 
+
       </div>`
-        if(renderHtml== "") throw 'empty 2-col -' + element.options.attribute[1];
+        if(renderHtml== "") {throw 'empty 2-col -' + element.options.attribute[1];}
 
         document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml)
       } 
