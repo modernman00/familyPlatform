@@ -1,14 +1,7 @@
 {
-    "/components/small-input.js": "/components/small-input.js",
+    "/codeSplit/smallInput.js": "/codeSplit/smallInput.js",
     "/index.js": "/index.js",
     "/style.css": "/style.css",
     "/manifest.js": "/manifest.js",
-    "/vendor.js": "/vendor.js",
-    "/code/small-input.js": "/code/small-input.js",
-    "/code_/small-input.js": "/code_/small-input.js",
-    "/codeSpl/small-input.js": "/codeSpl/small-input.js",
-    "/codeSplit/small-input.js": "/codeSplit/small-input.js",
-    "/codeSplit/smallinput.js": "/codeSplit/smallinput.js",
-    "/codeSplit/smallnput.js": "/codeSplit/smallnput.js",
-    "/codeSplit/smallInput.js": "/codeSplit/smallInput.js"
+    "/vendor.js": "/vendor.js"
 }

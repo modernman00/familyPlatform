@@ -21,8 +21,8 @@
   </noscript>
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
-
-  <link rel = "prefetch" href = "/components/small-input.js" as="script">
+{{-- 
+  <link rel = "prefetch" href = "/codeSplit/smallinput.js" as="script"> --}}
 
 
 </head>

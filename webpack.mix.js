@@ -1,7 +1,8 @@
 const mix = require('laravel-mix');
-mix.extract();
 mix.sass('resources/asset/scss/main.scss', 'public/style.css')
 .js('resources/asset/js/index.js', 'public/index.js')
+.setPublicPath('public')
+.extract();
 // .webpackConfig(webpack => {
 //     return {
 //         output: {
@@ -10,4 +11,3 @@ mix.sass('resources/asset/scss/main.scss', 'public/style.css')
 //         },
 //     };
 // });
-.setPublicPath('public')

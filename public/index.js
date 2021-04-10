@@ -409,6 +409,66 @@ try {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/login/submitFormLogin.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/login/submitFormLogin.js ***!
+  \****************************************************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+
+
+
+
+
+var formInput = document.querySelectorAll('.login');
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
+
+var process = function process() {
+  // clear error from the form
+  formData.clearError(); // set the maxlength, check the length of the value, raise error
+
+  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckLogin"].maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__["dataToCheckLogin"].maxLength.max);
+};
+
+process();
+
+var processFormSubmission = function processFormSubmission() {
+  try {
+    console.log('it worked');
+    formData.emailVal(); // sanitise email
+
+    formData.massValidate(); // validate and sanitise data
+
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])("it worked");
+
+    if (formData.error.length <= 0) {
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["id"])('submit').type = 'submit'; //console.log('submitted')
+    } else {
+      Object(_global__WEBPACK_IMPORTED_MODULE_1__["log"])(formData.error);
+      alert('The form cannot be submitted. Please check the errors');
+      process();
+    }
+  } catch (e) {
+    Object(_global__WEBPACK_IMPORTED_MODULE_1__["showError"])(e);
+  }
+};
+
+var testAlert = function testAlert() {
+  return alert('it worked login');
+};
+
+document.querySelector('.button').addEventListener('click', testAlert);
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/modal/profile.js":
 /*!********************************************************!*\
   !*** ./resources/asset/js/components/modal/profile.js ***!
@@ -1221,24 +1281,19 @@ var showError = function showError(e) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/global.js");
-/* harmony import */ var _components_register_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/register/index */ "./resources/asset/js/components/register/index.js");
-/* harmony import */ var _components_register_processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/register/processForm */ "./resources/asset/js/components/register/processForm.js");
-/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
-/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
-/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
-/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
-/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_7__);
-/* harmony import */ var _components_modal_profile__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/modal/profile */ "./resources/asset/js/components/modal/profile.js");
-/* harmony import */ var _components_hidden__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/hidden */ "./resources/asset/js/components/hidden.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./resources/asset/js/global.js");
+/* harmony import */ var _components_register_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/register/index */ "./resources/asset/js/components/register/index.js");
+/* harmony import */ var _components_register_processForm__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./components/register/processForm */ "./resources/asset/js/components/register/processForm.js");
+/* harmony import */ var _components_register_modal_kids__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./components/register/modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
+/* harmony import */ var _components_register_modal_siblings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/register/modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./cust/main */ "./resources/asset/js/cust/main.js");
+/* harmony import */ var _cust_main__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_cust_main__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./components/profilePage */ "./resources/asset/js/components/profilePage.js");
+/* harmony import */ var _components_profilePage__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_components_profilePage__WEBPACK_IMPORTED_MODULE_6__);
+/* harmony import */ var _components_modal_profile__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./components/modal/profile */ "./resources/asset/js/components/modal/profile.js");
+/* harmony import */ var _components_hidden__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./components/hidden */ "./resources/asset/js/components/hidden.js");
+/* harmony import */ var _components_login_submitFormLogin__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./components/login/submitFormLogin */ "./resources/asset/js/components/login/submitFormLogin.js");
 
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
  //import "./components/login/index"
@@ -1252,40 +1307,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //import "./components/organogram"
 
 
- //import "./components/login/submitFormLogin"
-// if (id('profilePage')) {
+
+ // if (id('profilePage')) {
 //     const loadProfile = await import("./components/modal/profile")
 // } 
 
-function loadSmallInput() {
-  return _loadSmallInput.apply(this, arguments);
-}
-
-function _loadSmallInput() {
-  _loadSmallInput = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _context.next = 2;
-            return __webpack_require__.e(/*! import() | /components/small-input */ "/codeSplit/smallInput").then(__webpack_require__.bind(null, /*! ./components/smallInput */ "./resources/asset/js/components/smallInput.js"));
-
-          case 2:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-  return _loadSmallInput.apply(this, arguments);
-}
-
 if (window.location.pathname === '/register') {
   console.log("it worked well");
-  __webpack_require__.e(/*! import() | /codeSplit/smallInput */ "/codeSplit/smallInput").then(__webpack_require__.bind(null, /*! ./components/smallInput */ "./resources/asset/js/components/smallInput.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | /codeSplit/smallInput */ "/codeSplit/smallInput").then(__webpack_require__.bind(null, /*! ./components/smallinput */ "./resources/asset/js/components/smallinput.js")).then(function (module) {
     return module["default"]();
   })["catch"](function (err) {
-    return console.log("MAD ERROR!! " + err);
+    return console.log("MAD ERROR!! " + err.message);
   });
 } // CODE SPLITTING BASED ON ROUTE
 
@@ -1315,4 +1347,4 @@ module.exports = __webpack_require__(/*! /Applications/MAMP/htdocs/familyPlatfor
 
 /***/ })
 
-},[[0,"/manifest","/vendor"]],["/codeSplit/smallInput"]]);
+},[[0,"/manifest"]],["/codeSplit/smallInput"]]);

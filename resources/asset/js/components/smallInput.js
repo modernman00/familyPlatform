@@ -5,8 +5,6 @@ export default () => {
 const maiden = id('motherMaiden_help')
 maiden.innerHTML = "Good to identify your family from mum's side"
 
-const amTesting = "It is going to be fine o"
-
 
 const mobile = id('mobile_help')
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809"

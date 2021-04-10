@@ -1,8 +1,8 @@
 (window["webpackJsonp"] = window["webpackJsonp"] || []).push([["/codeSplit/smallInput"],{
 
-/***/ "./resources/asset/js/components/smallInput.js":
+/***/ "./resources/asset/js/components/smallinput.js":
 /*!*****************************************************!*\
-  !*** ./resources/asset/js/components/smallInput.js ***!
+  !*** ./resources/asset/js/components/smallinput.js ***!
   \*****************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -14,7 +14,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = (function () {
   var maiden = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('motherMaiden_help');
   maiden.innerHTML = "Good to identify your family from mum's side";
-  var amTesting = "It is going to be fine o";
   var mobile = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('mobile_help');
   mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
   var password = Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('password_help');
