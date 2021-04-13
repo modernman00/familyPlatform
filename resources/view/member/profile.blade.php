@@ -1,4 +1,4 @@
-@extends ('cust.custBase')
+@extends ('member.custBase')
 @section('title', 'Profile page')
 @section('content')
 

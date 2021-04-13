@@ -13,7 +13,11 @@ class Organogram extends SingleCustomerData
     public function index()
     {
         $id =  checkInput($_GET['id']);
-        $data = $this->getCustomerData($id);
+
+         $table = ['personal', 'profile_pics', 'contact', 'otherFamily'];
+
+        $data = $this->getCustomerData($id, $table);
+        
         view('member/organogram', compact('data'));
     }
 }

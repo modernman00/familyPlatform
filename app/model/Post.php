@@ -1,42 +1,65 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\model;
 
 use App\classes\Select;
+use App\classes\InnerJoin;
+
 class Post extends Select
 {
 
-    function commentLink2Post($postNo)
+    static function commentLink2Post($postNo)
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "post_no");
-        return $this->selectFn(query: $query, bind: [$postNo]);
-       
+        return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    function postLink2Id($id)
+    static function postLink2Id($id)
     {
-          $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
-        return $this->selectFn(query: $query, bind:[ $id]);
-
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
+        return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    function getAllPost()
+    static function getAllPost()
     {
-         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
-        return $this->selectFn(query: $query);
+        $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
+        return parent::selectFn2(query: $query);
     }
 
-    function getAllPostPics($custNo)
+    /**
+     * get all posts and the profile pics
+     * @return array
+     */
+
+    public static function getAllPostProfilePics() : array
     {
-             $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
-        return $this->selectFn(query: $query, bind: [$custNo]);
-		
+        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
     }
 
-    function getAllComments()
+
+    public static function getAllCommentProfilePics() : array
     {
-              $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
-        return $this->selectFn(query: $query);
+        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $custNo this is the id
+     *  get the 
+     * @return array
+     */
+    public static function getAllPostPics($custNo) : array
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
+        return parent::selectFn2(query: $query, bind: [$custNo]);
+    }
+
+    static function getAllComments()
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
+        return parent::selectFn2(query: $query);
     }
 }

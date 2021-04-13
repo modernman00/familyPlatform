@@ -1,5 +1,6 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\controller\members;
 
@@ -10,7 +11,9 @@ use App\model\{
 
 use App\classes\{
     Sanitise,
-    ProcessImg, Insert, Select
+    ProcessImg,
+    Insert,
+    Select
 };
 
 use Exception;
@@ -29,25 +32,29 @@ class ProfilePage extends ProcessImg
         // GET MEMBER'S DATA
         $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
         $this->id = checkInput($_SESSION['memberId']);
+
         $setData = new SingleCustomerData;
-        $this->memberData = $setData->getCustomerData($this->id);
+
+        $table = ['personal', 'interest', 'profile_pics', 'contact', 'otherFamily', 'post'];
+
+        $this->memberData = $setData->getCustomerData($this->id, $table);
 
         //GET POST DATA 
-        $instanceAllData = new Post;
-        $this->allPostData = $instanceAllData->getAllPost();
+
+        $this->allPostData = Post::getAllPostProfilePics();
 
         //GET COMMENT DATA
-        $this->allCommentData = $instanceAllData->getAllComments();
-       
+        $this->allCommentData = Post::getAllCommentProfilePics();
+
         // POST AND ID
-        $this->post2Id = $instanceAllData->postLink2Id($this->id);
+        $this->post2Id = Post::postLink2Id($this->id);
 
         // COMMENT AND POST NO 
         //printArr($this->memberData);
-        //$postId = $this->allPostData['post_no'];
-        //  $this->comment2Post = $instanceAllData->commentLink2Post($postId);
+    //     $postId = $this->allPostData['post_no'];
+    //    $this->comment2Post = Post::commentLink2Post($postId);
 
-        $this->getAllPics = $instanceAllData->getAllPostPics($this->id);
+        $this->getAllPics = Post::getAllPostPics($this->id);
     }
 
     function index()
@@ -59,7 +66,7 @@ class ProfilePage extends ProcessImg
             $_SESSION['currentTime'] = time();
 
             view('member/profilePage', [
-                'data' => $this->memberData, 
+                'data' => $this->memberData,
                 'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
@@ -73,17 +80,20 @@ class ProfilePage extends ProcessImg
 
     private function processPostData()
     {
-        try {
+     
             if (!$_POST) {
                 throw new \Exception("There was no post data", 1);
             }
             // SANITISE THE POST 
             unset($_POST['post_img']);
-            $sanitise = new Sanitise($_POST, null);
+            $sanitise = new Sanitise($_POST);
             $getSanitisePost = $sanitise->getData();
 
             // check if there are images in the post
-                if ($_FILES && $_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
+            if ($_FILES) {
+
+
+                if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
                     fileUploadMultiple("img/post/", 'post_img');
 
@@ -94,6 +104,7 @@ class ProfilePage extends ProcessImg
                         $getSanitisePost["post_img$i"] = $image[$i];
                     }
                 }
+            }
 
 
             // get the other post variables id, fullname, time of post
@@ -101,13 +112,8 @@ class ProfilePage extends ProcessImg
             $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
             $getSanitisePost['post_time'] = $_SESSION['currentTime'];
 
-            // link the post profile image to the post 
-            $getSanitisePost['profileImg'] = $this->selectProfileImg();
-
             return $getSanitisePost;
-        } catch (\Throwable $th) {
-            showError($th);
-        }
+
     }
 
     function post()
@@ -122,12 +128,17 @@ class ProfilePage extends ProcessImg
         }
     }
 
+    /**
+     * Use this function to select the profile page
+     *
+     * @return void
+     */
     private function selectProfileImg()
     {
 
-        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: "profile_pics", identifier1:"id", orderBy:"ORDER BY no DESC", limit: "LIMIT ". 1);
+        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: "profile_pics", identifier1: "id", orderBy: "ORDER BY date_created DESC", limit: "LIMIT " . 1);
 
-        $result = Select::selectFn2($query, [$_SESSION['id']]);
+        $result = Select::selectFn2($query, [checkInput($_SESSION['id'])]);
 
         foreach ($result as $result);
         return $result['img'];
@@ -136,14 +147,19 @@ class ProfilePage extends ProcessImg
     function postComment()
     {
         try {
+        
             $getPost = $this->processPostData();
-             $insertFile = new Insert();
+            $insertFile = new Insert();
             $insertFile->submitForm('comment', $getPost);
             header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
+
+    /**
+     * Process profile image; the function was imported
+     */
 
     function profileImage()
     {
@@ -155,6 +171,10 @@ class ProfilePage extends ProcessImg
             showError($th);
         }
     }
+
+    /**
+     * post pictures on the profile page
+     */
 
     function postPics()
     {
@@ -172,12 +192,35 @@ class ProfilePage extends ProcessImg
                         'photo' => $image[$i],
                         'id' => checkInput($_SESSION['id'])
                     ];
-                     $insertFile = new Insert();
+                    $insertFile = new Insert();
                     $insertFile->submitForm('images', $arrData);
                 }
             }
 
             header(self::REDIRECT);
         }
+    }
+
+    /**
+     * show post pics when they are clicked on
+     */
+
+    public function showPics()
+    {
+        $path = checkInput($_GET['path']);
+        $imagePath = ProcessImg::showPostImg($path);
+
+        $postId = checkInput($_GET['pID']);
+
+
+        $comment2Post = Post::commentLink2Post($postId);
+
+        // printArr($comment2Post);
+
+        view('showImage', [
+            'imagePath' => $imagePath,
+            //'allData' => $this->allPostData,
+            'comment' => $comment2Post,
+        ]);
     }
 }

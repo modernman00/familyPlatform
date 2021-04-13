@@ -5,12 +5,11 @@
       <span onclick="document.getElementById('id01').style.display='none'"
         class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
 
-
       @isset($data['img'])
 
-      <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+      <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">
       @else
-      <img src="" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+      <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
 
       @endisset
 
@@ -25,18 +24,22 @@
         <textarea class="w3-input w3-border" style="resize:none" spellcheck="false" name="postMessage" id="postMessage"
           cols="50" rows="10">Post here</textarea> <br>
 
-        {{--  <button class='w3-button'>    --}}
-        <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
-        {{--  </button>  --}}
+        <div class="changeProfileDisplay">
 
-        <button type="submit" name="submit" class="w3-button w3-theme w3-button w3-green w3-large"><i
-            class="fa fa-pencil"></i>
-           Post</button>
+          {{--  <button class='w3-button'>    --}}
+          <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
+          {{--  </button>  --}}
 
-      </div>
-      <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-        <button onclick="document.getElementById('id01').style.display='none'" type="button"
-          class="w3-button w3-red">Cancel</button>
+       
+
+    
+        
+             <button type="submit" name="submit" class="w3-button w3-green"><i
+              class="fa fa-pencil"></i>
+             Post</button>
+
+          <button onclick="document.getElementById('id01').style.display='none'" type="button"
+            class="w3-button w3-red">Cancel</button>
 
       </div>
     </form>

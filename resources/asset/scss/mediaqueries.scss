@@ -46,4 +46,43 @@
 }
 
 
+@media only screen and (max-width: 600px) {
+
+  // the container
+  .showImageContainer {
+    background-color: lightblue;
+    flex-flow: row wrap;
+  }
+// the big picture
+  .showPics {
+    margin-right: 0;
+    margin-left: 0;
+    height: 60vh;
+    width: 100vw;
+  }
+// the comment
+  .showComment > p {
+      margin-top: 2vh;
+      font-size: 2em;
+      margin-left: 2vh;
+  }
+
+  .commentImg {
+      margin-top: 1vh;
+      height: 3rem;
+      width: 3rem;
+  }
+
+  .commentFont{
+    font-size: 5rem;
+  }
+
+  .commentInput {
+    width: 100%;
+  }
+
+}
+
+
+
 

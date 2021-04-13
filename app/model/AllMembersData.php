@@ -9,9 +9,22 @@ class AllMembersData extends innerJoin
 {
     public function getAllMembers()
     {
-        $firstTable = "personal";
-        $table = ['personal', 'otherFamily', 'profile_pics', 'contact', 'siblings'];
+       
+        $table = ['personal','otherFamily', 'profile_pics',  'contact', 'siblings'];
+        $firstTable = array_shift($table);
+
         $memberData = $this->joinAll($firstTable, 'id', $table);
+        return $memberData??= throw new \Exception("Member Data Error", 1);
+        
+    }
+
+     public function getAllMembersById($id)
+    {
+        
+          $table = ['personal','otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact', 'siblings'];;
+        $firstTable = array_shift($table);
+       
+        $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id );
         return $memberData??= throw new \Exception("Member Data Error", 1);
         
     }

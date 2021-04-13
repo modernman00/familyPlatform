@@ -11,7 +11,7 @@ use App\model\{
 
 use App\classes\{
     Sanitise,
-    ProcessImg
+    ProcessImg, Select
 };
 use Exception;
 class AllMembersController extends AllMembersData
@@ -37,16 +37,21 @@ class AllMembersController extends AllMembersData
     public function getProfile()
     {
         $id = checkInput($_SESSION['id']);
-        $result = $this->joinManyCondition7('personal', 'interest', 'contact', 'otherFamily', 'post',  'profile_pics', 'images','id', $id);
+        
+        $result = $this->getAllMembersById($id);
+       
 
         if(!$result) {
              throw new Exception("It could not process the data", 1);
         }
 
-        $pictures = $this->select_from('images', 'id', $id);
+         $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
+
+         $pictures= Select::selectFn2(query: $query, bind: [$id]);
+
  
         foreach($result as $data);
-       // foreach($pictures as $memberPics);
-        view('member/profilePage', compact('data', 'pictures'));
+
+        view('member/profile', compact('data', 'pictures'));
     }
 }

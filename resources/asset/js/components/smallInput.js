@@ -1,7 +1,5 @@
 import { id } from "../global"
 
-export default () => {
-
 const maiden = id('motherMaiden_help')
 maiden.innerHTML = "Good to identify your family from mum's side"
 
@@ -26,7 +24,6 @@ const showSpouse = (e) => {
 
 id('maritalStatus').addEventListener('change', showSpouse)
 
-}
 
 
 

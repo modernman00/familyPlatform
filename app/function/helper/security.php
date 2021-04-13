@@ -48,7 +48,7 @@ function checkInput($data) : mixed
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     $data = strip_tags($data);
-    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = htmlentities($data);
     $data = preg_replace('/[^0-9A-Za-z.@-]/', ' ', $data);
     return $data;
 }
@@ -59,7 +59,7 @@ function checkInputImage($data)
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     $data = strip_tags($data);
-    $data = htmlentities($data, ENT_QUOTES | ENT_HTML5, "UTF-8");
+    $data = htmlentities($data);
     $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
     return $data;
 }

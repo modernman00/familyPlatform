@@ -14,17 +14,28 @@
           <div id="Demo3" class="w3-hide w3-container">
             <div class="w3-row-padding">
               <br>
-            @foreach($pics2Id as $images)
-            @for ($i = 0; $i < 6; $i++)
-              @if($images["post_img$i"])
+              
+
+                @foreach($pics2Id as $images)
+                @for ($i = 0; $i < 6; $i++)
+                @if($images["post_img$i"])
+
+                <a href="/profilepage/img?dir=img&pics={{ $images["post_img$i"] }}&pID={{ $data["post_no"] }}&path=post">
+
                 <div class="w3-half">
-                <img src="/img/post/{{ $images["post_img$i"] }}" style="width:100%" class="w3-margin-bottom" alt="{{ $images["post_img$i"] }}">
+
+                  <img src="/img/post/{{ $images["post_img$i"] }}" style="width:100%" class="w3-margin-bottom" alt="{{ $images["post_img$i"] }}">
               
               </div>
+
+              </a>
               @endif
               
             @endfor
             @endforeach
+
+              
+           
 
             </div>
           </div>

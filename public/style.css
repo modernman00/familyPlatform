@@ -1,0 +1,475 @@
+* {
+  margin: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height: 1.8;
+  color: #818181;
+}
+
+.avatar {
+  vertical-align: middle;
+  width: 20vh;
+  height: 20vh;
+  border-radius: 50%;
+}
+
+p {
+  line-height: 1.75;
+}
+
+a {
+  color: #fed136;
+}
+
+a:hover {
+  color: #fec503;
+}
+
+.jumbotron {
+  font-family: Montserrat, sans-serif;
+}
+
+.navbar {
+  font-family: Montserrat, sans-serif;
+}
+
+.jumbotron {
+  background-color: #f4511e;
+  color: #ffffff;
+  padding: 10rem 2.5rem;
+}
+
+.container-fluid {
+  padding: 6rem 5rem;
+}
+
+.bg-grey {
+  background-color: #f6f6f6;
+}
+
+.logo {
+  font-size: 20rem;
+  color: #f4511e;
+}
+
+@media screen and (max-width: 768px) {
+  .col-sm-4 {
+    text-align: center;
+    margin: 2.5rem 0;
+  }
+}
+
+.logo-small {
+  color: #f4511e;
+  font-size: 50px;
+}
+
+.thumbnail {
+  padding: 0 0 15px 0;
+  border: none;
+  border-radius: 0;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10px;
+}
+
+.panel {
+  border: 1px solid #f4511e;
+  border-radius: 0;
+  transition: box-shadow 0.5s;
+}
+
+.panel:hover {
+  box-shadow: 5px 0px 40px #a12121;
+}
+
+.panel-footer .btn:hover {
+  border: 1px solid #f4511e;
+  background-color: #fff !important;
+  color: #f4511e;
+}
+
+.panel-heading {
+  color: #fff !important;
+  background-color: #f4511e !important;
+  padding: 25px;
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.panel-footer {
+  background-color: #fff !important;
+}
+
+.panel-footer h3 {
+  font-size: 32px;
+}
+
+.panel-footer h4 {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.panel-footer h3 {
+  font-size: 32px;
+}
+
+.panel-footer .btn {
+  margin: 15px 0;
+  background-color: #f4511e;
+  color: #fff;
+}
+
+.navbar {
+  margin-bottom: 0;
+  background-color: #f4511e;
+  z-index: 9999;
+  border: 0;
+  font-size: 12px !important;
+  line-height: 1.42857143 !important;
+  letter-spacing: 0.4rem;
+  border-radius: 0;
+}
+
+.navbar li a .navbar .navbar-brand {
+  color: #fff !important;
+}
+
+.navbar-nav li a:hover,
+.navbar-nav li.active a {
+  color: #f4511e !important;
+  background-color: #fff !important;
+}
+
+.navbar-default .navbar-toggle {
+  border-color: transparent;
+  color: #fff !important;
+}
+
+footer .glyphicon {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #f4511e;
+}
+
+.footerLogo {
+  font-size: 2rem;
+}
+
+.small {
+  color: blue;
+}
+
+.allMember_card {
+  display: flex;
+}
+
+#searchFamily {
+  margin-right: 20%;
+  margin-left: 10%;
+}
+
+.postMessage_uploadPics {
+  display: flex;
+  background-color: "red";
+}
+
+.styleForm {
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+.small {
+  font-size: 0.6rem;
+  font-style: italic;
+  color: #a7092b;
+}
+
+.error {
+  color: red;
+  font-size: 1rem;
+}
+
+input::-moz-placeholder {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+input:-ms-input-placeholder {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+input::placeholder {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.modal-content {
+  padding: 0 20px 0 20px;
+}
+
+#postMessage_uploadPics {
+  opacity: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.custom-file-container {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+}
+
+.subscribeForm {
+  margin-left: 2rem;
+  margin-right: 2rem;
+  margin-top: 2rem;
+}
+
+header.masthead {
+  text-align: center;
+  color: white;
+  background-image: url("/img/indexpics.jpeg");
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-position: center center;
+  background-size: cover;
+}
+
+.opo:hover {
+  color: white;
+}
+
+.rowo {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  font-size: 4rem;
+}
+
+header.masthead .intro-text {
+  padding-top: 150px;
+  padding-bottom: 100px;
+}
+
+header.masthead .intro-text .intro-lead-in {
+  font-size: 22px;
+  font-style: italic;
+  color: #fec503;
+  line-height: 22px;
+  margin-bottom: 25px;
+  font-family: 'Droid Serif', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+header.masthead .intro-text .intro-heading {
+  font-size: 50px;
+  font-weight: 700;
+  line-height: 50px;
+  margin-bottom: 25px;
+  font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+@media (min-width: 768px) {
+  header.masthead .intro-text {
+    padding-top: 300px;
+    padding-bottom: 200px;
+  }
+
+  header.masthead .intro-text .intro-lead-in {
+    font-size: 40px;
+    font-style: italic;
+    line-height: 40px;
+    margin-bottom: 25px;
+    font-family: 'Droid Serif', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  header.masthead .intro-text .intro-heading {
+    font-size: 75px;
+    font-weight: 700;
+    line-height: 75px;
+    margin-bottom: 50px;
+    font-family: 'Montserrat', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+}
+
+/* changed the paddings to 0 from 25 to reduce the height of the navbar */
+
+@media (min-width: 992px) {
+  .mainNav {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    transition: padding-top 0.3s, padding-bottom 0.3s;
+    border: none;
+    background-color: transparent;
+  }
+}
+
+/* When a screen is 992px or smaller, the background color will be pink */
+
+@media screen and (max-width: 576px) {
+  body {
+    font-size: 0.5em;
+  }
+
+  .subscribeForm {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 50%;
+  }
+
+  .homePageSubscribe {
+    font-size: 1.2em;
+    height: 50px;
+  }
+
+  .unhide {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 20px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .showImageContainer {
+    background-color: lightblue;
+    flex-flow: row wrap;
+  }
+
+  .showPics {
+    margin-right: 0;
+    margin-left: 0;
+    height: 60vh;
+    width: 100vw;
+  }
+
+  .showComment > p {
+    margin-top: 2vh;
+    font-size: 2em;
+    margin-left: 2vh;
+  }
+
+  .commentImg {
+    margin-top: 1vh;
+    height: 3rem;
+    width: 3rem;
+  }
+
+  .commentFont {
+    font-size: 5rem;
+  }
+
+  .commentInput {
+    width: 100%;
+  }
+}
+
+.form__login__logo {
+  margin-left: 40%;
+}
+
+.styleForm > h4 {
+  font-weight: 200;
+}
+
+.profileImg {
+  vertical-align: middle;
+  width: 20vh;
+  height: 20vh;
+  border-radius: 50%;
+}
+
+.changeProfileDisplay {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.changeProfileButton {
+  height: auto;
+  width: auto;
+  background-color: green;
+  color: whitesmoke;
+  margin-top: 1vh;
+}
+
+.postFont {
+  font-size: 2vh;
+  color: #000066;
+  font-family: "Playfair Display", serif;
+  font-weight: 800;
+}
+
+.showImageContainer {
+  display: flex;
+  margin-top: 5vh;
+  flex-flow: row;
+}
+
+.showPics {
+  margin-right: 2vh;
+  margin-left: 2vh;
+  height: 80vh;
+  width: 75vw;
+}
+
+.showComment {
+  margin-top: 2vh;
+}
+
+.commentBox {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.commentImg {
+  height: 5em;
+  width: 5em;
+}
+
+.commentFont {
+  font-size: 1.9vh;
+  color: #000066;
+  font-family: "Playfair Display", serif;
+  flex: 2;
+  margin-left: 10px;
+  align-items: center;
+}
+
+.inputComment,
+.submitComment {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  resize: none;
+}
+

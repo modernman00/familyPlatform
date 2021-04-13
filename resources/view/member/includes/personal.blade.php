@@ -7,29 +7,47 @@
       {{--  NAME  --}}
 
       <h5 class="w3-center">
-        {{ $data['firstName']  }} {{ $data['lastName'] }} {{$data['id']}}
+        <b><i>{{ $data['firstName']  }} {{ $data['lastName'] }}</i> </b>{{ $data['id'] }}
+
       </h5>
 
       {{--  PROFILE PICS  --}}
 
       <p class="w3-center">
         <a href="#profilePics" id="profilePics">
-          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle" style="height:180px;width:180px" alt="Avatar">
+
+          @isset($data['img'])
+  
+          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
+
+          @else
+          <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+
+          @endisset
+
+          {{--  @empty($data['img'])
+          <img src="/avatar/avatarF.png" alt="Avatar" class="avatar">
+          @endempty  --}}
+
         </a>
       </p>
 
       {{--  ADD / CHANGE PROFILE PICS  --}}
 
-      <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' id="formProfilePics" style="display: none;">
+      <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' id="formProfilePics"
+        style="display: none;">
+
+        <div class="changeProfileDisplay">
+
+          <label for="profileImage"></label><br>
+
+          <input for="profileImage" type="file" id="profileImage" name="profileImage">
+          <button class='w3-button'>
 
 
-        <label for="profileImage">Browse</label><br>
+            <button class='changeProfileButton' name='submit' type="submit">Submit</button>
+        </div>
 
-        <input for="profileImage" type="file" id="profileImage" name="profileImage">
-        <button class='w3-button'>
-
-
-          <button class='w3-button' name='submit' type="submit">submit</button>
 
       </form>
       <hr>

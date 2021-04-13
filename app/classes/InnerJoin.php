@@ -21,7 +21,8 @@ class InnerJoin extends Db
     public function joinParamOr(string $firstTable, string $para, array $table, mixed $id) : array
     {
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => "INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
+            $buildInnerJoinQuery = array_map(fn ($tab) => 
+            "INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString WHERE $firstTable.$para = ? OR $table[0].$para = ?";
             $result = $this->connect()->prepare($query2);
@@ -65,6 +66,24 @@ class InnerJoin extends Db
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString";
             $result = $this->connect()->prepare($query2);
+            $result->execute();
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            showError($e);
+        }
+    }
+
+    /**
+     * 
+     */
+
+      public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy) : array
+    {
+        try {
+            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
+            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
+            $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
+            $result = self::connect2()->prepare($query2);
             $result->execute();
             return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

@@ -14,7 +14,7 @@
 
      @php  
 
-      $formArray = [ 'email' => 'email', 'password' => 'password', 'checkbox'=> 'Remember me', 'token' => 'token', 'button' => 'button'];
+      $formArray = [ 'email' => 'email', 'password' => 'password', 'checkbox'=> 'Remember me', 'token' => 'token', 'button' => 'submit'];
 
       $form = new App\classes\BuildFormBulma($formArray);
       $form->genForm();
@@ -30,12 +30,6 @@
 
 </div>
 
-{{-- <script>
-
-  const testAlert = () => alert('it worked')
-
-  document.querySelector('.button').addEventListener('click', testAlert)
-</script> --}}
 
 
 @endsection

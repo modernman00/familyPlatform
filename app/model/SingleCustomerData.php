@@ -18,29 +18,13 @@ class SingleCustomerData extends InnerJoin
 		}
 	}
 
-	public function getCustomerData($custNo)
+	public function getCustomerData(string $custId, array $table) : array
 	{ 
 		try {
-			$table = ['interest', 'contact', 'otherFamily', 'post'];
+		
 			$id = "id";
-			$firstTable = "personal";
-
-			$query = $this->joinParamOr($firstTable, $id, $table, $custNo);
-
-			// $query = $this->joinManyCondition7('personal', 'interest', 'siblings', 'contact', 'otherFamily', 'post',  'profile_pics', 'id', $custNo);
-
-			// if(!$query) {
-			// 	$query = $this->joinManyCondition6('personal', 'interest', 'contact', 'otherFamily', 'post',  'profile_pics', 'id', $custNo);
-			// }
-			// if (!$query) {
-			// 	$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'post', 'id', $custNo);
-			// }
-			// if (!$query) {
-			// 	$query = $this->joinManyCondition5('personal', 'interest', 'contact', 'otherFamily', 'profile_pics', 'id', $custNo);
-			// }
-			// if (!$query) {
-			// 	$query = $this->joinManyCondition4('personal', 'interest', 'contact', 'otherFamily', 'id', $custNo);
-			// }
+			$firstTable = array_shift($table); // remove the first element of the array
+			$query = $this->joinParamOr(firstTable:$firstTable, para:$id, table:$table, id:$custId);
 			
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 1);

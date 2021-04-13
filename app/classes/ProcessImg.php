@@ -14,29 +14,46 @@ class ProcessImg extends AllFunctionalities
             if (!$_FILES) {
                 throw new \Exception("Error Processing Request - PIC NOT ADDED", 1);
             }
-            
+
             fileUpload("img/profile/", 'profileImage');
             // create a file path name for the database
             $fileName = checkInputImage($_FILES['profileImage']['name']);
+
             $this->profileImg = $fileName;
 
-            if(!$_SESSION['id']) {
-                throw new \Exception("can't find id", 1);      
+            if (!$_SESSION['id']) {
+                throw new \Exception("can't find id", 1);
             }
 
             $data = [
                 'img' => $fileName,
-                'id' => $_SESSION['id']
+                'where_from' => 'profile',
+                'id' => checkInput($_SESSION['id'])
             ];
 
-            $result = $this->insertData_NoRedirect($data, 'profile_pics');
-            if(!$result) {
-                throw new \Exception("Error Processing PROFILE IMAGE", 1);
-                
-            }
-            return $result;
+        
+            $insertFile = new Insert();
+
+            // insert the photo to the images table
+            $insertFile->submitForm('images', $data);
+
+            // Update the profile_table
+            return $this->update('profile_pics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
+
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    /**
+     * picsSource will either be post or profile or even avatar. it is from the public/img Directory
+     */
+
+    static function showPostImg(string $picsSource)
+    {
+        $imgName = checkInput($_GET['pics']);
+        $imgDir = checkInput($_GET['dir']);
+        $postSource = checkInput($picsSource);
+        return "/$imgDir/$postSource/$imgName";
     }
 }

@@ -8,4 +8,6 @@ $router->map('POST', '/member/profilePage/profileImg', 'App\controller\members\P
 
 $router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@postPics', 'MEMBERS_IMG_POST');
 
+$router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@showPics', 'MEMBERS_IMG_POST_SHOW');
+
 

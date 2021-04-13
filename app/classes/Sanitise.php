@@ -17,6 +17,7 @@ class Sanitise extends allFunctionalities
     /**
      * Class constructor.
      *  $data  = [min = [12, 12], max = [12, 12], data = [name, password]]
+     * you must firstly check if $this.error is empty before calling $self->getData
      */
     public function __construct(private array $formData, private mixed $dataLength = null)
     {
@@ -42,6 +43,8 @@ class Sanitise extends allFunctionalities
     {
         if (isset($this->formData['email']) && !filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
             $this->error[] = "Invalid Email Format \n";
+            throw new Exception("Error Processing Request - Email format", 1);
+            
         }
     }
 
@@ -81,6 +84,7 @@ class Sanitise extends allFunctionalities
                 $cleanNameKey = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $dataKey[$x]));
                 if (strlen($dataPost) < $this->dataLength['min'][$x]) {
                     $this->error[]  = "Your response to '{$cleanNameKey}' question does not meet either the required minimum input limit\n";
+                    
                 } elseif (strlen($dataPost) > $this->dataLength['max'][$x]) {
                     $length = $this->dataLength['max'][$x];
                     $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit $length\n";
@@ -98,7 +102,7 @@ class Sanitise extends allFunctionalities
             $this->data = stripslashes($this->value[$x]);
             $this->data = htmlspecialchars($this->value[$x]);
             $this->data = strip_tags($this->value[$x]);
-            $this->data = htmlentities($this->value[$x], ENT_QUOTES | ENT_HTML5, "UTF-8");
+            $this->data = htmlentities($this->value[$x]);
             $this->data = preg_replace('/[^0-9A-Za-z@._]/', ' ', $this->value[$x]);
             $this->value2[] = $this->data;
         }
