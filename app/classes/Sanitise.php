@@ -103,7 +103,7 @@ class Sanitise extends allFunctionalities
             $this->data = htmlspecialchars($this->value[$x]);
             $this->data = strip_tags($this->value[$x]);
             $this->data = htmlentities($this->value[$x]);
-            $this->data = preg_replace('/[^0-9A-Za-z@._]/', ' ', $this->value[$x]);
+            $this->data = preg_replace('/[^0-9A-Za-z@._-]/', ' ', $this->value[$x] );
             $this->value2[] = $this->data;
         }
         return $this;

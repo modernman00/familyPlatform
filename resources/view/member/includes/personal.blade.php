@@ -71,14 +71,16 @@
   <!-- ACCORDION -->
 
 
-  @include('member/includes/accordion')
+  @includeif('member/includes/accordion')
   <br>
 
   <!-- INTEREST -->
 
-  @include('member/includes/interest')
+  @includeif('member/includes/interest')
 
   <br>
+
+  @includeif('member/includes/modalEvent')
 
 
   <!-- End Left Column -->

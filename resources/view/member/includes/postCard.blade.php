@@ -47,33 +47,32 @@
     @endfor
     <br>
   </div>
+
+  {{--  LIKE BUTTON  --}}
   <button type="button" name="likeButton" class="w3-button w3-tiny w3-theme-d1 w3-margin-bottom"><em
       class="fa fa-thumbs-up"></em>
      Like</button>
 
-  <button type="button" class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em>
-     Comment</button>
+  {{--  COMMENT BUTTON  --}}
+  <button type="button" class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>
 
-  {{-- show comment --}}
-  {{-- every post has a number (post_no) that is linked to every comments (through comment_no) made under that post --}}
+  {{-- SHOW COMMENT --}}
+  
   @foreach ($comment as $comment)
-  @if ($allData['post_no'] === $comment['post_no'] )
-
-    @include('member/includes/comment')
-
-  @endif
+    @if ($allData['post_no'] === $comment['post_no'] )
+      @include('member/includes/comment')
+    @endif
   @endforeach
 
   <br>
 
+  {{--  PROCESS COMMENT $_POST  --}}
+
   <form action="/postCommentProfile" method="post" id="postCommentProfile{{ $allData['post_no'] }}">
-    {{-- like and comment --}}
 
-
-    {{-- COMMENTS --}}
+      {{-- every post has a number (post_no) that is linked to every comments (through comment_no) made under that post --}}
+      
     <input name='post_no' type="hidden" name="{{ $allData['post_no'] }}" value={{ $allData['post_no'] }} />
-    {{-- 
-    <input name='post_no' type="hidden" value={{ $allData['post_no'] }} /> --}}
 
     <input class="w3-input w3-border w3-round-large inputComment" 
     type="text" placeholder="Write a comment"

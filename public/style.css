@@ -473,3 +473,12 @@ textarea {
   resize: none;
 }
 
+.eventModalCancel {
+  background-color: red;
+  align-items: center;
+}
+
+.modal-h1 {
+  font-family: "Playfair Display", serif;
+}
+

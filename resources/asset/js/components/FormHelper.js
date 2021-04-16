@@ -24,8 +24,11 @@ export default class FormHelper {
         const reg = /[a-zA-Z0-9./@]/g;
         this.data.forEach((et) => {
             for (let post of et) {
+
+
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
+
                 // rid it off the submit button
                 if (post.type == 'submit' || post.name == 'token' || postName == "spouseName" || postName == "spouseMobile") {
                     continue;
@@ -60,6 +63,7 @@ export default class FormHelper {
         })
 
     }
+
 
     emailVal() {
         const emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;

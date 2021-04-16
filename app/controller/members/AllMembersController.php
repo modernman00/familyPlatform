@@ -20,7 +20,6 @@ class AllMembersController extends AllMembersData
     {
         try {
             $result = $this->getAllMembers();
-            // printArr($result);
             view('member/allMembers', compact('result'));
         } catch (\Throwable $th) {
             showError($th);

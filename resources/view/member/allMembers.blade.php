@@ -15,8 +15,7 @@
     @foreach($result as $result)
 
     <div class="card col-sm-4">
-        <img class="card-img-top" src="img/profile/{{ $result['img'] }}" alt="{{ $result['img'] }}" height="250"
-            width="200">
+        <img class="card-img-top" src="img/profile/{{ $result['img'] }}" alt="{{ $result['img'] }}" height="250" width="200">
         <div class="card-body">
             <h4 class='card-title'>{{ $result['firstName'] }} {{ $result['lastName'] }}</h4>
             <p class="card-text"><b>Alias:</b> {{ $result['alias'] }} 
@@ -28,7 +27,11 @@
             <br> <b>Siblings:</b>  {{ $result['sibling_name'] }}
             <br> <b>Contact:</b>  {{ $result['email'] }} | {{ $result['mobile'] }} </p>
 
-            <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary stretched-link">See Profile</a>
+            {{--  <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary stretched-link">See Profile</a>  --}}
+
+             <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary ">See Profile</a>
+
+            <a href="/organogram?id={{ $result['id'] }}" class="btn btn-primary ">See Organogram</a>
 
 
         </div>

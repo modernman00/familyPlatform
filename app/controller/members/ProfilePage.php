@@ -133,16 +133,16 @@ class ProfilePage extends ProcessImg
      *
      * @return void
      */
-    private function selectProfileImg()
-    {
+    // private function selectProfileImg()
+    // {
 
-        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: "profile_pics", identifier1: "id", orderBy: "ORDER BY date_created DESC", limit: "LIMIT " . 1);
+    //     $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: "profile_pics", identifier1: "id", orderBy: "ORDER BY date_created DESC", limit: "LIMIT " . 1);
 
-        $result = Select::selectFn2($query, [checkInput($_SESSION['id'])]);
+    //     $result = Select::selectFn2($query, [checkInput($_SESSION['id'])]);
 
-        foreach ($result as $result);
-        return $result['img'];
-    }
+    //     foreach ($result as $result);
+    //     return $result['img'];
+    // }
 
     function postComment()
     {
@@ -222,5 +222,33 @@ class ProfilePage extends ProcessImg
             //'allData' => $this->allPostData,
             'comment' => $comment2Post,
         ]);
+    }
+
+    static function processEvent()
+    {
+        try {
+             // SANITISE THE ENTRY
+            $sanitise = new Sanitise($_POST);
+
+            $result = $sanitise?->getData();
+            $error = $sanitise?->error;
+
+            if(count($error) > 0 ){
+                view('error/genError', compact('error'));
+            }
+           $result['id'] = checkInput($_SESSION['id']);
+
+            Insert::submitForm2('events', $result);
+
+             header(self::REDIRECT);
+
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+       
+
+
+
+            
     }
 }

@@ -6,6 +6,7 @@ import "./components/smallInput"
 import "./components/register/processForm"
 import "./components/register/modal/kids"
 import "./components/register/modal/siblings"
+// import "./components/submitForm"
 
 import "./components/profilePage"
 //import "./components/FilePreview"

@@ -402,7 +402,8 @@ __webpack_require__.r(__webpack_exports__);
 
 try {
   // id('spouse_div').style.display="none";
-  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "none"; // id("firstName_help").innerHTML = 
+  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('spouse_div').style.display = "none";
+  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('id_event_modal').style.display = "none"; // id("firstName_help").innerHTML = 
 } catch (error) {
   Object(_global__WEBPACK_IMPORTED_MODULE_0__["log"])(error.message);
 }
@@ -480,16 +481,6 @@ document.querySelector('.button').addEventListener('click', testAlert);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
 
-
-try {
-  var showModal = function showModal() {
-    return Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('id01').style.display = 'block';
-  };
-
-  Object(_global__WEBPACK_IMPORTED_MODULE_0__["id"])('postMessage').addEventListener('click', showModal);
-} catch (e) {
-  console.log(e.message);
-}
 
 /***/ }),
 
@@ -1088,6 +1079,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+ // import "./components/submitForm"
 
  //import "./components/FilePreview"
 //import "./components/organogram"
@@ -1131,4 +1123,4 @@ module.exports = __webpack_require__(/*! /Applications/MAMP/htdocs/familyPlatfor
 
 /***/ })
 
-},[[0,"/manifest"]]]);
+},[[0,"/manifest","/vendor"]]]);

@@ -14,11 +14,11 @@ class Insert extends Db
             // EXTRACT THE KEY FOR THE COL NAME
             $key = array_keys($field);
             $col = implode(', ', $key);
-            // extract values
-            $value = array_values($field);
             $placeholder = implode(', :', $key);
+
             // prep statement using placeholder :name
             $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
+
             $query = $this->connect()->prepare($stmt);
             if (!$query) {
                 throw new Exception("Not able to insert data", 1);
@@ -32,10 +32,39 @@ class Insert extends Db
             }
         } catch (PDOException $e) {
             showError($e);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $e) {
             showError($e);
         }
+    }
 
+    public static function submitForm2($table, $field)
+    {
+        try {
+
+            // EXTRACT THE KEY FOR THE COL NAME
+            $key = array_keys($field);
+            $col = implode(', ', $key);
+            $placeholder = implode(', :', $key);
+
+            // prep statement using placeholder :name
+            $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
+
+            $query = parent::connect2()->prepare($stmt);
+            if (!$query) {
+                throw new Exception("Not able to insert data", 1);
+            }
+            foreach ($field as $keys => $values) {
+                $query->bindValue(":$keys", $values);
+            }
+            $outcome = $query->execute();
+            if (!$outcome) {
+                throw new Exception("Not able to execute data", 1);
+            }
+        } catch (PDOException $e) {
+            showError($e);
+        } catch (\Throwable $e) {
+            showError($e);
+        }
     }
 
     public function selectForm($table, $column)

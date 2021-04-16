@@ -10,4 +10,6 @@ $router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@p
 
 $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@showPics', 'MEMBERS_IMG_POST_SHOW');
 
+$router->map('POST', '/member/createEvent', 'App\controller\members\ProfilePage@processEvent', 'PROCESS_EVENT');
+
 

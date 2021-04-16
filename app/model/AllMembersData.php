@@ -3,9 +3,9 @@ declare(strict_types =1);
 
 namespace App\model;
 
-use App\classes\innerJoin;
+use App\model\SingleCustomerData;
 
-class AllMembersData extends innerJoin
+class AllMembersData extends SingleCustomerData
 {
     public function getAllMembers()
     {
@@ -28,4 +28,5 @@ class AllMembersData extends innerJoin
         return $memberData??= throw new \Exception("Member Data Error", 1);
         
     }
+
 }
