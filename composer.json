@@ -20,7 +20,8 @@
         "app/function/helper/security.php",
         "app/function/helper/Validate.php",
         "app/function/helper/pdfConversion.php",
-        "app/function/helper/optimiser.php"
+        "app/function/helper/optimiser.php",
+        "app/function/helper/date.php"
         ]
     },
 

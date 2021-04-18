@@ -12,15 +12,14 @@ use App\model\{
 use App\classes\{
     Sanitise,
     ProcessImg,
-    Insert,
-    Select
+    Insert
 };
 
 use Exception;
 
 class ProfilePage extends ProcessImg
 {
-    private $allPostData;
+    public $allPostData;
     private $allCommentData;
     private $id;
     private const REDIRECT = "Location: /member/ProfilePage";
@@ -51,8 +50,8 @@ class ProfilePage extends ProcessImg
 
         // COMMENT AND POST NO 
         //printArr($this->memberData);
-    //     $postId = $this->allPostData['post_no'];
-    //    $this->comment2Post = Post::commentLink2Post($postId);
+        //     $postId = $this->allPostData['post_no'];
+        //    $this->comment2Post = Post::commentLink2Post($postId);
 
         $this->getAllPics = Post::getAllPostPics($this->id);
     }
@@ -224,31 +223,4 @@ class ProfilePage extends ProcessImg
         ]);
     }
 
-    static function processEvent()
-    {
-        try {
-             // SANITISE THE ENTRY
-            $sanitise = new Sanitise($_POST);
-
-            $result = $sanitise?->getData();
-            $error = $sanitise?->error;
-
-            if(count($error) > 0 ){
-                view('error/genError', compact('error'));
-            }
-           $result['id'] = checkInput($_SESSION['id']);
-
-            Insert::submitForm2('events', $result);
-
-             header(self::REDIRECT);
-
-        } catch (\Throwable $th) {
-            showError($th);
-        }
-       
-
-
-
-            
-    }
 }

@@ -27,11 +27,11 @@
             <br> <b>Siblings:</b>  {{ $result['sibling_name'] }}
             <br> <b>Contact:</b>  {{ $result['email'] }} | {{ $result['mobile'] }} </p>
 
-            {{--  <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary stretched-link">See Profile</a>  --}}
+            <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary stretched-link">See Profile</a>
 
-             <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary ">See Profile</a>
+             {{--  <a href="/setProfile?id={{ $result['id'] }}" class="btn btn-primary ">See Profile</a>  --}}
 
-            <a href="/organogram?id={{ $result['id'] }}" class="btn btn-primary ">See Organogram</a>
+            {{--  <a href="/organogram?id={{ $result['id'] }}" class="btn btn-primary ">See Organogram</a>  --}}
 
 
         </div>

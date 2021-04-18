@@ -62,7 +62,7 @@ class InnerJoin extends Db
     public function joinAll(string $firstTable, string $para, array $table) : array
     {
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
+            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString";
             $result = $this->connect()->prepare($query2);
@@ -74,7 +74,10 @@ class InnerJoin extends Db
     }
 
     /**
-     * 
+     * firstTable -> the first table in the array
+     * para - id 
+     * table -> the array of db tables
+     * orderBy -> the input you want to order it by - date, age etc
      */
 
       public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy) : array

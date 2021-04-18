@@ -47,10 +47,13 @@ class AllMembersController extends AllMembersData
          $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
 
          $pictures= Select::selectFn2(query: $query, bind: [$id]);
+        
 
  
         foreach($result as $data);
 
-        view('member/profile', compact('data', 'pictures'));
+
+
+        view('member/personalProfile', compact('data', 'pictures'));
     }
 }

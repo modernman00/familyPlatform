@@ -2,7 +2,6 @@
 declare(strict_types =1);
 
 use App\model\EmailData;
-use phpDocumentor\Reflection\Types\Boolean;
 
 function sendEmailMember()
 {
@@ -30,6 +29,7 @@ function sendEmailSelf()
    * 'viewPath' => ,
    *  data'=>
    * 'subject'=>
+   * recipientType can be either member or admin
    */
 
   function sendEmailWrapper($var, $recipientType)
