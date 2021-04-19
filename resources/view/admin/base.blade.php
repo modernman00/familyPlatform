@@ -69,7 +69,7 @@
 
                 @php 
 
-                $result = new \App\classes\Select;
+                // $result = new \App\classes\Select;
                 $array = [
                     'selection' => "SELECT_COUNT_ONE",
                     'table' => 'account',
@@ -77,7 +77,7 @@
                     'bind' => ['new']
                 ];
                 $callback = "selectCountFn";
-                $result = $result->combineSelect($array, $callback, "ONE_IDENTIFIER");
+                $result = \App\classes\Select::combineSelect($array, $callback, "ONE_IDENTIFIER");
 
 
                 @endphp

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\classes\{
+    AllFunctionalities,
     Db,
     Insert,
     Sanitise,
-    InnerJoin
+    Select,
+    CheckToken
 };
 
 use App\model\AllMembersData;
@@ -19,10 +21,11 @@ class Event extends AllMembersData
 {
     private const REDIRECT = "Location: /member/ProfilePage";
 
-    static function processEvent()
+    static function submitEvent()
     {
 
         try {
+            CheckToken::tokenCheck('token', self::REDIRECT);
             // SANITISE THE ENTRY
             $sanitise = new Sanitise($_POST);
 
@@ -44,107 +47,134 @@ class Event extends AllMembersData
 
     static function sendReminder()
     {
-            // * 2. get the data from the database about all event; get the id of the event 
+        try {
+            $todayDate =  date('Y-m-d');
+            $data = self::getEventData();
+            //printArr($data);
 
-        $data = parent::getMembers(['personal', 'events'], 'eventDate');
+            self::getEventMonth($data);
+            echo BR;
+           // printArr(self::getEventWeek($data));
 
-        // printArr($data);
+            echo BR;
+           // echo count(self::getEventWeek($data)) . "total number of array";
 
-        //   * 1. set today's day 
+            foreach ($data as $data) {
 
-        $todayDate = date('Y-m-d');
+                $eventDate = $data['eventDate'];
+                $firstName = $data['firstName'];
+                $eventName = $data['eventName'];
+                $eventDayFormatted = dateFormat($data['eventDate']);
 
-        //  * 2. get the difference between today and the date itself 
+                $diffEventAndTodayDate = dateDifference($todayDate, $eventDate);
 
-        $eventDate = date('21-04-08');
-        $eventDateSevenDays = modifyDate($eventDate, '7 days', 'date_add')['fullDate'];
-        echo $eventDateSevenDays;
-        // // GET THE EVENT DAY AND MONTH
-        // $eventMonth = date('m', strtotime($eventDate));
-        // $eventDay = date('d', strtotime($eventDate));
+                if ($diffEventAndTodayDate === "+7 days") {
 
+                    $subject = "$firstName's $eventName is on the $eventDayFormatted";
 
-        // 7 DAYS  
+                    self::sendNotification($data, $subject);
+                } elseif ($diffEventAndTodayDate === "+0 days") {
 
-        foreach($data as $data){
-          $diff = dateDifference($todayDate, $data['eventDate']);
-          if($diff === "-7 days") {
+                    $subject = "$firstName's $eventName is today, $eventDayFormatted";
 
-              // DO THIS 
+                    self::sendNotification($data, $subject);
 
-              // generate email wrapper 
-              $view = 'msg/events/event';
-              $firstName = $data['firstName'];
-              $eventName = $data['eventName'];
-              $subject = "$firstName's $eventName EVENT is on the $eventDateSevenDays";
-
-              $emailWrapper = genEmailArray($view, $data, $subject);
-
-              sendEmailWrapper($emailWrapper, "admin");
-
-              /**
-               * send a message to all depending on the group on the events using location
-               */
-
-              
-
-              
-
-          } elseif ($diff = "0 days") {
-              // DO THIS
-
-              // ALSO CHECK IF THE EVENT IS RECURRING
-              // IF YES, ADD THE RECURRING TO THE EVENT DATE AND UPDATE THE EVENT DATE
-          }
+                    self::extendEventByFrequency($data);
+                }
+            }
+        } catch (\Throwable $th) {
+            showError($th);
         }
-        //  // $diff == "-9 days"?  echo "xxxx". BR : ;
-          
-        // }
+    }
+
+    // GET THE EVENT DATA 
+    private static function getEventData(): array
+    {
+        $table = ['personal', 'events'];
+        return parent::getMembers($table, 'eventDate');
+    }
 
 
+    // PRIVATE FUNCTION TO SEND EVENT NOTIFICATION
+    private static function sendNotification($data, $subject)
+    {
 
-        /**
-       
-     
-        
-         * if it 7 days, send a 7 day reminder to the group by location excluding the id from the event
-         * if it 1 day, send a 1 day reminder 
-         * if same day, send a message to the celebrants
-         * Build the message template based on the celebration
-         * WHAT TO BUILD: 
-         * 
-         */
+        $allEmails = getAllEmails();
 
+        $view = 'msg/events/event';
 
-
-        // $today = date('Y-m-d');
-
-        // if ($today == $notify1) {
-        //     $subject = "Your SHOWAL payment will be due in 7 days: " . $notify10;
-
-        //     $text = "Gentle reminder: Hello $name, Your Loan payment of ₦$expected_nextpayment will be due in 7 days: $notify10";
-        // }
-        // if ($today == $notify2) {
-        //     $subject = "Your SHOWAL payment will be due tomorrow: " . $notify10;
-
-        //     $text = "Gentle reminder: Hello $name, Your Showal Loan payment of ₦$expected_nextpayment will be due tomorrow: $notify10";
-        // }
-        // if ($today == $paymentdd) {
-        //     $subject = "Your SHOWAL payment will be due today: " . $notify10;
-
-        //     $text = "Hello $name, Your Showal Loan payment of ₦$expected_nextpayment is due today: $notify10";
-        // }
-
-        // ob_start();
-        // require(__DIR__ . "/paymentHtml.php");
-        // $pdf2 = ob_get_contents();
-        // ob_end_clean();
+        foreach ($allEmails as $email) {
+            $data['email'] = $email;
+            $emailWrapper = genEmailArray($view, $data, $subject);
+            sendEmailWrapper($emailWrapper, "admin");
+        }
+    }
 
 
-        // for ($i = 0; $i < 3; $i++) {
-        //     if ($today == $notify[$i]) {
-        //         send_email('wale@showalinvest.com', $name, $subject, $pdf2);
-        //     }
-        // }
+    private static function getEventMonth($data): array
+    {
+        foreach ($data as $data) {
+            if (date('m') == date('m', strtotime($data['eventDate']))) {
+                $eventWeek[] = $data['eventDate'];
+            }
+        }
+        return $eventWeek;
+    }
+
+    /**
+     * this function get the events of the week from Sunday
+     */
+
+    private static function getEventWeek($data): array
+    {
+        foreach ($data as $data) {
+            if (date('l') == "Tuesday") {
+
+                for ($i = 0; $i <= 7; $i++) {
+
+                    $dateO = date('Y-m-d');
+
+                    $date = modifyDate($dateO, "+ $i days", 'date_add')['date'];
+                    echo $date;
+
+                    $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'events', identifier1: "eventDate");
+
+                    $result = Select::selectFn2(query: $query, bind: [$date]);
+
+                    if (!empty($result)) {
+
+                        foreach ($result as $key) {
+                            $event[] = $key;
+                        }
+                    }
+                }
+                return $event;
+            }
+        }
+    }
+
+    /**
+     * this function extends the event date on the due date 
+     */
+
+    private static function extendEventByFrequency($data)
+    {
+        $no = checkInput($data['no']);
+        $eventDate = checkInput($data['eventDate']);
+
+        return match ($data['eventFrequency']) {
+            "Annually" => self::processEventUpdate($eventDate, '1 year', $no),
+            "Monthly" => self::processEventUpdate($eventDate, '1 month', $no),
+            "Weekly" => self::processEventUpdate($eventDate, '1 week', $no)
+        };
+    }
+
+    // this is a sub function to extendEventByFrequency
+
+    private static function processEventUpdate($dateEvent, string $extendBy, string $no)
+    {
+        $newEventDate = modifyDate($dateEvent, $extendBy, 'date_add')['date'];
+
+        return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
 }

@@ -24,3 +24,9 @@ function dateDifference($date1, $date2)
     $diff = date_diff($createDate1, $createDate2);
     return $diff->format("%R%a days");
 }
+
+function dateFormat($date)
+{
+    $stringDate = strtotime($date);
+    return date('l jS \of F Y', $stringDate);
+}

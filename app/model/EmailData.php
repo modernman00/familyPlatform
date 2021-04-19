@@ -8,6 +8,7 @@ class EmailData
     private $password;
     private $senderEmail;
     private $senderName;
+
     /**
      * 
      * @param string $sender must be either, self, customer, payment, referral
@@ -31,6 +32,7 @@ class EmailData
 
     private function setEmailData()
     {
+    
         define('USER_APP', $this->username);
         define('PASS', $this->password);
         define('APP_EMAIL', $this->senderEmail);
@@ -39,6 +41,6 @@ class EmailData
 
     function getEmailData()
     {
-        return $this->setEmailData();
+        $this->setEmailData();
     }
 }

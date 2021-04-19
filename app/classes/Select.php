@@ -28,8 +28,9 @@ class Select extends Db
             'SELECT_NOT_AND' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 != ? $orderBy $limit",
             'SELECT_NOT_OR' => "SELECT * FROM $table WHERE $identifier1 !=? OR $identifier2 != ? $orderBy $limit",
             'SELECT_ALL' => "SELECT * FROM $table $orderBy $limit",
-            'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy " .$limit,
+            'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_COL' => "SELECT $column FROM $table $orderBy $limit",
+            'SELECT_COL_ID' => "SELECT $column FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_GREATER' => "SELECT * FROM $table WHERE $identifier1 > ? $orderBy $limit",
             'SELECT_GREATER_EQUAL' => "SELECT * FROM $table WHERE $identifier1 > ? OR $identifier2 = ? $orderBy $limit",
             'SELECT_COUNT_TWO' => "SELECT * FROM $table WHERE $identifier1 = ? AND $identifier2 = ?",
@@ -108,22 +109,25 @@ class Select extends Db
 
     /**
      * 
-     * @param array $array [selection, table, identifier1, identifier2(null), bind]
+     * @param array $array [selection => SELECT_ALL, table =>account, identifier1 =>id, identifier2(null), bind=>[$id]]
      * @param mixed $callback the Select function albeit in string example - selectCountFn, selectFn
      * @param string $switch to switch between ONE_IDENTIFIER or TWO_IDENTIFIERS
      * @return mixed 
      */
 
-    public function combineSelect(array $array, $callback, string $switch)
+    public static function combineSelect(array $array, $callback, string $switch)
     {
         try {
 
             $query = match($switch) {
-                "ONE_IDENTIFIER" => $this->formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1']),
-                "TWO_IDENTIFIERS" => $this->formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1'], identifier2: $array['identifier2']),
+                "ONE_IDENTIFIER_COLUMN" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], column:$array['column'], identifier1: $array['identifier1']),
+
+                "ONE_IDENTIFIER" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1']),
+                
+                "TWO_IDENTIFIERS" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1'], identifier2: $array['identifier2']),
             };
 
-            return $this->$callback($query, $array['bind']);
+            return self::$callback($query, $array['bind']);
         } catch (\Throwable $th) {
             showError($th);
         }

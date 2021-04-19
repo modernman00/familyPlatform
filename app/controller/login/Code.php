@@ -38,7 +38,7 @@ class Code extends Select
             // check if the code is stored in the database
             $formCodeQuery = ['selection' => "SELECT_COUNT_TWO", 'table' => 'account', 'identifier1' => 'token', 'identifier2' => 'id', 'bind' => [$code, $this->memberId]];
 
-            $result = $this->combineSelect($formCodeQuery, 'selectCountFn', 'TWO_IDENTIFIERS');
+            $result = Select::combineSelect($formCodeQuery, 'selectCountFn', 'TWO_IDENTIFIERS');
 
             if (!$result) {
                 throw new Exception("CODE NOT RECOGNISED", 1);

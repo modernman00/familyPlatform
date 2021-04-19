@@ -112,13 +112,7 @@
 																		<td class="img" style="font-size:0pt; line-height:0pt; text-align:left">
 																			<table width="100%" border="0" cellspacing="0" cellpadding="0" class="spacer" style="font-size:0pt; line-height:0pt; text-align:center; width:100%; min-width:100%; mso-cellspacing:0px; mso-padding-alt:0px 0px 0px 0px"><tr><td height="25" class="spacer" style="font-size:0pt; line-height:0pt; text-align:center; width:100%; min-width:100%; mso-cellspacing:0px; mso-padding-alt:0px 0px 0px 0px">&nbsp;</td></tr></table>
 
-																			<table class="center" border="0" cellspacing="0" cellpadding="0">
-																				<tr>
-																					<td class="text-top2" style="color:#ffffff; font-family:Arial,sans-serif, 'HG'; font-size:11px; line-height:16px; text-align:left; text-transform:uppercase; font-weight:bold"><a href="#" target="_blank" class="link-white-u" style="color:#ffffff; text-decoration:underline"><span class="link-white-u" style="color:#ffffff; text-decoration:underline">View Online</span></a></td>
-																					<td class="img" style="font-size:0pt; line-height:0pt; text-align:left" width="20"></td>
-																					<td class="text-top2" style="color:#ffffff; font-family:Arial,sans-serif, 'HG'; font-size:11px; line-height:16px; text-align:left; text-transform:uppercase; font-weight:bold"><a href="#" target="_blank" class="link-white-u" style="color:#ffffff; text-decoration:underline"><span class="link-white-u" style="color:#ffffff; text-decoration:underline">FORWARD</span></a></td>
-																				</tr>
-																			</table>
+																
 																			<table width="100%" border="0" cellspacing="0" cellpadding="0" class="spacer" style="font-size:0pt; line-height:0pt; text-align:center; width:100%; min-width:100%; mso-cellspacing:0px; mso-padding-alt:0px 0px 0px 0px"><tr><td height="25" class="spacer" style="font-size:0pt; line-height:0pt; text-align:center; width:100%; min-width:100%; mso-cellspacing:0px; mso-padding-alt:0px 0px 0px 0px">&nbsp;</td></tr></table>
 
 																		</td>

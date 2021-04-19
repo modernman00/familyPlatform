@@ -10,7 +10,7 @@ $router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@p
 
 $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@showPics', 'MEMBERS_IMG_POST_SHOW');
 
-$router->map('POST', '/member/createEvent', 'App\controller\members\Event@processEvent', 'PROCESS_EVENT');
+$router->map('POST', '/member/createEvent', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
 $router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');
 

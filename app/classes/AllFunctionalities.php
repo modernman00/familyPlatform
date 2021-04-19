@@ -19,6 +19,19 @@ class AllFunctionalities extends Db
         }
     }
 
+
+    public static function update2($table, $column, $column_ans, $identifier, $identifier_ans)
+    {
+        try {
+            $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
+            $result = parent::connect2()->prepare($query);
+            return $result->execute([$column_ans, $identifier_ans]);
+    
+        } catch (PDOException $e) {
+            showError($e);
+        }
+    }
+
     public function updateOr($table, $column, $column_ans, $identifier1, $identifier2, $identifier_ans)
     {
         try {

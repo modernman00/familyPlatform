@@ -12,7 +12,7 @@ class Update extends Db
 
     public function updateTable ($column, $column_ans, $identifier, $identifier_ans){
         try { $query = "UPDATE $this->table SET $column =? WHERE $identifier = ?";
-        $result = $this->connect()->prepare($query);
+        $result = parent::connect2()->prepare($query);
         $result ->execute([$column_ans, $identifier_ans]);
         return $result;
         }

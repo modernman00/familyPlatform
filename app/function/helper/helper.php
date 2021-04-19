@@ -33,12 +33,7 @@ function printArr(array $data)
     echo "</pre>";
 }
 
-function dateFormat($date)
-{
-    $stringDate = strtotime($date);
-    $dateFormatted = date('jS \of F Y', $stringDate);
-    return $dateFormatted;
-}
+
 
 function replace_whitespace($string)
 {
