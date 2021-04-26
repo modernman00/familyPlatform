@@ -1,7 +1,7 @@
-import { id } from "../global"
+import { id, log } from "../../global"
 
 const maiden = id('motherMaiden_help')
-maiden.innerHTML = "Good to identify your family from mum's side"
+maiden.innerHTML = "Good to identify your family from the mother's side"
 
 
 const mobile = id('mobile_help')

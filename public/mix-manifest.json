@@ -1,6 +1,9 @@
 {
     "/index.js": "/index.js",
-    "/style.css": "/style.css",
     "/manifest.js": "/manifest.js",
+    "/index/codeSplit/register.js": "/index/codeSplit/register.js",
+    "/index/codeSplit/all_members.js": "/index/codeSplit/all_members.js",
+    "/index/codeSplit/login.js": "/index/codeSplit/login.js",
+    "/style.css": "/style.css",
     "/vendor.js": "/vendor.js"
 }

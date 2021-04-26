@@ -94,6 +94,24 @@ class InnerJoin extends Db
         }
     }
 
+
+      public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy) 
+    {
+        try {
+            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
+            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
+            $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
+            $result = self::connect2()->prepare($query2);
+            $result->execute();
+            $jsResult = $result->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($jsResult, JSON_PRETTY_PRINT);
+        } catch (PDOException $e) {
+            showError($e);
+        }
+    }
+
+
+
         public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id) : array
     {
         try {

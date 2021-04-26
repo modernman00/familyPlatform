@@ -102,7 +102,7 @@
   </script>
 
     <script src="/manifest.js"></script>
-     <script src="/vendor.js"></script>
+     <script src="vendor/vendor.js"></script>
       <script src="/index.js"></script>
 
 </body>

@@ -1,4 +1,4 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/codeSplit/smallinput"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/codeSplit/all"],{
 
 /***/ "./resources/asset/js/components/smallinput.js":
 /*!*****************************************************!*\

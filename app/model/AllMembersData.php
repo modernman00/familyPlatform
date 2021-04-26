@@ -14,7 +14,7 @@ class AllMembersData extends InnerJoin
         $table = ['personal','otherFamily','profile_pics', 'contact'];
         $firstTable = array_shift($table);
         $memberData = parent::joinAll2(firstTable:$firstTable, para:'id', table:$table, orderBy:'date_created');
-        return $memberData??= throw new Exception(self::ERR_MSG, 1);
+       return $memberData??= throw new Exception(self::ERR_MSG, 1);
     }
 
      public function getAllMembersById($id)

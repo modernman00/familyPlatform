@@ -11,14 +11,24 @@ use App\model\{
 use App\classes\Select;
 
 use Exception;
+use PDO;
 
 class AllMembersController extends AllMembersData
 {
     public function index()
     {
         try {
-            $result = $this->getAllMembers();
+             $result = $this->getAllMembers();
             view('member/allMembers', compact('result'));
+          
+            // $stmt = $this->connect()->prepare("SELECT * FROM personal");
+            // $stmt->execute();
+            // $result = $stmt->fetchAll();
+            // echo $result;
+            // // echo json_encode(['allMembers' => $result, 'count' => count($result), JSON_PRETTY_PRINT]);
+            // // exit;
+          
+
         } catch (\Throwable $th) {
             showError($th);
         }

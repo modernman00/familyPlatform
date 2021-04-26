@@ -1,24 +1,23 @@
 import axios from "axios";
-import { id } from "./../../global"
+import { id, log } from "./../../global"
+import { realTimeServer} from "../../helper"
 
+id('searchFamily').addEventListener('keyup', (event) => {
+        const value = event.target.value
+        log(value)
+    })
 
-const getData = async () => {
+ 
+    // const config = {
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     data: {},
+    //     }
 
-    // get the search value;
-    const searchInput = id('searchFamily').value;
-
-    const api = await axios.create({ baseURL: 'http://localhost:80' });
-    api.get('/allMembers')
-        .then(response => {
-
-            response.data.forEach((el) => console.log(el))
-
-            response.data.filter(data => {
-                return data.firstName.toLowerCase().includes(this.state.input.toLowerCase())
-            })
-
-
-        })
-        .catch(err => console.error(err))
-
-}
+    // axios.get('http://olaogun.dev.com/allMembers',config)
+    //     .then((response) => {
+    //         log(response.data);
+    //         log(response.headers);
+    //         })
+    //     .catch(err => console.error(err))
