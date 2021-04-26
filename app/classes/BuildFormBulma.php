@@ -61,8 +61,7 @@ class BuildFormBulma extends AlterTable
 
     private function createYear(int $startVar, $dayOrYear)
     {
-        for ($i = $startVar; $i < (int) $dayOrYear; $i++) {
-         //   $this->setYear[] = "<option value=$i>$i</option>";
+        for ($i = $startVar; $i <= (int) $dayOrYear; $i++) {
             $this->setYear[] = $i;
         }
         return $this->setYear;
@@ -71,28 +70,25 @@ class BuildFormBulma extends AlterTable
     private function createDay(int $startVar, $dayOrYear)
     {
         for ($i = $startVar; $i < (int) $dayOrYear; $i++) {
-                 $this->setDay[] = $i;
+            $this->setDay[] = $i;
         }
         return $this->setDay;
     }
 
     public function getYear()
     {
-        $minAge = 17;
-        $yearLimit = (int) date('Y') - $minAge;
-        $this->createYear(1945, $yearLimit);
+        $yearLimit = (int) date('Y');
+        $this->createYear(1930, $yearLimit);
 
         for ($i = 0; $i < count($this->setYear); $i++) {
             $no = $this->setYear[$i];
             echo "<option value=$no> $no </option>";
         }
-        // echo "</select>";
     }
 
     private function getDay()
     {
         $this->createDay(1, 32);
-            // echo "<select>";
         for ($i = 0; $i < count($this->setDay); $i++) {
             $no = $this->setDay[$i];
             echo "<option value=$no> $no </option>";
@@ -103,11 +99,13 @@ class BuildFormBulma extends AlterTable
     /**
      * function to set the key of the form. Keys are the names of questions and the names of the database
      */
+
     public function setEntKey()
     {
         $this->EntKey = array_keys($this->question);
         return $this->EntKey;
     }
+
     /**
      * function to build the form although it is not modular
      */
@@ -131,11 +129,11 @@ class BuildFormBulma extends AlterTable
 
         //ITERATE TO CREATE A FORM
         for ($i = 0; $i < $this->EntCount; $i++) {
-        //    $value = "";
+    
 
             if (isset($_POST['submit'])) {
-             $value = $_POST[$this->EntKey[$i]];
-            } else{
+                $value = $_POST[$this->EntKey[$i]];
+            } else {
                 $value = "";
             }
 
@@ -208,7 +206,7 @@ class BuildFormBulma extends AlterTable
                 for ($y = 0; $y < count($this->EntValue[$i]); $y++) {
                     echo "<option>" . $this->EntValue[$i][$y] . "</option>";
                 }
-                    echo " </select>
+                echo " </select>
                          <p class='help' id={$nameKey}_help></p>
                     <p class='help' id={$nameKey}_error></p>
                     </div></div> ";
@@ -220,10 +218,10 @@ class BuildFormBulma extends AlterTable
                     <div class='control has-icons-left'>
 
                         <select class='input' id='$nameKey' name=$nameKey>";
-                        for ($y = 1; $y < count($this->EntValue[$i]); $y++) {
-                            echo "<option>" . $this->EntValue[$i][$y] . "</option>";
-                        }
-                       echo "</select>
+                for ($y = 1; $y < count($this->EntValue[$i]); $y++) {
+                    echo "<option>" . $this->EntValue[$i][$y] . "</option>";
+                }
+                echo "</select>
 
 
                         <span class='icon is-small is-left'>
@@ -290,7 +288,7 @@ class BuildFormBulma extends AlterTable
                         <div class='control'>
                         <label class='checkbox'>
 
-                            <input type='checkbox' id='{$nameKey}_id' name = '{$nameKey}_id'>
+                            <input type='checkbox' id='checkbox' name = '{$nameKey}_id'>
                             {$this->EntValue[$i]}
 
                         </label>
@@ -300,7 +298,7 @@ class BuildFormBulma extends AlterTable
             } elseif ($this->EntValue[$i] === 'button') {
                 echo "<div class='field'>
                     <p class='control'>
-                    <button name= 'submit' type = 'button' class='button is-warning'>
+                    <button name= 'submit' id='submit' type = 'button' class='button is-success button is-large is-fullwidth submit'>
                     Submit
                     </button>
                     </p>
@@ -308,7 +306,7 @@ class BuildFormBulma extends AlterTable
             } elseif ($this->EntValue[$i] === 'submit') {
                 echo "<div class='field'>
                     <p class='control'>
-                    <button name= 'submit' type = 'submit' class='button is-warning submit'>
+                    <button name= 'submit' id='submit' type = 'submit' class='button is-success button is-large is-fullwidth submit'>
                     Submit
                     </button>
                     </p>
@@ -320,67 +318,17 @@ class BuildFormBulma extends AlterTable
                     <input type='hidden' class ='input' name='token' value=$this->token>
 
                     </div></div> ";
-            } elseif ($this->EntValue[$i][0] === 'col-6') {
-                echo "  <div class = field>
-                <label class='label' id=$nameKey><b> $var</b></label>
-                    <div class='field-body'> ";
-                    for ($y = 1; $y < count($this->EntValue[$i]); $y++) {
-                    $name = $this->EntValue[$i][$y];
-                    $id = $name.'_id';
-                    $error = $name.'_error';
-                    $help = $name.'_help';
-                    $autocomplete = 'new-'.$name;
-                    $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                      echo   "<div class='field'>
-                    <p class='control is-expanded has-icons-left'>
-
-                      <input class='input' type='text' name='$name' id=$id autocomplete = $autocomplete placeholder='$namePlaceholder'>
-
-                      <span class='icon is-small is-left'>
-                        <i class='fas fa-user'></i>
-                      </span>
-                    </p>
-                  </div>";
-                }
-                 echo "
-                  </div>
-                  <p class='help' id=$help></p>
-                  <p class='help error' id=$error></p>
-                    </div>";
-            } elseif ($this->EntValue[$i][0] === 'col-6-label') {
-
-                echo "  <div class = field>
-
-                    <div class='field-body'> ";
-                    for ($y = 1; $y < count($this->EntValue[$i]); $y++) {
-                    $name = $this->EntValue[$i][$y];
-                    $id = $name.'_id';
-                    $error = $name.'_error';
-                    $help = $name.'_help';
-                    $autocomplete = 'new-'.$name;
-                    $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                      echo   "<div class='field'>
-                      <label class='label' id=$name><b> $namePlaceholder</b></label>
-
-                      <input class='input' type='text' id=$id name='$name' autocomplete = $autocomplete placeholder='$namePlaceholder'>
-                      <p class='help' id=$help></p>
-                    <p class='help error' id=$error></p>
-                  </div>";
-                }
-                 echo "
-                  </div>
-                    </div>";
             } elseif ($this->EntKey[$i] === 'blank') {
                 echo "  <div class = field>
                  ";
-                    for ($y = 1; $y < count($this->EntKey[$i]); $y++) {
+                for ($y = 1; $y < count($this->EntKey[$i]); $y++) {
                     $name = $this->EntValue['type'][$y];
                     $label = $this->EntValue['label'][$y];
-                    $id = $name.'id';
-                    $error = $name.'_error';
-                    $help = $name.'_help';
+                    $id = $name . 'id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
                     $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                echo   "<div class='field'>
+                    echo   "<div class='field'>
                 <label class='label' id=$label><b> $label</b></label>
                     <div class='field-body'>
                     <p class='control is-expanded has-icons-left'>
@@ -391,33 +339,34 @@ class BuildFormBulma extends AlterTable
                     </p>
                   </div>";
                 }
-                 echo "
+                echo "
                   </div>
                     </div>";
             } elseif ($this->EntValue[$i] === 'birthday') {
-                echo " <div class='field'>
-                        <label class='label' id=$nameKey><b> $var</b>
+                $divID= $this->EntValue[$i];
+                echo " <div class='field' id=$divID>
+                        <label class='label is-medium' id=$nameKey><b> $var</b>
                         </label>
                         <p class='help error' id={$nameKey}_error></p>
 
                     <div class='field-body'>
                         <div class='field'>
                         <div class='control'>
-                        <div class='select is-fullwidth'>
-                            <select name='birth_day' id=birth_day>
+                        <div class='select is-fullwidth is-medium'>
+                            <select name='day' id=day>
                             <option selected value=select>Day</option>";
-                            echo $this->getDay();
-                     echo "
+                echo $this->getDay();
+                echo "
 
                 </select>
                         </div>
                         </div>
-                        <p class='help error' id=birth_day_error></p>
+                        <p class='help error' id=day_error></p>
                         </div>
                         <div class='field'>
                         <div class='control'>
-                        <div class='select is-fullwidth'>
-                            <select name=birth_month id=birth_month>
+                        <div class='select is-fullwidth is-medium'>
+                            <select name=month id=month>
                             <option selected value=select>Month</option>
                             <option value='Jan'>Jan</option>
                             <option value='Feb'>Feb</option>
@@ -434,32 +383,32 @@ class BuildFormBulma extends AlterTable
                             </select>
                         </div>
                         </div>
-                        <p class='help error' id=birth_month_error></p>
+                        <p class='help error' id=month_error></p>
                         </div>
                         <div class='field'>
                         <div class='control'>
-                        <div class='select is-fullwidth'>
-                                <select name='birth_year' id=birth_year>
+                        <div class='select is-fullwidth is-medium'>
+                                <select name='year' id=year>
                                 <option selected value=select>Year
                                 ";
-                                    echo $this->getYear();
-                             echo " </select>
+                echo $this->getYear();
+                echo " </select>
                         </div>
                         </div>
-                        <p class='help' error id=birth_year_error></p>
+                        <p class='help' error id=year_error></p>
                         </div>
                     </div>
 
                 </div>";
             } elseif ($this->EntValue[$i][0] === 'slider') {
-              echo " <div class = field>
+                echo " <div class = field>
                     <label class='label' id=$nameKey><b> $var</b></label>
                         <div class='field-body'>
                           <div class = field>";
-                            $fAwesome = $this->EntValue[$i][1];
-                            $slider_id = $this->EntValue[$i][2];
-                            $input_id = $this->EntValue[$i][3];
-                            echo  "<div id = '$slider_id'>
+                $fAwesome = $this->EntValue[$i][1];
+                $slider_id = $this->EntValue[$i][2];
+                $input_id = $this->EntValue[$i][3];
+                echo  "<div id = '$slider_id'>
                           </div>
                         </div>
 
@@ -476,63 +425,31 @@ class BuildFormBulma extends AlterTable
                     </div>
 
                 </div>";
-            } elseif ($this->EntValue[$i][0] === 'col-4-int') {
-                echo " <br><div class = field>
-                <div class='field-label' id=$nameKey><b> </b></div>
-                    <div class='field-body'>";
-                    for ($y = 2; $y < count($this->EntValue[$i]); $y++) {
-                        $name = $this->EntValue[$i][$y];
-                        $id = $name.'_id';
-                        $error = $name.'_error';
-                        $help = $name.'_help';
-                        $autocomplete = 'new-'.$name;
-                        $readonly = $this->EntValue[$i][1];
-                        // $fontAwesome = $this->EntValue[$i][1];
-                        $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-
-                      echo " <div class = field is-expanded>
-                      <div class='field has-addons'>
-                         <p class='control'>
-                            <a class='button is-static'>
-                            <b>$namePlaceholder</b>
-                            </a>
-                          </p>
-                      <p class='control is-expanded has-icons-left'>
-                            <input class='input' type='number' value='1' $readonly name='$name'  id='$id'>
-                            <span class='icon is-small is-left'>
-                            <i class='fas fa-pound-sign'></i>
-                        </span>
-                        </p>
-                        <p class='help' id=$help></p>
-                        <p class='help error' id=$error></p>
-                        </div>
-
-                        </div>";
-                    }
-                echo "
-                </div>";
-            } elseif ($this->EntValue[$i][0] === 'mixed') {            
+            } elseif ($this->EntValue[$i][0] === 'mixed') {
+                $divID= $this->EntKey[$i];
                 $label = $this->EntValue[$i]['label'];
-                echo " <div class = field>
+                echo " <div class = field id= $divID >
                 <div class='field-body'> ";
-                  for ($y = 0; $y < count($label); $y++) {
-                  $name = $this->EntValue[$i]['label'][$y];
-                  $id = $name.'_id';
-                  $error = $name.'_error';
-                  $help = $name.'_help';
-                  $cleanName = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                  $labelType = $this->EntValue[$i]['inputType'][$y];
-                  $icon =  $this->EntValue[$i]['icon'][$y];
+                for ($y = 0; $y < count($label); $y++) {
+                    $label1 = $this->EntValue[$i]['label'][$y];
+                    $name = $this->EntValue[$i]['attribute'][$y];
+                    $placeholder = $this->EntValue[$i]['placeholder'][$y];
+                    $id = $name . '_id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
+                    $cleanName = strtoupper($label1);
+                    $labelType = $this->EntValue[$i]['inputType'][$y];
+                    $icon =  $this->EntValue[$i]['icon'][$y];
 
-                  echo   "<div class='field $name'>
-                  <label class='label' id=$name><b> $cleanName</b></label>";
-                  if($labelType === 'select')  {
-                    echo "<div class='control has-icons-left has-icons-right '>
-                        <select class='input' id='$id' name=$name>";
+                    echo   "<div class='field $name id={$name}_div'>
+                  <label class='label is-medium' id=$name><b> $cleanName</b></label>";
+                    if ($labelType === 'select') {
+                        echo "<div class='control has-icons-left has-icons-right '>
+                        <select class='input is-medium' id='$id' name=$name>";
                         for ($yii = 0; $yii < count($this->EntValue[$i]['options']); $yii++) {
                             echo "<option>" . $this->EntValue[$i]['options'][$yii] . "</option>";
                         }
-                    echo "</select>
+                        echo "</select>
 
                     <span class='icon is-small is-left'>
                     $icon
@@ -543,13 +460,13 @@ class BuildFormBulma extends AlterTable
                     <p class='help' id=$help</p>
                     <p class='help error' id=$error></p>
                     </div>";
-                  }
-                  if($labelType === 'inputButton'){
-                      echo " 
+                    }
+                    if ($labelType === 'inputButton') {
+                        echo " 
                       <div class='field has-addons has-addons-left '>
 
                       <div class= 'control is-expanded'> 
-                        <input class='input {$name}' id='{$name}_id' type='text' placeholder='$cleanName'>
+                        <input class='input {$name} input is-medium' id='{$name}_id' type='text' placeholder='$cleanName'>
                     </div>
                        <div class='control'>
                         <a class='button is-info' id='{$name}_button'>
@@ -557,11 +474,10 @@ class BuildFormBulma extends AlterTable
                         </a>
                     </div>          
                  </div>";
-;
-                  }
-                  if($labelType != 'select' && $labelType != 'inputButton' ) {
+                    }
+                    if ($labelType != 'select' && $labelType != 'inputButton') {
                         echo "<div class='control is-expanded has-icons-left'>
-                        <input class='input {$name}' type='$labelType' value='$value' maxlength='30' minlength='1' name='$name' id = $id placeholder='$cleanName'>
+                        <input class='input {$name} input is-medium' type='$labelType' value='$value' maxlength='30' minlength='1' name='$name' id = $id placeholder='$placeholder'>
                         <span class='icon is-small is-left'>
                                     $icon
                             </span>
@@ -569,31 +485,32 @@ class BuildFormBulma extends AlterTable
                         <p class='help' id={$name}_help></p>
                         <p class='help error' id={$name}_error></p>
                         </div>";
-                  }
-                 echo " </div>";
-
+                    }
+                    echo " </div>";
                 }
                 echo "  </div>
                 </div>";
             } elseif ($this->EntValue[$i][0] === 'select-many') {
-
-              echo " <div class='field'>
+                      $divID= $this->EntKey[$i];
+                echo " <div class = field id=$divID>
               <div class='field-body'> ";
-                        for ($y = 0; $y < count($this->EntValue[$i]['label']); $y++){      $options = $this->EntValue[$i]['options'];
-                            $name = $this->EntValue[$i]['label'][$y];
-                            $id = $name.'_id';
-                            $error = $name.'_error';
-                            $help = $name.'_help';
-                            $cleanName = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                            $icon =  $this->EntValue[$i]['icon'][$y];
-                            echo "<div class='field'>
-                            <label class='label' id=$name><b> $cleanName</b></label>
+                for ($y = 0; $y < count($this->EntValue[$i]['label']); $y++) {
+                    $options = $this->EntValue[$i]['options'];
+                    $label = $this->EntValue[$i]['label'][$y];
+                    $name = $this->EntValue[$i]['attribute'][$y];
+                    $id = $name . '_id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
+                    $cleanLabel = strtoupper($label);
+                    $icon =  $this->EntValue[$i]['icon'][$y];
+                    echo "<div class='field' id={$name}_div>
+                            <label class='label is-medium' id=$name><b> $cleanLabel</b></label>
                             <div class='control has-icons-left has-icons-right'>
-                            <select class='input' id='$id' name=$name>";
-                            for($x = 0; $x < count($options[$y]); $x++ ){
-                                echo "<option>" . $options[$y][$x] . "</option>";
-                            }
-                            echo "</select>
+                            <select class='input is-medium' id='$id' name=$name>";
+                    for ($x = 0; $x < count($options[$y]); $x++) {
+                        echo "<option>" . $options[$y][$x] . "</option>";
+                    }
+                    echo "</select>
                                 <span class='icon is-small is-left'>
                                 $icon
                                 </span>
@@ -601,18 +518,17 @@ class BuildFormBulma extends AlterTable
                                 <i class='fas fa-angle-down fasCol' ></i>
                                 </span>
                             </div>
-                        <p class='help' id=$help</p>
+                        <p class='help' id=$help></p>
                         <p class='help error' id=$error></p>
                         </div>";
-                        };
-                    echo "
+                };
+                echo "
                     </div>
                     </div>";
             } elseif ($this->EntValue[$i] === 'title') {
                 echo "<hr><br><p id={$nameKey}1 class='title is-3 is-spaced
                 has-text-centered is-primary the-title'>$var</p><br>
-                <p class='subtitle is-6 has-text-centered' id='{$nameKey}_help'></p>"
-                ;
+                <p class='subtitle is-6 has-text-centered' id='{$nameKey}_help'></p>";
             } elseif ($this->EntValue[$i] === 'subtitle') {
                 echo "<h2 class='subtitle has-text-centered is-primary>
                             $var
@@ -632,20 +548,7 @@ class BuildFormBulma extends AlterTable
                 </div>";
             } elseif ($this->EntValue[$i] === 'empty') {
                 echo " <div class = field id=$nameKey></div>";
-            } 
-            // elseif($this->EntValue[$i] === 'inputButton'){
-            //     echo "<div class='field has-addons'>
-                 
-            //         <div class='control'>
-            //             <input class='input' id='{$nameKey}_id' type='text' placeholder='$var'>
-            //         </div>
-            //         <div class='control'>
-            //             <a class='button is-info' id='{$nameKey}_button'>
-            //             Search
-            //             </a>
-            //         </div>
-            //         </div>";
-            // }
-        } 
+            }
+        }
     }
 }

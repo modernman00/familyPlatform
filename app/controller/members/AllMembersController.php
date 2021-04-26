@@ -1,19 +1,17 @@
 <?php
 
-declare(strict_types =1);
+declare(strict_types=1);
 
 namespace App\controller\members;
 
 use App\model\{
-    AllMembersData,
-    SingleCustomerData
+    AllMembersData
 };
 
-use App\classes\{
-    Sanitise,
-    ProcessImg, Select
-};
+use App\classes\Select;
+
 use Exception;
+
 class AllMembersController extends AllMembersData
 {
     public function index()
@@ -36,21 +34,18 @@ class AllMembersController extends AllMembersData
     public function getProfile()
     {
         $id = checkInput($_SESSION['id']);
-        
         $result = $this->getAllMembersById($id);
-       
-
-        if(!$result) {
-             throw new Exception("It could not process the data", 1);
+        if (!$result) {
+            throw new Exception("It could not process the data", 1);
         }
 
-         $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
+        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
 
-         $pictures= Select::selectFn2(query: $query, bind: [$id]);
-        
+        $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
- 
-        foreach($result as $data);
+
+
+        foreach ($result as $data);
 
 
 

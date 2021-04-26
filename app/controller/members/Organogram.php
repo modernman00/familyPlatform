@@ -7,6 +7,7 @@ use App\model\{
     AllMembersData,
     SingleCustomerData
 };
+use App\classes\Select;
 
 class Organogram extends SingleCustomerData
 {
@@ -14,10 +15,23 @@ class Organogram extends SingleCustomerData
     {
         $id =  checkInput($_GET['id']);
 
-         $table = ['personal', 'profile_pics', 'contact', 'otherFamily'];
+       
+
+         $table = ['personal', 'profile_pics', 'otherFamily'];
+
+         $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');
+         $getSibling = Select::selectFn2($siblingQuery, [$id]);
+
+        $kidQuery = Select::formAndMatchQuery('SELECT_ONE', 'kids', 'id');
+         $getKids = Select::selectFn2($kidQuery, [$id]);
+
+        // printArr($getKids);
+
 
         $data = $this->getCustomerData($id, $table);
+        //  printArr($data);
+    
         
-        view('member/organogram', compact('data'));
+        view('member/organogram', compact('data','getSibling', 'getKids'));
     }
 }

@@ -23,10 +23,10 @@ export const Personal = [
     unique: 'spouse',
     label: "Spouse's Details",
     options: {
-      label: ["Spouse's name", "Spouse's mobile"],
-      attribute: ['spouseName', 'spouseMobile'],
-      placeholder: ["wife/husband's fullname", '23480364168089'],
-      type: ['text', 'number']
+      label: ["Spouse's name", "Spouse's mobile", "Spouse Email"],
+      attribute: ['spouseName', 'spouseMobile', 'spouseEmail'],
+      placeholder: ["wife/husband's fullname", '23480364168089', 'spouse@gmail.com'],
+      type: ['text', 'number', 'email']
     }
   },
   {

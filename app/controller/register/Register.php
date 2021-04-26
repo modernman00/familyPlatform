@@ -17,7 +17,7 @@ class Register extends AllFunctionalities
 
     public function index()
     {
-        view('registration/register');
+        view('registration/registerTest');
     }
     /**
      * 

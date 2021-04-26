@@ -11,34 +11,29 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembers()
     {
-       
-        $table = ['account','otherFamily', 'personal', 'profile_pics',  'contact', 'siblings'];
+        $table = ['personal','otherFamily','profile_pics', 'contact'];
         $firstTable = array_shift($table);
-
         $memberData = parent::joinAll2(firstTable:$firstTable, para:'id', table:$table, orderBy:'date_created');
-
         return $memberData??= throw new Exception(self::ERR_MSG, 1);
-        
     }
 
      public function getAllMembersById($id)
     {
         
-          $table = ['personal','otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact', 'siblings'];
+          $table = ['personal','otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact'];
         $firstTable = array_shift($table);
        
         $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id );
+
         return $memberData??= throw new Exception(self::ERR_MSG, 1);
         
     }
 
     static function getMembers($table, $orderBy) : array
     {
-       
         $firstTable = array_shift($table);
         $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
         return $memberData??= throw new Exception(self::ERR_MSG, 1);
-  
     }
 
 }

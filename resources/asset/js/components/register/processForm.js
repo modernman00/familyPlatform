@@ -20,14 +20,14 @@ const process = () => {
 
 	//real time check 
 
-	formData.realTimeServer('spouseMobile',
+	formData.realTimeServer('spouseMobile_id',
 		`/search?attribute=spouseMobile&subject=spouse&hint`,
 		'spouseMobile_error')
 
-	formData.realTimeServer('fatherMobile',
+	formData.realTimeServer('fatherMobile_id',
 		'/search?attribute=fatherMobile&subject=father&hint', 'fatherMobile_error')
 
-	formData.realTimeServer('motherMobile',
+	formData.realTimeServer('motherMobile_id',
 		'/search?attribute=motherMobile&subject=mother&hint', 'motherMobile_error')
 
 
