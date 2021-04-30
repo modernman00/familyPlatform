@@ -88,7 +88,7 @@ class InnerJoin extends Db
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
             $result = self::connect2()->prepare($query2);
             $result->execute();
-            return $result->fetchAll(PDO::FETCH_ASSOC);
+            return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);
         }

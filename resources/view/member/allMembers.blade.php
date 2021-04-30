@@ -11,7 +11,9 @@
 </form>
  <br>
 <div class="row allMember_card">
+    <p id="idont"></p>
 
+@if(count($result))
 
     @foreach($result as $result)
 
@@ -41,6 +43,7 @@
     </div>
 
     @endforeach
+@endif
 </div>
 
 

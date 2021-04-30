@@ -34,9 +34,11 @@ class Register extends AllFunctionalities
             // process the image 
             $profileImage = new ProcessImg;
             $profileImage->processProfileImage();
+            
             $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
 
             $generateId = $this->setId($_POST, "firstName", 'account');
+
             //echo $generateId;
             // sanitise
             $data = $this->dataToCheck();

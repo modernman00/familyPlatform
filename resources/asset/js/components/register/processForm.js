@@ -20,15 +20,19 @@ const process = () => {
 
 	//real time check 
 
+	// formData.realTimeServer('spouseMobile_id',
+	// 	`/search?attribute=spouseMobile&subject=spouse&hint`,
+	// 	'spouseMobile_error')
+
 	formData.realTimeServer('spouseMobile_id',
-		`/search?attribute=spouseMobile&subject=spouse&hint`,
+		`/search?attribute=mobile&subject=spouse&hint`,
 		'spouseMobile_error')
 
 	formData.realTimeServer('fatherMobile_id',
-		'/search?attribute=fatherMobile&subject=father&hint', 'fatherMobile_error')
+		'/search?attribute=mobile&subject=father&hint', 'fatherMobile_error')
 
 	formData.realTimeServer('motherMobile_id',
-		'/search?attribute=motherMobile&subject=mother&hint', 'motherMobile_error')
+		'/search?attribute=mobile&subject=mother&hint', 'motherMobile_error')
 
 
 	// check if password matches real time

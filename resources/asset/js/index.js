@@ -14,6 +14,7 @@ import { id, idValue, idInnerHTML, qSel, log } from "./global"
 
 
 
+
 if (window.location.pathname === '/register') {
 
     import(

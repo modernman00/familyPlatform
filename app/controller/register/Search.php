@@ -3,6 +3,7 @@
 namespace App\controller\register;
 
 use App\Controller\Base;
+use App\classes\Select;
 
 class Search extends Base
 {
@@ -21,10 +22,13 @@ class Search extends Base
 
             $msg2 = "<h4><i>Your $subject is not on the platform. Do you want us to send them a text to register to the platform</i>? </h4>". $this->checkBox($subject);
 
-            $outcome = $this->select_count('otherFamily', $attribute, $hint); 
+            $query = Select::formAndMatchQuery(selection:"SELECT_COUNT_ONE", table:'contact', identifier1: $attribute);
+            $outcome = Select::selectFn2($query, [$hint]);
+
+            // $outcome = $this->select_count('otherFamily', $attribute, $hint); 
 
             $result = (!$outcome) ? $msg2 : $msg1 ;
-            echo ($result);
+            echo $result;
         } catch (\Throwable $th) {
             showError($th);
         }

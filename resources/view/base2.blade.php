@@ -12,7 +12,7 @@
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   {{-- custom css --}}
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/public/style.css">
   <link href="/css/style.css" rel="stylesheet">
   <noscript>
     <link rel="stylesheet" href="noscript.css" /></noscript>
@@ -22,7 +22,7 @@
   <link href="/owl-carousel/owl.carousel.css" rel="stylesheet">
 </head>
 
-<body id="myPage" data-spy="scroll" data-target=".navbar" data-offset='60'>
+<body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav">
     <a class="navbar-brand" href="#">Olaogun</a>

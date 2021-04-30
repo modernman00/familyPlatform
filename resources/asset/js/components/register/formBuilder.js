@@ -1,5 +1,5 @@
 "use strict";
-import {showError} from '../global';
+import {showError} from '../../global';
 
 /**
  * 

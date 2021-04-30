@@ -1,21 +1,19 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html {
-    font-size: 16px;
+  font-size: 16px;
 }
 
 body {
-    overflow-x: hidden;
-    font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    line-height: 1.7;
-    color: #818181;
-    padding: 30px;
-    
-
+  overflow-x: hidden;
+  font-family: "Roboto Slab", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.7;
+  color: #818181;
+  padding: 30px;
 }
 
 .avatar {
@@ -26,158 +24,184 @@ body {
 }
 
 p {
-    line-height: 1.75;
+  line-height: 1.75;
 }
 
 a {
-    color: #fed136;
+  color: #fed136;
 }
 
 a:hover {
-    color: #fec503;
+  color: #fec503;
 }
 
-
 .jumbotron {
-    font-family: Montserrat, sans-serif;
+  font-family: Montserrat, sans-serif;
 }
 
 .navbar {
-    font-family: Montserrat, sans-serif;
+  font-family: Montserrat, sans-serif;
 }
 
 .jumbotron {
-    background-color: #f4511e;
-    color: #ffffff;
-    padding: 10rem 2.5rem;
-
+  background-color: #f4511e;
+  color: #ffffff;
+  padding: 10rem 2.5rem;
 }
 
 .container-fluid {
-    padding: 6rem 5rem;
+  padding: 6rem 5rem;
 }
 
 .bg-grey {
-    background-color: #f6f6f6
+  background-color: #f6f6f6;
 }
 
 .logo {
-    font-size: 20rem;
-    color: #f4511e;
+  font-size: 20rem;
+  color: #f4511e;
 }
 
 @media screen and (max-width: 768px) {
-    .col-sm-4 {
-        text-align: center;
-        margin: 2.5rem 0;
-    }
+  .col-sm-4 {
+    text-align: center;
+    margin: 2.5rem 0;
+  }
 }
 
 .logo-small {
-    color: #f4511e;
-    font-size: 50px;
+  color: #f4511e;
+  font-size: 50px;
 }
 
 .thumbnail {
-    padding: 0 0 15px 0;
-    border: none;
-    border-radius: 0;
+  padding: 0 0 15px 0;
+  border: none;
+  border-radius: 0;
 }
 
 .thumbnail img {
-    width: 100%;
-    height: 100%;
-    margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
+  margin-bottom: 10px;
 }
 
 .panel {
-    border: 1px solid #f4511e;
-    border-radius: 0;
-    transition: box-shadow 0.5s;
+  border: 1px solid #f4511e;
+  border-radius: 0;
+  transition: box-shadow 0.5s;
 }
 
 .panel:hover {
-    box-shadow: 5px 0px 40px rgba($color: #a12121, $alpha: 2.0);
+  box-shadow: 5px 0px 40px rgba($color: #a12121, $alpha: 2);
 }
 
 .panel-footer .btn:hover {
-    border: 1px solid #f4511e;
-    background-color: #fff !important;
-    color: #f4511e;
-
+  border: 1px solid #f4511e;
+  background-color: #fff !important;
+  color: #f4511e;
 }
 
 .panel-heading {
-    color: #fff !important;
-    background-color: #f4511e !important;
-    padding: 25px;
-    border-bottom: 1px solid transparent;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+  color: #fff !important;
+  background-color: #f4511e !important;
+  padding: 25px;
+  border-bottom: 1px solid transparent;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
 }
 
 .panel-footer {
-    background-color: #fff !important;
+  background-color: #fff !important;
 }
 
 .panel-footer h3 {
-    font-size: 32px;
+  font-size: 32px;
 }
 
 .panel-footer h4 {
-    font-size: 14px;
-    color: #aaa;
+  font-size: 14px;
+  color: #aaa;
 }
 
 .panel-footer h3 {
-    font-size: 32px;
+  font-size: 32px;
 }
 
 .panel-footer .btn {
-    margin: 15px 0;
-    background-color: #f4511e;
-    color: #fff;
+  margin: 15px 0;
+  background-color: #f4511e;
+  color: #fff;
 }
 
 .navbar {
-    margin-bottom: 0;
-    background-color: #f4511e;
-    z-index: 9999;
-    border: 0;
-    font-size: 12px !important;
-    line-height: 1.42857143 !important;
-    letter-spacing: 0.4rem;
-    border-radius: 0;
-
+  margin-bottom: 0;
+  background-color: #f4511e;
+  z-index: 9999;
+  border: 0;
+  font-size: 12px !important;
+  line-height: 1.42857143 !important;
+  letter-spacing: 0.4rem;
+  border-radius: 0;
 }
 
 .navbar li a .navbar .navbar-brand {
-    color: #fff !important;
+  color: #fff !important;
 }
 
 .navbar-nav li a:hover,
 .navbar-nav li.active a {
-    color: #f4511e !important;
-    background-color: #fff !important;
+  color: #f4511e !important;
+  background-color: #fff !important;
 }
 
 .navbar-default .navbar-toggle {
-    border-color: transparent;
-    color: #fff !important;
+  border-color: transparent;
+  color: #fff !important;
 }
 
 footer .glyphicon {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    color: #f4511e;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #f4511e;
 }
 
 .footerLogo {
-    font-size: 2rem;
+  font-size: 2rem;
 }
 
 .small {
-    color: blue;
+  color: blue;
+}
+
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  justify-content:center;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
