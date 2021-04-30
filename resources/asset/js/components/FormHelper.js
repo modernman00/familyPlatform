@@ -112,7 +112,7 @@ export default class FormHelper {
             for (let i = 0;
                 i < input.length;
                 i++) {
-                const theData = this.id(`${input[i]}`);
+                const theData = this.id(`${input[i]}_id`);
                 if (theData == "") throw "empty dataInput";
                 const max = maxi[i];
                 const error = this.id(`${input[i]}_error`);
@@ -122,6 +122,7 @@ export default class FormHelper {
                     error.innerHTML = (theData.value.length > max) ? `You have reach the maximum limit` : "";
                     this.id(`${input[i]}_help`).style.color = 'red'
                     this.id(`${input[i]}_help`).style.fontSize = '10px'
+                    error.style.color ='red'
 
                     setTimeout(() => {
                         this.id(`${input[i]}_help`).style.display = 'none'

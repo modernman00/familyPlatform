@@ -165,7 +165,7 @@ var FormHelper = /*#__PURE__*/function () {
 
       try {
         var _loop2 = function _loop2(i) {
-          var theData = _this3.id("".concat(input[i]));
+          var theData = _this3.id("".concat(input[i], "_id"));
 
           if (theData == "") throw "empty dataInput";
           var max = maxi[i];
@@ -177,6 +177,7 @@ var FormHelper = /*#__PURE__*/function () {
             error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
             _this3.id("".concat(input[i], "_help")).style.color = 'red';
             _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.style.color = 'red';
             setTimeout(function () {
               _this3.id("".concat(input[i], "_help")).style.display = 'none';
             }, 5000);
@@ -405,13 +406,13 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
-  duplicate: {
-    email: 'email',
-    username: 'username'
-  },
+  // duplicate: {
+  // 	email: 'email',
+  // 	username: 'username'
+  // },
   password: {
     pwd: 'password',
     pwd2: 'confirm_password'

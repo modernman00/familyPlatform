@@ -2,20 +2,18 @@
 
 namespace App\controller;
 
-use App\controller\Base;
-
-class Index extends Base
+class Index
 {
     public function index()
     {
         view('index');
     }
 
-     function boot()
-    {
-        view('boot');
-    }
 
+    /**
+     * the launch page
+     * @return void 
+     */
     function launch()
     {
         view('launch');

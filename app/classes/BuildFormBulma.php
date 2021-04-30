@@ -527,7 +527,7 @@ class BuildFormBulma extends AlterTable
                     </div>";
             } elseif ($this->EntValue[$i] === 'title') {
                 echo "<hr><br><p id={$nameKey}1 class='title is-3 is-spaced
-                has-text-centered is-primary the-title'>$var</p><br>
+                has-text-centered has-text-link is-primary the-title'>$var</p><br>
                 <p class='subtitle is-6 has-text-centered' id='{$nameKey}_help'></p>";
             } elseif ($this->EntValue[$i] === 'subtitle') {
                 echo "<h2 class='subtitle has-text-centered is-primary>

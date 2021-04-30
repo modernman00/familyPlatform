@@ -17,8 +17,15 @@ class Register extends AllFunctionalities
 
     public function index()
     {
-        view('registration/registerTest');
+        view('registration/register');
     }
+
+    
+
+
+
+
+
     /**
      * 
      * @param mixed $array this is the POST Data 

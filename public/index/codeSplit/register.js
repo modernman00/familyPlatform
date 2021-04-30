@@ -165,7 +165,7 @@ var FormHelper = /*#__PURE__*/function () {
 
       try {
         var _loop2 = function _loop2(i) {
-          var theData = _this3.id("".concat(input[i]));
+          var theData = _this3.id("".concat(input[i], "_id"));
 
           if (theData == "") throw "empty dataInput";
           var max = maxi[i];
@@ -177,6 +177,7 @@ var FormHelper = /*#__PURE__*/function () {
             error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
             _this3.id("".concat(input[i], "_help")).style.color = 'red';
             _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.style.color = 'red';
             setTimeout(function () {
               _this3.id("".concat(input[i], "_help")).style.display = 'none';
             }, 5000);
@@ -317,76 +318,29 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/formBuilder.js":
-/*!***************************************************************!*\
-  !*** ./resources/asset/js/components/register/formBuilder.js ***!
-  \***************************************************************/
+/***/ "./resources/asset/js/components/register/event.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/event.js ***!
+  \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Input": () => (/* binding */ Input)
-/* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+ // import { show } from "./onChange"
 
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('children2').style.display = "none"; // ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
 
-
-/**
- * 
- * @param {That is the obj name} objData 
- * @param {* this is the div id} htmlId 
- */
-
-var Input = function Input(objData, htmlId) {
-  try {
-    // check errors for the input
-    if (objData == null) throw " data object is needed";
-    if (htmlId == null) throw "html id is required";
-    objData.map(function (element) {
-      if (element.inputType === 'NORMAL_INPUT') {
-        var renderHtml = "\n      <label> <strong>".concat(element.form.toUpperCase(), "</strong> </label>\n      <div class = 'form-group' id=").concat(element.attribute, "_div>\n         <label class='' for =").concat(element.attribute, "> \n         <strong>").concat(element.label.toUpperCase(), "</strong>\n         </label>\n         <input type=\"").concat(element.type, "\" class=\"form-control\" \n         id=\"").concat(element.attribute, "\"\n         name=\"").concat(element.attribute, "\"  placeholder=\"").concat(element.placeholder, "\"\n         />\n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>");
-        if (renderHtml == null) throw 'NORMAL INPUT -' + element.attribute;
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', renderHtml);
-      } else if (element.inputType === 'SELECT') {
-        var _renderHtml = "\n      <div class = 'form-group' id='".concat(element.attribute, "_div'>\n      <label for =").concat(element.attribute, "> <strong>").concat(element.label.toUpperCase(), "</strong> </label>   \n          <select class=\"form-control\" id=").concat(element.attribute, " name=").concat(element.attribute, ">\n                <option value= 'select'>\n                select\n                </option> \n                ").concat(element.options.map(function (el) {
-          return "<option value=".concat(el, ">").concat(el, "</option>");
-        }), "               \n          </select>     \n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          ");
-
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml);
-      } else if (element.inputType === 'FILE') {
-        var _renderHtml2 = "\n      <div class = 'form-group input-group mb-3' id='".concat(element.attribute, "_div'>\n       <div class=\"custom-file\">\n          <input type=\"file\" name=\"").concat(element.attribute, "\" class=\"custom-file-input\" id=").concat(element.attribute, ">\n          <label class=\"custom-file-label\" for=").concat(element.attribute, ">").concat(element.label, "</label>\n             <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n           </div>\n          </div>\n          ");
-
-        if (_renderHtml2 == "") throw 'FILE -' + element.attribute;
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml2);
-      } else if (element.inputType === 'RADIO') {
-        var _renderHtml3 = "\n      <div class='form-group col' id='".concat(element.attribute, "_div'>\n         <label for =").concat(element.attribute, "> <strong> ").concat(element.label.toUpperCase(), ": </strong>  </label> \n\n        <div class = 'form-check form-check-inline'>\n            ").concat(element.options.map(function (el) {
-          return "\n              <input \n              class='form-check-input' \n              type='radio' \n              name=".concat(element.attribute, " \n              id=").concat(element.attribute, "_").concat(el, " \n              value=").concat(el, ">\n\n              <label class= 'form-check-label' > ").concat(el, "</label>");
-        }), " \n      </div>  \n        <small id ='").concat(element.attribute, "_help' class='small text-muted'></small>\n            <small id =").concat(element.attribute, "_error class='error text-muted'></small>\n      </div>     \n      ");
-
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml3);
-      } else if (element.form === '3-col') {
-        var _renderHtml4 = "\n      <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n          <div class = 'form-row ").concat(element.unique, "' id='").concat(element.unique, "_div'>\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' name='").concat(element.options.attribute[0], "'\n            id='").concat(element.options.attribute[0], "' placeholder='").concat(element.options.placeholder[0], "'>\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control'  \n            id='").concat(element.options.attribute[1], "' name='").concat(element.options.attribute[1], "'\n            placeholder='").concat(element.options.placeholder[1], "'>\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n\n          <div class='form-group col-md-4'>\n            <label for='").concat(element.options.attribute[2], "'>").concat(element.options.label[2], "\n            </label>\n            <input type='").concat(element.options.type[2], "' class='form-control' \n            id='").concat(element.options.attribute[2], "' name='").concat(element.options.attribute[2], "' \n            placeholder='").concat(element.options.placeholder[2], "'>\n         <small id ='").concat(element.options.attribute[2], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[2], "_error class='error text-muted'></small>\n          </div> \n\n      </div>");
-
-        if (_renderHtml4 == "") {
-          throw 'empty 3-col -' + element.options.attribute[1];
-        }
-
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml4);
-      } else if (element.form === '2-col') {
-        var _renderHtml5 = "\n         <label> <strong>".concat(element.label.toUpperCase(), "</strong> </label>\n          <div class = 'form-row ").concat(element.unique, "' id='").concat(element.unique, "_div'>\n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[0], "'>\n            ").concat(element.options.label[0], "\n            </label>\n            <input type='").concat(element.options.type[0], "' class='form-control' \n            id='").concat(element.options.attribute[0], "' \n            placeholder='").concat(element.options.placeholder[0], "'\n            name='").concat(element.options.attribute[0], "'\n            >\n         <small id ='").concat(element.options.attribute[0], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[0], "_error class='error text-muted'></small>\n          </div>\n\n          <div class='form-group col-md-6'>\n            <label for='").concat(element.options.attribute[1], "'>").concat(element.options.label[1], "\n            </label>\n            <input type='").concat(element.options.type[1], "' class='form-control' \n            id='").concat(element.options.attribute[1], "' \n            placeholder='").concat(element.options.placeholder[1], "'\n            name='").concat(element.options.attribute[1], "'\n            >\n         <small id ='").concat(element.options.attribute[1], "_help' class='small text-muted'></small>\n            <small id =").concat(element.options.attribute[1], "_error class='error text-muted'></small>\n          </div> \n\n      </div>");
-
-        if (_renderHtml5 == "") {
-          throw 'empty 2-col -' + element.options.attribute[1];
-        }
-
-        document.getElementById(htmlId).insertAdjacentHTML('beforebegin', _renderHtml5);
-      }
-    });
-  } catch (e) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(e);
+var showSpouse = function showSpouse(e) {
+  if (e.target.value === "Yes") {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "block";
+  } else {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
   }
 };
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').addEventListener('change', showSpouse);
 
 /***/ }),
 
@@ -399,11 +353,9 @@ var Input = function Input(objData, htmlId) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _smallinput__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./smallinput */ "./resources/asset/js/components/register/smallinput.js");
-/* harmony import */ var _modal_kids__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal/kids */ "./resources/asset/js/components/register/modal/kids.js");
-/* harmony import */ var _modal_siblings__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal/siblings */ "./resources/asset/js/components/register/modal/siblings.js");
-/* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
-/* harmony import */ var _formBuilder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./formBuilder */ "./resources/asset/js/components/register/formBuilder.js");
-
+/* harmony import */ var _onChange__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./onChange */ "./resources/asset/js/components/register/onChange.js");
+/* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
+/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
 
 
 
@@ -411,83 +363,71 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/modal/kids.js":
-/*!**************************************************************!*\
-  !*** ./resources/asset/js/components/register/modal/kids.js ***!
-  \**************************************************************/
+/***/ "./resources/asset/js/components/register/onChange.js":
+/*!************************************************************!*\
+  !*** ./resources/asset/js/components/register/onChange.js ***!
+  \************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "show": () => (/* binding */ show)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
 
 
 
 
-var show = function show(e) {
+var renderHtmlFamily = function renderHtmlFamily(family, no) {
+  if (no) {
+    var kids_sib = family == "addChildren" ? "kid" : "siblings";
+    return " <div class=\"field is-horizontal\">\n            <div class=\"field \">\n        \n            <div class=\"control is-expanded has-icons-left\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n            </div></div>\n            <div class=\"field \">\n            <div class=\"control is-expanded has-icons-left\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n           </div>\n        </div></div><br>");
+  }
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers').insertAdjacentHTML('beforeend', html);
+};
+
+var show = function show(kids_or_sib) {
   try {
     // what was picked or selected
-    var kidsNo = e.target.value; // use the loop to generate the number of input
+    var value = event.target.value;
+    alert(value);
+    var addDiv = kids_or_sib == "kids" ? "addChildren" : "addSiblings";
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).classList.remove('.onChangeKidAndSiblings');
 
-    for (var i = 0; i < kidsNo; i++) {
-      var no = i + 1;
-      var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
-      var getSelectHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('kids_help');
-      getSelectHelp.innerHTML = msg;
-      getSelectHelp.style.fontSize = '1rem';
-      var addKids = " <div class=\"field is-horizontal\">\n            <div class=\"field \">\n        \n            <div class=\"control is-expanded has-icons-left\">\n            <input type=\"text\" placeholder = \"Enter child's full name - ".concat(no, "\" name =kid_name").concat(no, " class=\"input input is-medium\" id=\"kid_name").concat(no, "\">\n            </div></div>\n            <div class=\"field \">\n            <div class=\"control is-expanded has-icons-left\">\n           <input type=\"email\" placeholder = \"Enter child's email - ").concat(no, "\" name=kid_email").concat(no, " class=\"input input is-medium\" id=\"kid_email").concat(no, "\">\n           </div>\n        </div></div><br>");
-      var insertedContent = document.querySelector(".kid".concat(no));
+    if (value) {
+      // use the loop to generate the number of input
+      for (var i = 0; i < value; i++) {
+        var no = i + 1;
+        var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
+        var getSelectHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help"));
+        getSelectHelp.innerHTML = msg;
+        getSelectHelp.style.fontSize = '1rem';
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).classList.add("onChangeKidAndSiblings");
 
-      if (insertedContent) {
-        insertedContent.parentNode.removeChild(insertedContent);
+        var _html = renderHtmlFamily(addDiv, no);
+
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('afterend', _html);
       }
-
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('addChildren').insertAdjacentHTML('afterend', addKids);
     }
   } catch (error) {
     console.log(error.message);
   }
-}; // this is to activate the onchange event
+}; // ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
 
+var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
+  var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("noSiblings_id");
+  var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("kids_id");
+  kidInput.addEventListener('change', function () {
+    return show('kids');
+  });
+  sibInput.addEventListener('change', function () {
+    return show('noSiblings');
+  });
+};
 
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('kids_id').addEventListener('change', show);
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/register/modal/siblings.js":
-/*!******************************************************************!*\
-  !*** ./resources/asset/js/components/register/modal/siblings.js ***!
-  \******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../global */ "./resources/asset/js/global.js");
-
-
-
-
-var show = function show(e) {
-  var siblingNo = e.target.value; //    const checkAppend = qSel('.appendLabel')
-  //         if(checkAppend || id(`noSiblings${no}`) || id(`noSiblingsEmail${no}`)) {
-  //             checkAppend.remove()
-  //         }
-  // use the loop to generate the number of input
-
-  for (var i = 0; i < siblingNo; i++) {
-    //    checkAppend && checkAppend.remove()
-    var no = i + 1;
-    var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter your child name and email";
-    var getSelectHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('noSiblings_help');
-    getSelectHelp.innerHTML = msg;
-    getSelectHelp.style.fontSize = '1rem';
-    var addnoSiblings = " <div class=\"row appendLabel\">\n            <div class=\"col\">\n            <input type=\"text\" placeholder = \"Enter sibling's full name - ".concat(no, "\" name =\"sibling_name").concat(no, "\" class=\"form-control\" id=\"sibling_name").concat(no, "\">\n            </div>\n            <div class=\"col\">\n           <input type=\"email\" placeholder = \"Enter sibling's email - ").concat(no, "\" name=\"sibling_email").concat(no, "\" class=\"form-control\" id=\"sibling_email").concat(no, "\">\n           </div>\n        </div><br>");
-    if (!(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("noSiblings".concat(no)) || !(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("noSiblingsEmail".concat(no))) (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('noSiblings_div').insertAdjacentHTML('afterend', addnoSiblings);
-  }
-}; // this is to activate the onchange event
-
-
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('noSiblings').addEventListener('change', show);
+onChangeKidAndSiblings();
 
 /***/ }),
 
@@ -582,20 +522,12 @@ var maiden = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMaiden_help');
 maiden.innerHTML = "Good to identify your family from the mother's side";
 var mobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_help');
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
+var fatherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_help');
+fatherMobile.innerHTML = "Please, leave blank if father has passed on";
+var motherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_help');
+motherMobile.innerHTML = "Please, leave blank if mother has passed on";
 var password = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('password_help');
 password.innerHTML = 'Must be 8-20 characters long.';
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('children2').style.display = "none";
-
-var showSpouse = function showSpouse(e) {
-  if (e.target.value === "Yes") {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "block";
-  } else {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
-  }
-};
-
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').addEventListener('change', showSpouse);
 
 /***/ }),
 
@@ -615,13 +547,13 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouse', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
-  duplicate: {
-    email: 'email',
-    username: 'username'
-  },
+  // duplicate: {
+  // 	email: 'email',
+  // 	username: 'username'
+  // },
   password: {
     pwd: 'password',
     pwd2: 'confirm_password'

@@ -2,16 +2,16 @@
 export const dataToCheckRegister = {
 	maxLength: {
 		id: [
-		'firstName','lastName','alias','spouse', 'fatherName', 'motherName', 'motherMaiden','address','postcode','region','country','mobile','email','favSport','footballTeam','passion','occupation'
+		'firstName','lastName','alias','spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName',  'motherMaiden','address','postcode','region','country','mobile','email','favSport','footballTeam','passion','occupation',
 	 	],
-		 max: [15, 15, 15, 15, 30, 30, 15, 50, 10,15,15, 13, 45, 25,30,40,20 ],
+		 max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10,15,15, 13, 45, 25,30,40,20 ],
 	},
 
 
-	duplicate: {
-		email: 'email',
-		username: 'username'
-	},
+	// duplicate: {
+	// 	email: 'email',
+	// 	username: 'username'
+	// },
 
 	password: {
 		pwd : 'password',

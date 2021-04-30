@@ -32,8 +32,7 @@ class Db extends CheckToken
 
             return $conn;
         } catch (PDOException $e) {
-            $errorMsg = $e->getMessage();
-            echo "Connection Failed: $errorMsg ";
+             showError($e);
         }
     }
 
@@ -49,8 +48,7 @@ class Db extends CheckToken
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $conn;
         } catch (PDOException $e) {
-            $errorMsg = $e->getMessage();
-            echo "Connection Failed: $errorMsg ";
+            showError($e);
         }
     }
 
@@ -61,7 +59,7 @@ class Db extends CheckToken
         try {
             return mysqli_connect($this->serverName, $this->username, $this->password, $this->dbName);
         } catch (\Throwable $e) {
-            echo "Connection Failed" . $e->getMessage();
+             showError($e);
         }
     }
 }

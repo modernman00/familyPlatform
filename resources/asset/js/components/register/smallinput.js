@@ -8,23 +8,16 @@ const mobile = id('mobile_help')
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809"
 
 
+const fatherMobile=id('fatherMobile_help')
+fatherMobile.innerHTML = "Please, leave blank if father has passed on"
+
+const motherMobile=id('motherMobile_help')
+motherMobile.innerHTML = "Please, leave blank if mother has passed on"
+
+
 const password = id('password_help')
 password.innerHTML = 'Must be 8-20 characters long.'
 
-id('spouse').style.display = "none";
-
-id('children2').style.display = "none";
-
-const showSpouse = (e) => {
-    if(e.target.value  === "Yes") {
-        id('spouse').style.display = "block"
-    } else {
-        id('spouse').style.display = "none"
-    }
-
-}
-
-id('maritalStatus_id').addEventListener('change', showSpouse)
 
 
 

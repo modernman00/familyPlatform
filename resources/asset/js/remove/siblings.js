@@ -1,5 +1,5 @@
 "use strict";
-import { id, qSel } from "./../../../global";
+import { id, qSel } from "../global";
 
 const show = (e) => {
     const siblingNo = e.target.value;

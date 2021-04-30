@@ -11,6 +11,7 @@ const formData = new FormHelper(formInputArr);
 const process = () => {
 	// clear error from the form
 	formData.clearError()
+	
 	// set the maxlength, check the length of the value, raise error
 	formData.realTimeCheckLen(
 		dataToCheckRegister.maxLength.id,

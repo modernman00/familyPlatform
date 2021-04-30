@@ -1,10 +1,10 @@
 "use strict";
-import { Personal } from '../../data/Personal.js'
-import { Contact } from '../../data/Contact.js'
-import { Work } from '../../data/Work.js'
+import { Personal } from '../data/Personal.js'
+import { Contact } from '../data/Contact.js'
+import { Work } from '../data/Work.js'
 import { Input } from "../formBuilder.js";
-import { Interest } from "../../data/Interest";
-import { Account } from "../../data/Account";
+import { Interest } from "../data/Interest";
+import { Account } from "../data/Account";
 
 try {
   
