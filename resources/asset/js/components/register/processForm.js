@@ -1,7 +1,7 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log, showError } from '../../global';
-import {dataToCheckRegister} from '../../data/dataToCheck';
+import { id, log, showError } from '../global';
+import {dataToCheckRegister} from './dataToCheck';
 
 const formInput = document.querySelectorAll('.register');
 const formInputArr = Array.from(formInput);

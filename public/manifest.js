@@ -20,7 +20,7 @@
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -113,8 +113,8 @@
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1}[chunkId]) return "index/" + chunkId + ".js";
 /******/ 			if (chunkId === "/vendor") return "" + chunkId + ".js";
+/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1}[chunkId]) return "index/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};

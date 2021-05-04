@@ -1,4 +1,4 @@
-import { id, log } from "../../global"
+import { id, log } from "../global"
 
 
 // export const eventInput = () => {

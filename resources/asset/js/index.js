@@ -1,5 +1,5 @@
 "use strict";
-import { id, idValue, idInnerHTML, qSel, log } from "./global"
+import {log, showError} from "./components/global"
 
 
 // const splitCode = (path) => {
@@ -22,8 +22,8 @@ if (window.location.pathname === '/register') {
         /* webpackPrefetch: true */
         './components/register/index'
     )
-        .then((module) => module.default())
-        .catch((err) => log("MAD ERROR!! " + err.message))
+        .then((module) => module.default)
+        .catch((err) => showError(err))
 
 } else if (window.location.pathname === '/allMembers') {
     log("it worked allMembers")
@@ -32,8 +32,8 @@ if (window.location.pathname === '/register') {
         /* webpackPrefetch: true */
         './components/allMembers/index'
     )
-        .then((module) => module.default())
-        .catch((err) => log("MAD ERROR!! " + err.message))
+        .then((module) => module.default)
+        .catch((err) => showError(err))
 } else if (window.location.pathname === '/login') {
     log("it worked login")
     import(
@@ -41,8 +41,8 @@ if (window.location.pathname === '/register') {
         /* webpackPrefetch: true */
         './components/login/index'
     )
-        .then((module) => module.default())
-        .catch((err) => log("MAD ERROR!! " + err.message))
+        .then((module) => module.default)
+        .catch((err) => showError(err))
 }
 
 

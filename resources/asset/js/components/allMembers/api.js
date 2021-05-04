@@ -1,7 +1,7 @@
 import axios from "axios";
-import { id, log, } from "../../global"
+import { id, log, } from "../global"
 // import { eventInput } from "./event"
-import { loaderIcon } from "../../helper"
+import { loaderIcon } from "../helper/general"
 
 const config = {
     headers: {

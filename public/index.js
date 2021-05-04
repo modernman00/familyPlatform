@@ -1,9 +1,9 @@
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/index"],{
 
-/***/ "./resources/asset/js/global.js":
-/*!**************************************!*\
-  !*** ./resources/asset/js/global.js ***!
-  \**************************************/
+/***/ "./resources/asset/js/components/global.js":
+/*!*************************************************!*\
+  !*** ./resources/asset/js/components/global.js ***!
+  \*************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -69,7 +69,7 @@ var showError = function showError(e) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./global */ "./resources/asset/js/global.js");
+/* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/global */ "./resources/asset/js/components/global.js");
 
 
  // const splitCode = (path) => {
@@ -83,24 +83,24 @@ __webpack_require__.r(__webpack_exports__);
 // }
 
 if (window.location.pathname === '/register') {
-  __webpack_require__.e(/*! import() | codeSplit/register */ "codeSplit/register").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/index */ "./resources/asset/js/components/register/index.js")).then(function (module) {
-    return module["default"]();
+  Promise.all(/*! import() | codeSplit/register */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/index */ "./resources/asset/js/components/register/index.js")).then(function (module) {
+    return module["default"];
   })["catch"](function (err) {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("MAD ERROR!! " + err.message);
+    return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/allMembers') {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked allMembers");
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked allMembers");
   Promise.all(/*! import() | codeSplit/all_members */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/index */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
-    return module["default"]();
+    return module["default"];
   })["catch"](function (err) {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("MAD ERROR!! " + err.message);
+    return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/login') {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked login");
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked login");
   __webpack_require__.e(/*! import() | codeSplit/login */ "codeSplit/login").then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/index */ "./resources/asset/js/components/login/index.js")).then(function (module) {
-    return module["default"]();
+    return module["default"];
   })["catch"](function (err) {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("MAD ERROR!! " + err.message);
+    return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } // CODE SPLITTING BASED ON ROUTE
 
@@ -125,7 +125,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
-/******/ 	__webpack_require__.O(0, ["/index"], () => (["codeSplit/register","/vendor","codeSplit/all_members","codeSplit/login"].map(__webpack_require__.E)), 5);
+/******/ 	__webpack_require__.O(0, ["/index"], () => (["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login"].map(__webpack_require__.E)), 5);
 /******/ })();
 /******/ 
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))

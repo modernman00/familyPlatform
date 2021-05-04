@@ -202,10 +202,10 @@ var FormHelper = /*#__PURE__*/function () {
     value: function matchInput(first, second) {
       var error, firstInput, secondInput;
       error = this.id("".concat(second, "_error"));
-      firstInput = this.id(first);
-      secondInput = this.id(second);
+      firstInput = this.id(first + '_id');
+      secondInput = this.id(second + '_id');
       secondInput.addEventListener('keyup', function () {
-        error.innerHTML = firstInput.value !== secondInput.value ? 'Your passwords do not match' : "";
+        error.innerHTML = secondInput.value !== firstInput.value ? 'Your passwords do not match' : "";
       });
     }
     /**
@@ -340,8 +340,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
-/* harmony import */ var _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/dataToCheck */ "./resources/asset/js/data/dataToCheck.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../register/dataToCheck */ "./resources/asset/js/components/register/dataToCheck.js");
 
 
 
@@ -355,7 +355,7 @@ var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.id, _data_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.max);
+  formData.realTimeCheckLen(_register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.id, _register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.max);
 };
 
 process();
@@ -390,10 +390,10 @@ document.querySelector('.button').addEventListener('click', testAlert);
 
 /***/ }),
 
-/***/ "./resources/asset/js/data/dataToCheck.js":
-/*!************************************************!*\
-  !*** ./resources/asset/js/data/dataToCheck.js ***!
-  \************************************************/
+/***/ "./resources/asset/js/components/register/dataToCheck.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/register/dataToCheck.js ***!
+  \***************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";

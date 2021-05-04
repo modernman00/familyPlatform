@@ -20,11 +20,6 @@ class Register extends AllFunctionalities
         view('registration/register');
     }
 
-    
-
-
-
-
 
     /**
      * 

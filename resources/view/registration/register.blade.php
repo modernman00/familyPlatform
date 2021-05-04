@@ -1,249 +1,218 @@
 @extends('baseBulma')
-
 @section('title', 'Register')
+<link rel="stylesheet" type="text/css" href="https://kraaden.github.io/autocomplete/autocomplete.css">
 @section('data-page-id', 'registration')
 @section('content')
 
 <div class="columns">
-    <div class="column" style="text-align:center; margin-left:20%; margin-right:20%;">
-        <h1 class="title is-2">Register to join your family network</h1>
-    </div>
-</div>
+  <div class="column" style="text-align:center; margin-left:20%; margin-right:20%;">
+    <h1 class="title is-2"> Register to join your family network </h1> </div> </div> <form action="/register"
+        method="POST" class="register" enctype="multipart/form-data" autocomplete="off">
 
-  <form action="/register" method="POST" class="register" enctype="multipart/form-data">
+        @php
 
-  @php
+        $formArray = [
+        // PERSONAL
+        'Personal Information' => 'title',
 
-    $formArray = [
-      // PERSONAL 
-            'Personal Information' => 'title',
+        // names
 
-            // names
+        'name' => [
+        'mixed',
+        'label' => ['first Name', 'last Name', 'alias'],
+        'attribute' => ['firstName', 'lastName', 'alias'],
+        'placeholder' => ['Toyin', 'olaogun', "aka modernman"],
+        'inputType' => ['text', 'text', 'text'],
+        'icon' => [
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-user"></i>'
+        ]
+        ],
 
-            'name' => [
-              'mixed',
-              'label'=> ['first Name', 'last Name', 'alias'],
-              'attribute'=> ['firstName', 'lastName', 'alias'],
-              'placeholder'=> ['Toyin', 'olaogun', "aka modernman"],
-              'inputType' => ['text', 'text', 'text'],
-              'icon'=> [
-                '<i class="fas fa-user"></i>',
-                '<i class="fas fa-user"></i>',
-                '<i class="fas fa-user"></i>'
-              ]
-            ],
+        // BIRTHDAY
 
-            // BIRTHDAY
+        'date_of_birth' => 'birthday',
 
-                'date_of_birth' => 'birthday',
+        // married status and gender
 
-                          // married status and gender
+        'married_gender' => [
+        'select-many',
+        'label' => ['Marital status', 'gender'],
+        'attribute' => ['maritalStatus', 'gender'],
+        'options' => [
+        ['select', 'Yes', 'No'],
+        ['select', 'Male', 'Female']
+        ],
+        'icon' => [
+        '<i class="far fa-kiss-wink-heart"></i>',
+        '<i class="fas fa-user-friends"></i>',
 
-          'married_gender' => [
-              'select-many',
-              'label'=> ['Marital status', 'gender'],
-              'attribute'=> ['maritalStatus', 'gender'],
-              'options' => [
-                ['select', 'Yes','No' ],
-                ['select', 'Male', 'Female']
-                ],
-              'icon'=> [
-                '<i class="far fa-kiss-wink-heart"></i>',
-                '<i class="fas fa-user-friends"></i>',
-
-              ]
-            ],
-
-            
-
-            // spouse
-
-              'spouse' => [
-                'mixed',
-                'label'=> ["Spouse's name", "Spouse's mobile", "Spouse's  Email"],
-                'attribute'=> ['spouseName', 'spouseMobile', 'spouseEmail'],
-                'placeholder'=> ['Toyin', '23480364168089', "toyin@gmail.com"],
-                'inputType' => ['text', 'number', 'email'],
-                'icon'=> [
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-user"></i>'
-                ]
-              ],
+        ]
+        ],
 
 
-   
 
-                'Parent' => 'title',
+        // spouse
 
-            // mother
-
-              'mother' => [
-                'mixed',
-                'label'=> ["mother's name", "mother's mobile", "Mother's maiden name"],
-                'attribute'=> ['motherName', 'motherMobile', 'motherMaiden'],
-                'placeholder'=> ['Toyin', '23480364168089', "surname before marriage"],
-                'inputType' => ['text', 'number'],
-                'icon'=> [
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-mobile-alt"></i>',
-                  '<i class="fas fa-user"></i>'
-                ]
-            ],
-
-              // father
-
-              'father' => [
-                'mixed',
-                'label'=> ["Father's name", "Father's mobile"],
-                'attribute'=> ['fatherName', 'fatherMobile'],
-                 'placeholder'=> ['Toyin', '23480364168089', "surname before marriage"],
-                'inputType' => ['text', 'number'],
-                'icon'=> [
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-mobile-alt"></i>',
-                ]
-            ],
+        'spouse' => [
+        'mixed',
+        'label' => ["Spouse's name", "Spouse's mobile", "Spouse's Email"],
+        'attribute' => ['spouseName', 'spouseMobile', 'spouseEmail'],
+        'placeholder' => ['Toyin', '23480364168089', "toyin@gmail.com"],
+        'inputType' => ['text', 'number', 'email'],
+        'icon' => [
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-envelope-square"></i>'
+        ]
+        ],
 
 
-            'children and siblings' => 'title',
-          
-          
+        'Parent' => 'title',
 
-                        // kids
+        // mother
 
-            'childrenAndSiblings' => [
-              'select-many',
-              'label'=> ['Numbers of children', 'Number of Siblings'],
-              'attribute'=> ['kids', 'noSiblings'],
-              'inputType' => ['select', 'select'],
-              'options' => [
-                ['select', 0, 1, 2, 3, 4, 5, 6 ],
-                ['select', 0, 1, 2, 3, 4, 5, 6]
-                ],
-              'icon'=> [
-                '<i class="fas fa-baby"></i>',
-                '<i class="fas fa-user-friends"></i>',
-              ]
-            ],
+        'mother' => [
+        'mixed',
+        'label' => ["mother's name", "mother's mobile", "Mother's maiden name"],
+        'attribute' => ['motherName', 'motherMobile', 'motherMaiden'],
+        'placeholder' => ['Toyin Olaogun', '23480364168089', "surname before marriage"],
+        'inputType' => ['text', 'number'],
+        'icon' => [
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-mobile-alt"></i>',
+        '<i class="fas fa-user"></i>'
+        ]
+        ],
 
-            'addChildren' => 'empty', 
-            'addSiblings' => 'empty', 
+        // father
 
+        'father' => [
+        'mixed',
+        'label' => ["Father's name", "Father's mobile", "Father's email"],
+        'attribute' => ['fatherName', 'fatherMobile', 'fatherEmail'],
+        'placeholder' => ['Yommy Olaogun', '447809789098', "yomi@email.com"],
+        'inputType' => ['text', 'number', 'email'],
+        'icon' => [
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-mobile-alt"></i>',
+        '<i class="fas fa-envelope-square"></i>'
+        ]
+        ],
 
-            // 'children2' => [
-            //   'mixed',
-            //   'label'=> ['Numbers of children', 'Number of Siblings'],
-            //   'attribute'=> ['kids2', 'noSiblings2'],
-            //      'placeholder'=> ['Toyin',  "surname before marriage"],
-            //   'inputType' => ['text', 'email'],
-            //   'icon'=> [
-            //     '<i class="fas fa-people-carry"></i>',
-            //     '<i class="fas fa-user-friends"></i>',
-            //   ]
-            // ],
+        'children and siblings' => 'title',
+
+        // kids
+
+        'childrenAndSiblings' => [
+        'select-many',
+        'label' => ['Numbers of children', 'Number of Siblings'],
+        'attribute' => ['kids', 'siblings'],
+        'inputType' => ['select', 'select'],
+        'options' => [
+        ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        ],
+        'icon' => [
+        '<i class="fas fa-child"></i>',
+        '<i class="fas fa-user-friends"></i>',
+        ]
+        ],
 
 
 
         // CONTACT INFORMATION
+        'Contact Information' => 'title',
+        'address' => [
+        'mixed',
+        'label' => ["Address", "Postcode /zip code/area code", 'Region / State / District'],
+        'attribute' => ['address', 'postcode', 'region'],
+        'placeholder' => ['Your first line of address', 'SN2 3BF / 234', 'London / Lagos / New York'],
+        'inputType' => ['text', 'text', 'text'],
+        'icon' => [
+        '<i class="far fa-address-book"></i>',
+        '<i class="far fa-address-card"></i>',
+        '<i class="far fa-address-card"></i>',
+        ]
+        ],
 
-           'Contact Information' => 'title',
+        // COUNTRY, EMAIL N MOBILE
 
-           'address' => [
-                'mixed',
-                'label'=> ["Address", "Postcode /zip code/area code", 'Region / State / District'],
-                'attribute'=> ['address', 'postcode', 'region'],
-                 'placeholder'=> ['Your first line of address', 'SN2 3BF / 234', 'London / Lagos / New York'],
-                'inputType' => ['text', 'text', 'text'],
-                'icon'=> [
-                  '<i class="far fa-address-book"></i>',
-                  '<i class="far fa-address-card"></i>',
-                  '<i class="far fa-address-card"></i>',
-                ]
-            ],
+        'country_email_mobile' => [
+        'mixed',
+        'label' => ["Country", "Email", 'Mobile'],
+        'attribute' => ['country', 'email', 'mobile'],
+        'placeholder' => ['Your first line of address', 'toyin@yahoo.com', 'include the area code - 234 or 1 or 44'],
+        'inputType' => ['select', 'text', 'text'],
+        'options' => ['select', 'Nigeria', 'UK', 'Canada', 'Europe', 'USA', 'China', 'Asia', 'Latin America'],
+        'icon' => [
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-envelope-square"></i>',
+        '<i class="fas fa-mobile-alt"></i>',
+        ]
+        ],
 
-            // COUNTRY, EMAIL N MOBILE
+        // INTEREST
 
-              'country_email_mobile' => [
-                'mixed',
-                'label'=> ["Country", "Email", 'Mobile'],
-                'attribute'=> ['country', 'email', 'mobile'],
-                'placeholder'=> ['Your first line of address', 'toyin@yahoo.com', 'include the area code - 234 or 1 or 44'],
-                'inputType' => ['select', 'text', 'text'],
-                'options' => ['select','Nigeria', 'UK', 'Canada', 'Europe', 'USA', 'China', 'Asia', 'Latin America'],
-                'icon'=> [
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-user"></i>',
-                ]
-            ],
+        'interest' => 'title',
 
-            // INTEREST
+        'your_nterest' => [
+        'mixed',
+        'label' => ['Favourite Sport', 'Football team', 'Passion'],
+        'attribute' => ['favSport', 'footballTeam', 'passion'],
+        'placeholder' => ['Football, Tennis, F1', 'Chelsea, Liverpool', 'singing or tech or travelling'],
+        'inputType' => ['text', 'text', 'text'],
+        'icon' => [
+        '<i class="fas fa-swimmer"></i>',
+        '<i class="	far fa-futbol"></i>',
+        '<i class="fas fa-heart"></i>',
+        ]
+        ],
 
-            'interest' => 'title',
+        // work info
 
-            'your_nterest' => [
-                'mixed',
-                'label'=> ['Favourite Sport', 'Football team', 'Passion'],
-                'attribute'=> ['favSport', 'footballTeam', 'passion'],
-                'placeholder'=> ['Football, Tennis, F1', 'Chelsea, Liverpool', 'singing or tech or travelling'],
-                'inputType' => ['text', 'text', 'text'],
-                'icon'=> [
-                  '<i class="fas fa-running"></i>',
-                  '<i class="	fa fa-soccer-ball-o"></i>',
-                  '<i class="fa fa-toggle-up"></i>',
-                ]
-            ],
+        'work_information' => 'title',
 
-            // work info
+        'work' => [
+        'mixed',
+        'label' => ['employment status', 'Occupation'],
+        'attribute' => ['employmentStatus', 'occupation'],
+        'placeholder' => ['null', 'Accountant, Housewife, Student, Business man etc'],
+        'inputType' => ['select', 'text'],
+        "options" => ['select', 'Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
+        'icon' => [
+        '<i class="fas fa-info-circle"></i>',
+        '<i class="fas fa-user-md"></i>',
+        ]
+        ],
 
-             'work_information' => 'title',
+        'create an account' => 'title',
+        // account
 
-            'work' => [
-                'mixed',
-                'label'=> ['employment status', 'Occupation'],
-                'attribute'=> ['employmentStatus', 'occupation'],
-                'placeholder'=> ['null', 'Accountant, Housewife, Student, Business man etc'],
-                'inputType' => ['select', 'text'],
-                "options"=> ['select', 'Self-employed', 'Unemployed', 'Full-time-employment', 'Student'],
-                'icon'=> [
-                  '<i class="fas fa-user"></i>',
-                  '<i class="fas fa-user"></i>',
-                ]
-            ],
+        'account' => [
+        'mixed',
+        'label' => ['Password', 'Confirm password', 'Secret word'],
+        'attribute' => ['password', 'confirm_password', 'secretWord'],
+        'placeholder' => ['xxxx', 'xxxx', 'one time security code'],
+        'inputType' => ['password', 'password', 'password'],
+        'icon' => [
+        '<i class="fas fa-user-secret"></i>',
+        '<i class="fas fa-user-secret"></i>',
+        '<i class="fas fa-user-secret"></i>',
+        ]
+        ],
 
-            'create an account' => 'title',
-          // account
-
-            'account' => [
-                'mixed',
-                'label'=> ['Password', 'Confirm password', 'Secret word'],
-                'attribute'=> ['password', 'confirm_password', 'secretWord'],
-                'placeholder'=> ['xxxx', 'xxxx', 'one time security code'],
-                'inputType' => ['password', 'password', 'password'],
-                'icon'=> [
-                  '<i class="fas fa-password"></i>',
-                  '<i class="fas fa-password"></i>',
-                  '<i class="fas fa-password"></i>',
-                ]
-            ],
-
-
-
-            'checkbox' => 'By submitting this form, you agree handling your information as
-        outlined in our <a href="/privacy"> PRIVACY POLICY</a>',
-
+        'checkbox' => 'By submitting this form, you agree handling your information as outlined in our <a href="/privacy"> PRIVACY POLICY </a>', 
         'token'=> 'token',
 
             'Submit Application' => 'button'
 
-    ];
+            ];
 
-$form = new App\classes\BuildFormBulma($formArray);
-$form->genForm();
+            $form = new App\classes\BuildFormBulma($formArray);
+            $form->genForm();
 
-@endphp
-  
-</form>
+            @endphp
 
-@endsection
+            </form> @endsection

@@ -145,10 +145,10 @@ export default class FormHelper {
     matchInput(first, second) {
         let error, firstInput, secondInput
         error = this.id(`${second}_error`)
-        firstInput = this.id(first)
-        secondInput = this.id(second)
+        firstInput = this.id(first+'_id')
+        secondInput = this.id(second+'_id')
         secondInput.addEventListener('keyup', () => {
-            error.innerHTML = (firstInput.value !== secondInput.value) ? 'Your passwords do not match' : ""
+            error.innerHTML = (secondInput.value !==  firstInput.value) ? 'Your passwords do not match' : ""
         })
     }
     /**

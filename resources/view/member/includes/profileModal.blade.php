@@ -5,6 +5,7 @@
       <span onclick="document.getElementById('id01').style.display='none'"
         class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
 
+
       @isset($data['img'])
 
       <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">

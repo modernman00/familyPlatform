@@ -129,21 +129,16 @@ class BuildFormBulma extends AlterTable
 
         //ITERATE TO CREATE A FORM
         for ($i = 0; $i < $this->EntCount; $i++) {
-    
 
             if (isset($_POST['submit'])) {
                 $value = $_POST[$this->EntKey[$i]];
             } else {
                 $value = "";
             }
-
             // The questions, remove the underscore and change to uppercase
-
             $var = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $this->EntKey[$i]));
-
             // this is the form question, id and name
             $nameKey = $this->EntKey[$i];
-
             // CREATE THE FORM - NUMBER AND STRING
 
             if ($this->EntValue[$i] === 'text') {
@@ -174,7 +169,6 @@ class BuildFormBulma extends AlterTable
                </div>";
             } elseif ($this->EntValue[$i] === 'integer') {
                 echo " <div class = field>
-
                     <label class='label' id=$nameKey><b> $var</b></label>
                     <div class= control>
                     <input type='number' autocomplete='new-$nameKey' class ='input' placeholder= '$var' name= $nameKey value=$value>
@@ -343,7 +337,7 @@ class BuildFormBulma extends AlterTable
                   </div>
                     </div>";
             } elseif ($this->EntValue[$i] === 'birthday') {
-                $divID= $this->EntValue[$i];
+                $divID = $this->EntValue[$i];
                 echo " <div class='field' id=$divID>
                         <label class='label is-medium' id=$nameKey><b> $var</b>
                         </label>
@@ -426,7 +420,7 @@ class BuildFormBulma extends AlterTable
 
                 </div>";
             } elseif ($this->EntValue[$i][0] === 'mixed') {
-                $divID= $this->EntKey[$i];
+                $divID = $this->EntKey[$i];
                 $label = $this->EntValue[$i]['label'];
                 echo " <div class = field id= $divID >
                 <div class='field-body'> ";
@@ -461,6 +455,7 @@ class BuildFormBulma extends AlterTable
                     <p class='help error' id=$error></p>
                     </div>";
                     }
+
                     if ($labelType === 'inputButton') {
                         echo " 
                       <div class='field has-addons has-addons-left '>
@@ -491,7 +486,7 @@ class BuildFormBulma extends AlterTable
                 echo "  </div>
                 </div>";
             } elseif ($this->EntValue[$i][0] === 'select-many') {
-                      $divID= $this->EntKey[$i];
+                $divID = $this->EntKey[$i];
                 echo " <div class = field id=$divID>
               <div class='field-body'> ";
                 for ($y = 0; $y < count($this->EntValue[$i]['label']); $y++) {
@@ -521,10 +516,8 @@ class BuildFormBulma extends AlterTable
                         <p class='help' id=$help></p>
                         <p class='help error' id=$error></p>
                         </div>";
-                };
-                echo "
-                    </div>
-                    </div>";
+                }
+                echo "</div> </div>";
             } elseif ($this->EntValue[$i] === 'title') {
                 echo "<hr><br><p id={$nameKey}1 class='title is-3 is-spaced
                 has-text-centered has-text-link is-primary the-title'>$var</p><br>

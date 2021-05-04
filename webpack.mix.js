@@ -3,6 +3,9 @@ mix.sass('resources/asset/scss/main.scss', 'public/style.css')
 .js('resources/asset/js/index.js', 'public/index.js')
 .extract()
 .setPublicPath('public')
+.options({
+    legacyNodePolyfills: true
+})
 
 if(mix.inProduction()){
     mix.version();

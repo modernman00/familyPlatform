@@ -10,8 +10,8 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
-/* harmony import */ var _helper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../helper */ "./resources/asset/js/helper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
 
  // import { eventInput } from "./event"
 
@@ -35,7 +35,7 @@ var renderHtml = function renderHtml(el) {
 };
 
 axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMembers3', config).then(function (response) {
-  (0,_helper__WEBPACK_IMPORTED_MODULE_2__.loaderIcon)();
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.loaderIcon)();
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data); // add loader
 
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
@@ -87,7 +87,7 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMemb
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/global.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
  // export const eventInput = () => {
 //     id('searchFamily').addEventListener('keydown', (event) => {
 //     let searchValue = event.target.value
@@ -112,50 +112,87 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/asset/js/helper.js":
-/*!**************************************!*\
-  !*** ./resources/asset/js/helper.js ***!
-  \**************************************/
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "realTimeServer": () => (/* binding */ realTimeServer),
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon)
+/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
+/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
+/* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue)
 /* harmony export */ });
-var _this = undefined;
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
 
-var realTimeServer = function realTimeServer(input, url, outputId) {
-  var theInput, inputVal, output;
-  theInput = _this.id(input);
-  output = _this.id(outputId);
-  theInput.addEventListener('keyup', function () {
-    inputVal = theInput.value;
 
-    if (inputVal == 0) {
-      output.innerHTML = "";
-      return;
-    } else {
-      var xmlhttp = new XMLHttpRequest();
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-      xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          output.innerHTML = this.responseText;
-        }
-      };
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-      xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
-      xmlhttp.send();
-    }
-  });
-};
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
 var loaderIconBootstrap = function loaderIconBootstrap() {
   return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
 };
 var loaderIcon = function loaderIcon() {
   return "<div class=\"loader\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  newDiv.setAttribute('class', "field ".concat(setClass));
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  return parentDiv.appendChild(newDiv);
+};
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase(); // you can also use AJAX requests instead of preloaded data
+
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return _toConsumableArray(new Set(array));
 };
 
 /***/ })
