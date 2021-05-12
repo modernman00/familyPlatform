@@ -28,7 +28,9 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 		$mail->addAddress($email, $name);
 		$mail->addBCC(APP_EMAIL);
 		if($file){
-			$mail->AddStringAttachment($file, $filename, ENCODING, TYPE);}
+			$mail->AddStringAttachment($file, $filename, ENCODING, TYPE);
+			}
+
 		//Content
 		$mail->isHTML(true);                                  // Set email format to HTML
 		$mail->Subject = $subject;
@@ -37,7 +39,7 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 		return $mail->send();
 	
 	} catch (Exception $e) {
-		echo errorMsg($mail, $e);
+		errorMsg($mail, $e);
 	}
 }
 

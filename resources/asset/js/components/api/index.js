@@ -9,8 +9,18 @@ const config = {
     },
 }
 export const getAllData = async () => {
-   
-  const response = await axios.get('http://olaogun.dev.com/allMembers3', config)
-    .catch(err => err.message)
+
+    const response = await axios.get('http://olaogun.dev.com/allMembers3', config)
+        .catch(err => err.message)
     return response.data
+}
+
+export const postData = async (url, object) => {
+    await axios.post(url, object)
+        .then( (response)=> {
+            console.log(response);
+        })
+        .catch((error)=> {
+            console.log(error);
+        });
 }

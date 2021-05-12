@@ -164,7 +164,7 @@ function showError($th)
     echo "Error File- " . $th->getFile();
     echo "<br>";
     echo "<br>";
-    return json_encode(['Error_Message' => $th->getMessage()]);
+    echo json_encode(['Error_Message' => $th->getMessage()]);
 }
 
 

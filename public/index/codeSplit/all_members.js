@@ -126,7 +126,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
 /* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue)
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
+/* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "isChecked": () => (/* binding */ isChecked)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -193,6 +195,25 @@ var autoCompleter = function autoCompleter(inputId, data) {
 };
 var distinctValue = function distinctValue(array) {
   return _toConsumableArray(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
 };
 
 /***/ })

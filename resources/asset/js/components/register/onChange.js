@@ -1,6 +1,6 @@
 "use strict";
 // import { getEnvironmentVariable as env} from 'environment-variable-reader'
-import { id, log, qSel } from "../global";
+import { id, showError } from "../global";
 import { removeDiv, createAndAppendElement } from '../helper/general'
 
 
@@ -73,7 +73,7 @@ export const show = (kids_or_sib) => {
             }
         }
     } catch (error) {
-        console.log(error.message)
+        showError(error)
     }
 }
 

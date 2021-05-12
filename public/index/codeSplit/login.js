@@ -63,30 +63,31 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
 
             // capture the error to a variable
-            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
+            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit and token
 
 
-            if (post.type == 'submit' || post.name == 'token' || postName == "spouseName" || postName == "spouseMobile") {
+            if (post.name == 'submit' || post.name == 'token' || post.name == "spouseName" || post.name == "spouseMobile" || post.name == "checkbox_id") {
               continue;
             } // check if there is no value
 
 
             var postName = post.name.replace('_', ' ');
 
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile" || postName == "fatherEmail" || postName == "motherEmail") {
               if (post.value === "") {
-                post.value = "11";
+                post.value = "Not Provided";
               }
             }
 
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "<li style=color:'red';>".concat(postName, " cannot be left empty</li>");
+              errMsg.innerHTML = "* cannot be left empty";
+              errMsg.style.color = "red";
 
-              _this.error.push("<li style=color:'red';>".concat(postName, " cannot be left empty</li>"));
+              _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else if (post.value.match(reg) === null) {
-              errMsg.innerHTML = "<li style=color:'red';> only letters and numbers are allowed<li>";
+              errMsg.innerHTML = " only letters and numbers are allowed";
 
-              _this.error.push("<li style=color:'red';> only letters and numbers are allowed<li>");
+              _this.error.push(" only letters and numbers are allowed");
             } else {
               _this.result = 1;
             }
@@ -103,7 +104,7 @@ var FormHelper = /*#__PURE__*/function () {
     value: function emailVal() {
       var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
       var msg = "<li style=color:'red';> Please enter a valid email</li>";
-      var email = this.id('email').value;
+      var email = this.id('email_id').value;
 
       if (email.match(emailExp) === null) {
         this.id('email_error').innerHTML = msg;
@@ -407,7 +408,7 @@ __webpack_require__.r(__webpack_exports__);
 var dataToCheckRegister = {
   maxLength: {
     id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
   // duplicate: {
   // 	email: 'email',

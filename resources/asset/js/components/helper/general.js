@@ -56,3 +56,31 @@ export const autoCompleter = (inputId, data) => {
 export const distinctValue = (array) => { 
   return [... new Set(array)]
 }
+
+export const checkBox = (subject) => {
+    return `<div class="control"> 
+        <label class="radio">
+          <input type="radio" name="send${subject}" value="yes" id=${subject}Yes> Yes 
+        </label>
+        <label class="radio"> 
+          <input type="radio" name="send${subject}" value="no" id=${subject}No> No 
+        </label>
+      </div>`;
+}
+
+  export const isChecked = (name, fn)=> {
+    const yesId = (`${name}Yes`)
+    const noId = `${name}No`
+        const checked = () => {
+            if (id(yesId).checked) {
+                alert('check')
+                fn()
+            } else if (id(noId).checked) {
+               alert('check No')
+            }
+        }
+
+        id(yesId).addEventListener('click', checked)
+        id(noId).addEventListener('click', checked)
+
+    }

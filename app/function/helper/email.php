@@ -87,3 +87,41 @@ function genEmailArray($viewPath, $data, $subject, $file = null, $fileName = nul
         'fileName' => $fileName
     ];
 }
+
+/**
+ * 
+ * @param mixed $array 'viewPath' => string $viewPath, 'data' => array $data,'subject' => string $subject, 'file' => $file, 'fileName' => $fileName
+ * @param mixed $recipient 
+ * @return void 
+ */
+
+function sendEmailGeneral($array, $recipient)
+{
+    $notifyCustomer = new EmailData($recipient);
+
+    if (!defined('PASS')) {
+        $notifyCustomer->getEmailData();
+
+        $data = $array['data'];
+
+        ob_start();
+        $emailPage = view($array['viewPath'], compact('data'));
+        $emailContent = ob_get_contents();
+        ob_end_clean();
+
+        $email =  checkInputEmail($data['email']);
+       
+
+        if(!$email) {
+            $error = "Email not provided";
+            echo json_encode($error);
+            throw new Exception($error);
+        }
+
+        $name = checkInput($data['name']) ?? 'there';
+        // $file = $array['file'];
+        // $filename = $array['fileName'];
+
+        sendEmail($email, $name, $array['subject'], $emailContent);
+    }
+}

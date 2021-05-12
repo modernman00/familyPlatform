@@ -6,8 +6,8 @@
 
 <div class="columns">
   <div class="column" style="text-align:center; margin-left:20%; margin-right:20%;">
-    <h1 class="title is-2"> Register to join your family network </h1> </div> </div> <form action="/register"
-        method="POST" class="register" enctype="multipart/form-data" autocomplete="off">
+    <h1 class="title is-2"> Register To Join Your Family N petwork </h1> </div> </div> <form action="/register"
+        method="POST" class="register" id="register" enctype="multipart/form-data" autocomplete="off">
 
         @php
 
@@ -60,7 +60,7 @@
         'label' => ["Spouse's name", "Spouse's mobile", "Spouse's Email"],
         'attribute' => ['spouseName', 'spouseMobile', 'spouseEmail'],
         'placeholder' => ['Toyin', '23480364168089', "toyin@gmail.com"],
-        'inputType' => ['text', 'number', 'email'],
+        'inputType' => ['text', 'text', 'email'],
         'icon' => [
         '<i class="fas fa-user"></i>',
         '<i class="fas fa-user"></i>',
@@ -75,14 +75,15 @@
 
         'mother' => [
         'mixed',
-        'label' => ["mother's name", "mother's mobile", "Mother's maiden name"],
-        'attribute' => ['motherName', 'motherMobile', 'motherMaiden'],
-        'placeholder' => ['Toyin Olaogun', '23480364168089', "surname before marriage"],
-        'inputType' => ['text', 'number'],
+        'label' => ["mother's name", "mother's mobile", "Mother's maiden name", "mother's email"],
+        'attribute' => ['motherName', 'motherMobile', 'motherMaiden', 'motherEmail'],
+        'placeholder' => ['Toyin Olaogun', '23480364168089', "surname before marriage", "mother@yahoo.com"],
+        'inputType' => ['text', 'text', 'text', 'text'],
         'icon' => [
         '<i class="fas fa-user"></i>',
         '<i class="fas fa-mobile-alt"></i>',
-        '<i class="fas fa-user"></i>'
+        '<i class="fas fa-user"></i>',
+        '<i class="fas fa-envelope-square"></i>'
         ]
         ],
 
@@ -93,7 +94,7 @@
         'label' => ["Father's name", "Father's mobile", "Father's email"],
         'attribute' => ['fatherName', 'fatherMobile', 'fatherEmail'],
         'placeholder' => ['Yommy Olaogun', '447809789098', "yomi@email.com"],
-        'inputType' => ['text', 'number', 'email'],
+        'inputType' => ['text', 'text', 'text'],
         'icon' => [
         '<i class="fas fa-user"></i>',
         '<i class="fas fa-mobile-alt"></i>',

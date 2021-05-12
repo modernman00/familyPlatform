@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\controller\register;
 
 use App\classes\{
-    AllFunctionalities,
-    ProcessImg
+    ProcessImg, SubmitForm, Select, Db, CheckToken
     // Transaction as Transaction
 };
 use Exception;
 
-class Register extends AllFunctionalities
+class Register extends Db
 {
     private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
 
@@ -32,34 +31,34 @@ class Register extends AllFunctionalities
     {
 
         try {
-            $this->tokenCheck('token', '/register');
-            // process the image 
-            $profileImage = new ProcessImg;
-            $profileImage->processProfileImage();
+            //CheckToken::tokenCheck('token', '/register');
+            // // process the image 
+            // $profileImage = new ProcessImg;
+            // $profileImage->processProfileImage();
             
-            $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
+            // $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
 
             $generateId = $this->setId($_POST, "firstName", 'account');
 
-            //echo $generateId;
             // sanitise
             $data = $this->dataToCheck();
+
             //    TODO log the error and send to developer
             $cleanData = getSanitisedInputData($generateId, $data);
             $tableData = $this->tableData($cleanData);
-            // db table
+        
             // create session 
             $_SESSION['id'] = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
 
-            if (!$_SESSION['PROFILE_IMG']) {
-                throw new Exception("Image not captured ", 1);
-            }
+            // if (!$_SESSION['PROFILE_IMG']) {
+            //     throw new Exception("Image not captured ", 1);
+            // }
 
             // submit using function from insert
             $countTable = count($this->table);
             for ($i = 0; $i < $countTable; $i++) {
-                $this->submitForm($this->table[$i], $tableData[$i]);
+                SubmitForm::submitForm($this->table[$i], $tableData[$i]);
             }
 
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
@@ -76,6 +75,7 @@ class Register extends AllFunctionalities
                 null,
                 null
             );
+
             // send the email
             sendEmailWrapper($sendEmailArray, 'member');
             // $Transaction->commit();
@@ -116,9 +116,9 @@ class Register extends AllFunctionalities
     private function dataToCheck()
     {
         return [
-            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30],
-            'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation']
+            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7],
+            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 40],
+            'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password']
         ];
     }
 
@@ -131,7 +131,7 @@ class Register extends AllFunctionalities
                 'alias' => $cleanPostData['alias'],
                 'kids' => $cleanPostData['kids'],
                 'gender' => $cleanPostData['gender'],
-                'noSiblings' => $cleanPostData['noSiblings'],
+                'siblings' => $cleanPostData['siblings'],
                 'day' => $cleanPostData['day'],
                 'month' => $cleanPostData['month'],
                 'year' => $cleanPostData['year'],
@@ -170,8 +170,10 @@ class Register extends AllFunctionalities
                 'spouseMobile' => $cleanPostData['spouseMobile'],
                 'fatherName' => $cleanPostData['fatherName'],
                 'fatherMobile' => $cleanPostData['fatherMobile'],
+                'fatherEmail' => $cleanPostData['fatherEmail'],
                 'motherName' => $cleanPostData['motherName'],
                 'motherMobile' => $cleanPostData['motherMobile'],
+                'motherEmail' => $cleanPostData['motherEmail'],
                 'motherMaiden' => $cleanPostData['motherMaiden'],
                 'id' => $cleanPostData['id']
             ],
@@ -201,7 +203,8 @@ class Register extends AllFunctionalities
         $id .= strtoupper($idName);
 
         //check if the reference number exist
-        $check_for_id = $this->select_count($table, 'id', $id);
+        $query = Select::formAndMatchQuery(selection:'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
+        $check_for_id = Select::selectFn2($query, [$id]);
         if ($check_for_id >= 1) {
             $id = (random_int(900001, 999999));
             $id .= strtoupper($idName);

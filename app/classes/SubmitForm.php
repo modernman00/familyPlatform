@@ -17,9 +17,9 @@ class SubmitForm extends Db
             $placeholder = implode(', :', $key);
             // prep statement using placeholder :name
             $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
-            $query = $this->connect()->prepare($stmt);
+            $query = self::connect2()->prepare($stmt);
             if (!$query) {
-                throw new Exception("Not able to insert data", 1);
+                throw new \Exception("Not able to insert data", 1);
             }
             foreach ($field as $keys => $values) {
                 $query->bindValue(":$keys", $values);

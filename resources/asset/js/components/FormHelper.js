@@ -25,36 +25,44 @@ export default class FormHelper {
         this.data.forEach((et) => {
             for (let post of et) {
 
-
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
 
-                // rid it off the submit button
-                if (post.type == 'submit' || post.name == 'token' || postName == "spouseName" || postName == "spouseMobile") {
+                // rid it off the submit and token
+                if (post.name == 'submit' || 
+                    post.name == 'token' || 
+                    post.name == "spouseName" || 
+                    post.name == "spouseMobile" || 
+                    post.name =="checkbox_id") {
                     continue;
                 }
-
 
                 // check if there is no value
 
                 let postName = post.name.replace('_', ' ')
 
-                if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile" ) {
-                    if(post.value === "") {
-                        post.value = "11"
+                if (postName == "spouseName" || 
+                    postName == "spouseMobile" || 
+                    postName == "fatherMobile" || 
+                    postName == "motherMobile" || 
+                    postName == "fatherEmail" || 
+                    postName == "motherEmail"
+                    ) {
+                    if (post.value === "") {
+                        post.value = "Not Provided"
                     }
-                    
                 }
 
                 if (post.value === '' || post.value === 'select') {
 
-                    errMsg.innerHTML = `<li style=color:'red';>${postName} cannot be left empty</li>`
-                    this.error.push(`<li style=color:'red';>${postName} cannot be left empty</li>`)
+                    errMsg.innerHTML = `* cannot be left empty`
+                    errMsg.style.color ="red"
+                    this.error.push(`${postName.toUpperCase()} cannot be left empty`)
 
                 } else if (post.value.match(reg) === null) {
 
-                    errMsg.innerHTML = `<li style=color:'red';> only letters and numbers are allowed<li>`
-                    this.error.push(`<li style=color:'red';> only letters and numbers are allowed<li>`);
+                    errMsg.innerHTML = ` only letters and numbers are allowed`
+                    this.error.push(` only letters and numbers are allowed`);
 
                 } else {
                     this.result = 1
@@ -68,12 +76,11 @@ export default class FormHelper {
     emailVal() {
         const emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
         let msg = `<li style=color:'red';> Please enter a valid email</li>`
-        const email = this.id('email').value
+        const email = this.id('email_id').value
         if (email.match(emailExp) === null) {
             this.id('email_error').innerHTML = msg
             this.error.push(msg)
         }
-
     }
 
     clearError() {
@@ -122,7 +129,7 @@ export default class FormHelper {
                     error.innerHTML = (theData.value.length > max) ? `You have reach the maximum limit` : "";
                     this.id(`${input[i]}_help`).style.color = 'red'
                     this.id(`${input[i]}_help`).style.fontSize = '10px'
-                    error.style.color ='red'
+                    error.style.color = 'red'
 
                     setTimeout(() => {
                         this.id(`${input[i]}_help`).style.display = 'none'
@@ -145,10 +152,10 @@ export default class FormHelper {
     matchInput(first, second) {
         let error, firstInput, secondInput
         error = this.id(`${second}_error`)
-        firstInput = this.id(first+'_id')
-        secondInput = this.id(second+'_id')
+        firstInput = this.id(first + '_id')
+        secondInput = this.id(second + '_id')
         secondInput.addEventListener('keyup', () => {
-            error.innerHTML = (secondInput.value !==  firstInput.value) ? 'Your passwords do not match' : ""
+            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
         })
     }
     /**

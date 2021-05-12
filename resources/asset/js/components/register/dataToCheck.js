@@ -4,7 +4,7 @@ export const dataToCheckRegister = {
 		id: [
 		'firstName','lastName','alias','spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName',  'motherMaiden','address','postcode','region','country','mobile','email','favSport','footballTeam','passion','occupation',
 	 	],
-		 max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10,15,15, 13, 45, 25,30,40,20 ],
+		 max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10,15,15, 13, 45, 25,30,40,20 ],
 	},
 
 

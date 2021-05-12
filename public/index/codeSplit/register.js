@@ -63,30 +63,31 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
 
             // capture the error to a variable
-            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit button
+            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit and token
 
 
-            if (post.type == 'submit' || post.name == 'token' || postName == "spouseName" || postName == "spouseMobile") {
+            if (post.name == 'submit' || post.name == 'token' || post.name == "spouseName" || post.name == "spouseMobile" || post.name == "checkbox_id") {
               continue;
             } // check if there is no value
 
 
             var postName = post.name.replace('_', ' ');
 
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile" || postName == "fatherEmail" || postName == "motherEmail") {
               if (post.value === "") {
-                post.value = "11";
+                post.value = "Not Provided";
               }
             }
 
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "<li style=color:'red';>".concat(postName, " cannot be left empty</li>");
+              errMsg.innerHTML = "* cannot be left empty";
+              errMsg.style.color = "red";
 
-              _this.error.push("<li style=color:'red';>".concat(postName, " cannot be left empty</li>"));
+              _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else if (post.value.match(reg) === null) {
-              errMsg.innerHTML = "<li style=color:'red';> only letters and numbers are allowed<li>";
+              errMsg.innerHTML = " only letters and numbers are allowed";
 
-              _this.error.push("<li style=color:'red';> only letters and numbers are allowed<li>");
+              _this.error.push(" only letters and numbers are allowed");
             } else {
               _this.result = 1;
             }
@@ -103,7 +104,7 @@ var FormHelper = /*#__PURE__*/function () {
     value: function emailVal() {
       var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
       var msg = "<li style=color:'red';> Please enter a valid email</li>";
-      var email = this.id('email').value;
+      var email = this.id('email_id').value;
 
       if (email.match(emailExp) === null) {
         this.id('email_error').innerHTML = msg;
@@ -327,7 +328,8 @@ var FormHelper = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "getAllData": () => (/* binding */ getAllData)
+/* harmony export */   "getAllData": () => (/* binding */ getAllData),
+/* harmony export */   "postData": () => (/* binding */ postData)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
@@ -373,6 +375,31 @@ var getAllData = /*#__PURE__*/function () {
 
   return function getAllData() {
     return _ref.apply(this, arguments);
+  };
+}();
+var postData = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(url, object) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.next = 2;
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, object).then(function (response) {
+              console.log(response);
+            })["catch"](function (error) {
+              console.log(error);
+            });
+
+          case 2:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function postData(_x, _x2) {
+    return _ref2.apply(this, arguments);
   };
 }();
 
@@ -533,7 +560,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
 /* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue)
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
+/* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "isChecked": () => (/* binding */ isChecked)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -601,6 +630,25 @@ var autoCompleter = function autoCompleter(inputId, data) {
 var distinctValue = function distinctValue(array) {
   return _toConsumableArray(new Set(array));
 };
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
 
 /***/ }),
 
@@ -616,39 +664,111 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
 /* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../api/index */ "./resources/asset/js/components/api/index.js");
 /* harmony import */ var _helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/autocomplete */ "./resources/asset/js/components/helper/autocomplete.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
 
 
 
 
 var getData = (0,_api_index__WEBPACK_IMPORTED_MODULE_2__.getAllData)();
 var firstNameData = [];
-var generalData = [];
 var fatherName = [];
+var mobile = [];
 var motherName = [];
-var cities = ['Lagos', 'Oyo', 'New York', 'London', 'Wiltshire'];
 getData.then(function (el) {
   return el.map(function (element) {
-    generalData.push(element);
     firstNameData.push(element.firstName);
-    fatherName.push(element.alias);
+    fatherName.push(element.fatherName);
     motherName.push(element.motherName);
+    mobile.push(element.mobile);
   });
 });
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(fatherName);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(generalData);
 var lastAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
 var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id');
 var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherName_id');
 lastAutoComplete.setAttribute('autocomplete', 'off');
 fatherAutoComplete.setAttribute('autocomplete', 'off');
-motherAutoComplete.setAttribute('autocomplete', 'off'); // autoCompleter(lastNameAutoComplete, firstNameData)
+motherAutoComplete.setAttribute('autocomplete', 'off'); // AUTOCOMPLETE
 
-var result = (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.distinctValue)(fatherName);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.log)((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.distinctValue)([12, 12, 45, 21, 10]));
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(result);
 (0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(lastAutoComplete, firstNameData);
 (0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(fatherAutoComplete, fatherName);
-(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(motherAutoComplete, motherName);
+(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(motherAutoComplete, motherName); // CHECK THE MOBILE OF MOTHER AND FATHER
+
+var setInput = function setInput(element, name, value) {
+  var sex = name === "father" ? "him" : "her";
+  var genId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error"));
+  genId.style.display = "block";
+
+  if (value === element) {
+    genId.innerHTML = "Great news that your ".concat(name, " is already on the platform");
+  } else {
+    genId.innerHTML = "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name);
+
+    var processRadio = function processRadio() {
+      var surname = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
+      var postObj = {
+        mobile: value,
+        viewPath: "msg/contactNewMember",
+        data: {
+          email: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Email_id")).value,
+          name: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id').value,
+          surname: surname
+        },
+        subject: "Please, register to join the ".concat(surname, " family Network")
+      };
+      axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
+        console.log(response.data);
+        var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
+        mobileHelp.innerHTML = response.data.message;
+        mobileHelp.style.display = "block";
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error")).innerHTML = "";
+      })["catch"](function (error) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+      });
+    };
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener('click', processRadio);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener('click', function () {
+      return genId.style.display = "none";
+    });
+  }
+};
+/**
+ * @param {the idInput to check} the input id 
+ * @param {the array to check} data 
+ * @param {this should either be the mother oor father} who 
+ */
+
+
+var mobileFilter = function mobileFilter(event, name) {
+  var value = event.target.value;
+  return mobile.filter(function (el) {
+    var element = el;
+    setInput(element, name, value);
+  });
+};
+
+var fatherMobile = function fatherMobile(event) {
+  var setName = "father";
+  mobileFilter(event, setName);
+};
+
+var motherMobile = function motherMobile(event) {
+  var setName = "mother";
+  mobileFilter(event, setName);
+};
+
+var spouseMobile = function spouseMobile(event) {
+  var setName = "spouse";
+  mobileFilter(event, setName);
+};
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_id').addEventListener('keyup', fatherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_id').addEventListener('keyup', motherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouseMobile_id').addEventListener('keyup', spouseMobile);
 
 /***/ }),
 
@@ -669,7 +789,7 @@ __webpack_require__.r(__webpack_exports__);
 var dataToCheckRegister = {
   maxLength: {
     id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 14, 14, 14, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
   // duplicate: {
   // 	email: 'email',
@@ -791,7 +911,7 @@ var show = function show(kids_or_sib) {
       }
     }
   } catch (error) {
-    console.log(error.message);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
   }
 }; // ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
 
@@ -857,63 +977,44 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var formInput = document.querySelectorAll('.register');
-var formInputArr = Array.from(formInput);
+var formInputArr = Array.from(formInput); // var formData2 = new FormData(id('register'))
+// const formData = new FormHelper(formInputArr);
+
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
 
 var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max); //real time check 
-  // formData.realTimeServer('spouseMobile_id',
-  // 	`/search?attribute=spouseMobile&subject=spouse&hint`,
-  // 	'spouseMobile_error')
+  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max); // check if password matches real time
 
-  formData.realTimeServer('spouseMobile_id', "/search?attribute=mobile&subject=spouse&hint", 'spouseMobile_error');
-  formData.realTimeServer('fatherMobile_id', '/search?attribute=mobile&subject=father&hint', 'fatherMobile_error');
-  formData.realTimeServer('motherMobile_id', '/search?attribute=mobile&subject=mother&hint', 'motherMobile_error'); // check if password matches real time
-
-  formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2 // dataToCheckRegister.password.err
-  ); // check if they have a father yes
-  // formData.isChecked(dataToCheckRegister.familyCheck.father[0],
-  // 	dataToCheckRegister.familyCheck.father[1],
-  // 	'fatherEmail_error'
-  // )
-  // // check if they have a mother yes
-  // formData.isChecked(dataToCheckRegister.familyCheck.mother[0],
-  // 	dataToCheckRegister.familyCheck.mother[1],
-  // 	'motherEmail_error'
-  // )
-  // // check if they have a spouse yes
-  // formData.isChecked(dataToCheckRegister.familyCheck.spouse[0],
-  // 	dataToCheckRegister.familyCheck.spouse[1],
-  // 	'spouseEmail_error'
-  // )
+  formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
 };
 
 process();
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', function () {
+
+var processForm = function processForm() {
   try {
     if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
-      formData.emailVal(); // sanitise email
-
-      formData.massValidate(); // validate and sanitise data
-      //log(formData.error)
+      formData.emailVal();
+      formData.massValidate();
 
       if (formData.error.length <= 0) {
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').type = 'submit'; //console.log('submitted')
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').type = 'submit';
       } else {
         (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(formData.error);
         alert('The form cannot be submitted. Please check the errors');
         process();
       }
     } else {
-      alert('To continue, you need to agree to the Olaoguns handling your information as outlined in our privacy policy');
+      alert('To continue, you need to agree to the our privacy policy');
     }
   } catch (e) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(e);
   }
-});
+};
+
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', processForm);
 
 /***/ }),
 
