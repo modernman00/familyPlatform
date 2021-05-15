@@ -1,12 +1,9 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\register;
 
-use App\classes\{
-    ProcessImg, SubmitForm, Select, Db, CheckToken
-    // Transaction as Transaction
+use App\classes\{ ProcessImg, SubmitForm, Select, Db, CheckToken, Transaction
 };
 use Exception;
 
@@ -19,7 +16,6 @@ class Register extends Db
         view('registration/register');
     }
 
-
     /**
      * 
      * @param mixed $array this is the POST Data 
@@ -29,64 +25,69 @@ class Register extends Db
      */
     public function processForm()
     {
-
         try {
-            //CheckToken::tokenCheck('token', '/register');
-            // // process the image 
-            // $profileImage = new ProcessImg;
-            // $profileImage->processProfileImage();
-            
-            // $_SESSION['PROFILE_IMG'] = $profileImage->profileImg;
-
+            //Transaction::beginTransaction();
             $generateId = $this->setId($_POST, "firstName", 'account');
-
             // sanitise
             $data = $this->dataToCheck();
-
-            //    TODO log the error and send to developer
             $cleanData = getSanitisedInputData($generateId, $data);
             $tableData = $this->tableData($cleanData);
-        
             // create session 
             $_SESSION['id'] = $cleanData['id'];
+            $id = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
+            $firstName = $cleanData['firstName'];
+            $emailCheck = checkEmailExist($cleanData['email']);
+            if ($emailCheck) {
+                http_response_code(401);
+                echo http_response_code();
+                echo json_encode("Your email is already registered");
+                exit;
+                //throw new Exception("Your email is already registered");
+            }
 
-            // if (!$_SESSION['PROFILE_IMG']) {
-            //     throw new Exception("Image not captured ", 1);
-            // }
-
-            // submit using function from insert
+            CheckToken::tokenCheck('token', '/register');
             $countTable = count($this->table);
             for ($i = 0; $i < $countTable; $i++) {
                 SubmitForm::submitForm($this->table[$i], $tableData[$i]);
             }
-
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
             $this->process_kid_siblings('kid', $cleanData['kids'], $cleanData);
+            $this->process_kid_siblings('sibling', $cleanData['siblings'], $cleanData);
 
-            $this->process_kid_siblings('sibling', $cleanData['noSiblings'], $cleanData);
-
-            // ACCOMPANY EMAIL CONTENT
-            // generate the data to send the email
             $sendEmailArray = genEmailArray(
                 "msg/appSub",
                 $cleanData,
                 "We have received your application",
-                null,
-                null
             );
-
-            // send the email
             sendEmailWrapper($sendEmailArray, 'member');
-            // $Transaction->commit();
-            return view('registration/nextStep');
+
+              $adminEmail = getenv('ADMIN_EMAIL');
+              $token = $_SESSION['token'];
+
+            $successMsg =
+                "<div class='jumbotron'>
+                <h1 class='display-3'>Ref: $id </h1> 
+                <h1>$token</h1>
+                <h1>SUBJECT: <b>NEXT STEP</b></h1><br>
+                <p class='lead'>Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network<br><br>
+                Regards,<br>
+                Admin team<br>
+                $adminEmail</p>
+                <hr class='my-2'>
+            </div>";
+
+            //Transaction::commit();
+            http_response_code(200);
+            echo http_response_code();
+            echo json_encode($successMsg);
+            // return view('registration/nextStep');  
         } catch (\Throwable $th) {
-            // $Transaction->rollback();
-            
+            // Transaction::rollback();
             showError($th);
         }
     }
-
+    
     /**
      * 
      * @param mixed $type is it kids or siblings
@@ -109,6 +110,7 @@ class Register extends Db
                 $query->execute($dataArr);
             }
         } catch (\Throwable $th) {
+            http_response_code(406);
             showError($th);
         }
     }
@@ -117,7 +119,7 @@ class Register extends Db
     {
         return [
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7],
-            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 40],
+            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 50],
             'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password']
         ];
     }
@@ -168,6 +170,7 @@ class Register extends Db
             [
                 'spouseName' => $cleanPostData['spouseName'],
                 'spouseMobile' => $cleanPostData['spouseMobile'],
+                'spouseEmail' => $cleanPostData['spouseEmail'],
                 'fatherName' => $cleanPostData['fatherName'],
                 'fatherMobile' => $cleanPostData['fatherMobile'],
                 'fatherEmail' => $cleanPostData['fatherEmail'],
@@ -180,13 +183,15 @@ class Register extends Db
             [
                 'fullName' => $cleanPostData['firstName'],
                 'postMessage' => "Hey, welcome to your page",
-                'profileImg' => $_SESSION['PROFILE_IMG'],
+                // 'profileImg' => $_SESSION['PROFILE_IMG'],
+                'profileImg' => "/avatar/avatarF.png",
                 'id' => $cleanPostData['id']
             ],
             [
                 'fullName' => $cleanPostData['firstName'],
                 'comment' => "Your comment will show here",
-                'profileImg' => $_SESSION['PROFILE_IMG'],
+                // 'profileImg' => $_SESSION['PROFILE_IMG'],
+                'profileImg' => "/avatar/avatarF.png",
                 'post_no' => 1000,
                 'id' => $cleanPostData['id']
             ]
@@ -203,7 +208,7 @@ class Register extends Db
         $id .= strtoupper($idName);
 
         //check if the reference number exist
-        $query = Select::formAndMatchQuery(selection:'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
+        $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
         $check_for_id = Select::selectFn2($query, [$id]);
         if ($check_for_id >= 1) {
             $id = (random_int(900001, 999999));

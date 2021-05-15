@@ -53,7 +53,7 @@ var FormHelper = /*#__PURE__*/function () {
     value: function massValidate() {
       var _this = this;
 
-      var reg = /[a-zA-Z0-9./@]/g;
+      // const reg = /[a-zA-Z0-9./@]/g;
       this.data.forEach(function (et) {
         var _iterator = _createForOfIteratorHelper(et),
             _step;
@@ -66,14 +66,14 @@ var FormHelper = /*#__PURE__*/function () {
             var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit and token
 
 
-            if (post.name == 'submit' || post.name == 'token' || post.name == "spouseName" || post.name == "spouseMobile" || post.name == "checkbox_id") {
+            if (post.name == 'submit' || post.name == 'token' || post.name == "checkbox_id") {
               continue;
             } // check if there is no value
 
 
             var postName = post.name.replace('_', ' ');
 
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile" || postName == "fatherEmail" || postName == "motherEmail") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "motherEmail") {
               if (post.value === "") {
                 post.value = "Not Provided";
               }
@@ -84,10 +84,6 @@ var FormHelper = /*#__PURE__*/function () {
               errMsg.style.color = "red";
 
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
-            } else if (post.value.match(reg) === null) {
-              errMsg.innerHTML = " only letters and numbers are allowed";
-
-              _this.error.push(" only letters and numbers are allowed");
             } else {
               _this.result = 1;
             }
@@ -108,6 +104,7 @@ var FormHelper = /*#__PURE__*/function () {
 
       if (email.match(emailExp) === null) {
         this.id('email_error').innerHTML = msg;
+        this.id('email_error').style.color = "red";
         this.error.push(msg);
       }
     }
@@ -153,6 +150,30 @@ var FormHelper = /*#__PURE__*/function () {
         }
       });
     }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+            _step3;
+
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
     /**
      *
      * @param {input is the id of the input/ this is an array [as, it, it]} input
@@ -168,7 +189,7 @@ var FormHelper = /*#__PURE__*/function () {
         var _loop2 = function _loop2(i) {
           var theData = _this3.id("".concat(input[i], "_id"));
 
-          if (theData == "") throw "empty dataInput";
+          if (theData == "") throw new Error("empty dataInput");
           var max = maxi[i];
 
           var error = _this3.id("".concat(input[i], "_error"));
@@ -557,6 +578,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
 /* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
 /* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
 /* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
@@ -588,6 +610,9 @@ var loaderIconBootstrap = function loaderIconBootstrap() {
 };
 var loaderIcon = function loaderIcon() {
   return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
 };
 var removeDiv = function removeDiv(div_id) {
   var div = document.getElementById(div_id);
@@ -838,6 +863,7 @@ var showSpouse = function showSpouse(e) {
 };
 
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').addEventListener('change', showSpouse);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('register_notify').style.display = "none";
 
 /***/ }),
 
@@ -968,53 +994,126 @@ injectCountryCode();
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./dataToCheck */ "./resources/asset/js/components/register/dataToCheck.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dataToCheck */ "./resources/asset/js/components/register/dataToCheck.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
 
 
 
-var formInput = document.querySelectorAll('.register');
-var formInputArr = Array.from(formInput); // var formData2 = new FormData(id('register'))
-// const formData = new FormHelper(formInputArr);
+var formInput = document.querySelectorAll('.register'); // const formInput2 = id('register')
 
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__.default(formInputArr);
 
 var process = function process() {
   // clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max); // check if password matches real time
+  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_3__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_3__.dataToCheckRegister.maxLength.max); // check if password matches real time
 
-  formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
+  formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_3__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_3__.dataToCheckRegister.password.pwd2);
+  formData.duplicate('firstName_id', 'alias_id');
 };
 
 process();
 
-var processForm = function processForm() {
+var processFormDataAction = function processFormDataAction(addClass, resource) {
+  // display the success information for 10sec
+  (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('register_notify').style.display = "block"; // unblock the notification
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('register_notify').classList.add(addClass); // add the success class
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('error').innerHTML = resource.data; // error element
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('loader').classList.remove('loader'); // remove loader
+};
+
+var processFormData = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(url, formElement) {
+    var form, formEntries, options;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(formElement);
+            formEntries = new FormData(form);
+            formEntries["delete"]('submit');
+            formEntries["delete"]('checkbox_id');
+            options = {
+              xsrfCookieName: 'XSRF-TOKEN',
+              xsrfHeaderName: 'X-XSRF-TOKEN'
+            };
+            _context.next = 7;
+            return axios__WEBPACK_IMPORTED_MODULE_4___default().post(url, formEntries, options).then(function (response) {
+              // set timer to redirect to the homepage
+              setTimeout(function () {
+                window.location = "/";
+              }, 10000);
+              processFormDataAction('is-success', response); // it clears all the contents
+
+              // it clears all the contents
+              formData.clearHtml();
+            })["catch"](function (error) {
+              processFormDataAction('is-danger', error.response);
+            });
+
+          case 7:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function processFormData(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+var processForm = function processForm(e) {
   try {
-    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
+    e.preventDefault();
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('register_notify').classList.remove('is-danger'); // remove the danger class from the notification
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('error').innerHTML = ""; // empty the error element
+
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('checkbox').checked) {
+      // window.location.hash = '#setLoader';
+      (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("setLoader").focus(); // focus on the loader element
+
       formData.emailVal();
       formData.massValidate();
 
       if (formData.error.length <= 0) {
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').type = 'submit';
+        (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('loader').classList.add('loader'); // start the loader element
+
+        return processFormData("/register", 'register'); // initiate the api
       } else {
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(formData.error);
         alert('The form cannot be submitted. Please check the errors');
         process();
       }
     } else {
       alert('To continue, you need to agree to the our privacy policy');
     }
-  } catch (e) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(e);
+  } catch (event) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(event);
   }
 };
 
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', processForm);
+(0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('submit').addEventListener('click', processForm);
 
 /***/ }),
 

@@ -140,7 +140,6 @@ class BuildFormBulma extends AlterTable
             // this is the form question, id and name
             $nameKey = $this->EntKey[$i];
             // CREATE THE FORM - NUMBER AND STRING
-
             if ($this->EntValue[$i] === 'text') {
                 echo " <div class = field>
                     <label class='label' id=$nameKey><b> $var</b></label>
@@ -216,8 +215,6 @@ class BuildFormBulma extends AlterTable
                     echo "<option>" . $this->EntValue[$i][$y] . "</option>";
                 }
                 echo "</select>
-
-
                         <span class='icon is-small is-left'>
                         $fontAwesome
                         </span>
@@ -227,7 +224,6 @@ class BuildFormBulma extends AlterTable
                     </div>";
             } elseif ($this->EntValue[$i] === 'date') {
                 echo " <div class = field>
-
                     <label class='label'  id=$nameKey><b> $var</b></label>
                         <div class= control>
                     <input type='date' class ='input' placeholder= '$nameKey' id={$nameKey}_id name= $nameKey value=$value>
@@ -281,10 +277,8 @@ class BuildFormBulma extends AlterTable
                 echo " <div class='field'>
                         <div class='control'>
                         <label class='checkbox'>
-
                             <input type='checkbox' id='checkbox' name = '{$nameKey}_id'>
                             {$this->EntValue[$i]}
-
                         </label>
                         <p class='help' id={$nameKey}_error></p>
                         </div>
@@ -472,11 +466,10 @@ class BuildFormBulma extends AlterTable
                     }
                     if ($labelType != 'select' && $labelType != 'inputButton') {
                         echo "<div class='control is-expanded has-icons-left'>
-                        <input class='input {$name} input is-medium' type='$labelType' value='$value' maxlength='30' minlength='1' name='$name' id = $id placeholder='$placeholder'>
+                        <input class='input {$name} input is-medium' type='$labelType' value='' maxlength='30' minlength='1' name='$name' id = $id placeholder='$placeholder'>
                         <span class='icon is-small is-left'>
                                     $icon
                             </span>
-
                         <p class='help' id={$name}_help></p>
                         <p class='help error' id={$name}_error></p>
                         </div>";

@@ -53,7 +53,7 @@ var FormHelper = /*#__PURE__*/function () {
     value: function massValidate() {
       var _this = this;
 
-      var reg = /[a-zA-Z0-9./@]/g;
+      // const reg = /[a-zA-Z0-9./@]/g;
       this.data.forEach(function (et) {
         var _iterator = _createForOfIteratorHelper(et),
             _step;
@@ -66,14 +66,14 @@ var FormHelper = /*#__PURE__*/function () {
             var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit and token
 
 
-            if (post.name == 'submit' || post.name == 'token' || post.name == "spouseName" || post.name == "spouseMobile" || post.name == "checkbox_id") {
+            if (post.name == 'submit' || post.name == 'token' || post.name == "checkbox_id") {
               continue;
             } // check if there is no value
 
 
             var postName = post.name.replace('_', ' ');
 
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "fatherMobile" || postName == "motherMobile" || postName == "fatherEmail" || postName == "motherEmail") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "motherEmail") {
               if (post.value === "") {
                 post.value = "Not Provided";
               }
@@ -84,10 +84,6 @@ var FormHelper = /*#__PURE__*/function () {
               errMsg.style.color = "red";
 
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
-            } else if (post.value.match(reg) === null) {
-              errMsg.innerHTML = " only letters and numbers are allowed";
-
-              _this.error.push(" only letters and numbers are allowed");
             } else {
               _this.result = 1;
             }
@@ -108,6 +104,7 @@ var FormHelper = /*#__PURE__*/function () {
 
       if (email.match(emailExp) === null) {
         this.id('email_error').innerHTML = msg;
+        this.id('email_error').style.color = "red";
         this.error.push(msg);
       }
     }
@@ -153,6 +150,30 @@ var FormHelper = /*#__PURE__*/function () {
         }
       });
     }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+            _step3;
+
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
     /**
      *
      * @param {input is the id of the input/ this is an array [as, it, it]} input
@@ -168,7 +189,7 @@ var FormHelper = /*#__PURE__*/function () {
         var _loop2 = function _loop2(i) {
           var theData = _this3.id("".concat(input[i], "_id"));
 
-          if (theData == "") throw "empty dataInput";
+          if (theData == "") throw new Error("empty dataInput");
           var max = maxi[i];
 
           var error = _this3.id("".concat(input[i], "_error"));

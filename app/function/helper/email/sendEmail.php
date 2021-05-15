@@ -26,7 +26,7 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 		$mail->Port = 465;
 		$mail->setFrom(APP_EMAIL, APP_NAME);
 		$mail->addAddress($email, $name);
-		$mail->addBCC(APP_EMAIL);
+		$mail->addBCC(TEST_EMAIL);
 		if($file){
 			$mail->AddStringAttachment($file, $filename, ENCODING, TYPE);
 			}

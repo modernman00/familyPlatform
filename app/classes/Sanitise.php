@@ -34,16 +34,15 @@ class Sanitise extends allFunctionalities
             $this->dataCount = count($this->value);
             // $this->dataLength = $data ?? null;  //code...
         } catch (\Throwable $th) {
-            echo " Are you human or robot";
-            showError($th);
+            $this->error[] = " Are you human or robot";
         }
     }
 
     private function emailVal()
     {
         if (isset($this->formData['email']) && !filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
-            $this->error[] = "Invalid Email Format \n";
-            throw new Exception("Error Processing Request - Email format", 1);
+            $this->error[] = "Invalid Email Format ";
+            // throw new Exception("Error Processing Request - Email format", 1);
             
         }
     }
@@ -51,7 +50,7 @@ class Sanitise extends allFunctionalities
     private function passVal()
     {
         if (isset($this->formData['password']) && isset($this->formData['confirm_password']) && $this->formData['password'] !== $this->formData['confirm_password']) {
-                $this->error[] = " Your passwords do not match\n";
+                $this->error[] = " Your passwords do not match";
         }
         return $this;
     }
@@ -63,7 +62,7 @@ class Sanitise extends allFunctionalities
         for ($x = 0; $x < count($this->key); $x++) {
             if (empty($this->value[$x]) && $this->value[$x] == "" || $this->value[$x] == 'select') {
                 $cleanNameKey = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $this->key[$x]));
-                $this->error[]  = "The $cleanNameKey question is required\n";
+                $this->error[]  = "The $cleanNameKey question is required";
             }
         }
         return $this;
@@ -83,11 +82,10 @@ class Sanitise extends allFunctionalities
                 $dataPost = $_POST[$this->dataLength['data'][$x]];
                 $cleanNameKey = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $dataKey[$x]));
                 if (strlen($dataPost) < $this->dataLength['min'][$x]) {
-                    $this->error[]  = "Your response to '{$cleanNameKey}' question does not meet either the required minimum input limit\n";
+                    $this->error[]  = "Your response to '{$cleanNameKey}' question does not meet either the required minimum input limit";
                     
                 } elseif (strlen($dataPost) > $this->dataLength['max'][$x]) {
-                    $length = $this->dataLength['max'][$x];
-                    $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit $length\n";
+                    $this->error[]  = "Your response to '{$cleanNameKey}' question exceeds the required maximum limit ";
                 }
             }
         }
@@ -111,7 +109,7 @@ class Sanitise extends allFunctionalities
 
     private function setArrayData()
     {
-        $options = array('cost' => 15);
+        $options = array('cost' => 10);
         $this->cleanData = array_combine($this->key, $this->value2);
         // if password and confirm password are given, hash password
         // if only password is given, do not hash password
@@ -146,12 +144,13 @@ class Sanitise extends allFunctionalities
 
     public function getData(): array
     {
-        try {
+        // try {
             $this->runFunctions();
 
             return $this->cleanData;
-        } catch (\Throwable $th) {
-            showError($th);
-        } 
+        // } catch (\Throwable $th) {
+        //     // showError($th);
+        //     $this->error[]  = "The $cleanNameKey question is required\n";
+        // } 
     }
 }

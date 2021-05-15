@@ -9,7 +9,6 @@ const config = {
     },
 }
 export const getAllData = async () => {
-
     const response = await axios.get('http://olaogun.dev.com/allMembers3', config)
         .catch(err => err.message)
     return response.data

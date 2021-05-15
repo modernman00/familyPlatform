@@ -8,6 +8,7 @@ class EmailData
     private $password;
     private $senderEmail;
     private $senderName;
+    private $testEmail;
 
     /**
      * 
@@ -21,12 +22,14 @@ class EmailData
             $this->password = getenv("APP_PASSWORD");
             $this->senderName = getenv('APP_SENDER');
             $this->senderEmail = getenv("APP_EMAIL");
+            $this->testEmail = getenv("TEST_EMAIL");
         } elseif ($sender === 'admin') {
 
             $this->username = getenv("PAY_USERNAME");
             $this->password = getenv("PAY_PASSWORD");
             $this->senderName = getenv('PAY_SENDER');
             $this->senderEmail = getenv("PAY_EMAIL");
+            $this->testEmail = getenv("TEST_EMAIL");
         } 
     }
 
@@ -37,6 +40,7 @@ class EmailData
         define('PASS', $this->password);
         define('APP_EMAIL', $this->senderEmail);
         define('APP_NAME', $this->senderName);
+        define('TEST_EMAIL', $this->testEmail);
     }
 
     function getEmailData()

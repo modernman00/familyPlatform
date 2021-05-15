@@ -83,20 +83,20 @@ __webpack_require__.r(__webpack_exports__);
 // }
 
 if (window.location.pathname === '/register') {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none";
   Promise.all(/*! import() | codeSplit/register */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/index */ "./resources/asset/js/components/register/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/allMembers') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked allMembers");
   Promise.all(/*! import() | codeSplit/all_members */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/index */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/login') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.log)("it worked login");
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none";
   __webpack_require__.e(/*! import() | codeSplit/login */ "codeSplit/login").then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/index */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {

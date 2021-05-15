@@ -20,8 +20,8 @@ export default class FormHelper {
 
 
     massValidate() {
-
-        const reg = /[a-zA-Z0-9./@]/g;
+			
+       // const reg = /[a-zA-Z0-9./@]/g;
         this.data.forEach((et) => {
             for (let post of et) {
 
@@ -30,9 +30,7 @@ export default class FormHelper {
 
                 // rid it off the submit and token
                 if (post.name == 'submit' || 
-                    post.name == 'token' || 
-                    post.name == "spouseName" || 
-                    post.name == "spouseMobile" || 
+                    post.name == 'token' ||  
                     post.name =="checkbox_id") {
                     continue;
                 }
@@ -43,9 +41,10 @@ export default class FormHelper {
 
                 if (postName == "spouseName" || 
                     postName == "spouseMobile" || 
+                    postName == "spouseEmail" || 
                     postName == "fatherMobile" || 
+                    postName == "fatherEmail" ||
                     postName == "motherMobile" || 
-                    postName == "fatherEmail" || 
                     postName == "motherEmail"
                     ) {
                     if (post.value === "") {
@@ -59,16 +58,12 @@ export default class FormHelper {
                     errMsg.style.color ="red"
                     this.error.push(`${postName.toUpperCase()} cannot be left empty`)
 
-                } else if (post.value.match(reg) === null) {
-
-                    errMsg.innerHTML = ` only letters and numbers are allowed`
-                    this.error.push(` only letters and numbers are allowed`);
-
                 } else {
                     this.result = 1
                 }
             }
         })
+
 
     }
 
@@ -79,6 +74,7 @@ export default class FormHelper {
         const email = this.id('email_id').value
         if (email.match(emailExp) === null) {
             this.id('email_error').innerHTML = msg
+            this.id('email_error').style.color ="red"
             this.error.push(msg)
         }
     }
@@ -108,6 +104,20 @@ export default class FormHelper {
         })
     }
 
+     clearHtml() {
+       
+        this.data.forEach(el => {
+            for (let post of el) {
+                if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+                    continue
+                }
+               post.value = ""
+
+
+            }
+        })
+    }
+
     /**
      *
      * @param {input is the id of the input/ this is an array [as, it, it]} input
@@ -120,7 +130,7 @@ export default class FormHelper {
                 i < input.length;
                 i++) {
                 const theData = this.id(`${input[i]}_id`);
-                if (theData == "") throw "empty dataInput";
+                if (theData == "") throw new Error("empty dataInput");
                 const max = maxi[i];
                 const error = this.id(`${input[i]}_error`);
                 if (theData)

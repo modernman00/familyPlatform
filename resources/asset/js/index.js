@@ -1,5 +1,5 @@
 "use strict";
-import {log, showError} from "./components/global"
+import {qSel, showError} from "./components/global"
 
 
 // const splitCode = (path) => {
@@ -13,10 +13,9 @@ import {log, showError} from "./components/global"
 // }
 
 
-
-
 if (window.location.pathname === '/register') {
-
+    qSel('.signUp').style.display ="none"
+   
     import(
         /* webpackChunkName: 'codeSplit/register' */
         /* webpackPrefetch: true */
@@ -26,7 +25,7 @@ if (window.location.pathname === '/register') {
         .catch((err) => showError(err))
 
 } else if (window.location.pathname === '/allMembers') {
-    log("it worked allMembers")
+   
     import(
         /* webpackChunkName: 'codeSplit/all_members' */
         /* webpackPrefetch: true */
@@ -35,7 +34,7 @@ if (window.location.pathname === '/register') {
         .then((module) => module.default)
         .catch((err) => showError(err))
 } else if (window.location.pathname === '/login') {
-    log("it worked login")
+     qSel('.login').style.display ="none"
     import(
         /* webpackChunkName: 'codeSplit/login' */
         /* webpackPrefetch: true */

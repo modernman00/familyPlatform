@@ -16,26 +16,25 @@ use App\classes\{
  */
 function checkPassword($inputData, $databaseData)
 {
-  
-        $textPassword = $inputData['password'];
-        $dbPassword = $databaseData['password'];
-        $id = $databaseData['id'];
-        $table = "account";
-        $options = array('cost' => 12);
 
-        if (password_verify($textPassword, $dbPassword) === false) {
-            $error = 'There is a problem with your credential!';
-            echo json_encode(['error' => $error]);
-            throw new Exception("<h1>There is a problem with your login credential!</h1>");
-        }
-        if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
-            // If so, create a new hash, and replace the old one
-            $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
-            $data = ['password' => $newHash, 'id' => $id];
-            $passUpdate = new AllFunctionalities();
-            return $passUpdate->updateMultiplePOST($data, $table, 'id');
-        }
-    
+    $textPassword = $inputData['password'];
+    $dbPassword = $databaseData['password'];
+    $id = $databaseData['id'];
+    $table = "account";
+    $options = array('cost' => 12);
+
+    if (password_verify($textPassword, $dbPassword) === false) {
+        $error = 'There is a problem with your credential!';
+        echo json_encode(['error' => $error]);
+        throw new Exception("<h1>There is a problem with your login credential!</h1>");
+    }
+    if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
+        // If so, create a new hash, and replace the old one
+        $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
+        $data = ['password' => $newHash, 'id' => $id];
+        $passUpdate = new AllFunctionalities();
+        return $passUpdate->updateMultiplePOST($data, $table, 'id');
+    }
 }
 
 
@@ -67,13 +66,16 @@ function useEmailToFindData($inputData): array
  */
 function getSanitisedInputData($inputData, $minMaxData = NULL)
 {
-    // printArr($inputData);
     $sanitise = new Sanitise($inputData, $minMaxData);
     $sanitisedData = $sanitise->getData();
-    //printArr($sanitisedData);
     $error = $sanitise->error;
     if ($error) {
-        throw new Exception('<h1><b>There is a problem with your input.</b></h1><br>' . implode(', <br>', $error));
+        http_response_code(406); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
+        echo json_encode($theError);
+        exit;
+        // throw new Exception('<h1><b>There is a problem with your input.</b></h1><br>' . implode('; <br>', $error));
     }
 
     return $sanitisedData;

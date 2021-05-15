@@ -6,31 +6,25 @@ use App\classes\Db;
 
 class Transaction extends Db
 {
-    private $conn;
 
-    public function __construct()
+    public static function beginTransaction()
     {
-        $this->conn = $this->connect();
+       return self::connect2()->beginTransaction();
     }
 
-    public function beginTransaction()
+    public static function lastId()
     {
-       return $this->conn->beginTransaction();
+        return self::connect2()->lastInsertId();
     }
 
-    public function lastId()
+    public static function commit()
     {
-        return $this->conn->lastInsertId();
+        return self::connect2()->commit();
     }
 
-    public function commit()
+    public static function rollback()
     {
-        return $this->conn->commit();
-    }
-
-    public function rollback()
-    {
-        return $this->conn->rollBack();
+        return self::connect2()->rollBack();
     }
 
 }

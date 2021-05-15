@@ -15,6 +15,11 @@ export const loaderIcon = () => {
   return `<div class="loader"></div>`
 }
 
+export const loaderIconBulma = () => {
+
+  return `<div class="is-loading"></div>`
+}
+
 export const removeDiv = (div_id) => {
   const div = document.getElementById(div_id)
   if (div) {

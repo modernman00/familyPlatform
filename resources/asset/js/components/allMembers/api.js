@@ -45,8 +45,6 @@ axios.get('http://olaogun.dev.com/allMembers3', config)
 
         loaderIcon()
 
-        log(response.data)
-
         // add loader
 
         id('allMembers').classList.add('loader')

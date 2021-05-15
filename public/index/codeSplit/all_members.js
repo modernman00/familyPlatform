@@ -35,8 +35,7 @@ var renderHtml = function renderHtml(el) {
 };
 
 axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMembers3', config).then(function (response) {
-  (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.loaderIcon)();
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data); // add loader
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.loaderIcon)(); // add loader
 
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
@@ -123,6 +122,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
 /* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
 /* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
 /* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
@@ -154,6 +154,9 @@ var loaderIconBootstrap = function loaderIconBootstrap() {
 };
 var loaderIcon = function loaderIcon() {
   return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
 };
 var removeDiv = function removeDiv(div_id) {
   var div = document.getElementById(div_id);
