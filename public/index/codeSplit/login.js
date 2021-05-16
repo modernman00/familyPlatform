@@ -11,6 +11,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
 /* harmony export */ });
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -24,6 +25,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
 
 var FormHelper = /*#__PURE__*/function () {
   function FormHelper(data) {
@@ -86,6 +89,14 @@ var FormHelper = /*#__PURE__*/function () {
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {
               _this.result = 1;
+            }
+
+            var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
+
+            if (checkRegex === false) {
+              _this.error.push("There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question"));
+
+              errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
             }
           }
         } catch (err) {
@@ -340,6 +351,324 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/dataToCheck.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/dataToCheck.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
+/* harmony export */   "Login": () => (/* binding */ Login)
+/* harmony export */ });
+
+
+var dataToCheckRegister = {
+  maxLength: {
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+  },
+  // duplicate: {
+  // 	email: 'email',
+  // 	username: 'username'
+  // },
+  password: {
+    pwd: 'password',
+    pwd2: 'confirm_password'
+  },
+  familyCheck: {
+    father: ["fatherYes", "fatherNo"],
+    mother: ["motherYes", "motherNo"],
+    spouse: ["spouseYes", "spouseNo"]
+  }
+};
+var Login = {
+  maxLength: {
+    id: ['email', 'password'],
+    max: [35, 35]
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
+/* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
+/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
+/* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
+/* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "matchRegex": () => (/* binding */ matchRegex)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  newDiv.setAttribute('class', "field ".concat(setClass));
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  return parentDiv.appendChild(newDiv);
+};
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase(); // you can also use AJAX requests instead of preloaded data
+
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return _toConsumableArray(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[a-zA-Z0-9.@]+/g;
+      var result = data.match(regex);
+      if (result.length > 1) return false;
+    }
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/http.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/helper/http.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "realTimeServer": () => (/* binding */ realTimeServer),
+/* harmony export */   "postFormData": () => (/* binding */ postFormData)
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/index.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios_retry__WEBPACK_IMPORTED_MODULE_3__);
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+
+axios_retry__WEBPACK_IMPORTED_MODULE_3___default()((axios__WEBPACK_IMPORTED_MODULE_2___default()), {
+  retries: 3
+});
+var realTimeServer = function realTimeServer(input, url, outputId) {
+  var theInput, inputVal, output;
+  theInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(input);
+  output = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(outputId);
+  theInput.addEventListener('keyup', function () {
+    inputVal = theInput.value;
+
+    if (inputVal == 0) {
+      output.innerHTML = "";
+      return;
+    } else {
+      var xmlhttp = new XMLHttpRequest();
+
+      xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          output.innerHTML = this.responseText;
+        }
+      };
+
+      xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+      xmlhttp.send();
+    }
+  });
+};
+/**
+ * 
+ * @param {the url to post the data to} url 
+ * @param {* the id or class of the form} formElement 
+ * @param {* the redirect to another page /code or /admin/register} redirect 
+ NOTICE:::Make sure you set the notification id as the formId_notification
+ */
+
+var postFormData = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(url, formId) {
+    var redirect,
+        notificationId,
+        processFormDataAction,
+        form,
+        formEntries,
+        options,
+        _args = arguments;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : '/';
+            notificationId = "".concat(formId, "_notification"); // the notification function
+
+            processFormDataAction = function processFormDataAction(addClass, data) {
+              // display the success information for 10sec
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(notificationId).style.display = "block"; // unblock the notification
+
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(notificationId).classList.add(addClass); // add the success class
+
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = data; // error element
+
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+            }; // extract the form entries
+
+
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formId);
+            formEntries = new FormData(form);
+            formEntries["delete"]('submit');
+            formEntries["delete"]('checkbox_id');
+            options = {
+              xsrfCookieName: 'XSRF-TOKEN',
+              xsrfHeaderName: 'X-XSRF-TOKEN'
+            }; // AXIOS POST FUNCTIONALITY
+
+            _context.next = 10;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default().post(url, formEntries, options).then(function (response) {
+              processFormDataAction('is-success', response.data);
+              setTimeout(function () {
+                window.location.replace(redirect);
+              }, 1000); // it clears all the contents
+
+              // it clears all the contents
+              formData.clearHtml(); // set timer to redirect to the homepage
+            })["catch"](function (error) {
+              if (error.response) {
+                console.log("IT WORK", response);
+                processFormDataAction('is-danger', error.response.data);
+              }
+            });
+
+          case 10:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function postFormData(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/security.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/helper/security.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "showPassword": () => (/* binding */ showPassword)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+var showPassword = function showPassword(inputId) {
+  var y = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputId);
+
+  if (y.type === "password") {
+    y.type = "text";
+  } else {
+    y.type = "password";
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/login/index.js":
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/login/index.js ***!
@@ -363,95 +692,64 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../register/dataToCheck */ "./resources/asset/js/components/register/dataToCheck.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
 
 
 
 
 
-var formInput = document.querySelectorAll('.login');
+
+
+var formInput = document.querySelectorAll('.loginNow');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
 
 var process = function process() {
-  // clear error from the form
+  //clear error from the form
   formData.clearError(); // set the maxlength, check the length of the value, raise error
 
-  formData.realTimeCheckLen(_register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.id, _register_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckLogin.maxLength.max);
+  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.max);
 };
 
 process();
 
-var processFormSubmission = function processFormSubmission() {
+var LoginSubmission = function LoginSubmission(e) {
   try {
-    console.log('it worked');
-    formData.emailVal(); // sanitise email
+    e.preventDefault();
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
 
-    formData.massValidate(); // validate and sanitise data
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
 
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(formData.error);
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)("it worked");
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
 
-    if (formData.error.length <= 0) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').type = 'submit'; //console.log('submitted')
+      formData.emailVal(); // sanitise email
+
+      formData.massValidate(); // validate and sanitise data
+
+      if (formData.error.length == 0) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
+
+        (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code"); //id('submit').type = 'submit'
+        //console.log('submitted')
+      } else {
+        alert('The form cannot be submitted. Please check the errors');
+        process();
+      }
     } else {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(formData.error);
-      alert('The form cannot be submitted. Please check the errors');
-      process();
+      alert('To continue, you need to agree to the our privacy policy');
     }
-  } catch (e) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(e);
+  } catch (err) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }
 };
 
-var testAlert = function testAlert() {
-  return alert('it worked login');
-};
-
-document.querySelector('.button').addEventListener('click', testAlert);
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/register/dataToCheck.js":
-/*!***************************************************************!*\
-  !*** ./resources/asset/js/components/register/dataToCheck.js ***!
-  \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
-/* harmony export */   "dataToCheckLogin": () => (/* binding */ dataToCheckLogin)
-/* harmony export */ });
-
-
-var dataToCheckRegister = {
-  maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
-  },
-  // duplicate: {
-  // 	email: 'email',
-  // 	username: 'username'
-  // },
-  password: {
-    pwd: 'password',
-    pwd2: 'confirm_password'
-  },
-  familyCheck: {
-    father: ["fatherYes", "fatherNo"],
-    mother: ["motherYes", "motherNo"],
-    spouse: ["spouseYes", "spouseNo"]
-  }
-};
-var dataToCheckLogin = {
-  maxLength: {
-    id: ['email', 'password'],
-    max: [20, 15],
-    min: [5, 2]
-  }
-};
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', LoginSubmission);
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("showPassword_id").addEventListener('click', function () {
+  return (0,_helper_security__WEBPACK_IMPORTED_MODULE_4__.showPassword)('password_id');
+});
 
 /***/ })
 

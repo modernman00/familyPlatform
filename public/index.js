@@ -72,18 +72,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/global */ "./resources/asset/js/components/global.js");
 
 
- // const splitCode = (path) => {
-//     import(
-//         /* webpackChunkName: 'codeSplit/small_input' */
-//         /* webpackPrefetch: true */
-//         path
-//     )
-//         .then((module) => module.default())
-//         .catch((err) => log("MAD ERROR!! " + err.message))
-// }
+
 
 if (window.location.pathname === '/register') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none";
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
+
   Promise.all(/*! import() | codeSplit/register */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/index */ "./resources/asset/js/components/register/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
@@ -96,13 +89,14 @@ if (window.location.pathname === '/register') {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/login') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none";
-  __webpack_require__.e(/*! import() | codeSplit/login */ "codeSplit/login").then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/index */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
+
+  Promise.all(/*! import() | codeSplit/login */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/index */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
-} // CODE SPLITTING BASED ON ROUTE
+}
 
 /***/ }),
 

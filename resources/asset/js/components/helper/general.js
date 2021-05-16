@@ -58,12 +58,12 @@ export const autoCompleter = (inputId, data) => {
   })
 }
 
-export const distinctValue = (array) => { 
+export const distinctValue = (array) => {
   return [... new Set(array)]
 }
 
 export const checkBox = (subject) => {
-    return `<div class="control"> 
+  return `<div class="control"> 
         <label class="radio">
           <input type="radio" name="send${subject}" value="yes" id=${subject}Yes> Yes 
         </label>
@@ -73,19 +73,27 @@ export const checkBox = (subject) => {
       </div>`;
 }
 
-  export const isChecked = (name, fn)=> {
-    const yesId = (`${name}Yes`)
-    const noId = `${name}No`
-        const checked = () => {
-            if (id(yesId).checked) {
-                alert('check')
-                fn()
-            } else if (id(noId).checked) {
-               alert('check No')
-            }
-        }
-
-        id(yesId).addEventListener('click', checked)
-        id(noId).addEventListener('click', checked)
-
+export const isChecked = (name, fn) => {
+  const yesId = (`${name}Yes`)
+  const noId = `${name}No`
+  const checked = () => {
+    if (id(yesId).checked) {
+      alert('check')
+      fn()
+    } else if (id(noId).checked) {
+      alert('check No')
     }
+  }
+  id(yesId).addEventListener('click', checked)
+  id(noId).addEventListener('click', checked)
+}
+
+export const matchRegex = (data) => {
+  if (data) {
+    if (data != "Not Provided") {
+      const regex = /[a-zA-Z0-9.@]+/g
+      const result = data.match(regex)
+      if (result.length > 1) return false
+    }
+  }
+}

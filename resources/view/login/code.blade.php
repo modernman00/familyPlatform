@@ -3,16 +3,29 @@
 @section('content')
 
 <div class="styleForm" style="margin-top: 4rem;">
-<h3 style="margin-left:20%; margin-right:20%;">Please, enter the CODE to verify your identity</h3>
 
+    <h3 style="margin-left:20%; margin-right:20%;">
+        Please, enter the CODE to verify your identity
+    </h3>
 
-<hr class="my-2">
-<form action="/login/code" method="post" style="margin-left:20%; margin-right:20%;">
-    <div class="form-group">
-        <br>
-        <div class='row'>
+    @isset($error)
+        
 
-            <?php
+            {{ $error }}
+
+    
+
+    @endisset
+
+    <p id="codeError"></p>
+
+    <hr class="my-2">
+    <form action="/login/code" method="post" style="margin-left:20%; margin-right:20%;">
+        <div class="form-group">
+            <br>
+            <div class='row'>
+                
+                <?php
 
                     $formArray = [
                         'code' => 'text',
@@ -24,11 +37,11 @@
                     $form->genForm();
 
                 ?>
-            <br>
+                <br>
 
-        </div>
+            </div>
 
-</form>
+    </form>
 </div>
 
 

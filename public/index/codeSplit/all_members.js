@@ -128,7 +128,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
 /* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
-/* harmony export */   "isChecked": () => (/* binding */ isChecked)
+/* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "matchRegex": () => (/* binding */ matchRegex)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -217,6 +218,15 @@ var isChecked = function isChecked(name, fn) {
 
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[a-zA-Z0-9.@]+/g;
+      var result = data.match(regex);
+      if (result.length > 1) return false;
+    }
+  }
 };
 
 /***/ })

@@ -50,7 +50,7 @@
           <a href="/register" class="button is-primary signUp">
             <strong>Sign up</strong>
           </a>
-          <a href="login" class="button is-info login">
+          <a href="/login" class="button is-info login">
             Log in
           </a>
         </div>

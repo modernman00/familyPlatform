@@ -2,19 +2,8 @@
 import {qSel, showError} from "./components/global"
 
 
-// const splitCode = (path) => {
-//     import(
-//         /* webpackChunkName: 'codeSplit/small_input' */
-//         /* webpackPrefetch: true */
-//         path
-//     )
-//         .then((module) => module.default())
-//         .catch((err) => log("MAD ERROR!! " + err.message))
-// }
-
-
 if (window.location.pathname === '/register') {
-    qSel('.signUp').style.display ="none"
+    qSel('.signUp').style.display ="none" // navbar mgt
    
     import(
         /* webpackChunkName: 'codeSplit/register' */
@@ -33,8 +22,10 @@ if (window.location.pathname === '/register') {
     )
         .then((module) => module.default)
         .catch((err) => showError(err))
+
 } else if (window.location.pathname === '/login') {
-     qSel('.login').style.display ="none"
+     qSel('.login').style.display ="none" // navbar mgt
+
     import(
         /* webpackChunkName: 'codeSplit/login' */
         /* webpackPrefetch: true */
@@ -44,9 +35,6 @@ if (window.location.pathname === '/register') {
         .catch((err) => showError(err))
 }
 
-
-
-// CODE SPLITTING BASED ON ROUTE
 
 
 

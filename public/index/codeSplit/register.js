@@ -11,6 +11,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
 /* harmony export */ });
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -24,6 +25,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
 
 var FormHelper = /*#__PURE__*/function () {
   function FormHelper(data) {
@@ -86,6 +89,14 @@ var FormHelper = /*#__PURE__*/function () {
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {
               _this.result = 1;
+            }
+
+            var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
+
+            if (checkRegex === false) {
+              _this.error.push("There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question"));
+
+              errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
             }
           }
         } catch (err) {
@@ -426,6 +437,48 @@ var postData = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/dataToCheck.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/dataToCheck.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
+/* harmony export */   "Login": () => (/* binding */ Login)
+/* harmony export */ });
+
+
+var dataToCheckRegister = {
+  maxLength: {
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+  },
+  // duplicate: {
+  // 	email: 'email',
+  // 	username: 'username'
+  // },
+  password: {
+    pwd: 'password',
+    pwd2: 'confirm_password'
+  },
+  familyCheck: {
+    father: ["fatherYes", "fatherNo"],
+    mother: ["motherYes", "motherNo"],
+    spouse: ["spouseYes", "spouseNo"]
+  }
+};
+var Login = {
+  maxLength: {
+    id: ['email', 'password'],
+    max: [35, 35]
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/helper/autocomplete.js":
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/helper/autocomplete.js ***!
@@ -584,7 +637,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
 /* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
-/* harmony export */   "isChecked": () => (/* binding */ isChecked)
+/* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "matchRegex": () => (/* binding */ matchRegex)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -673,6 +727,15 @@ var isChecked = function isChecked(name, fn) {
 
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[a-zA-Z0-9.@]+/g;
+      var result = data.match(regex);
+      if (result.length > 1) return false;
+    }
+  }
 };
 
 /***/ }),
@@ -794,49 +857,6 @@ var spouseMobile = function spouseMobile(event) {
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_id').addEventListener('keyup', fatherMobile);
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_id').addEventListener('keyup', motherMobile);
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouseMobile_id').addEventListener('keyup', spouseMobile);
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/register/dataToCheck.js":
-/*!***************************************************************!*\
-  !*** ./resources/asset/js/components/register/dataToCheck.js ***!
-  \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
-/* harmony export */   "dataToCheckLogin": () => (/* binding */ dataToCheckLogin)
-/* harmony export */ });
-
-
-var dataToCheckRegister = {
-  maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
-  },
-  // duplicate: {
-  // 	email: 'email',
-  // 	username: 'username'
-  // },
-  password: {
-    pwd: 'password',
-    pwd2: 'confirm_password'
-  },
-  familyCheck: {
-    father: ["fatherYes", "fatherNo"],
-    mother: ["motherYes", "motherNo"],
-    spouse: ["spouseYes", "spouseNo"]
-  }
-};
-var dataToCheckLogin = {
-  maxLength: {
-    id: ['email', 'password'],
-    max: [20, 15],
-    min: [5, 2]
-  }
-};
 
 /***/ }),
 
@@ -998,7 +1018,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./dataToCheck */ "./resources/asset/js/components/register/dataToCheck.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
 
@@ -1013,8 +1033,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
-var formInput = document.querySelectorAll('.register'); // const formInput2 = id('register')
-
+var formInput = document.querySelectorAll('.register');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__.default(formInputArr);
 

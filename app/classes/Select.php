@@ -96,6 +96,18 @@ class Select extends Db
         }
     }
 
+      public static function selectCountFn2(string $query, array $bind = null): string|array|int
+    {
+        try {
+            $sql = $query;
+            $result = self::connect2()->prepare($sql);
+            $result->execute($bind);
+            return $result->rowCount();
+        } catch (PDOException $e) {
+            returnErrorCode(505, $e);
+        }
+    }
+
     public function selectCountAll($table)
     {
 

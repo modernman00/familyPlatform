@@ -247,7 +247,7 @@ class BuildFormBulma extends AlterTable
                 echo "   <div class='field'>
                         <label class='label'  id=$nameKey><b> $var</b></label>
                         <div class='control has-icons-left has-icons-right'>
-                        <input type='email' id='{$nameKey}_id' placeholder= 'alex@gmail.com' class ='input' name= $nameKey value=$value>
+                        <input type='email' id='{$nameKey}_id' placeholder='alex@gmail.com' class ='input $nameKey' name= $nameKey value=$value>
                         <span class='icon is-small is-left'>
                         <i class='fas fa-envelope'></i>
                         </span>
@@ -262,7 +262,7 @@ class BuildFormBulma extends AlterTable
                 echo "   <div class='field'>
                     <label class='label'  id=$nameKey><b> $var</b></label>
                     <div class='control has-icons-left has-icons-right'>
-                    <input type='password' id='$nameKey' placeholder= 'password' autocomplete='new-password' class ='input' name= $nameKey >
+                    <input type='password' id={$nameKey}_id placeholder= 'password' autocomplete='new-password' class ='input $nameKey' name= $nameKey >
                     <span class='icon is-small is-left'>
                     <i class='fas fa-lock'></i>
                     </span>

@@ -26,12 +26,11 @@ export const dataToCheckRegister = {
 	}
 };
 
-export const dataToCheckLogin = {
+export const Login = {
 
 	maxLength: {
 		id: ['email','password'],
-		max: [20, 15],
-		min: [5, 2]
+		max: [35, 35]
 	},
 
 };

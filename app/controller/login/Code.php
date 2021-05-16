@@ -1,5 +1,6 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\controller\login;
 
@@ -15,58 +16,77 @@ class Code extends Select
     public $email;
     public $next;
     private $memberId;
+    private const TOKEN_SESSION = '2FA_token_ts';
+    private $errorArr = array();
 
     public function show()
     {
-
-        return view('login/code');
+        if ($_SESSION[self::TOKEN_SESSION]) {
+            printArr($_SESSION);
+            return view('login/code');
+        } else {
+            $login = "login";
+            return view('error/notFound', compact('login'));
+        }
     }
 
     public function verify()
     {
         try {
+
             CheckToken::tokenCheck('token', '/login/code');
+
             $code = checkInput($_POST["code"]);
+
             $this->memberId = checkInput($_SESSION['identifyCust']);
 
             // set time limit to use code
-            if ((time() - $_SESSION['2FA_token_ts']) > 10000) {
+            if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 10000) {
+                $this->errorArr[] = "Invalid or expired Token";
                 throw new Exception("Invalid or expired Token", 1);
             }
-            unset($_SESSION['2FA_token_ts']);
+            unset($_SESSION[self::TOKEN_SESSION]); // job done! delete
 
             // check if the code is stored in the database
-            $formCodeQuery = ['selection' => "SELECT_COUNT_TWO", 'table' => 'account', 'identifier1' => 'token', 'identifier2' => 'id', 'bind' => [$code, $this->memberId]];
 
-            $result = Select::combineSelect($formCodeQuery, 'selectCountFn', 'TWO_IDENTIFIERS');
+            $query = Select::formAndMatchQuery(selection:"SELECT_COUNT_TWO", table:'account', identifier1: 'id', identifier2: 'token');
+
+            $result = Select::selectCountFn2($query, [$this->memberId, $code]);
 
             if (!$result) {
-                throw new Exception("CODE NOT RECOGNISED", 1);
+                $this->errorArr[] = "There is a problem - Code";
+                throw new Exception("There is a problem - check the Code", 1);
             }
-            // for normal login redirection
-            if (isset($_SESSION['login'])) {
 
-                $_SESSION['loggedIn'] = true;
-                session_regenerate_id();
-                $_SESSION['memberId'] = $this->memberId;
+            if (count($this->errorArr) == 0) {
 
-                if ($_SESSION['loginType'] = "/login") {
+                // for normal login redirection
+                if (isset($_SESSION['login'])) {
 
-                    unset($_SESSION['login']);
-                    header("Location: /member/ProfilePage");
+                    $_SESSION['loggedIn'] = true;
+                   
+                    $_SESSION['memberId'] = $this->memberId;
 
+                    if ($_SESSION['loginType'] = "/login") {
+                        session_regenerate_id();
+                        unset($_SESSION['login'], $_SESSION['id']);
+                        header("Location: /member/ProfilePage");
+                    } else {
+
+                        header("Location: /admin/dashboard");
+                    }
+                } elseif ($_SESSION['changePW']) {
+
+                    // login if password is forgotten
+                    header('Location: /login/changePW');
+                    unset($_SESSION['changePW']);
                 } else {
-
-                    header("Location: /admin/dashboard");
+                    throw new Exception("You are an alien!");
                 }
-            } elseif ($_SESSION['changePW']) {
-
-                // login if password is forgotten
-                header('Location: /login/changePW');
-                unset($_SESSION['changePW']);
             }
         } catch (\Throwable $th) {
-            showError($th);
+            $error = $th->getMessage();
+            return view("error/genError", compact('error'));
         }
     }
 }

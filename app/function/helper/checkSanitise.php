@@ -24,8 +24,11 @@ function checkPassword($inputData, $databaseData)
     $options = array('cost' => 12);
 
     if (password_verify($textPassword, $dbPassword) === false) {
-        $error = 'There is a problem with your credential!';
-        echo json_encode(['error' => $error]);
+         http_response_code(406); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        // throw new Exception("<h1>We cannot find your email</h1>");
+        // $error = 'There is a problem with your credential!';
+        // echo json_encode($error);
         throw new Exception("<h1>There is a problem with your login credential!</h1>");
     }
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
@@ -51,7 +54,12 @@ function useEmailToFindData($inputData): array
     $data = $select->selectFn(query: $query, bind: [$inputData['email']]);
 
     if (!$data) {
-        throw new Exception("<h1>We cannot find your email</h1>");
+        http_response_code(406); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        // $theError = "We cannot find your email";
+        // echo json_encode($theError);
+        throw new Exception("We cannot find your email");
+        // exit;
     }
     foreach ($data as $data);
     return $data;
@@ -100,12 +108,14 @@ function generateUpdateTableWithToken($customerId)
 {
     //5. generate code
     $token = generateAuthToken();
-    $_SESSION['2FA_token_ts'] = time();
+
     //6.  update login account table with the code
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if (!$updateCodeToCustomer) {
         throw new Exception("<h1>Error : Could not update token</h1>E", 1);
     }
+    $_SESSION['2FA_token_ts'] = time();
+    $_SESSION['identifyCust'] = $customerId;
     return $token;
 }

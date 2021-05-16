@@ -75,3 +75,17 @@ function checkInputEmail($data): string
     return $data;
 }
 
+function returnErrorCode(int $errCode, $errObj)
+{
+    http_response_code($errCode);
+    echo http_response_code();
+    return showError($errObj);
+}
+
+function returnSuccessCode($msg)
+{
+    http_response_code(200);
+    echo http_response_code();
+    echo json_encode($msg);
+}
+

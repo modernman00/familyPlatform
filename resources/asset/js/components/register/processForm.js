@@ -1,11 +1,10 @@
 "use strict";
 import FormHelper from '../FormHelper';
 import { id, log, showError } from '../global';
-import { dataToCheckRegister } from './dataToCheck';
+import { dataToCheckRegister } from '../dataToCheck';
 import axios from "axios";
 
 const formInput = document.querySelectorAll('.register');
-// const formInput2 = id('register')
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
@@ -36,7 +35,6 @@ const processFormDataAction = (addClass, resource) => {
 		id('register_notify').classList.add(addClass) // add the success class
 		id('error').innerHTML = resource.data // error element
 		id('loader').classList.remove('loader') // remove loader
-
 }
 
 const processFormData = async (url, formElement) => {

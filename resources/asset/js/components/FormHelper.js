@@ -1,4 +1,6 @@
 'use strict'
+
+import { matchRegex } from "./helper/general"
 export default class FormHelper {
     constructor(data) {
         this.data = data;
@@ -20,53 +22,52 @@ export default class FormHelper {
 
 
     massValidate() {
-			
-       // const reg = /[a-zA-Z0-9./@]/g;
-        this.data.forEach((et) => {
-            for (let post of et) {
+        // const reg = /[a-zA-Z0-9./@]/g;
+        this.data.forEach(et => {
 
+            for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
 
                 // rid it off the submit and token
-                if (post.name == 'submit' || 
-                    post.name == 'token' ||  
-                    post.name =="checkbox_id") {
+                if (post.name == 'submit' ||
+                    post.name == 'token' ||
+                    post.name == "checkbox_id") {
                     continue;
                 }
 
                 // check if there is no value
 
                 let postName = post.name.replace('_', ' ')
-
-                if (postName == "spouseName" || 
-                    postName == "spouseMobile" || 
-                    postName == "spouseEmail" || 
-                    postName == "fatherMobile" || 
+                if (postName == "spouseName" ||
+                    postName == "spouseMobile" ||
+                    postName == "spouseEmail" ||
+                    postName == "fatherMobile" ||
                     postName == "fatherEmail" ||
-                    postName == "motherMobile" || 
+                    postName == "motherMobile" ||
                     postName == "motherEmail"
-                    ) {
+                ) {
                     if (post.value === "") {
                         post.value = "Not Provided"
                     }
                 }
 
                 if (post.value === '' || post.value === 'select') {
-
                     errMsg.innerHTML = `* cannot be left empty`
-                    errMsg.style.color ="red"
+                    errMsg.style.color = "red"
                     this.error.push(`${postName.toUpperCase()} cannot be left empty`)
-
                 } else {
                     this.result = 1
                 }
+                const checkRegex = matchRegex(post.value)
+                if (checkRegex === false) {
+                    this.error.push(`There is a problem with you entry for ${postName.toUpperCase()}'s question`)
+
+                    errMsg.innerHTML = `* There is a problem with you entry for ${postName.toUpperCase()}'s question`
+                }
             }
         })
-
-
     }
-
 
     emailVal() {
         const emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
@@ -74,19 +75,17 @@ export default class FormHelper {
         const email = this.id('email_id').value
         if (email.match(emailExp) === null) {
             this.id('email_error').innerHTML = msg
-            this.id('email_error').style.color ="red"
+            this.id('email_error').style.color = "red"
             this.error.push(msg)
         }
     }
 
     clearError() {
         this.error = [] // empty the array 
-
         this.data.forEach(el => {
             for (let post of el) {
                 if (post.id == 'submit' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
                     continue
-
                 }
 
                 if (post.value != 'select') {
@@ -98,20 +97,18 @@ export default class FormHelper {
                         this.id(`${post.name}_error`).innerHTML = ''
                     })
                 }
-
-
             }
         })
     }
 
-     clearHtml() {
-       
+    clearHtml() {
+
         this.data.forEach(el => {
             for (let post of el) {
                 if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
                     continue
                 }
-               post.value = ""
+                post.value = ""
 
 
             }

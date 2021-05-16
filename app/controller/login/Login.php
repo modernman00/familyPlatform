@@ -56,7 +56,7 @@ class Login extends Select
             if ($data) {
 
                 // check password 
-                checkPassword(inputData:$sanitisedData, databaseData:$data);
+                checkPassword(inputData: $sanitisedData, databaseData: $data);
 
                 //4. control for login
                 $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
@@ -67,6 +67,12 @@ class Login extends Select
                 } else if ($detectIfAdminOrCustomer === self::LOGIN) {
                     $this->customerLogin($data);
                 }
+
+                http_response_code(200); // sets the response to 406
+                echo http_response_code(); // echo the new response code
+                // throw new Exception("<h1>We cannot find your email</h1>");
+                $successMsg = "Credentials validated";
+                echo json_encode($successMsg);
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -81,18 +87,30 @@ class Login extends Select
         $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
+            http_response_code(406); // sets the response to 406
+            echo http_response_code(); // echo the new response code
+            // throw new Exception("<h1>We cannot find your email</h1>");
+            // $theError = "We do not recognise your account";
+            // echo json_encode($theError);
+
             throw new Exception("We do not recognise your account", 1);
         }
 
-        if (generateSendTokenEmail($data)) {
+        generateSendTokenEmail($data);
+        $_SESSION['login'] = 1;
+        session_regenerate_id();
 
-            $_SESSION['identifyCust'] = $data['id'];
-            $_SESSION['login'] = 1;
 
-            session_regenerate_id();
+        
 
-            header('Location: /login/code');
-        }
+
+
+        // returnSuccessCode("Credentials Validated");
+
+
+
+        // header('Location: /login/code');
+
     }
 
     private function adminLogin($sanitisedData)
@@ -104,6 +122,11 @@ class Login extends Select
         $outcome = $this->selectFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
 
         if (!$outcome) {
+            http_response_code(406); // sets the response to 406
+            echo http_response_code(); // echo the new response code
+            // throw new Exception("<h1>We cannot find your email</h1>");
+            // $theError = "Your input to code is not recognised";
+            // echo json_encode($theError);
             throw new Exception("Your input to code is not recognised");
         }
 
