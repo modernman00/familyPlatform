@@ -82,6 +82,12 @@ document.getElementById('profilePics').addEventListener('click', ()=> {
   document.getElementById('formProfilePics').style.display ="block"
 })
 
+
+
+
+
+
+
 </script>
 
 

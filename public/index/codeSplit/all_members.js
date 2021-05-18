@@ -27,16 +27,16 @@ var config = {
 var renderHtml = function renderHtml(el) {
   if (el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
-    var html = "<div class=\"card col-sm-4\" id=".concat(el.id, ">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat(el.date_created, " ago </p>\n                    <a href=\"/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n            </div>");
+    var html = "<div class=\"card col-sm-4\" id=".concat(el.id, ">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat(el.date_created, " ago </p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n            </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
   }
 };
 
-axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMembers3', config).then(function (response) {
-  (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.loaderIcon)(); // add loader
-
+axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMembers/processApiData', config).then(function (response) {
+  // loaderIcon()
+  // add loader
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
   response.data.map(function (el) {

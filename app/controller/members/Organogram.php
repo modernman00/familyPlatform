@@ -15,8 +15,6 @@ class Organogram extends SingleCustomerData
     {
         $id =  checkInput($_GET['id']);
 
-       
-
          $table = ['personal', 'profile_pics', 'otherFamily'];
 
          $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');
@@ -25,12 +23,7 @@ class Organogram extends SingleCustomerData
         $kidQuery = Select::formAndMatchQuery('SELECT_ONE', 'kids', 'id');
          $getKids = Select::selectFn2($kidQuery, [$id]);
 
-        // printArr($getKids);
-
-
         $data = $this->getCustomerData($id, $table);
-        //  printArr($data);
-    
         
         view('member/organogram', compact('data','getSibling', 'getKids'));
     }

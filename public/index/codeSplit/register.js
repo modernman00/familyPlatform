@@ -389,7 +389,7 @@ var getAllData = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             _context.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().get('http://olaogun.dev.com/allMembers3', config)["catch"](function (err) {
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().get('http://olaogun.dev.com/allMembers/processApiData', config)["catch"](function (err) {
               return err.message;
             });
 

@@ -56,16 +56,6 @@
   {{--  COMMENT BUTTON  --}}
   <button type="button" class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>
 
-  {{-- SHOW COMMENT --}}
-  
-  @foreach ($comment as $comment)
-    @if ($allData['post_no'] === $comment['post_no'] )
-      @include('member/includes/comment')
-    @endif
-  @endforeach
-
-  <br>
-
   {{--  PROCESS COMMENT $_POST  --}}
 
   <form action="/postCommentProfile" method="post" id="postCommentProfile{{ $allData['post_no'] }}">
@@ -84,4 +74,16 @@
   </form>
 
   <br><br>
+
+  {{-- SHOW COMMENT --}}
+  
+  @foreach ($comment as $comment)
+    @if ($allData['post_no'] === $comment['post_no'] )
+      @include('member/includes/comment')
+    @endif
+  @endforeach
+
+  <br>
+
+  
 </div>

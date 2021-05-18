@@ -19,13 +19,13 @@ class AllMembersController extends AllMembersData
         try {
 
 
-            view('member/allMembers3', compact('result'));
+            view('member/homePage', compact('result'));
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-    public function index3()
+    public function processApiData()
     {
         try {
             $result = $this->getAllMembers();
@@ -39,22 +39,22 @@ class AllMembersController extends AllMembersData
 
 
 
-    public function index2()
-    {
-        try {
-            $result = $this->getAllMembers();
+    // public function index2()
+    // {
+    //     try {
+    //         $result = $this->getAllMembers();
 
-            view('member/allMembers', compact('result'));
-        } catch (\Throwable $th) {
-            showError($th);
-        }
-    }
+    //         view('member/allMembers', compact('result'));
+    //     } catch (\Throwable $th) {
+    //         showError($th);
+    //     }
+    // }
 
     public function setProfile()
     {
         $id = checkInput($_GET['id']);
         $_SESSION['id'] = $id;
-        header("Location: /getProfile");
+        header("Location: /allMembers/getProfile");
     }
 
     public function getProfile()
@@ -75,6 +75,6 @@ class AllMembersController extends AllMembersData
 
 
 
-        view('member/personalProfile', compact('data', 'pictures'));
+        view('member/getProfile', compact('data', 'pictures'));
     }
 }

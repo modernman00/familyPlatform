@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <!-- Bootstrap CSS -->
+<!-- Bootstrap CSS -->
  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
 
  <script src="https://use.fontawesome.com/1dca29b934.js"></script>
@@ -41,11 +41,7 @@
           <a class="nav-link" href="/member/ProfilePage">My Page</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/allMembers">All</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="/organogram">Family-Tree</a>
+          <a class="nav-link" href="/allMembers">All Members</a>
         </li>
       </ul>
 

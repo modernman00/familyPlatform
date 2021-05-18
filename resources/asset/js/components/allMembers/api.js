@@ -25,7 +25,7 @@ const renderHtml = (el) => {
                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
                     <br> <b>Contact:</b>  ${el.email} | ${el.mobile} 
                     <br> <b>Date joined:</b> ${el.date_created} ago </p>
-                    <a href="/setProfile?id=${el.id}" class="btn btn-primary stretched-link">See Profile</a>
+                    <a href="/allMembers/setProfile?id=${el.id}" class="btn btn-primary stretched-link">See Profile</a>
                 </div>
             </div>`
 
@@ -40,10 +40,10 @@ const renderHtml = (el) => {
 }
 
 
-axios.get('http://olaogun.dev.com/allMembers3', config)
+axios.get('http://olaogun.dev.com/allMembers/processApiData', config)
     .then(function (response) {
 
-        loaderIcon()
+        // loaderIcon()
 
         // add loader
 
