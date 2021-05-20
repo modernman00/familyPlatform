@@ -14,4 +14,8 @@ $router->map('POST', '/member/createEvent', 'App\controller\members\Event@submit
 
 $router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');
 
+$router->map('GET', '/profileCard/getLikes', 'App\controller\members\PostCard@likeFunction', 'likeCounter');
+
+// $router->map('GET', '/member/profileCard/getComments', 'App\model\Post@likeFunction', 'likeCounter');
+
 

@@ -58,7 +58,13 @@ class ProfilePage extends ProcessImg
 
     function index()
     {
-        try {;
+        if(!$_SESSION['loggedIn']){
+            http_response_code(401);
+            echo http_response_code();
+            header("location: /login");
+        }
+
+        try {
             $_SESSION['id'] = $this->id;
             $_SESSION['fName'] = $this->memberData['firstName'];
             $_SESSION['lName'] = $this->memberData['lastName'];
@@ -88,9 +94,10 @@ class ProfilePage extends ProcessImg
             $sanitise = new Sanitise($_POST);
             $getSanitisePost = $sanitise->getData();
 
+            // var_dump($getSanitisePost);
+
             // check if there are images in the post
             if ($_FILES) {
-
 
                 if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
@@ -105,7 +112,6 @@ class ProfilePage extends ProcessImg
                 }
             }
 
-
             // get the other post variables id, fullname, time of post
             $getSanitisePost['id'] = $_SESSION['id'];
             $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
@@ -119,9 +125,8 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getPost = $this->processPostData();
-            $insertFile = new Insert();
-            $insertFile->submitForm('post', $getPost);
-            header(self::REDIRECT);
+            Insert::submitForm2('post', $getPost);
+           header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -147,11 +152,11 @@ class ProfilePage extends ProcessImg
     {
         try {
         
-            $getPost = $this->processPostData();
-            $insertFile = new Insert();
-            $insertFile->submitForm('comment', $getPost);
-            header(self::REDIRECT);
+            $getComment = $this->processPostData();
+            Insert::submitForm2('comment', $getComment);
+           // header(self::REDIRECT);
         } catch (\Throwable $th) {
+            returnErrorCode(401, $th);
             showError($th);
         }
     }

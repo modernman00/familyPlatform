@@ -523,7 +523,8 @@ var matchRegex = function matchRegex(data) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "realTimeServer": () => (/* binding */ realTimeServer),
-/* harmony export */   "postFormData": () => (/* binding */ postFormData)
+/* harmony export */   "postFormData": () => (/* binding */ postFormData),
+/* harmony export */   "getApiData": () => (/* binding */ getApiData)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
@@ -604,7 +605,8 @@ var postFormData = /*#__PURE__*/function () {
             }; // extract the form entries
 
 
-            form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formId);
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formId); // log("Form "+ form)
+
             formEntries = new FormData(form);
             formEntries["delete"]('submit');
             formEntries["delete"]('checkbox_id');
@@ -624,7 +626,6 @@ var postFormData = /*#__PURE__*/function () {
               formData.clearHtml(); // set timer to redirect to the homepage
             })["catch"](function (error) {
               if (error.response) {
-                console.log("IT WORK", response);
                 processFormDataAction('is-danger', error.response.data);
               }
             });
@@ -639,6 +640,44 @@ var postFormData = /*#__PURE__*/function () {
 
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
+  };
+}();
+/**
+ * 
+ * @param { the url you want to get} URL 
+ * @returns 
+ */
+
+var getApiData = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
+    var config;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            config = {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            };
+            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (res) {
+              return res.data;
+            })["catch"](function (err) {
+              return err.response.data;
+            }));
+
+          case 2:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function getApiData(_x3) {
+    return _ref2.apply(this, arguments);
   };
 }();
 

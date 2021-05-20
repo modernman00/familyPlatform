@@ -4,6 +4,7 @@
     "/index/codeSplit/register.js": "/index/codeSplit/register.js",
     "/index/codeSplit/all_members.js": "/index/codeSplit/all_members.js",
     "/index/codeSplit/login.js": "/index/codeSplit/login.js",
+    "/index/codeSplit/profilePage.js": "/index/codeSplit/profilePage.js",
     "/style.css": "/style.css",
     "/vendor.js": "/vendor.js"
 }

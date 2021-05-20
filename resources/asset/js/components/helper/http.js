@@ -46,9 +46,10 @@ export const postFormData = async (url, formId, redirect = '/') => {
         id('error').innerHTML = data // error element
         id('loader').classList.remove('loader') // remove loader
     }
-
+   
     // extract the form entries
     const form = id(formId)
+    // log("Form "+ form)
     let formEntries = new FormData(form)
     formEntries.delete('submit')
     formEntries.delete('checkbox_id')
@@ -59,10 +60,7 @@ export const postFormData = async (url, formId, redirect = '/') => {
     }
     // AXIOS POST FUNCTIONALITY
     await axios.post(url, formEntries, options).then(response => {
-      
-
         processFormDataAction('is-success', response.data)
-
            setTimeout(() => {
             window.location.replace(redirect)
         }, 1000)
@@ -74,11 +72,31 @@ export const postFormData = async (url, formId, redirect = '/') => {
     }
     ).catch(error => {
             if(error.response) {
-                  console.log("IT WORK", response)
                 processFormDataAction('is-danger', error.response.data)
             }
         
 
     })
 
+}
+
+/**
+ * 
+ * @param { the url you want to get} URL 
+ * @returns 
+ */
+
+export const getApiData = async (URL) => {
+    const config = {
+    headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    },
+}
+    return axios.get(URL, config)
+    .then(res => res.data)
+    .catch(err => err.response.data)
+
+    
 }

@@ -8,17 +8,15 @@ if (window.location.pathname === '/register') {
     import(
         /* webpackChunkName: 'codeSplit/register' */
         /* webpackPrefetch: true */
-        './components/register/index'
-    )
-        .then((module) => module.default)
-        .catch((err) => showError(err))
+        './components/register/'
+    ).then((module) => module.default).catch((err) => showError(err))
 
 } else if (window.location.pathname === '/allMembers') {
    
     import(
         /* webpackChunkName: 'codeSplit/all_members' */
         /* webpackPrefetch: true */
-        './components/allMembers/index'
+        './components/allMembers/'
     )
         .then((module) => module.default)
         .catch((err) => showError(err))
@@ -29,7 +27,18 @@ if (window.location.pathname === '/register') {
     import(
         /* webpackChunkName: 'codeSplit/login' */
         /* webpackPrefetch: true */
-        './components/login/index'
+        './components/login/'
+    )
+        .then((module) => module.default)
+        .catch((err) => showError(err))
+
+} else if (window.location.pathname === '/member/ProfilePage') {
+    // qSel('.login').style.display ="none" // navbar mgt
+
+    import(
+        /* webpackChunkName: 'codeSplit/profilePage' */
+        /* webpackPrefetch: true */
+        './components/profilePage/'
     )
         .then((module) => module.default)
         .catch((err) => showError(err))

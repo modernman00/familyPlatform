@@ -18,6 +18,12 @@
     h5 {
         font-family: "Raleway", sans-serif
     }
+
+    .likeCounter{
+  padding: 10px;
+  margin: 12px;
+  color: red;
+}
 </style>
 
 <body class="w3-light-grey">
@@ -108,6 +114,10 @@ function w3_close() {
   overlayBg.style.display = "none";
 }
     </script>
+
+    <script src="/manifest.js"></script>
+     <script src="vendor/vendor.js"></script>
+      <script src="/index.js"></script>
 
 </body>
 

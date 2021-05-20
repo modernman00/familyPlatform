@@ -40,26 +40,6 @@
 
 {{-- POST MODAL --}}
 <script>
-  try {
-    const showModal = ()=> {
-        return document.getElementById('id01').style.display = 'block'
-    }
-    document.getElementById('postMsg').addEventListener('click', showModal)
-
-    // CREATE EVENT
-
-       const showEvent = () => {
-        return document.getElementById('id_event_modal').style.display = 'block'
-
-    }
-
-    document.getElementById('createEvent').addEventListener('click', showEvent)
-
-
-
-} catch (e) {
-    console.log(e.message)
-}
 
 
 
@@ -74,13 +54,12 @@ const processComment = (el) => {
       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
+
+  const postId = @json($allData['post_no'])
+
 // checkTest.map(el => {
 //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
 // })
-
-document.getElementById('profilePics').addEventListener('click', ()=> {
-  document.getElementById('formProfilePics').style.display ="block"
-})
 
 
 
