@@ -18,3 +18,4 @@ export const showError = (e) => {
   console.log(e.columnNumber)          // 2
   console.log(e.stack)
 }
+

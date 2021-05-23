@@ -8,19 +8,10 @@
         Please, enter the CODE to verify your identity
     </h3>
 
-    @isset($error)
-        
-
-            {{ $error }}
-
-    
-
-    @endisset
-
-    <p id="codeError"></p>
+    {{-- <p id="codeError"></p> --}}
 
     <hr class="my-2">
-    <form action="/login/code" method="post" style="margin-left:20%; margin-right:20%;">
+    <form action="/login/code" method="post" id="codeError" style="margin-left:20%; margin-right:20%;">
         <div class="form-group">
             <br>
             <div class='row'>
@@ -28,6 +19,7 @@
                 <?php
 
                     $formArray = [
+                        "codeError_notification"=> "showError",
                         'code' => 'text',
                         'token' => 'token',
                         'button' => 'submit'

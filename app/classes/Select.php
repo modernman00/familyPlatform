@@ -10,7 +10,7 @@ class Select extends Db
     /**
      * Undocumented function
      *
-     * @param [type] $selection - the selection match(SELECT_OR, SELECT_AND, SELECT_ALL, SELECT_ONE, SELECT_GREATER, SELECT_GREATER_EQUAL, SELECT_COUNT_TWO, SELECT_COUNT_ONE, SELECT_COUNT_ALL, SELECT_DISTINCT, SELECT_AVERAGE, SELECT_AVERAGE_ALL, SELECT_SUM_ALL)
+     * @param [type] $selection - the selection match(SELECT_OR, SELECT_AND, SELECT_ALL, SELECT_COL_ID, SELECT_ONE, SELECT_GREATER, SELECT_GREATER_EQUAL, SELECT_COUNT_TWO, SELECT_COUNT_ONE, SELECT_COL, SELECT_COUNT_ALL, SELECT_DISTINCT, SELECT_AVERAGE, SELECT_AVERAGE_ALL, SELECT_SUM_ALL)
      * @param [type] $table
      * @param [type] $identifier1 (id) - where id = ?
      * @param [type] $identifier2 (email) - where email = ?
@@ -19,7 +19,7 @@ class Select extends Db
      *@param [type] $limit (example) LIMIT 5; use if you want order
      * @return string
      */
-    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $orderBy = null, $limit = null)
+    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $column2 = null, $orderBy = null, $limit = null)
     {
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
@@ -31,6 +31,7 @@ class Select extends Db
             'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_COL' => "SELECT $column FROM $table $orderBy $limit",
             'SELECT_COL_ID' => "SELECT $column FROM $table WHERE $identifier1 = ? $orderBy $limit",
+            'SELECT_TWO_COLS_ID' => "SELECT $column, $column2 FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_GREATER' => "SELECT * FROM $table WHERE $identifier1 > ? $orderBy $limit",
             'SELECT_GREATER_EQUAL' => "SELECT * FROM $table WHERE $identifier1 > ? OR $identifier2 = ? $orderBy $limit",
             'SELECT_COUNT_TWO' => "SELECT * FROM $table WHERE $identifier1 = ? AND $identifier2 = ?",

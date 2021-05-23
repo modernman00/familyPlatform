@@ -34,48 +34,48 @@ export const realTimeServer = (input, url, outputId) => {
  * @param {* the redirect to another page /code or /admin/register} redirect 
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
-export const postFormData = async (url, formId, redirect = '/') => {
+export const postFormData = async (url, formId, redirect = null) => {
 
     let notificationId = `${formId}_notification`
-
     // the notification function
     const processFormDataAction = (addClass, data) => {
-        // display the success information for 10sec
         id(notificationId).style.display = "block" // unblock the notification
         id(notificationId).classList.add(addClass) // add the success class
         id('error').innerHTML = data // error element
-        id('loader').classList.remove('loader') // remove loader
+        return id('loader').classList.remove('loader') // remove loader
     }
-   
+
     // extract the form entries
     const form = id(formId)
     // log("Form "+ form)
     let formEntries = new FormData(form)
+
     formEntries.delete('submit')
     formEntries.delete('checkbox_id')
+    // formEntries.delete('token')
 
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
-    // AXIOS POST FUNCTIONALITY
-    await axios.post(url, formEntries, options).then(response => {
-        processFormDataAction('is-success', response.data)
-           setTimeout(() => {
-            window.location.replace(redirect)
-        }, 1000)
 
-        // it clears all the contents
-        formData.clearHtml();
+    // AXIOS POST FUNCTIONALITY
+    await axios.post(url, formEntries, options)
+    .then(response => {
+        processFormDataAction('is-success', response.data)
         // set timer to redirect to the homepage
-     
+        if (redirect) {
+            setTimeout(() => {
+                window.location.replace(redirect)
+            }, 2000)
+        }
+        //it clears all the contents
+        formData.clearHtml()
     }
     ).catch(error => {
-            if(error.response) {
-                processFormDataAction('is-danger', error.response.data)
-            }
-        
-
+        if (error.response) {
+            processFormDataAction('is-danger', error.response.data)
+        }
     })
 
 }
@@ -88,15 +88,15 @@ export const postFormData = async (url, formId, redirect = '/') => {
 
 export const getApiData = async (URL) => {
     const config = {
-    headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-}
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+    }
     return axios.get(URL, config)
-    .then(res => res.data)
-    .catch(err => err.response.data)
+        .then(res => res.data)
+        .catch(err => err.response.data)
 
-    
+
 }

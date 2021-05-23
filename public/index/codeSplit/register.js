@@ -638,7 +638,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
 /* harmony export */   "isChecked": () => (/* binding */ isChecked),
-/* harmony export */   "matchRegex": () => (/* binding */ matchRegex)
+/* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
+/* harmony export */   "matchInput": () => (/* binding */ matchInput)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -736,6 +737,28 @@ var matchRegex = function matchRegex(data) {
       if (result.length > 1) return false;
     }
   }
+};
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
 };
 
 /***/ }),

@@ -5,6 +5,10 @@ import { Login } from "../dataToCheck";
 import { postFormData } from "../helper/http"
 import { showPassword } from "../helper/security"
 
+// block the setLoader div
+
+id("setLoader").style.display = "none";
+
 const formInput = document.querySelectorAll('.loginNow');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
@@ -35,6 +39,9 @@ const LoginSubmission = (e) => {
 
 			if (formData.error.length == 0) {
 
+				// display the success information for 10sec
+				id('setLoader').style.display = "block" // unblock the div block at the global.js
+
 				id('loader').classList.add('loader') // start the loader element
 
 				postFormData("/login", "loginNow", "/login/code")
@@ -57,7 +64,7 @@ const LoginSubmission = (e) => {
 }
 
 id('submit').addEventListener('click', LoginSubmission)
-id("showPassword_id").addEventListener('click', ()=>showPassword('password_id'))
+id("showPassword_id").addEventListener('click', () => showPassword('password_id'))
 
 
 

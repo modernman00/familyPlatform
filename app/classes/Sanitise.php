@@ -34,7 +34,7 @@ class Sanitise extends allFunctionalities
             $this->dataCount = count($this->value);
             // $this->dataLength = $data ?? null;  //code...
         } catch (\Throwable $th) {
-            $this->error[] = " Are you human or robot";
+            $this->error[] = " Are you human or robot ". $th->getMessage();
         }
     }
 

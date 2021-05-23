@@ -1,4 +1,46 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/profilePage"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/forgotPwd"],{
+
+/***/ "./resources/asset/js/components/forgotPwd/index.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/forgotPwd/index.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
+
+
+
+
+ // block the setLoader div
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("setLoader").style.display = "none";
+
+var forgotPasswordSubmission = function forgotPasswordSubmission(e) {
+  try {
+    e.preventDefault();
+    var email = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_id').value; // just in case there was an earlier error notification - remove it
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('forgotPassword_notification').classList.remove('is-danger');
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = "";
+
+    if (!(0,_helper_security__WEBPACK_IMPORTED_MODULE_2__.emailVal)(email)) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("setLoader").style.display = "block";
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader');
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/forgot", "forgotPassword");
+      window.location.replace("/login/code");
+    }
+  } catch (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
+  }
+};
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submit').addEventListener('click', forgotPasswordSubmission);
+
+/***/ }),
 
 /***/ "./resources/asset/js/components/helper/http.js":
 /*!******************************************************!*\
@@ -175,145 +217,47 @@ var getApiData = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/comment.js":
-/*!**************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/comment.js ***!
-  \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-
-
-
-
-
-
-try {
-  (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getApiData)();
-  var newLikeCounterVal = 0; // CLICK EVENT get the comment and like button from the document
-
-  document.onclick = function (e) {
-    var elementId = e.target.id;
-    var postId = e.target.name; // const eClass = e.target
-    // log(eClass)
-
-    if (elementId.includes("likeButton")) {
-      // replace button with Counter to get the span id 
-      var likeCounterId = elementId.replace('Button', 'Counter');
-      var likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(likeCounterId).innerHTML; // get the post like using the post id
-
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal)); // add one to the result 
-
-      newLikeCounterVal = parseInt(likeCounterVal) + 1;
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(likeCounterId).innerHTML = newLikeCounterVal; // Make the comment form to appear onclick
-    } else if (elementId.includes("initComment")) {
-      var commentFormId = elementId.replace('init', 'form');
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(commentFormId).style.display = "block"; // Submit function for comment using POST API
-    } else if (elementId.includes("submitComment")) {
-      // get the specific form id
-      e.preventDefault();
-      var idForm = elementId.replace("submit", "form");
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
-      location.reload(); // getApiData()
-    }
-  };
-} catch (e) {
-  showError(e);
-}
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/createPost.js":
-/*!*****************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/createPost.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-
-
-
-
-
-try {
-  // NEW MESSAGE MODAL
-  var showModal = function showModal() {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
-  }; // CREATE EVENT MODAL
-
-
-  var showEvent = function showEvent() {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
-  }; //EVENT ACTION
-
-
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent').addEventListener('click', showEvent);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg').addEventListener('click', showModal); // handle post message
-} catch (e) {
-  console.log(e.message);
-}
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/getPost.js":
-/*!**************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/getPost.js ***!
-  \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-
-
-
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/img.js":
+/***/ "./resources/asset/js/components/helper/security.js":
 /*!**********************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/img.js ***!
+  !*** ./resources/asset/js/components/helper/security.js ***!
   \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "showPassword": () => (/* binding */ showPassword),
+/* harmony export */   "emailVal": () => (/* binding */ emailVal)
+/* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
+var showPassword = function showPassword(inputId) {
+  var y = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputId);
 
+  if (y.type === "password") {
+    y.type = "text";
+  } else {
+    y.type = "password";
+  }
+};
+/**
+ * 
+ * @param {* } email 
+ * @returns 1 if there is an error
+ */
 
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePics').addEventListener('click', function () {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formProfilePics').style.display = "block";
-});
+var emailVal = function emailVal(email) {
+  var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+  var error;
+  var msg = "<li style=color:'red';> Please enter a valid email</li>";
 
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/index.js":
-/*!************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/index.js ***!
-  \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _createPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./createPost */ "./resources/asset/js/components/profilePage/createPost.js");
-/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
-/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
-/* harmony import */ var _getPost__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./getPost */ "./resources/asset/js/components/profilePage/getPost.js");
-
-
-
-
-
-
+  if (email.match(emailExp) === null) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').innerHTML = msg;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').style.color = "red";
+    error = 1;
+    return error;
+  }
+};
 
 /***/ })
 

@@ -46,7 +46,7 @@
 
     <div class="navbar-end">
       <div class="navbar-item">
-        <div class="buttons">
+        <div class="buttons signup_login">
           <a href="/register" class="button is-primary signUp">
             <strong>Sign up</strong>
           </a>

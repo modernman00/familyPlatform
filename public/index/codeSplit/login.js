@@ -411,7 +411,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
 /* harmony export */   "isChecked": () => (/* binding */ isChecked),
-/* harmony export */   "matchRegex": () => (/* binding */ matchRegex)
+/* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
+/* harmony export */   "matchInput": () => (/* binding */ matchInput)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -510,6 +511,28 @@ var matchRegex = function matchRegex(data) {
     }
   }
 };
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
 
 /***/ }),
 
@@ -590,18 +613,17 @@ var postFormData = /*#__PURE__*/function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : '/';
+            redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
             notificationId = "".concat(formId, "_notification"); // the notification function
 
             processFormDataAction = function processFormDataAction(addClass, data) {
-              // display the success information for 10sec
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(notificationId).style.display = "block"; // unblock the notification
 
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(notificationId).classList.add(addClass); // add the success class
 
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = data; // error element
 
-              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
             }; // extract the form entries
 
 
@@ -609,7 +631,8 @@ var postFormData = /*#__PURE__*/function () {
 
             formEntries = new FormData(form);
             formEntries["delete"]('submit');
-            formEntries["delete"]('checkbox_id');
+            formEntries["delete"]('checkbox_id'); // formEntries.delete('token')
+
             options = {
               xsrfCookieName: 'XSRF-TOKEN',
               xsrfHeaderName: 'X-XSRF-TOKEN'
@@ -617,13 +640,18 @@ var postFormData = /*#__PURE__*/function () {
 
             _context.next = 10;
             return axios__WEBPACK_IMPORTED_MODULE_2___default().post(url, formEntries, options).then(function (response) {
-              processFormDataAction('is-success', response.data);
-              setTimeout(function () {
-                window.location.replace(redirect);
-              }, 1000); // it clears all the contents
+              processFormDataAction('is-success', response.data); // set timer to redirect to the homepage
 
-              // it clears all the contents
-              formData.clearHtml(); // set timer to redirect to the homepage
+              // set timer to redirect to the homepage
+              if (redirect) {
+                setTimeout(function () {
+                  window.location.replace(redirect);
+                }, 2000);
+              } //it clears all the contents
+
+
+              //it clears all the contents
+              formData.clearHtml();
             })["catch"](function (error) {
               if (error.response) {
                 processFormDataAction('is-danger', error.response.data);
@@ -692,7 +720,8 @@ var getApiData = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "showPassword": () => (/* binding */ showPassword)
+/* harmony export */   "showPassword": () => (/* binding */ showPassword),
+/* harmony export */   "emailVal": () => (/* binding */ emailVal)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -703,6 +732,24 @@ var showPassword = function showPassword(inputId) {
     y.type = "text";
   } else {
     y.type = "password";
+  }
+};
+/**
+ * 
+ * @param {* } email 
+ * @returns 1 if there is an error
+ */
+
+var emailVal = function emailVal(email) {
+  var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+  var error;
+  var msg = "<li style=color:'red';> Please enter a valid email</li>";
+
+  if (email.match(emailExp) === null) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').innerHTML = msg;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').style.color = "red";
+    error = 1;
+    return error;
   }
 };
 
@@ -740,7 +787,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+ // block the setLoader div
 
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").style.display = "none";
 var formInput = document.querySelectorAll('.loginNow');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
@@ -769,6 +818,9 @@ var LoginSubmission = function LoginSubmission(e) {
       formData.massValidate(); // validate and sanitise data
 
       if (formData.error.length == 0) {
+        // display the success information for 10sec
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
+
         (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
 
         (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code"); //id('submit').type = 'submit'

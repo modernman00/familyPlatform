@@ -19,7 +19,7 @@ class PassChange extends Pass
         // unset unneeded sessions
         unset($_SESSION['changePW'], $_SESSION['loggedIn'], $_SESSION['memberId']);
 
-        $_SESSION['email'] ??= throw new Exception("<h1>We cant find your credentials </h1> ", 1);
+        $_SESSION['email'] ??= throw new Exception("<h1>What are you doing here! </h1>", 1);
 
         return view('login/passChange');
     }
@@ -28,17 +28,20 @@ class PassChange extends Pass
     function verify()
     {
         try {
-            //1.  token verified
-            CheckToken::tokenCheck('token', '/login/changePW');
 
-            $reDirect = $_SESSION['loginType'];  // was set on the login page
-            // 2. sanitise Post Data
+            // 1. sanitise Post Data
             $cleanData = getSanitisedInputData(inputData: $_POST);
 
-            // 3. Check if email exists
+            // 2. Check if email exists
             $email = checkInputEmail($_SESSION['email']);
+
+            //3.  token verified
+            CheckToken::tokenCheck('token', '/login/changePW');
+
             $result = $this->update($this->table, 'password', $cleanData['password'], 'email', $email);
             if (!$result) {
+                http_response_code(501);
+                echo http_response_code();
                 throw new Exception("Password cannot be updated");
             }
 
@@ -48,8 +51,11 @@ class PassChange extends Pass
             sendEmailWrapper(var :$emailData, recipientType:'member');
 
             session_regenerate_id();
-            header("Location: $reDirect");
             unset($_SESSION['loginType']);
+            http_response_code(200);
+            echo http_response_code();
+            echo json_encode("Password was successfully changed");
+
 
         } catch (Throwable $e) {
             showError($e);

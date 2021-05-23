@@ -3,18 +3,19 @@
 @section('content')
 
 <div class="styleForm" style="margin-top: 4rem;">
-<h3 style="margin-left:20%; margin-right:20%;">Please, enter the email to verify your identity</h3>
+    <h3 style="margin-left:20%; margin-right:20%;">Please, enter the email to verify your identity</h3>
 
 
-<hr class="my-2">
-<form action="/login/forgot" method="post" style="margin-left:20%; margin-right:20%;">
-    <div class="form-group">
-        <br>
-        <div class='row'>
+    <hr class="my-2">
+    <form action="/login/forgot" id="forgotPassword" method="post" style="margin-left:20%; margin-right:20%;">
+        <div class="form-group">
+            <br>
+            <div class='row'>
 
-            <?php
+                <?php
 
                     $formArray = [
+                        'forgotPassword_notification'=>'showError',
                         'email' => 'email',
                         'token' => 'token',
                         'button' => 'submit'
@@ -24,11 +25,11 @@
                     $form->genForm();
 
                 ?>
-            <br>
+                <br>
 
-        </div>
+            </div>
 
-</form>
+    </form>
 </div>
 
 

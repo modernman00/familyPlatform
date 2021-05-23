@@ -21,13 +21,12 @@ class Code extends Select
 
     public function show()
     {
-        if ($_SESSION[self::TOKEN_SESSION]) {
-            printArr($_SESSION);
-            return view('login/code');
-        } else {
+        if (!$_SESSION[self::TOKEN_SESSION]) {
             $login = "login";
             return view('error/notFound', compact('login'));
         }
+
+        return view('login/code');
     }
 
     public function verify()
@@ -38,10 +37,16 @@ class Code extends Select
 
             $code = checkInput($_POST["code"]);
 
+            if(!$_SESSION['identifyCust']){
+                $this->errorArr[] = "Hmm, we can't seem to find you - try again";
+                throw new Exception("Hmm, we can't seem to find you - try again", 1);
+            }
+
             $this->memberId = checkInput($_SESSION['identifyCust']);
 
             // set time limit to use code
             if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 10000) {
+
                 $this->errorArr[] = "Invalid or expired Token";
                 throw new Exception("Invalid or expired Token", 1);
             }
@@ -49,7 +54,7 @@ class Code extends Select
 
             // check if the code is stored in the database
 
-            $query = Select::formAndMatchQuery(selection:"SELECT_COUNT_TWO", table:'account', identifier1: 'id', identifier2: 'token');
+            $query = Select::formAndMatchQuery(selection: "SELECT_COUNT_TWO", table: 'account', identifier1: 'id', identifier2: 'token');
 
             $result = Select::selectCountFn2($query, [$this->memberId, $code]);
 
@@ -64,7 +69,7 @@ class Code extends Select
                 if (isset($_SESSION['login'])) {
 
                     $_SESSION['loggedIn'] = true;
-                   
+
                     $_SESSION['memberId'] = $this->memberId;
 
                     if ($_SESSION['loginType'] = "/login") {

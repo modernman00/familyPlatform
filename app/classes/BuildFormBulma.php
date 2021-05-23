@@ -116,7 +116,15 @@ class BuildFormBulma extends AlterTable
         return $_SESSION['token'];
     }
 
-
+    /**
+     * important ones are mixed, select-many, setError
+     * example - mixed 'spouse' => ['mixed','label' => ["Spouse's name", "Spouse's mobile", "Spouse's Email"],'attribute' => ['spouseName', 'spouseMobile', 'spouseEmail'],'placeholder' => ['Toyin', '23480364168089', "toyin@gmail.com"], 'inputType' => ['text', 'text', 'email'],'icon' => ['<i class="fas fa-user"></i>','<i class="fas fa-user"></i>','<i class="fas fa-envelope-square"></i>']],
+     * 
+     * example select-many  'married_gender' => ['select-many','label' => ['Marital status', 'gender']'attribute' => ['maritalStatus', 'gender'],'options' => [['select', 'Yes', 'No'],['select', 'Male', 'Female']],'icon' => ['<i class="far fa-kiss-wink-heart"></i>','<i class="fas fa-user-friends"></i>',]],
+     * 
+     * example showError  nameKey => showError - the namekey should be the id of the div or form that will release the error. See Login or Register.js for a clear example
+     * @return void 
+     */
     public function genForm()
     {
         // set the array VALUE
@@ -534,6 +542,14 @@ class BuildFormBulma extends AlterTable
                 </div>";
             } elseif ($this->EntValue[$i] === 'empty') {
                 echo " <div class = field id=$nameKey></div>";
+            } elseif ($this->EntValue[$i] === 'showError') {
+                echo "<div id='setLoader' tabindex='-1'>
+                        <div id='loader'>
+                        <div class='notification' id='$nameKey'>
+                        <p id='error'></p>
+                        </div>
+                            </div>
+                    </div>";
             }
         }
     }

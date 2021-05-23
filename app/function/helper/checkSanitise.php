@@ -26,17 +26,21 @@ function checkPassword($inputData, $databaseData)
     if (password_verify($textPassword, $dbPassword) === false) {
          http_response_code(406); // sets the response to 406
         echo http_response_code(); // echo the new response code
-        // throw new Exception("<h1>We cannot find your email</h1>");
-        // $error = 'There is a problem with your credential!';
-        // echo json_encode($error);
-        throw new Exception("<h1>There is a problem with your login credential!</h1>");
+        throw new Exception("<h1>There is a problem with your login credential! - Password</h1>");
     }
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
         $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
         $data = ['password' => $newHash, 'id' => $id];
         $passUpdate = new AllFunctionalities();
-        return $passUpdate->updateMultiplePOST($data, $table, 'id');
+        $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
+
+        if(!$result) {
+                     http_response_code(406); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        throw new Exception("<h1>Password could not be updated</h1>");
+
+        }
     }
 }
 
@@ -49,9 +53,10 @@ function checkPassword($inputData, $databaseData)
  */
 function useEmailToFindData($inputData): array
 {
-    $select = new Select;
+    $email = $inputData['email'];
+
     $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
-    $data = $select->selectFn(query: $query, bind: [$inputData['email']]);
+    $data = Select::selectFn2(query: $query, bind: [$email]);
 
     if (!$data) {
         http_response_code(406); // sets the response to 406
@@ -59,7 +64,87 @@ function useEmailToFindData($inputData): array
         // $theError = "We cannot find your email";
         // echo json_encode($theError);
         throw new Exception("We cannot find your email");
-        // exit;
+    }
+    foreach ($data as $data);
+    return $data;
+}
+
+/**
+ * 
+ * @param mixed $inputData form data as a $email
+ * @return mixed 
+ * @throws \Exception 
+ */
+function checkIfEmailExist(string $email): mixed
+{
+
+    $query = Select::formAndMatchQuery(selection: 'SELECT_COL_ID', table: 'account', identifier1: 'email', column: "email");
+    $data = Select::selectCountFn2(query: $query, bind: [$email]);
+
+    if (!$data) {
+        http_response_code(404); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        // $theError = "We cannot find your email";
+        // echo json_encode($theError);
+        throw new Exception("We cannot find your email");
+    }
+    foreach ($data as $data);
+    return $data;
+}
+
+/**
+ * 
+ * @param string $col  the first column could be "id"
+ * @param string $col2 the second column, could be "status'
+ * @param array $data , could be the postdata but must have a email
+ * @return mixed 
+ * @throws \Exception 
+ */
+function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
+{
+    $outcome = useEmailToFindData($data);
+    $colOne =  $outcome["$col"];
+    $colTwo =  $outcome["$col2"];
+
+
+    $query = Select::formAndMatchQuery(selection: 'SELECT_TWO_COLS_ID', table: 'account', identifier1: 'email', column: $col, column2: $col2);
+    $data = Select::selectFn2(query: $query, bind: [$colOne, $colTwo]);
+
+    if (!$data) {
+        http_response_code(404); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        // $theError = "We cannot find your email";
+        // echo json_encode($theError);
+        throw new Exception("We cannot locate the information");
+    }
+    foreach ($data as $data);
+    return $data;
+}
+
+/**
+ * 
+ * @param string $col  the first column could be "id"
+ * @param array $data , could be the postdata but must have a email
+ * @return mixed 
+ * @throws \Exception 
+ */
+function findOneColUsingEmail(string $col, array $data): mixed
+{
+    $outcome = useEmailToFindData($data);
+
+   // $colOne =  $outcome["$col"];
+    $email =  $data['email'];
+
+    $query = Select::formAndMatchQuery(selection: 'SELECT_COL_ID', table: 'account', identifier1: 'email', column: $col);
+
+    $data = Select::selectFn2(query: $query, bind: [$email]);
+
+    if (!$data) {
+        http_response_code(404); // sets the response to 406
+        echo http_response_code(); // echo the new response code
+        // $theError = "We cannot find your email";
+        // echo json_encode($theError);
+        throw new Exception("We cannot locate the information");
     }
     foreach ($data as $data);
     return $data;
@@ -83,7 +168,6 @@ function getSanitisedInputData($inputData, $minMaxData = NULL)
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
         echo json_encode($theError);
         exit;
-        // throw new Exception('<h1><b>There is a problem with your input.</b></h1><br>' . implode('; <br>', $error));
     }
 
     return $sanitisedData;
@@ -113,6 +197,8 @@ function generateUpdateTableWithToken($customerId)
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if (!$updateCodeToCustomer) {
+         http_response_code(406); 
+        echo http_response_code();
         throw new Exception("<h1>Error : Could not update token</h1>E", 1);
     }
     $_SESSION['2FA_token_ts'] = time();

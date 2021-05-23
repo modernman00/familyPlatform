@@ -97,3 +97,28 @@ export const matchRegex = (data) => {
     }
   }
 }
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+export const matchInput = (first, second, err) => {
+        let error, firstInput, secondInput
+        error = id(err)
+        firstInput = id(first)
+        secondInput = id(second)
+        secondInput.addEventListener('keyup', () => {
+
+            if(secondInput.value !== firstInput.value) {
+              error.innerHTML = 'Your passwords do not match'
+              error.style.color ="red"
+            } else {
+              error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>"
+              error.style.color ="green"
+            }
+              
+             
+        })
+    }

@@ -18,11 +18,6 @@ class Login extends Select
     private const LOGIN = "/login";
     private const LOGIN_TYPE = "/loginType";
 
-    public function index()
-    {
-        view('login');
-    }
-
     public function show()
     {
         $formAction = self::LOGIN;
@@ -40,40 +35,38 @@ class Login extends Select
     public function login()
     {
         try {
+            //1.  token verified
             CheckToken::tokenCheck('token', '/error/token');
-
+            //2. create min and max limit
             $minMaxData = [
                 'data' => ['email', 'password'],
                 'min' => [5, 3],
                 'max' => [35, 65]
             ];
-            // sanitise the post data 
+
+            //3. sanitise the post data 
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
-            // check if email exist and get the database password
+            //4 check if email exist and get the database password
             $data = useEmailToFindData($sanitisedData);
 
-            if ($data) {
+            //5. check password 
+            checkPassword(inputData: $sanitisedData, databaseData: $data);
 
-                // check password 
-                checkPassword(inputData: $sanitisedData, databaseData: $data);
+            //4. control for login
+            $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
-                //4. control for login
-                $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
-
-                // Login now 
-                if ($detectIfAdminOrCustomer === self::ADMIN) {
-                    $this->adminLogin($sanitisedData);
-                } else if ($detectIfAdminOrCustomer === self::LOGIN) {
-                    $this->customerLogin($data);
-                }
-
-                http_response_code(200); // sets the response to 406
-                echo http_response_code(); // echo the new response code
-                // throw new Exception("<h1>We cannot find your email</h1>");
-                $successMsg = "Credentials validated";
-                echo json_encode($successMsg);
+            // Login now based on login type
+            if ($detectIfAdminOrCustomer === self::ADMIN) {
+                $this->adminLogin($sanitisedData);
+            } else if ($detectIfAdminOrCustomer === self::LOGIN) {
+                $this->customerLogin($data);
             }
+
+            http_response_code(200); // sets the response to 200
+            echo http_response_code(); // echo the new response code
+            $successMsg = "Credentials validated";
+            echo json_encode($successMsg);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -89,28 +82,12 @@ class Login extends Select
         if (!$checkAccountIsApproved) {
             http_response_code(406); // sets the response to 406
             echo http_response_code(); // echo the new response code
-            // throw new Exception("<h1>We cannot find your email</h1>");
-            // $theError = "We do not recognise your account";
-            // echo json_encode($theError);
-
             throw new Exception("We do not recognise your account", 1);
         }
 
         generateSendTokenEmail($data);
         $_SESSION['login'] = 1;
         session_regenerate_id();
-
-
-        
-
-
-
-        // returnSuccessCode("Credentials Validated");
-
-
-
-        // header('Location: /login/code');
-
     }
 
     private function adminLogin($sanitisedData)
@@ -124,9 +101,6 @@ class Login extends Select
         if (!$outcome) {
             http_response_code(406); // sets the response to 406
             echo http_response_code(); // echo the new response code
-            // throw new Exception("<h1>We cannot find your email</h1>");
-            // $theError = "Your input to code is not recognised";
-            // echo json_encode($theError);
             throw new Exception("Your input to code is not recognised");
         }
 
