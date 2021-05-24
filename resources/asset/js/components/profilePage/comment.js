@@ -5,7 +5,7 @@ import { postFormData, getApiData } from "../helper/http"
 
 try {
 
-    getApiData()
+    // getApiData()
 
     let newLikeCounterVal = 0;
 

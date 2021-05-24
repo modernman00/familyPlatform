@@ -5,8 +5,7 @@
 
   <a href="/profilepage/img?dir=img&pics={{ $allData["img"] }}&pID={{ $allData["post_no"] }}&path=profile">
 
-    <img src="/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right"
-      style="width:60px">
+    <img src="/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
   </a>
 
   @else

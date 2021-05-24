@@ -14,6 +14,7 @@ use App\classes\{
     ProcessImg,
     Insert
 };
+use App\model\AllMembersData as DataAll;
 
 use Exception;
 
@@ -22,6 +23,7 @@ class ProfilePage extends ProcessImg
     public $allPostData;
     private $allCommentData;
     private $id;
+    private $eventData;
     private const REDIRECT = "Location: /member/ProfilePage";
 
     function __construct()
@@ -41,6 +43,10 @@ class ProfilePage extends ProcessImg
         //GET POST DATA 
 
         $this->allPostData = Post::getAllPostProfilePics();
+
+        //GET ALL EVENTS DATA
+        $this->eventData = DataAll::getEventData();
+
 
         //GET COMMENT DATA
         $this->allCommentData = Post::getAllCommentProfilePics();
@@ -75,7 +81,8 @@ class ProfilePage extends ProcessImg
                 'allData' => $this->allPostData,
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
-                'pics2Id' => $this->getAllPics
+                'pics2Id' => $this->getAllPics,
+                'eventData' => $this->eventData
                 // 'comment2Post' => $this->comment2Post
             ]);
         } catch (\Throwable $th) {

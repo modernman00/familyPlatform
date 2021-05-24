@@ -28,14 +28,16 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
-
+                // console.log(post)
                 // rid it off the submit and token
                 if (post.name == 'submit' ||
+                    post.name == 'button' ||
                     post.name == 'token' ||
+                    post.name == 'cancel' ||
                     post.name == "checkbox_id") {
                     continue;
                 }
-
+                
                 // check if there is no value
 
                 let postName = post.name.replace('_', ' ')
@@ -51,6 +53,7 @@ export default class FormHelper {
                         post.value = "Not Provided"
                     }
                 }
+                
 
                 if (post.value === '' || post.value === 'select') {
                     errMsg.innerHTML = `* cannot be left empty`

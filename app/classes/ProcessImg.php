@@ -51,7 +51,8 @@ class ProcessImg extends AllFunctionalities
 
     static function showPostImg(string $picsSource)
     {
-        $imgName = checkInput($_GET['pics']);
+        //$imgName = checkInput($_GET['pics']);
+         $imgName = $_GET['pics'];
         $imgDir = checkInput($_GET['dir']);
         $postSource = checkInput($picsSource);
         return "/$imgDir/$postSource/$imgName";

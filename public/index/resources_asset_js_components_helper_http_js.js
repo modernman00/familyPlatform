@@ -87,7 +87,7 @@ var postFormData = /*#__PURE__*/function () {
 
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = data; // error element
 
-              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
             }; // extract the form entries
 
 

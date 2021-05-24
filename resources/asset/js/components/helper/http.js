@@ -42,7 +42,7 @@ export const postFormData = async (url, formId, redirect = null) => {
         id(notificationId).style.display = "block" // unblock the notification
         id(notificationId).classList.add(addClass) // add the success class
         id('error').innerHTML = data // error element
-        return id('loader').classList.remove('loader') // remove loader
+        id('loader').classList.remove('loader') // remove loader
     }
 
     // extract the form entries

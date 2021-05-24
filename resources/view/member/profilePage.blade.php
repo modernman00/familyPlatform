@@ -9,9 +9,14 @@
   <!-- The Grid -->
   <div class="w3-row">
 
-    @include('member/includes/personal')
+<!-- Left Column -->
+    <div class="w3-col m3">
+      
+      @include('member/includes/personal')
 
-    <br>
+    </div>
+
+  <!-- End Left Column -->
 
     {{-- POST MESSAGE --}}
     <div class="w3-col m7">

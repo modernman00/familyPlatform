@@ -35,7 +35,8 @@
         "filp/whoops": "^2.7",
           "phpmailer/phpmailer": "^6.1",
         "firebase/php-jwt": "^5.2",
-        "tinify/tinify": "^1.5"
+        "tinify/tinify": "^1.5",
+        "ps/image-optimizer": "^2.0"
     },
     
     "require-dev": {

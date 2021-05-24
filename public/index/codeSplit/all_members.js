@@ -203,9 +203,9 @@ var isChecked = function isChecked(name, fn) {
 var matchRegex = function matchRegex(data) {
   if (data) {
     if (data != "Not Provided") {
-      var regex = /[a-zA-Z0-9.@]+/g;
+      var regex = /[<?/>]+/g;
       var result = data.match(regex);
-      if (result.length > 1) return false;
+      if (result.length >= 1) return false;
     }
   }
 };

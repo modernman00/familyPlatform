@@ -25,6 +25,20 @@ function dateDifference($date1, $date2)
     return $diff->format("%R%a days");
 }
 
+/**
+ * 
+ * @param mixed $date1 
+ * @param mixed $date2 
+ * @return int a number
+ */
+function dateDifferenceInt($date1, $date2)
+{
+    $createDate1 = date_create($date1);
+    $createDate2 = date_create($date2);
+    $diff = date_diff($createDate1, $createDate2);
+    return (int) $diff->format("%R%a");
+}
+
 function dateFormat($date)
 {
     $stringDate = strtotime($date);

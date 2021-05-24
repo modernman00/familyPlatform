@@ -58,7 +58,7 @@ function number2word(int $number)
         $fool = new \NumberFormatter("en", \NumberFormatter::SPELLOUT);
         $fool->setTextAttribute(\NumberFormatter::DEFAULT_RULESET, "%spellout-numbering-verbose");
         $output = $fool->format($number);
-        return strtoupper($output);
+        return ucfirst($output);
     } catch (TypeError $e) {
         echo $e->getMessage() . "\n";
     }

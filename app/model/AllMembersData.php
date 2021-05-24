@@ -44,4 +44,18 @@ class AllMembersData extends InnerJoin
         return $memberData??= throw new Exception(self::ERR_MSG, 1);
     }
 
+       public static function getEventData()
+    {
+        try {
+                $query = "SELECT events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate DESC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute();
+            return $result->fetchAll();
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+        
+            
+    }
+
 }

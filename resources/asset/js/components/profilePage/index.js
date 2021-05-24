@@ -3,4 +3,4 @@
 import "./createPost"
 import "./img"
 import "./comment"
-import "./getPost"
+import "./event"

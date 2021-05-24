@@ -1,4 +1,4 @@
-@extends('base')
+@extends('layouts.w3s_member')
 
 @section('title', 'Image')
 @section('data-page-id', 'showImage')

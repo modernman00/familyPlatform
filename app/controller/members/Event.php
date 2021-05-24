@@ -49,7 +49,7 @@ class Event extends AllMembersData
     {
         try {
             $todayDate =  date('Y-m-d');
-            $data = self::getEventData();
+            $data = parent::getEventData();
             //printArr($data);
 
             self::getEventMonth($data);
@@ -87,12 +87,12 @@ class Event extends AllMembersData
         }
     }
 
-    // GET THE EVENT DATA 
-    private static function getEventData(): array
-    {
-        $table = ['personal', 'events'];
-        return parent::getMembers($table, 'eventDate');
-    }
+    // // GET THE EVENT DATA 
+    // private static function getEventData(): array
+    // {
+    //     $table = ['personal', 'events'];
+    //     return parent::getMembers($table, 'eventDate');
+    // }
 
 
     // PRIVATE FUNCTION TO SEND EVENT NOTIFICATION
@@ -177,4 +177,6 @@ class Event extends AllMembersData
 
         return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
+
+ 
 }

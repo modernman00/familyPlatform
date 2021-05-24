@@ -16,17 +16,23 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    static function postLink2Id($id)
+    static function postLink2Id(string $id) : array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    static function getAllPost()
+    static function getAllPost() : array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
         return parent::selectFn2(query: $query);
     }
+
+    //  static function getAllEvents() : array
+    // {
+    //     $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'events');
+    //     return parent::selectFn2(query: $query);
+    // }
 
     /**
      * get all posts and the profile pics

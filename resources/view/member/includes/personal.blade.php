@@ -1,15 +1,15 @@
-<!-- Left Column -->
-<div class="w3-col m3">
+
   <!-- Profile -->
   <div class="w3-card w3-round w3-white">
     <div class="w3-container">
 
       {{--  NAME  --}}
 
-      <h5 class="w3-center">
-        <b><i>{{ $data['firstName']  }} {{ $data['lastName'] }}</i> </b>{{ $data['id'] }}
+      <h4 class="w3-center">
+        <b><i>{{ $data['firstName']  }} {{ $data['lastName'] }}</i> </b>
+        {{--  {{ $data['id'] }}  --}}
 
-      </h5>
+      </h4>
 
       {{--  PROFILE PICS  --}}
 
@@ -18,7 +18,7 @@
 
           @isset($data['img'])
   
-          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
+          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" style="height:106px;width:106px" alt="Avatar">
 
           @else
           <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
@@ -83,5 +83,4 @@
   @includeif('member/includes/modalEvent')
 
 
-  <!-- End Left Column -->
-</div>
+  <!-- End Left Column -->  <!-- End Left Column -->

@@ -66,10 +66,11 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
 
             // capture the error to a variable
-            var errMsg = _this.id("".concat(post.name, "_error")); // rid it off the submit and token
+            var errMsg = _this.id("".concat(post.name, "_error")); // console.log(post)
+            // rid it off the submit and token
 
 
-            if (post.name == 'submit' || post.name == 'token' || post.name == "checkbox_id") {
+            if (post.name == 'submit' || post.name == 'button' || post.name == 'token' || post.name == 'cancel' || post.name == "checkbox_id") {
               continue;
             } // check if there is no value
 
@@ -505,9 +506,9 @@ var isChecked = function isChecked(name, fn) {
 var matchRegex = function matchRegex(data) {
   if (data) {
     if (data != "Not Provided") {
-      var regex = /[a-zA-Z0-9.@]+/g;
+      var regex = /[<?/>]+/g;
       var result = data.match(regex);
-      if (result.length > 1) return false;
+      if (result.length >= 1) return false;
     }
   }
 };
@@ -623,7 +624,7 @@ var postFormData = /*#__PURE__*/function () {
 
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = data; // error element
 
-              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
             }; // extract the form entries
 
 
