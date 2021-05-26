@@ -139,6 +139,10 @@ var FormHelper = /*#__PURE__*/function () {
               return "continue";
             }
 
+            _this2.id(post.id).addEventListener('change', function () {
+              _this2.id("".concat(post.name, "_error")).innerHTML = '';
+            });
+
             if (post.value != 'select') {
               _this2.id(post.id).addEventListener('keyup', function () {
                 _this2.id("".concat(post.name, "_error")).innerHTML = '';
@@ -735,7 +739,7 @@ var matchRegex = function matchRegex(data) {
     if (data != "Not Provided") {
       var regex = /[<?/>]+/g;
       var result = data.match(regex);
-      if (result.length >= 1) return false;
+      if (result === null) return true;
     }
   }
 };

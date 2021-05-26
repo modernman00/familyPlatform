@@ -157,17 +157,19 @@ function cleanSession($x)
 
 function showError($th)
 {
-    // echo "Error msg - " . $th->getMessage();
-    // echo "<br>";
-    // echo "Error Line - " . $th->getLine();
-    // echo "<br>";
-    // echo "Error code - " . $th->getCode();
-    // echo "<br>";
-    // echo "Error File- " . $th->getFile();
-    // echo "<br>";
-    // echo "<br>";
-    // echo json_encode(['Error_Message' => $th->getMessage()]);
-      echo json_encode( $th->getMessage());
+    $error = $th->getMessage() . " " .$th->getLine() ." " .$th->getCode(). " " . $th->getFile();  
+    echo json_encode(['message' => $error]);
+}
+
+function showErrorExp($th)
+{
+    echo "Error msg - " . $th->getMessage();
+    echo "<br>";
+    echo "Error Line - " . $th->getLine();
+    echo "<br>";
+    echo "Error code - " . $th->getCode();
+    echo "<br>";
+    echo "Error File- " . $th->getFile();
 }
 
 

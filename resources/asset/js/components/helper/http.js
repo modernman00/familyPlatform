@@ -34,7 +34,7 @@ export const realTimeServer = (input, url, outputId) => {
  * @param {* the redirect to another page /code or /admin/register} redirect 
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
-export const postFormData = async (url, formId, redirect = null) => {
+export const postFormData = async (url, formId, redirect = null, css=null) => {
 
     let notificationId = `${formId}_notification`
     // the notification function
@@ -47,7 +47,7 @@ export const postFormData = async (url, formId, redirect = null) => {
 
     // extract the form entries
     const form = id(formId)
-    // log("Form "+ form)
+  
     let formEntries = new FormData(form)
 
     formEntries.delete('submit')
@@ -62,19 +62,41 @@ export const postFormData = async (url, formId, redirect = null) => {
     // AXIOS POST FUNCTIONALITY
     await axios.post(url, formEntries, options)
     .then(response => {
-        processFormDataAction('is-success', response.data)
+
+        var theClass;
+         if(css === "W3css") {
+             theClass = "w3-green"
+        } else if(css  === 'bulma') {
+            theClass = "is-success"
+        } else {
+            theClass = "is-success"
+        }
+     
+        processFormDataAction(theClass, response.data.message)
         // set timer to redirect to the homepage
         if (redirect) {
             setTimeout(() => {
-                window.location.replace(redirect)
+                //window.location.replace(redirect)
+                window.location.assign(redirect)
             }, 2000)
         }
         //it clears all the contents
         formData.clearHtml()
+        
     }
     ).catch(error => {
+        log(error)
+           var theClass;
+         if(css === "W3css") {
+             theClass = "w3-red"
+        } else if(css  === 'bulma') {
+            theClass = "is-danger"
+        }else {
+            theClass = "is-danger"
+        }
         if (error.response) {
-            processFormDataAction('is-danger', error.response.data)
+            log(error.response)
+            processFormDataAction(theClass, error.response.data.message)
         }
     })
 

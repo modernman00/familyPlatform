@@ -6,9 +6,7 @@ namespace App\controller\members;
 
 use App\classes\{
     AllFunctionalities,
-    Db,
     Insert,
-    Sanitise,
     Select,
     CheckToken
 };
@@ -25,21 +23,19 @@ class Event extends AllMembersData
     {
 
         try {
-            CheckToken::tokenCheck('token', self::REDIRECT);
+          
             // SANITISE THE ENTRY
-            $sanitise = new Sanitise($_POST);
+            $cleanData = getSanitisedInputData($_POST);
+            CheckToken::tokenCheck('token', self::REDIRECT);
 
-            $result = $sanitise?->getData();
-            $error = $sanitise?->error;
+            $cleanData['id'] = checkInput($_SESSION['id']);
 
-            if (count($error) > 0) {
-                view('error/genError', compact('error'));
-            }
-            $result['id'] = checkInput($_SESSION['id']);
+            Insert::submitForm2('events', $cleanData);
 
-            Insert::submitForm2('events', $result);
+            http_response_code(200);
+            echo http_response_code();
+            echo json_encode("event successfully created");
 
-            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }

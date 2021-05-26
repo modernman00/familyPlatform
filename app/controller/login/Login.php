@@ -6,7 +6,7 @@ namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
-    Select,
+    Select, JwtHandler, verifyToken
 };
 
 use Exception;
@@ -35,6 +35,13 @@ class Login extends Select
     public function login()
     {
         try {
+
+            header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
+            header("Content-Type: application/json; charset=UTF-8");
+            header("Access-Control-Allow-Methods: POST");
+            header("Access-Control-Max-Age: 3600");
+            header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
             //1.  token verified
             CheckToken::tokenCheck('token', '/error/token');
             //2. create min and max limit
@@ -53,6 +60,10 @@ class Login extends Select
             //5. check password 
             checkPassword(inputData: $sanitisedData, databaseData: $data);
 
+            $jwt = new JwtHandler();
+            $token = $jwt->jwtEncodeData(getenv('APP_URL'), ['id' => $data['id'], 'email'=>$sanitisedData['email']]);
+            msgSuccess(201, "Credentials validated", $token);
+
             //4. control for login
             $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
@@ -63,10 +74,6 @@ class Login extends Select
                 $this->customerLogin($data);
             }
 
-            http_response_code(200); // sets the response to 200
-            echo http_response_code(); // echo the new response code
-            $successMsg = "Credentials validated";
-            echo json_encode($successMsg);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -80,9 +87,13 @@ class Login extends Select
         $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
-            http_response_code(406); // sets the response to 406
-            echo http_response_code(); // echo the new response code
-            throw new Exception("We do not recognise your account", 1);
+            // http_response_code(406); // sets the response to 406
+            // echo http_response_code(); // echo the new response code
+            // throw new Exception("We do not recognise your account", 1);
+
+            msgException(406, 'We do not recognise your account');
+
+
         }
 
         generateSendTokenEmail($data);

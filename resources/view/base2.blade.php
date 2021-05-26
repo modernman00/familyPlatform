@@ -13,7 +13,7 @@
  <script src="https://use.fontawesome.com/1dca29b934.js"></script>
 
    {{-- custom css --}}
-  <link rel="stylesheet" href="/public/style.css">
+  <link rel="stylesheet" href="/style.css">
 
   <noscript>
     <link rel="stylesheet" href="noscript.css" /></noscript>

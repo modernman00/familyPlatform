@@ -91,6 +91,9 @@ export default class FormHelper {
                     continue
                 }
 
+                this.id(post.id).addEventListener('change', () => {
+                        this.id(`${post.name}_error`).innerHTML = ''
+                })
                 if (post.value != 'select') {
                     this.id(post.id).addEventListener('keyup', () => {
                         this.id(`${post.name}_error`).innerHTML = ''

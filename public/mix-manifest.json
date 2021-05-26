@@ -7,7 +7,7 @@
     "/index/codeSplit/forgotPwd.js": "/index/codeSplit/forgotPwd.js",
     "/index/codeSplit/code.js": "/index/codeSplit/code.js",
     "/index/codeSplit/profilePage.js": "/index/codeSplit/profilePage.js",
+    "/index/codeSplit/changePW.js": "/index/codeSplit/changePW.js",
     "/style.css": "/style.css",
-    "/vendor.js": "/vendor.js",
-    "/index/codeSplit/changePW.js": "/index/codeSplit/changePW.js"
+    "/vendor.js": "/vendor.js"
 }

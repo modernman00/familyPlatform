@@ -139,6 +139,10 @@ var FormHelper = /*#__PURE__*/function () {
               return "continue";
             }
 
+            _this2.id(post.id).addEventListener('change', function () {
+              _this2.id("".concat(post.name, "_error")).innerHTML = '';
+            });
+
             if (post.value != 'select') {
               _this2.id(post.id).addEventListener('keyup', function () {
                 _this2.id("".concat(post.name, "_error")).innerHTML = '';
@@ -508,7 +512,7 @@ var matchRegex = function matchRegex(data) {
     if (data != "Not Provided") {
       var regex = /[<?/>]+/g;
       var result = data.match(regex);
-      if (result.length >= 1) return false;
+      if (result === null) return true;
     }
   }
 };
@@ -604,6 +608,7 @@ var realTimeServer = function realTimeServer(input, url, outputId) {
 var postFormData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(url, formId) {
     var redirect,
+        css,
         notificationId,
         processFormDataAction,
         form,
@@ -615,6 +620,7 @@ var postFormData = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
+            css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
             notificationId = "".concat(formId, "_notification"); // the notification function
 
             processFormDataAction = function processFormDataAction(addClass, data) {
@@ -628,8 +634,7 @@ var postFormData = /*#__PURE__*/function () {
             }; // extract the form entries
 
 
-            form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formId); // log("Form "+ form)
-
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formId);
             formEntries = new FormData(form);
             formEntries["delete"]('submit');
             formEntries["delete"]('checkbox_id'); // formEntries.delete('token')
@@ -639,14 +644,25 @@ var postFormData = /*#__PURE__*/function () {
               xsrfHeaderName: 'X-XSRF-TOKEN'
             }; // AXIOS POST FUNCTIONALITY
 
-            _context.next = 10;
+            _context.next = 11;
             return axios__WEBPACK_IMPORTED_MODULE_2___default().post(url, formEntries, options).then(function (response) {
-              processFormDataAction('is-success', response.data); // set timer to redirect to the homepage
+              var theClass;
+
+              if (css === "W3css") {
+                theClass = "w3-green";
+              } else if (css === 'bulma') {
+                theClass = "is-success";
+              } else {
+                theClass = "is-success";
+              }
+
+              processFormDataAction(theClass, response.data.message); // set timer to redirect to the homepage
 
               // set timer to redirect to the homepage
               if (redirect) {
                 setTimeout(function () {
-                  window.location.replace(redirect);
+                  //window.location.replace(redirect)
+                  window.location.assign(redirect);
                 }, 2000);
               } //it clears all the contents
 
@@ -654,12 +670,24 @@ var postFormData = /*#__PURE__*/function () {
               //it clears all the contents
               formData.clearHtml();
             })["catch"](function (error) {
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error);
+              var theClass;
+
+              if (css === "W3css") {
+                theClass = "w3-red";
+              } else if (css === 'bulma') {
+                theClass = "is-danger";
+              } else {
+                theClass = "is-danger";
+              }
+
               if (error.response) {
-                processFormDataAction('is-danger', error.response.data);
+                (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response);
+                processFormDataAction(theClass, error.response.data.message);
               }
             });
 
-          case 10:
+          case 11:
           case "end":
             return _context.stop();
         }
@@ -824,6 +852,7 @@ var LoginSubmission = function LoginSubmission(e) {
 
         (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
 
+        localStorage.setItem('redirect', '/member/ProfilePage');
         (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code"); //id('submit').type = 'submit'
         //console.log('submitted')
       } else {

@@ -24,9 +24,8 @@ function checkPassword($inputData, $databaseData)
     $options = array('cost' => 12);
 
     if (password_verify($textPassword, $dbPassword) === false) {
-         http_response_code(406); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        throw new Exception("<h1>There is a problem with your login credential! - Password</h1>");
+
+        msgException(404, "There is a problem with your login credential! - Password");
     }
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
@@ -36,9 +35,7 @@ function checkPassword($inputData, $databaseData)
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if(!$result) {
-                     http_response_code(406); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        throw new Exception("<h1>Password could not be updated</h1>");
+        msgException(404, "Password could not be updated");
 
         }
     }
@@ -59,11 +56,8 @@ function useEmailToFindData($inputData): array
     $data = Select::selectFn2(query: $query, bind: [$email]);
 
     if (!$data) {
-        http_response_code(406); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        // $theError = "We cannot find your email";
-        // echo json_encode($theError);
-        throw new Exception("We cannot find your email");
+
+        msgException(404, "We cannot find your email");
     }
     foreach ($data as $data);
     return $data;
@@ -82,11 +76,8 @@ function checkIfEmailExist(string $email): mixed
     $data = Select::selectCountFn2(query: $query, bind: [$email]);
 
     if (!$data) {
-        http_response_code(404); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        // $theError = "We cannot find your email";
-        // echo json_encode($theError);
-        throw new Exception("We cannot find your email");
+
+        msgException(404, "We cannot find your email");
     }
     foreach ($data as $data);
     return $data;
@@ -111,11 +102,8 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
     $data = Select::selectFn2(query: $query, bind: [$colOne, $colTwo]);
 
     if (!$data) {
-        http_response_code(404); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        // $theError = "We cannot find your email";
-        // echo json_encode($theError);
-        throw new Exception("We cannot locate the information");
+  
+        msgException(404, "We cannot locate the information");
     }
     foreach ($data as $data);
     return $data;
@@ -140,11 +128,8 @@ function findOneColUsingEmail(string $col, array $data): mixed
     $data = Select::selectFn2(query: $query, bind: [$email]);
 
     if (!$data) {
-        http_response_code(404); // sets the response to 406
-        echo http_response_code(); // echo the new response code
-        // $theError = "We cannot find your email";
-        // echo json_encode($theError);
-        throw new Exception("We cannot locate the information");
+
+        msgException(404, "We cannot locate the information");
     }
     foreach ($data as $data);
     return $data;
@@ -163,10 +148,10 @@ function getSanitisedInputData($inputData, $minMaxData = NULL)
     $sanitisedData = $sanitise->getData();
     $error = $sanitise->error;
     if ($error) {
-        http_response_code(406); // sets the response to 406
-        echo http_response_code(); // echo the new response code
+
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
         echo json_encode($theError);
+        msgException(404, $theError);
         exit;
     }
 
@@ -197,9 +182,8 @@ function generateUpdateTableWithToken($customerId)
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if (!$updateCodeToCustomer) {
-         http_response_code(406); 
-        echo http_response_code();
-        throw new Exception("<h1>Error : Could not update token</h1>E", 1);
+
+        msgException(406, "Error : Could not update token");
     }
     $_SESSION['2FA_token_ts'] = time();
     $_SESSION['identifyCust'] = $customerId;

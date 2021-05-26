@@ -1,20 +1,21 @@
-<?php 
+<?php
+
 use App\model\EmailData;
 
 function loggedDetection($filename)
 {
-     //TODO send text to the user with the code
+    //TODO send text to the user with the code
     $emailSender = new EmailData('internal');
     $emailSender->getEmailData();
-    $msg = "Hello, <br><br> This is a notification that a <strong>logged -in</strong> has been detected from this file : $filename at this time: ".  date("h:i:sa") . "  and with this IP address: ". getUserIpAddr(). " <br><br>  IT Security Team";
+    $msg = "Hello, <br><br> This is a notification that a <strong>logged -in</strong> has been detected from this file : $filename at this time: " .  date("h:i:sa") . "  and with this IP address: " . getUserIpAddr() . " <br><br>  IT Security Team";
 
-    sendEmail('wale@loaneasyfinance.com','logged-in', 'LOGGED-IN DETECTION', $msg);
+    sendEmail('wale@loaneasyfinance.com', 'logged-in', 'LOGGED-IN DETECTION', $msg);
 }
 
-function notifyCustOfLogIn($data) : mixed
+function notifyCustOfLogIn($data): mixed
 {
-    $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOGGED-IN DETECTION", null,null);
-    return sendEmailWrapper($generateEmailArray, 'customer');   
+    $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOGGED-IN DETECTION", null, null);
+    return sendEmailWrapper($generateEmailArray, 'customer');
 }
 
 /**
@@ -24,25 +25,25 @@ function notifyCustOfLogIn($data) : mixed
  * @throws \Exception 
  * @throws \PDOException 
  */
-function generateSendTokenEmail($data) : mixed
+function generateSendTokenEmail($data): mixed
 {
-        $id = $data['id'];
-        // 1. check if email exists 
-        $email = checkInputEmail($data['email']);
+    $id = $data['id'];
+    // 1. check if email exists 
+    $email = checkInputEmail($data['email']);
 
-        //2. generate token and update table
-        $deriveToken = generateUpdateTableWithToken($id);  
-        //TODO send text to the user with the code
+    //2. generate token and update table
+    $deriveToken = generateUpdateTableWithToken($id);
+    //TODO send text to the user with the code
 
-        //3. ACCOMPANY EMAIL CONTENT             
-        $emailData = ['token' => $deriveToken, 'email' => $email];
-        $generateEmailArray = genEmailArray(viewPath: "msg/customer/token", data: $emailData, subject: "TOKEN");
+    //3. ACCOMPANY EMAIL CONTENT             
+    $emailData = ['token' => $deriveToken, 'email' => $email];
+    $generateEmailArray = genEmailArray(viewPath: "msg/customer/token", data: $emailData, subject: "TOKEN");
 
-        return sendEmailWrapper(var: $generateEmailArray, recipientType:'member');      
+    return sendEmailWrapper(var: $generateEmailArray, recipientType: 'member');
 }
 
 
-function checkInput($data) : mixed
+function checkInput($data): mixed
 {
     $data = trim($data);
     $data = stripslashes($data);
@@ -89,3 +90,31 @@ function returnSuccessCode($msg)
     echo json_encode($msg);
 }
 
+/**
+ * 
+ * @param mixed $errCode 401, 404 
+ * @param mixed $msg message that goes in side the throw exception
+ * @return never 
+ * @throws \Exception 
+ */
+function returnMsg(int $errCode, string $msg, array $extra = [])
+{
+    http_response_code($errCode); // sets the response to 406
+    echo http_response_code(); // echo the new response code
+    $apiMsg = [ 'status' => $errCode, 'message'=> $msg];
+    return array_merge($apiMsg, $extra);
+}
+
+function msgException(int $errCode, string $msg)
+{
+    http_response_code($errCode); // sets the response to 406
+    //echo json_encode((['message' => $msg]));
+    return throw new Exception($msg, $errCode);
+}
+
+function msgSuccess(int $code, string|array $msg, mixed $token =null)
+{
+    http_response_code($code); // sets the response to 406
+   // echo http_response_code(); // echo the new response code
+    echo json_encode((['message' => $msg, 'token' => $token]));
+}

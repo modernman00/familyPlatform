@@ -93,7 +93,7 @@ export const matchRegex = (data) => {
     if (data != "Not Provided") {
       const regex = /[<?/>]+/g
       const result = data.match(regex)
-      if (result.length >= 1) return false
+      if (result === null) return true
     }
   }
 }

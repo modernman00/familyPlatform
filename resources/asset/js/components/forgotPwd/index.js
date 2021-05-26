@@ -22,10 +22,11 @@ const forgotPasswordSubmission = (e) => {
             id("setLoader").style.display = "block";
 
             id('loader').classList.add('loader')
-            
-            postFormData("/login/forgot", "forgotPassword")
 
-            window.location.replace("/login/code")
+             localStorage.setItem('redirect', '/login/changePW')
+            
+            postFormData("/login/forgot", "forgotPassword", "/login/code")
+
         }
     } catch (error) {
         showError(err)

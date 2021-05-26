@@ -205,7 +205,7 @@ var matchRegex = function matchRegex(data) {
     if (data != "Not Provided") {
       var regex = /[<?/>]+/g;
       var result = data.match(regex);
-      if (result.length >= 1) return false;
+      if (result === null) return true;
     }
   }
 };

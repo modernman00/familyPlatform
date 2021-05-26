@@ -47,7 +47,7 @@ class AllMembersData extends InnerJoin
        public static function getEventData()
     {
         try {
-                $query = "SELECT events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate DESC";
+                $query = "SELECT events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();

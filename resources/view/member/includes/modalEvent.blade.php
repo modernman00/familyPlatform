@@ -8,6 +8,8 @@
             Enter the event details below
         </h3>
 
+        <div id="loader"></div>
+
         <div id="eventModalForm_notification">
             <p id="error"></p>
         </div>
@@ -15,6 +17,7 @@
         @php 
 
             $token = urlencode(base64_encode((random_bytes(32))));
+            $_SESSION['token'] = $token;
 
 
         @endphp
@@ -32,7 +35,7 @@
 
 
 
-        <form class="w3-container eventModalForm" action="/member/createEvent" id='eventModalForm' method="post"
+        <form class="w3-container eventModalForm" action="" id='eventModalForm' method="post"
             enctype='multipart/form-data'>
 
             <div class="w3-row w3-section">
@@ -118,10 +121,10 @@
 
               <input type="hidden" name= 'token' value = {{ $token }} >
 
-            <button id="submitEventModal"  type="button" name="button" class="w3-button w3-block w3-section w3-blue  w3-padding"> Create Event
+            <button id="submitEventModal"  type="submit" name="submit" class="w3-button w3-block w3-section w3-blue  w3-padding submitEventModal"> Create Event
             </button>
 
-            <button id="cancel" type="button" name="cancel"
+            <button id="cancelModal" type="button" name="cancel"
             class="w3-button w3-red eventModalCancel">Cancel</button>
             <br><br>
 
