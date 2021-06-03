@@ -12,7 +12,8 @@ use App\model\{
 use App\classes\{
     Sanitise,
     ProcessImg,
-    Insert
+    Insert,
+    VerifyToken
 };
 use App\model\AllMembersData as DataAll;
 
@@ -47,7 +48,6 @@ class ProfilePage extends ProcessImg
         //GET ALL EVENTS DATA
         $this->eventData = DataAll::getEventData();
 
-
         //GET COMMENT DATA
         $this->allCommentData = Post::getAllCommentProfilePics();
 
@@ -64,9 +64,8 @@ class ProfilePage extends ProcessImg
 
     function index()
     {
-        if(!$_SESSION['loggedIn']){
-            http_response_code(401);
-            echo http_response_code();
+        if (!$_SESSION['loggedIn']) {
+            msgException(404, "How did you get here?");
             header("location: /login");
         }
 
@@ -76,56 +75,64 @@ class ProfilePage extends ProcessImg
             $_SESSION['lName'] = $this->memberData['lastName'];
             $_SESSION['currentTime'] = time();
 
-            view('member/profilePage', [
-                'data' => $this->memberData,
-                'allData' => $this->allPostData,
-                'comment' => $this->allCommentData,
-                'post2Id' => $this->post2Id,
-                'pics2Id' => $this->getAllPics,
-                'eventData' => $this->eventData
-                // 'comment2Post' => $this->comment2Post
-            ]);
+            //  verify token
+
+            $tokenVerify = new verifyToken();
+            $result = $tokenVerify->profilePage();
+
+            // if token is verified
+
+            if ($result) {
+                view('member/profilePage', [
+                    'data' => $this->memberData,
+                    'allData' => $this->allPostData,
+                    'comment' => $this->allCommentData,
+                    'post2Id' => $this->post2Id,
+                    'pics2Id' => $this->getAllPics,
+                    'eventData' => $this->eventData
+                    // 'comment2Post' => $this->comment2Post
+                ]);
+            }
         } catch (\Throwable $th) {
-            showError($th);
+            showErrorExp($th);
         }
     }
 
     private function processPostData()
     {
-     
-            if (!$_POST) {
-                throw new \Exception("There was no post data", 1);
-            }
-            // SANITISE THE POST 
-            unset($_POST['post_img']);
-            $sanitise = new Sanitise($_POST);
-            $getSanitisePost = $sanitise->getData();
 
-            // var_dump($getSanitisePost);
+        if (!$_POST) {
+            throw new \Exception("There was no post data", 1);
+        }
+        // SANITISE THE POST 
+        unset($_POST['post_img']);
+        $sanitise = new Sanitise($_POST);
+        $getSanitisePost = $sanitise->getData();
 
-            // check if there are images in the post
-            if ($_FILES) {
+        // var_dump($getSanitisePost);
 
-                if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
+        // check if there are images in the post
+        if ($_FILES) {
 
-                    fileUploadMultiple("img/post/", 'post_img');
+            if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
-                    // create a file path name for the database
-                    $image = $_FILES['post_img']['name'];
-                    // create the post array for the post image
-                    for ($i = 0; $i < count($image); $i++) {
-                        $getSanitisePost["post_img$i"] = $image[$i];
-                    }
+                fileUploadMultiple("img/post/", 'post_img');
+
+                // create a file path name for the database
+                $image = $_FILES['post_img']['name'];
+                // create the post array for the post image
+                for ($i = 0; $i < count($image); $i++) {
+                    $getSanitisePost["post_img$i"] = $image[$i];
                 }
             }
+        }
 
-            // get the other post variables id, fullname, time of post
-            $getSanitisePost['id'] = $_SESSION['id'];
-            $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
-            $getSanitisePost['post_time'] = $_SESSION['currentTime'];
+        // get the other post variables id, fullname, time of post
+        $getSanitisePost['id'] = $_SESSION['id'];
+        $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
+        $getSanitisePost['post_time'] = $_SESSION['currentTime'];
 
-            return $getSanitisePost;
-
+        return $getSanitisePost;
     }
 
     function post()
@@ -133,7 +140,7 @@ class ProfilePage extends ProcessImg
         try {
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
-           header(self::REDIRECT);
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -158,10 +165,10 @@ class ProfilePage extends ProcessImg
     function postComment()
     {
         try {
-        
+
             $getComment = $this->processPostData();
             Insert::submitForm2('comment', $getComment);
-           // header(self::REDIRECT);
+            // header(self::REDIRECT);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);
@@ -234,5 +241,4 @@ class ProfilePage extends ProcessImg
             'comment' => $comment2Post,
         ]);
     }
-
 }

@@ -17,24 +17,30 @@ class VerifyToken
         header("Access-Control-Allow-Origin: $allowUrl");
         header("Access-Control-Allow-Methods: POST");
         header("Access-Control-Max-Age: 3600");
-        header("Content-Type: application/json; charset=UTF-8");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
     }
 
-    public function index()
+    public function profilePage()
     {
         try {
 
-            $allHeader = array_change_key_case(getallheaders(), CASE_LOWER);
-            
-            $auth = new Auth($allHeader);
-            $outcome = $auth->isAuth();
-            if (!$outcome) {
-                msgException(401, "Unauthorized");
+            $token = $_COOKIE['waleToken'];
+
+            if (isset($token)) {
+
+                $auth = new Auth($token);
+
+                $outcome = $auth->isAuth();
+
+                if (!$outcome) {
+                    setcookie("waleToken", "", time() - 7300);
+                    header("Location: /login", 401);
+                   // msgException(401, "Unauthorized");
+                }
+                return $outcome;
             }
-            return msgSuccess(201, "Approved to log in");
         } catch (\Throwable $th) {
-            showError($th);
+            showErrorExp($th);
         }
     }
 }

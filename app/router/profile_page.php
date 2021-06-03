@@ -14,6 +14,8 @@ $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@show
 
 $router->map('POST', '/member/profilePage', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
+$router->map('GET', '/member/profilePage/setHeader', 'App\controller\members\PostCard@setHeader', 'HEADER_SET');
+
 
 
 $router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');

@@ -76,7 +76,8 @@
   {{-- SHOW COMMENT --}}
 
   @foreach ($comment as $comment)
-  @if ($allData['post_no'] === $comment['post_no'] )
+ 
+  @if ($allData['post_no'] == $comment['post_no'] )
   @include('member/includes/comment')
   @endif
   @endforeach

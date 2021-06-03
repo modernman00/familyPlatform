@@ -50,7 +50,7 @@ if (window.location.pathname === '/register') {
     import(
         /* webpackChunkName: 'codeSplit/code' */
         /* webpackPrefetch: true */
-        './components/generateCode/'
+        './components/generateCode/Code'
     )
         .then((module) => module.default)
         .catch((err) => showError(err))

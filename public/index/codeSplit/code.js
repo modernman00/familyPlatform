@@ -1,9 +1,9 @@
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/code"],{
 
-/***/ "./resources/asset/js/components/generateCode/index.js":
-/*!*************************************************************!*\
-  !*** ./resources/asset/js/components/generateCode/index.js ***!
-  \*************************************************************/
+/***/ "./resources/asset/js/components/generateCode/Code.js":
+/*!************************************************************!*\
+  !*** ./resources/asset/js/components/generateCode/Code.js ***!
+  \************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -23,8 +23,9 @@ var LoginCode = function LoginCode(e) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('codeForm_notification').classList.remove('is-danger');
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = "";
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').style.display = "block";
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // const location = localStorage.getItem('redirect')
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // get the direct from the login script (getstorage)
 
+    var location = localStorage.getItem('redirect');
     (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/code", "codeForm", location);
     localStorage.removeItem('redirect');
   } catch (err) {
@@ -45,9 +46,11 @@ var LoginCode = function LoginCode(e) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "realTimeServer": () => (/* binding */ realTimeServer),
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
-/* harmony export */   "getApiData": () => (/* binding */ getApiData)
+/* harmony export */   "getApiData": () => (/* binding */ getApiData),
+/* harmony export */   "setCookie": () => (/* binding */ setCookie),
+/* harmony export */   "getCookie": () => (/* binding */ getCookie),
+/* harmony export */   "checkCookie": () => (/* binding */ checkCookie)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
@@ -56,6 +59,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/index.js");
 /* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios_retry__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var js_cookie__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! js-cookie */ "./node_modules/js-cookie/src/js.cookie.js");
+/* harmony import */ var js_cookie__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(js_cookie__WEBPACK_IMPORTED_MODULE_4__);
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -65,33 +70,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+
 axios_retry__WEBPACK_IMPORTED_MODULE_3___default()((axios__WEBPACK_IMPORTED_MODULE_2___default()), {
   retries: 3
 });
-var realTimeServer = function realTimeServer(input, url, outputId) {
-  var theInput, inputVal, output;
-  theInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(input);
-  output = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(outputId);
-  theInput.addEventListener('keyup', function () {
-    inputVal = theInput.value;
-
-    if (inputVal == 0) {
-      output.innerHTML = "";
-      return;
-    } else {
-      var xmlhttp = new XMLHttpRequest();
-
-      xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          output.innerHTML = this.responseText;
-        }
-      };
-
-      xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
-      xmlhttp.send();
-    }
-  });
-};
 /**
  * 
  * @param {the url to post the data to} url 
@@ -106,6 +88,7 @@ var postFormData = /*#__PURE__*/function () {
         css,
         notificationId,
         processFormDataAction,
+        addClassByCSS,
         form,
         formEntries,
         options,
@@ -126,6 +109,16 @@ var postFormData = /*#__PURE__*/function () {
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = data; // error element
 
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+            };
+
+            addClassByCSS = function addClassByCSS(theCss, status) {
+              if (theCss === "W3css") {
+                return status == 'green' ? "w3-green" : "w3-red";
+              } else if (theCss === 'bulma') {
+                return status == 'green' ? "is-success" : "is-danger";
+              } else {
+                return status == 'green' ? "is-success" : "is-danger";
+              }
             }; // extract the form entries
 
 
@@ -139,18 +132,10 @@ var postFormData = /*#__PURE__*/function () {
               xsrfHeaderName: 'X-XSRF-TOKEN'
             }; // AXIOS POST FUNCTIONALITY
 
-            _context.next = 11;
+            _context.next = 12;
             return axios__WEBPACK_IMPORTED_MODULE_2___default().post(url, formEntries, options).then(function (response) {
-              var theClass;
-
-              if (css === "W3css") {
-                theClass = "w3-green";
-              } else if (css === 'bulma') {
-                theClass = "is-success";
-              } else {
-                theClass = "is-success";
-              }
-
+              // TO DECIDE ON THE NOTIFICATION
+              var theClass = addClassByCSS(css, 'green');
               processFormDataAction(theClass, response.data.message); // set timer to redirect to the homepage
 
               // set timer to redirect to the homepage
@@ -160,21 +145,11 @@ var postFormData = /*#__PURE__*/function () {
                   window.location.assign(redirect);
                 }, 2000);
               } //it clears all the contents
+              // formData.clearHtml()
 
-
-              //it clears all the contents
-              formData.clearHtml();
             })["catch"](function (error) {
               (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error);
-              var theClass;
-
-              if (css === "W3css") {
-                theClass = "w3-red";
-              } else if (css === 'bulma') {
-                theClass = "is-danger";
-              } else {
-                theClass = "is-danger";
-              }
+              var theClass = addClassByCSS(css, 'red');
 
               if (error.response) {
                 (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response);
@@ -182,7 +157,7 @@ var postFormData = /*#__PURE__*/function () {
               }
             });
 
-          case 11:
+          case 12:
           case "end":
             return _context.stop();
         }
@@ -201,7 +176,7 @@ var postFormData = /*#__PURE__*/function () {
  */
 
 var getApiData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL, token) {
     var config;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
       while (1) {
@@ -211,7 +186,8 @@ var getApiData = /*#__PURE__*/function () {
               headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
               }
             };
             return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (res) {
@@ -228,10 +204,54 @@ var getApiData = /*#__PURE__*/function () {
     }, _callee2);
   }));
 
-  return function getApiData(_x3) {
+  return function getApiData(_x3, _x4) {
     return _ref2.apply(this, arguments);
   };
 }();
+/**
+ * 
+ * @param { name} cname 
+ * @param {* value} cvalue 
+ * @param {* no of days 365} exdays 
+ */
+
+var setCookie = function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+  var expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+};
+var getCookie = function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+
+  return "";
+};
+var checkCookie = function checkCookie() {
+  var user = getCookie("username");
+
+  if (user != "") {
+    alert("Welcome again " + user);
+  } else {
+    user = prompt("Please enter your name:", "");
+
+    if (user != "" && user != null) {
+      setCookie("username", user, 365);
+    }
+  }
+};
 
 /***/ })
 

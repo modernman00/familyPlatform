@@ -16,12 +16,12 @@ const LoginCode = (e) => {
         id('setLoader').style.display = "block"
         id('loader').classList.add('loader')
 
-       // const location = localStorage.getItem('redirect')
+        // get the direct from the login script (getstorage)
+        const location = localStorage.getItem('redirect')
 
-       postFormData("/login/code", "codeForm", location)
+        postFormData("/login/code", "codeForm", location)
 
         localStorage.removeItem('redirect')
-
 
     } catch (err) {
         showError(err)

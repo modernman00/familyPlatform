@@ -30,15 +30,17 @@ function checkPassword($inputData, $databaseData)
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
         $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
+       
         $data = ['password' => $newHash, 'id' => $id];
         $passUpdate = new AllFunctionalities();
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if(!$result) {
         msgException(404, "Password could not be updated");
-
         }
-    }
+
+    }  
+    return true;
 }
 
 
@@ -186,6 +188,6 @@ function generateUpdateTableWithToken($customerId)
         msgException(406, "Error : Could not update token");
     }
     $_SESSION['2FA_token_ts'] = time();
-    $_SESSION['identifyCust'] = $customerId;
+    $_SESSION['identifyCust'] = $customerId ?? "TEST";
     return $token;
 }

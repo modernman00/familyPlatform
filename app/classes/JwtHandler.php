@@ -16,10 +16,11 @@ class JwtHandler {
     public function __construct()
     {
         date_default_timezone_set('Europe/London');
+        
         $this->issuedAt =time();
 
-        //Token validity 
-        $this->expired = $this->issuedAt + 3600;
+        //Token validity  2 hours (7300)
+        $this->expired = $this->issuedAt + getenv('COOKIE_EXPIRE');
 
         // secret word or signature 
         $this->jwtSecret = getenv('JWT_TOKEN');
@@ -27,16 +28,17 @@ class JwtHandler {
 
     // encoding the token 
 
-    public function jwtEncodeData($iss, $data)
+    public function jwtEncodeData($serverName, $data)
     {
         $this->token = array(
-            'iss' => $iss,
-            'aud' => $iss,
+            'iss' => $serverName,
+            'aud' => $serverName,
             'iat'=> $this->issuedAt,
+            'nbf'=> $this->issuedAt,
             'exp'=> $this->expired,
             'data'=> $data
         );
-        $this->jwt = JWT::encode($this->token, $this->jwtSecret);
+        $this->jwt = JWT::encode($this->token, $this->jwtSecret, 'HS512');
         return $this->jwt;
     }
 
@@ -51,7 +53,7 @@ class JwtHandler {
     public function jwtDecodeData($jwt_token)
     {
         try{
-            $decode = JWT::decode($jwt_token, $this->jwtSecret, array('HS256'));
+            $decode = JWT::decode($jwt_token, $this->jwtSecret, array('HS512'));
             return [
                 "auth" => 1,
                 "data" => $decode->data

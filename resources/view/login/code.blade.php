@@ -10,6 +10,8 @@
 
     {{-- <p id="codeError"></p> --}}
 
+  
+
     <hr class="my-2">
     <form action="" method="post" id="codeForm" style="margin-left:20%; margin-right:20%;">
         <div class="form-group">

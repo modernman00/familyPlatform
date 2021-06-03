@@ -43,13 +43,10 @@ const LoginSubmission = (e) => {
 				id('setLoader').style.display = "block" // unblock the div block at the global.js
 
 				id('loader').classList.add('loader') // start the loader element
-				 localStorage.setItem('redirect', '/member/ProfilePage')
+				localStorage.setItem('redirect', '/member/ProfilePage')
 
 				postFormData("/login", "loginNow", "/login/code")
 
-				//id('submit').type = 'submit'
-
-				//console.log('submitted')
 			} else {
 
 				alert('The form cannot be submitted. Please check the errors')

@@ -29,7 +29,7 @@
         <p id="errorEventModal"></p>
 
         <div class="w3-center"><br>
-            <span id="cancel"
+            <span id="cancelModal"
                 class="w3-button w3-xlarge w3-hover-red w3-display-topright" title="Close Modal">&times;</span>
         </div>
 
@@ -124,8 +124,8 @@
             <button id="submitEventModal"  type="submit" name="submit" class="w3-button w3-block w3-section w3-blue  w3-padding submitEventModal"> Create Event
             </button>
 
-            <button id="cancelModal" type="button" name="cancel"
-            class="w3-button w3-red eventModalCancel">Cancel</button>
+            {{-- <button id="cancelModal" type="button" name="cancel"
+            class="w3-button w3-red eventModalCancel">Cancel</button> --}}
             <br><br>
 
           

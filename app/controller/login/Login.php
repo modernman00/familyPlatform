@@ -6,7 +6,9 @@ namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
-    Select, JwtHandler, verifyToken
+    Select,
+    JwtHandler,
+    verifyToken
 };
 
 use Exception;
@@ -20,6 +22,7 @@ class Login extends Select
 
     public function show()
     {
+
         $formAction = self::LOGIN;
         $_SESSION[self::LOGIN_TYPE] = self::LOGIN;
         return view('login', compact('formAction'));
@@ -57,23 +60,37 @@ class Login extends Select
             //4 check if email exist and get the database password
             $data = useEmailToFindData($sanitisedData);
 
-            //5. check password 
-            checkPassword(inputData: $sanitisedData, databaseData: $data);
+            $_SESSION['ID'] = $data['id'];
 
-            $jwt = new JwtHandler();
-            $token = $jwt->jwtEncodeData(getenv('APP_URL'), ['id' => $data['id'], 'email'=>$sanitisedData['email']]);
-            msgSuccess(201, "Credentials validated", $token);
+            //5. check password 
+            $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
             //4. control for login
             $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
-            // Login now based on login type
-            if ($detectIfAdminOrCustomer === self::ADMIN) {
-                $this->adminLogin($sanitisedData);
-            } else if ($detectIfAdminOrCustomer === self::LOGIN) {
-                $this->customerLogin($data);
-            }
+            if ($data && $validatePwd) {
 
+                // Login now based on login type
+                if ($detectIfAdminOrCustomer === self::ADMIN) {
+
+                    $this->adminLogin($sanitisedData);
+
+                } else if ($detectIfAdminOrCustomer === self::LOGIN) {
+
+                    $this->customerLogin($data);
+
+                }
+
+               
+
+                msgSuccess(201, "Credentials validated");
+
+            } else {
+
+                session_unset();
+
+                msgException(401, "Your credential could not be verified");
+            }
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -87,17 +104,16 @@ class Login extends Select
         $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
-            // http_response_code(406); // sets the response to 406
-            // echo http_response_code(); // echo the new response code
-            // throw new Exception("We do not recognise your account", 1);
 
             msgException(406, 'We do not recognise your account');
-
-
         }
 
         generateSendTokenEmail($data);
+
         $_SESSION['login'] = 1;
+
+        unset($_SESSION['/loginType']); // not needed anymore
+
         session_regenerate_id();
     }
 

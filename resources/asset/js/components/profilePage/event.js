@@ -22,14 +22,13 @@ const process = (e) => {
         id('eventModalForm_notification').classList.remove('w3-red') // remove the danger class from the notification
         id('error').innerHTML = ""
         formData.massValidate();
-        log(formData.error)
+        // log(formData.error)
         if (formData.error.length <= 0) {
             // initiate the api
             //  qSel('.submitEventModal').type = 'submit'
             id('loader').classList.add('loader') // start the loader element
             postFormData("/member/profilePage", 'eventModalForm', null, "w3css")
-
-            window.location.replace("/member/profilePage")
+            //window.location.replace("/member/profilePage")
         } else {
             alert('The form cannot be submitted. Please check the errors')
             formData.clearError()

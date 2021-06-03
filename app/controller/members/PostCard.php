@@ -41,4 +41,12 @@ class PostCard extends Db {
      
     }
 
+
+    public function setHeader()
+    {
+        $token = $_GET['token'];
+         setCookie(name:'tokenJWT', value:$token, expires_or_options:time() + 3600, path: "/", domain:'', secure: true, httponly: true );
+         msgSuccess(200, "message set");
+    }
+
 }

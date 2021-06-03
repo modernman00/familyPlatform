@@ -12,18 +12,13 @@ use App\classes\{
 };
 
 use App\model\AllMembersData;
-// use Exception;
-
-
 class Event extends AllMembersData
 {
     private const REDIRECT = "Location: /member/ProfilePage";
 
     static function submitEvent()
     {
-
         try {
-          
             // SANITISE THE ENTRY
             $cleanData = getSanitisedInputData($_POST);
             CheckToken::tokenCheck('token', self::REDIRECT);
@@ -32,9 +27,7 @@ class Event extends AllMembersData
 
             Insert::submitForm2('events', $cleanData);
 
-            http_response_code(200);
-            echo http_response_code();
-            echo json_encode("event successfully created");
+            msgSuccess(200, "event successfully created");
 
         } catch (\Throwable $th) {
             showError($th);
@@ -82,14 +75,6 @@ class Event extends AllMembersData
             showError($th);
         }
     }
-
-    // // GET THE EVENT DATA 
-    // private static function getEventData(): array
-    // {
-    //     $table = ['personal', 'events'];
-    //     return parent::getMembers($table, 'eventDate');
-    // }
-
 
     // PRIVATE FUNCTION TO SEND EVENT NOTIFICATION
     private static function sendNotification($data, $subject)

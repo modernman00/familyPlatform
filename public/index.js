@@ -107,7 +107,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/code') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/code */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/ */ "./resources/asset/js/components/generateCode/index.js")).then(function (module) {
+  Promise.all(/*! import() | codeSplit/code */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);

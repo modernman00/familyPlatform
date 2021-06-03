@@ -6,7 +6,8 @@ namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
-    Select, VerifyToken
+    Select,
+    jwtHandler
 };
 use Exception;
 
@@ -21,19 +22,12 @@ class Code extends Select
 
     public function show()
     {
-        if (!$_SESSION[self::TOKEN_SESSION]) {
-            $login = "login";
-            return view('error/notFound', compact('login'));
-        }
-        //  printArr($_SESSION);
         return view('login/code');
     }
 
     public function verify()
     {
         try {
-
-           CheckToken::tokenCheck('token', '/login/code');
 
             $code = checkInput($_POST["code"]);
 
@@ -44,15 +38,16 @@ class Code extends Select
 
             $this->memberId = checkInput($_SESSION['identifyCust']);
 
-            // // set time limit to use code
-            if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 100000) {
-
+            if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 1000) {
+                $diff = time() - $_SESSION[self::TOKEN_SESSION];
                 $this->errorArr[] = "Invalid or expired Token";
-                msgException(401, "Invalid or expired Token");
+                msgException(401, "Invalid or expired Token $diff");
             }
-            unset($_SESSION[self::TOKEN_SESSION]); // job done! delete
+            //unset($_SESSION[self::TOKEN_SESSION]); // job done! delete
 
             // check if the code is stored in the database
+
+            CheckToken::tokenCheck('token', '/login/code');
 
             $query = Select::formAndMatchQuery(selection: "SELECT_COUNT_TWO", table: 'account', identifier1: 'id', identifier2: 'token');
 
@@ -68,30 +63,47 @@ class Code extends Select
             if (count($this->errorArr) == 0) {
 
                 // for normal login redirection
-                if (isset($_SESSION['/loginType'])) {
+                if (isset($_SESSION['login'])) {
 
                     $_SESSION['loggedIn'] = true;
 
                     $_SESSION['memberId'] = $this->memberId;
 
+                    // generate a jwt token
+                    $jwt = new JwtHandler();
+                    $token = $jwt->jwtEncodeData(getenv('APP_URL'), ['id' => $this->memberId]);
+                    // 86400 = 1 day
+
+                    // only set a cookie if not already set
+
+                    if (!isset($_COOKIE['waleToken'])) {
+                        if (getenv("APP_ENV") === "local") {
+
+                            setcookie("waleToken", $token, time() + getenv('COOKIE_EXPIRE'), '/', "", false, true);
+                        } else {
+                            setcookie("waleToken", $token, time() + getenv('COOKIE_EXPIRE'), "/", getenv('APP_URL'), true, true);
+                        }
+                    }
+
                     // if ($_SESSION['loginType'] = "/login") {
-                        session_regenerate_id();
-                        unset($_SESSION['login'], $_SESSION['id']);
+                    session_regenerate_id();
+                    unset($_SESSION['login'], $_SESSION['id']);
 
-                        // verify token  
-
-                        $tokenVerify = new verifyToken();
-                        $tokenVerify->index();
+                    msgSuccess(200, "Code authentication", $token);
 
                     unset($_SESSION['changePW']);
-                } 
-                else {
-                    throw new Exception("You are an alien!");
+
+                } elseif ($_SESSION['changePW']) {
+
+                    msgSuccess(200, "Code authentication");
+
+                } else {
+
+                    msgException(401, "You are an alien");
                 }
             }
         } catch (\Throwable $th) {
             showError($th);
-
         }
     }
 }

@@ -17,7 +17,7 @@
           
         </span>
 
-        <p class="commentFont"> {{ $comment['comment'] }}</p>
+        <p class="commentFont"> {{ $comment['comment'] }} </p>
         
         <hr>
 
