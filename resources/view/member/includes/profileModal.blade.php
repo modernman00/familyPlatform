@@ -17,8 +17,9 @@
 
     </div>
 
-    <form class="w3-container" action="/member/profilePage/post" id='formPostMessageModal' method="post"
-      enctype='multipart/form-data'>
+      <p id="formPostMessageModal_notification"></p>
+
+    <form class="w3-container" id='formPostMessageModal' method="post" enctype='multipart/form-data'>
 
       <div class="w3-section">
 
@@ -31,18 +32,13 @@
           <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
           {{--  </button>  --}}
 
-       
-
-    
-        
-             <button type="submit" name="submit" class="w3-button w3-green"><i
-              class="fa fa-pencil"></i>
+          <button type="button" id="submitPost" name="submit" class="w3-button w3-green"><i class="fa fa-pencil"></i>
              Post</button>
 
           <button onclick="document.getElementById('id01').style.display='none'" type="button"
             class="w3-button w3-red">Cancel</button>
 
-      </div>
+        </div>
     </form>
 
 

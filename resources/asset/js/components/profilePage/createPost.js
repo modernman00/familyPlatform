@@ -1,7 +1,7 @@
 "use strict";
 import { id } from "../global"
 
-import { postFormData } from "../helper/http"
+// import { postFormData } from "../helper/http"
 
 try{
 

@@ -40,7 +40,7 @@ try {
             id(commentFormId).style.display = "block"
 
             // Submit function for comment using POST API
-        } else if (elementId.includes("submitComment")){
+        } else if (elementId.includes("submitComment")) {
             // get the specific form id
             e.preventDefault()
             const idForm = elementId.replace("submit", "form")
@@ -50,7 +50,10 @@ try {
             location.reload();
 
             // getApiData()
-        }   
+        } else if (elementId.includes("submitPost")) {
+            postFormData("/member/profilePage/post", "formPostMessageModal")
+            location.reload();
+        }
     }
 } catch (e) {
     showError(e)

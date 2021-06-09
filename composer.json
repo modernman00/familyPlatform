@@ -2,7 +2,7 @@
     "description": "family platform",
     "authors" : [
         {
-            "name": "Jumoke and Olutobi Olaogun",
+            "name": "Olawale Olaogun",
             "email": "modernman00@yahoo.com"
         }
     ],     
@@ -27,6 +27,8 @@
 
 	"require": {
         "php" : "^8.0",
+        "cboden/ratchet" : "^0.4.3",
+        "react/zmq": "^0.4.0",
 		"dompdf/dompdf": "^0.8.3",
         "ext-gd": "*",
          "vlucas/phpdotenv": "^3.6",
@@ -36,7 +38,8 @@
           "phpmailer/phpmailer": "^6.1",
         "firebase/php-jwt": "^5.2",
         "tinify/tinify": "^1.5",
-        "ps/image-optimizer": "^2.0"
+        "ps/image-optimizer": "^2.0",
+        "rollbar/rollbar": "~1.5"
     },
     
     "require-dev": {

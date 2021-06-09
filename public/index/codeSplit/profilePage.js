@@ -762,6 +762,9 @@ try {
       var idForm = elementId.replace("submit", "form");
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
       location.reload(); // getApiData()
+    } else if (elementId.includes("submitPost")) {
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage/post", "formPostMessageModal");
+      location.reload();
     }
   };
 } catch (e) {
@@ -779,11 +782,9 @@ try {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 
 
-
-
+ // import { postFormData } from "../helper/http"
 
 try {
   // NEW MESSAGE MODAL

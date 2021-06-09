@@ -1,6 +1,12 @@
 <?php
 
 use App\model\EmailData;
+use \Rollbar\Rollbar;
+use \Rollbar\Payload\Level;
+Rollbar::init(array(
+    'access_token' => '376306559e2124e72b1577cb75a9a6475',
+    'environment'=> 'production'
+));
 
 function loggedDetection($filename)
 {
@@ -109,6 +115,7 @@ function msgException(int $errCode, string $msg)
 {
     http_response_code($errCode); // sets the response to 406
     //echo json_encode((['message' => $msg]));
+    Rollbar::log(Level::info(), $msg);
     return throw new Exception($msg, $errCode);
 }
 

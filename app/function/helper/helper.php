@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Philo\Blade\Blade;
 use App\classes\Select;
 
+
 function view($path, array $data = [])
 {
     // 1st param = accept the path to the file we actually want to load

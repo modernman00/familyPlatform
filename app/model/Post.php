@@ -16,13 +16,13 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    static function postLink2Id(string $id) : array
+    static function postLink2Id(string $id): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    static function getAllPost() : array
+    static function getAllPost(): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
         return parent::selectFn2(query: $query);
@@ -39,13 +39,13 @@ class Post extends Select
      * @return array
      */
 
-    public static function getAllPostProfilePics() : array
+    public static function getAllPostProfilePics(): array
     {
         return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
     }
 
 
-    public static function getAllCommentProfilePics() : array
+    public static function getAllCommentProfilePics(): array
     {
         return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
     }
@@ -57,7 +57,7 @@ class Post extends Select
      *  get the 
      * @return array
      */
-    public static function getAllPostPics($custNo) : array
+    public static function getAllPostPics($custNo): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+use React\EventLoop\Factory;
+
+
+
 use App\model\{
     SingleCustomerData,
     Post
@@ -13,9 +17,14 @@ use App\classes\{
     Sanitise,
     ProcessImg,
     Insert,
-    VerifyToken
+    VerifyToken,
+    Pusher
 };
+
+use App\classes\websocket\ReactServer;
 use App\model\AllMembersData as DataAll;
+
+
 
 use Exception;
 
@@ -140,7 +149,25 @@ class ProfilePage extends ProcessImg
         try {
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
-            header(self::REDIRECT);
+            msgSuccess(200, "Success");
+
+
+            // ReactServer::startChat();
+
+            // $loop = Factory::create();
+            // $pusher = new Pusher;
+
+
+            // This is our new stuff
+            // $context = new ZMQContext();
+            // $socket = $context->getSocket(ZMQ::SOCKET_PUSH, 'my pusher');
+
+            // printArr($socket);
+            // $socket->connect("tcp://localhost:80");
+
+            // $socket->send(json_encode($getPost));
+
+           // header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -165,7 +192,6 @@ class ProfilePage extends ProcessImg
     function postComment()
     {
         try {
-
             $getComment = $this->processPostData();
             Insert::submitForm2('comment', $getComment);
             // header(self::REDIRECT);

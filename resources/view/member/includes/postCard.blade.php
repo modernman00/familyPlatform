@@ -14,7 +14,9 @@
 
   {{--  POST TIME  --}}
   <span class="w3-right w3-opacity">
+
     {{ humanTiming($allData['date_created'])  }} ago
+
   </span>
 
   {{--  POST NAME  --}}
@@ -23,6 +25,7 @@
 
 
   <hr class="w3-clear">
+  
   {{--  POST MESSAGE  --}}
   <p class="postFont"> {{ $allData['postMessage'] }} </p>
 

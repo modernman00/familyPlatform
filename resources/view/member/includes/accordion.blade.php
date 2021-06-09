@@ -6,6 +6,10 @@
             <i class="fa fa-calendar-check-o fa-fw w3-margin-right"></i> Create Events
           </button>
 
+          <button class="w3-button w3-block w3-theme-l1 w3-left-align" id="chatBox">
+            <i class="fa fa-comment fa-fw w3-margin-right"></i> Chat
+          </button>
+
           <button onclick="myFunction('Demo2')" class="w3-button w3-block w3-theme-l1 w3-left-align">
             <i class="fa fa-calendar-check-o fa-fw w3-margin-right"></i> My Events
           </button>

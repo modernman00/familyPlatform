@@ -10,6 +10,8 @@ if (!session_start()) {
 }
 
 define("BR", "<br>");
+
+
 /**
  * You should use the mb_internal_encoding() function at the top of every PHP script you write (or at the top of your global include script), and the mb_http_output() function right after it if your script is outputting to a browser. Explicitly defining the encoding of your strings in every script will save you a lot of headaches down the road.
  * https://phptherightway.com/
