@@ -3,10 +3,13 @@
 use App\model\EmailData;
 use \Rollbar\Rollbar;
 use \Rollbar\Payload\Level;
+
 Rollbar::init(array(
-    'access_token' => '376306559e2124e72b1577cb75a9a6475',
-    'environment'=> 'production'
+    'access_token' => 'aabae2591eac40e3b26cfeb2da28a5fc',
+    'environment' => 'production'
 ));
+
+//376306559e2124e72b1577cb75a9a6475
 
 function loggedDetection($filename)
 {
@@ -107,7 +110,7 @@ function returnMsg(int $errCode, string $msg, array $extra = [])
 {
     http_response_code($errCode); // sets the response to 406
     echo http_response_code(); // echo the new response code
-    $apiMsg = [ 'status' => $errCode, 'message'=> $msg];
+    $apiMsg = ['status' => $errCode, 'message' => $msg];
     return array_merge($apiMsg, $extra);
 }
 
@@ -119,9 +122,16 @@ function msgException(int $errCode, string $msg)
     return throw new Exception($msg, $errCode);
 }
 
-function msgSuccess(int $code, string|array $msg, mixed $token =null)
+function msgSuccess(int $code, string|array $msg, mixed $token = null)
 {
     http_response_code($code); // sets the response to 406
-   // echo http_response_code(); // echo the new response code
+    // echo http_response_code(); // echo the new response code
     echo json_encode((['message' => $msg, 'token' => $token]));
+}
+
+function msgServerSent(string|array $data)
+{
+    $get = json_encode($data);
+    echo "data: {$get}\n\n";
+    flush();
 }

@@ -635,15 +635,24 @@ var postFormData = /*#__PURE__*/function () {
  * 
  * @param { the url you want to get} URL 
  * @returns 
+ // now we can use that data from the outside!
+axiosTest()
+    .then(data => {
+        response.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err))
  */
 
 var getApiData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL, token) {
-    var config;
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
+    var token,
+        config,
+        _args2 = arguments;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
             config = {
               headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -651,14 +660,13 @@ var getApiData = /*#__PURE__*/function () {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + token
               }
-            };
-            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (res) {
-              return res.data;
-            })["catch"](function (err) {
-              return err.response.data;
+            }; // create a promise for the axios request
+
+            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
+              return response.data;
             }));
 
-          case 2:
+          case 3:
           case "end":
             return _context2.stop();
         }
@@ -666,7 +674,7 @@ var getApiData = /*#__PURE__*/function () {
     }, _callee2);
   }));
 
-  return function getApiData(_x3, _x4) {
+  return function getApiData(_x3) {
     return _ref2.apply(this, arguments);
   };
 }();
@@ -729,6 +737,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+
+
 
 
 
@@ -761,9 +774,10 @@ try {
       e.preventDefault();
       var idForm = elementId.replace("submit", "form");
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
-      location.reload(); // getApiData()
+      location.reload(); // submit the post 
     } else if (elementId.includes("submitPost")) {
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage/post", "formPostMessageModal");
+      location.reload();
       location.reload();
     }
   };
@@ -882,6 +896,43 @@ var process = function process(e) {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/profilePage/html.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/html.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "allPost": () => (/* binding */ allPost)
+/* harmony export */ });
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+
+var allPost = function allPost(el) {
+  if (el) {
+    var _ref;
+
+    var imgArr = [];
+    var x;
+
+    for (x = 0; el.post_img; x++) {
+      imgArr.push(el.post_img[x]);
+    }
+
+    var img = (_ref = "/img/profile/".concat(el.img)) !== null && _ref !== void 0 ? _ref : "/avatar/avatarF.png";
+    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n        <a href=\"/profilepage/img?dir=img&pics=".concat(el.img, "&pID=").concat(el.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        <span class=\"w3-right w3-opacity\"> ").concat(el.timing, " ago</span>\n\n  <h5 id=\"fullName\"> ").concat(el.fullName, "\n  </h5>\n\n\n  <hr class=\"w3-clear\">\n\n  <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n  <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n  ").concat(imgArr.map(function (image, i) {
+      return "<a href=/profilepage/img?dir=img&pics=image&pID=".concat(image.post_no, "&path=post> <div class=w3-half> <img src=/img/post/").concat(image.post_no, " style=width:100% alt=images class=w3-margin-bottom w3-hover-sepia id=postImage").concat(i, "></div></a>");
+    }), "\n\n    <br>\n  </div>\n\n  <button type=\"button\" id=\"likeButton").concat(el.post_no, "\" name=\"").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(el.post_no, "\">").concat(el.post_likes, "</span></b>\n  </button>\n\n  <button type=\"button\" id=\"initComment").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n\n  <p id=\"formComment").concat(el.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(el.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(el.post_no, "\" value=").concat(el.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(el.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(el.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>\n\n  <br><br>\n\n  \n");
+    (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postIt', 'messagePost', 'postIt');
+    document.getElementById('postIt').insertAdjacentHTML('beforeend', html);
+  } else {
+    return "<p> Sorry, we could find the data</p>";
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/profilePage/img.js":
 /*!**********************************************************!*\
   !*** ./resources/asset/js/components/profilePage/img.js ***!
@@ -908,19 +959,65 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./homePage */ "./resources/asset/js/components/profilePage/homePage.js");
-/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_homePage__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _createPost__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./createPost */ "./resources/asset/js/components/profilePage/createPost.js");
-/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
-/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
-/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/profilePage/event.js");
+/* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
+/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homePage */ "./resources/asset/js/components/profilePage/homePage.js");
+/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_homePage__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _createPost__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./createPost */ "./resources/asset/js/components/profilePage/createPost.js");
+/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
+/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
+/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/profilePage/event.js");
+
+
+ // const postDataI = () => {
+//     getApiData(`/post/getAllPost`)
+//             .then(data => {
+//                 console.log(data.message)
+//                 data.message.map(el => { 
+//                     allPost(el)
+//                 })
+//             })
+//             .catch(err => {console.log(err)})
+// }
 
 
 
 
 
+ // import { allPost } from "../profilePage/html"
+// var source = new EventSource("/post/getAllPost");
+//     source.onmessage = function (event) {
+//         console.log(event)
+//         const data = JSON.parse(event.data)
+//         console.log(data)
+//         data.map(el => allPost(el))
+//     }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/loadPost.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/loadPost.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+ // import { getApiData } from "../helper/http"
 
 
+var source = new EventSource("/post/getAllPost");
+
+source.onmessage = function (event) {
+  // console.log(event)
+  var data = JSON.parse(event.data);
+  console.log(data);
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postIt');
+  data.map(function (el) {
+    return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(el);
+  });
+};
 
 /***/ })
 

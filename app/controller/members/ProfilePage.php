@@ -109,6 +109,7 @@ class ProfilePage extends ProcessImg
 
     private function processPostData()
     {
+     
 
         if (!$_POST) {
             throw new \Exception("There was no post data", 1);
@@ -144,9 +145,11 @@ class ProfilePage extends ProcessImg
         return $getSanitisePost;
     }
 
+
     function post()
     {
         try {
+    
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
             msgSuccess(200, "Success");

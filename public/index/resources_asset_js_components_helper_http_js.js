@@ -136,15 +136,24 @@ var postFormData = /*#__PURE__*/function () {
  * 
  * @param { the url you want to get} URL 
  * @returns 
+ // now we can use that data from the outside!
+axiosTest()
+    .then(data => {
+        response.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err))
  */
 
 var getApiData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL, token) {
-    var config;
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
+    var token,
+        config,
+        _args2 = arguments;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
+            token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
             config = {
               headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -152,14 +161,13 @@ var getApiData = /*#__PURE__*/function () {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + token
               }
-            };
-            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (res) {
-              return res.data;
-            })["catch"](function (err) {
-              return err.response.data;
+            }; // create a promise for the axios request
+
+            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
+              return response.data;
             }));
 
-          case 2:
+          case 3:
           case "end":
             return _context2.stop();
         }
@@ -167,7 +175,7 @@ var getApiData = /*#__PURE__*/function () {
     }, _callee2);
   }));
 
-  return function getApiData(_x3, _x4) {
+  return function getApiData(_x3) {
     return _ref2.apply(this, arguments);
   };
 }();

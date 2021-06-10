@@ -44,6 +44,12 @@ class Post extends Select
         return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
     }
 
+    public function getAllPostProfilePics2(): array
+    {
+        $inner = new InnerJoin;
+        return $inner->joinAll(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
+    }
+
 
     public static function getAllCommentProfilePics(): array
     {

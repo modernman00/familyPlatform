@@ -80,9 +80,15 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
  * 
  * @param { the url you want to get} URL 
  * @returns 
+ // now we can use that data from the outside!
+axiosTest()
+    .then(data => {
+        response.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err))
  */
 
-export const getApiData = async (URL, token) => {
+export const getApiData = async (URL, token=null) => {
   const config = {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -91,9 +97,14 @@ export const getApiData = async (URL, token) => {
       'Authorization': 'Bearer ' + token
     },
   }
-  return axios.get(URL, config)
-    .then(res => res.data)
-    .catch(err => err.response.data)
+   // create a promise for the axios request
+    
+  return axios.get(URL, config).then((response) => response.data)
+
+   // using .then, create a new promise which extracts the data
+
+    // .then(res => res.data)
+    // .catch(err => err.response.data)
 }
 
 /**

@@ -2,6 +2,8 @@
 import { get } from "lodash";
 import { id, log } from "../global"
 import { postFormData, getApiData } from "../helper/http"
+import axios from "axios"
+import { allPost} from "../profilePage/html"
 
 try {
 
@@ -33,6 +35,7 @@ try {
 
             id(likeCounterId).innerHTML = newLikeCounterVal;
 
+
             // Make the comment form to appear onclick
         } else if (elementId.includes("initComment")) {
 
@@ -49,10 +52,15 @@ try {
 
             location.reload();
 
-            // getApiData()
+            // submit the post 
         } else if (elementId.includes("submitPost")) {
+
             postFormData("/member/profilePage/post", "formPostMessageModal")
+
+        
             location.reload();
+            location.reload();
+
         }
     }
 } catch (e) {

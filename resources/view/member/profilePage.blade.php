@@ -19,14 +19,21 @@
   <!-- End Left Column -->
 
     {{-- POST MESSAGE --}}
-    <div class="w3-col m7">
+    <div class="w3-col m7" id=" postMessages">
 
       @include('member/includes/postMessage')
       {{-- DISPLAY POST --}}
 
-      @foreach ($allData as $allData)
+      <div id="messagePost">
+
+         <div class="postIt" id="postIt"></div>
+
+      </div>
+
+ 
+      {{-- @foreach ($allData as $allData)
       @include('member/includes/postCard')
-      @endforeach
+      @endforeach --}}
 
       {{-- @endfor  --}}
     </div>

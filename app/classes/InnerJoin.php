@@ -59,12 +59,12 @@ class InnerJoin extends Db
         }
     }
 
-    public function joinAll(string $firstTable, string $para, array $table) : array
+    public function joinAll(string $firstTable, string $para, array $table, string $orderBy) : array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
-            $query2 = "SELECT * FROM $firstTable  $innerQueryToString";
+            $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
             $result = $this->connect()->prepare($query2);
             $result->execute();
             return $result->fetchAll(PDO::FETCH_ASSOC);

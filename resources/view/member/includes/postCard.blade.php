@@ -25,7 +25,7 @@
 
 
   <hr class="w3-clear">
-  
+
   {{--  POST MESSAGE  --}}
   <p class="postFont"> {{ $allData['postMessage'] }} </p>
 
@@ -89,6 +89,8 @@
 
 
 </div>
+
+
 
 {{-- <script>  
  const postId = @json($allData['post_no']) 

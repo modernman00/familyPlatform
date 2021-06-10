@@ -4,7 +4,7 @@ $router->map('POST', '/member/profilePage/post', 'App\controller\members\Profile
 
 // GET ALL MEMBERS POST
 
-$router->map('GET', '/post/getAllPost', 'App\model\Post@getAllPost', 'all_posts');
+$router->map('GET', '/post/getAllPost', 'App\controller\members\PostMessage@index', 'all_posts');
 
 $router->map('POST', '/postCommentProfile', 'App\controller\members\ProfilePage@postComment', 'profile_page_comment');
 
