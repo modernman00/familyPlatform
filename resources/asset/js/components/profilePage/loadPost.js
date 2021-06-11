@@ -1,6 +1,6 @@
 import { removeDiv, createAndAppendElement } from '../helper/general'
 // import { getApiData } from "../helper/http"
-import { allPost } from "../profilePage/html"
+import { allPost, pictures} from "../profilePage/html"
 
     var source = new EventSource("/post/getAllPost");
     source.onmessage = function (event) {
@@ -8,6 +8,11 @@ import { allPost } from "../profilePage/html"
         const data = JSON.parse(event.data)
         console.log(data)
          removeDiv('postIt')
-        data.map(el => allPost(el))
+         removeDiv('postItButton')
+        data.map(el => {
+            allPost(el)
+            pictures(el)
+            })
+    
     }
 

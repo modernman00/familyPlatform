@@ -905,27 +905,26 @@ var process = function process(e) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "pictures": () => (/* binding */ pictures),
 /* harmony export */   "allPost": () => (/* binding */ allPost)
 /* harmony export */ });
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
+
+var pictures = function pictures(el) {
+  var html = "\n  <button type=\"button\" id=\"likeButton".concat(el.post_no, "\" name=\"").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(el.post_no, "\">").concat(el.post_likes, "</span></b>\n  </button>\n\n  <button type=\"button\" id=\"initComment").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n");
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postItButton', 'messagePost', 'postItButton');
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postItButtons').insertAdjacentHTML('beforeend', html);
+};
 var allPost = function allPost(el) {
   if (el) {
     var _ref;
 
-    var imgArr = [];
-    var x;
-
-    for (x = 0; el.post_img; x++) {
-      imgArr.push(el.post_img[x]);
-    }
-
     var img = (_ref = "/img/profile/".concat(el.img)) !== null && _ref !== void 0 ? _ref : "/avatar/avatarF.png";
-    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n        <a href=\"/profilepage/img?dir=img&pics=".concat(el.img, "&pID=").concat(el.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        <span class=\"w3-right w3-opacity\"> ").concat(el.timing, " ago</span>\n\n  <h5 id=\"fullName\"> ").concat(el.fullName, "\n  </h5>\n\n\n  <hr class=\"w3-clear\">\n\n  <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n  <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n  ").concat(imgArr.map(function (image, i) {
-      return "<a href=/profilepage/img?dir=img&pics=image&pID=".concat(image.post_no, "&path=post> <div class=w3-half> <img src=/img/post/").concat(image.post_no, " style=width:100% alt=images class=w3-margin-bottom w3-hover-sepia id=postImage").concat(i, "></div></a>");
-    }), "\n\n    <br>\n  </div>\n\n  <button type=\"button\" id=\"likeButton").concat(el.post_no, "\" name=\"").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(el.post_no, "\">").concat(el.post_likes, "</span></b>\n  </button>\n\n  <button type=\"button\" id=\"initComment").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n\n  <p id=\"formComment").concat(el.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(el.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(el.post_no, "\" value=").concat(el.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(el.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(el.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>\n\n  <br><br>\n\n  \n");
+    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n        <a href=\"/profilepage/img?dir=img&pics=".concat(el.img, "&pID=").concat(el.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        <span class=\"w3-right w3-opacity\"> ").concat(el.timing, " ago</span>\n\n  <h5 id=\"fullName\"> ").concat(el.fullName, "\n  </h5>\n\n\n  <hr class=\"w3-clear\">\n\n  <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n\n\n  <p id=\"formComment").concat(el.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(el.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(el.post_no, "\" value=").concat(el.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(el.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(el.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>\n\n  <br><br>\n\n  \n");
     (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postIt', 'messagePost', 'postIt');
-    document.getElementById('postIt').insertAdjacentHTML('beforeend', html);
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
   }
@@ -1014,8 +1013,10 @@ source.onmessage = function (event) {
   var data = JSON.parse(event.data);
   console.log(data);
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postIt');
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postItButton');
   data.map(function (el) {
-    return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(el);
+    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(el);
+    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.pictures)(el);
   });
 };
 

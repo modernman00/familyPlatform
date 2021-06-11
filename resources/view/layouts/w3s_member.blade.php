@@ -22,7 +22,7 @@
 // Accordion
 function myFunction(id) {
   var x = document.getElementById(id);
-  if (x.className.indexOf("w3-show") == -1) {w nz
+  if (x.className.indexOf("w3-show") == -1) {
     x.className += " w3-show";
     x.previousElementSibling.className += " w3-theme-d1";
   } else { 

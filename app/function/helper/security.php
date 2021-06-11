@@ -4,10 +4,10 @@ use App\model\EmailData;
 use \Rollbar\Rollbar;
 use \Rollbar\Payload\Level;
 
-Rollbar::init(array(
-    'access_token' => 'aabae2591eac40e3b26cfeb2da28a5fc',
-    'environment' => 'production'
-));
+// Rollbar::init(array(
+//     'access_token' => 'aabae2591eac40e3b26cfeb2da28a5fc',
+//     'environment' => 'production'
+// ));
 
 //376306559e2124e72b1577cb75a9a6475
 

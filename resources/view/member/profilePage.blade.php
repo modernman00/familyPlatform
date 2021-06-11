@@ -27,6 +27,7 @@
       <div id="messagePost">
 
          <div class="postIt" id="postIt"></div>
+          <div class="postItButton" id="postItButton"></div>
 
       </div>
 
