@@ -4,6 +4,8 @@ namespace App\controller;
 
 class About {
 
+    private $var = "delta";
+
     public function index()
     {
        view('about');
@@ -12,5 +14,10 @@ class About {
     function testing()
     {
         echo "this testing worked";
+    }
+
+    function testing2()
+    {
+        return view('learn');
     }
 }

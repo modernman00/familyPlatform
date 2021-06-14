@@ -58,8 +58,8 @@ try {
             postFormData("/member/profilePage/post", "formPostMessageModal")
 
         
-            location.reload();
-            location.reload();
+            ////location.reload();
+   
 
         }
     }

@@ -1,17 +1,21 @@
-import { removeDiv, createAndAppendElement } from '../helper/general'
+import { removeDiv } from '../helper/general'
 // import { getApiData } from "../helper/http"
 import { allPost, pictures} from "../profilePage/html"
 
-    var source = new EventSource("/post/getAllPost");
-    source.onmessage = function (event) {
-        // console.log(event)
+    // open connection to the server
+    var serverConnection = new EventSource("/post/getAllPost"); 
+
+    // start listening for messages from the server by attaching a handler for the message event
+
+    serverConnection.onmessage = function (event) {
+   
         const data = JSON.parse(event.data)
         console.log(data)
          removeDiv('postIt')
-         removeDiv('postItButton')
+     
         data.map(el => {
             allPost(el)
-            pictures(el)
+        
             })
     
     }

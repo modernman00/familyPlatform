@@ -776,9 +776,7 @@ try {
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
       location.reload(); // submit the post 
     } else if (elementId.includes("submitPost")) {
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage/post", "formPostMessageModal");
-      location.reload();
-      location.reload();
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage/post", "formPostMessageModal"); ////location.reload();
     }
   };
 } catch (e) {
@@ -917,12 +915,56 @@ var pictures = function pictures(el) {
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postItButton', 'messagePost', 'postItButton');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postItButtons').insertAdjacentHTML('beforeend', html);
 };
+
+var name = function name(fullName) {
+  return "<h5 id=\"fullName\"> ".concat(fullName, "</h5>");
+};
+
+var timing = function timing(postedAt) {
+  return "<span class=\"w3-right w3-opacity\"> ".concat(postedAt, " ago</span>");
+}; // showComment = () => {
+// }
+
+
+var nameImgTiming = function nameImgTiming(data) {
+  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(timing(data.timing), " ").concat(name(data.fullName));
+};
+
+var commentForm = function commentForm(data) {
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>");
+}; // const postImg = () => {
+// }
+
+
+var button = function button(data) {
+  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, " name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+};
+
+var showPostImg = function showPostImg(data) {
+  var postImg = [];
+
+  for (var i = 0; i < 6; i++) {
+    var images = 'post_img' + i;
+
+    if (data[images]) {
+      postImg.push(data[images]);
+    }
+  }
+
+  var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
+    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n        <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n          class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>");
+  };
+
+  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n  ".concat(postImg.map(function (pics, i) {
+    return picsImgHtml(pics, i, data.post_no);
+  }), "\n    <br>\n  </div>");
+};
+
 var allPost = function allPost(el) {
   if (el) {
-    var _ref;
+    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n  <br><br>"); // the function to be activated
 
-    var img = (_ref = "/img/profile/".concat(el.img)) !== null && _ref !== void 0 ? _ref : "/avatar/avatarF.png";
-    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n        <a href=\"/profilepage/img?dir=img&pics=".concat(el.img, "&pID=").concat(el.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        <span class=\"w3-right w3-opacity\"> ").concat(el.timing, " ago</span>\n\n  <h5 id=\"fullName\"> ").concat(el.fullName, "\n  </h5>\n\n\n  <hr class=\"w3-clear\">\n\n  <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n\n\n  <p id=\"formComment").concat(el.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(el.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(el.post_no, "\" value=").concat(el.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(el.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(el.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>\n\n  <br><br>\n\n  \n");
     (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postIt', 'messagePost', 'postIt');
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', html);
   } else {
@@ -1005,18 +1047,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
  // import { getApiData } from "../helper/http"
 
+ // open connection to the server
 
-var source = new EventSource("/post/getAllPost");
+var serverConnection = new EventSource("/post/getAllPost"); // start listening for messages from the server by attaching a handler for the message event
 
-source.onmessage = function (event) {
-  // console.log(event)
+serverConnection.onmessage = function (event) {
   var data = JSON.parse(event.data);
   console.log(data);
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postIt');
-  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postItButton');
   data.map(function (el) {
     (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(el);
-    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.pictures)(el);
   });
 };
 
