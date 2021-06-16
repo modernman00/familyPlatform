@@ -1,9 +1,6 @@
 "use strict";
-import { get } from "lodash";
 import { id, log } from "../global"
 import { postFormData, getApiData } from "../helper/http"
-import axios from "axios"
-import { allPost} from "../profilePage/html"
 
 try {
 
@@ -57,9 +54,11 @@ try {
 
             postFormData("/member/profilePage/post", "formPostMessageModal")
 
-        
-            ////location.reload();
-   
+            // make the post modal display disappear
+
+            id('id01').style.display = 'none'
+
+            // location.reload();   
 
         }
     }

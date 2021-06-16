@@ -64,7 +64,7 @@ const commentForm = (data) => {
 // }
 
 const button = (data) => {
-  return `<button type="button" id="likeButton${data.post_no} name="${data.post_no}"
+  return `<button type="button" id="likeButton${data.post_no}" name="${data.post_no}"
     class="w3-button w3-tiny w3-green w3-margin-bottom">
     <em class="fa fa-thumbs-up"></em>
      Like <b><span class="likeCounter" id="likeCounter${data.post_no}">${data.post_likes}</span></b>

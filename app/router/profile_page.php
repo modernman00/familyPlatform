@@ -6,6 +6,8 @@ $router->map('POST', '/member/profilePage/post', 'App\controller\members\Profile
 
 $router->map('GET', '/post/getAllPost', 'App\controller\members\PostMessage@index', 'all_posts');
 
+$router->map('GET', '/post/getAllPost/update', 'App\controller\members\PostMessage@update', 'all_posts_update');
+
 $router->map('POST', '/postCommentProfile', 'App\controller\members\ProfilePage@postComment', 'profile_page_comment');
 
 $router->map('POST', '/member/profilePage/profileImg', 'App\controller\members\ProfilePage@profileImage', 'profile_page_profileImg');

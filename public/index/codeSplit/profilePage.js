@@ -663,7 +663,7 @@ var getApiData = /*#__PURE__*/function () {
             }; // create a promise for the axios request
 
             return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
-              return response.data;
+              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
             }));
 
           case 3:
@@ -725,24 +725,16 @@ var checkCookie = function checkCookie() {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/comment.js":
-/*!**************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/comment.js ***!
-  \**************************************************************/
+/***/ "./resources/asset/js/components/profilePage/allEvents.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/allEvents.js ***!
+  \****************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
-
-
-
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 
 
 
@@ -760,23 +752,25 @@ try {
     if (elementId.includes("likeButton")) {
       // replace button with Counter to get the span id 
       var likeCounterId = elementId.replace('Button', 'Counter');
-      var likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(likeCounterId).innerHTML; // get the post like using the post id
+      var likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML; // get the post like using the post id
 
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal)); // add one to the result 
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal)); // add one to the result 
 
       newLikeCounterVal = parseInt(likeCounterVal) + 1;
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(likeCounterId).innerHTML = newLikeCounterVal; // Make the comment form to appear onclick
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal; // Make the comment form to appear onclick
     } else if (elementId.includes("initComment")) {
       var commentFormId = elementId.replace('init', 'form');
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(commentFormId).style.display = "block"; // Submit function for comment using POST API
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block"; // Submit function for comment using POST API
     } else if (elementId.includes("submitComment")) {
       // get the specific form id
       e.preventDefault();
       var idForm = elementId.replace("submit", "form");
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
       location.reload(); // submit the post 
     } else if (elementId.includes("submitPost")) {
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage/post", "formPostMessageModal"); ////location.reload();
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/member/profilePage/post", "formPostMessageModal"); // make the post modal display disappear
+
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none'; // location.reload();   
     }
   };
 } catch (e) {
@@ -785,43 +779,10 @@ try {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/createPost.js":
-/*!*****************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/createPost.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-
-
- // import { postFormData } from "../helper/http"
-
-try {
-  // NEW MESSAGE MODAL
-  var showModal = function showModal() {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
-  }; // CREATE EVENT MODAL
-
-
-  var showEvent = function showEvent() {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
-  }; //EVENT ACTION
-
-
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent').addEventListener('click', showEvent);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg').addEventListener('click', showModal); // handle post message
-} catch (e) {
-  console.log(e.message);
-}
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/event.js":
-/*!************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/event.js ***!
-  \************************************************************/
+/***/ "./resources/asset/js/components/profilePage/createEvent.js":
+/*!******************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/createEvent.js ***!
+  \******************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -938,7 +899,7 @@ var commentForm = function commentForm(data) {
 
 
 var button = function button(data) {
-  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, " name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
 };
 
 var showPostImg = function showPostImg(data) {
@@ -1003,10 +964,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
 /* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homePage */ "./resources/asset/js/components/profilePage/homePage.js");
 /* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_homePage__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _createPost__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./createPost */ "./resources/asset/js/components/profilePage/createPost.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
 /* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
-/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
-/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/profilePage/event.js");
+/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
+/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 
 
  // const postDataI = () => {
@@ -1044,21 +1005,83 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
- // import { getApiData } from "../helper/http"
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
 
- // open connection to the server
 
-var serverConnection = new EventSource("/post/getAllPost"); // start listening for messages from the server by attaching a handler for the message event
 
-serverConnection.onmessage = function (event) {
-  var data = JSON.parse(event.data);
-  console.log(data);
+ // const config = {
+//     headers: {
+//       'X-Requested-With': 'XMLHttpRequest',
+//       'Content-Type': 'application/json',
+//       'Accept': 'application/json',
+//     //   'Authorization': 'Bearer ' + token
+//     },
+//   }
+// axios.get("/post/getAllPost", config)
+// .then(response => response.data.message.map(el => {
+//         allPost(el)
+//         }))
+// .catch(err => log(err.message))
+// open connection to the server
+
+var serverConnection = new EventSource("/post/getAllPost/update"); // start listening for messages from the server by attaching a handler for the message event
+
+var newPostFn = function newPostFn(e) {
+  if (e.origin != "http://olaogun.dev.com") {
+    throw new Error("What is your origin?");
+  }
+
+  var data = JSON.parse(e.data);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e); // const count = localStorage.getItem('count')
+  // if (count == data.length) {
+
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postIt');
-  data.map(function (el) {
-    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(el);
-  });
+  return data.map(function (el) {
+    // log(el)
+    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.allPost)(el);
+  }); // }
+  // localStorage.setItem('count', data.length)
 };
+
+serverConnection.onmessage = function (e) {
+  newPostFn(e);
+}; //serverConnection.addEventListener = ('newPost', newPostFn)
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/modal.js":
+/*!************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/modal.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+ // import { postFormData } from "../helper/http"
+
+try {
+  // NEW MESSAGE MODAL
+  var showModal = function showModal() {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
+  }; // CREATE EVENT MODAL
+
+
+  var showEvent = function showEvent() {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
+  }; //EVENT ACTION
+
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent').addEventListener('click', showEvent);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg').addEventListener('click', showModal); // handle post message
+} catch (e) {
+  console.log(e.message);
+}
 
 /***/ })
 

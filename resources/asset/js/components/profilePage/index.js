@@ -16,10 +16,10 @@ import "./loadPost"
  
 
 import './homePage'
-import "./createPost"
+import "./modal"
 import "./img"
-import "./comment"
-import "./event"
+import "./allEvents"
+import "./createEvent"
 
 // import { allPost } from "../profilePage/html"
 

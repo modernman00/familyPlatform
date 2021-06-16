@@ -99,7 +99,7 @@ export const getApiData = async (URL, token=null) => {
   }
    // create a promise for the axios request
     
-  return axios.get(URL, config).then((response) => response.data)
+  return axios.get(URL, config).then((response) => log(response.data))
 
    // using .then, create a new promise which extracts the data
 

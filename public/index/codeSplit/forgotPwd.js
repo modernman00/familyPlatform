@@ -206,7 +206,7 @@ var getApiData = /*#__PURE__*/function () {
             }; // create a promise for the axios request
 
             return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
-              return response.data;
+              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
             }));
 
           case 3:

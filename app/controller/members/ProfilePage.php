@@ -149,9 +149,12 @@ class ProfilePage extends ProcessImg
     function post()
     {
         try {
+
+            
     
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
+            $_SESSION['NEW_POST'] = true; // use it for server sent event update
             msgSuccess(200, "Success");
 
 
