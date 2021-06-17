@@ -1,25 +1,6 @@
 import { removeDiv, createAndAppendElement } from '../helper/general'
 import { id, log } from '../global'
 
-export const pictures = (el) => {
-
-
-
-  const html = `
-  <button type="button" id="likeButton${el.post_no}" name="${el.post_no}"
-    class="w3-button w3-tiny w3-green w3-margin-bottom">
-    <em class="fa fa-thumbs-up"></em>
-     Like <b><span class="likeCounter" id="likeCounter${el.post_no}">${el.post_likes}</span></b>
-  </button>
-
-  <button type="button" id="initComment${el.post_no}"
-    class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>
-`
-  createAndAppendElement('div', 'postItButton', 'messagePost', 'postItButton')
-
-  id('postItButtons').insertAdjacentHTML('beforeend', html)
-
-}
 
 const name = (fullName) => {
   return `<h5 id="fullName"> ${fullName}</h5>`
@@ -29,9 +10,6 @@ const timing = (postedAt) => {
   return `<span class="w3-right w3-opacity"> ${postedAt} ago</span>`
 }
 
-// showComment = () => {
-
-// }
 
 
 const nameImgTiming = (data) => {
@@ -103,11 +81,8 @@ const showPostImg = (data) => {
 
 }
 
-export const allPost = (el) => {
-
-  if (el) {
-
-    const html = `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
+const html = (el) => {
+  return `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
 
       ${nameImgTiming(el)}
 
@@ -120,18 +95,51 @@ export const allPost = (el) => {
     ${button(el)}
 
     ${commentForm(el)}
-  <br><br>`
+  </div><br><br>`
+}
 
+export const allPost = (el) => {
+
+  if (el) {
+
+
+    const postHtml = html(el);
 
     // the function to be activated
 
-    createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
+    /**
+     * ! Deprecated 
+      createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
+     */
 
-    id('postIt').insertAdjacentHTML('beforeend', html)
+
+    id('postIt').insertAdjacentHTML('beforeend', postHtml) // ! should be reviewed
+
+
 
   } else {
 
     return `<p> Sorry, we could find the data</p>`
 
   }
+}
+
+// ? is it still needed?
+
+export const appendNewPost = (el) => {
+  
+  if (!el) { return false; }
+
+  const commentForm1 = id(`formComment${el.post_no}`);
+  const inputComment = id(`formComment${el.post_no}`)
+  const submitComment = id(`formComment${el.post_no}`);
+
+  if (!commentForm1 || !inputComment || !submitComment) {
+
+    const appendHTML = html(el);
+
+    id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
+
+  }
+
 }

@@ -89,6 +89,8 @@ axiosTest()
  */
 
 export const getApiData = async (URL, token=null) => {
+  try {
+
   const config = {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -97,14 +99,18 @@ export const getApiData = async (URL, token=null) => {
       'Authorization': 'Bearer ' + token
     },
   }
-   // create a promise for the axios request
+
+  const fetch = await axios.get(URL, config)
+  return fetch.data
+  
     
-  return axios.get(URL, config).then((response) => log(response.data))
+  } catch (error) {
 
-   // using .then, create a new promise which extracts the data
-
-    // .then(res => res.data)
-    // .catch(err => err.response.data)
+    return error;
+    
+  }
+ 
+    
 }
 
 /**

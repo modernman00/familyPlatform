@@ -647,12 +647,14 @@ var getApiData = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
     var token,
         config,
+        fetch,
         _args2 = arguments;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
+            _context2.prev = 1;
             config = {
               headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -660,18 +662,25 @@ var getApiData = /*#__PURE__*/function () {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + token
               }
-            }; // create a promise for the axios request
+            };
+            _context2.next = 5;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config);
 
-            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
-              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
-            }));
+          case 5:
+            fetch = _context2.sent;
+            return _context2.abrupt("return", fetch.data);
 
-          case 3:
+          case 9:
+            _context2.prev = 9;
+            _context2.t0 = _context2["catch"](1);
+            return _context2.abrupt("return", _context2.t0);
+
+          case 12:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2);
+    }, _callee2, null, [[1, 9]]);
   }));
 
   return function getApiData(_x3) {
@@ -864,18 +873,13 @@ var process = function process(e) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "pictures": () => (/* binding */ pictures),
-/* harmony export */   "allPost": () => (/* binding */ allPost)
+/* harmony export */   "allPost": () => (/* binding */ allPost),
+/* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost)
 /* harmony export */ });
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
-var pictures = function pictures(el) {
-  var html = "\n  <button type=\"button\" id=\"likeButton".concat(el.post_no, "\" name=\"").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(el.post_no, "\">").concat(el.post_likes, "</span></b>\n  </button>\n\n  <button type=\"button\" id=\"initComment").concat(el.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n");
-  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postItButton', 'messagePost', 'postItButton');
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postItButtons').insertAdjacentHTML('beforeend', html);
-};
 
 var name = function name(fullName) {
   return "<h5 id=\"fullName\"> ".concat(fullName, "</h5>");
@@ -883,9 +887,7 @@ var name = function name(fullName) {
 
 var timing = function timing(postedAt) {
   return "<span class=\"w3-right w3-opacity\"> ".concat(postedAt, " ago</span>");
-}; // showComment = () => {
-// }
-
+};
 
 var nameImgTiming = function nameImgTiming(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
@@ -922,14 +924,37 @@ var showPostImg = function showPostImg(data) {
   }), "\n    <br>\n  </div>");
 };
 
+var html = function html(el) {
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n  </div><br><br>");
+};
+
 var allPost = function allPost(el) {
   if (el) {
-    var html = "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n  <br><br>"); // the function to be activated
+    var postHtml = html(el); // the function to be activated
 
-    (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)('div', 'postIt', 'messagePost', 'postIt');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', html);
+    /**
+     * ! Deprecated 
+      createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
+     */
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml); // ! should be reviewed
   } else {
     return "<p> Sorry, we could find the data</p>";
+  }
+}; // ? is it still needed?
+
+var appendNewPost = function appendNewPost(el) {
+  if (!el) {
+    return false;
+  }
+
+  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+
+  if (!commentForm1 || !inputComment || !submitComment) {
+    var appendHTML = html(el);
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
   }
 };
 
@@ -1009,25 +1034,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 
 
 
- // const config = {
-//     headers: {
-//       'X-Requested-With': 'XMLHttpRequest',
-//       'Content-Type': 'application/json',
-//       'Accept': 'application/json',
-//     //   'Authorization': 'Bearer ' + token
-//     },
-//   }
-// axios.get("/post/getAllPost", config)
-// .then(response => response.data.message.map(el => {
-//         allPost(el)
-//         }))
-// .catch(err => log(err.message))
-// open connection to the server
 
-var serverConnection = new EventSource("/post/getAllPost/update"); // start listening for messages from the server by attaching a handler for the message event
+ // get the postdata which returns a promise
+
+var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_4__.getApiData)("/post/getAllPost"); // then get the result of the promise with the then function
+
+postData.then(function (response) {
+  return response.message.map(function (el) {
+    return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.allPost)(el);
+  });
+})["catch"](function (err) {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(err);
+});
+var serverConnection = new EventSource("/post/getAllPost/update");
 
 var newPostFn = function newPostFn(e) {
   if (e.origin != "http://olaogun.dev.com") {
@@ -1035,19 +1058,15 @@ var newPostFn = function newPostFn(e) {
   }
 
   var data = JSON.parse(e.data);
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e); // const count = localStorage.getItem('count')
-  // if (count == data.length) {
-
-  (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.removeDiv)('postIt');
-  return data.map(function (el) {
-    // log(el)
-    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.allPost)(el);
-  }); // }
-  // localStorage.setItem('count', data.length)
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e.lastEventId);
+  return data.forEach(function (el) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(el.post_no);
+    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(el);
+  });
 };
 
 serverConnection.onmessage = function (e) {
-  newPostFn(e);
+  return newPostFn(e);
 }; //serverConnection.addEventListener = ('newPost', newPostFn)
 
 /***/ }),

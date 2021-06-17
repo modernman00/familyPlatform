@@ -74,17 +74,11 @@ class Login extends Select
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
                     $this->adminLogin($sanitisedData);
-
                 } else if ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);
-
                 }
-
-               
-
                 msgSuccess(201, "Credentials validated");
-
             } else {
 
                 session_unset();
@@ -108,7 +102,11 @@ class Login extends Select
             msgException(406, 'We do not recognise your account');
         }
 
-        generateSendTokenEmail($data);
+  
+            generateSendTokenEmail($data);
+
+
+
 
         $_SESSION['login'] = 1;
 

@@ -5,6 +5,8 @@ namespace App\classes;
 use Exception;
 use PDOException;
 
+use App\classes\Transaction;
+
 class Insert extends Db
 {
     public function submitForm($table, $field)
@@ -39,6 +41,7 @@ class Insert extends Db
 
     public static function submitForm2($table, $field)
     {
+           Transaction::beginTransaction();
         try {
 
             // EXTRACT THE KEY FOR THE COL NAME
@@ -62,10 +65,16 @@ class Insert extends Db
                 echo http_response_code(); // echo the new response code
                 throw new Exception("Not able to execute data", 1);
             }
+
+            $_SESSION['LAST_INSERT_ID'] = Transaction::lastId();
+
+            Transaction::commit();
+            
             return $outcome;
         } catch (PDOException $e) {
             showError($e);
         } catch (\Throwable $e) {
+               Transaction::rollback();
             showError($e);
         }
     }

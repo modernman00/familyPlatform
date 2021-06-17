@@ -47,7 +47,7 @@
 
     {{-- MODAL --}}
 
-    @include('member/includes/profileModal')
+    @include('member/includes/postModal')
 
 
   </div>

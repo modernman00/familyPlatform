@@ -21,6 +21,8 @@ use App\classes\{
     Pusher
 };
 
+use App\controller\members\PostMessage;
+
 use App\classes\websocket\ReactServer;
 use App\model\AllMembersData as DataAll;
 
@@ -39,6 +41,8 @@ class ProfilePage extends ProcessImg
     function __construct()
     {
         unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
+
+       //TODO something is destroying the session after a few hours: find out
 
         // GET MEMBER'S DATA
         $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
@@ -150,11 +154,14 @@ class ProfilePage extends ProcessImg
     {
         try {
 
-            
-    
+
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
             $_SESSION['NEW_POST'] = true; // use it for server sent event update
+            $getPost['LAST_INSERT_ID'] = $_SESSION['LAST_INSERT_ID'];
+
+            // GET ALL THE INFORMATION ABOUT THE NEW POST: PROFILE PICS OF THE 
+
             msgSuccess(200, "Success");
 
 

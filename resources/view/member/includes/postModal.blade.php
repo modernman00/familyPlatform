@@ -32,7 +32,7 @@
           <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
           {{--  </button>  --}}
 
-          <button type="button" id="submitPost" name="submit" class="w3-button w3-green"><i class="fa fa-pencil"></i>
+          <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
              Post</button>
 
           <button onclick="document.getElementById('id01').style.display='none'" type="button"

@@ -148,12 +148,14 @@ var getApiData = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(URL) {
     var token,
         config,
+        fetch,
         _args2 = arguments;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
+            _context2.prev = 1;
             config = {
               headers: {
                 'X-Requested-With': 'XMLHttpRequest',
@@ -161,18 +163,25 @@ var getApiData = /*#__PURE__*/function () {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + token
               }
-            }; // create a promise for the axios request
+            };
+            _context2.next = 5;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config);
 
-            return _context2.abrupt("return", axios__WEBPACK_IMPORTED_MODULE_2___default().get(URL, config).then(function (response) {
-              return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
-            }));
+          case 5:
+            fetch = _context2.sent;
+            return _context2.abrupt("return", fetch.data);
 
-          case 3:
+          case 9:
+            _context2.prev = 9;
+            _context2.t0 = _context2["catch"](1);
+            return _context2.abrupt("return", _context2.t0);
+
+          case 12:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2);
+    }, _callee2, null, [[1, 9]]);
   }));
 
   return function getApiData(_x3) {
