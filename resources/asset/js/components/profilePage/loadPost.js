@@ -1,7 +1,6 @@
 import { removeDiv } from '../helper/general'
 import { id, log } from '../global'
 import { allPost, appendNewPost } from '../profilePage/html'
-import axios from "axios"
 import { getApiData } from "../helper/http"
 
 // get the postdata which returns a promise

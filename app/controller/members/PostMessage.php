@@ -48,20 +48,23 @@ class PostMessage
             // pick the newly added post using the session
 
             if ($_SESSION['LAST_INSERT_ID']) {
-
+                
+                // ! deprecated at some point
                 $lastEventId = floatval(isset($_SERVER['HTTP_LAST_EVENT_ID']) ? $_SERVER['HTTP_LAST_EVENT_ID'] : 0);
 
                 if ($lastEventId == 0) {
                     $lastEventId = floatval(isset($_GET['lastEventId']) ? $_GET['lastEventId'] : 0);
                 }
 
+                // find the new post data using the last insert id
+                
                 $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'post', identifier1: "post_no");
 
                 $message = Select::selectFn2($query, [$_SESSION['LAST_INSERT_ID']]);
 
                 $id = (int) $_SESSION['LAST_INSERT_ID'];
 
-                unset($_SESSION['LAST_INSERT_ID']);
+               $_SESSION['LAST_INSERT_ID'] = false;
 
                 msgServerSent($message, $id);
             }

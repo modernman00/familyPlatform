@@ -1032,16 +1032,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 
 
 
  // get the postdata which returns a promise
 
-var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_4__.getApiData)("/post/getAllPost"); // then get the result of the promise with the then function
+var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.getApiData)("/post/getAllPost"); // then get the result of the promise with the then function
 
 postData.then(function (response) {
   return response.message.map(function (el) {
