@@ -129,17 +129,12 @@ function msgSuccess(int $code, string|array $msg, mixed $token = null)
     echo json_encode((['message' => $msg, 'token' => $token]));
 }
 
-function msgServerSent(string|array $data, $id)
+function msgServerSent(string|array $data, string | int $id, string $event)
 {
     $get = json_encode($data);
-  
-    // $random = rand(10, 800000000);
-    echo "retry: 1000\n";   // ten seconds
-    // echo "id: $random\n";
+    echo "retry: 1000\n";   // one seconds
      echo "id: $id\n";
-     
-    //echo "event: $event\n";
-    // echo "data: {$po}\n";
+    echo "event: $event\n";
     echo "data: {$get}\n\n";
     // ob_flush();
     flush();

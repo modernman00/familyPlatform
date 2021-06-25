@@ -144,7 +144,8 @@ class ProfilePage extends ProcessImg
         // get the other post variables id, fullname, time of post
         $getSanitisePost['id'] = $_SESSION['id'];
         $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
-        $getSanitisePost['post_time'] = $_SESSION['currentTime'];
+        // $getSanitisePost['post_time'] = $_SESSION['currentTime'];
+        $getSanitisePost['post_time'] = milliSeconds();
 
         return $getSanitisePost;
     }
@@ -153,12 +154,10 @@ class ProfilePage extends ProcessImg
     function post()
     {
         try {
-
-
             $getPost = $this->processPostData();
             Insert::submitForm2('post', $getPost);
-            $_SESSION['NEW_POST'] = true; // use it for server sent event update
-            $getPost['LAST_INSERT_ID'] = $_SESSION['LAST_INSERT_ID'];
+            // $_SESSION['NEW_POST'] = true; // use it for server sent event update
+            // $getPost['LAST_INSERT_ID'] = $_SESSION['LAST_INSERT_ID'];
 
             // GET ALL THE INFORMATION ABOUT THE NEW POST: PROFILE PICS OF THE 
 

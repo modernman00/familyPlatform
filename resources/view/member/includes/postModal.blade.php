@@ -35,6 +35,7 @@
           <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
              Post</button>
 
+
           <button onclick="document.getElementById('id01').style.display='none'" type="button"
             class="w3-button w3-red">Cancel</button>
 

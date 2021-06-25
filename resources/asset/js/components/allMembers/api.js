@@ -1,5 +1,6 @@
 import axios from "axios";
 import { id, log, } from "../global"
+import { format, render } from "timeago.js"
 // import { eventInput } from "./event"
 import { loaderIcon } from "../helper/general"
 
@@ -12,10 +13,15 @@ const config = {
 }
 
 const renderHtml = (el) => {
+    log(el)
     if (el) {
         id('allMembers').classList.remove('loader')
 
-        const html = `<div class="card col-sm-4" id=${el.id}>
+          const img = (el.img) ? `/img/profile/${el.img}` : "/avatar/avatarF.png"
+
+        const html = `<div class="col-sm-4 mb-3" id=${el.id}>
+        <div class="card">
+         <img src="${img}" class="card-img-top allMember_profileImg" alt="...">
  
         <div class="card-body">
                     <h4 class='card-title'>${el.firstName} ${el.lastName}</h4>
@@ -24,8 +30,9 @@ const renderHtml = (el) => {
                     <br> <b>Mother:</b> ${el.motherName}
                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
                     <br> <b>Contact:</b>  ${el.email} | ${el.mobile} 
-                    <br> <b>Date joined:</b> ${el.date_created} ago </p>
+                    <br> <b>Date joined:</b> ${format(el.date_created)}</p>
                     <a href="/allMembers/setProfile?id=${el.id}" class="btn btn-primary stretched-link">See Profile</a>
+                </div>
                 </div>
             </div>`
 

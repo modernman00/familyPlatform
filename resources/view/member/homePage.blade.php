@@ -4,13 +4,16 @@
 @section('content')
 <br><br>
 <form>
-    <div class="form-group" style="margin-top: 30px;">
-         <input type="text" placeholder="search" name="searchFamily" class="form-control" id="searchFamily">
+    {{--  <div class="form-group" style="margin-top: 30px;">  --}}
+        <div class="mb-3 mt-3">
+               <input type="text" placeholder="search" name="searchFamily" class="form-control" id="searchFamily">
          <p id="searchHidden"></p>
-    </div>
+        </div>
+      
+    {{--  </div>  --}}
    
 </form>
- <br>
+
 
 <div class="row" id="allMembers">
 

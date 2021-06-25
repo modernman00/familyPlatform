@@ -36,7 +36,6 @@ class AllMembersController extends AllMembersData
         }
     }
 
-ππ
 
 
     // public function index2()

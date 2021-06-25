@@ -356,6 +356,123 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/helper/date.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/helper/date.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "calTiming": () => (/* binding */ calTiming),
+/* harmony export */   "updateTimeRealTime": () => (/* binding */ updateTimeRealTime),
+/* harmony export */   "timeAgo": () => (/* binding */ timeAgo)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+var calTiming = function calTiming(date) {
+  var seconds = Math.floor((new Date() - date) / 1000);
+  var interval = seconds / 31536000;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " years";
+  }
+
+  interval = seconds / 2592000;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " months";
+  }
+
+  interval = seconds / 86400;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " days";
+  }
+
+  interval = seconds / 3600;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " hours";
+  }
+
+  interval = seconds / 60;
+
+  if (interval > 1) {
+    return Math.floor(interval) + " minutes";
+  }
+
+  return Math.floor(seconds) + " seconds";
+};
+var aDay = 24 * 60 * 60 * 1000;
+console.log(calTiming(new Date(Date.now() - aDay)));
+console.log(calTiming(new Date(Date.now() - aDay * 2)));
+var element = document.querySelectorAll('time[data-time]');
+var updateTimeRealTime = function updateTimeRealTime() {
+  Array.prototype.forEach.call(element, function (entry) {
+    var out = ''; // ...
+
+    entry.textContent = out;
+  });
+  setTimeout(updateTimeRealTime, 1000 * 60);
+};
+setTimeout(updateTimeRealTime, 1000 * 60);
+var epochs = [['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60], ['second', 1]];
+
+var getDuration = function getDuration(timeAgoInSeconds) {
+  var _iterator = _createForOfIteratorHelper(epochs),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var _step$value = _slicedToArray(_step.value, 2),
+          name = _step$value[0],
+          seconds = _step$value[1];
+
+      var interval = Math.floor(timeAgoInSeconds / seconds);
+
+      if (interval >= 1) {
+        return {
+          interval: interval,
+          epoch: name
+        };
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+};
+
+var timeAgo = function timeAgo(date) {
+  var timeAgoInSeconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+  var _getDuration = getDuration(timeAgoInSeconds),
+      interval = _getDuration.interval,
+      epoch = _getDuration.epoch;
+
+  var suffix = interval === 1 ? '' : 's';
+  return "".concat(interval, " ").concat(epoch).concat(suffix, " ago");
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/helper/general.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
@@ -777,6 +894,7 @@ try {
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
       location.reload(); // submit the post 
     } else if (elementId.includes("submitPost")) {
+      var time = Date.now();
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/member/profilePage/post", "formPostMessageModal"); // make the post modal display disappear
 
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none'; // location.reload();   
@@ -876,22 +994,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "allPost": () => (/* binding */ allPost),
 /* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost)
 /* harmony export */ });
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_date__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/date */ "./resources/asset/js/components/helper/date.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
+
+
+var timeAgo = function timeAgo(x) {
+  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_1__.format)(x);
+};
 
 var name = function name(fullName) {
   return "<h5 id=\"fullName\"> ".concat(fullName, "</h5>");
 };
 
-var timing = function timing(postedAt) {
-  return "<span class=\"w3-right w3-opacity\"> ".concat(postedAt, " ago</span>");
+var postedAt = function postedAt(date) {
+  return "<div class=\"w3-right w3-opacity timeago\" datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_1__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 
 var nameImgTiming = function nameImgTiming(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
-  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(timing(data.timing), " ").concat(name(data.fullName));
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
 };
 
 var commentForm = function commentForm(data) {
@@ -937,7 +1061,7 @@ var allPost = function allPost(el) {
       createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
      */
 
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml); // ! should be reviewed
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').insertAdjacentHTML('afterbegin', postHtml); // ! should be reviewed
   } else {
     return "<p> Sorry, we could find the data</p>";
   }
@@ -948,13 +1072,13 @@ var appendNewPost = function appendNewPost(el) {
     return false;
   }
 
-  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
 
   if (!commentForm1 || !inputComment || !submitComment) {
     var appendHTML = html(el);
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').insertAdjacentHTML('beforeend', appendHTML);
   }
 };
 
@@ -993,6 +1117,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
 /* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
  // const postDataI = () => {
@@ -1005,6 +1130,7 @@ __webpack_require__.r(__webpack_exports__);
 //             })
 //             .catch(err => {console.log(err)})
 // }
+
 
 
 
@@ -1033,38 +1159,56 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 
 
 
- // get the postdata which returns a promise
 
-var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.getApiData)("/post/getAllPost"); // then get the result of the promise with the then function
+ // set an empty array
 
+var state = {
+  data: []
+}; // 2. get the data from the database to set the inital data
+
+var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.getApiData)("/post/getAllPost");
 postData.then(function (response) {
-  return response.message.map(function (el) {
-    return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.allPost)(el);
-  });
-})["catch"](function (err) {
+  state.data = response.message;
+  var serverConnection = new EventSource("/post/getAllPost/update");
+
+  var updatePost = function updatePost(e) {
+    if (e.origin != "http://olaogun.dev.com") {
+      throw new Error("What is your origin?");
+    }
+
+    if (e.data) {
+      var newPostData = JSON.parse(e.data); // check if the post no already exist
+
+      var newData = state.data.some(function (el) {
+        return el.post_no === newPostData.post_no;
+      }); // if it is not available, add to the data state
+
+      if (!newData) {
+        state.data.push(newPostData);
+      }
+    }
+
+    state.data.map(function (ele) {
+      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(ele);
+    });
+  }; //    serverConnection.onopen = function(e) {
+  //     console.log("Connection is opened");
+  //   };
+
+
+  serverConnection.addEventListener("update", function (e) {
+    return updatePost(e);
+  }); // addEventListener version
+  //  serverConnection.addEventListener('error', (e) => {
+  //   console.log("An error occurred while attempting to connect.");
+  // });
+}).then()["catch"](function (err) {
   return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(err);
 });
-var serverConnection = new EventSource("/post/getAllPost/update");
-
-var newPostFn = function newPostFn(e) {
-  if (e.origin != "http://olaogun.dev.com") {
-    throw new Error("What is your origin?");
-  }
-
-  var data = JSON.parse(e.data);
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e.lastEventId);
-  return data.forEach(function (el) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(el.post_no);
-    (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(el);
-  });
-};
-
-serverConnection.onmessage = function (e) {
-  return newPostFn(e);
-}; //serverConnection.addEventListener = ('newPost', newPostFn)
 
 /***/ }),
 

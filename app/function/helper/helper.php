@@ -378,6 +378,18 @@ function humanTiming($time)
     }
 }
 
+
+function milliSeconds() {
+  $microtime = microtime();
+  $comps = explode(' ', $microtime);
+
+  // Note: Using a string here to prevent loss of precision
+  // in case of "overflow" (PHP converts it to a double)
+  return sprintf('%d%03d', $comps[1], $comps[0] * 1000);
+}
+
+
+
 function checkEmailExist($email)
 {
     $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: 'account', identifier1: 'email');

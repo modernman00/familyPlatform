@@ -20,6 +20,9 @@ import "./modal"
 import "./img"
 import "./allEvents"
 import "./createEvent"
+import {log} from '../global';
+
+
 
 // import { allPost } from "../profilePage/html"
 

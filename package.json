@@ -24,10 +24,10 @@
   "devDependencies": {
     "cross-env": "^6.0.3",
     "laravel-mix": "^6.0.18",
-    "node-sass": "^4.13.1",
+    "node-sass": "^6.0.1",
     "parcel": "^2.0.0-beta.2",
     "resolve-url-loader": "^3.1.2",
-    "sass-loader": "^8.0.0",
+    "sass-loader": "^12.1.0",
     "vue-template-compiler": "^2.6.12",
     "webpack": "^5.9.0"
   },
@@ -53,6 +53,7 @@
     "path-browserify": "^0.0.1",
     "sass": "^1.32.2",
     "svg-gauge": "^1.0.6",
+    "timeago.js": "^4.0.2",
     "validator": "^13.5.2"
   }
 }

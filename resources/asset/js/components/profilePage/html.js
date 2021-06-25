@@ -1,14 +1,23 @@
-import { removeDiv, createAndAppendElement } from '../helper/general'
+import { calTiming, getDuration } from '../helper/date'
+import { format, render } from "timeago.js"
+
 import { id, log } from '../global'
+
+
+
+const timeAgo = (x) => format(x)
 
 
 const name = (fullName) => {
   return `<h5 id="fullName"> ${fullName}</h5>`
 }
 
-const timing = (postedAt) => {
-  return `<span class="w3-right w3-opacity"> ${postedAt} ago</span>`
+const postedAt = (date) => {
+  return `<div class="w3-right w3-opacity timeago" datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
 }
+
+
+
 
 
 
@@ -18,7 +27,7 @@ const nameImgTiming = (data) => {
   return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile">
         <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
         </a>
-        ${timing(data.timing)} ${name(data.fullName)}`
+        ${postedAt(data)} ${name(data.fullName)}`
 }
 
 const commentForm = (data) => {
@@ -113,7 +122,7 @@ export const allPost = (el) => {
      */
 
 
-    id('postIt').insertAdjacentHTML('beforeend', postHtml) // ! should be reviewed
+    id('postIt').insertAdjacentHTML('afterbegin', postHtml) // ! should be reviewed
 
 
 
@@ -127,7 +136,7 @@ export const allPost = (el) => {
 // ? is it still needed?
 
 export const appendNewPost = (el) => {
-  
+
   if (!el) { return false; }
 
   const commentForm1 = id(`formComment${el.post_no}`);
@@ -138,7 +147,7 @@ export const appendNewPost = (el) => {
 
     const appendHTML = html(el);
 
-    id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
+    id('postIt').insertAdjacentHTML('beforeend', appendHTML)
 
   }
 

@@ -24,7 +24,7 @@ class Post extends Select
 
     static function getAllPost(): array
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post');
+        $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post', orderBy: "ORDER BY post_no DESC");
         return parent::selectFn2(query: $query);
     }
 
@@ -41,7 +41,7 @@ class Post extends Select
 
     public static function getAllPostProfilePics(): array
     {
-        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
+        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.post_no');
     }
 
     public function getAllPostProfilePics2(): array

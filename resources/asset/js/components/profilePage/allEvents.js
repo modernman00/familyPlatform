@@ -52,6 +52,8 @@ try {
             // submit the post 
         } else if (elementId.includes("submitPost")) {
 
+            const time = Date.now();
+
             postFormData("/member/profilePage/post", "formPostMessageModal")
 
             // make the post modal display disappear

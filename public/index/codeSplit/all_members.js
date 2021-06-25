@@ -11,7 +11,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+
 
  // import { eventInput } from "./event"
 
@@ -25,9 +27,12 @@ var config = {
 };
 
 var renderHtml = function renderHtml(el) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(el);
+
   if (el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
-    var html = "<div class=\"card col-sm-4\" id=".concat(el.id, ">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat(el.date_created, " ago </p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n            </div>");
+    var img = el.img ? "/img/profile/".concat(el.img) : "/avatar/avatarF.png";
+    var html = "<div class=\"col-sm-4 mb-3\" id=".concat(el.id, ">\n        <div class=\"card\">\n         <img src=\"").concat(img, "\" class=\"card-img-top allMember_profileImg\" alt=\"...\">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "</p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n                </div>\n            </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
