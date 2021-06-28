@@ -24,7 +24,7 @@
       <div class="w3-section">
 
         <textarea class="w3-input w3-border" style="resize:none" spellcheck="false" name="postMessage" id="postMessage"
-          cols="50" rows="10">Post here</textarea> <br>
+          cols="50" rows="10"></textarea> <br>
 
         <div class="changeProfileDisplay">
 

@@ -1,9 +1,6 @@
-import { calTiming, getDuration } from '../helper/date'
 import { format, render } from "timeago.js"
 
 import { id, log } from '../global'
-
-
 
 const timeAgo = (x) => format(x)
 
@@ -13,13 +10,8 @@ const name = (fullName) => {
 }
 
 const postedAt = (date) => {
-  return `<div class="w3-right w3-opacity timeago" datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
+  return `<div class="timeago w3-right w3-opacity" datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
 }
-
-
-
-
-
 
 const nameImgTiming = (data) => {
 
@@ -46,9 +38,6 @@ const commentForm = (data) => {
   </form>`
 }
 
-// const postImg = () => {
-
-// }
 
 const button = (data) => {
   return `<button type="button" id="likeButton${data.post_no}" name="${data.post_no}"
@@ -73,67 +62,49 @@ const showPostImg = (data) => {
 
   const picsImgHtml = (imgElement, i, postNo) => {
     return `<a href="/profilepage/img?dir=img&pics=${imgElement}&pID=${postNo}&path=post"> <div class="w3-half">
-        <img src="/img/post/${imgElement}" style="width:100%" alt="images${i}"
-          class="w3-margin-bottom w3-hover-sepia" id="postImage${i}">
-      </div>
-    </a>`
+            <img src="/img/post/${imgElement}" style="width:100%" alt="images${i}"
+              class="w3-margin-bottom w3-hover-sepia" id="postImage${i}">
+          </div>
+        </a>`
   }
 
   return `<div class="w3-row-padding" style="margin:0 -16px">
 
-  ${postImg.map((pics, i) => {
+      ${postImg.map((pics, i) => {
     return picsImgHtml(pics, i, data.post_no)
   }
   )}
-    <br>
-  </div>`
+        <br>
+      </div>`
 
 }
 
-const html = (el) => {
+const html = (el, comment = null) => {
   return `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
-
       ${nameImgTiming(el)}
-
     <hr class="w3-clear">
-
     <p class="postFont"> ${el.postMessage} </p>
-
      ${showPostImg(el)}
-
     ${button(el)}
-
     ${commentForm(el)}
-  </div><br><br>`
+    
+  ${showComment(comment)}
+  </div>`
 }
 
-export const allPost = (el) => {
+export const allPost = (el, commentData) => {
 
-  if (el) {
+  if (!el) { return false; }
 
+ let postNo = parseInt(el.post_no)
 
-    const postHtml = html(el);
+  const filterComment = commentData.filter(comm => postNo === parseInt(comm.post_no)) // filter the comment to an array
 
-    // the function to be activated
+  const postHtml = html(el, filterComment)
 
-    /**
-     * ! Deprecated 
-      createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
-     */
-
-
-    id('postIt').insertAdjacentHTML('afterbegin', postHtml) // ! should be reviewed
-
-
-
-  } else {
-
-    return `<p> Sorry, we could find the data</p>`
-
-  }
+  id('postIt').insertAdjacentHTML('beforeend', postHtml)
 }
 
-// ? is it still needed?
 
 export const appendNewPost = (el) => {
 
@@ -147,8 +118,34 @@ export const appendNewPost = (el) => {
 
     const appendHTML = html(el);
 
-    id('postIt').insertAdjacentHTML('beforeend', appendHTML)
+    id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
 
   }
+
+}
+
+
+const showComment = (comment) => {
+
+
+  if(!comment){ return false;} // only run if there is comment
+
+  return comment.map(commentElement => {
+
+    log(commentElement)
+    
+      const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
+
+
+      return `<div class="w3-ul w3-border" id="comment" name='commentDiv'>
+      <div class="w3-container commentDiv">
+      <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
+       <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
+         <p class="commentFont"> ${commentElement.comment}</p>
+    </div>
+</div>`
+    // }
+  })
+
 
 }

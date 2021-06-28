@@ -181,7 +181,6 @@ a:hover {
     margin: 2.5rem 0;
   }
 }
-
 .logo-small {
   color: #f4511e;
   font-size: 50px;
@@ -311,7 +310,6 @@ footer .glyphicon {
     transform: rotate(360deg);
   }
 }
-
 /* Safari */
 @-webkit-keyframes spin {
   0% {
@@ -321,7 +319,6 @@ footer .glyphicon {
     -webkit-transform: rotate(360deg);
   }
 }
-
 .allMember_card {
   display: flex;
 }
@@ -393,7 +390,6 @@ input::placeholder {
     font-size: 3.5rem;
   }
 }
-
 /* changed the paddings to 0 from 25 to reduce the height of the navbar */
 @media (min-width: 992px) {
   .mainNav {
@@ -404,57 +400,62 @@ input::placeholder {
     background-color: transparent;
   }
 }
-
 /* When a screen is 992px or smaller, the background color will be pink */
 @media screen and (max-width: 576px) {
   body {
     font-size: 0.5em;
   }
+
   .subscribeForm {
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 50%;
   }
+
   .homePageSubscribe {
     font-size: 1.2em;
     height: 50px;
   }
+
   .unhide {
     margin-left: 0px;
     margin-right: 0px;
     margin-bottom: 20px;
   }
 }
-
 @media only screen and (max-width: 600px) {
   .showImageContainer {
     background-color: lightblue;
     flex-flow: row wrap;
   }
+
   .showPics {
     margin-right: 0;
     margin-left: 0;
     height: 60vh;
     width: 100vw;
   }
+
   .showComment > p {
     margin-top: 2vh;
     font-size: 2em;
     margin-left: 2vh;
   }
+
   .commentImg {
     margin-top: 1vh;
     height: 3rem;
     width: 3rem;
   }
+
   .commentFont {
     font-size: 5rem;
   }
+
   .commentInput {
     width: 100%;
   }
 }
-
 .form__login__logo {
   margin-left: 40%;
 }
@@ -594,7 +595,7 @@ textarea {
 
 /*We will use ::before and ::after to draw the connectors*/
 .tree li::before, .tree li::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 50%;
@@ -611,7 +612,7 @@ textarea {
 }
 
 /*We need to remove left-right connectors from elements without 
-		any siblings*/
+any siblings*/
 .tree li:only-child::after, .tree li:only-child::before {
   display: none;
 }
@@ -622,7 +623,7 @@ textarea {
 }
 
 /*Remove left connector from first child and 
-		right connector from last child*/
+right connector from last child*/
 .tree li:first-child::before, .tree li:last-child::after {
   border: 0 none;
 }
@@ -643,7 +644,7 @@ textarea {
 
 /*Time to add downward connectors from parents*/
 .tree ul ul::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -12px;
   left: 51.5%;
@@ -673,7 +674,7 @@ textarea {
 }
 
 .tree li a + a::before {
-  content: '';
+  content: "";
   position: absolute;
   border-top: 1px solid #ccc;
   top: 50%;
@@ -724,7 +725,6 @@ textarea {
     transform: none;
   }
 }
-
 @keyframes spinner-grow {
   0% {
     transform: scale(0);
@@ -734,7 +734,6 @@ textarea {
     transform: none;
   }
 }
-
 .spinner-grow {
   display: inline-block;
   width: 2rem;
@@ -754,9 +753,8 @@ textarea {
 
 @media (prefers-reduced-motion: reduce) {
   .spinner-border,
-  .spinner-grow {
+.spinner-grow {
     -webkit-animation-duration: 1.5s;
     animation-duration: 1.5s;
   }
 }
-

@@ -32,6 +32,18 @@ class PostMessage
         }
     }
 
+
+    function getComment()
+    {
+        try {
+             $message =Post::getAllCommentProfilePics();
+              msgSuccess(200, $message);
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
+       
+    }
+
     static function update()
     {
         try {
@@ -59,11 +71,17 @@ class PostMessage
 
             foreach ($messages as $message);
 
+            $messageComments= Post::getAllCommentProfilePics();
+
+            foreach ($messageComments as $messageComment);
+
             $id = (int) $_SESSION['LAST_INSERT_ID'];
 
             $_SESSION['LAST_INSERT_ID'] = false;
 
-            msgServerSent($message, $id, "update");
+            msgServerSent($message, $id, "updatePost");
+             msgServerSent($messageComment, $id, "updateComment");
+
         } catch (\Throwable $th) {
             showErrorExp($th);
         }

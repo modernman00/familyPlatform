@@ -1,58 +1,67 @@
-import { removeDiv } from '../helper/general'
-import { id, log } from '../global'
-import { allPost, appendNewPost } from '../profilePage/html'
-import { getApiData } from "../helper/http"
-import { render } from "timeago.js"
 
+import { id, log } from '../global'
+import { appendNewPost, allPost, showComment } from '../profilePage/html'
+import { getApiData, getMultipleApiData } from "../helper/http"
+import { render } from "timeago.js"
+import axios from "axios"
 
 // set an empty array
-const state = { data: [] }
+try {
 
-// 2. get the data from the database to set the inital data
-const postData = getApiData("/post/getAllPost");
-
-postData.then(response => {
-
-    state.data = response.message;
-
-    const serverConnection = new EventSource("/post/getAllPost/update");
-
-    const updatePost = (e) => {
-        if (e.origin != "http://olaogun.dev.com") {
-            throw new Error("What is your origin?")
-        }
-
-
-        if (e.data) {
-            const newPostData = JSON.parse(e.data)
-
-            // check if the post no already exist
-            let newData = state.data.some(el => el.post_no === newPostData.post_no);
-
-            // if it is not available, add to the data state
-            if (!newData) {
-                state.data.push(newPostData)
-            }
-        }
-        
-        state.data.map(ele => appendNewPost(ele))
-
+    const state = {
+        post: [],
+        comment: []
     }
 
-    //    serverConnection.onopen = function(e) {
-    //     console.log("Connection is opened");
-    //   };
+    // 2. get the data from the database to set the inital data
+    const postData = getMultipleApiData("/post/getAllPost", '/member/pp/comment');
+
+    postData.then(response => {
+
+        state.post = response[0].data.message;
+
+        state.comment = response[1].data.message
+
+      state.post.map(data => allPost(data, state.comment))
+
+        let serverConnection = new EventSource("/post/getAllPost/update")
+
+        id("submitPost").addEventListener('click', () => {
+
+            const updatePost = (e) => {
+                if (e.origin != "http://olaogun.dev.com") {
+                    throw new Error("What is your origin?")
+                }
+
+                if (e.data) {
+                    const newPostData = JSON.parse(e.data)
+
+                    let newData = state.post.some(el => el.post_no === newPostData.post_no); // check if the post no does not already exist
+
+                    if (!newData) {   // if it is not available, add to the data state
+                        state.post.push(newPostData)
+                    }
+                }
+
+                return state.post.map(ele => appendNewPost(ele))
+
+            }
+
+            serverConnection.addEventListener("updatePost", (e) => updatePost(e))
+        })
+
+        // once the comment submit button is click 
 
 
+        // serverConnection.addEventListener("updateComment", (e) => updatePost(e))
 
-    serverConnection.addEventListener("update", (e) => updatePost(e))
 
-    // addEventListener version
-//  serverConnection.addEventListener('error', (e) => {
-//   console.log("An error occurred while attempting to connect.");
-// });
-}).then()
-.catch(err => log(err))
+    }).catch(err => log(err))
+
+} catch (error) {
+    console.log(error)
+}
+
 
 
 

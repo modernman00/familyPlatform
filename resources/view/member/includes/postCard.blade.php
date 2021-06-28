@@ -64,7 +64,7 @@
 
     {{-- every post has a number (post_no) that is linked to every comments (through comment_no) made under that post --}}
 
-    <input name='post_no' type="hidden" name="{{ $allData['post_no'] }}" value={{ $allData['post_no'] }} />
+    <input name='post_no' type="hidden" name="{{ $allData['post_no'] }}" value= {{ $allData['post_no'] }} />
 
     <input class="w3-input w3-border w3-round-large inputComment" type="text" placeholder="Write a comment"
       id="inputComment{{ $allData['post_no'] }} " name='comment'>

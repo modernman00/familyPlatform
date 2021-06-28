@@ -28,10 +28,11 @@
 
          <div class="postIt" id="postIt"></div>
 
-         
-          {{-- <div class="postItButton" id="postItButton"></div> --}}
+
 
       </div>
+
+      {{--  <div class="commentParent" id="commentParent"></div>  --}}
 
  
       {{-- @foreach ($allData as $allData)

@@ -29,8 +29,8 @@ export const calTiming = (date) => {
     return Math.floor(seconds) + " seconds";
 }
 var aDay = 24 * 60 * 60 * 1000;
-console.log(calTiming(new Date(Date.now() - aDay)));
-console.log(calTiming(new Date(Date.now() - aDay * 2)));
+// console.log(calTiming(new Date(Date.now() - aDay)));
+// console.log(calTiming(new Date(Date.now() - aDay * 2)));
 
 
 

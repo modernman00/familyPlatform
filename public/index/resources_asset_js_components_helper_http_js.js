@@ -11,6 +11,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
 /* harmony export */   "getApiData": () => (/* binding */ getApiData),
+/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
 /* harmony export */   "setCookie": () => (/* binding */ setCookie),
 /* harmony export */   "getCookie": () => (/* binding */ getCookie),
 /* harmony export */   "checkCookie": () => (/* binding */ checkCookie)
@@ -186,6 +187,50 @@ var getApiData = /*#__PURE__*/function () {
 
   return function getApiData(_x3) {
     return _ref2.apply(this, arguments);
+  };
+}();
+var getMultipleApiData = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3(url1, url2) {
+    var token,
+        config,
+        fetch,
+        _args3 = arguments;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            token = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
+            _context3.prev = 1;
+            config = {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
+              }
+            };
+            _context3.next = 5;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default().all([axios__WEBPACK_IMPORTED_MODULE_2___default().get(url1, config), axios__WEBPACK_IMPORTED_MODULE_2___default().get(url2, config)]);
+
+          case 5:
+            fetch = _context3.sent;
+            return _context3.abrupt("return", fetch);
+
+          case 9:
+            _context3.prev = 9;
+            _context3.t0 = _context3["catch"](1);
+            return _context3.abrupt("return", _context3.t0);
+
+          case 12:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[1, 9]]);
+  }));
+
+  return function getMultipleApiData(_x4, _x5) {
+    return _ref3.apply(this, arguments);
   };
 }();
 /**

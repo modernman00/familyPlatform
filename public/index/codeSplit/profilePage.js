@@ -356,123 +356,6 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/helper/date.js":
-/*!******************************************************!*\
-  !*** ./resources/asset/js/components/helper/date.js ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "calTiming": () => (/* binding */ calTiming),
-/* harmony export */   "updateTimeRealTime": () => (/* binding */ updateTimeRealTime),
-/* harmony export */   "timeAgo": () => (/* binding */ timeAgo)
-/* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-
-var calTiming = function calTiming(date) {
-  var seconds = Math.floor((new Date() - date) / 1000);
-  var interval = seconds / 31536000;
-
-  if (interval > 1) {
-    return Math.floor(interval) + " years";
-  }
-
-  interval = seconds / 2592000;
-
-  if (interval > 1) {
-    return Math.floor(interval) + " months";
-  }
-
-  interval = seconds / 86400;
-
-  if (interval > 1) {
-    return Math.floor(interval) + " days";
-  }
-
-  interval = seconds / 3600;
-
-  if (interval > 1) {
-    return Math.floor(interval) + " hours";
-  }
-
-  interval = seconds / 60;
-
-  if (interval > 1) {
-    return Math.floor(interval) + " minutes";
-  }
-
-  return Math.floor(seconds) + " seconds";
-};
-var aDay = 24 * 60 * 60 * 1000;
-console.log(calTiming(new Date(Date.now() - aDay)));
-console.log(calTiming(new Date(Date.now() - aDay * 2)));
-var element = document.querySelectorAll('time[data-time]');
-var updateTimeRealTime = function updateTimeRealTime() {
-  Array.prototype.forEach.call(element, function (entry) {
-    var out = ''; // ...
-
-    entry.textContent = out;
-  });
-  setTimeout(updateTimeRealTime, 1000 * 60);
-};
-setTimeout(updateTimeRealTime, 1000 * 60);
-var epochs = [['year', 31536000], ['month', 2592000], ['day', 86400], ['hour', 3600], ['minute', 60], ['second', 1]];
-
-var getDuration = function getDuration(timeAgoInSeconds) {
-  var _iterator = _createForOfIteratorHelper(epochs),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var _step$value = _slicedToArray(_step.value, 2),
-          name = _step$value[0],
-          seconds = _step$value[1];
-
-      var interval = Math.floor(timeAgoInSeconds / seconds);
-
-      if (interval >= 1) {
-        return {
-          interval: interval,
-          epoch: name
-        };
-      }
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
-  }
-};
-
-var timeAgo = function timeAgo(date) {
-  var timeAgoInSeconds = Math.floor((new Date() - new Date(date)) / 1000);
-
-  var _getDuration = getDuration(timeAgoInSeconds),
-      interval = _getDuration.interval,
-      epoch = _getDuration.epoch;
-
-  var suffix = interval === 1 ? '' : 's';
-  return "".concat(interval, " ").concat(epoch).concat(suffix, " ago");
-};
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/helper/general.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
@@ -627,6 +510,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
 /* harmony export */   "getApiData": () => (/* binding */ getApiData),
+/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
 /* harmony export */   "setCookie": () => (/* binding */ setCookie),
 /* harmony export */   "getCookie": () => (/* binding */ getCookie),
 /* harmony export */   "checkCookie": () => (/* binding */ checkCookie)
@@ -804,6 +688,50 @@ var getApiData = /*#__PURE__*/function () {
     return _ref2.apply(this, arguments);
   };
 }();
+var getMultipleApiData = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3(url1, url2) {
+    var token,
+        config,
+        fetch,
+        _args3 = arguments;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            token = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
+            _context3.prev = 1;
+            config = {
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
+              }
+            };
+            _context3.next = 5;
+            return axios__WEBPACK_IMPORTED_MODULE_2___default().all([axios__WEBPACK_IMPORTED_MODULE_2___default().get(url1, config), axios__WEBPACK_IMPORTED_MODULE_2___default().get(url2, config)]);
+
+          case 5:
+            fetch = _context3.sent;
+            return _context3.abrupt("return", fetch);
+
+          case 9:
+            _context3.prev = 9;
+            _context3.t0 = _context3["catch"](1);
+            return _context3.abrupt("return", _context3.t0);
+
+          case 12:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[1, 9]]);
+  }));
+
+  return function getMultipleApiData(_x4, _x5) {
+    return _ref3.apply(this, arguments);
+  };
+}();
 /**
  * 
  * @param { name} cname 
@@ -891,10 +819,11 @@ try {
       // get the specific form id
       e.preventDefault();
       var idForm = elementId.replace("submit", "form");
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage");
-      location.reload(); // submit the post 
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none"; // make the comment form disappear
+
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage"); // location.reload();
+      // submit the post 
     } else if (elementId.includes("submitPost")) {
-      var time = Date.now();
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/member/profilePage/post", "formPostMessageModal"); // make the post modal display disappear
 
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none'; // location.reload();   
@@ -994,15 +923,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "allPost": () => (/* binding */ allPost),
 /* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost)
 /* harmony export */ });
-/* harmony import */ var _helper_date__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/date */ "./resources/asset/js/components/helper/date.js");
-/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
 
 var timeAgo = function timeAgo(x) {
-  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_1__.format)(x);
+  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
 };
 
 var name = function name(fullName) {
@@ -1010,7 +937,7 @@ var name = function name(fullName) {
 };
 
 var postedAt = function postedAt(date) {
-  return "<div class=\"w3-right w3-opacity timeago\" datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_1__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+  return "<div class=\"timeago w3-right w3-opacity\" datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 
 var nameImgTiming = function nameImgTiming(data) {
@@ -1020,9 +947,7 @@ var nameImgTiming = function nameImgTiming(data) {
 
 var commentForm = function commentForm(data) {
   return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>");
-}; // const postImg = () => {
-// }
-
+};
 
 var button = function button(data) {
   return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
@@ -1040,46 +965,58 @@ var showPostImg = function showPostImg(data) {
   }
 
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n        <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n          class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>");
+    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n              class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
   };
 
-  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n  ".concat(postImg.map(function (pics, i) {
+  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n      ".concat(postImg.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
-  }), "\n    <br>\n  </div>");
+  }), "\n        <br>\n      </div>");
 };
 
 var html = function html(el) {
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n  </div><br><br>");
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n      ".concat(nameImgTiming(el), "\n    <hr class=\"w3-clear\">\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n     ").concat(showPostImg(el), "\n    ").concat(button(el), "\n    ").concat(commentForm(el), "\n    \n  ").concat(showComment(comment), "\n  </div>");
 };
 
-var allPost = function allPost(el) {
-  if (el) {
-    var postHtml = html(el); // the function to be activated
-
-    /**
-     * ! Deprecated 
-      createAndAppendElement('div', 'postIt', 'messagePost', 'postIt')
-     */
-
-    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').insertAdjacentHTML('afterbegin', postHtml); // ! should be reviewed
-  } else {
-    return "<p> Sorry, we could find the data</p>";
+var allPost = function allPost(el, commentData) {
+  if (!el) {
+    return false;
   }
-}; // ? is it still needed?
 
+  var postNo = parseInt(el.post_no);
+  var filterComment = commentData.filter(function (comm) {
+    return postNo === parseInt(comm.post_no);
+  }); // filter the comment to an array
+
+  var postHtml = html(el, filterComment);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
+};
 var appendNewPost = function appendNewPost(el) {
   if (!el) {
     return false;
   }
 
-  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
-  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
-  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formComment".concat(el.post_no));
+  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
 
   if (!commentForm1 || !inputComment || !submitComment) {
     var appendHTML = html(el);
-    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').insertAdjacentHTML('beforeend', appendHTML);
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
   }
+};
+
+var showComment = function showComment(comment) {
+  if (!comment) {
+    return false;
+  } // only run if there is comment
+
+
+  return comment.map(function (commentElement) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(commentElement);
+    var img = commentElement.img ? "/img/profile/".concat(commentElement.img) : "/avatar/avatarF.png";
+    return "<div class=\"w3-ul w3-border\" id=\"comment\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"".concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\"> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(commentElement.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(commentElement.comment, "</p>\n    </div>\n</div>"); // }
+  });
 };
 
 /***/ }),
@@ -1117,7 +1054,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
 /* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
  // const postDataI = () => {
@@ -1130,7 +1066,6 @@ __webpack_require__.r(__webpack_exports__);
 //             })
 //             .catch(err => {console.log(err)})
 // }
-
 
 
 
@@ -1155,60 +1090,66 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
 
  // set an empty array
 
-var state = {
-  data: []
-}; // 2. get the data from the database to set the inital data
+try {
+  var state = {
+    post: [],
+    comment: []
+  }; // 2. get the data from the database to set the inital data
 
-var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.getApiData)("/post/getAllPost");
-postData.then(function (response) {
-  state.data = response.message;
-  var serverConnection = new EventSource("/post/getAllPost/update");
-
-  var updatePost = function updatePost(e) {
-    if (e.origin != "http://olaogun.dev.com") {
-      throw new Error("What is your origin?");
-    }
-
-    if (e.data) {
-      var newPostData = JSON.parse(e.data); // check if the post no already exist
-
-      var newData = state.data.some(function (el) {
-        return el.post_no === newPostData.post_no;
-      }); // if it is not available, add to the data state
-
-      if (!newData) {
-        state.data.push(newPostData);
-      }
-    }
-
-    state.data.map(function (ele) {
-      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(ele);
+  var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getMultipleApiData)("/post/getAllPost", '/member/pp/comment');
+  postData.then(function (response) {
+    state.post = response[0].data.message;
+    state.comment = response[1].data.message;
+    state.post.map(function (data) {
+      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
     });
-  }; //    serverConnection.onopen = function(e) {
-  //     console.log("Connection is opened");
-  //   };
+    var serverConnection = new EventSource("/post/getAllPost/update");
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("submitPost").addEventListener('click', function () {
+      var updatePost = function updatePost(e) {
+        if (e.origin != "http://olaogun.dev.com") {
+          throw new Error("What is your origin?");
+        }
 
+        if (e.data) {
+          var newPostData = JSON.parse(e.data);
+          var newData = state.post.some(function (el) {
+            return el.post_no === newPostData.post_no;
+          }); // check if the post no does not already exist
 
-  serverConnection.addEventListener("update", function (e) {
-    return updatePost(e);
-  }); // addEventListener version
-  //  serverConnection.addEventListener('error', (e) => {
-  //   console.log("An error occurred while attempting to connect.");
-  // });
-}).then()["catch"](function (err) {
-  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(err);
-});
+          if (!newData) {
+            // if it is not available, add to the data state
+            state.post.push(newPostData);
+          }
+        }
+
+        return state.post.map(function (ele) {
+          return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
+        });
+      };
+
+      serverConnection.addEventListener("updatePost", function (e) {
+        return updatePost(e);
+      });
+    }); // once the comment submit button is click 
+    // serverConnection.addEventListener("updateComment", (e) => updatePost(e))
+  })["catch"](function (err) {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
+  });
+} catch (error) {
+  console.log(error);
+}
 
 /***/ }),
 

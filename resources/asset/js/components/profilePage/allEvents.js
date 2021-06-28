@@ -37,6 +37,7 @@ try {
         } else if (elementId.includes("initComment")) {
 
             const commentFormId = elementId.replace('init', 'form')
+
             id(commentFormId).style.display = "block"
 
             // Submit function for comment using POST API
@@ -45,14 +46,15 @@ try {
             e.preventDefault()
             const idForm = elementId.replace("submit", "form")
 
+             id(idForm).style.display = "none"   // make the comment form disappear
+
             postFormData("/postCommentProfile", idForm, "/member/ProfilePage")
 
-            location.reload();
+            // location.reload();
 
             // submit the post 
         } else if (elementId.includes("submitPost")) {
 
-            const time = Date.now();
 
             postFormData("/member/profilePage/post", "formPostMessageModal")
 
