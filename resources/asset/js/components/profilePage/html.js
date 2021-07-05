@@ -45,6 +45,7 @@ const button = (data) => {
     <em class="fa fa-thumbs-up"></em>
      Like <b><span class="likeCounter" id="likeCounter${data.post_no}">${data.post_likes}</span></b>
   </button>
+
    <button type="button" id="initComment${data.post_no}"
     class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>
     `
@@ -81,14 +82,24 @@ const showPostImg = (data) => {
 
 const html = (el, comment = null) => {
   return `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
+
       ${nameImgTiming(el)}
+
     <hr class="w3-clear">
+
     <p class="postFont"> ${el.postMessage} </p>
+
      ${showPostImg(el)}
+
     ${button(el)}
+
     ${commentForm(el)}
-    
-  ${showComment(comment)}
+
+    <div id = 'showComment${el.post_no}'>
+
+      ${showComment(comment)}
+      
+    </div><br>
   </div>`
 }
 
@@ -96,7 +107,7 @@ export const allPost = (el, commentData) => {
 
   if (!el) { return false; }
 
- let postNo = parseInt(el.post_no)
+  let postNo = parseInt(el.post_no)
 
   const filterComment = commentData.filter(comm => postNo === parseInt(comm.post_no)) // filter the comment to an array
 
@@ -125,25 +136,40 @@ export const appendNewPost = (el) => {
 }
 
 
-const showComment = (comment) => {
+export const commentHTML = (data) => {
 
+      const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
 
-  if(!comment){ return false;} // only run if there is comment
-
-  return comment.map(commentElement => {
-
-    log(commentElement)
-    
-      const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
-
-
-      return `<div class="w3-ul w3-border" id="comment" name='commentDiv'>
+    return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
       <div class="w3-container commentDiv">
       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
-       <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
-         <p class="commentFont"> ${commentElement.comment}</p>
+       <p class="w3-right w3-opacity commentTiming"> ${format(data.date_created)} </p> 
+         <p class="commentFont"> ${data.comment}</p>
     </div>
 </div>`
+
+
+}
+
+ const showComment = (comment) => {
+
+
+  if (!comment) { return `<div class="w3-ul w3-border" id="comment" name='commentDiv'></div>` } // only run if there is comment
+
+  return comment.map(commentElement => {
+    return commentHTML(commentElement)
+
+
+
+//     const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
+
+//     return `<div class="w3-ul w3-border" id="comment${commentElement.comment_no}" name='commentDiv'>
+//       <div class="w3-container commentDiv">
+//       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
+//        <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
+//          <p class="commentFont"> ${commentElement.comment}</p>
+//     </div>
+// </div>`
     // }
   })
 

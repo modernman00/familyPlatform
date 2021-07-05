@@ -2,7 +2,7 @@
 
 namespace App\controller;
 use App\classes\{
-    Select
+    Select, InnerJoin
 };
 
 class About {
@@ -16,12 +16,16 @@ class About {
 
     function testing()
     {
+
+        $data = InnerJoin::joinAll2('post', 'id', ['comment'], 'post.post_no');
+
+        printArr($data);
         //    $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'post', identifier1: "post_no");
 
         //     $message = Select::selectFn2($query, [$_SESSION['LAST_INSERT_ID']]);
         //     echo $_SESSION['LAST_INSERT_ID'];
 
-             printArr($_SERVER);
+            //  printArr($_SERVER);
     }
 
     function testing2()

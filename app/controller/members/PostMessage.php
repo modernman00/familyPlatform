@@ -36,12 +36,25 @@ class PostMessage
     function getComment()
     {
         try {
-             $message =Post::getAllCommentProfilePics();
-              msgSuccess(200, $message);
+            $message = Post::getAllCommentProfilePics();
+            msgSuccess(200, $message);
         } catch (\Throwable $th) {
             showErrorExp($th);
         }
-       
+    }
+
+    function getCommentNo()
+    {
+        try {
+
+            $commentNo = checkInput($_GET['commentNo']);
+
+            $message = Post::commentByNo($commentNo);
+            foreach($message as $data);
+            msgSuccess(200, $data);
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
     }
 
     static function update()
@@ -57,12 +70,12 @@ class PostMessage
             header('Cache-Control: no-cache');
             // header('Access-Control-Allow-Origin: *');
 
-            // ! deprecated at some point
-            $lastEventId = floatval(isset($_SERVER['HTTP_LAST_EVENT_ID']) ? $_SERVER['HTTP_LAST_EVENT_ID'] : 0);
+            // // ! deprecated at some point
+            // $lastEventId = floatval(isset($_SERVER['HTTP_LAST_EVENT_ID']) ? $_SERVER['HTTP_LAST_EVENT_ID'] : 0);
 
-            if ($lastEventId == 0) {
-                $lastEventId = floatval(isset($_GET['lastEventId']) ? $_GET['lastEventId'] : 0);
-            }
+            // if ($lastEventId == 0) {
+            //     $lastEventId = floatval(isset($_GET['lastEventId']) ? $_GET['lastEventId'] : 0);
+            // }
 
 
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'post', identifier1: "post_no");
@@ -71,17 +84,15 @@ class PostMessage
 
             foreach ($messages as $message);
 
-            $messageComments= Post::getAllCommentProfilePics();
-
-            foreach ($messageComments as $messageComment);
+            $messageComments = Post::getAllCommentProfilePics();
 
             $id = (int) $_SESSION['LAST_INSERT_ID'];
-
+            $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
+            
             $_SESSION['LAST_INSERT_ID'] = false;
 
             msgServerSent($message, $id, "updatePost");
-             msgServerSent($messageComment, $id, "updateComment");
-
+            msgServerSent($messageComments, $idComment, "updateComment");
         } catch (\Throwable $th) {
             showErrorExp($th);
         }

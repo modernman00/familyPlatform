@@ -789,6 +789,11 @@ var checkCookie = function checkCookie() {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+
+
 
 
 
@@ -817,12 +822,36 @@ try {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block"; // Submit function for comment using POST API
     } else if (elementId.includes("submitComment")) {
       // get the specific form id
-      e.preventDefault();
-      var idForm = elementId.replace("submit", "form");
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none"; // make the comment form disappear
+      e.preventDefault(); //elementId == submitComment511
 
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/postCommentProfile", idForm, "/member/ProfilePage"); // location.reload();
-      // submit the post 
+      var idForm = elementId.replace("submit", "form"); //idForm == formComment511
+
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none"; // make the comment form disappear
+      // extract the form entries
+
+      var form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
+      var formEntries = new FormData(form);
+      formEntries["delete"]('submit');
+      formEntries["delete"]('checkbox_id'); // formEntries.delete('token')
+
+      var options = {
+        xsrfCookieName: 'XSRF-TOKEN',
+        xsrfHeaderName: 'X-XSRF-TOKEN'
+      }; // AXIOS POST FUNCTIONALITY
+
+      axios__WEBPACK_IMPORTED_MODULE_3___default().post('/postCommentProfile', formEntries, options).then(function (response) {
+        // POST SENDS BACK THE LAST COMMENT NO POSTED
+        // USE IT TO GET THE NEW COMMENT
+        // ADD THE NEW COMMENT TO THE COMMENT DIV 
+        axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
+          var postNo = res.data.message.post_no;
+          var idDiv = "showComment".concat(postNo);
+          var commentHtml = (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.commentHTML)(res.data.message);
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idDiv).insertAdjacentHTML('afterbegin', commentHtml);
+        });
+      })["catch"](function (error) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
+      }); // submit the post 
     } else if (elementId.includes("submitPost")) {
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/member/profilePage/post", "formPostMessageModal"); // make the post modal display disappear
 
@@ -921,7 +950,8 @@ var process = function process(e) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "allPost": () => (/* binding */ allPost),
-/* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost)
+/* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost),
+/* harmony export */   "commentHTML": () => (/* binding */ commentHTML)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -950,7 +980,7 @@ var commentForm = function commentForm(data) {
 };
 
 var button = function button(data) {
-  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
 };
 
 var showPostImg = function showPostImg(data) {
@@ -975,7 +1005,7 @@ var showPostImg = function showPostImg(data) {
 
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n      ".concat(nameImgTiming(el), "\n    <hr class=\"w3-clear\">\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n     ").concat(showPostImg(el), "\n    ").concat(button(el), "\n    ").concat(commentForm(el), "\n    \n  ").concat(showComment(comment), "\n  </div>");
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat(showComment(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 var allPost = function allPost(el, commentData) {
@@ -1005,17 +1035,27 @@ var appendNewPost = function appendNewPost(el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
   }
 };
+var commentHTML = function commentHTML(data) {
+  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\"> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
+};
 
 var showComment = function showComment(comment) {
   if (!comment) {
-    return false;
+    return "<div class=\"w3-ul w3-border\" id=\"comment\" name='commentDiv'></div>";
   } // only run if there is comment
 
 
   return comment.map(function (commentElement) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(commentElement);
-    var img = commentElement.img ? "/img/profile/".concat(commentElement.img) : "/avatar/avatarF.png";
-    return "<div class=\"w3-ul w3-border\" id=\"comment\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"".concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\"> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(commentElement.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(commentElement.comment, "</p>\n    </div>\n</div>"); // }
+    return commentHTML(commentElement); //     const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
+    //     return `<div class="w3-ul w3-border" id="comment${commentElement.comment_no}" name='commentDiv'>
+    //       <div class="w3-container commentDiv">
+    //       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
+    //        <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
+    //          <p class="commentFont"> ${commentElement.comment}</p>
+    //     </div>
+    // </div>`
+    // }
   });
 };
 
@@ -1112,11 +1152,24 @@ try {
   postData.then(function (response) {
     state.post = response[0].data.message;
     state.comment = response[1].data.message;
+    var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
+    // once the comment submit button is click 
+
+    var updateComment = function updateComment(e) {
+      var commentData = JSON.parse(e.data);
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(e.lastEventId);
+      state.comment = commentData; // log(state.comment)
+    };
+
+    serverConnection.addEventListener("updateComment", function (e) {
+      return updateComment(e);
+    });
     state.post.map(function (data) {
       return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
-    });
-    var serverConnection = new EventSource("/post/getAllPost/update");
+    }); // show all the post and comments
+
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("submitPost").addEventListener('click', function () {
+      // once the cliek submit for post if submitted
       var updatePost = function updatePost(e) {
         if (e.origin != "http://olaogun.dev.com") {
           throw new Error("What is your origin?");
@@ -1142,8 +1195,7 @@ try {
       serverConnection.addEventListener("updatePost", function (e) {
         return updatePost(e);
       });
-    }); // once the comment submit button is click 
-    // serverConnection.addEventListener("updateComment", (e) => updatePost(e))
+    });
   })["catch"](function (err) {
     return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
   });

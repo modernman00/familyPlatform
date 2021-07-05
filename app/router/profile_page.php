@@ -9,6 +9,11 @@ $router->map('GET', '/post/getAllPost', 'App\controller\members\PostMessage@inde
 // GET ALL COMMENT 
 $router->map('GET', '/member/pp/comment', 'App\controller\members\PostMessage@getComment', 'all_comment');
 
+//commentByNo
+
+// GET ALL COMMENT  BY NO
+$router->map('GET', '/member/pp/comment/byNumber', 'App\controller\members\PostMessage@getCommentNo', 'all_comment_by_number');
+
 // GET NEW POST
 $router->map('GET', '/post/getAllPost/update', 'App\controller\members\PostMessage@update', 'all_posts_update');
 

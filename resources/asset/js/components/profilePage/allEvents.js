@@ -1,6 +1,8 @@
 "use strict";
 import { id, log } from "../global"
 import { postFormData, getApiData } from "../helper/http"
+import { commentHTML } from '../profilePage/html'
+import axios from "axios"
 
 try {
 
@@ -44,13 +46,53 @@ try {
         } else if (elementId.includes("submitComment")) {
             // get the specific form id
             e.preventDefault()
+            //elementId == submitComment511
+
             const idForm = elementId.replace("submit", "form")
+            //idForm == formComment511
 
-             id(idForm).style.display = "none"   // make the comment form disappear
+            id(idForm).style.display = "none"   // make the comment form disappear
 
-            postFormData("/postCommentProfile", idForm, "/member/ProfilePage")
+            // extract the form entries
+            const form = id(idForm)
 
-            // location.reload();
+            let formEntries = new FormData(form)
+
+            formEntries.delete('submit')
+            formEntries.delete('checkbox_id')
+            // formEntries.delete('token')
+
+            const options = {
+                xsrfCookieName: 'XSRF-TOKEN',
+                xsrfHeaderName: 'X-XSRF-TOKEN',
+            }
+
+            // AXIOS POST FUNCTIONALITY
+            axios.post('/postCommentProfile', formEntries, options)
+                .then(response => {
+
+                    // POST SENDS BACK THE LAST COMMENT NO POSTED
+                    // USE IT TO GET THE NEW COMMENT
+                    // ADD THE NEW COMMENT TO THE COMMENT DIV 
+
+                    axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
+                        .then(res => {
+                            const postNo = res.data.message.post_no
+                            const idDiv = `showComment${postNo}`
+                            const commentHtml = commentHTML(res.data.message)
+                            id(idDiv).insertAdjacentHTML('afterbegin', commentHtml)
+
+                        })
+
+                }
+                ).catch(error => {
+                    log(error)
+
+                })
+
+
+
+
 
             // submit the post 
         } else if (elementId.includes("submitPost")) {

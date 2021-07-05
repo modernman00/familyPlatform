@@ -18,15 +18,34 @@ try {
 
     postData.then(response => {
 
+
         state.post = response[0].data.message;
 
         state.comment = response[1].data.message
 
-      state.post.map(data => allPost(data, state.comment))
 
-        let serverConnection = new EventSource("/post/getAllPost/update")
+        let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 
-        id("submitPost").addEventListener('click', () => {
+
+        // once the comment submit button is click 
+
+        const updateComment = (e) => {
+          
+            const commentData = JSON.parse(e.data)
+              log(e.lastEventId)
+            state.comment = commentData
+            // log(state.comment)
+        }
+
+        serverConnection.addEventListener("updateComment", (e) => updateComment(e))
+
+        state.post.map(data => allPost(data, state.comment)) // show all the post and comments
+
+
+
+
+
+        id("submitPost").addEventListener('click', () => { // once the cliek submit for post if submitted
 
             const updatePost = (e) => {
                 if (e.origin != "http://olaogun.dev.com") {
@@ -50,10 +69,7 @@ try {
             serverConnection.addEventListener("updatePost", (e) => updatePost(e))
         })
 
-        // once the comment submit button is click 
 
-
-        // serverConnection.addEventListener("updateComment", (e) => updatePost(e))
 
 
     }).catch(err => log(err))

@@ -185,28 +185,14 @@ class ProfilePage extends ProcessImg
         }
     }
 
-    /**
-     * Use this function to select the profile page
-     *
-     * @return void
-     */
-    // private function selectProfileImg()
-    // {
-
-    //     $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: "profile_pics", identifier1: "id", orderBy: "ORDER BY date_created DESC", limit: "LIMIT " . 1);
-
-    //     $result = Select::selectFn2($query, [checkInput($_SESSION['id'])]);
-
-    //     foreach ($result as $result);
-    //     return $result['img'];
-    // }
 
     function postComment()
     {
         try {
             $getComment = $this->processPostData();
-            Insert::submitForm2('comment', $getComment);
-            // header(self::REDIRECT);
+            Insert::submitFormDynamic('comment', $getComment);
+            //    msgSuccess(200, "Success");
+             
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);

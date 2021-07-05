@@ -29,6 +29,7 @@ class Insert extends Db
                 $query->bindValue(":$keys", $values);
             }
             $outcome = $query->execute();
+            // $last_id = $query->lastInsertId();
             if (!$outcome) {
                 throw new Exception("Not able to execute data", 1);
             }
@@ -41,8 +42,9 @@ class Insert extends Db
 
     public static function submitForm2($table, $field)
     {
-           Transaction::beginTransaction();
+        Transaction::beginTransaction();
         try {
+
 
             // EXTRACT THE KEY FOR THE COL NAME
             $key = array_keys($field);
@@ -69,12 +71,63 @@ class Insert extends Db
             $_SESSION['LAST_INSERT_ID'] = Transaction::lastId();
 
             Transaction::commit();
-            
+
             return $outcome;
         } catch (PDOException $e) {
             showError($e);
         } catch (\Throwable $e) {
-               Transaction::rollback();
+            Transaction::rollback();
+            showError($e);
+        }
+    }
+
+    /**
+     * 
+     * @param mixed $table THE TABLE
+     * @param mixed $field  THE POST ARRAY
+     * @return mixed 
+     * @throws \PDOException 
+     */
+
+    public static function submitFormDynamic($table, $field)
+    {
+
+        try {
+            $DYNAMIC = strtoupper($table);
+
+            // EXTRACT THE KEY FOR THE COL NAME
+            $key = array_keys($field);
+            $col = implode(', ', $key);
+            $placeholder = implode(', :', $key);
+
+            // prep statement using placeholder :name
+            $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
+
+            $query = parent::connect2()->prepare($stmt);
+            if (!$query) {
+                throw new Exception("Not able to insert data", 1);
+            }
+            foreach ($field as $keys => $values) {
+                $query->bindValue(":$keys", $values);
+            }
+            $outcome = $query->execute();
+            if (!$outcome) {
+                http_response_code(406); // sets the response to 406
+                echo http_response_code(); // echo the new response code
+                throw new Exception("Not able to execute data", 1);
+            }
+
+            $lastId = parent::connect2()->lastInsertId();
+
+            $_SESSION["LAST_INSERT_ID_$DYNAMIC"] = $lastId;
+
+            msgSuccess(200,  $lastId);
+
+            return $outcome;
+        } catch (PDOException $e) {
+            showError($e);
+        } catch (\Throwable $e) {
+            Transaction::rollback();
             showError($e);
         }
     }
