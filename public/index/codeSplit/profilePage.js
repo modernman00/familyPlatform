@@ -1153,12 +1153,18 @@ try {
     state.post = response[0].data.message;
     state.comment = response[1].data.message;
     var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
-    // once the comment submit button is click 
 
     var updateComment = function updateComment(e) {
-      var commentData = JSON.parse(e.data);
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(e.lastEventId);
-      state.comment = commentData; // log(state.comment)
+      var commentData = JSON.parse(e.data); // log(commentData)
+
+      var newData = state.comment.some(function (com) {
+        return com.comment_no === commentData.comment_no;
+      }); // check if the post no does not already exist
+
+      if (!newData) {
+        // if it is not available, add to the data state
+        state.comment.push(commentData);
+      }
     };
 
     serverConnection.addEventListener("updateComment", function (e) {
@@ -1168,33 +1174,30 @@ try {
       return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
     }); // show all the post and comments
 
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("submitPost").addEventListener('click', function () {
-      // once the cliek submit for post if submitted
-      var updatePost = function updatePost(e) {
-        if (e.origin != "http://olaogun.dev.com") {
-          throw new Error("What is your origin?");
+    var updatePost = function updatePost(e) {
+      if (e.origin != "http://olaogun.dev.com") {
+        throw new Error("What is your origin?");
+      }
+
+      if (e.data) {
+        var newPostData = JSON.parse(e.data);
+        var newData = state.post.some(function (el) {
+          return el.post_no === newPostData.post_no;
+        }); // check if the post no does not already exist
+
+        if (!newData) {
+          // if it is not available, add to the data state
+          state.post.push(newPostData);
         }
+      }
 
-        if (e.data) {
-          var newPostData = JSON.parse(e.data);
-          var newData = state.post.some(function (el) {
-            return el.post_no === newPostData.post_no;
-          }); // check if the post no does not already exist
-
-          if (!newData) {
-            // if it is not available, add to the data state
-            state.post.push(newPostData);
-          }
-        }
-
-        return state.post.map(function (ele) {
-          return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
-        });
-      };
-
-      serverConnection.addEventListener("updatePost", function (e) {
-        return updatePost(e);
+      return state.post.map(function (ele) {
+        return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
       });
+    };
+
+    serverConnection.addEventListener("updatePost", function (e) {
+      return updatePost(e);
     });
   })["catch"](function (err) {
     return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);

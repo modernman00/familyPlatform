@@ -23,18 +23,19 @@ try {
 
         state.comment = response[1].data.message
 
-
         let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 
-
-        // once the comment submit button is click 
-
         const updateComment = (e) => {
-          
+
             const commentData = JSON.parse(e.data)
-              log(e.lastEventId)
-            state.comment = commentData
-            // log(state.comment)
+
+            // log(commentData)
+
+            let newData = state.comment.some(com => com.comment_no === commentData.comment_no); // check if the post no does not already exist
+
+            if (!newData) {   // if it is not available, add to the data state
+                state.comment.push(commentData)
+            }
         }
 
         serverConnection.addEventListener("updateComment", (e) => updateComment(e))
@@ -42,32 +43,26 @@ try {
         state.post.map(data => allPost(data, state.comment)) // show all the post and comments
 
 
-
-
-
-        id("submitPost").addEventListener('click', () => { // once the cliek submit for post if submitted
-
-            const updatePost = (e) => {
-                if (e.origin != "http://olaogun.dev.com") {
-                    throw new Error("What is your origin?")
-                }
-
-                if (e.data) {
-                    const newPostData = JSON.parse(e.data)
-
-                    let newData = state.post.some(el => el.post_no === newPostData.post_no); // check if the post no does not already exist
-
-                    if (!newData) {   // if it is not available, add to the data state
-                        state.post.push(newPostData)
-                    }
-                }
-
-                return state.post.map(ele => appendNewPost(ele))
-
+        const updatePost = (e) => {
+            if (e.origin != "http://olaogun.dev.com") {
+                throw new Error("What is your origin?")
             }
 
-            serverConnection.addEventListener("updatePost", (e) => updatePost(e))
-        })
+            if (e.data) {
+                const newPostData = JSON.parse(e.data)
+
+                let newData = state.post.some(el => el.post_no === newPostData.post_no); // check if the post no does not already exist
+
+                if (!newData) {   // if it is not available, add to the data state
+                    state.post.push(newPostData)
+                }
+            }
+
+            return state.post.map(ele => appendNewPost(ele))
+
+        }
+
+        serverConnection.addEventListener("updatePost", (e) => updatePost(e))
 
 
 

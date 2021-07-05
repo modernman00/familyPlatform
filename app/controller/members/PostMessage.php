@@ -79,16 +79,17 @@ class PostMessage
 
 
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'post', identifier1: "post_no");
-
             $messages = Select::selectFn2($query, [$_SESSION['LAST_INSERT_ID']]);
 
             foreach ($messages as $message);
 
-            $messageComments = Post::getAllCommentProfilePics();
+            $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
+
+            $messageComments = Post::commentByNo($idComment);
 
             $id = (int) $_SESSION['LAST_INSERT_ID'];
-            $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
-            
+    
+
             $_SESSION['LAST_INSERT_ID'] = false;
 
             msgServerSent($message, $id, "updatePost");
