@@ -31,7 +31,7 @@ const LoginSubmission = (e) => {
 		id('loginNow_notification').classList.remove('is-danger') // remove the danger class from the notification
 		id('error').innerHTML = "" // empty the error element
 
-		if (id('checkbox').checked) {
+		// if (id('checkbox').checked) {
 			id("setLoader").focus(); // focus on the loader element
 
 			formData.emailVal() // sanitise email
@@ -53,9 +53,10 @@ const LoginSubmission = (e) => {
 
 				process()
 			}
-		} else {
-			alert('To continue, you need to agree to the our privacy policy')
-		}
+		// } 
+		// else {
+		// 	alert('To continue, you need to agree to the our privacy policy')
+		// }
 	} catch (err) {
 		showError(err)
 	}

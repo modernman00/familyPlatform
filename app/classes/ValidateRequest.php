@@ -1,6 +1,6 @@
 <?php
 // all the functions will take three parameters
-namespace App\Classes;
+namespace App\classes;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 

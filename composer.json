@@ -39,7 +39,8 @@
         "firebase/php-jwt": "^5.2",
         "tinify/tinify": "^1.5",
         "ps/image-optimizer": "^2.0",
-        "rollbar/rollbar": "~1.5"
+        "rollbar/rollbar": "~1.5",
+        "pusher/pusher-php-server": "^7.0"
     },
     
     "require-dev": {

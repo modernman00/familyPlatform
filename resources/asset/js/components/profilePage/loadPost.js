@@ -13,25 +13,26 @@ try {
         comment: []
     }
 
+    let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
+
     // 2. get the data from the database to set the inital data
     const postData = getMultipleApiData("/post/getAllPost", '/member/pp/comment');
 
     postData.then(response => {
 
-
         state.post = response[0].data.message;
 
         state.comment = response[1].data.message
 
-        let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
+        state.post.map(data => allPost(data, state.comment)) // show all the post and comments
+
+        // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 
         const updateComment = (e) => {
 
             const commentData = JSON.parse(e.data)
 
-            // log(commentData)
-
-            let newData = state.comment.some(com => com.comment_no === commentData.comment_no); // check if the post no does not already exist
+            let newData = state.comment.some(com => com.comment_no === commentData.comment_no); // check if the comment no does not already exist
 
             if (!newData) {   // if it is not available, add to the data state
                 state.comment.push(commentData)
@@ -39,9 +40,6 @@ try {
         }
 
         serverConnection.addEventListener("updateComment", (e) => updateComment(e))
-
-        state.post.map(data => allPost(data, state.comment)) // show all the post and comments
-
 
         const updatePost = (e) => {
             if (e.origin != "http://olaogun.dev.com") {
@@ -57,15 +55,25 @@ try {
                     state.post.push(newPostData)
                 }
             }
-
-            return state.post.map(ele => appendNewPost(ele))
+         return state.post.map(ele => appendNewPost(ele))
 
         }
-
         serverConnection.addEventListener("updatePost", (e) => updatePost(e))
 
+        // // serverConnection.close()
+
+       
+
+   
 
 
+        // AUTOMATICALLY UPDATE TIMESTAMP
+
+        const updatePostTiming = document.querySelectorAll(".timeago")
+        const updateCommentTiming = document.querySelectorAll(".commentTiming")
+
+        render(updatePostTiming)
+        render(updateCommentTiming)
 
     }).catch(err => log(err))
 

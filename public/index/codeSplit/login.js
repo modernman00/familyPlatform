@@ -906,29 +906,30 @@ var LoginSubmission = function LoginSubmission(e) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
 
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
+    // if (id('checkbox').checked) {
 
-    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
 
-      formData.emailVal(); // sanitise email
+    formData.emailVal(); // sanitise email
 
-      formData.massValidate(); // validate and sanitise data
+    formData.massValidate(); // validate and sanitise data
 
-      if (formData.error.length == 0) {
-        // display the success information for 10sec
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
+    if (formData.error.length == 0) {
+      // display the success information for 10sec
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
 
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
 
-        localStorage.setItem('redirect', '/member/ProfilePage');
-        (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code");
-      } else {
-        alert('The form cannot be submitted. Please check the errors');
-        process();
-      }
+      localStorage.setItem('redirect', '/member/ProfilePage');
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code");
     } else {
-      alert('To continue, you need to agree to the our privacy policy');
-    }
+      alert('The form cannot be submitted. Please check the errors');
+      process();
+    } // } 
+    // else {
+    // 	alert('To continue, you need to agree to the our privacy policy')
+    // }
+
   } catch (err) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }

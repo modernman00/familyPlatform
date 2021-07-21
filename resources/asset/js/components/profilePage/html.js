@@ -1,4 +1,4 @@
-import { format, render } from "timeago.js"
+import { format} from "timeago.js"
 
 import { id, log } from '../global'
 
@@ -80,7 +80,7 @@ const showPostImg = (data) => {
 
 }
 
-const html = (el, comment = null) => {
+export const html = (el, comment = null) => {
   return `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
 
       ${nameImgTiming(el)}
@@ -143,7 +143,7 @@ export const commentHTML = (data) => {
     return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
       <div class="w3-container commentDiv">
       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
-       <p class="w3-right w3-opacity commentTiming"> ${format(data.date_created)} </p> 
+       <p class="w3-right w3-opacity commentTiming" datetime='${data.date_created}' title='${data.date_created}'> ${format(data.date_created)} </p> 
          <p class="commentFont"> ${data.comment}</p>
     </div>
 </div>`
@@ -159,18 +159,6 @@ export const commentHTML = (data) => {
   return comment.map(commentElement => {
     return commentHTML(commentElement)
 
-
-
-//     const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
-
-//     return `<div class="w3-ul w3-border" id="comment${commentElement.comment_no}" name='commentDiv'>
-//       <div class="w3-container commentDiv">
-//       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
-//        <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
-//          <p class="commentFont"> ${commentElement.comment}</p>
-//     </div>
-// </div>`
-    // }
   })
 
 

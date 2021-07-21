@@ -131,11 +131,12 @@ function msgSuccess(int $code, string|array $msg, mixed $token = null)
 
 function msgServerSent(string|array $data, string | int $id, string $event)
 {
+ 
     $get = json_encode($data);
     echo "retry: 1000\n";   // one seconds
      echo "id: $id\n";
     echo "event: $event\n";
     echo "data: {$get}\n\n";
-    // ob_flush();
+     ob_flush();
     flush();
 }

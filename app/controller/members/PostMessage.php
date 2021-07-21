@@ -13,6 +13,8 @@ use App\classes\{
     Select
 };
 
+use Pusher\Pusher;
+
 
 class PostMessage
 {
@@ -50,14 +52,28 @@ class PostMessage
             $commentNo = checkInput($_GET['commentNo']);
 
             $message = Post::commentByNo($commentNo);
-            foreach($message as $data);
+            foreach ($message as $data);
             msgSuccess(200, $data);
         } catch (\Throwable $th) {
             showErrorExp($th);
         }
     }
 
-    static function update()
+    function getPostNo()
+    {
+        try {
+
+            $postNo = checkInput($_GET['postNo']);
+
+            $message = Post::postByNo($postNo);
+            foreach ($message as $data);
+            msgSuccess(200, $data);
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
+    }
+
+    static function update2()
     {
         try {
             // session_destroy();
@@ -77,23 +93,58 @@ class PostMessage
             //     $lastEventId = floatval(isset($_GET['lastEventId']) ? $_GET['lastEventId'] : 0);
             // }
 
+            $id = (int) $_SESSION['LAST_INSERT_ID_POST'];
 
-            $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'post', identifier1: "post_no");
-            $messages = Select::selectFn2($query, [$_SESSION['LAST_INSERT_ID']]);
 
+            $messages = Post::postByNo($id);
             foreach ($messages as $message);
 
             $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
 
             $messageComments = Post::commentByNo($idComment);
 
-            $id = (int) $_SESSION['LAST_INSERT_ID'];
-    
 
-            $_SESSION['LAST_INSERT_ID'] = false;
 
             msgServerSent($message, $id, "updatePost");
             msgServerSent($messageComments, $idComment, "updateComment");
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
+    }
+
+    static function update()
+    {
+        try {
+
+            $option = array(
+                'cluster' => 'eu',
+                'useTLS' => true
+            );
+
+            $pusher = new Pusher(
+                'd1f1e43f3d8afb028a1f',
+                '67557ee07262c6a29970',
+                '1218019',
+                $option
+            );
+
+
+            $id = (int) $_SESSION['LAST_INSERT_ID_POST'];
+
+
+            $messages = Post::postByNo($id);
+            foreach ($messages as $message);
+
+            $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
+
+            $messageComments = Post::commentByNo($idComment);
+
+            $pusher->trigger('my-channel', 'updatePost', $message);
+
+
+
+            // msgServerSent($message, $id, "updatePost");
+            // msgServerSent($messageComments, $idComment, "updateComment");
         } catch (\Throwable $th) {
             showErrorExp($th);
         }

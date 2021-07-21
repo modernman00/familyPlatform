@@ -26,13 +26,16 @@
 
       @php  
 
-      $formArray = [ 'email' => 'email', 'password' => 'password', 'checkbox'=> 'Remember me', 'token' => 'token', 'button' => 'submit'];
+      $formArray = [ 'email' => 'email', 
+      'password' => 'password', 
+      // 'checkbox'=> 'Remember me', 
+      'token' => 'token', 
+      'button' => 'submit'];
 
       $form = new App\classes\BuildFormBulma($formArray);
       $form->genForm();
 
     @endphp
-    <br>
 
     <label class="checkbox">
   <input type="checkbox" id="showPassword_id">

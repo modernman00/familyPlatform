@@ -3,17 +3,15 @@ import { id, log, qSel, showError } from "../global"
 import FormHelper from '../FormHelper';
 import { postFormData } from "../helper/http"
 
+const formInput = document.querySelectorAll('.eventModalForm');
+const formInputArr = Array.from(formInput);
+const formData = new FormHelper(formInputArr);
 
-    const formInput = document.querySelectorAll('.eventModalForm');
-    const formInputArr = Array.from(formInput);
-    const formData = new FormHelper(formInputArr);
+formData.clearError()
 
-    formData.clearError()
+const displayNone = () => id('id_event_modal').style.display = 'none'
 
-    const displayNone = () => id('id_event_modal').style.display = 'none'
-
-    id('cancelModal').addEventListener('click', displayNone)
-
+id('cancelModal').addEventListener('click', displayNone)
 
 const process = (e) => {
     try {

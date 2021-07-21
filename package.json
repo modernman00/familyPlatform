@@ -51,6 +51,7 @@
     "lodash": "^4.17.21",
     "npm": "^7.4.0",
     "path-browserify": "^0.0.1",
+    "pusher-js": "^7.0.3",
     "sass": "^1.32.2",
     "svg-gauge": "^1.0.6",
     "timeago.js": "^4.0.2",

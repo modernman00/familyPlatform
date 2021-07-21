@@ -792,6 +792,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
+
 
 
 
@@ -800,13 +803,38 @@ __webpack_require__.r(__webpack_exports__);
 
 
 try {
-  // getApiData()
-  var newLikeCounterVal = 0; // CLICK EVENT get the comment and like button from the document
+  (pusher_js__WEBPACK_IMPORTED_MODULE_4___default().logToConsole) = true;
+  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('d1f1e43f3d8afb028a1f', {
+    cluster: 'eu'
+  }); // getApiData()
+
+  var newLikeCounterVal = 0;
+  var options = {
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN'
+  }; // let serverConnection = new EventSource("/post/getAllPost/update") 
+  // const Pusher = (pushData) => {
+  // // open the server sent event
+  //     const update = (e) => {
+  //         const data = JSON.parse(e.data)
+  //         // log(data)
+  //         if( appendNewPost(pushData)) {
+  //             serverConnection.close()
+  //         }
+  //     }
+  //     serverConnection.addEventListener("updatePost", update)
+  // }
+
+  var showTheComment = function showTheComment(commentResponse) {
+    var idDiv = "showComment".concat(commentResponse.post_no);
+    var commentHtml = (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.commentHTML)(commentResponse);
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idDiv).insertAdjacentHTML('afterbegin', commentHtml);
+  }; // CLICK EVENT get the comment and like button from the document
+
 
   document.onclick = function (e) {
     var elementId = e.target.id;
-    var postId = e.target.name; // const eClass = e.target
-    // log(eClass)
+    var postId = e.target.name;
 
     if (elementId.includes("likeButton")) {
       // replace button with Counter to get the span id 
@@ -821,8 +849,14 @@ try {
       var commentFormId = elementId.replace('init', 'form');
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block"; // Submit function for comment using POST API
     } else if (elementId.includes("submitComment")) {
+      //elementId == submitComment511
+      // 0.5 LISTEN FOR THE SUBMIT EVENT
+      // 0.7 GET THE COMMENT FORM ID 
+      // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
+      // 2.  USE IT TO GET THE NEW COMMENT
+      // 3. ADD THE NEW COMMENT TO THE COMMENT DIV 
       // get the specific form id
-      e.preventDefault(); //elementId == submitComment511
+      e.preventDefault(); // 0.7
 
       var idForm = elementId.replace("submit", "form"); //idForm == formComment511
 
@@ -830,32 +864,43 @@ try {
       // extract the form entries
 
       var form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
-      var formEntries = new FormData(form);
-      formEntries["delete"]('submit');
-      formEntries["delete"]('checkbox_id'); // formEntries.delete('token')
-
-      var options = {
-        xsrfCookieName: 'XSRF-TOKEN',
-        xsrfHeaderName: 'X-XSRF-TOKEN'
-      }; // AXIOS POST FUNCTIONALITY
+      var formEntries = new FormData(form); // 1.
 
       axios__WEBPACK_IMPORTED_MODULE_3___default().post('/postCommentProfile', formEntries, options).then(function (response) {
-        // POST SENDS BACK THE LAST COMMENT NO POSTED
-        // USE IT TO GET THE NEW COMMENT
-        // ADD THE NEW COMMENT TO THE COMMENT DIV 
+        // 2. note. message returns the new post_no from the database
         axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
-          var postNo = res.data.message.post_no;
-          var idDiv = "showComment".concat(postNo);
-          var commentHtml = (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.commentHTML)(res.data.message);
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idDiv).insertAdjacentHTML('afterbegin', commentHtml);
+          // 3.
+          showTheComment(res.data.message);
         });
       })["catch"](function (error) {
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
-      }); // submit the post 
+      }); // SUBMIT THE POST
     } else if (elementId.includes("submitPost")) {
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/member/profilePage/post", "formPostMessageModal"); // make the post modal display disappear
+      // LISTEN TO THE SUBMIT EVENT 
+      // 2. GET THE FORM id
+      // 3. POST TO THE SERVER USING AXIOS POST
+      //4. GET THE POST FROM THE SERVER USING AXIOS GET 
+      //5. APPEND THE NEW POST TO THE POSTCARD 
+      // 2. 
+      var formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
+      var formData = new FormData(formExtra); // 3. 
 
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none'; // location.reload();   
+      axios__WEBPACK_IMPORTED_MODULE_3___default().post("/member/profilePage/post", formData, options).then(function (response) {
+        //  4. 
+        axios__WEBPACK_IMPORTED_MODULE_3___default().get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
+          // 5. 
+          // log(res.data.message)
+          (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(res.data.message); // Pusher(res.data.message)
+        }); // Enable pusher logging - don't include this in production
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('updatePost', function (data) {
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking1");
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(data.message);
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking");
+        });
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
+      });
     }
   };
 } catch (e) {
@@ -918,28 +963,6 @@ var process = function process(e) {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/homePage.js":
-/*!***************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/homePage.js ***!
-  \***************************************************************/
-/***/ (() => {
-
-// import { id, log } from '../global'
-// import { getApiData } from '../helper/http'
-// import Cookies from 'js-cookie'
-// import axios from 'axios'
-// const url = "/member/ProfilePage"
-// const token = Cookies.get('waletoken') 
-// log(token);
-// // const result = getApiData(url, token)
-// // log(result);
-// const res = await axios.get('/member/ProfilePage', { 
-//     headers : { 'Authorization' : 'Bearer ' + token}
-// })
-// log(res)
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/profilePage/html.js":
 /*!***********************************************************!*\
   !*** ./resources/asset/js/components/profilePage/html.js ***!
@@ -949,6 +972,7 @@ var process = function process(e) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "html": () => (/* binding */ html),
 /* harmony export */   "allPost": () => (/* binding */ allPost),
 /* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost),
 /* harmony export */   "commentHTML": () => (/* binding */ commentHTML)
@@ -1007,7 +1031,6 @@ var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat(showComment(comment), "\n      \n    </div><br>\n  </div>");
 };
-
 var allPost = function allPost(el, commentData) {
   if (!el) {
     return false;
@@ -1037,7 +1060,7 @@ var appendNewPost = function appendNewPost(el) {
 };
 var commentHTML = function commentHTML(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
-  return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\"> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
+  return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\" datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
 };
 
 var showComment = function showComment(comment) {
@@ -1047,15 +1070,7 @@ var showComment = function showComment(comment) {
 
 
   return comment.map(function (commentElement) {
-    return commentHTML(commentElement); //     const img = (commentElement.img) ? `/img/profile/${commentElement.img}` : "/avatar/avatarF.png"
-    //     return `<div class="w3-ul w3-border" id="comment${commentElement.comment_no}" name='commentDiv'>
-    //       <div class="w3-container commentDiv">
-    //       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
-    //        <p class="w3-right w3-opacity commentTiming"> ${format(commentElement.date_created)} </p> 
-    //          <p class="commentFont"> ${commentElement.comment}</p>
-    //     </div>
-    // </div>`
-    // }
+    return commentHTML(commentElement);
   });
 };
 
@@ -1088,37 +1103,17 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
-/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./homePage */ "./resources/asset/js/components/profilePage/homePage.js");
-/* harmony import */ var _homePage__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_homePage__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
-/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
-/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
-/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
-
-
- // const postDataI = () => {
-//     getApiData(`/post/getAllPost`)
-//             .then(data => {
-//                 console.log(data.message)
-//                 data.message.map(el => { 
-//                     allPost(el)
-//                 })
-//             })
-//             .catch(err => {console.log(err)})
-// }
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
+/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
+/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
+/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 
 
 
 
 
- // import { allPost } from "../profilePage/html"
-// var source = new EventSource("/post/getAllPost");
-//     source.onmessage = function (event) {
-//         console.log(event)
-//         const data = JSON.parse(event.data)
-//         console.log(data)
-//         data.map(el => allPost(el))
-//     }
+
+
 
 /***/ }),
 
@@ -1146,20 +1141,24 @@ try {
   var state = {
     post: [],
     comment: []
-  }; // 2. get the data from the database to set the inital data
+  };
+  var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
+  // 2. get the data from the database to set the inital data
 
   var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getMultipleApiData)("/post/getAllPost", '/member/pp/comment');
   postData.then(function (response) {
     state.post = response[0].data.message;
     state.comment = response[1].data.message;
-    var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
+    state.post.map(function (data) {
+      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
+    }); // show all the post and comments
+    // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 
     var updateComment = function updateComment(e) {
-      var commentData = JSON.parse(e.data); // log(commentData)
-
+      var commentData = JSON.parse(e.data);
       var newData = state.comment.some(function (com) {
         return com.comment_no === commentData.comment_no;
-      }); // check if the post no does not already exist
+      }); // check if the comment no does not already exist
 
       if (!newData) {
         // if it is not available, add to the data state
@@ -1170,9 +1169,6 @@ try {
     serverConnection.addEventListener("updateComment", function (e) {
       return updateComment(e);
     });
-    state.post.map(function (data) {
-      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
-    }); // show all the post and comments
 
     var updatePost = function updatePost(e) {
       if (e.origin != "http://olaogun.dev.com") {
@@ -1198,7 +1194,13 @@ try {
 
     serverConnection.addEventListener("updatePost", function (e) {
       return updatePost(e);
-    });
+    }); // // serverConnection.close()
+    // AUTOMATICALLY UPDATE TIMESTAMP
+
+    var updatePostTiming = document.querySelectorAll(".timeago");
+    var updateCommentTiming = document.querySelectorAll(".commentTiming");
+    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updatePostTiming);
+    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updateCommentTiming);
   })["catch"](function (err) {
     return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
   });

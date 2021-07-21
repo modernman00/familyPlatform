@@ -16,10 +16,16 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-        static function commentByNo($commentNo)
+    static function commentByNo($commentNo)
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
         return parent::selectFn2(query: $query, bind: [$commentNo]);
+    }
+
+      static function postByNo($postNo)
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
+        return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
     static function postLink2Id(string $id): array

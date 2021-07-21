@@ -6,6 +6,10 @@ $router->map('POST', '/member/profilePage/post', 'App\controller\members\Profile
 
 $router->map('GET', '/post/getAllPost', 'App\controller\members\PostMessage@index', 'all_posts');
 
+// GET ALL MEMBERS POST BY NO
+
+$router->map('GET', '/post/getAllPost/byNumber', 'App\controller\members\PostMessage@getPostNo', 'all_posts_by_last_no');
+
 // GET ALL COMMENT 
 $router->map('GET', '/member/pp/comment', 'App\controller\members\PostMessage@getComment', 'all_comment');
 

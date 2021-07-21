@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use React\EventLoop\Factory;
-
-
-
 use App\model\{
     SingleCustomerData,
     Post
@@ -18,12 +14,9 @@ use App\classes\{
     ProcessImg,
     Insert,
     VerifyToken,
-    Pusher
 };
 
-use App\controller\members\PostMessage;
-
-use App\classes\websocket\ReactServer;
+use Pusher\Pusher;
 use App\model\AllMembersData as DataAll;
 
 
@@ -42,7 +35,7 @@ class ProfilePage extends ProcessImg
     {
         unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
 
-       //TODO something is destroying the session after a few hours: find out
+        //TODO something is destroying the session after a few hours: find out
 
         // GET MEMBER'S DATA
         $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
@@ -113,7 +106,7 @@ class ProfilePage extends ProcessImg
 
     private function processPostData()
     {
-     
+
 
         if (!$_POST) {
             throw new \Exception("There was no post data", 1);
@@ -154,45 +147,40 @@ class ProfilePage extends ProcessImg
     function post()
     {
         try {
+               header('Content-Type: text/event-stream');
+            header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
-            Insert::submitForm2('post', $getPost);
-            // $_SESSION['NEW_POST'] = true; // use it for server sent event update
-            // $getPost['LAST_INSERT_ID'] = $_SESSION['LAST_INSERT_ID'];
+            Insert::submitFormDynamic('post', $getPost);
+            $option = array(
+                'cluster' => 'eu',
+                'useTLS' => true
+            );
 
-            // GET ALL THE INFORMATION ABOUT THE NEW POST: PROFILE PICS OF THE 
+            $pusher = new Pusher(
+                'd1f1e43f3d8afb028a1f',
+                '67557ee07262c6a29970',
+                '1218019',
+                $option
+            );
 
-            msgSuccess(200, "Success");
+            $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
 
 
-            // ReactServer::startChat();
+            $messages = Post::postByNo($theId);
+            foreach ($messages as $message);
 
-            // $loop = Factory::create();
-            // $pusher = new Pusher;
-
-
-            // This is our new stuff
-            // $context = new ZMQContext();
-            // $socket = $context->getSocket(ZMQ::SOCKET_PUSH, 'my pusher');
-
-            // printArr($socket);
-            // $socket->connect("tcp://localhost:80");
-
-            // $socket->send(json_encode($getPost));
-
-           // header(self::REDIRECT);
+            $pusher->trigger('my-channel', 'updatePost', $message);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-
+    // MESSAGE IS SENT THROUGH THE SUBMIT FOR DYNAMIC
     function postComment()
     {
         try {
             $getComment = $this->processPostData();
             Insert::submitFormDynamic('comment', $getComment);
-            //    msgSuccess(200, "Success");
-             
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);
