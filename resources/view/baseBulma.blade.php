@@ -18,13 +18,13 @@
 
   <style>
 .loader {
-  border: 16px solid #11e11c;
-  border-radius: 50%;
-  border-top: 16px solid #3498db;
-  width: 350px;
-  height: 350px;
-  -webkit-animation: spin 2s linear infinite; /* Safari */
-  animation: spin 2s linear infinite;
+    border: 16px solid #11e11b79;
+    border-radius: 50%;
+    border-top: 16px solid #2092ddf3;
+    width: 350px;
+    height: 350px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
 }
 
 /* Safari */

@@ -139,7 +139,6 @@ class ProfilePage extends ProcessImg
         $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
         // $getSanitisePost['post_time'] = $_SESSION['currentTime'];
         $getSanitisePost['post_time'] = milliSeconds();
-
         return $getSanitisePost;
     }
 

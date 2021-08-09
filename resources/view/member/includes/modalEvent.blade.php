@@ -26,7 +26,7 @@
 
         {{--  SHOW ERROR   --}}
 
-        <p id="errorEventModal"></p>
+        {{--  <p id="errorEventModal"></p>  --}}
 
         <div class="w3-center"><br>
             <span id="cancelModal"

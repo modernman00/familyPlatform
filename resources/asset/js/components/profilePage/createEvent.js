@@ -26,7 +26,9 @@ const process = (e) => {
             //  qSel('.submitEventModal').type = 'submit'
             id('loader').classList.add('loader') // start the loader element
             postFormData("/member/profilePage", 'eventModalForm', null, "w3css")
-            //window.location.replace("/member/profilePage")
+            displayNone();
+
+            // window.location.replace("/member/profilePage")
         } else {
             alert('The form cannot be submitted. Please check the errors')
             formData.clearError()

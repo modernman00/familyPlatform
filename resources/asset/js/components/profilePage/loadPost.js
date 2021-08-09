@@ -55,16 +55,16 @@ try {
                     state.post.push(newPostData)
                 }
             }
-         return state.post.map(ele => appendNewPost(ele))
+            return state.post.map(ele => appendNewPost(ele))
 
         }
         serverConnection.addEventListener("updatePost", (e) => updatePost(e))
 
         // // serverConnection.close()
 
-       
 
-   
+
+
 
 
         // AUTOMATICALLY UPDATE TIMESTAMP

@@ -949,7 +949,8 @@ var process = function process(e) {
       //  qSel('.submitEventModal').type = 'submit'
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // start the loader element
 
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage", 'eventModalForm', null, "w3css"); //window.location.replace("/member/profilePage")
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage", 'eventModalForm', null, "w3css");
+      displayNone(); // window.location.replace("/member/profilePage")
     } else {
       alert('The form cannot be submitted. Please check the errors');
       formData.clearError();
