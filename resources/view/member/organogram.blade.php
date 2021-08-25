@@ -75,7 +75,16 @@
             {{--  THE CHILDREN AND GRANDKIDS  --}}
             <ul>
                  <li>
-                    @if($data['spouseName'])<a href="#">{{ $data['spouseName'] }} </a>@endif<a href="#">{{ $data['firstName'] }} {{ $data['lastName'] }} </a> 
+                    @if($data['spouseName'])
+                        <a href="#">
+                            {{ $data['spouseName'] }} 
+                        </a>
+                        @else 
+                        
+                    @endif
+                    <a href="#">
+                        {{ $data['firstName'] }} {{ $data['lastName'] }} 
+                    </a> 
                     <ul>
                         @if(isset($getKids) !== null)
                         @foreach($getKids as $child)

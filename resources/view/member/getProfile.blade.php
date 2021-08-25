@@ -8,24 +8,33 @@
 
 
   </div> --}}
-    <h4><b>{{ $data['firstName'] }} {{ $data['lastName'] }} </b></h4>
+
     <h4> <a
-        href="/organogram?id={{ $data['id'] }}"> SEE MY FAMILY TREE</a></h4>
+        href="/organogram?id={{ $data['id'] }}"> SEE {{ $data['firstName'] }} {{ $data['lastName'] }} FAMILY TREE</a></h4>
        
 
     <img src="/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="600" height="650">
 
     <div class="w3-content w3-justify" style="max-width:600px">
       <h4>{{ $data['firstName'] }} {{ $data['lastName'] }}</h4>
-      <p>Some text about me. I love taking photos of PEOPLE. I am lorem ipsum consectetur adipiscing elit, sed do
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-        ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-        dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-        cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing
-        elit, sed do eiusmod tempor
-        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
-        nisi ut aliquip ex ea commodo consequat.
+      <p>
+        {{ $data['firstName'] }} {{ $data['lastName'] }} lives in {{ $data['country'] }}. 
+          @if ( $data['gender'] == "male") 
+            He 
+          @else 
+        She 
+        @endif 
+
+        loves {{ $data['passion'] }} and {{ $data['favSport'] }}
+
+        @isset($data['footballTeam'])
+           ,  and also support {{ $data['footballTeam'] }} football team. 
+        @endisset
+
       </p>
+      <br>
+
+      Contact details:
       <p>mail: {{ $data['email'] }}</p>
       <p>tel: {{ $data['mobile'] }}</p>
       <hr class="w3-opacity">
@@ -37,7 +46,7 @@
 
       </div>
     </div>
-
+{{--  
     <!-- Contact section -->
     <div class="w3-container w3-light-grey w3-padding-32 w3-padding-large" id="contact">
       <div class="w3-content" style="max-width:600px">
@@ -59,7 +68,7 @@
           <button type="submit" class="w3-button w3-block w3-black w3-margin-bottom">Send Message</button>
         </form>
       </div>
-    </div>
+    </div>  --}}
 
 
 

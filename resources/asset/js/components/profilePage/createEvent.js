@@ -1,5 +1,5 @@
 "use strict";
-import { id, log, qSel, showError } from "../global"
+import { id,  showError } from "../global"
 import FormHelper from '../FormHelper';
 import { postFormData } from "../helper/http"
 
@@ -12,6 +12,8 @@ formData.clearError()
 const displayNone = () => id('id_event_modal').style.display = 'none'
 
 id('cancelModal').addEventListener('click', displayNone)
+
+
 
 const process = (e) => {
     try {
