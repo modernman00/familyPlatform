@@ -12,32 +12,43 @@ let fatherName = []
 let mobile = []
 let motherName = []
 
+/**
+ * 
+ * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
+ * @param {*} searchElement  the element to search against ("Mango")
+ */
+
+const checkExistence = (baseArray, searchElement) => {
+    if(baseArray.includes(searchElement) === false){
+        baseArray.push(searchElement)
+}
+}
+
 getData.then(el =>
     el.map(element => {
-        firstNameData.push(element.firstName)
-        fatherName.push(element.fatherName)
-        motherName.push(element.motherName)
-        mobile.push(element.mobile)
+        checkExistence(firstNameData, element.firstName)
+        checkExistence(fatherName, element.fatherName)
+        checkExistence(motherName, element.motherName)
+        checkExistence(mobile, element.mobile)
     })
 )
 
-const lastAutoComplete = id('firstName_id')
+const firstAutoComplete = id('firstName_id')
 const fatherAutoComplete = id('fatherName_id')
 const motherAutoComplete = id('motherName_id')
 
-lastAutoComplete.setAttribute('autocomplete', 'off')
+firstAutoComplete.setAttribute('autocomplete', 'off')
 fatherAutoComplete.setAttribute('autocomplete', 'off')
 motherAutoComplete.setAttribute('autocomplete', 'off')
 
 // AUTOCOMPLETE
-autocomplete(lastAutoComplete, firstNameData)
+autocomplete(firstAutoComplete, firstNameData)
 autocomplete(fatherAutoComplete, fatherName)
 autocomplete(motherAutoComplete, motherName)
 
 // CHECK THE MOBILE OF MOTHER AND FATHER
 
 const setInput = (element, name, value) => {
-
 
     const sex = (name === "father") ? "him" : "her"
     const genId = id(`${name}Mobile_error`)
@@ -48,21 +59,25 @@ const setInput = (element, name, value) => {
         genId.innerHTML = `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
 
         const processRadio = () => {
-            let surname = id('lastName_id').value
+            let fName = id('firstName_id').value
+            let lName = id('lastName_id').value
 
             const postObj = {
                 mobile: value,
                 viewPath: "msg/contactNewMember",
+                
                 data: { 
                     email: id(`${name}Email_id`).value, 
+                    mobile: id(`${name}Mobile_id`).value, 
                     name: id('fatherName_id').value,
-                    surname: surname
+                    fName: fName
                     },
-                subject: `Please, register to join the ${surname} family Network`,
+
+                subject: `Hello ${name},  ${fName}recommended your contact. Please register to join the ${lName} family Network`,
             }
             axios.post('/register/contactNewMember', postObj)
                 .then((response) => {
-                    console.log(response.data);
+                    // console.log(response.data);
                     const mobileHelp = id(`${name}Mobile_help`)
                     mobileHelp.innerHTML=response.data.message
                     mobileHelp.style.display = "block"
@@ -104,7 +119,6 @@ const spouseMobile = (event) => {
     const setName = "spouse"
      mobileFilter(event, setName)  
 }
-
 
 id('fatherMobile_id').addEventListener('keyup', fatherMobile)
 id('motherMobile_id').addEventListener('keyup', motherMobile)

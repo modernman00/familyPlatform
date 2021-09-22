@@ -794,22 +794,34 @@ var firstNameData = [];
 var fatherName = [];
 var mobile = [];
 var motherName = [];
+/**
+ * 
+ * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
+ * @param {*} searchElement  the element to search against ("Mango")
+ */
+
+var checkExistence = function checkExistence(baseArray, searchElement) {
+  if (baseArray.includes(searchElement) === false) {
+    baseArray.push(searchElement);
+  }
+};
+
 getData.then(function (el) {
   return el.map(function (element) {
-    firstNameData.push(element.firstName);
-    fatherName.push(element.fatherName);
-    motherName.push(element.motherName);
-    mobile.push(element.mobile);
+    checkExistence(firstNameData, element.firstName);
+    checkExistence(fatherName, element.fatherName);
+    checkExistence(motherName, element.motherName);
+    checkExistence(mobile, element.mobile);
   });
 });
-var lastAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
+var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
 var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id');
 var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherName_id');
-lastAutoComplete.setAttribute('autocomplete', 'off');
+firstAutoComplete.setAttribute('autocomplete', 'off');
 fatherAutoComplete.setAttribute('autocomplete', 'off');
 motherAutoComplete.setAttribute('autocomplete', 'off'); // AUTOCOMPLETE
 
-(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(lastAutoComplete, firstNameData);
+(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(firstAutoComplete, firstNameData);
 (0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(fatherAutoComplete, fatherName);
 (0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(motherAutoComplete, motherName); // CHECK THE MOBILE OF MOTHER AND FATHER
 
@@ -824,19 +836,21 @@ var setInput = function setInput(element, name, value) {
     genId.innerHTML = "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name);
 
     var processRadio = function processRadio() {
-      var surname = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
+      var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id').value;
+      var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
       var postObj = {
         mobile: value,
         viewPath: "msg/contactNewMember",
         data: {
           email: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Email_id")).value,
+          mobile: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_id")).value,
           name: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id').value,
-          surname: surname
+          fName: fName
         },
-        subject: "Please, register to join the ".concat(surname, " family Network")
+        subject: "Hello ".concat(name, ",  ").concat(fName, "recommended your contact. Please register to join the ").concat(lName, " family Network")
       };
       axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
-        console.log(response.data);
+        // console.log(response.data);
         var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
         mobileHelp.innerHTML = response.data.message;
         mobileHelp.style.display = "block";
@@ -957,7 +971,7 @@ __webpack_require__.r(__webpack_exports__);
 var renderHtmlFamily = function renderHtmlFamily(family, no) {
   if (no) {
     var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    return "\n        <div class=\"field-body\">\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"text\" placeholder = \"Enter ".concat(kids_sib, "'s full name - ").concat(no, "\" name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                    <i class=\"fas fa-user\"></i>\n                </span>\n                </p>\n            </div>\n\n            <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                <i class=\"fas fa-envelope\"></i>\n                </span>\n                <span class=\"icon is-small is-right\">\n                <i class=\"fas fa-check\"></i>\n                </span>\n                </p>\n           </div>\n\n        </div><br>");
+    return "\n        <div class=\"field-body\">\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"text\" placeholder = \"Enter ".concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                    <i class=\"fas fa-user\"></i>\n                </span>\n                </p>\n            </div>\n\n            <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                <i class=\"fas fa-envelope\"></i>\n                </span>\n                <span class=\"icon is-small is-right\">\n                <i class=\"fas fa-check\"></i>\n                </span>\n                </p>\n           </div>\n\n        </div><br>");
   }
 };
 

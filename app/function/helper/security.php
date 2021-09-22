@@ -11,14 +11,14 @@ use \Rollbar\Payload\Level;
 
 //376306559e2124e72b1577cb75a9a6475
 
-function loggedDetection($filename)
+function loggedDetection($filename, $receivingEmail)
 {
     //TODO send text to the user with the code
-    $emailSender = new EmailData('internal');
+    $emailSender = new EmailData('admin');
     $emailSender->getEmailData();
     $msg = "Hello, <br><br> This is a notification that a <strong>logged -in</strong> has been detected from this file : $filename at this time: " .  date("h:i:sa") . "  and with this IP address: " . getUserIpAddr() . " <br><br>  IT Security Team";
 
-    sendEmail('wale@loaneasyfinance.com', 'logged-in', 'LOGGED-IN DETECTION', $msg);
+    sendEmail($receivingEmail, 'logged-in', 'LOGGED-IN DETECTION', $msg);
 }
 
 function notifyCustOfLogIn($data): mixed

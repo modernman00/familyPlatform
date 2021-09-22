@@ -54,7 +54,6 @@ export default class FormHelper {
                     }
                 }
                 
-
                 if (post.value === '' || post.value === 'select') {
                     errMsg.innerHTML = `* cannot be left empty`
                     errMsg.style.color = "red"

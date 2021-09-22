@@ -76,7 +76,7 @@
                     'identifier1'=> 'status',
                     'bind' => ['new']
                 ];
-                $callback = "selectCountFn";
+                $callback = "selectCountFn2";
                 $result = \App\classes\Select::combineSelect($array, $callback, "ONE_IDENTIFIER");
 
 
@@ -86,24 +86,24 @@
                     Application(<span id='newApp'>{{ $result }}</span>)
                 </a>
 
-                  <a href="/admin/profit" class="navbar-item">
-                    Profit
+                  <a href="/admin/allMembers" class="navbar-item">
+                    All Members
                 </a>
 
-                 <a href="/admin/fca" class="navbar-item">
+                 {{-- <a href="/admin/fca" class="navbar-item">
                     FCA
                 </a>
 
                  <a href="/admin/report" class="navbar-item">
                     Reports
-                </a>
+                </a> --}}
 
-                <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link">
+                {{-- <div class="navbar-item has-dropdown is-hoverable"> --}}
+                    {{-- <a class="navbar-link">
                        Loan Info
-                    </a>
+                    </a> --}}
 
-                    <div class="navbar-dropdown">
+                    {{-- <div class="navbar-dropdown">
                         <a class="navbar-item" href="/admin/allCust">
                             All loan
                         </a>
@@ -123,8 +123,8 @@
                         <a class="navbar-item" href="/complaint">
                             Profit by loan
                         </a>
-                    </div>
-                </div>
+                    </div> --}}
+                {{-- </div> --}}
             </div>
 
             <div class="navbar-end">

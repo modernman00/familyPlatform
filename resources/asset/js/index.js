@@ -32,7 +32,18 @@ if (window.location.pathname === '/register') {
         .then((module) => module.default)
         .catch((err) => showError(err))
 
-} else if (window.location.pathname === '/login/forgot') {
+}else if (window.location.pathname === '/lasu') {
+     qSel('.login').style.display ="none" // navbar mgt
+
+    import(
+        /* webpackChunkName: 'codeSplit/login' */
+        /* webpackPrefetch: true */
+        './components/login/admin'
+    )
+        .then((module) => module.default)
+        .catch((err) => showError(err))
+
+}else if (window.location.pathname === '/login/forgot') {
     qSel('.signup_login').style.display ="none" // navbar mgt
  
     import(

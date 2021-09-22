@@ -74,6 +74,7 @@ class Login extends Select
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
                     $this->adminLogin($sanitisedData);
+
                 } else if ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);
@@ -129,11 +130,11 @@ class Login extends Select
             throw new Exception("Your input to code is not recognised");
         }
 
-        loggedDetection("http://olaogun.dev.com/lasu");
+        loggedDetection("http://olaogun.dev.com/lasu", $sanitisedData['email']);
 
         session_regenerate_id();
 
-        header('Location: /admin/reviewApps');
+        // header('Location: /admin/reviewApps');
     }
 
     function adminSignOut()

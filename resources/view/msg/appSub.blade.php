@@ -12,6 +12,6 @@
 
 Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br><br>
 
-If your application approved, then you should be able to log in to your account and access the family social network
+If your application is approved, then you should be able to log in to your account and access the family social network.
 
 @endsection

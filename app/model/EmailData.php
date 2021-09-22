@@ -24,11 +24,10 @@ class EmailData
             $this->senderEmail = getenv("APP_EMAIL");
             $this->testEmail = getenv("TEST_EMAIL");
         } elseif ($sender === 'admin') {
-
-            $this->username = getenv("PAY_USERNAME");
-            $this->password = getenv("PAY_PASSWORD");
-            $this->senderName = getenv('PAY_SENDER');
-            $this->senderEmail = getenv("PAY_EMAIL");
+            $this->username = getenv("ADMIN_USERNAME");
+            $this->password = getenv("ADMIN_PASSWORD");
+            $this->senderName = getenv('ADMIN_SENDER');
+            $this->senderEmail = getenv("ADMIN_EMAIL");
             $this->testEmail = getenv("TEST_EMAIL");
         } 
     }

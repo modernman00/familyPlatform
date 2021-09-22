@@ -1,4 +1,4 @@
-import { format} from "timeago.js"
+import { format } from "timeago.js"
 
 import { id, log } from '../global'
 
@@ -16,7 +16,7 @@ const postedAt = (date) => {
 const nameImgTiming = (data) => {
 
   const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
-  return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile">
+  return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}">
         <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
         </a>
         ${postedAt(data)} ${name(data.fullName)}`
@@ -138,9 +138,9 @@ export const appendNewPost = (el) => {
 
 export const commentHTML = (data) => {
 
-      const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
+  const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
 
-    return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
+  return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
       <div class="w3-container commentDiv">
       <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
        <p class="w3-right w3-opacity commentTiming" datetime='${data.date_created}' title='${data.date_created}'> ${format(data.date_created)} </p> 
@@ -151,7 +151,7 @@ export const commentHTML = (data) => {
 
 }
 
- const showComment = (comment) => {
+const showComment = (comment) => {
 
 
   if (!comment) { return `<div class="w3-ul w3-border" id="comment" name='commentDiv'></div>` } // only run if there is comment

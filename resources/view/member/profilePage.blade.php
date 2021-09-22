@@ -22,13 +22,12 @@
     <div class="w3-col m7" id=" postMessages">
 
       @include('member/includes/postMessage')
+
       {{-- DISPLAY POST --}}
 
       <div id="messagePost">
 
          <div class="postIt" id="postIt"></div>
-
-
 
       </div>
 

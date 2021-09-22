@@ -5,8 +5,9 @@
 
 <script type="text/javascript">
     const dataPull = @json($data, JSON_PRETTY_PRINT);
+    const kids = @json($getSibling, JSON_PRETTY_PRINT);
 
-        console.log(dataPull);
+        console.log(kids);
     
 
         google.charts.load('current', {packages:["orgchart"]});
@@ -71,35 +72,45 @@
 <div class="tree">
     <ul>
         <li>
-            <a href="#"><b>Father: </b>{{ $data['fatherName'] }}<br></a><a href="#"><b>Mother: </b>{{ $data['motherName'] }}</a>
+            <a href="#"><b>Father: </b>{{ $data['fatherName'] }}<br></a>
+            <a href="#"><b>Mother: </b>{{ $data['motherName'] }}</a>
             {{--  THE CHILDREN AND GRANDKIDS  --}}
             <ul>
-                 <li>
+                <li>
+
+                    {{--  check if there is a spouse  --}}
                     @if($data['spouseName'])
-                        <a href="#">
-                            {{ $data['spouseName'] }} 
-                        </a>
-                        @else 
-                        
-                    @endif
                     <a href="#">
-                        {{ $data['firstName'] }} {{ $data['lastName'] }} 
-                    </a> 
+                        {{ $data['spouseName'] }}
+                    </a>
+                    @else
+
+                    @endif
+
+                    {{--  first and last name  --}}
+                    <a href="#">
+                        {{ $data['firstName'] }} {{ $data['lastName'] }}
+                    </a>
+
+                    {{--  check if there are kids  --}}
                     <ul>
                         @if(isset($getKids) !== null)
                         @foreach($getKids as $child)
-                            <li>
-                                <a href="#">{{ $child['kid_name'] }}</a>
-                            </li>
+                        <li>
+                            <a href="#">{{ $child['kid_name'] }}</a>
+                        </li>
                         @endforeach
                         @endif
                     </ul>
                 </li>
-                @if(isset($getKids) !== null)
+
+                {{--  check if there are siblings  --}}
+
+                @if(isset($getSibling) !== null)
                 @foreach($getSibling as $siblings)
                 <li>
                     <a href="#">{{ $siblings['sibling_name'] }}</a>
-                
+
                 </li>
 
                 @endforeach

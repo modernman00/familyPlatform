@@ -6,9 +6,9 @@
 
   <a href="/allMembers" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="News"><i class="fa fa-users"></i> All Members</a>
 
-  <a href="/organogram?id= {{ $data['id'] }}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i class="fa fa-tree"></i>Family Tree</a>
+  {{--  <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i class="fa fa-tree"></i>Family Tree</a>  --}}
 
-    <a href="/setting?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i class="fa fa-cog"></i>Account Setting</a>
+    {{--  <a href="/setting?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i class="fa fa-cog"></i>Account Setting</a>  --}}
 {{--  
   <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Messages"><i class="fa fa-envelope"></i></a>  --}}
   {{--  <div class="w3-dropdown-hover w3-hide-small">
@@ -28,8 +28,8 @@
 <div id="navDemo" class="w3-bar-block w3-theme-d2 w3-hide w3-hide-large w3-hide-medium w3-large">
   <a href="/allMembers" class="w3-bar-item w3-button w3-padding-large">All Members</a>
 
-    <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-large" title="Account Settings"><i class="fa fa-tree"></i>Family Tree</a>
+    {{--  <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-large" title="Account Settings"><i class="fa fa-tree"></i>Family Tree</a>
 
-    <a href="/setting?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-large" title="Account Settings"><i class="fa fa-cog"></i>Account Setting</a>
+    <a href="/setting?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-large" title="Account Settings"><i class="fa fa-cog"></i>Account Setting</a>  --}}
 
 </div>

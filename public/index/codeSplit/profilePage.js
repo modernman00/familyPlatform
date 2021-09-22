@@ -997,7 +997,7 @@ var postedAt = function postedAt(date) {
 
 var nameImgTiming = function nameImgTiming(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
-  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
 };
 
 var commentForm = function commentForm(data) {
