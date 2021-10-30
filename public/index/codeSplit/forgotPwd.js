@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/forgotPwd"],{
 
 /***/ "./resources/asset/js/components/forgotPwd/index.js":
@@ -6,7 +7,6 @@
   \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
@@ -48,7 +48,6 @@ var forgotPasswordSubmission = function forgotPasswordSubmission(e) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
@@ -328,7 +327,6 @@ var checkCookie = function checkCookie() {
   \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "showPassword": () => (/* binding */ showPassword),

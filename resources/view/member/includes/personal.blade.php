@@ -18,7 +18,7 @@
 
           @isset($data['img'])
   
-          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" style="height:106px;width:106px" alt="Avatar">
+          <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
 
           @else
           <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
@@ -39,13 +39,11 @@
 
         <div class="changeProfileDisplay">
 
-          <label for="profileImage"></label><br>
+          <label for="profileImageFile"></label><br>
 
-          <input for="profileImage" type="file" id="profileImage" name="profileImage">
-          <button class='w3-button'>
+          <input for="profileImageFile" type="file" id="profileImageFile" class="profileImageFile" name="profileImageFile">
 
-
-            <button class='changeProfileButton' name='submit' type="submit">Submit</button>
+            <button class='changeProfileButton' name='submit' type="submit">Change pics</button>
         </div>
 
 

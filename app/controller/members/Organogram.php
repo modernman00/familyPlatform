@@ -48,7 +48,7 @@ class Organogram extends SingleCustomerData
 
             }
         }
-       printArr($newSiblingData[0]);
+    //    printArr($newSiblingData[0]);
         
         view('member/organogram', compact('data','getSibling', 'getKids'));
     }

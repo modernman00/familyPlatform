@@ -33,10 +33,9 @@
                <label>Upload File  </label>
               <a href="javascript:void(0)" 
               class="custom-file-container__image-clear" 
-              title="Clear Image"><i class="fa fa-ban" style="color: blue" arial-hidden="true"></i></a>
+              title="Clear Image"><em class="fa fa-ban" style="color: blue" arial-hidden="true"></em></a>
            
            
-
             <label for="postMessage_uploadPics" class="custom-file-container__custom-file">
               <input type="file" accept="image/*, image/heif, image/heic, video/*" class="custom-file-container__custom-file__custom-file-input" aria-label="Choose File"
                 id="postMessage_uploadPics" name="photo[]" multiple />

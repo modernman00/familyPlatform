@@ -1,0 +1,183 @@
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 65%;
+  box-sizing: border-box;
+}
+
+.personal__name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant: small-caps;
+}
+
+.personal__name:hover {
+  background-color: rgb(49, 47, 47);
+  color: #ffffff;
+}
+
+.hidden {
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  left: -999999px;
+}
+
+.profileImg {
+  vertical-align: middle;
+  width: 20vh;
+  height: 20vh;
+  border-radius: 50%;
+}
+
+.changeProfileDisplay {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  /* flex-wrap: wrap; */
+}
+
+.profileImageFile {
+  align-self: center;
+}
+
+.changeProfileButton {
+  box-shadow: 0px -1px 0px 0px #3dc21b;
+  background-color: #44c767;
+  border-radius: 1.5rem;
+  border: 1px solid #18ab29;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 0.7rem;
+  width: 8rem;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  text-shadow: 0px 0px 0px #2f6627;
+}
+
+.changeProfileButton:hover {
+  background-color: #5cbf2a;
+}
+.changeProfileButton:active {
+  position: relative;
+  top: 1px;
+}
+
+.postFont {
+  font-size: 2.5rem;
+  color: #010124;
+  font-family: "Playfair Display", serif;
+  font-weight: 800;
+}
+
+.commentDiv {
+  padding: rem;
+}
+
+.showComment {
+  margin-top: 2vh;
+}
+
+.commentBox {
+  display: flex;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+/* 
+// .commentPics > img {
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 50%;
+// } */
+
+.commentImg {
+  height: 5em;
+  width: 5em;
+}
+
+.commentTiming {
+  font-size: 1rem;
+  padding-top: 1rem;
+  margin-left: 1.5rem;
+}
+
+.postTiming {
+  font-size: 1rem;
+  margin-left: 1.5rem;
+}
+
+.commentFont {
+  font-size: 1.5rem;
+  margin-left: 0.65rem;
+  padding-top: 1rem;
+}
+*/ .inputComment,
+.submitComment {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  padding: 12px 20px;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  resize: none;
+}
+
+.eventModalCancel {
+  background-color: red;
+  align-items: center;
+}
+
+.modal-h1 {
+  font-family: "Playfair Display", serif;
+}
+
+.likeCounter {
+  padding: 10px;
+  margin: 12px;
+  color: whitesmoke;
+}
+
+ .showImageContainer {
+  display: flex;
+  /* justify-content: space-between;
+  gap: 2rem; */
+  padding: 1rem;
+  flex-wrap: wrap;
+  align-items:center;
+
+ }
+
+.showImageContainer__image {
+  margin-top: 5rem;
+  height: 80rem;
+  width: 70rem;
+  margin-right: 5rem;
+
+  /* min-width: 60vw; */
+  margin-left: 5rem;
+  min-width: 80%;
+}
+
+.showImageContainer__comment {
+  margin-top: 5rem;
+  width: 40rem;
+}
+

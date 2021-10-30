@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/login"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
@@ -6,7 +7,6 @@
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
@@ -362,7 +362,6 @@ var FormHelper = /*#__PURE__*/function () {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
@@ -404,7 +403,6 @@ var Login = {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
@@ -547,7 +545,6 @@ var matchInput = function matchInput(first, second, err) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
@@ -827,7 +824,6 @@ var checkCookie = function checkCookie() {
   \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "showPassword": () => (/* binding */ showPassword),
@@ -871,7 +867,6 @@ var emailVal = function emailVal(email) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -889,7 +884,7 @@ __webpack_require__.r(__webpack_exports__);
 (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").style.display = "none";
 var formInput = document.querySelectorAll('.loginNow');
 var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 
 var process = function process() {
   //clear error from the form
@@ -948,7 +943,6 @@ var LoginSubmission = function LoginSubmission(e) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -966,7 +960,7 @@ __webpack_require__.r(__webpack_exports__);
 (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").style.display = "none";
 var formInput = document.querySelectorAll('.loginNow');
 var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__.default(formInputArr);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 
 var process = function process() {
   //clear error from the form
@@ -1025,7 +1019,6 @@ var LoginSubmission = function LoginSubmission(e) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Login__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Login */ "./resources/asset/js/components/login/Login.js");
 

@@ -19,7 +19,7 @@
   <!-- End Left Column -->
 
     {{-- POST MESSAGE --}}
-    <div class="w3-col m7" id=" postMessages">
+    <div class="w3-col m7" id="postMessages">
 
       @include('member/includes/postMessage')
 
@@ -44,20 +44,15 @@
 
     @include('member/includes/rightCol')
 
-
     {{-- MODAL --}}
 
     @include('member/includes/postModal')
-
 
   </div>
 </div>
 
 {{-- POST MODAL --}}
 <script>
-
-
-
 
 // insert comment  
 
@@ -69,17 +64,12 @@ const processComment = (el) => {
       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
-
   const postId = @json($allData['post_no'])
 
 // checkTest.map(el => {
 //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
 // })
 
-
-
 </script>
-
-
 
 @endsection

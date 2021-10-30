@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["resources_asset_js_components_helper_general_js"],{
 
 /***/ "./resources/asset/js/components/helper/general.js":
@@ -6,7 +7,6 @@
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),

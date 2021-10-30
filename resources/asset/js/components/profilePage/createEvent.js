@@ -24,8 +24,7 @@ const process = (e) => {
         formData.massValidate();
         // log(formData.error)
         if (formData.error.length <= 0) {
-            // initiate the api
-            //  qSel('.submitEventModal').type = 'submit'
+
             id('loader').classList.add('loader') // start the loader element
             postFormData("/member/profilePage", 'eventModalForm', null, "w3css")
             displayNone();

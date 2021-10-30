@@ -13,11 +13,7 @@
   @endisset
 
   {{--  POST TIME  --}}
-  <span class="w3-right w3-opacity">
-
-    {{ humanTiming($allData['date_created'])  }} ago
-
-  </span>
+  <p class="w3-right w3-opacity postTiming">{{ humanTiming($allData['date_created'])  }} ago</p>
 
   {{--  POST NAME  --}}
   <h5 id="fullName"> {{ $allData['fullName'] }}
@@ -37,8 +33,7 @@
     <a href="/profilepage/img?dir=img&pics={{ $allData["post_img$i"] }}&pID={{ $allData["post_no"] }}&path=post">
 
       <div class="w3-half">
-        <img src="/img/post/{{ $allData["post_img$i"] }}" style="width:100%" alt="images{{ $i }}"
-          class="w3-margin-bottom w3-hover-sepia" id="postImage{{ $i }}">
+        <img src="/img/post/{{ $allData["post_img$i"] }}" style="width:100%" alt="images{{ $i }}" class="w3-margin-bottom w3-hover-sepia" id="postImage{{ $i }}">
       </div>
     </a>
     @endfor
@@ -79,13 +74,10 @@
   {{-- SHOW COMMENT --}}
 
   @foreach ($comment as $comment)
- 
-  @if ($allData['post_no'] == $comment['post_no'] )
-  @include('member/includes/comment')
-  @endif
+    @if ($allData['post_no'] == $comment['post_no'] )
+    @includeif('member/includes/comment')
+    @endif
   @endforeach
-
-  <br>
 
 
 </div>

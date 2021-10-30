@@ -241,7 +241,6 @@ class ProfilePage extends ProcessImg
 
         $postId = checkInput($_GET['pID']);
 
-
         $comment2Post = Post::commentLink2Post($postId);
 
         // printArr($comment2Post);

@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/index"],{
 
 /***/ "./resources/asset/js/components/global.js":
@@ -6,7 +7,6 @@
   \*************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "id": () => (/* binding */ id),
@@ -67,7 +67,6 @@ var showError = function showError(e) {
   \*************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/global */ "./resources/asset/js/components/global.js");
 
@@ -144,7 +143,6 @@ if (window.location.pathname === '/register') {
   \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
@@ -153,11 +151,11 @@ __webpack_require__.r(__webpack_exports__);
 
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
-/******/ "use strict";
-/******/ 
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
-/******/ 	__webpack_require__.O(0, ["/index"], () => (["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW"].map(__webpack_require__.E)), 5);
+/******/ 	__webpack_require__.O(0, ["/index"], () => {
+/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW"].map(__webpack_require__.E);
+/******/ 	}, 5);
 /******/ })();
 /******/ 
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))

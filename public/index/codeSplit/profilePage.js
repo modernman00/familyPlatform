@@ -1,3 +1,4 @@
+"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/profilePage"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
@@ -6,7 +7,6 @@
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
@@ -362,7 +362,6 @@ var FormHelper = /*#__PURE__*/function () {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
@@ -505,7 +504,6 @@ var matchInput = function matchInput(first, second, err) {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "postFormData": () => (/* binding */ postFormData),
@@ -785,7 +783,6 @@ var checkCookie = function checkCookie() {
   \****************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
@@ -915,7 +912,6 @@ try {
   \******************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
@@ -927,7 +923,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var formInput = document.querySelectorAll('.eventModalForm');
 var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__.default(formInputArr);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__["default"](formInputArr);
 formData.clearError();
 
 var displayNone = function displayNone() {
@@ -945,8 +941,6 @@ var process = function process(e) {
     formData.massValidate(); // log(formData.error)
 
     if (formData.error.length <= 0) {
-      // initiate the api
-      //  qSel('.submitEventModal').type = 'submit'
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // start the loader element
 
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage", 'eventModalForm', null, "w3css");
@@ -970,7 +964,6 @@ var process = function process(e) {
   \***********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "html": () => (/* binding */ html),
@@ -988,16 +981,16 @@ var timeAgo = function timeAgo(x) {
 };
 
 var name = function name(fullName) {
-  return "<h5 id=\"fullName\"> ".concat(fullName, "</h5>");
+  return "<h6 id=\"fullName\"><b>".concat(fullName, "</b> </h6>");
 };
 
 var postedAt = function postedAt(date) {
-  return "<div class=\"timeago w3-right w3-opacity\" datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+  return "<div class=\"timeago w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 
 var nameImgTiming = function nameImgTiming(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
-  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\">\n        <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
 };
 
 var commentForm = function commentForm(data) {
@@ -1083,7 +1076,6 @@ var showComment = function showComment(comment) {
   \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -1101,7 +1093,6 @@ __webpack_require__.r(__webpack_exports__);
   \************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
 /* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
@@ -1124,7 +1115,6 @@ __webpack_require__.r(__webpack_exports__);
   \***************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
@@ -1217,7 +1207,6 @@ try {
   \************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 

@@ -6,33 +6,51 @@
 
 <div class="showImageContainer">
 
-  <div>
-    <img src={{ $imagePath }} alt="image" class="showPics">
+  {{-- IMAGE --}}
+
+  <div class="showImageContainer__img">
+      <img src={{ $imagePath }} alt="image" class="showImageContainer__image">
   </div>
 
   <hr>
 
-  <form action="/postCommentProfile" method="post">
+  {{-- SHOW COMMENT --}}
 
-    <div class="showComment">
+      <div class="showImageContainer__comment">
 
-      @foreach ($comment as $comment)
+            @foreach ($comment as $comment)
 
-      @include('member/includes/comment')
+            @include('member/includes/comment')
 
-      <input name='post_no' type="hidden" name="{{ $comment['post_no'] }}" value={{ $comment['post_no'] }} />
+            <input name='post_no' type="hidden" name="{{ $comment['post_no'] }}" value={{ $comment['post_no'] }} />
 
-      @endforeach
+            @endforeach
+
+            <br>
+
+            {{-- SUBMIT COMMENT --}}
+
+              <div class="showImageContainer__form">
+
+    <form action="/postCommentProfile" method="post">
 
       <textarea placeholder="Write a comment" id={{ $comment['post_no'] }} name='comment'>  </textarea>
 
       <br><br>
 
       <button type='submit' class="w3-button w3-green submitComment">Submit</button>
-    </div>
-  </form>
 
-</div>
+  </form>
+  </div>
+
+      </div>
+
+  </div>
+
+
+
+
+
 
 
 

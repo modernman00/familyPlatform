@@ -1,8 +1,20 @@
+.personal__name {
+  color:red;
+  height: 120px;
+}
+
+
 .profileImg {
   vertical-align: middle;
   width: 20vh;
   height: 20vh;
   border-radius: 50%;
+}
+
+.postImg{
+  height: 2rem;
+  width: 2rem;
+
 }
 
 .changeProfileDisplay {
@@ -26,23 +38,6 @@
   font-weight: 800;
 }
 
-.showImageContainer {
-  display: flex;
-  margin-top: 5vh;
-  flex-flow: row;
-}
-
-.showPics {
-  //flex-grow: 1;
-  margin-right: 2vh;
-  margin-left: 2vh;
-  height: 80vh;
-  width: 75vw;
-}
-
-.showComment {
-  margin-top: 2vh;
-}
 
 .commentBox {
   display: flex;
@@ -61,14 +56,14 @@
   width: 5em;
 }
 
-.commentFont {
-  font-size: 1.9vh;
-  color: #000066;
-  font-family: "Playfair Display", serif;
-  flex: 2;
-  margin-left: 10px;
-  align-items: center;
-}
+// .commentFont {
+//   font-size: 1vh;
+//   // color: #000066;
+//   // font-family: "Playfair Display", serif;
+//   flex: 2;
+//   margin-left: 10px;
+//   align-items: center;
+// }
 
  .inputComment, .submitComment {
     width: 100%;
@@ -108,6 +103,8 @@
   margin: 12px;
   color: red;
 }
+
+
 
 
 

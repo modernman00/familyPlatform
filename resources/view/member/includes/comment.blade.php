@@ -8,7 +8,7 @@
 
         @else
 
-        <img src="/avatar/avatarM.jpeg" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg " style="width:30px; height:30px" >
+        <img src="/avatar/avatarM.jpeg" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:30px; height:30px" >
 
         @endisset
 

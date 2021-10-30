@@ -6,18 +6,18 @@ const timeAgo = (x) => format(x)
 
 
 const name = (fullName) => {
-  return `<h5 id="fullName"> ${fullName}</h5>`
+  return `<h6 id="fullName"><b>${fullName}</b> </h6>`
 }
 
 const postedAt = (date) => {
-  return `<div class="timeago w3-right w3-opacity" datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
+  return `<div class="timeago w3-right w3-opacity"  datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
 }
 
 const nameImgTiming = (data) => {
 
   const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
-  return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}">
-        <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
+  
+  return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}"> <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">
         </a>
         ${postedAt(data)} ${name(data.fullName)}`
 }
@@ -147,8 +147,6 @@ export const commentHTML = (data) => {
          <p class="commentFont"> ${data.comment}</p>
     </div>
 </div>`
-
-
 }
 
 const showComment = (comment) => {
@@ -158,7 +156,6 @@ const showComment = (comment) => {
 
   return comment.map(commentElement => {
     return commentHTML(commentElement)
-
   })
 
 

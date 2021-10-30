@@ -123,7 +123,7 @@ html {
 
 body {
   overflow-x: hidden;
-  font-family: "Roboto Slab", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Arial", "Roboto Slab", "Helvetica Neue", Helvetica, sans-serif;
   line-height: 1.7;
   color: #818181;
   padding: 30px;
@@ -464,11 +464,21 @@ input::placeholder {
   font-weight: 200;
 }
 
+.personal__name {
+  color: red;
+  height: 120px;
+}
+
 .profileImg {
   vertical-align: middle;
   width: 20vh;
   height: 20vh;
   border-radius: 50%;
+}
+
+.postImg {
+  height: 2rem;
+  width: 2rem;
 }
 
 .changeProfileDisplay {
@@ -492,23 +502,6 @@ input::placeholder {
   font-weight: 800;
 }
 
-.showImageContainer {
-  display: flex;
-  margin-top: 5vh;
-  flex-flow: row;
-}
-
-.showPics {
-  margin-right: 2vh;
-  margin-left: 2vh;
-  height: 80vh;
-  width: 75vw;
-}
-
-.showComment {
-  margin-top: 2vh;
-}
-
 .commentBox {
   display: flex;
   margin-top: 10px;
@@ -518,15 +511,6 @@ input::placeholder {
 .commentImg {
   height: 5em;
   width: 5em;
-}
-
-.commentFont {
-  font-size: 1.9vh;
-  color: #000066;
-  font-family: "Playfair Display", serif;
-  flex: 2;
-  margin-left: 10px;
-  align-items: center;
 }
 
 .inputComment, .submitComment {
