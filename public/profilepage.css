@@ -168,11 +168,10 @@ textarea {
 .showImageContainer__image {
   margin-top: 5rem;
   height: 80rem;
-  width: 70rem;
+  width: 80rem;
   margin-right: 5rem;
 
   /* min-width: 60vw; */
-  margin-left: 5rem;
   min-width: 80%;
 }
 

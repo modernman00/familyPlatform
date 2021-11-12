@@ -179,7 +179,8 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getComment = $this->processPostData();
-            Insert::submitFormDynamic('comment', $getComment);
+            \printArr($getComment);
+            // Insert::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);
@@ -241,14 +242,16 @@ class ProfilePage extends ProcessImg
 
         $postId = checkInput($_GET['pID']);
 
-        $comment2Post = Post::commentLink2Post($postId);
+         $comment2Img = Post::commentLink2Img($postId);
+
+        // $comment2Post = Post::commentLink2Post($postId);
 
         // printArr($comment2Post);
 
         view('showImage', [
             'imagePath' => $imagePath,
             //'allData' => $this->allPostData,
-            'comment' => $comment2Post,
+            'comment' => $comment2Img
         ]);
     }
 }

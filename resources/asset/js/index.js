@@ -88,6 +88,15 @@ else if (window.location.pathname === '/member/ProfilePage') {
     )
         .then((module) => module.default)
         .catch((err) => showError(err))
+} else if (window.location.pathname === '/profilepage/img') {
+    // qSel('.login').style.display ="none" // navbar mgt
+    import(
+        /* webpackChunkName: 'codeSplit/changePW' */
+        /* webpackPrefetch: true */
+        './components/profilePage/imgViewer'
+    )
+        .then((module) => module.default)
+        .catch((err) => showError(err))
 } 
 
  

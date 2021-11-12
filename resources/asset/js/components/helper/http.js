@@ -1,7 +1,7 @@
 import { id, log } from '../global'
 import axios from 'axios'
 import axiosRetry from 'axios-retry';
-import Cookies from 'js-cookie'
+// import Cookies from 'js-cookie'
 
 axiosRetry(axios, { retries: 3 });
 
@@ -13,24 +13,29 @@ axiosRetry(axios, { retries: 3 });
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
 export const postFormData = async (url, formId, redirect = null, css = null) => {
+
   let notificationId = `${formId}_notification`
 
   // the notification function
   const processFormDataAction = (addClass, data) => {
-    id(notificationId).style.display = "block" // unblock the notification
-    id(notificationId).classList.add(addClass) // add the success class
-    id('error').innerHTML = data // error element
-    id('loader').classList.remove('loader') // remove loader
+
+      id(notificationId).style.display = "block" // unblock the notification
+      id(notificationId).classList.add(addClass) // add the success class
+      id('error').innerHTML = data // error element
+      id('loader').classList.remove('loader') // remove loader
+
   }
 
   const addClassByCSS = (theCss, status) => {
-    if (theCss === "W3css") {
-      return (status == 'green') ? "w3-green" : "w3-red"
-    } else if (theCss === 'bulma') {
-      return (status == 'green') ? "is-success" : "is-danger"
-    } else {
-      return (status == 'green') ? "is-success" : "is-danger"
-    }
+
+      if (theCss === "W3css") {
+        return (status == 'green') ? "w3-green" : "w3-red"
+      } else if (theCss === 'bulma') {
+        return (status == 'green') ? "is-success" : "is-danger"
+      } else {
+        return (status == 'green') ? "is-success" : "is-danger"
+      }
+      
   }
 
   // extract the form entries
