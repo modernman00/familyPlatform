@@ -41,6 +41,7 @@ const LoginSubmission = (e) => {
 				id('loader').classList.add('loader') // start the loader element
 				localStorage.setItem('redirect', '/member/ProfilePage')
 				postFormData("/login", "loginNow", "/login/code")
+
 			} else {
 				alert('The form cannot be submitted. Please check the errors')
 				process()

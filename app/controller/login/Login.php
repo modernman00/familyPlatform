@@ -25,6 +25,7 @@ class Login extends Select
 
         $formAction = self::LOGIN;
         $_SESSION[self::LOGIN_TYPE] = self::LOGIN;
+        // \printArr(\get_defined_constants());
         return view('login', compact('formAction'));
     }
 
@@ -74,7 +75,6 @@ class Login extends Select
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
                     $this->adminLogin($sanitisedData);
-
                 } else if ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);
@@ -100,14 +100,10 @@ class Login extends Select
 
         if (!$checkAccountIsApproved) {
 
-            msgException(406, 'We do not recognise your account');
+            msgException(406, 'We do not recognise your account'); 
         }
 
-  
-            generateSendTokenEmail($data);
-
-
-
+        generateSendTokenEmail($data);  // send token to email 
 
         $_SESSION['login'] = 1;
 

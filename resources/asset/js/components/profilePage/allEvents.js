@@ -101,12 +101,11 @@ try {
             const form = id(idForm)
             let formEntries = new FormData(form)
 
-
-
             // 1.
             axios.post('/postCommentProfile', formEntries, options)
                 .then(response => {
                     // 2. note. message returns the new post_no from the database
+
                     axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
                         .then(res => {
                             // 3.

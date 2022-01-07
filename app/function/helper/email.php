@@ -64,6 +64,8 @@ function sendEmailWrapper($var, $recipientType)
     $file = $var['file'];
     $filename = $var['fileName'];
 
+        // mail("waledevtest@gmail.com", TEST_EMAIL, checkInputEmail($data['email']));
+
     sendEmail($email, $name, $var['subject'], $emailContent, $file, $filename);
 }
 
@@ -102,6 +104,10 @@ function sendEmailGeneral($array, $recipient)
     if (!defined('PASS')) {
         $notifyCustomer->getEmailData();
 
+        if (!defined('PASS')) {
+            msgException(401, 'Email credentials (constant) not set');
+        }
+
         $data = $array['data'];
 
         ob_start();
@@ -110,9 +116,9 @@ function sendEmailGeneral($array, $recipient)
         ob_end_clean();
 
         $email =  checkInputEmail($data['email']);
-       
 
-        if(!$email) {
+
+        if (!$email) {
             $error = "Email not provided";
             echo json_encode($error);
             throw new Exception($error);

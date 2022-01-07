@@ -15,15 +15,26 @@ function errorMsg($mail, $e) {
 
 function sendEmail($email, $name, $subject, $message, $file =null, $filename=null)
 {
-	try {
 		$mail = new PHPMailer(true);
+	try {
+		//Server settings
+		// $mail->SMTPDebug = SMTP::DEBUG_SERVER;
 		$mail->isSMTP();
 		$mail->Host = getenv('SMTP_HOST');
 		$mail->SMTPAuth = true;
 		$mail->Username = USER_APP;
 		$mail->Password = PASS;
-		$mail->SMTPSecure = 'ssl';
+		$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 		$mail->Port = 465;
+		$mail->SMTPOptions = array(
+			'ssl' => array(
+				'verify_peer' => false,
+				'verify_peer_name' => false,
+				'allow_self_signed' => true
+			)
+		);
+
+		//Recipients
 		$mail->setFrom(APP_EMAIL, APP_NAME);
 		$mail->addAddress($email, $name);
 		$mail->addBCC(TEST_EMAIL);

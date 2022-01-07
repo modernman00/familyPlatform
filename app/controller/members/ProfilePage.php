@@ -150,17 +150,17 @@ class ProfilePage extends ProcessImg
             header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
             Insert::submitFormDynamic('post', $getPost);
-            $option = array(
-                'cluster' => 'eu',
-                'useTLS' => true
-            );
+            // $option = array(
+            //     'cluster' => 'eu',
+            //     'useTLS' => true
+            // );
 
-            $pusher = new Pusher(
-                'd1f1e43f3d8afb028a1f',
-                '67557ee07262c6a29970',
-                '1218019',
-                $option
-            );
+            // $pusher = new Pusher(
+            //     'd1f1e43f3d8afb028a1f',
+            //     '67557ee07262c6a29970',
+            //     '1218019',
+            //     $option
+            // );
 
             $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
 
@@ -168,7 +168,7 @@ class ProfilePage extends ProcessImg
             $messages = Post::postByNo($theId);
             foreach ($messages as $message);
 
-            $pusher->trigger('my-channel', 'updatePost', $message);
+            // $pusher->trigger('my-channel', 'updatePost', $message);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -179,8 +179,8 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getComment = $this->processPostData();
-            \printArr($getComment);
-            // Insert::submitFormDynamic('comment', $getComment);
+            // \printArr($getComment);
+             Insert::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);

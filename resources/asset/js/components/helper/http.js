@@ -60,8 +60,9 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
       let theClass = addClassByCSS(css, 'green');
 
       processFormDataAction(theClass, response.data.message)
+
       // set timer to redirect to the homepage
-      if (redirect) {
+      if (redirect ) {
         setTimeout(() => {
           //window.location.replace(redirect)
           window.location.assign(redirect)

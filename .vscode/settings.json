@@ -11,4 +11,8 @@
         "baseUri": "/",                             //  ii. workspace
         "proxyUri": "http://localhost:80/" // iii. actual address
     },
+    // vscode coloring
+
+     "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs":"active"
 }

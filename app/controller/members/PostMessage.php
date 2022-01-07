@@ -14,8 +14,6 @@ use App\classes\{
 };
 
 use Pusher\Pusher;
-
-
 class PostMessage
 {
 
@@ -116,17 +114,17 @@ class PostMessage
     {
         try {
 
-            $option = array(
-                'cluster' => 'eu',
-                'useTLS' => true
-            );
+            // $option = array(
+            //     'cluster' => 'eu',
+            //     'useTLS' => true
+            // );
 
-            $pusher = new Pusher(
-                'd1f1e43f3d8afb028a1f',
-                '67557ee07262c6a29970',
-                '1218019',
-                $option
-            );
+            // $pusher = new Pusher(
+            //     'd1f1e43f3d8afb028a1f',
+            //     '67557ee07262c6a29970',
+            //     '1218019',
+            //     $option
+            // );
 
 
             $id = (int) $_SESSION['LAST_INSERT_ID_POST'];
@@ -139,12 +137,12 @@ class PostMessage
 
             $messageComments = Post::commentByNo($idComment);
 
-            $pusher->trigger('my-channel', 'updatePost', $message);
+            // $pusher->trigger('my-channel', 'updatePost', $message);
 
 
 
-            // msgServerSent($message, $id, "updatePost");
-            // msgServerSent($messageComments, $idComment, "updateComment");
+            msgServerSent($message, $id, "updatePost");
+            msgServerSent($messageComments, $idComment, "updateComment");
         } catch (\Throwable $th) {
             showErrorExp($th);
         }
