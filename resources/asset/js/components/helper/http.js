@@ -19,23 +19,23 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
   // the notification function
   const processFormDataAction = (addClass, data) => {
 
-      id(notificationId).style.display = "block" // unblock the notification
-      id(notificationId).classList.add(addClass) // add the success class
-      id('error').innerHTML = data // error element
-      id('loader').classList.remove('loader') // remove loader
+    id(notificationId).style.display = "block" // unblock the notification
+    id(notificationId).classList.add(addClass) // add the success class
+    id('error').innerHTML = data // error element
+    id('loader').classList.remove('loader') // remove loader
 
   }
 
   const addClassByCSS = (theCss, status) => {
 
-      if (theCss === "W3css") {
-        return (status == 'green') ? "w3-green" : "w3-red"
-      } else if (theCss === 'bulma') {
-        return (status == 'green') ? "is-success" : "is-danger"
-      } else {
-        return (status == 'green') ? "is-success" : "is-danger"
-      }
-      
+    if (theCss === "W3css") {
+      return (status == 'green') ? "w3-green" : "w3-red"
+    } else if (theCss === 'bulma') {
+      return (status == 'green') ? "is-success" : "is-danger"
+    } else {
+      return (status == 'green') ? "is-success" : "is-danger"
+    }
+
   }
 
   // extract the form entries
@@ -62,7 +62,7 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
       processFormDataAction(theClass, response.data.message)
 
       // set timer to redirect to the homepage
-      if (redirect ) {
+      if (redirect) {
         setTimeout(() => {
           //window.location.replace(redirect)
           window.location.assign(redirect)
@@ -94,58 +94,58 @@ axiosTest()
     .catch(err => console.log(err))
  */
 
-export const getApiData = async (URL, token=null) => {
+export const getApiData = async (URL, token = null) => {
   try {
 
-  const config = {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer ' + token
-    },
-  }
+    const config = {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+    }
 
-  const fetch = await axios.get(URL, config)
-  return fetch.data
-  
-    
+    const fetch = await axios.get(URL, config)
+    return fetch.data
+
+
   } catch (error) {
 
     return error;
-    
+
   }
- 
-    
+
+
 }
 
-export const getMultipleApiData = async (url1, url2 ,token=null) => {
+export const getMultipleApiData = async (url1, url2, token = null) => {
   try {
 
-  const config = {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest',
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer ' + token
-    },
-  }
+    const config = {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+    }
 
 
 
-  const fetch = await axios.all([
-    axios.get(url1, config),
-    axios.get(url2, config)
-  ])
-  return fetch
-  
+    const fetch = await axios.all([
+      axios.get(url1, config),
+      axios.get(url2, config)
+    ])
+    return fetch
+
   } catch (error) {
 
     return error;
-    
+
   }
- 
-    
+
+
 }
 
 /**

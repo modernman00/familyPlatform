@@ -196,7 +196,8 @@ class ProfilePage extends ProcessImg
         try {
             // process the image 
             $this->processProfileImage();
-            header(self::REDIRECT);
+            \printArr($_FILES);
+             header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }

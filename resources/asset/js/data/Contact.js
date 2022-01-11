@@ -33,7 +33,7 @@ export const Contact = [
       }
    },
    {
-      label: 'Country',
+      label: 'Country of residence',
       attribute: 'country',
       type: 'select',
       options: ['Nigeria', 'UK', 'Canada', 'Europe', 'USA', 'China', 'Asia', 'Latin America'],

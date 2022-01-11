@@ -7,7 +7,7 @@ use App\classes\{
 
 class About {
 
-    private $var = "delta";
+    //private $var = "delta";
 
     public function index()
     {

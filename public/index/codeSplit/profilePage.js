@@ -932,13 +932,14 @@ var displayNone = function displayNone() {
 var process = function process(e) {
   try {
     e.preventDefault();
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm_notification').classList.remove('w3-red'); // remove the danger class from the notification
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm_notification').classList.remove('w3-red'); // remove the danger class from the notification - may not be needed
 
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = "";
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = ""; // may not be needed
+
     formData.massValidate(); // log(formData.error)
 
     if (formData.error.length <= 0) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // start the loader element
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // start the loader element // may not be needed
 
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage", 'eventModalForm', null, "w3css");
       displayNone(); // window.location.replace("/member/profilePage")

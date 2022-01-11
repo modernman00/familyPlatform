@@ -159,5 +159,36 @@ class Event extends AllMembersData
         return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
 
- 
+    static function getEventData()
+    {
+        $allEventData = allMembersData::getEventData();
+
+        $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
+      
+
+        foreach ($allEventData as $event) {
+            if ($dateDiff > 0 && $dateDiff <= 30) {
+                $eventFirstName = $event['firstName'];
+                $eventLastName = $event['LastName'];
+                $eventName = $event['eventName'];
+                $eventDate = dateFormat($event['eventDate']);
+                $eventFrequency = $event['eventFrequency'];
+                $eventType = $event['eventType'];
+                $eventDescription = $event['eventDescription'];
+                $eventNo2Word = \number2word($dateDiff);
+
+        return "<p class='eventInfo'><strong>RSVP: </strong> $eventFirstName $eventLastName</p>
+            <p class='eventInfo'><strong>Event: </strong>$eventName</p>
+            <p class='eventInfo'><strong>Date: </strong>$eventDate <em style='color: rgba(11, 11, 201, 0.631)'> In $eventNo2Word Days</em> </p>
+            <p class='eventInfo'><strong>Type: </strong>$eventType</p>
+            <p class='eventInfo'><strong>Description: </strong> $eventDescription</p>
+            <p class='eventInfo'><strong>Frequency: </strong> $eventFrequency</p>
+           <hr>";
+            }
+
+            
+
+        }
+    }
+
 }
