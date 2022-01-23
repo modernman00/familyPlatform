@@ -83,6 +83,58 @@ class Insert extends Db
 
     /**
      * 
+     * @param mixed $table - database table
+     * @param mixed $field - post array
+     * @param mixed $lastIdCol the column you want to return the last id - e.g id, no, eventNo 
+     * @return mixed 
+     */
+
+       public static function submitFormDynamicLastId($table, $field, $lastIdCol)
+    {
+    
+        try {
+            $DYNAMIC = strtoupper($table);
+
+            // EXTRACT THE KEY FOR THE COL NAME
+            $key = array_keys($field);
+            $col = implode(', ', $key);
+            $placeholder = implode(', :', $key);
+
+            // prep statement using placeholder :name
+            $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
+
+            $query = parent::connect2()->prepare($stmt);
+            if (!$query) {
+                throw new Exception("Not able to insert data", 1);
+            }
+            foreach ($field as $keys => $values) {
+                $query->bindValue(":$keys", $values);
+            }
+            $outcome = $query->execute();
+            if (!$outcome) {
+                http_response_code(406); // sets the response to 406
+                echo http_response_code(); // echo the new response code
+                throw new Exception("Not able to execute data", 1);
+            }
+
+             $returnedLastId = parent::connect2()->lastInsertId($lastIdCol);
+
+            $_SESSION["LAST_INSERT_ID_$DYNAMIC"] = $returnedLastId;
+
+            msgSuccess(200,  $returnedLastId);
+
+            return $returnedLastId;
+
+        } catch (PDOException $e) {
+            showError($e);
+        } catch (\Throwable $e) {
+            Transaction::rollback();
+            showError($e);
+        }
+    }
+
+    /**
+     * 
      * @param mixed $table THE TABLE
      * @param mixed $field  THE POST ARRAY
      * @return mixed 

@@ -28,6 +28,7 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$commentNo]);
     }
 
+
     static function postByNo($postNo)
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
@@ -85,6 +86,12 @@ class Post extends Select
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);
+    }
+
+    public static function getProfilePics($id): array
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'profile_pics', identifier1: "id");
+        return parent::selectFn2(query: $query, bind: [$id]);
     }
 
     static function getAllComments()

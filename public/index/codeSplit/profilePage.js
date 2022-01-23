@@ -912,7 +912,8 @@ try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
 
 
 
@@ -921,7 +922,6 @@ __webpack_require__.r(__webpack_exports__);
 var formInput = document.querySelectorAll('.eventModalForm');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__["default"](formInputArr);
-formData.clearError();
 
 var displayNone = function displayNone() {
   return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'none';
@@ -929,19 +929,41 @@ var displayNone = function displayNone() {
 
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('cancelModal').addEventListener('click', displayNone);
 
+var eventHtml = function eventHtml(data) {
+  return "<p class='eventInfo'><strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+};
+
+var checkEventAndAdd = function checkEventAndAdd(data) {
+  var appendEvent = eventHtml(data);
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+};
+
+var options = {
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN'
+};
+
 var process = function process(e) {
   try {
-    e.preventDefault();
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm_notification').classList.remove('w3-red'); // remove the danger class from the notification - may not be needed
+    e.preventDefault(); // id('eventModalForm_notification').classList.remove('w3-red') // remove the danger class from the notification - may not be needed
 
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = ""; // may not be needed
 
     formData.massValidate(); // log(formData.error)
 
     if (formData.error.length <= 0) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // start the loader element // may not be needed
+      // get the form data
+      var eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm');
+      var eventFormEntries = new FormData(eventForm); // post the form data to the database and get the last posted event no
 
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)("/member/profilePage", 'eventModalForm', null, "w3css");
+      axios__WEBPACK_IMPORTED_MODULE_2___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
+        // use the event no to get the last event from the database
+        axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/getEventByNo?eventNo=".concat(response.data.message)).then(function (res) {
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(res.data); // add new event real time
+
+          checkEventAndAdd(res.data.message);
+        });
+      });
       displayNone(); // window.location.replace("/member/profilePage")
     } else {
       alert('The form cannot be submitted. Please check the errors');
@@ -992,7 +1014,7 @@ var nameImgTiming = function nameImgTiming(data) {
 };
 
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>");
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
 };
 
 var button = function button(data) {
@@ -1051,13 +1073,15 @@ var appendNewPost = function appendNewPost(el) {
   }
 };
 var commentHTML = function commentHTML(data) {
-  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  var imgURL = data.img ? data.img : data.profileImg;
+  console.log(imgURL);
+  var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
   return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\" datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
 };
 
 var showComment = function showComment(comment) {
   if (!comment) {
-    return "<div class=\"w3-ul w3-border\" id=\"comment\" name='commentDiv'></div>";
+    return "<div class=\"w3-ul w3-border\" id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
 

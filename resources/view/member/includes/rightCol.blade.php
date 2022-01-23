@@ -5,7 +5,9 @@
         <hr>
         {{--  <img src="/w3images/forest.jpg" alt="Forest" style="width:100%;">  --}}
 
-        @foreach($eventData as $event) 
+        <div class="eventList" id="eventList">
+
+           @foreach($eventData as $event) 
 
         @php $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']); @endphp
 
@@ -20,6 +22,11 @@
           @endif
        
         @endforeach
+
+
+        </div>
+
+       
         
         {{--  <p><button class="w3-button w3-block w3-theme-l4">Info</button></p>  --}}
       </div>

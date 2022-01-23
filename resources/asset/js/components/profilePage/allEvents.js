@@ -48,7 +48,6 @@ try {
         const idDiv = `showComment${commentResponse.post_no}`
         const commentHtml = commentHTML(commentResponse)
         return id(idDiv).insertAdjacentHTML('afterbegin', commentHtml)
-
     }
 
 
@@ -109,6 +108,7 @@ try {
                     axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
                         .then(res => {
                             // 3.
+                       
                             showTheComment(res.data.message)
                         })
                 }
@@ -156,7 +156,7 @@ try {
                     id('id01').style.display = 'none'
                 })
 
-        }
+        } 
     }
 } catch (e) {
     showError(e)

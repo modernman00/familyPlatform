@@ -31,7 +31,7 @@ $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@show
 
 // $router->map('POST', '/member/createEvent', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
-$router->map('POST', '/member/profilePage', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
+$router->map('POST', '/member/profilePage/event', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
 $router->map('GET', '/member/profilePage/setHeader', 'App\controller\members\PostCard@setHeader', 'HEADER_SET');
 
@@ -40,6 +40,10 @@ $router->map('GET', '/member/profilePage/setHeader', 'App\controller\members\Pos
 $router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');
 
 $router->map('GET', '/profileCard/getLikes', 'App\controller\members\PostCard@likeFunction', 'likeCounter');
+
+$router->map('GET', '/member/getEventData', 'App\controller\members\Event@getEventData', 'getEventData');
+
+$router->map('GET', '/member/getEventByNo', 'App\controller\members\Event@getEventByNo', 'getEvent_by_no');
 
 // $router->map('GET', '/member/profileCard/getComments', 'App\model\Post@likeFunction', 'likeCounter');
 

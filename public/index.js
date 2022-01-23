@@ -17,6 +17,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "qSelInnerHTML": () => (/* binding */ qSelInnerHTML),
 /* harmony export */   "log": () => (/* binding */ log),
 /* harmony export */   "write": () => (/* binding */ write),
+/* harmony export */   "date2String": () => (/* binding */ date2String),
 /* harmony export */   "showError": () => (/* binding */ showError)
 /* harmony export */ });
 var id = function id(_id) {
@@ -42,6 +43,9 @@ var log = function log(id) {
 };
 var write = function write(input) {
   return document.write(input);
+};
+var date2String = function date2String(date) {
+  return new Date().toDateString(date);
 };
 var showError = function showError(e) {
   console.log(e instanceof TypeError); // true

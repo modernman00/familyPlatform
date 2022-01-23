@@ -50,7 +50,18 @@ class PostMessage
             $commentNo = checkInput($_GET['commentNo']);
 
             $message = Post::commentByNo($commentNo);
+
             foreach ($message as $data);
+
+            // GET THE COMMENT PROFILE PICS USING THE COMMENT ID
+
+            $profilePics = Post::getProfilePics($data['id']);
+
+            $data['profileImg'] = $profilePics[0]['img'];
+
+
+
+
             msgSuccess(200, $data);
         } catch (\Throwable $th) {
             showErrorExp($th);

@@ -351,7 +351,7 @@ var nameImgTiming = function nameImgTiming(data) {
 };
 
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button>\n  </form>");
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
 };
 
 var button = function button(data) {
@@ -410,13 +410,15 @@ var appendNewPost = function appendNewPost(el) {
   }
 };
 var commentHTML = function commentHTML(data) {
-  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  var imgURL = data.img ? data.img : data.profileImg;
+  console.log(imgURL);
+  var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
   return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\" datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
 };
 
 var showComment = function showComment(comment) {
   if (!comment) {
-    return "<div class=\"w3-ul w3-border\" id=\"comment\" name='commentDiv'></div>";
+    return "<div class=\"w3-ul w3-border\" id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
 

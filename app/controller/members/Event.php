@@ -12,6 +12,7 @@ use App\classes\{
 };
 
 use App\model\AllMembersData;
+
 class Event extends AllMembersData
 {
     private const REDIRECT = "Location: /member/ProfilePage";
@@ -25,9 +26,10 @@ class Event extends AllMembersData
 
             $cleanData['id'] = checkInput($_SESSION['id']);
 
-            Insert::submitForm2('events', $cleanData);
+            // insert the data and return the last event no
 
-            msgSuccess(200, "event successfully created");
+            return Insert::submitFormDynamicLastId('events', $cleanData, 'no');
+
 
         } catch (\Throwable $th) {
             showError($th);
@@ -43,10 +45,10 @@ class Event extends AllMembersData
 
             self::getEventMonth($data);
             echo BR;
-           // printArr(self::getEventWeek($data));
+            // printArr(self::getEventWeek($data));
 
             echo BR;
-           // echo count(self::getEventWeek($data)) . "total number of array";
+            // echo count(self::getEventWeek($data)) . "total number of array";
 
             foreach ($data as $data) {
 
@@ -163,32 +165,28 @@ class Event extends AllMembersData
     {
         $allEventData = allMembersData::getEventData();
 
-        $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
-      
+        // $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
 
-        foreach ($allEventData as $event) {
-            if ($dateDiff > 0 && $dateDiff <= 30) {
-                $eventFirstName = $event['firstName'];
-                $eventLastName = $event['LastName'];
-                $eventName = $event['eventName'];
-                $eventDate = dateFormat($event['eventDate']);
-                $eventFrequency = $event['eventFrequency'];
-                $eventType = $event['eventType'];
-                $eventDescription = $event['eventDescription'];
-                $eventNo2Word = \number2word($dateDiff);
-
-        return "<p class='eventInfo'><strong>RSVP: </strong> $eventFirstName $eventLastName</p>
-            <p class='eventInfo'><strong>Event: </strong>$eventName</p>
-            <p class='eventInfo'><strong>Date: </strong>$eventDate <em style='color: rgba(11, 11, 201, 0.631)'> In $eventNo2Word Days</em> </p>
-            <p class='eventInfo'><strong>Type: </strong>$eventType</p>
-            <p class='eventInfo'><strong>Description: </strong> $eventDescription</p>
-            <p class='eventInfo'><strong>Frequency: </strong> $eventFrequency</p>
-           <hr>";
-            }
-
-            
-
-        }
+        \msgSuccess(201, $allEventData);
     }
 
+    static function getEventByNo()
+    {
+
+        try {
+
+            $eventNo = checkInput($_GET['eventNo']);
+
+            $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'events', identifier1: "no");
+
+            $result = Select::selectFn2(query: $query, bind: [$eventNo]);
+            $result[0]['firstName'] = $_SESSION['fName'];
+            $result[0]['lastName'] = $_SESSION['lName'];
+
+            foreach ($result as $key); // NEEDS INVESTIGATION WHY IT WORKS
+            return \msgSuccess(201, $key);
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
+    }
 }

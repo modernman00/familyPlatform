@@ -34,7 +34,7 @@ const commentForm = (data) => {
 
     <br>
 
-    <button type='submit' id="submitComment${data.post_no}" class="w3-button w3-green submitComment">Submit</button>
+    <button type='submit' id="submitComment${data.post_no}" class="w3-button w3-green submitComment">Submit</button><br><br>
   </form>`
 }
 
@@ -138,7 +138,10 @@ export const appendNewPost = (el) => {
 
 export const commentHTML = (data) => {
 
-  const img = (data.img) ? `/img/profile/${data.img}` : "/avatar/avatarF.png"
+  const imgURL = (data.img) ? data.img : data.profileImg
+  console.log(imgURL)
+ 
+  const img = (imgURL) ? `/img/profile/${imgURL}` : "/avatar/avatarF.png"
 
   return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
       <div class="w3-container commentDiv">
@@ -152,7 +155,7 @@ export const commentHTML = (data) => {
 const showComment = (comment) => {
 
 
-  if (!comment) { return `<div class="w3-ul w3-border" id="comment" name='commentDiv'></div>` } // only run if there is comment
+  if (!comment) { return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>` } // only run if there is comment
 
   return comment.map(commentElement => {
     return commentHTML(commentElement)

@@ -9,6 +9,8 @@ export const qSelInnerHTML = (name) => qSel(name).innerHTML
 export const log = (id) => console.log(id)
 export const write = (input) => document.write(input)
 
+export const date2String = (date) => new Date().toDateString(date)
+
 export const showError = (e) => {
     console.log(e instanceof TypeError)  // true
   console.log(e.message)               // "null has no properties"

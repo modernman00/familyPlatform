@@ -15,14 +15,9 @@
         </div>
 
         @php 
-
             $token = urlencode(base64_encode((random_bytes(32))));
             $_SESSION['token'] = $token;
-
-
         @endphp
-
-
 
         {{--  SHOW ERROR   --}}
 
@@ -39,7 +34,7 @@
             enctype='multipart/form-data'>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-glass"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-glass"></em></div>
                 <div class="w3-rest">
                     <input class="w3-input w3-border" name="eventName" id="eventName" type="text"
                         placeholder="Event Name">
@@ -48,7 +43,7 @@
             </div>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-user"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-user"></em></div>
                 <div class="w3-rest">
                     <input class="w3-input w3-border" name="eventDate" id="eventDate" type="date">
                     <p id="eventDate_error"></p>
@@ -56,7 +51,7 @@
             </div>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-glass"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-glass"></em></div>
                 <div class="w3-rest">
                     <select class="w3-select" id="eventType" name="eventType" id="eventType">
                         <option value="" disabled selected>Choose event type</option>
@@ -79,7 +74,7 @@
             </div>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-location-arrow"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-location-arrow"></em></div>
                 <div class="w3-rest">
                     <select class="w3-select" name="eventGroup" id="eventGroup">
                         <option value="" disabled selected>Choose event group</option>
@@ -95,7 +90,7 @@
             </div>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-comments"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-comments"></em></div>
                 <div class="w3-rest">
                     <input class="w3-input w3-border" name="eventDescription" type="text"
                         placeholder="Describe what the event is all about" id="eventDescription">
@@ -104,7 +99,7 @@
             </div>
 
             <div class="w3-row w3-section">
-                <div class="w3-col" style="width:50px"><i class="w3-xxlarge fa fa-pencil"></i></div>
+                <div class="w3-col" style="width:50px"><em class="w3-xxlarge fa fa-pencil"></em></div>
                 <div class="w3-rest">
                     <select class="w3-select" name="eventFrequency" id="eventFrequency">
                         <option value="" disabled selected>Choose event frequency</option>

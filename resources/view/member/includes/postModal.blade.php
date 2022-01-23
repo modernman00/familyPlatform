@@ -31,13 +31,14 @@
           {{--  <button class='w3-button'>    --}}
           <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
           {{--  </button>  --}}
-
+        <div class="w3-bar">
           <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
              Post</button>
 
 
           <button onclick="document.getElementById('id01').style.display='none'" type="button"
             class="w3-button w3-red">Cancel</button>
+        </div>
 
         </div>
     </form>
