@@ -99,4 +99,5 @@ class Post extends Select
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
         return parent::selectFn2(query: $query);
     }
+
 }

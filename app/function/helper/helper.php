@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Philo\Blade\Blade;
 use App\classes\Select;
-
+use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
 
 function view($path, array $data = [])
 {
@@ -241,6 +241,11 @@ function fileUploadMultiple($fileLocation, $formInputName)
 
         $uploadFile = move_uploaded_file($fileTemp, $fileLocation . $fileName);
 
+        // Optimise the image
+
+        $optimizerChain = ImgOptimizer::create();
+        $optimizerChain->optimize($fileLocation . $fileName);
+
         if ($uploadFile) {
             $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
         } else {
@@ -292,6 +297,11 @@ function fileUpload($fileLocation, $formInputName)
     if (!move_uploaded_file($fileTemp, $fileName_location)) {
         throw new \Exception("Sorry, there was an error uploading your file.", 1);
     }
+
+    $optimizerChain = ImgOptimizer::create();
+    $optimizerChain->optimize($fileName_location);
+
+
 }
 
 // ADD COUNTRY CODE
@@ -400,3 +410,5 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
+
+

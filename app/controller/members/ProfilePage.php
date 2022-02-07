@@ -6,7 +6,8 @@ namespace App\controller\members;
 
 use App\model\{
     SingleCustomerData,
-    Post
+    Post,
+    Email
 };
 
 use App\classes\{
@@ -150,6 +151,8 @@ class ProfilePage extends ProcessImg
             header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
             Insert::submitFormDynamic('post', $getPost);
+
+
             // $option = array(
             //     'cluster' => 'eu',
             //     'useTLS' => true

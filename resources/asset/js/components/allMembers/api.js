@@ -21,7 +21,7 @@ const renderHtml = (el) => {
 
         const html = `<div class="col-sm-4 mb-3" id=${el.id}>
         <div class="card">
-         <img src="${img}" class="card-img-top allMember_profileImg " alt="profile img">
+         <img src="${img}" class="card-img-top allMember_profileImg" width="300" height="300" alt="profile img">
  
         <div class="card-body">
                     <h4 class='card-title'>${el.firstName} ${el.lastName}</h4>

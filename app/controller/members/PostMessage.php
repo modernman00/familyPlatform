@@ -10,7 +10,7 @@ use App\model\{
 };
 
 use App\classes\{
-    Select
+    Select, InnerJoin
 };
 
 use Pusher\Pusher;
@@ -68,7 +68,7 @@ class PostMessage
         }
     }
 
-    function getPostNo()
+    function getPostNo_t()
     {
         try {
 
@@ -77,6 +77,33 @@ class PostMessage
             $message = Post::postByNo($postNo);
             foreach ($message as $data);
             msgSuccess(200, $data);
+        } catch (\Throwable $th) {
+            showErrorExp($th);
+        }
+    }
+
+    function getPostNo()
+    {
+        try {
+
+            $postNo = checkInput($_GET['postNo']);
+
+            $message = Post::postByNo($postNo);
+            foreach ($message as $data);
+            $posterName = $data['fullName'];
+
+            $result = InnerJoin::joinAll2('personal', 'id', ['contact'], 'email');
+
+            foreach ($result as $notifyCustomerData) {
+                // integrate the name of the poster to the data array
+                $notifyCustomerData['poster'] = $posterName;
+              
+                sendEmailAll($notifyCustomerData, "msg/customer/notifyNewPost", "$posterName has posted a new update");
+
+            };
+
+            msgSuccess(200, $data);
+
         } catch (\Throwable $th) {
             showErrorExp($th);
         }

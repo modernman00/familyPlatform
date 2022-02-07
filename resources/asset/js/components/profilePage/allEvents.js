@@ -98,24 +98,35 @@ try {
 
             // extract the form entries
             const form = id(idForm)
+           
             let formEntries = new FormData(form)
+            
+            // if the comment form input is empty. Get the input id and check 
+            const inputComment = idForm.replace("form", "input")
+        
+            const idInputComment = id(inputComment);
 
-            // 1.
-            axios.post('/postCommentProfile', formEntries, options)
-                .then(response => {
-                    // 2. note. message returns the new post_no from the database
+            if (idInputComment.value == null || idInputComment.value == "") {
+                alert("Please enter a comment")
+            } else {
 
-                    axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
-                        .then(res => {
-                            // 3.
-                       
-                            showTheComment(res.data.message)
-                        })
-                }
-                ).catch(error => {
-                    log(error)
-                })
+                // 1.
+                axios.post('/postCommentProfile', formEntries, options)
+                    .then(response => {
+                        // 2. note. message returns the new post_no from the database
 
+                        axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
+                            .then(res => {
+                                // 3.
+
+                                showTheComment(res.data.message)
+                            })
+                    }
+                    ).catch(error => {
+                        log(error)
+                    })
+
+            }
             // SUBMIT THE POST
         } else if (elementId.includes("submitPost")) {
 
@@ -133,12 +144,12 @@ try {
             axios.post("/member/profilePage/post", formData, options)
                 .then(response => {
 
-                  //  4. 
+                    //  4. 
                     axios.get(`/post/getAllPost/byNumber?postNo=${response.data.message}`)
                         .then(res => {
                             // 5. 
 
-                            // log(res.data.message)
+                            //  log(res.data)
                             appendNewPost(res.data.message)
 
                             // Pusher(res.data.message)
@@ -146,17 +157,17 @@ try {
                         })
                     // Enable pusher logging - don't include this in production
 
-                    const channel = pusher.subscribe('my-channel');
+                    const channel = pusher.subscribe('my-channel')
 
                     channel.bind('updatePost', function (data) {
-                        log("checking1")
-                        log(data.message);
-                        log("checking")
+                        // log("checking1")
+                        // log(data.message);
+                        // log("checking")
                     });
                     id('id01').style.display = 'none'
                 })
 
-        } 
+        }
     }
 } catch (e) {
     showError(e)

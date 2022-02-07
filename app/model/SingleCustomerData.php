@@ -4,6 +4,7 @@ declare(strict_types =1);
 namespace App\model;
 
 use App\classes\InnerJoin;
+use App\classes\Select;
 
 class SingleCustomerData extends InnerJoin
 {
@@ -70,5 +71,13 @@ class SingleCustomerData extends InnerJoin
 			showError($e);
 		}
 	}
+
+	  public static function getCustById($custId, $table): array
+    {
+        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
+        return Select::selectFn2(query: $query, bind: [$custId]);
+    }
+
+
 
 }

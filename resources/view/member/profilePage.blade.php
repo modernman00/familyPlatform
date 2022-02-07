@@ -31,14 +31,7 @@
 
       </div>
 
-      {{--  <div class="commentParent" id="commentParent"></div>  --}}
 
- 
-      {{-- @foreach ($allData as $allData)
-      @include('member/includes/postCard')
-      @endforeach --}}
-
-      {{-- @endfor  --}}
     </div>
 
 

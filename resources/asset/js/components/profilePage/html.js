@@ -30,7 +30,7 @@ const commentForm = (data) => {
     <input name='post_no' type="hidden" name="${data.post_no}" value=${data.post_no} />
 
     <input class="w3-input w3-border w3-round-large inputComment" type="text" placeholder="Write a comment"
-      id="inputComment${data.post_no} " name='comment'>
+      id="inputComment${data.post_no}" value = "" name='comment'>
 
     <br>
 

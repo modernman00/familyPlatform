@@ -1,5 +1,6 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\classes;
 
@@ -18,10 +19,10 @@ class InnerJoin extends Db
      *
      * @return void
      */
-    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id) : array
+    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id): array
     {
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => 
+            $buildInnerJoinQuery = array_map(fn ($tab) =>
             "INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString WHERE $firstTable.$para = ? OR $table[0].$para = ?";
@@ -45,7 +46,7 @@ class InnerJoin extends Db
      * @return array
      */
 
-    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind) : array
+    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind): array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -59,7 +60,7 @@ class InnerJoin extends Db
         }
     }
 
-    public function joinAll(string $firstTable, string $para, array $table, string $orderBy) : array
+    public function joinAll(string $firstTable, string $para, array $table, string $orderBy): array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para", $table);
@@ -80,7 +81,7 @@ class InnerJoin extends Db
      * orderBy -> the input you want to order it by - date, age etc
      */
 
-      public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy) : array
+    public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy): array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -95,7 +96,7 @@ class InnerJoin extends Db
     }
 
 
-      public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy) 
+    public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy)
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -112,7 +113,7 @@ class InnerJoin extends Db
 
 
 
-        public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id) : array
+    public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id): array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);

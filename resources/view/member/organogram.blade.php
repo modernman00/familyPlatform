@@ -57,10 +57,9 @@
         }
 </script>
 
-
 @section('data-page-id', 'Organogram')
 @section('content')
-
+na
 <br><br><br><br>
 
 {{-- <div style="margin-left: 30px">

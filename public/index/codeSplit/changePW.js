@@ -351,7 +351,7 @@ var nameImgTiming = function nameImgTiming(data) {
 };
 
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" value = \"\" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
 };
 
 var button = function button(data) {

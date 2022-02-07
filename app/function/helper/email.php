@@ -25,13 +25,15 @@ function sendEmailSelf()
 
 function getAllEmails()
 {
-    $dataArray = ['selection' => 'SELECT_COL_ID', 'column' => 'email', 'table' => 'account', 'identifier1' => 'status', 'bind' => ['approved']];
-    $result = Select::combineSelect($dataArray, 'selectFn2', 'ONE_IDENTIFIER_COLUMN');
+    $data = ['selection' => 'SELECT_COL_ID', 'column' => 'email', 'table' => 'account', 'identifier1' => 'status', 'bind' => ['approved']];
+    $result = Select::combineSelect($data, 'selectFn2', 'ONE_IDENTIFIER_COLUMN');
     for ($r = 0; $r < count($result); $r++) {
         $email1[] = $result[$r]['email'];
     }
     return $email1;
 }
+
+
 
 // SEND FORMATTED EMAIL
 
@@ -60,11 +62,11 @@ function sendEmailWrapper($var, $recipientType)
     ob_end_clean();
 
     $email =  checkInputEmail($data['email']);
-    $name = $data['first_name'] ?? 'there';
+    $name = $data['firstName'] ?? $data['first_name'] ?? 'there';
     $file = $var['file'];
     $filename = $var['fileName'];
 
-        // mail("waledevtest@gmail.com", TEST_EMAIL, checkInputEmail($data['email']));
+    //  mail("waledevtest@gmail.com", "TEST_EMAIL", $email);
 
     sendEmail($email, $name, $var['subject'], $emailContent, $file, $filename);
 }
@@ -130,4 +132,65 @@ function sendEmailGeneral($array, $recipient)
 
         sendEmail($email, $name, $array['subject'], $emailContent);
     }
+
+    
 }
+
+/**
+ * 
+ * @param mixed $data this must include firstName and lastName 
+ * @param mixed $viewPath 
+ * @param mixed $subject 
+ * @return void 
+ * @throws \Psr\Log\InvalidArgumentException 
+ * @throws \Exception 
+ */
+
+function sendEmailAll($data, $viewPath, $subject)
+{
+    $notifyCustomer = new EmailData("member");
+
+    if (!defined('PASS')) {
+        $notifyCustomer->getEmailData();
+
+        if (!defined('PASS')) {
+            msgException(401, 'Email credentials (constant) not set');
+        }
+
+             if (!$data) {
+            $error = "Data not provided";
+            echo json_encode($error);
+            throw new Exception($error);
+        }
+
+        ob_start();
+
+        $emailPage = view($viewPath, compact('data'));
+        // $emailContent = ob_get_contents();
+        $emailContent = ob_get_clean();
+        // ob_end_clean();
+
+        $email =  checkInputEmail($data['email']);
+
+
+        if (!$email) {
+            $error = "Email not provided";
+            echo json_encode($error);
+            throw new Exception($error);
+        }
+
+        $fName = $data['firstName'];
+        $lName = $data['lastName'];
+
+        $name = "$fName $lName";
+
+        // $name = checkInput($data['fullName']) ?? checkInput($data['firstName'])?? 'there';
+        // $file = $data['file'];
+        // $filename = $data['fileName'];
+
+        sendEmail($email, $name, $subject, $emailContent);
+    }
+
+    
+}
+

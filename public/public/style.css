@@ -686,6 +686,11 @@ right connector from last child*/
   display: flex;
 }
 
+.allMember_profileImg {
+  width: 439px;
+  height: 328px;
+}
+
 .onChangeKidAndSiblings {
   background-color: blue;
 }

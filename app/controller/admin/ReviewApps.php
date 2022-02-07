@@ -7,6 +7,7 @@ namespace App\controller\admin;
 use App\model\ReviewAppsData;
 use Exception;
 use App\classes\AllFunctionalities;
+use App\classes\Delete;
 
 class ReviewApps extends ReviewAppsData
 {
@@ -78,7 +79,16 @@ class ReviewApps extends ReviewAppsData
             $data = $this->getCustomerData();
             $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'member');
             $this->updateAccountStatus('cancel');
+
+           
+
+            $deleteQuery = Delete::formAndMatchQuery(selection:"DELETE_ONE", table:"contact", identifier1:"id", limit:1);
+      
+
+            Delete::deleteFn($deleteQuery, [$data['id']]);
+
             header(self::REDIRECT);
+
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -88,10 +98,19 @@ class ReviewApps extends ReviewAppsData
     {
         try {
 
+               
+
             $data = $this->getCustomerData();
+      
             $data['email'] = 'application@loaneasyfinance.com';
-            $this->toSendEmail("msg/admin/delete", $data, "Delete App", 'internal');
+            $this->toSendEmail("msg/admin/delete", $data, "Delete App", 'admin');
             $this->updateAccountStatus('deleted');
+
+            // DELETE IT FROM THE CONTACT TABLE
+             $deleteQuery = Delete::formAndMatchQuery(selection:"DELETE_ONE", table:"contact", identifier1:"id", limit: "LIMIT 1");
+
+            Delete::deleteFn($deleteQuery, [$data['id']]);
+
             header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);

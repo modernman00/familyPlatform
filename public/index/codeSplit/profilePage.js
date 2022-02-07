@@ -858,17 +858,26 @@ try {
       // extract the form entries
 
       var form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
-      var formEntries = new FormData(form); // 1.
+      var formEntries = new FormData(form); // if the comment form input is empty. Get the input id and check 
 
-      axios__WEBPACK_IMPORTED_MODULE_3___default().post('/postCommentProfile', formEntries, options).then(function (response) {
-        // 2. note. message returns the new post_no from the database
-        axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
-          // 3.
-          showTheComment(res.data.message);
+      var inputComment = idForm.replace("form", "input");
+      var idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
+
+      if (idInputComment.value == null || idInputComment.value == "") {
+        alert("Please enter a comment");
+      } else {
+        // 1.
+        axios__WEBPACK_IMPORTED_MODULE_3___default().post('/postCommentProfile', formEntries, options).then(function (response) {
+          // 2. note. message returns the new post_no from the database
+          axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
+            // 3.
+            showTheComment(res.data.message);
+          });
+        })["catch"](function (error) {
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
         });
-      })["catch"](function (error) {
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
-      }); // SUBMIT THE POST
+      } // SUBMIT THE POST
+
     } else if (elementId.includes("submitPost")) {
       // LISTEN TO THE SUBMIT EVENT 
       // 2. GET THE FORM id
@@ -883,15 +892,14 @@ try {
         //  4. 
         axios__WEBPACK_IMPORTED_MODULE_3___default().get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
           // 5. 
-          // log(res.data.message)
+          //  log(res.data)
           (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(res.data.message); // Pusher(res.data.message)
         }); // Enable pusher logging - don't include this in production
 
         var channel = pusher.subscribe('my-channel');
-        channel.bind('updatePost', function (data) {
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking1");
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(data.message);
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking");
+        channel.bind('updatePost', function (data) {// log("checking1")
+          // log(data.message);
+          // log("checking")
         });
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
       });
@@ -1014,7 +1022,7 @@ var nameImgTiming = function nameImgTiming(data) {
 };
 
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, " \" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" value = \"\" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
 };
 
 var button = function button(data) {

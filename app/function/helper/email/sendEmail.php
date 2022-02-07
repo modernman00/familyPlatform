@@ -44,7 +44,7 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 
 		//Content
 		$mail->isHTML(true);                                  // Set email format to HTML
-		$mail->Subject = $subject;
+		$mail->Subject = "$subject";
 		$mail->Body    = $message;
 		$mail->AltBody = BODY_TEXT;
 		return $mail->send();
