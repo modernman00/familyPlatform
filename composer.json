@@ -29,7 +29,7 @@
         "php" : "^8.0",
         "cboden/ratchet" : "^0.4.3",
         "react/zmq": "^0.4.0",
-		"dompdf/dompdf": "^0.8.3",
+		"dompdf/dompdf": "^1.2.1",
         "ext-gd": "*",
          "vlucas/phpdotenv": "^3.6",
         "altorouter/altorouter": "^2.0",
