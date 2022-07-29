@@ -2,7 +2,7 @@
 
 namespace App\classes;
 
-use App\classes\AllFunctionalities;
+use App\classes\{AllFunctionalities, Select};
 
 
 class Pass extends AllFunctionalities
@@ -17,8 +17,12 @@ class Pass extends AllFunctionalities
       throw new \Exception("Email did not pass the verification", 1);
     }
 
+    $query = Select::formAndMatchQuery(selection:"SELECT_COUNT_ONE", table:$table, identifier1:"email");
 
-    $outcome = $this->select_count($table, 'email', $email) ?? throw new \Exception("Your email is not recognised", 1);
+    $outcome = Select::selectCountFn2($query, [$email]) ?? throw new \Exception("Your email is not recognised", 1);
+
+
+    // $outcome = $this->select_count($table, 'email', $email) ?? throw new \Exception("Your email is not recognised", 1);
 
     if (!$outcome) {
       throw new \Exception("Your email is not recognised", 1);

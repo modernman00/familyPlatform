@@ -12,5 +12,6 @@ include __DIR__ . "/admin.php";
 include __DIR__ . "/profile_page.php";
 include __DIR__ . "/allMembersRoute.php";
 include __DIR__ . "/chat.php";
+include __DIR__ . "/Event.php";
 
 $router->map('GET', '/php8', 'App\controller\Testphp@index', 'php8');

@@ -23,6 +23,7 @@ class CheckToken
             unset($_SESSION[$token]);
             if ($tokenCheck != $postToken) {
                 header("Location: $redirect");
+                die();
             }
         } catch (\Throwable $th) {
             showError($th);

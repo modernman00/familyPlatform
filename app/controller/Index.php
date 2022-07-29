@@ -19,5 +19,8 @@ class Index
         view('launch');
     }
 
+    public function privacy()
+    {
+        view('privacy');
+    }
 }
-

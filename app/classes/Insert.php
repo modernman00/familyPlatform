@@ -222,6 +222,7 @@ class Insert extends Db
             $stmtExec = $stmt->execute();
             if ($stmtExec) {
                 header($redirect);
+                die();
             }
             return $stmtExec;
         } catch (PDOException $e) {

@@ -32,16 +32,17 @@ var renderHtml = function renderHtml(el) {
   if (el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     var img = el.img ? "/img/profile/".concat(el.img) : "/avatar/avatarF.png";
-    var html = "<div class=\"col-sm-4 mb-3\" id=".concat(el.id, ">\n        <div class=\"card\">\n         <img src=\"").concat(img, "\" class=\"card-img-top allMember_profileImg\" width=\"300\" height=\"300\" alt=\"profile img\">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "</p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n                </div>\n            </div>");
+    var html = "<div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n        <div class=\"card\">\n         <img src=\"").concat(img, "\" class=\"card-img-top allMember_profileImg\" width=\"300\" height=\"300\" alt=\"profile img\">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "</p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n                </div>\n            </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
   }
 };
 
-axios__WEBPACK_IMPORTED_MODULE_0___default().get('http://olaogun.dev.com/allMembers/processApiData', config).then(function (response) {
-  // loaderIcon()
-  // add loader
+var URL = "http://olaogun.test/";
+axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + '/allMembers/processApiData', config).then(function (response) {
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_3__.loaderIcon)(); // add loader
+
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
   response.data.map(function (el) {
@@ -103,17 +104,18 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
-/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
-/* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
-/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "checkBox2": () => (/* binding */ checkBox2),
+/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
+/* harmony export */   "matchInput": () => (/* binding */ matchInput),
 /* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
-/* harmony export */   "matchInput": () => (/* binding */ matchInput)
+/* harmony export */   "removeDiv": () => (/* binding */ removeDiv)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -185,7 +187,10 @@ var distinctValue = function distinctValue(array) {
   return _toConsumableArray(new Set(array));
 };
 var checkBox = function checkBox(subject) {
-  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
 };
 var isChecked = function isChecked(name, fn) {
   var yesId = "".concat(name, "Yes");

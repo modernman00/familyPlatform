@@ -33,7 +33,7 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
       var container = settings.container || doc.createElement("div");
       var containerStyle = container.style;
       var userAgent = navigator.userAgent;
-      var mobileFirefox = userAgent.indexOf("Firefox") !== -1 && userAgent.indexOf("Mobile") !== -1;
+      var mobileFirefox = ~userAgent.indexOf("Firefox") && ~userAgent.indexOf("Mobile");
       var debounceWaitMs = settings.debounceWaitMs || 0;
       var preventSubmit = settings.preventSubmit || false;
       var disableAutoSelect = settings.disableAutoSelect || false;
@@ -222,14 +222,14 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
       }
       function keyupEventHandler(ev) {
           var keyCode = ev.which || ev.keyCode || 0;
-          var ignore = [38 /* Up */, 13 /* Enter */, 27 /* Esc */, 39 /* Right */, 37 /* Left */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */];
+          var ignore = settings.keysToIgnore || [38 /* Up */, 13 /* Enter */, 27 /* Esc */, 39 /* Right */, 37 /* Left */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */];
           for (var _i = 0, ignore_1 = ignore; _i < ignore_1.length; _i++) {
               var key = ignore_1[_i];
               if (keyCode === key) {
                   return;
               }
           }
-          if (keyCode >= 112 /* F1 */ && keyCode <= 123 /* F12 */) {
+          if (keyCode >= 112 /* F1 */ && keyCode <= 123 /* F12 */ && !settings.keysToIgnore) {
               return;
           }
           // the down key is used to open autocomplete
@@ -343,18 +343,19 @@ module.exports = __webpack_require__(/*! regenerator-runtime */ "./node_modules/
           // this may cause redrawing autocomplete multiple times after the last key was pressed.
           // To avoid this, the number of times keyboard was pressed will be saved and checked before redraw.
           var savedKeypressCounter = ++keypressCounter;
-          var val = input.value;
-          if (val.length >= minLen || trigger === 1 /* Focus */) {
+          var inputText = input.value;
+          var cursorPos = input.selectionStart || 0;
+          if (inputText.length >= minLen || trigger === 1 /* Focus */) {
               clearDebounceTimer();
               debounceTimer = window.setTimeout(function () {
-                  settings.fetch(val, function (elements) {
+                  settings.fetch(inputText, function (elements) {
                       if (keypressCounter === savedKeypressCounter && elements) {
                           items = elements;
-                          inputValue = val;
+                          inputValue = inputText;
                           selected = (items.length < 1 || disableAutoSelect) ? undefined : items[0];
                           update();
                       }
-                  }, trigger);
+                  }, trigger, cursorPos);
               }, trigger === 0 /* Keyboard */ ? debounceWaitMs : 0);
           }
           else {
@@ -2718,7 +2719,7 @@ process.umask = function() { return 0; };
 /***/ ((module) => {
 
 /*!
- * Pusher JavaScript Library v7.0.3
+ * Pusher JavaScript Library v7.0.6
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -3102,7 +3103,7 @@ exports.maxDecodedLength = function (length) {
 exports.decodedLength = function (s) {
     return stdCoder.decodedLength(s);
 };
-//# sourceMappingURL=base64.js.map
+
 
 /***/ }),
 /* 1 */
@@ -3257,22 +3258,23 @@ function decode(arr) {
     return chars.join("");
 }
 exports.decode = decode;
-//# sourceMappingURL=utf8.js.map
+
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __nested_webpack_require_19967__) {
+/***/ (function(module, exports, __nested_webpack_require_19901__) {
 
 // required so we don't have to do require('pusher').default etc.
-module.exports = __nested_webpack_require_19967__(3).default;
+module.exports = __nested_webpack_require_19901__(3).default;
 
 
 /***/ }),
 /* 3 */
-/***/ (function(module, __webpack_exports__, __nested_webpack_require_20171__) {
+/***/ (function(module, __webpack_exports__, __nested_webpack_require_20105__) {
 
 "use strict";
-__nested_webpack_require_20171__.r(__webpack_exports__);
+// ESM COMPAT FLAG
+__nested_webpack_require_20105__.r(__webpack_exports__);
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/script_receiver_factory.ts
 var ScriptReceiverFactory = (function () {
@@ -3306,7 +3308,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.0.3",
+    VERSION: "7.0.6",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -5259,10 +5261,10 @@ var presence_channel_PresenceChannel = (function (_super) {
 /* harmony default export */ var presence_channel = (presence_channel_PresenceChannel);
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
-var utf8 = __nested_webpack_require_20171__(1);
+var utf8 = __nested_webpack_require_20105__(1);
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
-var base64 = __nested_webpack_require_20171__(0);
+var base64 = __nested_webpack_require_20105__(0);
 
 // CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
 var encrypted_channel_extends = ( false) || (function () {
@@ -7278,6 +7280,7 @@ runtime.setup(pusher_Pusher);
 /***/ })
 /******/ ]);
 });
+//# sourceMappingURL=pusher.js.map
 
 /***/ }),
 
@@ -8085,10 +8088,10 @@ var format = function (date, locale, opts) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "format": () => (/* reexport safe */ _format__WEBPACK_IMPORTED_MODULE_3__.format),
-/* harmony export */   "render": () => (/* reexport safe */ _realtime__WEBPACK_IMPORTED_MODULE_4__.render),
 /* harmony export */   "cancel": () => (/* reexport safe */ _realtime__WEBPACK_IMPORTED_MODULE_4__.cancel),
-/* harmony export */   "register": () => (/* reexport safe */ _register__WEBPACK_IMPORTED_MODULE_2__.register)
+/* harmony export */   "format": () => (/* reexport safe */ _format__WEBPACK_IMPORTED_MODULE_3__.format),
+/* harmony export */   "register": () => (/* reexport safe */ _register__WEBPACK_IMPORTED_MODULE_2__.register),
+/* harmony export */   "render": () => (/* reexport safe */ _realtime__WEBPACK_IMPORTED_MODULE_4__.render)
 /* harmony export */ });
 /* harmony import */ var _lang_en_US__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./lang/en_US */ "./node_modules/timeago.js/esm/lang/en_US.js");
 /* harmony import */ var _lang_zh_CN__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./lang/zh_CN */ "./node_modules/timeago.js/esm/lang/zh_CN.js");
@@ -8242,8 +8245,8 @@ function render(nodes, locale, opts) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "register": () => (/* binding */ register),
-/* harmony export */   "getLocale": () => (/* binding */ getLocale)
+/* harmony export */   "getLocale": () => (/* binding */ getLocale),
+/* harmony export */   "register": () => (/* binding */ register)
 /* harmony export */ });
 /**
  * Created by hustcc on 18/5/20.
@@ -8282,10 +8285,10 @@ var getLocale = function (locale) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "toDate": () => (/* binding */ toDate),
-/* harmony export */   "formatDiff": () => (/* binding */ formatDiff),
 /* harmony export */   "diffSec": () => (/* binding */ diffSec),
-/* harmony export */   "nextInterval": () => (/* binding */ nextInterval)
+/* harmony export */   "formatDiff": () => (/* binding */ formatDiff),
+/* harmony export */   "nextInterval": () => (/* binding */ nextInterval),
+/* harmony export */   "toDate": () => (/* binding */ toDate)
 /* harmony export */ });
 /**
  * Created by hustcc on 18/5/20.
@@ -8414,8 +8417,8 @@ function nextInterval(diff) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "getDateAttribute": () => (/* binding */ getDateAttribute),
-/* harmony export */   "setTimerId": () => (/* binding */ setTimerId),
-/* harmony export */   "getTimerId": () => (/* binding */ getTimerId)
+/* harmony export */   "getTimerId": () => (/* binding */ getTimerId),
+/* harmony export */   "setTimerId": () => (/* binding */ setTimerId)
 /* harmony export */ });
 var ATTR_TIMEAGO_TID = 'timeago-id';
 /**
@@ -8456,13 +8459,13 @@ function getTimerId(node) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "isNetworkError": () => (/* binding */ isNetworkError),
-/* harmony export */   "isRetryableError": () => (/* binding */ isRetryableError),
-/* harmony export */   "isSafeRequestError": () => (/* binding */ isSafeRequestError),
-/* harmony export */   "isIdempotentRequestError": () => (/* binding */ isIdempotentRequestError),
-/* harmony export */   "isNetworkOrIdempotentRequestError": () => (/* binding */ isNetworkOrIdempotentRequestError),
+/* harmony export */   "default": () => (/* binding */ axiosRetry),
 /* harmony export */   "exponentialDelay": () => (/* binding */ exponentialDelay),
-/* harmony export */   "default": () => (/* binding */ axiosRetry)
+/* harmony export */   "isIdempotentRequestError": () => (/* binding */ isIdempotentRequestError),
+/* harmony export */   "isNetworkError": () => (/* binding */ isNetworkError),
+/* harmony export */   "isNetworkOrIdempotentRequestError": () => (/* binding */ isNetworkOrIdempotentRequestError),
+/* harmony export */   "isRetryableError": () => (/* binding */ isRetryableError),
+/* harmony export */   "isSafeRequestError": () => (/* binding */ isSafeRequestError)
 /* harmony export */ });
 /* harmony import */ var is_retry_allowed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! is-retry-allowed */ "./node_modules/is-retry-allowed/index.js");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -8525,7 +8528,7 @@ function isIdempotentRequestError(error) {
 }
 /**
  * @param  {Error}  error
- * @return {boolean | Promise}
+ * @return {boolean}
  */
 
 function isNetworkOrIdempotentRequestError(error) {
@@ -8666,8 +8669,9 @@ function _shouldRetry() {
 
     if (typeof shouldRetryOrPromise === 'object') {
       try {
-        yield shouldRetryOrPromise;
-        return true;
+        var shouldRetryPromiseResult = yield shouldRetryOrPromise; // keep return true unless shouldRetryPromiseResult return false for compatibility
+
+        return shouldRetryPromiseResult !== false;
       } catch (_err) {
         return false;
       }

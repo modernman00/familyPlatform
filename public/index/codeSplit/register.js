@@ -385,6 +385,7 @@ var config = {
     'Accept': 'application/json'
   }
 };
+var URL = "http://olaogun.test/";
 var getAllData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
     var response;
@@ -393,7 +394,7 @@ var getAllData = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             _context.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1___default().get('http://olaogun.dev.com/allMembers/processApiData', config)["catch"](function (err) {
+            return axios__WEBPACK_IMPORTED_MODULE_1___default().get(URL + 'allMembers/processApiData', config)["catch"](function (err) {
               return err.message;
             });
 
@@ -449,8 +450,8 @@ var postData = /*#__PURE__*/function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
-/* harmony export */   "Login": () => (/* binding */ Login)
+/* harmony export */   "Login": () => (/* binding */ Login),
+/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister)
 /* harmony export */ });
 
 
@@ -630,17 +631,18 @@ var autocomplete = function autocomplete(inp, arr) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
-/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
-/* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
-/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "checkBox2": () => (/* binding */ checkBox2),
+/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
+/* harmony export */   "matchInput": () => (/* binding */ matchInput),
 /* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
-/* harmony export */   "matchInput": () => (/* binding */ matchInput)
+/* harmony export */   "removeDiv": () => (/* binding */ removeDiv)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -712,7 +714,10 @@ var distinctValue = function distinctValue(array) {
   return _toConsumableArray(new Set(array));
 };
 var checkBox = function checkBox(subject) {
-  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
 };
 var isChecked = function isChecked(name, fn) {
   var yesId = "".concat(name, "Yes");
@@ -764,139 +769,6 @@ var matchInput = function matchInput(first, second, err) {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/autocomplete.js":
-/*!****************************************************************!*\
-  !*** ./resources/asset/js/components/register/autocomplete.js ***!
-  \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../api/index */ "./resources/asset/js/components/api/index.js");
-/* harmony import */ var _helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/autocomplete */ "./resources/asset/js/components/helper/autocomplete.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
-
-
-
-
-
-
-
-var getData = (0,_api_index__WEBPACK_IMPORTED_MODULE_2__.getAllData)();
-var firstNameData = [];
-var fatherName = [];
-var mobile = [];
-var motherName = [];
-/**
- * 
- * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
- * @param {*} searchElement  the element to search against ("Mango")
- */
-
-var checkExistence = function checkExistence(baseArray, searchElement) {
-  if (baseArray.includes(searchElement) === false) {
-    baseArray.push(searchElement);
-  }
-};
-
-getData.then(function (el) {
-  return el.map(function (element) {
-    checkExistence(firstNameData, element.firstName);
-    checkExistence(fatherName, element.fatherName);
-    checkExistence(motherName, element.motherName);
-    checkExistence(mobile, element.mobile);
-  });
-});
-var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
-var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id');
-var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherName_id');
-firstAutoComplete.setAttribute('autocomplete', 'off');
-fatherAutoComplete.setAttribute('autocomplete', 'off');
-motherAutoComplete.setAttribute('autocomplete', 'off'); // AUTOCOMPLETE
-
-(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(firstAutoComplete, firstNameData);
-(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(fatherAutoComplete, fatherName);
-(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(motherAutoComplete, motherName); // CHECK THE MOBILE OF MOTHER AND FATHER
-
-var setInput = function setInput(element, name, value) {
-  var sex = name === "father" ? "him" : "her";
-  var genId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error"));
-  genId.style.display = "block";
-
-  if (value === element) {
-    genId.innerHTML = "Great news that your ".concat(name, " is already on the platform");
-  } else {
-    genId.innerHTML = "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name);
-
-    var processRadio = function processRadio() {
-      var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id').value;
-      var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
-      var postObj = {
-        mobile: value,
-        viewPath: "msg/contactNewMember",
-        data: {
-          email: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Email_id")).value,
-          mobile: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_id")).value,
-          name: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id').value,
-          fName: fName
-        },
-        subject: "Hello ".concat(name, ",  ").concat(fName, "recommended your contact. Please register to join the ").concat(lName, " family Network")
-      };
-      axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
-        // console.log(response.data);
-        var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
-        mobileHelp.innerHTML = response.data.message;
-        mobileHelp.style.display = "block";
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error")).innerHTML = "";
-      })["catch"](function (error) {
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-      });
-    };
-
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener('click', processRadio);
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener('click', function () {
-      return genId.style.display = "none";
-    });
-  }
-};
-/**
- * @param {the idInput to check} the input id 
- * @param {the array to check} data 
- * @param {this should either be the mother oor father} who 
- */
-
-
-var mobileFilter = function mobileFilter(event, name) {
-  var value = event.target.value;
-  return mobile.filter(function (el) {
-    var element = el;
-    setInput(element, name, value);
-  });
-};
-
-var fatherMobile = function fatherMobile(event) {
-  var setName = "father";
-  mobileFilter(event, setName);
-};
-
-var motherMobile = function motherMobile(event) {
-  var setName = "mother";
-  mobileFilter(event, setName);
-};
-
-var spouseMobile = function spouseMobile(event) {
-  var setName = "spouse";
-  mobileFilter(event, setName);
-};
-
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_id').addEventListener('keyup', fatherMobile);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_id').addEventListener('keyup', motherMobile);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouseMobile_id').addEventListener('keyup', spouseMobile);
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/register/event.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/event.js ***!
@@ -934,12 +806,233 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
 /* harmony import */ var _onChange__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./onChange */ "./resources/asset/js/components/register/onChange.js");
 /* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
-/* harmony import */ var _autocomplete__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./autocomplete */ "./resources/asset/js/components/register/autocomplete.js");
+/* harmony import */ var _mobileNameCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mobileNameCheck */ "./resources/asset/js/components/register/mobileNameCheck.js");
 
 
 
 
 
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/mobileNameCheck.js":
+/*!*******************************************************************!*\
+  !*** ./resources/asset/js/components/register/mobileNameCheck.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../api/index */ "./resources/asset/js/components/api/index.js");
+/* harmony import */ var _helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/autocomplete */ "./resources/asset/js/components/helper/autocomplete.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+
+
+var getData = (0,_api_index__WEBPACK_IMPORTED_MODULE_2__.getAllData)();
+var firstNameData = [];
+var fatherName = [];
+var mobile = [];
+var motherName = [];
+var checkEmail = [];
+var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id').value;
+var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
+/**
+ * 
+ * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
+ * @param {*} searchElement  the element to search against ("Mango")
+ */
+
+var checkExistence = function checkExistence(baseArray, searchElement) {
+  if (baseArray.includes(searchElement) === false) {
+    baseArray.push(searchElement);
+  }
+};
+
+getData.then(function (el) {
+  return el.map(function (element) {
+    checkExistence(firstNameData, element.firstName);
+    checkExistence(fatherName, element.fatherName);
+    checkExistence(motherName, element.motherName);
+    checkExistence(mobile, element.mobile);
+    checkExistence(checkEmail, element.email);
+  });
+});
+var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
+var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id');
+var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherName_id');
+firstAutoComplete.setAttribute('autocomplete', 'off');
+fatherAutoComplete.setAttribute('autocomplete', 'off');
+motherAutoComplete.setAttribute('autocomplete', 'off'); // AUTOCOMPLETE
+
+(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(firstAutoComplete, firstNameData);
+(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(fatherAutoComplete, fatherName);
+(0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(motherAutoComplete, motherName); // CHECK THE MOBILE OF MOTHER AND FATHER
+
+var setInput = function setInput(name, value) {
+  var sex = name === "father" ? "him" : "her";
+  var genId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error"));
+  genId.style.display = "block";
+
+  if (mobile.includes(value)) {
+    genId.innerHTML = "Great news that your ".concat(name, " is already on the platform");
+  } else {
+    genId.innerHTML = "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name);
+
+    var processRadio = function processRadio() {
+      var postObj = {
+        mobile: value,
+        viewPath: "msg/contactNewMember",
+        data: {
+          email: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Email_id")).value,
+          mobile: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_id")).value,
+          name: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Name_id")).value,
+          yourName: "".concat(fName, " ").concat(lName)
+        },
+        subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
+      };
+      axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
+        var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
+        mobileHelp.innerHTML = response.data.message;
+        mobileHelp.style.display = "block";
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error")).innerHTML = "";
+      })["catch"](function (error) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+      });
+    };
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener('click', processRadio);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener('click', function () {
+      return genId.style.display = "none";
+    });
+  }
+};
+/**
+ * @param {the idInput to check} the input id 
+ * @param {the array to check} data 
+ * @param {this should either be the mother oor father} who 
+ */
+
+
+var mobileFilter = function mobileFilter(event, name) {
+  var value = event.target.value;
+
+  if (value.length >= 11) {
+    // mobile value is 10 digits
+    // return mobile.find(el => {
+    return setInput(name, value); // })
+  }
+};
+
+var fatherMobile = function fatherMobile() {
+  var setName = "father";
+  mobileFilter(event, setName);
+};
+
+var motherMobile = function motherMobile() {
+  var setName = "mother";
+  mobileFilter(event, setName);
+};
+
+var spouseMobile = function spouseMobile() {
+  var setName = "spouse";
+  mobileFilter(event, setName);
+};
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_id').addEventListener('keyup', fatherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_id').addEventListener('keyup', motherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouseMobile_id').addEventListener('keyup', spouseMobile); // create the data for the function below 
+
+var checkObj = {
+  emailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
+  nameInput: ["kid_name1", "kid_name2", "kid_name3", "kid_name4", "kid_name5", "kid_name6", "kid_name7", "kid_name8", "kid_name9", "kid_name10"],
+  siblingEmail: ["sibling_email1", "sibling_email2", "sibling_email3", "sibling_email4", "sibling_email5", "sibling_email6", "sibling_email7", "sibling_email8", "sibling_email9", "sibling_email10"],
+  siblingName: ["sibling_name1", "sibling_name2", "sibling_name3", "sibling_name4", "sibling_name5", "sibling_name6", "sibling_name7", "sibling_name8", "sibling_name9", "sibling_name10"]
+}; // check if there is a sibling or kids by email
+
+document.onkeydown = function (e) {
+  //. use the onclick to get the id of the element that was clicked
+  // 2. use event listener to get the email value (if it is not empty)
+  // 3. use the email value to check if it is in the array
+  // 4. if it is in the array, show the Yes or No Radio
+  // 5. click yes to send email to the kid or sibling
+  // create an object with the data to check
+  var elementId = e.target.id; // id of the element that was clicked or press down
+  // check if id / event.id is either kid or sibling
+
+  var chooseEmail = [];
+  var chooseName = [];
+  var helpHTML = "";
+
+  if (checkObj.emailInput.includes(elementId)) {
+    chooseEmail = checkObj.emailInput;
+    chooseName = checkObj.nameInput;
+    helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
+  } else if (checkObj.siblingEmail.includes(elementId)) {
+    chooseEmail = checkObj.siblingEmail;
+    chooseName = checkObj.siblingName;
+    helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
+  }
+
+  var checkFamilyEmail = function checkFamilyEmail(event) {
+    var emailInput = event.target.value;
+
+    if (chooseEmail) {
+      var index = chooseEmail.indexOf(elementId);
+      var email = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(chooseEmail[index]);
+      var emailValue = email.value;
+      var name = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(chooseName[index]);
+      var nameValue = name.value;
+
+      if (emailInput.length > 6) {
+        getData.then(function (el) {
+          return el.map(function (element) {
+            checkExistence(checkEmail, element.email);
+          });
+        });
+        helpHTML.style.display = "block";
+        helpHTML.innerHTML = checkEmail.includes(emailInput) ? "Great news! ".concat(nameValue, " is already on the platform") : "<h4><i>".concat(nameValue, " is not on the platform. Do you want us to send ").concat(nameValue, " a email to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(elementId);
+
+        var processKidRadio = function processKidRadio(ev) {
+          var postObj = {
+            mobile: "",
+            // is this needed?
+            viewPath: "msg/contactNewMember",
+            data: {
+              email: emailValue,
+              name: nameValue,
+              yourName: "".concat(fName, " ").concat(lName)
+            },
+            subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
+          };
+          axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
+            helpHTML.innerHTML = response.data.message;
+            setTimeout(function () {
+              helpHTML.style.display = "none";
+            }, 5000);
+          })["catch"](function (error) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+          });
+        };
+
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "Yes")).addEventListener('click', processKidRadio);
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).addEventListener('click', function () {
+          return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).style.display = "none";
+        });
+      }
+    }
+  };
+
+  if (chooseEmail.includes(elementId)) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).addEventListener("keyup", checkFamilyEmail);
+  }
+};
 
 /***/ }),
 
@@ -958,19 +1051,21 @@ __webpack_require__.r(__webpack_exports__);
  // import { getEnvironmentVariable as env} from 'environment-variable-reader'
 
 
-
+ // let childrenOnchangeValue = 0;
+// let childrenOnchangeValue = 0;
 
 var renderHtmlFamily = function renderHtmlFamily(family, no) {
   if (no) {
     var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    return "\n        <div class=\"field-body\">\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"text\" placeholder = \"Enter ".concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                    <i class=\"fas fa-user\"></i>\n                </span>\n                </p>\n            </div>\n\n            <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                <i class=\"fas fa-envelope\"></i>\n                </span>\n                <span class=\"icon is-small is-right\">\n                <i class=\"fas fa-check\"></i>\n                </span>\n                </p>\n           </div>\n\n        </div><br>");
+    return "\n        <div class=\"field-body\">\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"text\" placeholder = \"Enter ".concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                    <i class=\"fas fa-user\"></i>\n                </span>\n                </p>\n               \n            </div>\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                <i class=\"fas fa-envelope\"></i>\n                </span>\n                <span class=\"icon is-small is-right\">\n                <i class=\"fas fa-check\"></i>\n                </span>\n                </p>\n                 <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n           </div>\n\n        </div><br>");
   }
 };
 
 var show = function show(kids_or_sib) {
   try {
     // what was picked or selected
-    var value = event.target.value;
+    var value = event.target.value; // childrenOnchangeValue = value;
+
     var addDiv = kids_or_sib == "kids" ? "addChildren" : "addSiblings"; // remove the div 
 
     (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.removeDiv)(addDiv);
@@ -1113,7 +1208,7 @@ var processFormData = /*#__PURE__*/function () {
               // set timer to redirect to the homepage
               setTimeout(function () {
                 window.location = "/";
-              }, 10000);
+              }, 20000);
               processFormDataAction('is-success', response); // it clears all the contents
 
               // it clears all the contents

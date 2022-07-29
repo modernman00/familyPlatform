@@ -54,6 +54,7 @@ class AllMembersController extends AllMembersData
         $id = checkInput($_GET['id']);
         $_SESSION['id'] = $id;
         header("Location: /allMembers/getProfile");
+        die();
     }
 
     public function getProfile()

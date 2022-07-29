@@ -17,9 +17,9 @@ const renderHtml = (el) => {
     if (el) {
         id('allMembers').classList.remove('loader')
 
-          const img = (el.img) ? `/img/profile/${el.img}` : "/avatar/avatarF.png"
+        const img = (el.img) ? `/img/profile/${el.img}` : "/avatar/avatarF.png"
 
-        const html = `<div class="col-sm-4 mb-3" id=${el.id}>
+        const html = `<div class="col-sm-3 mb-3" id=${el.id}>
         <div class="card">
          <img src="${img}" class="card-img-top allMember_profileImg" width="300" height="300" alt="profile img">
  
@@ -46,41 +46,42 @@ const renderHtml = (el) => {
 
 }
 
+const URL = process.env.MIX_APP_URL2
 
-axios.get('http://olaogun.dev.com/allMembers/processApiData', config)
-    .then(function (response) {
+axios.get(URL + '/allMembers/processApiData', config)
+    .then(function(response) {
 
-        // loaderIcon()
+        loaderIcon()
 
         // add loader
 
         id('allMembers').classList.add('loader')
 
         id('allMembers').innerHTML = ""
-                
+
         response.data.map(el => {
 
-                    renderHtml(el)
-                })
+            renderHtml(el)
+        })
 
         const input = () => {
 
-        let inputVal = id('searchFamily').value
+            let inputVal = id('searchFamily').value
 
-            if(inputVal == "") {
+            if (inputVal == "") {
 
                 id('allMembers').innerHTML = ""
-                
+
                 response.data.map(el => {
 
                     renderHtml(el)
                 })
             }
 
-        
+
 
             if (inputVal) {
-                 id('allMembers').innerHTML = ""
+                id('allMembers').innerHTML = ""
 
                 let filter = response.data.filter(el => el.firstName.toLowerCase().includes(inputVal.toLowerCase()))
                 log(filter)
@@ -88,7 +89,7 @@ axios.get('http://olaogun.dev.com/allMembers/processApiData', config)
 
                     renderHtml(el)
                 })
-            } 
+            }
 
 
         }
@@ -109,4 +110,4 @@ axios.get('http://olaogun.dev.com/allMembers/processApiData', config)
     })
     // id('allMembers').classList.remove('loader')
 
-    .catch(err => console.error(err.message))
+.catch(err => console.error(err.message))

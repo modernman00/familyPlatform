@@ -2,7 +2,7 @@
 @section('title', 'email')
 
 @section('subject')
-MEMBERSHIP DECISION NOTIFICATION for {{ $data['firstName'] }} {{ $data['lastName'] }}
+MEMBERSHIP DECISION NOTIFICATION for {{ strtoupper($data['firstName']) }} {{ $data['lastName'] }}
 @endsection
 
 @section('reference') {{ $data['id'] }} @endsection
@@ -11,7 +11,7 @@ MEMBERSHIP DECISION NOTIFICATION for {{ $data['firstName'] }} {{ $data['lastName
 <p>
 
     Hello
-    {{ $data['firstName'] }} {{ $data['lastName'] }}, <br><br> Your application for membership of the Olaogun family platform has
+    {{ strtoupper($data['firstName']) }} {{ $data['lastName'] }}, <br><br> Your application for membership of the Olaogun family platform has
     been approved.<br><br>
 
     You can now log in with your details and upload your profile pics.

@@ -3,6 +3,9 @@
 import { id, showError } from "../global";
 import { removeDiv, createAndAppendElement } from '../helper/general'
 
+// let childrenOnchangeValue = 0;
+// let childrenOnchangeValue = 0;
+
 
 const renderHtmlFamily = (family, no) => {
 
@@ -20,10 +23,11 @@ const renderHtmlFamily = (family, no) => {
                     <i class="fas fa-user"></i>
                 </span>
                 </p>
+               
             </div>
 
             <div class="field">
-                    <p class="control is-expanded has-icons-left">
+                <p class="control is-expanded has-icons-left">
                 <input type="email" placeholder = "Enter ${kids_sib}'s email - ${no}" value = "Please, provide email address" name=${kids_sib}_email${no} class="input input is-medium is-rounded" id="${kids_sib}_email${no}">
                 <span class="icon is-small is-left">
                 <i class="fas fa-envelope"></i>
@@ -32,6 +36,7 @@ const renderHtmlFamily = (family, no) => {
                 <i class="fas fa-check"></i>
                 </span>
                 </p>
+                 <p class="help is-danger" id="${kids_sib}_email${no}_help"></p>
            </div>
 
         </div><br>`
@@ -43,6 +48,10 @@ export const show = (kids_or_sib) => {
     try {
         // what was picked or selected
         const value = event.target.value;
+
+        // childrenOnchangeValue = value;
+
+
 
         const addDiv = (kids_or_sib == "kids") ? "addChildren" : "addSiblings"
 
@@ -93,24 +102,24 @@ onChangeKidAndSiblings()
 // inject the country code once one of the country is picked
 
 const injectCountryCode = () => {
-    id('country_id').addEventListener('change', (e)=> {
+    id('country_id').addEventListener('change', (e) => {
         let value = e.target.value;
-        switch(value) {
+        switch (value) {
             case 'Nigeria':
-            id('mobile_id').value = "234";
-            break;
+                id('mobile_id').value = "234";
+                break;
             case 'UK':
-            id('mobile_id').value = "44";
-            break;
+                id('mobile_id').value = "44";
+                break;
             case 'Canada':
             case 'USA':
-            id('mobile_id').value = "1";
-            break;
+                id('mobile_id').value = "1";
+                break;
             case 'China':
-            id('mobile_id').value = "86";
-            break;
+                id('mobile_id').value = "86";
+                break;
             default:
-            id('mobile_id').value = "";
+                id('mobile_id').value = "";
 
         }
 
@@ -119,6 +128,3 @@ const injectCountryCode = () => {
 }
 
 injectCountryCode()
-
-
-

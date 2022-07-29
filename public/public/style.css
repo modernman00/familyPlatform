@@ -336,7 +336,7 @@ footer .glyphicon {
 .small {
   font-size: 0.6rem;
   font-style: italic;
-  color: #a7092b;
+  color: rgb(167, 9, 43);
 }
 
 .error {

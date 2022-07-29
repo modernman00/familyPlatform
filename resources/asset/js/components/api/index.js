@@ -9,18 +9,20 @@ const config = {
     },
 }
 
-export const getAllData = async () => {
-    const response = await axios.get('http://olaogun.dev.com/allMembers/processApiData', config)
+const URL = process.env.MIX_APP_URL2
+
+export const getAllData = async() => {
+    const response = await axios.get(URL + 'allMembers/processApiData', config)
         .catch(err => err.message)
     return response.data
 }
 
-export const postData = async (url, object) => {
+export const postData = async(url, object) => {
     await axios.post(url, object)
-        .then((response)=> {
+        .then((response) => {
             console.log(response);
         })
-        .catch((error)=> {
+        .catch((error) => {
             console.log(error);
         });
 }

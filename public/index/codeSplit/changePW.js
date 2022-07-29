@@ -46,12 +46,12 @@ Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "postFormData": () => (/* binding */ postFormData),
+/* harmony export */   "checkCookie": () => (/* binding */ checkCookie),
 /* harmony export */   "getApiData": () => (/* binding */ getApiData),
-/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
-/* harmony export */   "setCookie": () => (/* binding */ setCookie),
 /* harmony export */   "getCookie": () => (/* binding */ getCookie),
-/* harmony export */   "checkCookie": () => (/* binding */ checkCookie)
+/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
+/* harmony export */   "postFormData": () => (/* binding */ postFormData),
+/* harmony export */   "setCookie": () => (/* binding */ setCookie)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
@@ -323,10 +323,10 @@ var checkCookie = function checkCookie() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "html": () => (/* binding */ html),
 /* harmony export */   "allPost": () => (/* binding */ allPost),
 /* harmony export */   "appendNewPost": () => (/* binding */ appendNewPost),
-/* harmony export */   "commentHTML": () => (/* binding */ commentHTML)
+/* harmony export */   "commentHTML": () => (/* binding */ commentHTML),
+/* harmony export */   "html": () => (/* binding */ html)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");

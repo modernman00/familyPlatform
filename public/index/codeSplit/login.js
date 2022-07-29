@@ -364,8 +364,8 @@ var FormHelper = /*#__PURE__*/function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister),
-/* harmony export */   "Login": () => (/* binding */ Login)
+/* harmony export */   "Login": () => (/* binding */ Login),
+/* harmony export */   "dataToCheckRegister": () => (/* binding */ dataToCheckRegister)
 /* harmony export */ });
 
 
@@ -405,17 +405,18 @@ var Login = {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
-/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
-/* harmony export */   "removeDiv": () => (/* binding */ removeDiv),
-/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
 /* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "checkBox": () => (/* binding */ checkBox),
+/* harmony export */   "checkBox2": () => (/* binding */ checkBox2),
+/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
+/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
 /* harmony export */   "isChecked": () => (/* binding */ isChecked),
+/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
+/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
+/* harmony export */   "matchInput": () => (/* binding */ matchInput),
 /* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
-/* harmony export */   "matchInput": () => (/* binding */ matchInput)
+/* harmony export */   "removeDiv": () => (/* binding */ removeDiv)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -487,7 +488,10 @@ var distinctValue = function distinctValue(array) {
   return _toConsumableArray(new Set(array));
 };
 var checkBox = function checkBox(subject) {
-  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
 };
 var isChecked = function isChecked(name, fn) {
   var yesId = "".concat(name, "Yes");
@@ -547,12 +551,12 @@ var matchInput = function matchInput(first, second, err) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "postFormData": () => (/* binding */ postFormData),
+/* harmony export */   "checkCookie": () => (/* binding */ checkCookie),
 /* harmony export */   "getApiData": () => (/* binding */ getApiData),
-/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
-/* harmony export */   "setCookie": () => (/* binding */ setCookie),
 /* harmony export */   "getCookie": () => (/* binding */ getCookie),
-/* harmony export */   "checkCookie": () => (/* binding */ checkCookie)
+/* harmony export */   "getMultipleApiData": () => (/* binding */ getMultipleApiData),
+/* harmony export */   "postFormData": () => (/* binding */ postFormData),
+/* harmony export */   "setCookie": () => (/* binding */ setCookie)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
@@ -823,8 +827,8 @@ var checkCookie = function checkCookie() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "showPassword": () => (/* binding */ showPassword),
-/* harmony export */   "emailVal": () => (/* binding */ emailVal)
+/* harmony export */   "emailVal": () => (/* binding */ emailVal),
+/* harmony export */   "showPassword": () => (/* binding */ showPassword)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 

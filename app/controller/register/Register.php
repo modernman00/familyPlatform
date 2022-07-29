@@ -1,9 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\controller\register;
 
-use App\classes\{ ProcessImg, SubmitForm, Select, Db, CheckToken, Transaction
+use App\classes\{
+    ProcessImg,
+    SubmitForm,
+    Select,
+    Db,
+    CheckToken,
+    Transaction
 };
 use Exception;
 
@@ -27,11 +34,11 @@ class Register extends Db
     {
         try {
             // required headers
-header("Access-Control-Allow-Origin: ". getenv("APP_URL"));
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+            header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
+            header("Content-Type: application/json; charset=UTF-8");
+            header("Access-Control-Allow-Methods: POST");
+            header("Access-Control-Max-Age: 3600");
+            header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
             //Transaction::beginTransaction();
             $generateId = $this->setId($_POST, "firstName", 'account');
@@ -69,20 +76,23 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
             );
             sendEmailWrapper($sendEmailArray, 'member');
 
-              $adminEmail = getenv('ADMIN_EMAIL');
-              $token = $_SESSION['token'];
+            $adminEmail = getenv('ADMIN_EMAIL');
+            $token = $_SESSION['token'];
 
-            $successMsg =
-                "<div class='jumbotron'>
-                <h1 class='display-3'>Ref: $id </h1> 
-                <h1>$token</h1>
-                <h1>SUBJECT: <b>NEXT STEP</b></h1><br>
-                <p class='lead'>Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network<br><br>
-                Regards,<br>
-                Admin team<br>
-                $adminEmail</p>
-                <hr class='my-2'>
-            </div>";
+            // $successMsg =
+            //     "<div class='jumbotron'>
+            //     <h1 class='display-3'>Ref: $id </h1> 
+            //     <h1>$token</h1>
+            //     <h1>SUBJECT: <b>NEXT STEP</b></h1><br>
+            //     <p class='lead'>Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network<br><br>
+            //     Regards,<br>
+            //     Admin team<br>
+            //     $adminEmail</p>
+            //     <hr class='my-2'>
+            // </div>";
+
+                 $successMsg = "Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network.
+                <hr>";
 
             //Transaction::commit();
             http_response_code(200);
@@ -94,7 +104,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
             showError($th);
         }
     }
-    
+
     /**
      * 
      * @param mixed $type is it kids or siblings

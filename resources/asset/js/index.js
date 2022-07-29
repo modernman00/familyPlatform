@@ -1,7 +1,6 @@
 "use strict";
 import {qSel, showError} from "./components/global"
 
-
 if (window.location.pathname === '/register') {
     qSel('.signUp').style.display ="none" // navbar mgt
    

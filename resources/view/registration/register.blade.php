@@ -73,14 +73,14 @@
 
   'spouse' => [
   'mixed',
-  'label' => ["Spouse's name", "Spouse's mobile", "Spouse's Email"],
-  'attribute' => ['spouseName', 'spouseMobile', 'spouseEmail'],
-  'placeholder' => ['Toyin', '23480364168089', "toyin@gmail.com"],
-  'inputType' => ['text', 'text', 'email'],
+  'label' => ["Spouse's name", "Spouse's Email","Spouse's mobile"],
+  'attribute' => ['spouseName', 'spouseEmail', 'spouseMobile'],
+  'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089'],
+  'inputType' => ['text','email', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
-  '<i class="fas fa-user"></i>',
-  '<i class="fas fa-envelope-square"></i>'
+  '<i class="fas fa-envelope-square"></i>',
+  '<i class="fas fa-user"></i>'
   ]
   ],
 
@@ -91,15 +91,16 @@
 
   'mother' => [
   'mixed',
-  'label' => ["mother's name", "mother's mobile", "Mother's maiden name", "mother's email"],
-  'attribute' => ['motherName', 'motherMobile', 'motherMaiden', 'motherEmail'],
-  'placeholder' => ['Toyin Olaogun', '23480364168089', "surname before marriage", "mother@yahoo.com"],
-  'inputType' => ['text', 'text', 'text', 'text'],
+  'label' => ["mother's name", "mother's email", "mother's mobile","Mother's maiden name"],
+  'attribute' => ['motherName',  'motherEmail','motherMobile', 'motherMaiden'],
+  'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089', "surname before marriage"],
+  'inputType' => ['text', 'email', 'text', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
+    '<i class="fas fa-envelope-square"></i>',
   '<i class="fas fa-mobile-alt"></i>',
-  '<i class="fas fa-user"></i>',
-  '<i class="fas fa-envelope-square"></i>'
+  '<i class="fas fa-user"></i>'
+
   ]
   ],
 
@@ -107,14 +108,15 @@
 
   'father' => [
   'mixed',
-  'label' => ["Father's name", "Father's mobile", "Father's email"],
-  'attribute' => ['fatherName', 'fatherMobile', 'fatherEmail'],
-  'placeholder' => ['Yommy Olaogun', '447809789098', "yomi@email.com"],
+  'label' => ["Father's name", "Father's email", "Father's mobile"],
+  'attribute' => ['fatherName','fatherEmail', 'fatherMobile' ],
+  'placeholder' => ['Yommy Olaogun',"yomi@email.com", '447809789098'],
   'inputType' => ['text', 'text', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
-  '<i class="fas fa-mobile-alt"></i>',
-  '<i class="fas fa-envelope-square"></i>'
+    '<i class="fas fa-envelope-square"></i>',
+  '<i class="fas fa-mobile-alt"></i>'
+
   ]
   ],
 

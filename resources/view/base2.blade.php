@@ -26,7 +26,7 @@
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top mainNav mx-4 my-2">
     {{--  <div class="container-fluid">  --}}
       <a class="navbar-brand" href="#"> <img src={{ getenv("IMG_CONTRACT") }}></a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span>

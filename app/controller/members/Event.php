@@ -39,15 +39,14 @@ class Event extends AllMembersData
     static function sendReminder()
     {
         try {
+         
             $todayDate =  date('Y-m-d');
             $data = parent::getEventData();
-            //printArr($data);
+            // printArr($data);
 
             self::getEventMonth($data);
-            echo BR;
             // printArr(self::getEventWeek($data));
 
-            echo BR;
             // echo count(self::getEventWeek($data)) . "total number of array";
 
             foreach ($data as $data) {
@@ -61,7 +60,7 @@ class Event extends AllMembersData
 
                 if ($diffEventAndTodayDate === "+7 days") {
 
-                    $subject = "$firstName's $eventName is on the $eventDayFormatted";
+                    $subject = "$firstName's $eventName is on $eventDayFormatted";
 
                     self::sendNotification($data, $subject);
                 } elseif ($diffEventAndTodayDate === "+0 days") {
