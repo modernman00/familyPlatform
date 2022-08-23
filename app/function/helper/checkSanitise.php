@@ -120,8 +120,7 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
  */
 function findOneColUsingEmail(string $col, array $data): mixed
 {
-    $outcome = useEmailToFindData($data);
-
+    // $outcome = useEmailToFindData($data);
    // $colOne =  $outcome["$col"];
     $email =  $data['email'];
 

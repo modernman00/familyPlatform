@@ -40,7 +40,7 @@ var renderHtml = function renderHtml(el) {
 };
 
 var URL = "http://olaogun.test/";
-axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + '/allMembers/processApiData', config).then(function (response) {
+axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiData', config).then(function (response) {
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_3__.loaderIcon)(); // add loader
 
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');

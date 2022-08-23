@@ -48,7 +48,8 @@ const renderHtml = (el) => {
 
 const URL = process.env.MIX_APP_URL2
 
-axios.get(URL + '/allMembers/processApiData', config)
+
+axios.get(URL + 'allMembers/processApiData', config)
     .then(function(response) {
 
         loaderIcon()

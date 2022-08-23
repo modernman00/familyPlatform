@@ -1,5 +1,5 @@
 "use strict";
-import { id, showError} from '../global'
+import { id, showError } from '../global'
 import { postFormData } from "../helper/http"
 import { emailVal } from "../helper/security"
 
@@ -23,8 +23,8 @@ const forgotPasswordSubmission = (e) => {
 
             id('loader').classList.add('loader')
 
-             localStorage.setItem('redirect', '/login/changePW')
-            
+            localStorage.setItem('redirect', '/login/changePW')
+
             postFormData("/login/forgot", "forgotPassword", "/login/code")
 
         }
@@ -33,4 +33,4 @@ const forgotPasswordSubmission = (e) => {
     }
 }
 
-    id('submit').addEventListener('click', forgotPasswordSubmission)
+id('submit').addEventListener('click', forgotPasswordSubmission)

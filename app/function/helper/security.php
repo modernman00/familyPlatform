@@ -117,9 +117,9 @@ function returnMsg(int $errCode, string $msg, array $extra = [])
 function msgException(int $errCode, string $msg)
 {
     http_response_code($errCode); // sets the response to 406
-    //echo json_encode((['message' => $msg]));
+    echo json_encode((['message' => $msg]));
     Rollbar::log(Level::info(), $msg);
-    return throw new Exception($msg, $errCode);
+    throw new Exception($msg, $errCode);
 }
 
 function msgSuccess(int $code, string|array $msg, mixed $token = null)
