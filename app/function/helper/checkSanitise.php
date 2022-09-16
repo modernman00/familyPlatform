@@ -60,6 +60,7 @@ function useEmailToFindData($inputData): array
     if (!$data) {
 
         msgException(404, "We cannot find your email");
+        exit;
     }
     foreach ($data as $data);
     return $data;

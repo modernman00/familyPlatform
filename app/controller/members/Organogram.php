@@ -4,7 +4,7 @@ declare(strict_types =1);
 namespace App\controller\members;
 
 use App\model\{
-    AllMembersData,
+    // AllMembersData,
     SingleCustomerData
 };
 use App\classes\Select;

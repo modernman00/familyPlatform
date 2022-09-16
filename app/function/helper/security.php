@@ -114,19 +114,22 @@ function returnMsg(int $errCode, string $msg, array $extra = [])
     return array_merge($apiMsg, $extra);
 }
 
+
+// 8/9/22- i commented out the json code because I want to throw the exception and catch it before using the json
 function msgException(int $errCode, string $msg)
 {
     http_response_code($errCode); // sets the response to 406
-    echo json_encode((['message' => $msg]));
-    Rollbar::log(Level::info(), $msg);
-    throw new Exception($msg, $errCode);
+    // echo json_encode(['message' => $msg]);
+    //   echo json_encode($msg);
+    // Rollbar::log(Level::info(), $msg);
+     throw new Exception($msg, $errCode);
 }
 
 function msgSuccess(int $code, string|array $msg, mixed $token = null)
 {
     http_response_code($code); // sets the response to 406
     // echo http_response_code(); // echo the new response code
-    echo json_encode((['message' => $msg, 'token' => $token]));
+    echo json_encode(['message' => $msg, 'token' => $token]);
 }
 
 function msgServerSent(string|array $data, string | int $id, string $event)

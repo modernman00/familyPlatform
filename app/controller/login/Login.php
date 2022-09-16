@@ -75,6 +75,7 @@ class Login extends Select
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
                     $this->adminLogin($sanitisedData);
+
                 } else if ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);

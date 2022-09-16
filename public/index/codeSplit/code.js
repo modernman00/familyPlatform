@@ -19,10 +19,13 @@ __webpack_require__.r(__webpack_exports__);
 
 var LoginCode = function LoginCode(e) {
   try {
-    e.preventDefault();
+    e.preventDefault(); // the notification div and the content
+
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('codeForm_notification').classList.remove('is-danger');
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = "";
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').style.display = "block";
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = ""; // show notification
+
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').style.display = "block"; // add the notification div
+
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader'); // get the direct from the login script (getstorage)
 
     var location = localStorage.getItem('redirect');
@@ -145,11 +148,11 @@ var postFormData = /*#__PURE__*/function () {
               // formData.clearHtml()
 
             })["catch"](function (error) {
-              (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error);
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response.data.message);
               var theClass = addClassByCSS(css, 'red');
 
               if (error.response) {
-                (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response);
+                // log("we love" + error)
                 processFormDataAction(theClass, error.response.data.message);
               }
             });

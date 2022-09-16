@@ -1,14 +1,15 @@
 /* changed the paddings to 0 from 25 to reduce the height of the navbar */
+
 @media (min-width: 992px) {
-  .mainNav {
-    padding-top: 0px;
-    padding-bottom: 0px;
-    -webkit-transition: padding-top 0.3s, padding-bottom 0.3s;
-    -moz-transition: padding-top 0.3s, padding-bottom 0.3s;
-    transition: padding-top 0.3s, padding-bottom 0.3s;
-    border: none;
-    background-color: transparent;
-  }
+    .mainNav {
+        padding-top: 0px;
+        padding-bottom: 0px;
+        -webkit-transition: padding-top 0.3s, padding-bottom 0.3s;
+        -moz-transition: padding-top 0.3s, padding-bottom 0.3s;
+        transition: padding-top 0.3s, padding-bottom 0.3s;
+        border: none;
+        background-color: transparent;
+    }
 }
 
 // @media (min-width: 576px) {
@@ -19,70 +20,56 @@
 // }
 
 /* When a screen is 992px or smaller, the background color will be pink */
-@media screen and (max-width: 576px) {
-  body {
-    font-size: 0.5em;
-  }
 
-   .subscribeForm {
+@media screen and (max-width: 576px) {
+    body {
+        // font-size: 0.5em;
+        font-size: 0.5em;
+    }
+    .subscribeForm {
         margin-left: 5px;
         margin-right: 5px;
         margin-top: 50%;
     }
-
-   .homePageSubscribe {
+    .homePageSubscribe {
         font-size: 1.2em;
         height: 50px;
     }
-
-    .unhide {     
+    .unhide {
         margin-left: 0px;
         margin-right: 0px;
         margin-bottom: 20px;
-
     }
-
-    
 }
-
 
 @media only screen and (max-width: 600px) {
-
-  // the container
-  .showImageContainer {
-    background-color: lightblue;
-    flex-flow: row wrap;
-  }
-// the big picture
-  .showPics {
-    margin-right: 0;
-    margin-left: 0;
-    height: 60vh;
-    width: 100vw;
-  }
-// the comment
-  .showComment > p {
-      margin-top: 2vh;
-      font-size: 2em;
-      margin-left: 2vh;
-  }
-
-  .commentImg {
-      margin-top: 1vh;
-      height: 3rem;
-      width: 3rem;
-  }
-
-  .commentFont{
-    font-size: 5rem;
-  }
-
-  .commentInput {
-    width: 100%;
-  }
-
+    // the container
+    .showImageContainer {
+        background-color: lightblue;
+        flex-flow: row wrap;
+    }
+    // the big picture
+    .showPics {
+        margin-right: 0;
+        margin-left: 0;
+        height: 60vh;
+        width: 100vw;
+    }
+    // the comment
+    .showComment>p {
+        margin-top: 2vh;
+        font-size: 2em;
+        margin-left: 2vh;
+    }
+    .commentImg {
+        margin-top: 1vh;
+        height: 3rem;
+        width: 3rem;
+    }
+    .commentFont {
+        font-size: 5rem;
+    }
+    .commentInput {
+        width: 100%;
+    }
 }
-
-
-
-

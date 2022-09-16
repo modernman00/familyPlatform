@@ -610,11 +610,11 @@ var postFormData = /*#__PURE__*/function () {
               // formData.clearHtml()
 
             })["catch"](function (error) {
-              (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error);
+              (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response.data.message);
               var theClass = addClassByCSS(css, 'red');
 
               if (error.response) {
-                (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error.response);
+                // log("we love" + error)
                 processFormDataAction(theClass, error.response.data.message);
               }
             });
