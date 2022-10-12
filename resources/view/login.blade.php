@@ -11,7 +11,7 @@
 
   <form action="{{ $formAction }}" method="POST" class="loginNow" id="loginNow" enctype="multipart/form-data" style="margin-left:15%; margin-right:15%;">
 
-  <div id="setLoader" tabindex="-1">
+  <div id="setLoader">
   <div id="loader">
     <div class="notification" id="loginNow_notification">
       <p id="error"></p>

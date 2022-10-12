@@ -2,7 +2,7 @@
 @section('title', 'Register')
 <link rel="stylesheet" type="text/css" href="https://kraaden.github.io/autocomplete/autocomplete.css">
 
-@section('data-page-id', 'registration')
+@section('data-page-id', 'register')
 @section('content')
 
 <div class="columns">
@@ -13,7 +13,7 @@
 
 </div>
 
-<div id="setLoader" tabindex="-1">
+<div id="setLoader">
   <div id="loader">
     <div class="notification" id="register_notify">
       <p id="error"></p>

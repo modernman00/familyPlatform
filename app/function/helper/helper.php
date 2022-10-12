@@ -12,7 +12,7 @@ function view($path, array $data = [])
     //2nd param array = any data that we want to pass to the view
     $view = __DIR__ . "/../../../resources/view";
     $cache = __DIR__ . "/../../../bootstrap/cache";
-    $blade = new Blade($cache, $view);
+    $blade = new Blade(cachePath:$cache, viewPaths:$view);
     // 2 parameters
     //requires a path to the view -> folder where views are located
     // 2nd is the path to a cache directory -> cache under bootstrap
