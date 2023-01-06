@@ -457,7 +457,6 @@ class BuildFormBulma extends AlterTable
                     <p class='help error' id=$error></p>
                     </div>";
                     }
-
                     if ($labelType === 'inputButton') {
                         echo " 
                       <div class='field has-addons has-addons-left '>
