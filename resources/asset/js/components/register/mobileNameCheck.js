@@ -26,11 +26,13 @@ let lName = id('lastName_id').value
 const checkExistence = (baseArray, searchElement) => {
     if (baseArray.includes(searchElement) === false) {
         baseArray.push(searchElement)
+
     }
 }
 
 getData.then(el =>
     el.map(element => {
+
         checkExistence(firstNameData, element.firstName)
         checkExistence(fatherName, element.fatherName)
         checkExistence(motherName, element.motherName)
@@ -38,6 +40,7 @@ getData.then(el =>
         checkExistence(checkEmail, element.email)
     })
 )
+
 
 const firstAutoComplete = id('firstName_id')
 const fatherAutoComplete = id('fatherName_id')
@@ -61,43 +64,45 @@ const setInput = (name, value) => {
     const genId = id(`${name}Mobile_error`)
     genId.style.display = "block"
 
-    if (mobile.includes(value)) {
-        genId.innerHTML = `Great news that your ${name} is already on the platform`
-    } else {
-        genId.innerHTML = `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
+    // if (mobile.includes(value)) {
+    //     genId.innerHTML = `Great news that your ${name} is already on the platform`
+    // } else {
+    //     genId.innerHTML = `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
 
-        const processRadio = () => {
+    genId.innerHTML = mobile.includes(value) ? `Great news that your ${name} is already on the platform` : `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
 
+    const processRadio = () => {
 
-            const postObj = {
-                mobile: value,
-                viewPath: "msg/contactNewMember",
+        const postObj = {
+            mobile: value,
+            viewPath: "msg/contactNewMember",
 
-                data: {
-                    email: id(`${name}Email_id`).value,
-                    mobile: id(`${name}Mobile_id`).value,
-                    name: id(`${name}Name_id`).value,
-                    yourName: `${fName} ${lName}`,
-                },
+            data: {
+                email: id(`${name}Email_id`).value,
+                mobile: id(`${name}Mobile_id`).value,
+                name: id(`${name}Name_id`).value,
+                yourName: `${fName} ${lName}`,
+            },
 
-                subject: `${fName} ${lName} recommended that you join your family network.`,
-            }
-
-            axios.post('/register/contactNewMember', postObj)
-                .then((response) => {
-                    const mobileHelp = id(`${name}Mobile_help`)
-                    mobileHelp.innerHTML = response.data.message
-                    mobileHelp.style.display = "block"
-                    id(`${name}Mobile_error`).innerHTML = ""
-                })
-                .catch((error) => {
-                    showError(error);
-                });
+            subject: `${fName} ${lName} recommended that you join your family network.`
         }
-        id(`${name}Yes`).addEventListener('click', processRadio)
-        id(`${name}No`).addEventListener('click', () => genId.style.display = "none")
+
+        axios.post('/register/contactNewMember', postObj)
+            .then((response) => {
+                const mobileHelp = id(`${ name }Mobile_help`)
+                mobileHelp.innerHTML = response.data.message
+                mobileHelp.style.display = "block"
+                id(`${ name }Mobile_error `).innerHTML = ""
+            })
+            .catch((error) => {
+                id(`${ name }Mobile_error`).innerHTML = error.message
+                showError(error);
+            });
     }
+    id(`${ name }Yes`).addEventListener('click', processRadio)
+    id(`${ name }No`).addEventListener('click', () => genId.style.display = "none")
 }
+
 
 /**
  * @param {the idInput to check} the input id 
@@ -153,89 +158,133 @@ document.onkeydown = (e) => {
     // 4. if it is in the array, show the Yes or No Radio
     // 5. click yes to send email to the kid or sibling
 
-    // create an object with the data to check
-    const elementId = e.target.id // id of the element that was clicked or press down
-
-    // check if id / event.id is either kid or sibling
-
-    let chooseEmail = []
-    let chooseName = []
-    let helpHTML = ""
-
-    if (checkObj.emailInput.includes(elementId)) {
-        chooseEmail = checkObj.emailInput
-        chooseName = checkObj.nameInput
-        helpHTML = id(`${elementId}_help`)
-
-    } else if (checkObj.siblingEmail.includes(elementId)) {
-        chooseEmail = checkObj.siblingEmail
-        chooseName = checkObj.siblingName
-        helpHTML = id(`${elementId}_help`)
-    }
-
-    const checkFamilyEmail = (event) => {
-
-        const emailInput = event.target.value;
+    try {
 
 
-        if (chooseEmail) {
+        // create an object with the data to check
+        const elementId = e.target.id // id of the element that was clicked or press down
+
+        if (elementId === null) throw new Error("target id is null and empty")
+
+        // check if id / event.id is either kid or sibling
+
+        let chooseEmail = []
+        let chooseName = []
+        let helpHTML = ""
+
+        if (checkObj.emailInput.includes(elementId)) {
+            chooseEmail = checkObj.emailInput
+            chooseName = checkObj.nameInput
+            helpHTML = id(`
+        $ { elementId }
+        _help `)
+
+        } else if (checkObj.siblingEmail.includes(elementId)) {
+            chooseEmail = checkObj.siblingEmail
+            chooseName = checkObj.siblingName
+            helpHTML = id(`
+        $ { elementId }
+        _help `)
+        }
+
+        const checkFamilyEmail = (event) => {
+
+            const emailInput = event.target.value;
+
+            if (emailInput === null || emailInput === "") throw new Error("email input is empty")
+
+            if (emailInput.length < 6) throw new Error("email input is faulty")
+
+            if (chooseEmail === null || chooseEmail === "") throw new Error("choose email is empty")
+
+
+            // if (chooseEmail) {
             const index = chooseEmail.indexOf(elementId)
             const email = id(chooseEmail[index])
             const emailValue = email.value
             const name = id(chooseName[index])
             const nameValue = name.value
 
-            if (emailInput.length > 6) {
+            if (emailValue === null || email === "") throw new Error("another round of email is empty")
+            if (nameValue === "") throw new Error("name is empty")
+            if (getData.length === 0) throw new Error("data is faulty")
 
-                getData.then(el => el.map(element => {
-                    checkExistence(checkEmail, element.email)
-                }))
+            // if (emailInput.length > 6) {
 
-                helpHTML.style.display = "block"
-                helpHTML.innerHTML = (checkEmail.includes(emailInput)) ? `Great news! ${nameValue} is already on the platform` : `<h4><i>${nameValue} is not on the platform. Do you want us to send ${nameValue} a email to register to the platform</i>?</h4>` + checkBox(elementId)
+            getData.then(el => el.map(element => {
+                checkExistence(checkEmail, element.email)
+            }))
 
-                const processKidRadio = (ev) => {
+            helpHTML.style.display = "block"
+            helpHTML.innerHTML = (checkEmail.includes(emailInput)) ? `
+        Great news!$ { nameValue }
+        is already on the platform ` : ` < h4 > < i > $ { nameValue }
+        is not on the platform.Do you want us to send $ { nameValue }
+        a email to register to the platform < /i>?</h
+        4 > ` + checkBox(elementId)
 
-                    const postObj = {
-                        mobile: "", // is this needed?
-                        viewPath: "msg/contactNewMember",
+            const processKidRadio = (ev) => {
 
-                        data: {
-                            email: emailValue,
-                            name: nameValue,
-                            yourName: `${fName} ${lName}`,
-                        },
+                const postObj = {
+                    mobile: "", // is this needed?
+                    viewPath: "msg/contactNewMember",
 
-                        subject: `${fName} ${lName} recommended that you join your family network.`,
-                    }
+                    data: {
+                        email: emailValue,
+                        name: nameValue,
+                        yourName: `
+        $ { fName }
+        $ { lName }
+        `,
+                    },
 
-                    axios.post('/register/contactNewMember', postObj)
-                        .then((response) => {
-
-                            helpHTML.innerHTML = response.data.message
-
-                            setTimeout(() => {
-                                helpHTML.style.display = "none"
-                            }, 5000)
-                        })
-                        .catch((error) => {
-                            showError(error);
-                        });
+                    subject: `
+        $ { fName }
+        $ { lName }
+        recommended that you join your family network.
+        `,
                 }
-                id(`${elementId}Yes`).addEventListener('click', processKidRadio)
 
-                id(`${elementId}No`).addEventListener('click', () => id(`${elementId}No`).style.display = "none")
+                axios.post('/register/contactNewMember', postObj)
+                    .then((response) => {
 
+                        helpHTML.innerHTML = response.data.message
+
+                        setTimeout(() => {
+                            helpHTML.style.display = "none"
+                        }, 5000)
+                    })
+                    .catch((error) => {
+                        showError(error);
+                    });
             }
+            id(`
+        $ { elementId }
+        Yes `).addEventListener('click', processKidRadio)
+
+            id(`
+        $ { elementId }
+        No `).addEventListener('click', () => id(`
+        $ { elementId }
+        No `).style.display = "none")
+
+            // }
+            // }
+
+
+
+
         }
 
+        if (chooseEmail.includes(elementId)) {
+            id(elementId).addEventListener("keyup", checkFamilyEmail)
+        }
 
+    } catch (error) {
 
+        showError(error.message)
 
     }
 
-    if (chooseEmail.includes(elementId)) {
-        id(elementId).addEventListener("keyup", checkFamilyEmail)
-    }
 
 }

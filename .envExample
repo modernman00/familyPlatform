@@ -1,5 +1,5 @@
-APP_URL_DEV = http://olaogun.dev.com/
-APP_URL = http://olaogun.dev.com/
+APP_URL_DEV = http://olaogun.test/
+APP_URL = http://olaogun.test/
 APP_ENV = local
 APP_NAME = "Family Platform"
 

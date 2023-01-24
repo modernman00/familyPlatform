@@ -289,16 +289,12 @@ footer .glyphicon {
 }
 
 .loader {
-  border: 16px solid #f3f3f3;
-  /* Light grey */
-  border-top: 16px solid #3498db;
-  /* Blue */
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
   border-radius: 50%;
   width: 120px;
   justify-content: center;
-  height: 120px;
-  -webkit-animation: spin 2s linear infinite;
-  /* Safari */
+  height: 120px; /* Safari */
   animation: spin 2s linear infinite;
 }
 
@@ -311,14 +307,6 @@ footer .glyphicon {
   }
 }
 /* Safari */
-@-webkit-keyframes spin {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
 .allMember_card {
   display: flex;
 }
@@ -345,11 +333,6 @@ footer .glyphicon {
 }
 
 input::-moz-placeholder {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-}
-
-input:-ms-input-placeholder {
   font-size: 0.7rem;
   text-transform: uppercase;
 }
@@ -381,7 +364,6 @@ input::placeholder {
   text-anchor: middle;
   -webkit-user-select: none;
   -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -405,18 +387,15 @@ input::placeholder {
   body {
     font-size: 0.5em;
   }
-
   .subscribeForm {
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 50%;
   }
-
   .homePageSubscribe {
     font-size: 1.2em;
     height: 50px;
   }
-
   .unhide {
     margin-left: 0px;
     margin-right: 0px;
@@ -428,30 +407,25 @@ input::placeholder {
     background-color: lightblue;
     flex-flow: row wrap;
   }
-
   .showPics {
     margin-right: 0;
     margin-left: 0;
     height: 60vh;
     width: 100vw;
   }
-
   .showComment > p {
     margin-top: 2vh;
     font-size: 2em;
     margin-left: 2vh;
   }
-
   .commentImg {
     margin-top: 1vh;
     height: 3rem;
     width: 3rem;
   }
-
   .commentFont {
     font-size: 5rem;
   }
-
   .commentInput {
     width: 100%;
   }
@@ -695,16 +669,6 @@ right connector from last child*/
   background-color: blue;
 }
 
-@-webkit-keyframes spinner-grow {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @keyframes spinner-grow {
   0% {
     transform: scale(0);
@@ -731,7 +695,6 @@ right connector from last child*/
   background-color: currentColor;
   border-radius: 50%;
   opacity: 0;
-  -webkit-animation: 0.75s linear infinite spinner-grow;
   animation: 0.75s linear infinite spinner-grow;
 }
 
@@ -742,8 +705,7 @@ right connector from last child*/
 
 @media (prefers-reduced-motion: reduce) {
   .spinner-border,
-.spinner-grow {
-    -webkit-animation-duration: 1.5s;
+  .spinner-grow {
     animation-duration: 1.5s;
   }
 }

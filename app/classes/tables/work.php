@@ -29,7 +29,7 @@ class Work extends Insert
 
             $conn = $this->connect();
             // use exec() because no results are returned
-            $conn->exec($sql);
+            return $conn->exec($sql);
         } catch (PDOException $e) {
             echo $sql . "<br>" . $e->getMessage();
         }

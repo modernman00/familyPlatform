@@ -12,7 +12,7 @@ function view($path, array $data = [])
     //2nd param array = any data that we want to pass to the view
     $view = __DIR__ . "/../../../resources/view";
     $cache = __DIR__ . "/../../../bootstrap/cache";
-    $blade = new Blade(cachePath:$cache, viewPaths:$view);
+    $blade = new Blade(viewPaths: $view, cachePath: $cache);
     // 2 parameters
     //requires a path to the view -> folder where views are located
     // 2nd is the path to a cache directory -> cache under bootstrap
@@ -158,7 +158,7 @@ function cleanSession($x)
 
 function showError($th)
 {
-    $error = $th->getMessage() . " " .$th->getLine() ." " .$th->getCode(). " " . $th->getFile();  
+    $error = $th->getMessage() . " " . $th->getLine() . " " . $th->getCode() . " " . $th->getFile();
     echo json_encode(['message' => $error]);
 }
 
@@ -300,8 +300,6 @@ function fileUpload($fileLocation, $formInputName)
 
     $optimizerChain = ImgOptimizer::create();
     $optimizerChain->optimize($fileName_location);
-
-
 }
 
 // ADD COUNTRY CODE
@@ -389,13 +387,14 @@ function humanTiming($time)
 }
 
 
-function milliSeconds() {
-  $microtime = microtime();
-  $comps = explode(' ', $microtime);
+function milliSeconds()
+{
+    $microtime = microtime();
+    $comps = explode(' ', $microtime);
 
-  // Note: Using a string here to prevent loss of precision
-  // in case of "overflow" (PHP converts it to a double)
-  return sprintf('%d%03d', $comps[1], $comps[0] * 1000);
+    // Note: Using a string here to prevent loss of precision
+    // in case of "overflow" (PHP converts it to a double)
+    return sprintf('%d%03d', $comps[1], $comps[0] * 1000);
 }
 
 
@@ -410,5 +409,3 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
-
-

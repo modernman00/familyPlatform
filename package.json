@@ -1,61 +1,61 @@
 {
-  "name": "family",
-  "version": "1.0.0",
-  "description": "family app",
-  "main": "index",
-  "typings": "index",
-  "scripts": {
-    "dev": "npm run development",
-    "development": "npx mix",
-    "watch": "npx mix watch",
-    "prod": "npm run production",
-    "production": "npx mix -p"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/modernman00/js.git"
-  },
-  "author": "the olaoguns",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/modernman00/js/issues"
-  },
-  "homepage": "https://github.com/modernman00/js#readme",
-  "devDependencies": {
-    "cross-env": "^6.0.3",
-    "laravel-mix": "^6.0.18",
-    "node-sass": "^7.0.1",
-    "parcel": "^2.1.1",
-    "resolve-url-loader": "^4.0.0",
-    "sass-loader": "^12.1.0",
-    "vue-template-compiler": "^2.6.12",
-    "webpack": "^5.9.0"
-  },
-  "dependencies": {
-    "all-the-cities": "^3.1.0",
-    "autocompleter": "^6.1.0",
-    "axios": "^0.21.1",
-    "axios-retry": "^3.1.9",
-    "babel-core": "^6.26.3",
-    "babel-loader": "^8.2.2",
-    "babel-plugin-syntax-dynamic-import": "^6.18.0",
-    "babel-preset-env": "^1.7.0",
-    "bulma": "^0.8.0",
-    "dotenv": "^10.0.0",
-    "fibers": "^4.0.2",
-    "file-upload-with-preview": "^4.1.0",
-    "g": "^2.0.1",
-    "gauge-chart": "^0.5.3",
-    "google-charts": "^2.0.0",
-    "jquery": "^3.4.1",
-    "js-cookie": "^2.2.1",
-    "lodash": "^4.17.21",
-    "npm": "^7.4.0",
-    "path-browserify": "^0.0.1",
-    "pusher-js": "^7.0.3",
-    "sass": "^1.32.2",
-    "svg-gauge": "^1.0.6",
-    "timeago.js": "^4.0.2",
-    "validator": "^13.5.2"
-  }
+    "name": "family",
+    "version": "1.0.0",
+    "description": "family app",
+    "main": "index",
+    "typings": "index",
+    "scripts": {
+        "dev": "npm run development",
+        "development": "npx mix",
+        "watch": "npx mix watch",
+        "prod": "npm run production",
+        "production": "npx mix -p"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/modernman00/js.git"
+    },
+    "author": "the olaoguns",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/modernman00/js/issues"
+    },
+    "homepage": "https://github.com/modernman00/js#readme",
+    "devDependencies": {
+        "cross-env": "^6.0.3",
+        "laravel-mix": "^6.0.18",
+        "node-sass": "^7.0.1",
+        "parcel": "^2.1.1",
+        "resolve-url-loader": "^4.0.0",
+        "sass-loader": "^12.1.0",
+        "vue-template-compiler": "^2.6.12",
+        "webpack": "^5.9.0"
+    },
+    "dependencies": {
+        "all-the-cities": "^3.1.0",
+        "autocompleter": "^6.1.0",
+        "axios": "^0.21.1",
+        "axios-retry": "^3.1.9",
+        "babel-core": "^6.26.3",
+        "babel-loader": "^8.2.2",
+        "babel-plugin-syntax-dynamic-import": "^6.18.0",
+        "babel-preset-env": "^1.7.0",
+        "bulma": "^0.8.0",
+        "dotenv": "^16.0.3",
+        "fibers": "^4.0.2",
+        "file-upload-with-preview": "^4.1.0",
+        "g": "^2.0.1",
+        "gauge-chart": "^0.5.3",
+        "google-charts": "^2.0.0",
+        "jquery": "^3.4.1",
+        "js-cookie": "^2.2.1",
+        "lodash": "^4.17.21",
+        "npm": "^7.4.0",
+        "path-browserify": "^0.0.1",
+        "pusher-js": "^7.0.3",
+        "sass": "^1.32.2",
+        "svg-gauge": "^1.0.6",
+        "timeago.js": "^4.0.2",
+        "validator": "^13.5.2"
+    }
 }

@@ -49,17 +49,11 @@ var date2String = function date2String(date) {
 };
 var showError = function showError(e) {
   console.log(e instanceof TypeError); // true
-
   console.log(e.message); // "null has no properties"
-
   console.log(e.name); // "TypeError"
-
   console.log(e.fileName); // "Scratchpad/1"
-
   console.log(e.lineNumber); // 2
-
   console.log(e.columnNumber); // 2
-
   console.log(e.stack);
 };
 
@@ -73,7 +67,6 @@ var showError = function showError(e) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/global */ "./resources/asset/js/components/global.js");
-
 
 
 
@@ -125,6 +118,7 @@ if (window.location.pathname === '/register') {
   });
 } else if (window.location.pathname === '/member/ProfilePage') {
   // qSel('.login').style.display ="none" // navbar mgt
+
   Promise.all(/*! import() | codeSplit/profilePage */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/profilePage")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/ */ "./resources/asset/js/components/profilePage/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {

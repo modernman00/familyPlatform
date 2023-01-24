@@ -1,6 +1,3 @@
-import { id, log } from '../global'
-
-
 export const calTiming = (date) => {
 
     const seconds = Math.floor((new Date() - date) / 1000);
@@ -28,7 +25,7 @@ export const calTiming = (date) => {
     }
     return Math.floor(seconds) + " seconds";
 }
-var aDay = 24 * 60 * 60 * 1000;
+const aDay = 24 * 60 * 60 * 1000;
 // console.log(calTiming(new Date(Date.now() - aDay)));
 // console.log(calTiming(new Date(Date.now() - aDay * 2)));
 
@@ -36,14 +33,14 @@ var aDay = 24 * 60 * 60 * 1000;
 
 let element = document.querySelectorAll('time[data-time]')
 
-export const  updateTimeRealTime = () => {
-        Array.prototype.forEach.call(element, function (entry) {
-            var out = '';
-            // ...
-            entry.textContent = out;
-        });
-        setTimeout(updateTimeRealTime, 1000 * 60);
-    };
+export const updateTimeRealTime = () => {
+    Array.prototype.forEach.call(element, function(entry) {
+        const out = '';
+        // ...
+        entry.textContent = out;
+    });
+    setTimeout(updateTimeRealTime, 1000 * 60);
+};
 setTimeout(updateTimeRealTime, 1000 * 60);
 
 
@@ -70,7 +67,7 @@ const getDuration = (timeAgoInSeconds) => {
 
 export const timeAgo = (date) => {
     const timeAgoInSeconds = Math.floor((new Date() - new Date(date)) / 1000);
-    const {interval, epoch} = getDuration(timeAgoInSeconds);
+    const { interval, epoch } = getDuration(timeAgoInSeconds);
     const suffix = interval === 1 ? '' : 's';
     return `${interval} ${epoch}${suffix} ago`;
 };

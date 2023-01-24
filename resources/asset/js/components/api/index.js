@@ -10,9 +10,11 @@ const config = {
 }
 
 const URL = process.env.MIX_APP_URL2
+    // https: //laravel.com/docs/5.4/mix#environment-variables
 
 export const getAllData = async() => {
-    const response = await axios.get(URL + 'allMembers/processApiData', config)
+    // const response = await axios.get(`${URL}/allMembers/processApiData`, config)
+    const response = await axios.get(`${URL}allMembers/processApiData`, config)
         .catch(err => err.message)
     return response.data
 }

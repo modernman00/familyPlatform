@@ -1,12 +1,12 @@
-<?php 
+<?php
 
 namespace App\classes;
 
 
-class SubmitForm extends Db 
+class SubmitForm extends Db
 {
-
-    static public function submitForm($table, $field)
+/** @phpstan-ignore-next-line */
+    public static function submitForm($table, $field): bool
     {
         try {
             // EXTRACT THE KEY FOR THE COL NAME
@@ -23,15 +23,15 @@ class SubmitForm extends Db
                 throw new \Exception("Not able to insert data", 1);
             }
             foreach ($field as $keys => $values) {
-               if(!$query->bindValue(":$keys", $values)){
-                   throw new \Exception("Not able to insert data");
-               } 
+                if (!$query->bindValue(":$keys", $values)) {
+                    throw new \Exception("Not able to insert data");
+                }
             }
             return $query->execute();
         } catch (\PDOException $e) {
             showError($e);
         } catch (\Throwable $th) {
-              showError($th);
+            showError($th);
         }
         //
     }
