@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\controller\register;
 
 use App\classes\{
-    ProcessImg,
     SubmitForm,
     Select,
     Db,
-    CheckToken,
-    Transaction
+    CheckToken
 };
 use Exception;
 
@@ -41,33 +39,48 @@ class Register extends Db
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
             //Transaction::beginTransaction();
+
+            // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
-            // sanitise
+
+            // 
             $data = $this->dataToCheck();
+
+            // Sanitise the data and get the cleaned data
+
             $cleanData = getSanitisedInputData($generateId, $data);
+
+            // the database table matched to the POST data
             $tableData = $this->tableData($cleanData);
-            // create session 
+
+            // create sessions and some variables
             $_SESSION['id'] = $cleanData['id'];
-            $id = $cleanData['id'];
+
+            // $id = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
             $firstName = $cleanData['firstName'];
+
+            // check if the email already exist
             $emailCheck = checkEmailExist($cleanData['email']);
             if ($emailCheck) {
                 http_response_code(401);
                 echo http_response_code();
-                echo json_encode("Your email is already registered");
+                echo json_encode(['message' =>"Your email is already registered"]);      
                 exit;
-                //throw new Exception("Your email is already registered");
             }
 
             CheckToken::tokenCheck('token', '/register');
+
+            // time to submit the input data to database
+
             $countTable = count($this->table);
+
             for ($i = 0; $i < $countTable; $i++) {
                 SubmitForm::submitForm($this->table[$i], $tableData[$i]);
             }
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-            $this->process_kid_siblings('kid', $cleanData['kids'], $cleanData);
-            $this->process_kid_siblings('sibling', $cleanData['siblings'], $cleanData);
+            $this->processKidSibling('kid', $cleanData['kids'], $cleanData);
+            $this->processKidSibling('sibling', $cleanData['siblings'], $cleanData);
 
             $sendEmailArray = genEmailArray(
                 "msg/appSub",
@@ -76,8 +89,8 @@ class Register extends Db
             );
             sendEmailWrapper($sendEmailArray, 'member');
 
-            $adminEmail = getenv('ADMIN_EMAIL');
-            $token = $_SESSION['token'];
+            // $adminEmail = getenv('ADMIN_EMAIL');
+            // $token = $_SESSION['token'];
 
             // $successMsg =
             //     "<div class='jumbotron'>
@@ -91,7 +104,7 @@ class Register extends Db
             //     <hr class='my-2'>
             // </div>";
 
-                 $successMsg = "Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network.
+            $successMsg = "Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network.
                 <hr>";
 
             //Transaction::commit();
@@ -112,7 +125,7 @@ class Register extends Db
      * @param mixed $data cleaned POST data
      * @return bool|void 
      */
-    private function process_kid_siblings($type, $typeCount, $data)
+    private function processKidSibling($type, $typeCount, $data)
     {
         try {
             for ($i = 1; $i <= $typeCount; $i++) {
@@ -132,16 +145,24 @@ class Register extends Db
         }
     }
 
-    private function dataToCheck()
+    private function dataToCheck() : array
     {
         return [
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7],
             'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 50],
-            'data' => ['firstName', 'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password']
+            'data' => ['firstName', 
+            'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 
+            'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password']
         ];
     }
 
-    private function tableData($cleanPostData)
+     /**
+      * Summary of tableData
+      * @param mixed $cleanPostData - sanitised $_POST data 
+      * @return array
+      */
+
+    private function tableData(array $cleanPostData) : array
     {
         return [
             [
@@ -215,10 +236,19 @@ class Register extends Db
         ];
     }
 
-    private function setId(array $postData, string|int $name, string $table)
+    /**
+     * Summary of setId
+     * @param array $postData - array data from the input form
+     * @param string|int $name - the input name 
+     * @param string $table = the db table to save the id 
+     * @throws Exception
+     * @return array
+     */
+
+    private function setId(array $postData, string|int $name, string $table) : array
     {
 
-        $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Info not provided");
+        $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Provide Info");
 
         $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName);
         $id = random_int(1000, 900000);
@@ -226,8 +256,8 @@ class Register extends Db
 
         //check if the reference number exist
         $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
-        $check_for_id = Select::selectFn2($query, [$id]);
-        if ($check_for_id >= 1) {
+        $idCheck = Select::selectFn2($query, [$id]);
+        if ($idCheck >= 1) {
             $id = (random_int(900001, 999999));
             $id .= strtoupper($idName);
         }

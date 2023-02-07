@@ -14,7 +14,7 @@ class CheckToken
      *
      * @return void
      */
-    static function tokenCheck($token, $redirect)
+    public static function tokenCheck($token, $redirect): never
     {
         try {
             $tokenCheck = $_SESSION[$token] ?? "bad";
@@ -23,7 +23,7 @@ class CheckToken
             unset($_SESSION[$token]);
             if ($tokenCheck != $postToken) {
                 header("Location: $redirect");
-                die();
+                exit();
             }
         } catch (\Throwable $th) {
             showError($th);

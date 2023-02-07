@@ -11,7 +11,7 @@
 
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
-      <link rel="stylesheet" href="noscript.css" />
+      <link rel="stylesheet" href="noscript.css"/>
   </noscript>
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>

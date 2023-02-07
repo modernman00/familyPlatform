@@ -360,7 +360,7 @@ function changeToJs($variableName, $variable)
  * @return string 
  */
 
-function humanTiming($time)
+function humanTiming($time) : string
 {
     try {
         $time = strtotime($time);

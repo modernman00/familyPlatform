@@ -144,7 +144,7 @@ function findOneColUsingEmail(string $col, array $data): mixed
  * @return mixed 
  * @throws \Exception 
  */
-function getSanitisedInputData($inputData, $minMaxData = NULL)
+function getSanitisedInputData(array $inputData, $minMaxData = NULL)
 {
     $sanitise = new Sanitise($inputData, $minMaxData);
     $sanitisedData = $sanitise->getData();

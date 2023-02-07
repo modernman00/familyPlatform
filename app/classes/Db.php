@@ -8,7 +8,7 @@ use App\classes\CheckToken;
 
 class Db extends CheckToken
 {
-    const BR = "<br>";
+    public const BR = "<br>"; // can't be changed
     private static function dbVariables()
     {
         return [

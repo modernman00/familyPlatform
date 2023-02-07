@@ -402,8 +402,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
   // duplicate: {
   // 	email: 'email',
@@ -1194,6 +1194,8 @@ var processForm = function processForm(e) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
+var maiden = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMaiden_help');
+maiden.innerHTML = "Good to identify your family from the mother's side";
 var mobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_help');
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
 var fatherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_help');

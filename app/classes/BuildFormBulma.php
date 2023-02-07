@@ -16,12 +16,11 @@ class BuildFormBulma extends AlterTable
      * When there is a need for new entries, use the newEnt array
      *
      */
-    public $question = array();
     public $question2 = array();
     private $EntKey;
+    private $token;
     private $EntValue;
     private $EntCount;
-    private $token;
     public $ref;
     public $year;
     public $month;
@@ -37,18 +36,16 @@ class BuildFormBulma extends AlterTable
      * title of section ( work_information => title)
      */
 
-    function __construct(array $array)
-    {
-        $this->question = $array;
+    public function __construct(public array $question) {
         $this->token = urlencode(base64_encode((random_bytes(32))));
     }
 
     /**
      * it extracts out the values of the form. this is what we use to decide the type of question
      *
-     * @return void
+     * @return array
      */
-    public function setEntValue()
+    public function setEntValue(): array
     {
         $this->EntValue = array_values($this->question);
         $this->EntCount = count($this->EntValue);

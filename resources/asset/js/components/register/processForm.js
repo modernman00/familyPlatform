@@ -86,6 +86,7 @@ const processForm = (e) => {
             } else {
 
                 alert('The form cannot be submitted. Please check the errors')
+                console.log(formData.error)
                 process()
             }
 

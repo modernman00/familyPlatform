@@ -68,6 +68,7 @@ class ReviewApps extends ReviewAppsData
 
             $this->updateAccountStatus('approved');
             header(self::REDIRECT);
+            exit;
         } catch (\Throwable $th) {
             showError($th);
         }
