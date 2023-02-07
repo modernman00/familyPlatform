@@ -402,8 +402,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
   },
   // duplicate: {
   // 	email: 'email',
@@ -762,11 +762,11 @@ var fatherName = [];
 var mobile = [];
 var motherName = [];
 var checkEmail = [];
-var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id').value;
-var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value;
+var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("firstName_id").value;
+var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("lastName_id").value;
 
 /**
- * 
+ *
  * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
  * @param {*} searchElement  the element to search against ("Mango")
  */
@@ -785,12 +785,12 @@ getData.then(function (el) {
     checkExistence(checkEmail, element.email);
   });
 });
-var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('firstName_id');
-var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherName_id');
-var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherName_id');
-firstAutoComplete.setAttribute('autocomplete', 'off');
-fatherAutoComplete.setAttribute('autocomplete', 'off');
-motherAutoComplete.setAttribute('autocomplete', 'off');
+var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("firstName_id");
+var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("fatherName_id");
+var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("motherName_id");
+firstAutoComplete.setAttribute("autocomplete", "off");
+fatherAutoComplete.setAttribute("autocomplete", "off");
+motherAutoComplete.setAttribute("autocomplete", "off");
 
 // AUTOCOMPLETE
 (0,_helper_autocomplete__WEBPACK_IMPORTED_MODULE_3__.autocomplete)(firstAutoComplete, firstNameData);
@@ -822,7 +822,7 @@ var setInput = function setInput(name, value) {
       },
       subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
     };
-    axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
+    axios__WEBPACK_IMPORTED_MODULE_4___default().post("/register/contactNewMember", postObj).then(function (response) {
       var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
       mobileHelp.innerHTML = response.data.message;
       mobileHelp.style.display = "block";
@@ -832,20 +832,21 @@ var setInput = function setInput(name, value) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
     });
   };
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener('click', processRadio);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener('click', function () {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener("click", processRadio);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener("click", function () {
     return genId.style.display = "none";
   });
 };
 
 /**
- * @param {the idInput to check} the input id 
- * @param {the array to check} data 
- * @param {this should either be the mother oor father} who 
+ * @param {the idInput to check} the input id
+ * @param {the array to check} data
+ * @param {this should either be the mother oor father} who
  */
 
 var mobileFilter = function mobileFilter(event, name) {
   var value = event.target.value;
+  if (value === "" || value === undefined || value === null) throw new Error("Number value is empty");
   if (value.length >= 11) {
     // mobile value is 10 digits
     // return mobile.find(el => {
@@ -866,11 +867,11 @@ var spouseMobile = function spouseMobile() {
   var setName = "spouse";
   mobileFilter(event, setName);
 };
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_id').addEventListener('keyup', fatherMobile);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_id').addEventListener('keyup', motherMobile);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouseMobile_id').addEventListener('keyup', spouseMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("fatherMobile_id").addEventListener("keyup", fatherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("motherMobile_id").addEventListener("keyup", motherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("spouseMobile_id").addEventListener("keyup", spouseMobile);
 
-// create the data for the function below 
+// create the data for the function below
 
 var checkObj = {
   emailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
@@ -902,17 +903,17 @@ document.onkeydown = function (e) {
     if (checkObj.emailInput.includes(elementId)) {
       chooseEmail = checkObj.emailInput;
       chooseName = checkObj.nameInput;
-      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("\n        $ { elementId }\n        _help ");
+      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
     } else if (checkObj.siblingEmail.includes(elementId)) {
       chooseEmail = checkObj.siblingEmail;
       chooseName = checkObj.siblingName;
-      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("\n        $ { elementId }\n        _help ");
+      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help "));
     }
     var checkFamilyEmail = function checkFamilyEmail(event) {
       var emailInput = event.target.value;
       if (emailInput === null || emailInput === "") throw new Error("email input is empty");
       if (emailInput.length < 6) throw new Error("email input is faulty");
-      if (chooseEmail === null || chooseEmail === "") throw new Error("choose email is empty");
+      if (chooseEmail === null || chooseEmail == "") throw new Error("choose email is empty");
 
       // if (chooseEmail) {
       var index = chooseEmail.indexOf(elementId);
@@ -920,7 +921,7 @@ document.onkeydown = function (e) {
       var emailValue = email.value;
       var name = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(chooseName[index]);
       var nameValue = name.value;
-      if (emailValue === null || email === "") throw new Error("another round of email is empty");
+      if (emailValue === null || email == "") throw new Error("another round of email is empty");
       if (nameValue === "") throw new Error("name is empty");
       if (getData.length === 0) throw new Error("data is faulty");
 
@@ -932,7 +933,7 @@ document.onkeydown = function (e) {
         });
       });
       helpHTML.style.display = "block";
-      helpHTML.innerHTML = checkEmail.includes(emailInput) ? "\n        Great news!$ { nameValue }\n        is already on the platform " : " < h4 > < i > $ { nameValue }\n        is not on the platform.Do you want us to send $ { nameValue }\n        a email to register to the platform < /i>?</h\n        4 > " + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(elementId);
+      helpHTML.innerHTML = checkEmail.includes(emailInput) ? "Great news!".concat(nameValue, " is already on the platform ") : " < h4 > < i > ".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform < /i>?</h4> ").concat(checkbox(elementId));
       var processKidRadio = function processKidRadio(ev) {
         var postObj = {
           mobile: "",
@@ -941,11 +942,11 @@ document.onkeydown = function (e) {
           data: {
             email: emailValue,
             name: nameValue,
-            yourName: "\n        $ { fName }\n        $ { lName }\n        "
+            yourName: "".concat(fName, " ").concat(lName)
           },
-          subject: "\n        $ { fName }\n        $ { lName }\n        recommended that you join your family network.\n        "
+          subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
         };
-        axios__WEBPACK_IMPORTED_MODULE_4___default().post('/register/contactNewMember', postObj).then(function (response) {
+        axios__WEBPACK_IMPORTED_MODULE_4___default().post("/register/contactNewMember", postObj).then(function (response) {
           helpHTML.innerHTML = response.data.message;
           setTimeout(function () {
             helpHTML.style.display = "none";
@@ -954,9 +955,9 @@ document.onkeydown = function (e) {
           (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
         });
       };
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("\n        $ { elementId }\n        Yes ").addEventListener('click', processKidRadio);
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("\n        $ { elementId }\n        No ").addEventListener('click', function () {
-        return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("\n        $ { elementId }\n        No ").style.display = "none";
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "Yes")).addEventListener("click", processKidRadio);
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).addEventListener("click", function () {
+        return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).style.display = "none";
       });
 
       // }
@@ -1193,8 +1194,6 @@ var processForm = function processForm(e) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
-var maiden = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMaiden_help');
-maiden.innerHTML = "Good to identify your family from the mother's side";
 var mobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_help');
 mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
 var fatherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_help');
