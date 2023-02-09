@@ -42,7 +42,7 @@ class EmailData
         define('TEST_EMAIL', $this->testEmail);
     }
 
-    function getEmailData()
+    public function getEmailData()
     {
         $this->setEmailData();
     }

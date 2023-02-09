@@ -39,7 +39,8 @@
         "ps/image-optimizer": "^2.0",
         "rollbar/rollbar": "~1.5",
         "pusher/pusher-php-server": "^7.0",
-        "spatie/image-optimizer": "^1.6"
+        "spatie/image-optimizer": "^1.6",
+        "tracy/tracy": "^2.9"
     },
 
     "require-dev": {
@@ -52,7 +53,10 @@
     "bin-dir": ["local-php-security-checker"],
 
     "config": {
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
 
     }
 }

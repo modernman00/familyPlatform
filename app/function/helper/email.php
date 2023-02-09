@@ -105,7 +105,7 @@ function sendEmailGeneral($array, $recipient)
 
     if (!defined('PASS')) {
         $notifyCustomer->getEmailData();
-
+// if it is still not set, then throw an error
         if (!defined('PASS')) {
             msgException(401, 'Email credentials (constant) not set');
         }
@@ -113,22 +113,21 @@ function sendEmailGeneral($array, $recipient)
         $data = $array['data'];
 
         ob_start();
-        $emailPage = view($array['viewPath'], compact('data'));
-        $emailContent = ob_get_contents();
+        // $emailPage = view($array['viewPath'], compact('data'));
+       view($array['viewPath'], compact('data'));
+
+        $emailContent = ob_get_contents() ?? throw new Exception('email content not available');
+
         ob_end_clean();
 
         $email =  checkInputEmail($data['email']);
 
 
         if (!$email) {
-            $error = "Email not provided";
-            echo json_encode($error);
-            throw new Exception($error);
+            msgException(401, "Email not provided");
         }
 
         $name = checkInput($data['name']) ?? 'there';
-        // $file = $array['file'];
-        // $filename = $array['fileName'];
 
         sendEmail($email, $name, $array['subject'], $emailContent);
     }

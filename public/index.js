@@ -18,6 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "qSelInnerHTML": () => (/* binding */ qSelInnerHTML),
 /* harmony export */   "qSelValue": () => (/* binding */ qSelValue),
 /* harmony export */   "showError": () => (/* binding */ showError),
+/* harmony export */   "showNotification": () => (/* binding */ showNotification),
 /* harmony export */   "write": () => (/* binding */ write)
 /* harmony export */ });
 var id = function id(_id) {
@@ -55,6 +56,28 @@ var showError = function showError(e) {
   console.log(e.lineNumber); // 2
   console.log(e.columnNumber); // 2
   console.log(e.stack);
+};
+
+/**
+ * 
+ * @param {*} elementId - element id
+ * @param {*} addClass either a success or danger class (green or red)
+ * @param {*} message - html message to convey success or failure
+ * @param {*} timer - timer for the message to disappear- default is 5 secs
+ */
+var showNotification = function showNotification(elementId, addClass, message) {
+  var timer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5000;
+  // display the success information for 10sec
+  id("".concat(elementId)).style.display = "block"; // unblock the notification
+  id("".concat(elementId)).classList.add(addClass); // add the success class
+  id("".concat(elementId)).innerHTML = message; // error element
+  id('loader').classList.remove('loader'); // remove loader
+
+  setTimeout(function () {
+    id("".concat(elementId)).style.backgroundColor = "";
+    id("".concat(elementId)).style.color = "";
+    id("".concat(elementId)).innerHTML = "";
+  }, timer);
 };
 
 /***/ }),

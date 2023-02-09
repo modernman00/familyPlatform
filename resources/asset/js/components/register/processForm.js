@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log, showError } from '../global';
+import { id, log, showError, showNotification } from '../global';
 import { dataToCheckRegister } from '../dataToCheck';
 import axios from "axios";
 
@@ -8,11 +8,34 @@ const formInput = document.querySelectorAll('.register');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-const process = () => {
-    // clear error from the form
-    formData.clearError()
+// const process = () => {
+//     // clear error from the form
+//     formData.clearError()
+
+//     // set the maxlength, check the length of the value, raise error
+//     formData.realTimeCheckLen(
+//         dataToCheckRegister.maxLength.id,
+//         dataToCheckRegister.maxLength.max
+//     );
+
+//     // check if password matches real time
+//     formData.matchInput(dataToCheckRegister.password.pwd,
+//         dataToCheckRegister.password.pwd2,
+//     );
+
+//     formData.duplicate('firstName_id', 'alias_id')
+
+// }
+
+// process()
+
+
+(() => {
+
+    formData.clearError();
 
     // set the maxlength, check the length of the value, raise error
+
     formData.realTimeCheckLen(
         dataToCheckRegister.maxLength.id,
         dataToCheckRegister.maxLength.max
@@ -25,17 +48,19 @@ const process = () => {
 
     formData.duplicate('firstName_id', 'alias_id')
 
-}
-
-process()
+})();
 
 const processFormDataAction = (addClass, resource) => {
     // display the success information for 10sec
-    id('register_notify').style.display = "block" // unblock the notification
-    id('register_notify').classList.add(addClass) // add the success class
-    id('error').innerHTML = resource.data // error element
+    id('register_notify_div').style.display = "block" // unblock the notification
+    id('register_notify_div').classList.add(addClass) // add the success class
+    id('register_notify_div_msg').innerHTML = resource.data // error element
     id('loader').classList.remove('loader') // remove loader
 }
+
+
+
+
 
 const processFormData = async(url, formElement) => {
     const form = id(formElement)
@@ -50,10 +75,11 @@ const processFormData = async(url, formElement) => {
 
     await axios.post(url, formEntries, options).then(response => {
         // set timer to redirect to the homepage
-        setTimeout(() => {
-            window.location = "/"
-        }, 20000)
+        // setTimeout(() => {
+        //     window.location = "/"
+        // }, 20000)
 
+        // get the api message and output it to the form
         processFormDataAction('is-success', response)
             // it clears all the contents
         formData.clearHtml();
@@ -69,8 +95,8 @@ const processForm = (e) => {
     try {
         e.preventDefault();
 
-        id('register_notify').classList.remove('is-danger') // remove the danger class from the notification
-        id('error').innerHTML = "" // empty the error element
+        id('register_notify_div').classList.remove('is-danger') // remove the danger class from the notification
+        id('register_notify_div_msg').innerHTML = "" // empty the error element
 
         if (id('checkbox').checked) {
             // window.location.hash = '#setLoader';
@@ -87,11 +113,16 @@ const processForm = (e) => {
 
                 alert('The form cannot be submitted. Please check the errors')
                 console.log(formData.error)
-                process()
+                    // process()
             }
 
         } else {
             alert('To continue, you need to agree to the our privacy policy')
+
+            const errorData = "To continue, you need to agree to the our privacy policy"
+
+            showNotification('checkbox_error', 'is-danger', errorData)
+
         }
 
     } catch (event) {

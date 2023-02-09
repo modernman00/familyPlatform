@@ -2,6 +2,8 @@
 
 namespace App\controller;
 
+use Exception;
+
 
 class General
 {
@@ -15,7 +17,9 @@ class General
 
     public function sendEmailToMember()
     {
-        $data = json_decode(file_get_contents("php://input"), true);
+        try {
+
+             $data = json_decode(file_get_contents("php://input"), true);
 
         $array = [
             'viewPath' => $data['viewPath'],
@@ -23,7 +27,15 @@ class General
             'subject' => $data['subject'],
         ];
         sendEmailGeneral($array, 'member');
+
         echo json_encode(['message' => "Message sent to " . $data['data']['name']]);
+
+        } catch (Exception $err) {
+
+            showError($err);
+
+        }
+       
     }
 
       public function sendTextMember()

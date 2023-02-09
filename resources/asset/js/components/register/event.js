@@ -20,4 +20,4 @@ const showSpouse = (e) => {
 
 id('maritalStatus_id').addEventListener('change', showSpouse)
 
-id('register_notify').style.display = "none"
+id('register_notify_div').style.display = "none"

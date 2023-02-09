@@ -706,7 +706,7 @@ var showSpouse = function showSpouse(e) {
   }
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').addEventListener('change', showSpouse);
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('register_notify').style.display = "none";
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('register_notify_div').style.display = "none";
 
 /***/ }),
 
@@ -803,14 +803,8 @@ var setInput = function setInput(name, value) {
   var sex = name === "father" ? "him" : "her";
   var genId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error"));
   genId.style.display = "block";
-
-  // if (mobile.includes(value)) {
-  //     genId.innerHTML = `Great news that your ${name} is already on the platform`
-  // } else {
-  //     genId.innerHTML = `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
-
-  genId.innerHTML = mobile.includes(value) ? "Great news that your ".concat(name, " is already on the platform") : "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>") + (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name);
-  var processRadio = function processRadio() {
+  genId.innerHTML = mobile.includes(value) ? "Great news that your ".concat(name, " is already on the platform") : "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text to register to the platform</i>?</h4>").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name));
+  function processRadio() {
     var postObj = {
       mobile: value,
       viewPath: "msg/contactNewMember",
@@ -823,15 +817,14 @@ var setInput = function setInput(name, value) {
       subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
     };
     axios__WEBPACK_IMPORTED_MODULE_4___default().post("/register/contactNewMember", postObj).then(function (response) {
-      var mobileHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_help"));
-      mobileHelp.innerHTML = response.data.message;
-      mobileHelp.style.display = "block";
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error ")).innerHTML = "";
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_help"), 'is-success', response.data.message);
+      genId.innerHTML = "";
     })["catch"](function (error) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error")).innerHTML = error.message;
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_error"), 'is-danger', error.message);
+      // id(`${name}Mobile_error`).innerHTML = error.message;
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
     });
-  };
+  }
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Yes")).addEventListener("click", processRadio);
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "No")).addEventListener("click", function () {
     return genId.style.display = "none";
@@ -873,7 +866,7 @@ var spouseMobile = function spouseMobile() {
 
 // create the data for the function below
 
-var checkObj = {
+var checkEmailObj = {
   emailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
   nameInput: ["kid_name1", "kid_name2", "kid_name3", "kid_name4", "kid_name5", "kid_name6", "kid_name7", "kid_name8", "kid_name9", "kid_name10"],
   siblingEmail: ["sibling_email1", "sibling_email2", "sibling_email3", "sibling_email4", "sibling_email5", "sibling_email6", "sibling_email7", "sibling_email8", "sibling_email9", "sibling_email10"],
@@ -894,25 +887,25 @@ document.onkeydown = function (e) {
     var elementId = e.target.id; // id of the element that was clicked or press down
 
     if (elementId === null) throw new Error("target id is null and empty");
-
-    // check if id / event.id is either kid or sibling
-
     var chooseEmail = [];
     var chooseName = [];
     var helpHTML = "";
-    if (checkObj.emailInput.includes(elementId)) {
-      chooseEmail = checkObj.emailInput;
-      chooseName = checkObj.nameInput;
+
+    // check if id / event.id is either kid or sibling
+
+    if (checkEmailObj.emailInput.includes(elementId)) {
+      chooseEmail = checkEmailObj.emailInput;
+      chooseName = checkEmailObj.nameInput;
       helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
-    } else if (checkObj.siblingEmail.includes(elementId)) {
-      chooseEmail = checkObj.siblingEmail;
-      chooseName = checkObj.siblingName;
-      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help "));
+    } else if (checkEmailObj.siblingEmail.includes(elementId)) {
+      chooseEmail = checkEmailObj.siblingEmail;
+      chooseName = checkEmailObj.siblingName;
+      helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
     }
     var checkFamilyEmail = function checkFamilyEmail(event) {
       var emailInput = event.target.value;
       if (emailInput === null || emailInput === "") throw new Error("email input is empty");
-      if (emailInput.length < 6) throw new Error("email input is faulty");
+      if (emailInput.length < 6) throw new Error("email input is SHORT");
       if (chooseEmail === null || chooseEmail == "") throw new Error("choose email is empty");
 
       // if (chooseEmail) {
@@ -933,7 +926,7 @@ document.onkeydown = function (e) {
         });
       });
       helpHTML.style.display = "block";
-      helpHTML.innerHTML = checkEmail.includes(emailInput) ? "Great news!".concat(nameValue, " is already on the platform ") : " < h4 > < i > ".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform < /i>?</h4> ").concat(checkbox(elementId));
+      helpHTML.innerHTML = checkEmail.includes(emailInput) ? "Great news!".concat(nameValue, " is already on the platform") : " < h4 > < i > ".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform < /i>?</h4> ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(elementId));
       var processKidRadio = function processKidRadio(ev) {
         var postObj = {
           mobile: "",
@@ -965,6 +958,7 @@ document.onkeydown = function (e) {
     };
 
     if (chooseEmail.includes(elementId)) {
+      console.log(elementId);
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).addEventListener("keyup", checkFamilyEmail);
     }
   } catch (error) {
@@ -1099,23 +1093,44 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 var formInput = document.querySelectorAll('.register');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
-var process = function process() {
-  // clear error from the form
+
+// const process = () => {
+//     // clear error from the form
+//     formData.clearError()
+
+//     // set the maxlength, check the length of the value, raise error
+//     formData.realTimeCheckLen(
+//         dataToCheckRegister.maxLength.id,
+//         dataToCheckRegister.maxLength.max
+//     );
+
+//     // check if password matches real time
+//     formData.matchInput(dataToCheckRegister.password.pwd,
+//         dataToCheckRegister.password.pwd2,
+//     );
+
+//     formData.duplicate('firstName_id', 'alias_id')
+
+// }
+
+// process()
+
+(function () {
   formData.clearError();
 
   // set the maxlength, check the length of the value, raise error
+
   formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max);
 
   // check if password matches real time
   formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
   formData.duplicate('firstName_id', 'alias_id');
-};
-process();
+})();
 var processFormDataAction = function processFormDataAction(addClass, resource) {
   // display the success information for 10sec
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify').style.display = "block"; // unblock the notification
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify').classList.add(addClass); // add the success class
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = resource.data; // error element
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').style.display = "block"; // unblock the notification
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').classList.add(addClass); // add the success class
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg').innerHTML = resource.data; // error element
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
 };
 
@@ -1136,9 +1151,11 @@ var processFormData = /*#__PURE__*/function () {
           _context.next = 7;
           return axios__WEBPACK_IMPORTED_MODULE_3___default().post(url, formEntries, options).then(function (response) {
             // set timer to redirect to the homepage
-            setTimeout(function () {
-              window.location = "/";
-            }, 20000);
+            // setTimeout(() => {
+            //     window.location = "/"
+            // }, 20000)
+
+            // get the api message and output it to the form
             processFormDataAction('is-success', response);
             // it clears all the contents
             formData.clearHtml();
@@ -1158,8 +1175,8 @@ var processFormData = /*#__PURE__*/function () {
 var processForm = function processForm(e) {
   try {
     e.preventDefault();
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify').classList.remove('is-danger'); // remove the danger class from the notification
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').classList.remove('is-danger'); // remove the danger class from the notification
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg').innerHTML = ""; // empty the error element
 
     if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
       // window.location.hash = '#setLoader';
@@ -1172,10 +1189,13 @@ var processForm = function processForm(e) {
         return processFormData("/register", 'register'); // initiate the api
       } else {
         alert('The form cannot be submitted. Please check the errors');
-        process();
+        console.log(formData.error);
+        // process()
       }
     } else {
       alert('To continue, you need to agree to the our privacy policy');
+      var errorData = "To continue, you need to agree to the our privacy policy";
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.showNotification)('checkbox_error', 'is-danger', errorData);
     }
   } catch (event) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(event);

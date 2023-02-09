@@ -15,8 +15,8 @@
 
 <div id="setLoader">
   <div id="loader">
-    <div class="notification" id="register_notify">
-      <p id="error"></p>
+    <div class="notification" id="register_notify_div">
+      <p id="register_notify_div_msg"></p>
     </div>
   </div>
 </div>

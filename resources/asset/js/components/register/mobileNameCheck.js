@@ -1,5 +1,5 @@
 "use strict";
-import { id, showError } from "../global";
+import { id, showError, showNotification } from "../global";
 import { checkBox } from "../helper/general";
 import { getAllData } from "../api/index";
 import { autocomplete } from "../helper/autocomplete";
@@ -57,17 +57,13 @@ const setInput = (name, value) => {
     const genId = id(`${name}Mobile_error`);
     genId.style.display = "block";
 
-    // if (mobile.includes(value)) {
-    //     genId.innerHTML = `Great news that your ${name} is already on the platform`
-    // } else {
-    //     genId.innerHTML = `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` + checkBox(name)
 
     genId.innerHTML = mobile.includes(value) ?
         `Great news that your ${name} is already on the platform` :
-        `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>` +
-        checkBox(name);
+        `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>${checkBox(name)}`;
 
-    const processRadio = () => {
+
+    function processRadio() {
         const postObj = {
             mobile: value,
             viewPath: "msg/contactNewMember",
@@ -85,16 +81,18 @@ const setInput = (name, value) => {
         axios
             .post("/register/contactNewMember", postObj)
             .then((response) => {
-                const mobileHelp = id(`${name}Mobile_help`);
-                mobileHelp.innerHTML = response.data.message;
-                mobileHelp.style.display = "block";
-                id(`${name}Mobile_error `).innerHTML = "";
+
+                showNotification(`${name}Mobile_help`, 'is-success', response.data.message);
+
+                genId.innerHTML = "";
+
             })
             .catch((error) => {
-                id(`${name}Mobile_error`).innerHTML = error.message;
+                showNotification(`${name}Mobile_error`, 'is-danger', error.message);
+                // id(`${name}Mobile_error`).innerHTML = error.message;
                 showError(error);
             });
-    };
+    }
     id(`${name}Yes`).addEventListener("click", processRadio);
     id(`${name}No`).addEventListener(
         "click",
@@ -142,7 +140,7 @@ id("spouseMobile_id").addEventListener("keyup", spouseMobile);
 
 // create the data for the function below
 
-const checkObj = {
+const checkEmailObj = {
     emailInput: [
         "kid_email1",
         "kid_email2",
@@ -208,20 +206,22 @@ document.onkeydown = (e) => {
 
         if (elementId === null) throw new Error("target id is null and empty");
 
-        // check if id / event.id is either kid or sibling
+
 
         let chooseEmail = [];
         let chooseName = [];
         let helpHTML = "";
 
-        if (checkObj.emailInput.includes(elementId)) {
-            chooseEmail = checkObj.emailInput;
-            chooseName = checkObj.nameInput;
+        // check if id / event.id is either kid or sibling
+
+        if (checkEmailObj.emailInput.includes(elementId)) {
+            chooseEmail = checkEmailObj.emailInput;
+            chooseName = checkEmailObj.nameInput;
             helpHTML = id(`${elementId}_help`);
-        } else if (checkObj.siblingEmail.includes(elementId)) {
-            chooseEmail = checkObj.siblingEmail;
-            chooseName = checkObj.siblingName;
-            helpHTML = id(`${elementId}_help `);
+        } else if (checkEmailObj.siblingEmail.includes(elementId)) {
+            chooseEmail = checkEmailObj.siblingEmail;
+            chooseName = checkEmailObj.siblingName;
+            helpHTML = id(`${elementId}_help`);
         }
 
         const checkFamilyEmail = (event) => {
@@ -230,7 +230,7 @@ document.onkeydown = (e) => {
             if (emailInput === null || emailInput === "")
                 throw new Error("email input is empty");
 
-            if (emailInput.length < 6) throw new Error("email input is faulty");
+            if (emailInput.length < 6) throw new Error("email input is SHORT");
 
             if (chooseEmail === null || chooseEmail == "")
                 throw new Error("choose email is empty");
@@ -257,10 +257,8 @@ document.onkeydown = (e) => {
 
             helpHTML.style.display = "block";
             helpHTML.innerHTML = checkEmail.includes(emailInput) ?
-                `Great news!${nameValue} is already on the platform ` :
-                ` < h4 > < i > ${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform < /i>?</h4> ${checkbox(
-            elementId,
-          )}`;
+                `Great news!${nameValue} is already on the platform` :
+                ` < h4 > < i > ${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform < /i>?</h4> ${checkBox(elementId)}`;
 
             const processKidRadio = (ev) => {
                 const postObj = {
@@ -298,6 +296,7 @@ document.onkeydown = (e) => {
         };
 
         if (chooseEmail.includes(elementId)) {
+            console.log(elementId);
             id(elementId).addEventListener("keyup", checkFamilyEmail);
         }
     } catch (error) {
