@@ -12,6 +12,8 @@ class Sanitise extends allFunctionalities
     private $value2 = array();
     public $error = array();
     private $cleanData = array();
+    private $dataCount;
+    private $data;
 
 
     /**

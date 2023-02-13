@@ -14,7 +14,7 @@ class CheckToken
      *
      * @return void
      */
-    public static function tokenCheck($token, $redirect): never
+    public static function tokenCheck($token, $redirect)
     {
         try {
             $tokenCheck = $_SESSION[$token] ?? "bad";

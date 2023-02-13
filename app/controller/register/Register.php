@@ -38,8 +38,6 @@ class Register extends Db
             header("Access-Control-Max-Age: 3600");
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-            //Transaction::beginTransaction();
-
             // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
 
@@ -63,9 +61,8 @@ class Register extends Db
             // check if the email already exist
             $emailCheck = checkEmailExist($cleanData['email']);
             if ($emailCheck) {
-                http_response_code(401);
-                echo http_response_code();
-                echo json_encode(['message' =>"Your email is already registered"]);      
+                $theError = "Your email is already registered";
+                msgException(401, $theError);
                 exit;
             }
 
@@ -89,31 +86,12 @@ class Register extends Db
             );
             sendEmailWrapper($sendEmailArray, 'member');
 
-            // $adminEmail = getenv('ADMIN_EMAIL');
-            // $token = $_SESSION['token'];
+            $successMsg = "Hello $firstName - Your application has been successfully submitted. 
+            Our team will review and email you a decision within the next 24 hours.";
 
-            // $successMsg =
-            //     "<div class='jumbotron'>
-            //     <h1 class='display-3'>Ref: $id </h1> 
-            //     <h1>$token</h1>
-            //     <h1>SUBJECT: <b>NEXT STEP</b></h1><br>
-            //     <p class='lead'>Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network<br><br>
-            //     Regards,<br>
-            //     Admin team<br>
-            //     $adminEmail</p>
-            //     <hr class='my-2'>
-            // </div>";
-
-            $successMsg = "Hello $firstName, <br> Your application has been successfully submitted. Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If your application approved, then you should be able to log in to your account and access the family social network.
-                <hr>";
-
-            //Transaction::commit();
-            http_response_code(200);
-            echo http_response_code();
-            echo json_encode($successMsg);
-            // return view('registration/nextStep');  
+            msgSuccess(200, $successMsg);
         } catch (\Throwable $th) {
-            // Transaction::rollback();
+
             showError($th);
         }
     }
@@ -145,24 +123,26 @@ class Register extends Db
         }
     }
 
-    private function dataToCheck() : array
+    private function dataToCheck(): array
     {
         return [
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7],
             'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 50],
-            'data' => ['firstName', 
-            'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 
-            'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password']
+            'data' => [
+                'firstName',
+                'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode',
+                'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password'
+            ]
         ];
     }
 
-     /**
-      * Summary of tableData
-      * @param mixed $cleanPostData - sanitised $_POST data 
-      * @return array
-      */
+    /**
+     * Summary of tableData
+     * @param mixed $cleanPostData - sanitised $_POST data 
+     * @return array
+     */
 
-    private function tableData(array $cleanPostData) : array
+    private function tableData(array $cleanPostData): array
     {
         return [
             [
@@ -245,7 +225,7 @@ class Register extends Db
      * @return array
      */
 
-    private function setId(array $postData, string|int $name, string $table) : array
+    private function setId(array $postData, string|int $name, string $table): array
     {
 
         $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Provide Info");

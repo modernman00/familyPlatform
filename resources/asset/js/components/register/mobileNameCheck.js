@@ -211,6 +211,7 @@ document.onkeydown = (e) => {
         let chooseEmail = [];
         let chooseName = [];
         let helpHTML = "";
+        let checkEmail = "";
 
         // check if id / event.id is either kid or sibling
 
@@ -222,6 +223,9 @@ document.onkeydown = (e) => {
             chooseEmail = checkEmailObj.siblingEmail;
             chooseName = checkEmailObj.siblingName;
             helpHTML = id(`${elementId}_help`);
+        } else if (elementId == "email_id") {
+            checkEmail = id(elementId)
+            checkEmail.addEventListener('keyup', checkEmailFn)
         }
 
         const checkFamilyEmail = (event) => {
@@ -258,7 +262,7 @@ document.onkeydown = (e) => {
             helpHTML.style.display = "block";
             helpHTML.innerHTML = checkEmail.includes(emailInput) ?
                 `Great news!${nameValue} is already on the platform` :
-                ` < h4 > < i > ${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform < /i>?</h4> ${checkBox(elementId)}`;
+                `${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform ? ${checkBox(elementId)}`;
 
             const processKidRadio = (ev) => {
                 const postObj = {
@@ -287,6 +291,7 @@ document.onkeydown = (e) => {
                         showError(error);
                     });
             };
+
             id(`${elementId}Yes`).addEventListener("click", processKidRadio);
 
             id(`${ elementId }No`).addEventListener("click", () => (id(`${ elementId }No`).style.display = "none"));
@@ -296,7 +301,7 @@ document.onkeydown = (e) => {
         };
 
         if (chooseEmail.includes(elementId)) {
-            console.log(elementId);
+            // console.log(elementId);
             id(elementId).addEventListener("keyup", checkFamilyEmail);
         }
     } catch (error) {

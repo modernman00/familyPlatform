@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . "/../app/config.php";
+
 if (!session_start()) {
     session_start([
     'cookie_httponly' => true,
@@ -19,10 +21,10 @@ define("BR", "<br>");
 mb_internal_encoding();
 mb_http_output();
 
-require __DIR__ . "/../app/config.php";
+
 date_default_timezone_set('Europe/London');
 // SET ERROR HANDLER
 // set_error_handler([new \App\classes\ErrorHandler(__DIR__ . '/log'), 'handleErrors']);
 new \App\classes\ErrorHandler(__DIR__ . '/log');
-require __DIR__ . "/../app/router/router.php";
+require_once __DIR__ . "/../app/router/router.php";
 restore_exception_handler();

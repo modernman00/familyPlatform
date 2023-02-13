@@ -152,7 +152,6 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
     if ($error) {
 
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
-        echo json_encode($theError);
         msgException(404, $theError);
         exit;
     }

@@ -8,27 +8,6 @@ const formInput = document.querySelectorAll('.register');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-// const process = () => {
-//     // clear error from the form
-//     formData.clearError()
-
-//     // set the maxlength, check the length of the value, raise error
-//     formData.realTimeCheckLen(
-//         dataToCheckRegister.maxLength.id,
-//         dataToCheckRegister.maxLength.max
-//     );
-
-//     // check if password matches real time
-//     formData.matchInput(dataToCheckRegister.password.pwd,
-//         dataToCheckRegister.password.pwd2,
-//     );
-
-//     formData.duplicate('firstName_id', 'alias_id')
-
-// }
-
-// process()
-
 
 (() => {
 
@@ -50,16 +29,13 @@ const formData = new FormHelper(formInputArr);
 
 })();
 
-const processFormDataAction = (addClass, resource) => {
+const processFormDataAction = (addClass, serverResponse) => {
     // display the success information for 10sec
     id('register_notify_div').style.display = "block" // unblock the notification
     id('register_notify_div').classList.add(addClass) // add the success class
-    id('register_notify_div_msg').innerHTML = resource.data // error element
+    id('register_notify_div_msg').innerHTML = serverResponse.message // error element
     id('loader').classList.remove('loader') // remove loader
 }
-
-
-
 
 
 const processFormData = async(url, formElement) => {
@@ -74,16 +50,15 @@ const processFormData = async(url, formElement) => {
     }
 
     await axios.post(url, formEntries, options).then(response => {
-        // set timer to redirect to the homepage
-        // setTimeout(() => {
-        //     window.location = "/"
-        // }, 20000)
+        console.log(response)
 
         // get the api message and output it to the form
-        processFormDataAction('is-success', response)
+        processFormDataAction('is-success', response.data)
             // it clears all the contents
-        formData.clearHtml();
+            //  formData.clearHtml();
     }).catch(error => {
+
+        console.log(error)
 
         processFormDataAction('is-danger', error.response)
 
@@ -101,6 +76,8 @@ const processForm = (e) => {
         if (id('checkbox').checked) {
             // window.location.hash = '#setLoader';
             id("setLoader").focus(); // focus on the loader element
+
+            formData.clearError()
 
             formData.emailVal()
             formData.massValidate();

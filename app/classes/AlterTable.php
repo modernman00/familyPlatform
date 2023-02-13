@@ -12,7 +12,7 @@ class AlterTable extends allFunctionalities
      * dataArr - this is array of the new column name to be updated ['payment', 'dob]
      */
 
-    function __construct(public string $table, public ?array $dataArray = null)
+    public function __construct(public string $table, public ?array $dataArray = null)
     {}
 
     public function addNewColArr($lastData)
