@@ -158,7 +158,10 @@ function cleanSession($x)
 
 function showError($th)
 {
-    $error = $th->getMessage() . " " . $th->getLine() . " " . $th->getCode() . " " . $th->getFile();
+    
+    http_response_code(301); // sets the response to 406
+    // echo http_response_code(); it stringify the message in the array
+    $error = $th->getMessage() . " on Line " . $th->getLine() .  " on file " . $th->getFile();
     echo json_encode(['message' => $error]);
 }
 

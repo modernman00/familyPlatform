@@ -1,6 +1,7 @@
 'use strict'
 
 import { matchRegex } from "./helper/general"
+import { showNotification } from './global';
 export default class FormHelper {
     constructor(data) {
         this.data = data;
@@ -28,8 +29,8 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
-                // console.log(post)
-                // rid it off the submit and token
+                    // console.log(post)
+                    // rid it off the submit and token
                 if (post.name == 'submit' ||
                     post.name == 'button' ||
                     post.name == 'token' ||
@@ -37,7 +38,7 @@ export default class FormHelper {
                     post.name == "checkbox_id") {
                     continue;
                 }
-                
+
                 // check if there is no value
 
                 let postName = post.name.replace('_', ' ')
@@ -53,7 +54,7 @@ export default class FormHelper {
                         post.value = "Not Provided"
                     }
                 }
-                
+
                 if (post.value === '' || post.value === 'select') {
                     errMsg.innerHTML = `* cannot be left empty`
                     errMsg.style.color = "red"
@@ -91,7 +92,7 @@ export default class FormHelper {
                 }
 
                 this.id(post.id).addEventListener('change', () => {
-                        this.id(`${post.name}_error`).innerHTML = ''
+                    this.id(`${post.name}_error`).innerHTML = ''
                 })
                 if (post.value != 'select') {
                     this.id(post.id).addEventListener('keyup', () => {
@@ -128,9 +129,8 @@ export default class FormHelper {
 
     realTimeCheckLen(input, maxi) {
         try {
-            for (let i = 0;
-                i < input.length;
-                i++) {
+
+            for (let i = 0; i < input.length; i++) {
                 const theData = this.id(`${input[i]}_id`);
                 if (theData == "") throw new Error("empty dataInput");
                 const max = maxi[i];
@@ -162,19 +162,19 @@ export default class FormHelper {
      */
 
     matchInput(first, second) {
-        let error, firstInput, secondInput
-        error = this.id(`${second}_error`)
-        firstInput = this.id(first + '_id')
-        secondInput = this.id(second + '_id')
-        secondInput.addEventListener('keyup', () => {
-            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
-        })
-    }
-    /**
-     *
-     * @param {the id of the input you want to inject to/ this is an array} idArray
-     * @param {*the comment or questions you want o inject} html
-     */
+            let error, firstInput, secondInput
+            error = this.id(`${second}_error`)
+            firstInput = this.id(first + '_id')
+            secondInput = this.id(second + '_id')
+            secondInput.addEventListener('keyup', () => {
+                error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
+            })
+        }
+        /**
+         *
+         * @param {the id of the input you want to inject to/ this is an array} idArray
+         * @param {*the comment or questions you want o inject} html
+         */
 
     injectData(idArray, html) {
         let idData;
@@ -218,7 +218,7 @@ export default class FormHelper {
                 return;
             } else {
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function () {
+                xmlhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         output.innerHTML = this.responseText;
                     }

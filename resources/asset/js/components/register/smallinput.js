@@ -1,29 +1,19 @@
 import { id } from "../global"
 
-const maiden = id('motherMaiden_help')
-maiden.innerHTML = "Good to identify your family from the mother's side"
+/**
+ * 
+ * @param {*} parentId - id of the element string
+ * @param {*} msg - messages to pass - string
+ */
+const showMsg = (parentId, msg = "Please, leave blank if not available") => {
+    id(parentId).innerHTML = msg
+}
 
-
-const mobile = id('mobile_help')
-mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809"
-
-
-const fatherMobile=id('fatherMobile_help')
-fatherMobile.innerHTML = "Please, leave blank if father has passed on"
-
-const motherMobile=id('motherMobile_help')
-motherMobile.innerHTML = "Please, leave blank if mother has passed on"
-
-const password = id('password_help')
-password.innerHTML = 'Must be 8-20 characters long.'
+showMsg('fatherMobile_help')
+showMsg('motherMobile_help')
+showMsg('motherEmail_help')
+showMsg('fatherEmail_help')
+showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809")
+showMsg('password_help', 'Must be 8-20 characters long.')
 
 const lastName = id('lastName_id').value = "OLAOGUN"
-
-
-
-
-
-
-
-
-

@@ -91,15 +91,14 @@
 
   'mother' => [
   'mixed',
-  'label' => ["mother's name", "mother's email", "mother's mobile","Mother's maiden name"],
-  'attribute' => ['motherName',  'motherEmail','motherMobile', 'motherMaiden'],
-  'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089', "surname before marriage"],
-  'inputType' => ['text', 'email', 'text', 'text'],
+  'label' => ["mother's name", "mother's email", "mother's mobile"],
+  'attribute' => ['motherName',  'motherEmail','motherMobile'],
+  'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089'],
+  'inputType' => ['text', 'email', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
     '<i class="fas fa-envelope-square"></i>',
   '<i class="fas fa-mobile-alt"></i>',
-  '<i class="fas fa-user"></i>'
 
   ]
   ],
@@ -143,18 +142,18 @@
 
   // CONTACT INFORMATION
   'Contact Information' => 'title',
-  'address' => [
-  'mixed',
-  'label' => ["Address", "Postcode /zip code/area code", 'Region / State / District'],
-  'attribute' => ['address', 'postcode', 'region'],
-  'placeholder' => ['Your first line of address', 'SN2 3BF / 234', 'London / Lagos / New York'],
-  'inputType' => ['text', 'text', 'text'],
-  'icon' => [
-  '<i class="far fa-address-book"></i>',
-  '<i class="far fa-address-card"></i>',
-  '<i class="far fa-address-card"></i>',
-  ]
-  ],
+  // 'address' => [
+  // 'mixed',
+  // 'label' => ["Address", "Postcode /zip code/area code", 'Region / State / District'],
+  // 'attribute' => ['address', 'postcode', 'region'],
+  // 'placeholder' => ['Your first line of address', 'SN2 3BF / 234', 'London / Lagos / New York'],
+  // 'inputType' => ['text', 'text', 'text'],
+  // 'icon' => [
+  // '<i class="far fa-address-book"></i>',
+  // '<i class="far fa-address-card"></i>',
+  // '<i class="far fa-address-card"></i>',
+  // ]
+  // ],
 
   // COUNTRY, EMAIL N MOBILE
 
@@ -174,20 +173,20 @@
 
   // INTEREST
 
-  'interest' => 'title',
+  // 'interest' => 'title',
 
-  'your_nterest' => [
-  'mixed',
-  'label' => ['Favourite Sport', 'Football team', 'Passion'],
-  'attribute' => ['favSport', 'footballTeam', 'passion'],
-  'placeholder' => ['Football, Tennis, F1', 'Chelsea, Liverpool', 'singing or tech or travelling'],
-  'inputType' => ['text', 'text', 'text'],
-  'icon' => [
-  '<i class="fas fa-swimmer"></i>',
-  '<i class="	far fa-futbol"></i>',
-  '<i class="fas fa-heart"></i>',
-  ]
-  ],
+  // 'your_nterest' => [
+  // 'mixed',
+  // 'label' => ['Favourite Sport', 'Football team', 'Passion'],
+  // 'attribute' => ['favSport', 'footballTeam', 'passion'],
+  // 'placeholder' => ['Football, Tennis, F1', 'Chelsea, Liverpool', 'singing or tech or travelling'],
+  // 'inputType' => ['text', 'text', 'text'],
+  // 'icon' => [
+  // '<i class="fas fa-swimmer"></i>',
+  // '<i class="	far fa-futbol"></i>',
+  // '<i class="fas fa-heart"></i>',
+  // ]
+  // ],
 
   // work info
 
@@ -211,14 +210,14 @@
 
   'account' => [
   'mixed',
-  'label' => ['Password', 'Confirm password', 'Secret word'],
-  'attribute' => ['password', 'confirm_password', 'secretWord'],
-  'placeholder' => ['xxxx', 'xxxx', 'one time security code'],
-  'inputType' => ['password', 'password', 'password'],
+  'label' => ['Password', 'Confirm password'],
+  'attribute' => ['password', 'confirm_password'],
+  'placeholder' => ['xxxx', 'xxxx'],
+  'inputType' => ['password', 'password'],
   'icon' => [
   '<i class="fas fa-user-secret"></i>',
   '<i class="fas fa-user-secret"></i>',
-  '<i class="fas fa-user-secret"></i>',
+  // '<i class="fas fa-user-secret"></i>',
   ]
   ],
 

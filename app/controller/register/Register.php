@@ -14,7 +14,7 @@ use Exception;
 
 class Register extends Db
 {
-    private $table = ['personal', 'work', 'contact',  'interest', 'account', 'otherFamily', 'post', 'comment'];
+    private $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment'];
 
     public function index()
     {
@@ -36,7 +36,9 @@ class Register extends Db
             header("Content-Type: application/json; charset=UTF-8");
             header("Access-Control-Allow-Methods: POST");
             header("Access-Control-Max-Age: 3600");
-            header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+            header("Access-Control-Allow-Headers: Content-Type, 
+            Access-Control-Allow-Headers, Authorization, 
+            X-Requested-With");
 
             // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
@@ -53,8 +55,6 @@ class Register extends Db
 
             // create sessions and some variables
             $_SESSION['id'] = $cleanData['id'];
-
-            // $id = $cleanData['id'];
             $_SESSION['firstName'] = $cleanData['firstName'];
             $firstName = $cleanData['firstName'];
 
@@ -62,8 +62,7 @@ class Register extends Db
             $emailCheck = checkEmailExist($cleanData['email']);
             if ($emailCheck) {
                 $theError = "Your email is already registered";
-                msgException(401, $theError);
-                exit;
+                throw new Exception($theError);
             }
 
             CheckToken::tokenCheck('token', '/register');
@@ -86,8 +85,7 @@ class Register extends Db
             );
             sendEmailWrapper($sendEmailArray, 'member');
 
-            $successMsg = "Hello $firstName - Your application has been successfully submitted. 
-            Our team will review and email you a decision within the next 24 hours.";
+            $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
 
             msgSuccess(200, $successMsg);
         } catch (\Throwable $th) {
@@ -126,12 +124,11 @@ class Register extends Db
     private function dataToCheck(): array
     {
         return [
-            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 7],
-            'max' => [15, 15, 35, 35, 30, 50, 10, 30, 20, 16, 30, 15, 40, 25, 30, 50],
+            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
+            'max' => [15, 15, 35, 35, 20, 16, 30, 15, 30],
             'data' => [
                 'firstName',
-                'lastName', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode',
-                'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation', 'password'
+                'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
             ]
         ];
     }
@@ -163,24 +160,24 @@ class Register extends Db
                 'id' => $cleanPostData['id']
             ],
             [
-                'address' => $cleanPostData['address'],
-                'postcode' => $cleanPostData['postcode'],
+                // 'address' => $cleanPostData['address'],
+                // 'postcode' => $cleanPostData['postcode'],
                 'email' => $cleanPostData['email'],
-                'region' => $cleanPostData['region'],
+                // 'region' => $cleanPostData['region'],
                 'country' => $cleanPostData['country'],
                 'mobile' => $cleanPostData['mobile'],
                 'id' => $cleanPostData['id'],
             ],
-            [
-                'favSport' => $cleanPostData['favSport'],
-                'footballTeam' => $cleanPostData['footballTeam'],
-                'passion' => $cleanPostData['passion'],
-                'id' => $cleanPostData['id'],
-            ],
+            // [
+            //     'favSport' => $cleanPostData['favSport'],
+            //     'footballTeam' => $cleanPostData['footballTeam'],
+            //     'passion' => $cleanPostData['passion'],
+            //     'id' => $cleanPostData['id'],
+            // ],
             [
                 'email' => $cleanPostData['email'],
                 'password' => $cleanPostData['password'],
-                'secretWord' => $cleanPostData['secretWord'],
+                // 'secretWord' => $cleanPostData['secretWord'],
                 'status' => 'new',
                 'type' => 'member',
                 'id' => $cleanPostData['id'],
@@ -195,7 +192,6 @@ class Register extends Db
                 'motherName' => $cleanPostData['motherName'],
                 'motherMobile' => $cleanPostData['motherMobile'],
                 'motherEmail' => $cleanPostData['motherEmail'],
-                'motherMaiden' => $cleanPostData['motherMaiden'],
                 'id' => $cleanPostData['id']
             ],
             [

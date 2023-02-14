@@ -50,17 +50,15 @@ const processFormData = async(url, formElement) => {
     }
 
     await axios.post(url, formEntries, options).then(response => {
-        console.log(response)
+        // console.log(response)
 
         // get the api message and output it to the form
         processFormDataAction('is-success', response.data)
             // it clears all the contents
             //  formData.clearHtml();
     }).catch(error => {
-
-        console.log(error)
-
-        processFormDataAction('is-danger', error.response)
+        processFormDataAction('is-danger', error.response.data)
+            // console.log(error.response.data.message);
 
     })
 
@@ -78,19 +76,18 @@ const processForm = (e) => {
             id("setLoader").focus(); // focus on the loader element
 
             formData.clearError()
-
             formData.emailVal()
             formData.massValidate();
 
             if (formData.error.length <= 0) {
 
-                id('loader').classList.add('loader') // start the loader element
-                return processFormData("/register", 'register') // initiate the api
+                id('loader').classList.add('loader')
+                return processFormData("/register", 'register')
             } else {
 
                 alert('The form cannot be submitted. Please check the errors')
-                console.log(formData.error)
-                    // process()
+                    // console.log(formData.error)
+
             }
 
         } else {

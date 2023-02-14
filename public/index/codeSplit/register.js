@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ FormHelper)
 /* harmony export */ });
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
 
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
@@ -23,6 +24,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
 
 var FormHelper = /*#__PURE__*/function () {
   function FormHelper(data) {
@@ -402,8 +404,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'motherMaiden', 'address', 'postcode', 'region', 'country', 'mobile', 'email', 'favSport', 'footballTeam', 'passion', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 50, 10, 15, 15, 13, 45, 25, 30, 40, 20]
+    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
+    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
   },
   // duplicate: {
   // 	email: 'email',
@@ -732,7 +734,7 @@ var confirmPs = document.getElementById("confirm_password_id");
 var secretWd = document.getElementById("secretWord_id");
 currentPs.setAttribute('autocomplete', 'on');
 confirmPs.setAttribute('autocomplete', 'on');
-secretWd.setAttribute('autocomplete', 'on');
+// secretWd.setAttribute('autocomplete', 'on')
 
 /***/ }),
 
@@ -1132,15 +1134,15 @@ var processFormData = /*#__PURE__*/function () {
           };
           _context.next = 7;
           return axios__WEBPACK_IMPORTED_MODULE_3___default().post(url, formEntries, options).then(function (response) {
-            console.log(response);
+            // console.log(response)
 
             // get the api message and output it to the form
             processFormDataAction('is-success', response.data);
             // it clears all the contents
             //  formData.clearHtml();
           })["catch"](function (error) {
-            console.log(error);
-            processFormDataAction('is-danger', error.response);
+            processFormDataAction('is-danger', error.response.data);
+            // console.log(error.response.data.message);
           });
         case 7:
         case "end":
@@ -1166,12 +1168,11 @@ var processForm = function processForm(e) {
       formData.emailVal();
       formData.massValidate();
       if (formData.error.length <= 0) {
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
-        return processFormData("/register", 'register'); // initiate the api
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader');
+        return processFormData("/register", 'register');
       } else {
         alert('The form cannot be submitted. Please check the errors');
-        console.log(formData.error);
-        // process()
+        // console.log(formData.error)
       }
     } else {
       alert('To continue, you need to agree to the our privacy policy');
@@ -1195,16 +1196,22 @@ var processForm = function processForm(e) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
-var maiden = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMaiden_help');
-maiden.innerHTML = "Good to identify your family from the mother's side";
-var mobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_help');
-mobile.innerHTML = "Nigeria: 2348036517179, UK: 447871717809";
-var fatherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('fatherMobile_help');
-fatherMobile.innerHTML = "Please, leave blank if father has passed on";
-var motherMobile = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('motherMobile_help');
-motherMobile.innerHTML = "Please, leave blank if mother has passed on";
-var password = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('password_help');
-password.innerHTML = 'Must be 8-20 characters long.';
+
+/**
+ * 
+ * @param {*} parentId - id of the element string
+ * @param {*} msg - messages to pass - string
+ */
+var showMsg = function showMsg(parentId) {
+  var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Please, leave blank if not available";
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parentId).innerHTML = msg;
+};
+showMsg('fatherMobile_help');
+showMsg('motherMobile_help');
+showMsg('motherEmail_help');
+showMsg('fatherEmail_help');
+showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
+showMsg('password_help', 'Must be 8-20 characters long.');
 var lastName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value = "OLAOGUN";
 
 /***/ })

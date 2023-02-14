@@ -10,4 +10,4 @@ const secretWd = document.getElementById("secretWord_id")
 
 currentPs.setAttribute('autocomplete', 'on')
 confirmPs.setAttribute('autocomplete', 'on')
-secretWd.setAttribute('autocomplete', 'on')
+    // secretWd.setAttribute('autocomplete', 'on')
