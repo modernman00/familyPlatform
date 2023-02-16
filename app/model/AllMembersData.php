@@ -30,7 +30,7 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembersNoPics()
     {
-        $table = ['personal', 'otherFamily', "contact"];
+        $table = ['personal',"contact","profile_pics", 'otherFamily'];
         $firstTable = array_shift($table);
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 

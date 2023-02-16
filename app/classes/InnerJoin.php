@@ -98,7 +98,7 @@ class InnerJoin extends Db
         public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): array
     {
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => " FULL OUTER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
+            $buildInnerJoinQuery = array_map(fn ($tab) => " RIGHT JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ", $buildInnerJoinQuery);
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
             $result = self::connect2()->prepare($query2);
