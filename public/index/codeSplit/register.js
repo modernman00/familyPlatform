@@ -349,7 +349,7 @@ var getAllData = /*#__PURE__*/function () {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           _context.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData"), config)["catch"](function (err) {
+          return axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData2"), config)["catch"](function (err) {
             return err.message;
           });
         case 2:
@@ -407,11 +407,6 @@ var dataToCheckRegister = {
     id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
     max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
   },
-  // duplicate: {
-  // 	email: 'email',
-  // 	username: 'username'
-  // },
-
   password: {
     pwd: 'password',
     pwd2: 'confirm_password'
@@ -764,6 +759,7 @@ var fatherName = [];
 var mobile = [];
 var motherName = [];
 var checkEmail = [];
+console.log(getData);
 var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("firstName_id").value;
 var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("lastName_id").value;
 
@@ -1134,15 +1130,17 @@ var processFormData = /*#__PURE__*/function () {
           };
           _context.next = 7;
           return axios__WEBPACK_IMPORTED_MODULE_3___default().post(url, formEntries, options).then(function (response) {
-            // console.log(response)
-
             // get the api message and output it to the form
             processFormDataAction('is-success', response.data);
+            setTimeout(function () {
+              //window.location.replace(redirect)
+              window.location.replace('register/nextStep');
+            }, 5000);
+
             // it clears all the contents
             //  formData.clearHtml();
           })["catch"](function (error) {
             processFormDataAction('is-danger', error.response.data);
-            // console.log(error.response.data.message);
           });
         case 7:
         case "end":

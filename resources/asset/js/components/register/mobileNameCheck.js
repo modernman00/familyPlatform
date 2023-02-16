@@ -12,6 +12,8 @@ let mobile = [];
 let motherName = [];
 let checkEmail = [];
 
+console.log(getData);
+
 let fName = id("firstName_id").value;
 let lName = id("lastName_id").value;
 

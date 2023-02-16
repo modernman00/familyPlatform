@@ -21,6 +21,11 @@ class Register extends Db
         view('registration/register');
     }
 
+    public function nextStep()
+    {
+        view('registration/nextStep');
+    }
+
     /**
      * 
      * @param mixed $array this is the POST Data 
@@ -36,9 +41,9 @@ class Register extends Db
             header("Content-Type: application/json; charset=UTF-8");
             header("Access-Control-Allow-Methods: POST");
             header("Access-Control-Max-Age: 3600");
-            header("Access-Control-Allow-Headers: Content-Type, 
-            Access-Control-Allow-Headers, Authorization, 
-            X-Requested-With");
+            // header("Access-Control-Allow-Headers: Content-Type, 
+            // Access-Control-Allow-Headers, Authorization, 
+            // X-Requested-With");
 
             // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
@@ -86,7 +91,7 @@ class Register extends Db
             sendEmailWrapper($sendEmailArray, 'member');
 
             $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
-
+            
             msgSuccess(200, $successMsg);
         } catch (\Throwable $th) {
 

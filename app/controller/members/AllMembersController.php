@@ -29,14 +29,21 @@ class AllMembersController extends AllMembersData
     {
         try {
             $result = $this->getAllMembers();
-
             echo json_encode($result);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-
+    public function processApiData2()
+    {
+        try {
+            $result = $this->getAllMembersNoPics();
+            echo json_encode($result);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 
     // public function index2()
     // {

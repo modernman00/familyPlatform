@@ -1,61 +1,76 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\model;
+
 use Exception;
 
 use App\classes\InnerJoin;
+
 class AllMembersData extends InnerJoin
 {
     private const ERR_MSG = "Member Data Error";
 
     public function getAllMembers()
     {
-        $table = ['personal','otherFamily','profile_pics', 'contact'];
+        $table = ['personal', 'otherFamily', 'profile_pics', 'contact'];
         $firstTable = array_shift($table);
-        $memberData = parent::joinAll2(firstTable:$firstTable, para:'id', table:$table, orderBy:'date_created');
+        $memberData = parent::joinAll2(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
-        if(!$memberData) {
-             http_response_code(400);
-        echo http_response_code();
-       throw new Exception(self::ERR_MSG, 1);
+        if (!$memberData) {
+            http_response_code(400);
+            echo http_response_code();
+            throw new Exception(self::ERR_MSG, 1);
         }
-    
-       
-       return $memberData;
+
+
+        return $memberData;
     }
 
-     public function getAllMembersById($id)
+    public function getAllMembersNoPics()
     {
-        
-          $table = ['personal','otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact'];
+        $table = ['personal', 'otherFamily', "contact"];
         $firstTable = array_shift($table);
-       
-        $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id );
+        $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
-        return $memberData??= throw new Exception(self::ERR_MSG, 1);
-        
+        if (!$memberData) {
+            http_response_code(400);
+            echo http_response_code();
+            throw new Exception(self::ERR_MSG, 1);
+        }
+
+
+        return $memberData;
     }
 
-    static function getMembers($table, $orderBy) : array
+    public function getAllMembersById($id)
+    {
+
+        $table = ['personal', 'otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact'];
+        $firstTable = array_shift($table);
+
+        $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id);
+
+        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
+    }
+
+    public static function getMembers($table, $orderBy): array
     {
         $firstTable = array_shift($table);
         $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
-        return $memberData??= throw new Exception(self::ERR_MSG, 1);
+        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
     }
 
-       public static function getEventData()
+    public static function getEventData()
     {
         try {
-                $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);
         }
-        
-            
     }
-
 }

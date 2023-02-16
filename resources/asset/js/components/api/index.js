@@ -14,7 +14,7 @@ const URL = process.env.MIX_APP_URL2
 
 export const getAllData = async() => {
     // const response = await axios.get(`${URL}/allMembers/processApiData`, config)
-    const response = await axios.get(`${URL}allMembers/processApiData`, config)
+    const response = await axios.get(`${URL}allMembers/processApiData2`, config)
         .catch(err => err.message)
     return response.data
 }

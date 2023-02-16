@@ -50,15 +50,19 @@ const processFormData = async(url, formElement) => {
     }
 
     await axios.post(url, formEntries, options).then(response => {
-        // console.log(response)
 
         // get the api message and output it to the form
         processFormDataAction('is-success', response.data)
-            // it clears all the contents
-            //  formData.clearHtml();
+
+        setTimeout(() => {
+            //window.location.replace(redirect)
+            window.location.replace('register/nextStep')
+        }, 5000)
+
+        // it clears all the contents
+        //  formData.clearHtml();
     }).catch(error => {
         processFormDataAction('is-danger', error.response.data)
-            // console.log(error.response.data.message);
 
     })
 
