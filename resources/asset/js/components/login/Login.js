@@ -28,6 +28,7 @@ process()
 const LoginSubmission = (e) => {
     try {
         e.preventDefault();
+
         id('loginNow_notification').classList.remove('is-danger') // remove the danger class from the notification
         id('error').innerHTML = "" // empty the error element
 
@@ -36,10 +37,13 @@ const LoginSubmission = (e) => {
         formData.emailVal() // sanitise email
         formData.massValidate(); // validate and sanitise data
         if (formData.error.length == 0) {
+
+
             // display the success information for 10sec
             id('setLoader').style.display = "block" // unblock the div block at the global.js
             id('loader').classList.add('loader') // start the loader element
             localStorage.setItem('redirect', '/member/ProfilePage')
+            log('got here')
             postFormData("/login", "loginNow", "/login/code")
 
         } else {

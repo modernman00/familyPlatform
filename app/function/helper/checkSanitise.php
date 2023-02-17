@@ -25,7 +25,7 @@ function checkPassword($inputData, $databaseData)
 
     if (password_verify($textPassword, $dbPassword) === false) {
 
-        msgException(404, "There is a problem with your login credential! - Password");
+        throw new Exception('"There is a problem with your login credential! - Password"');
     }
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
@@ -35,7 +35,7 @@ function checkPassword($inputData, $databaseData)
         $passUpdate = new AllFunctionalities();
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
-        if(!$result) {
+        if (!$result) {
         msgException(404, "Password could not be updated");
         }
 
@@ -47,23 +47,22 @@ function checkPassword($inputData, $databaseData)
 /**
  * 
  * @param mixed $inputData form data as a array $inputData['email']
- * @return mixed 
+ * @return array
  * @throws \Exception 
  */
-function useEmailToFindData($inputData): array
+function useEmailToFindData($inputData)
 {
     $email = $inputData['email'];
 
     $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
-    $data = Select::selectFn2(query: $query, bind: [$email]);
+    $emailData = Select::selectFn2(query: $query, bind: [$email]);
 
-    if (!$data) {
-
-        msgException(404, "We cannot find your email");
-        exit;
-    }
-    foreach ($data as $data);
-    return $data;
+    if (empty($emailData)) {
+        throw new Exception('There is a problem with your authentication');
+            }
+   
+    return $emailData[0];
+    
 }
 
 /**
@@ -154,6 +153,7 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
         msgException(404, $theError);
         exit;
+    
     }
 
     return $sanitisedData;

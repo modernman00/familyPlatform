@@ -570,6 +570,8 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
+            console.log(response);
+
             // TO DECIDE ON THE NOTIFICATION
             var theClass = addClassByCSS(css, 'green');
             processFormDataAction(theClass, response.data.message);
@@ -584,9 +586,9 @@ var postFormData = /*#__PURE__*/function () {
             //it clears all the contents
             // formData.clearHtml()
           })["catch"](function (error) {
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error.response.data.message);
+            // log(error.response.data)
             var theClass = addClassByCSS(css, 'red');
-            if (error.response) {
+            if (error.response.data) {
               // log("we love" + error)
               processFormDataAction(theClass, error.response.data.message);
             }
@@ -820,6 +822,7 @@ var LoginSubmission = function LoginSubmission(e) {
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
       localStorage.setItem('redirect', '/member/ProfilePage');
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)('got here');
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code");
     } else {
       alert('The form cannot be submitted. Please check the errors');

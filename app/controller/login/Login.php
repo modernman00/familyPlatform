@@ -63,6 +63,7 @@ class Login extends Select
 
             $_SESSION['ID'] = $data['id'];
 
+
             //5. check password 
             $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
@@ -75,8 +76,7 @@ class Login extends Select
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
                     $this->adminLogin($sanitisedData);
-
-                } else if ($detectIfAdminOrCustomer === self::LOGIN) {
+                } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);
                 }
@@ -101,7 +101,7 @@ class Login extends Select
 
         if (!$checkAccountIsApproved) {
 
-            msgException(406, 'We do not recognise your account'); 
+            msgException(406, 'We do not recognise your account');
         }
 
         generateSendTokenEmail($data);  // send token to email 

@@ -55,6 +55,7 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
     // AXIOS POST FUNCTIONALITY
     await axios.post(url, formEntries, options)
         .then(response => {
+            console.log(response)
 
             // TO DECIDE ON THE NOTIFICATION
             let theClass = addClassByCSS(css, 'green');
@@ -71,10 +72,10 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
             //it clears all the contents
             // formData.clearHtml()
         }).catch(error => {
-            log(error.response.data.message)
+            // log(error.response.data)
             let theClass = addClassByCSS(css, 'red');
 
-            if (error.response) {
+            if (error.response.data) {
                 // log("we love" + error)
                 processFormDataAction(theClass, error.response.data.message)
             }

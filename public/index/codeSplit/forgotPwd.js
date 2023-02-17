@@ -124,6 +124,8 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
+            console.log(response);
+
             // TO DECIDE ON THE NOTIFICATION
             var theClass = addClassByCSS(css, 'green');
             processFormDataAction(theClass, response.data.message);
@@ -138,9 +140,9 @@ var postFormData = /*#__PURE__*/function () {
             //it clears all the contents
             // formData.clearHtml()
           })["catch"](function (error) {
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error.response.data.message);
+            // log(error.response.data)
             var theClass = addClassByCSS(css, 'red');
-            if (error.response) {
+            if (error.response.data) {
               // log("we love" + error)
               processFormDataAction(theClass, error.response.data.message);
             }
