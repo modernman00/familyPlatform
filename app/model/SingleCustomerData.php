@@ -30,17 +30,20 @@ class SingleCustomerData extends InnerJoin
 	public function getCustomerData(string $custId, array $table) : array
 	{ 
 		try {
-		
-			$id = "id";
-			$firstTable = array_shift($table); // remove the first element of the array
-			$query = $this->joinParamOr(firstTable:$firstTable, para:$id, table:$table, id:$custId);
+			$para = "id";
+			// remove the first element of the array
+			$firstTable = array_shift($table); 
+			$query = $this->joinParamOr(firstTable:$firstTable, para:$para, table:$table, id:$custId);
+
+			//  printArr($query);
+			// json_encode(["message" => "mesage"]);
 			
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 1);
 			}
 
-				foreach ($query as $query);
-				unset($query['password']);
+			foreach ($query as $query);
+			unset($query[0]['password']);
 			return $query;
 		} catch (\PDOException $e) {
 			showError($e);

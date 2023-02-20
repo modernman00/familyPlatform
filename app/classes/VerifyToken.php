@@ -26,11 +26,15 @@ class VerifyToken
 
             $token = $_COOKIE['waleToken'];
 
+            // echo json_encode(['message1' => $token]);
+
             if (isset($token)) {
 
                 $auth = new Auth($token);
 
                 $outcome = $auth->isAuth();
+
+                // echo json_encode(['message2' => $outcome]);
 
                 if (!$outcome) {
                     setcookie("waleToken", "", time() - 7300);

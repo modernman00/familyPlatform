@@ -26,8 +26,7 @@ $router->map('GET', '/login/forgot', 'App\controller\login\Forgot@show', 'forgot
 
 $router->map('POST', '/login/forgot', 'App\controller\login\Forgot@verify', 'forgot_VERIFY');
 
-// profile page member
-$router->map('GET', '/member/ProfilePage', 'App\controller\members\ProfilePage@index', 'opening page member');
+
 
 // profile page member
 $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'opening page admin');

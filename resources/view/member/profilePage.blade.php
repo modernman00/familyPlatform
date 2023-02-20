@@ -3,6 +3,7 @@
 @section('data-page-id', 'profilePage')
 @section('content')
 
+<h1>We give you</h1>
 
 <!-- Page Container -->
 <div class="w3-container w3-content" style="max-width:1400px;margin-top:80px">
@@ -47,7 +48,7 @@
 {{-- POST MODAL --}}
 <script>
 
-// insert comment  
+
 
 // const checkTest= @php echo json_encode($allData) @endphp;
 const checkTest= @json($allData);
@@ -57,7 +58,15 @@ const processComment = (el) => {
       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
-  const postId = @json($allData['post_no'])
+
+
+const postId = checkTest.map(el=> {
+
+  return el.id
+  
+})
+
+
 
 // checkTest.map(el => {
 //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))

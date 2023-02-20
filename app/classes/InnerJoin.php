@@ -16,19 +16,27 @@ class InnerJoin extends Db
      * @param string $para the id parameter
      * @param array $table table name
      * @param mixed $id id
-     *
-     * @return void
+     * @return array
      */
     public function joinParamOr(string $firstTable, string $para, array $table, mixed $id): array
     {
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) =>
-            "INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
-            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
-            $query2 = "SELECT * FROM $firstTable  $innerQueryToString WHERE $firstTable.$para = ? OR $table[0].$para = ?";
-            $result = $this->connect()->prepare($query2);
+            $buildInnerJoinQuery = array_map(
+                fn ($tab) =>"
+                INNER JOIN $tab ON $firstTable.$para = $tab.$para",
+                $table
+            );
+
+            $innerQueryToString = join(" ", $buildInnerJoinQuery);
+
+            $query = "SELECT * FROM $firstTable $innerQueryToString WHERE $firstTable.$para=? OR $table[0].$para = ?";
+
+            $result = $this->connect()->prepare($query);
+
             $result->execute([$id, $id]);
+
             return $result->fetchAll(PDO::FETCH_ASSOC);
+
         } catch (PDOException $e) {
             showError($e);
         }
@@ -95,7 +103,7 @@ class InnerJoin extends Db
         }
     }
 
-        public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): array
+    public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): array
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " RIGHT JOIN $tab ON $firstTable.$para = $tab.$para ", $table);

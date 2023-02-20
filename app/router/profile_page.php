@@ -1,4 +1,8 @@
 <?php
+
+// profile page member
+$router->map('GET', '/member/ProfilePage', 'App\controller\members\ProfilePage@index', 'opening page member');
+
 // POST UPDATES
 $router->map('POST', '/member/profilePage/post', 'App\controller\members\ProfilePage@post', 'profile_page_post');
 

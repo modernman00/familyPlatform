@@ -30,9 +30,12 @@ class ProfilePage extends ProcessImg
     private $allCommentData;
     private $id;
     private $eventData;
+    private $memberData;
+    private $post2Id;
+    private $getAllPics;
     private const REDIRECT = "Location: /member/ProfilePage";
 
-    function __construct()
+    public function __construct()
     {
         unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
 
@@ -44,13 +47,15 @@ class ProfilePage extends ProcessImg
 
         $setData = new SingleCustomerData;
 
-        $table = ['personal', 'interest', 'profile_pics', 'contact', 'otherFamily', 'post'];
+        $table = ['personal', 'contact', 'otherFamily', 'post'];
 
         $this->memberData = $setData->getCustomerData($this->id, $table);
 
         //GET POST DATA 
 
         $this->allPostData = Post::getAllPostProfilePics();
+
+        // printArr($this->allPostData);
 
         //GET ALL EVENTS DATA
         $this->eventData = DataAll::getEventData();
@@ -69,7 +74,7 @@ class ProfilePage extends ProcessImg
         $this->getAllPics = Post::getAllPostPics($this->id);
     }
 
-    function index()
+    public function index()
     {
         if (!$_SESSION['loggedIn']) {
             msgException(404, "How did you get here?");
@@ -77,6 +82,7 @@ class ProfilePage extends ProcessImg
         }
 
         try {
+
             $_SESSION['id'] = $this->id;
             $_SESSION['fName'] = $this->memberData['firstName'];
             $_SESSION['lName'] = $this->memberData['lastName'];
@@ -89,7 +95,9 @@ class ProfilePage extends ProcessImg
 
             // if token is verified
 
-            if ($result) {
+            if (!$result) {throw new Exception('authentication failed ');}
+
+           
                 view('member/profilePage', [
                     'data' => $this->memberData,
                     'allData' => $this->allPostData,
@@ -99,7 +107,7 @@ class ProfilePage extends ProcessImg
                     'eventData' => $this->eventData
                     // 'comment2Post' => $this->comment2Post
                 ]);
-            }
+            
         } catch (\Throwable $th) {
             showErrorExp($th);
         }
@@ -116,8 +124,6 @@ class ProfilePage extends ProcessImg
         unset($_POST['post_img']);
         $sanitise = new Sanitise($_POST);
         $getSanitisePost = $sanitise->getData();
-
-        // var_dump($getSanitisePost);
 
         // check if there are images in the post
         if ($_FILES) {
@@ -138,13 +144,12 @@ class ProfilePage extends ProcessImg
         // get the other post variables id, fullname, time of post
         $getSanitisePost['id'] = $_SESSION['id'];
         $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
-        // $getSanitisePost['post_time'] = $_SESSION['currentTime'];
         $getSanitisePost['post_time'] = milliSeconds();
         return $getSanitisePost;
     }
 
 
-    function post()
+    public function post()
     {
         try {
                header('Content-Type: text/event-stream');
@@ -152,33 +157,19 @@ class ProfilePage extends ProcessImg
             $getPost = $this->processPostData();
             Insert::submitFormDynamic('post', $getPost);
 
-
-            // $option = array(
-            //     'cluster' => 'eu',
-            //     'useTLS' => true
-            // );
-
-            // $pusher = new Pusher(
-            //     'd1f1e43f3d8afb028a1f',
-            //     '67557ee07262c6a29970',
-            //     '1218019',
-            //     $option
-            // );
-
             $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
 
 
             $messages = Post::postByNo($theId);
             foreach ($messages as $message);
 
-            // $pusher->trigger('my-channel', 'updatePost', $message);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
     // MESSAGE IS SENT THROUGH THE SUBMIT FOR DYNAMIC
-    function postComment()
+    public function postComment()
     {
         try {
             $getComment = $this->processPostData();
@@ -210,7 +201,7 @@ class ProfilePage extends ProcessImg
      * post pictures on the profile page
      */
 
-    function postPics()
+    public function postPics()
     {
         if ($_FILES) {
             if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {

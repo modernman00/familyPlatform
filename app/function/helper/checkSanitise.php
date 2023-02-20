@@ -30,16 +30,15 @@ function checkPassword($inputData, $databaseData)
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
         $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
-       
+
         $data = ['password' => $newHash, 'id' => $id];
         $passUpdate = new AllFunctionalities();
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if (!$result) {
-        msgException(404, "Password could not be updated");
+            msgException(404, "Password could not be updated");
         }
-
-    }  
+    }
     return true;
 }
 
@@ -59,10 +58,9 @@ function useEmailToFindData($inputData)
 
     if (empty($emailData)) {
         throw new Exception('There is a problem with your authentication');
-            }
-   
+    }
+
     return $emailData[0];
-    
 }
 
 /**
@@ -104,7 +102,7 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
     $data = Select::selectFn2(query: $query, bind: [$colOne, $colTwo]);
 
     if (!$data) {
-  
+
         msgException(404, "We cannot locate the information");
     }
     foreach ($data as $data);
@@ -121,7 +119,7 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
 function findOneColUsingEmail(string $col, array $data): mixed
 {
     // $outcome = useEmailToFindData($data);
-   // $colOne =  $outcome["$col"];
+    // $colOne =  $outcome["$col"];
     $email =  $data['email'];
 
     $query = Select::formAndMatchQuery(selection: 'SELECT_COL_ID', table: 'account', identifier1: 'email', column: $col);
@@ -153,7 +151,6 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
         msgException(404, $theError);
         exit;
-    
     }
 
     return $sanitisedData;
