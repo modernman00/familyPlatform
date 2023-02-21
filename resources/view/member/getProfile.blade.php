@@ -26,11 +26,6 @@
       She
       @endif
 
-      loves {{ $data['passion'] }} and {{ $data['favSport'] }}
-
-      @isset($data['footballTeam'])
-      , and also support {{ $data['footballTeam'] }} football team.
-      @endisset
 
     </p>
     <br>

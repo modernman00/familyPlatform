@@ -2,15 +2,13 @@
 <html lang="en">
 
 <head>
-  <title> @yield('title') </title>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title')</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
 
- <script src="https://use.fontawesome.com/1dca29b934.js"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
 
   <noscript>
@@ -27,10 +25,25 @@
 <body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
 
+<section class="hero is-info is-large">
 
-  @yield('content')
 
-  <hr>
+   <div class="hero-head">
+     @include('includes/bulmaNav')
+  </div>
+
+   <div class="hero-body">
+    <div class="container has-text-centered">
+      <p class="title">
+        There is an Error: 
+      </p>
+      <h3 class="title">
+        @yield('content')
+      </h3>
+    </div>
+  </div>
+
+</section>    
  
  
   <!-- Optional JavaScript -->

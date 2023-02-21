@@ -95,19 +95,23 @@ class ProfilePage extends ProcessImg
 
             // if token is verified
 
-            if (!$result) {throw new Exception('authentication failed ');}
+            if (!$result) {
+                $tokenErr = "Authentication failed";
+                view('error/genError', ['error' => $tokenErr]);
+            }
 
-           
-                view('member/profilePage', [
-                    'data' => $this->memberData,
-                    'allData' => $this->allPostData,
-                    'comment' => $this->allCommentData,
-                    'post2Id' => $this->post2Id,
-                    'pics2Id' => $this->getAllPics,
-                    'eventData' => $this->eventData
-                    // 'comment2Post' => $this->comment2Post
-                ]);
-            
+
+
+
+            view('member/profilePage', [
+                'data' => $this->memberData,
+                'allData' => $this->allPostData,
+                'comment' => $this->allCommentData,
+                'post2Id' => $this->post2Id,
+                'pics2Id' => $this->getAllPics,
+                'eventData' => $this->eventData
+                // 'comment2Post' => $this->comment2Post
+            ]);
         } catch (\Throwable $th) {
             showErrorExp($th);
         }
@@ -152,7 +156,7 @@ class ProfilePage extends ProcessImg
     public function post()
     {
         try {
-               header('Content-Type: text/event-stream');
+            header('Content-Type: text/event-stream');
             header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
             Insert::submitFormDynamic('post', $getPost);
@@ -162,7 +166,6 @@ class ProfilePage extends ProcessImg
 
             $messages = Post::postByNo($theId);
             foreach ($messages as $message);
-
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -174,7 +177,7 @@ class ProfilePage extends ProcessImg
         try {
             $getComment = $this->processPostData();
             // \printArr($getComment);
-             Insert::submitFormDynamic('comment', $getComment);
+            Insert::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
             showError($th);
@@ -191,7 +194,7 @@ class ProfilePage extends ProcessImg
             // process the image 
             $this->processProfileImage();
             \printArr($_FILES);
-             header(self::REDIRECT);
+            header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -237,7 +240,7 @@ class ProfilePage extends ProcessImg
 
         $postId = checkInput($_GET['pID']);
 
-         $comment2Img = Post::commentLink2Img($postId);
+        $comment2Img = Post::commentLink2Img($postId);
 
         // $comment2Post = Post::commentLink2Post($postId);
 

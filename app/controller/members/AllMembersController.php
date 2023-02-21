@@ -76,11 +76,7 @@ class AllMembersController extends AllMembersData
 
         $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
-
-
         foreach ($result as $data);
-
-
 
         view('member/getProfile', compact('data', 'pictures'));
     }

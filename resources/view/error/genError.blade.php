@@ -4,14 +4,20 @@
 
 @section('content')
 
-    <div class="jumbotron error">
-        <div class="container">
-            <h1 class="display-4 text-center">THERE IS AN ERROR</h1>
-             <p class="alert alert-danger text-center lead" role="alert">
-        {{ $error }}
-    </p>
-        </div>
+<justify-content-center vh-100 bg-primary">
+        <h1 class="display-1 fw-bold text-white">404</h1>
+        <h2> {{ $error }}</h2>
     </div>
+
+
+
+
+
+
+
+
+
+
 
 
 

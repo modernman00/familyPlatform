@@ -47,7 +47,7 @@ class AllMembersData extends InnerJoin
     public function getAllMembersById($id)
     {
 
-        $table = ['personal', 'otherFamily', 'profile_pics', 'interest', 'post', 'images', 'contact'];
+        $table = ['personal', 'otherFamily', 'profile_pics', 'post', 'images', 'contact'];
         $firstTable = array_shift($table);
 
         $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id);
