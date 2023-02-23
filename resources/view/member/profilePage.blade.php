@@ -3,8 +3,6 @@
 @section('data-page-id', 'profilePage')
 @section('content')
 
-<h1>We give you</h1>
-
 <!-- Page Container -->
 <div class="w3-container w3-content" style="max-width:1400px;margin-top:80px">
   <!-- The Grid -->

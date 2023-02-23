@@ -13,10 +13,8 @@ const config = {
 }
 
 const renderHtml = (el) => {
-    log(el)
     if (el) {
         id('allMembers').classList.remove('loader')
-
         const img = (el.img) ? `/img/profile/${el.img}` : "/avatar/avatarF.png"
 
         const html = `<div class="col-sm-3 mb-3" id=${el.id}>

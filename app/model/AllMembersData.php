@@ -19,9 +19,8 @@ class AllMembersData extends InnerJoin
         $memberData = parent::joinAll2(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
         if (!$memberData) {
-            http_response_code(400);
-            echo http_response_code();
-            throw new Exception(self::ERR_MSG, 1);
+
+            throw new Exception(self::ERR_MSG, 400);
         }
 
 
@@ -37,7 +36,7 @@ class AllMembersData extends InnerJoin
         if (!$memberData) {
             http_response_code(400);
             echo http_response_code();
-            throw new Exception(self::ERR_MSG, 1);
+            throw new Exception(self::ERR_MSG, 400);
         }
 
 
@@ -47,7 +46,8 @@ class AllMembersData extends InnerJoin
     public function getAllMembersById($id)
     {
 
-        $table = ['personal', 'otherFamily', 'profile_pics', 'post', 'images', 'contact'];
+        $table = ['personal', 'otherFamily', 'profile_pics', 'post',  'contact'];
+        //  $table = ['personal', 'otherFamily', 'profile_pics', 'post', 'contact'];
         $firstTable = array_shift($table);
 
         $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id);

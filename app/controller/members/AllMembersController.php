@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\model\{
-    AllMembersData
+use App\model\AllMembersData;
+
+use App\classes\{
+    Select,
+    VerifyToken
 };
-
-use App\classes\Select;
-
 use Exception;
 
 class AllMembersController extends AllMembersData
@@ -17,9 +17,7 @@ class AllMembersController extends AllMembersData
     public function index()
     {
         try {
-
-
-            view('member/homePage', compact('result'));
+            view('member/allMembers', compact('result'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -28,6 +26,15 @@ class AllMembersController extends AllMembersData
     public function processApiData()
     {
         try {
+            $tokenVerify = new verifyToken();
+
+            $tokenConfirm = $tokenVerify->profilePage();
+
+            if (!$tokenConfirm) {
+                $tokenErr = "Authentication failed";
+                view('error/genError', ['error' => $tokenErr]);
+            }
+
             $result = $this->getAllMembers();
             echo json_encode($result);
         } catch (\Throwable $th) {
@@ -66,6 +73,18 @@ class AllMembersController extends AllMembersData
 
     public function getProfile()
     {
+        try {
+               //  verify token
+        $tokenVerify = new verifyToken();
+        $result = $tokenVerify->profilePage();
+
+        // if token is verified
+
+        if (!$result) {
+            $tokenErr = "Authentication failed";
+            view('error/genError', ['error' => $tokenErr]);
+        }
+
         $id = checkInput($_SESSION['id']);
         $result = $this->getAllMembersById($id);
         if (!$result) {
@@ -79,5 +98,10 @@ class AllMembersController extends AllMembersData
         foreach ($result as $data);
 
         view('member/getProfile', compact('data', 'pictures'));
+
+        } catch (Exception $e) {
+            showError($e);
+        }
+     
     }
 }

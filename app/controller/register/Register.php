@@ -146,6 +146,7 @@ class Register extends Db
 
     private function tableData(array $cleanPostData): array
     {
+        $profileAvatar = $cleanPostData['gender'] === "male"? "avatarM.jpeg" : "avatarF.png";
         return [
             [
                 'firstName' => $cleanPostData['firstName'],
@@ -203,15 +204,19 @@ class Register extends Db
                 'fullName' => $cleanPostData['firstName'],
                 'postMessage' => "Hey, welcome to your page",
                 // 'profileImg' => $_SESSION['PROFILE_IMG'],
-                'profileImg' => "/avatar/avatarF.png",
+                'profileImg' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ],
             [
                 'fullName' => $cleanPostData['firstName'],
                 'comment' => "Your comment will show here",
                 // 'profileImg' => $_SESSION['PROFILE_IMG'],
-                'profileImg' => "/avatar/avatarF.png",
+                'profileImg' => $profileAvatar,
                 'post_no' => 1000,
+                'id' => $cleanPostData['id']
+            ],
+            [
+                'img' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ]
         ];

@@ -786,6 +786,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
+/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
 
 
 
@@ -800,13 +801,13 @@ __webpack_require__.r(__webpack_exports__);
 var formInput = document.querySelectorAll('.loginNow');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
-var process = function process() {
+(function () {
   //clear error from the form
   formData.clearError();
+
   // set the maxlength, check the length of the value, raise error
   formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.max);
-};
-process();
+})();
 var LoginSubmission = function LoginSubmission(e) {
   try {
     e.preventDefault();

@@ -49,12 +49,13 @@ class ProcessImg extends AllFunctionalities
      * picsSource will either be post or profile or even avatar. it is from the public/img Directory
      */
 
-    static function showPostImg(string $picsSource)
+    public static function showPostImg(string $picsSource)
     {
         //$imgName = checkInput($_GET['pics']);
          $imgName = $_GET['pics'];
         $imgDir = checkInput($_GET['dir']);
         $postSource = checkInput($picsSource);
         return "/$imgDir/$postSource/$imgName";
+      
     }
 }

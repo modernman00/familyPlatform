@@ -13,17 +13,18 @@ const formInput = document.querySelectorAll('.loginNow');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-const process = () => {
+(() => {
     //clear error from the form
     formData.clearError()
-        // set the maxlength, check the length of the value, raise error
+
+    // set the maxlength, check the length of the value, raise error
     formData.realTimeCheckLen(
         Login.maxLength.id,
         Login.maxLength.max
     );
-}
+})();
 
-process()
+
 
 const LoginSubmission = (e) => {
     try {

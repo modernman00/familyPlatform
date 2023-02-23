@@ -26,7 +26,6 @@ var config = {
   }
 };
 var renderHtml = function renderHtml(el) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(el);
   if (el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     var img = el.img ? "/img/profile/".concat(el.img) : "/avatar/avatarF.png";

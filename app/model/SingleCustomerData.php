@@ -39,7 +39,7 @@ class SingleCustomerData extends InnerJoin
 			// json_encode(["message" => "mesage"]);
 			
 			if (!$query) {
-				throw new \Exception("Error Processing Request - query", 1);
+				throw new \Exception("Error Processing Request - query", 301);
 			}
 
 			foreach ($query as $query);

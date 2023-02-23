@@ -16,7 +16,7 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    static function commentLink2Img($imgPath)
+    public static function commentLink2Img($imgPath)
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "picture");
         return parent::selectFn2(query: $query, bind: [$imgPath]);

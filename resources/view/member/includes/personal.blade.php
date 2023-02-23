@@ -6,8 +6,8 @@
       {{--  NAME  --}}
 
       <h4 class="w3-center">
-        <b><i>{{ $data['firstName']  }} {{ $data['lastName'] }}</i> </b>
-        {{--  {{ $data['id'] }}  --}}
+        <b><i>{{ $data['firstName']  }} {{ $data['lastName'] }} </i> </b>
+         {{-- {{ $data['id'] }}  --}}
 
       </h4>
 
@@ -71,10 +71,6 @@
 
   @includeif('member/includes/accordion')
   <br>
-
-  <!-- INTEREST -->
-
-  @includeif('member/includes/interest')
 
   <br>
 

@@ -37,51 +37,50 @@ class ProfilePage extends ProcessImg
 
     public function __construct()
     {
-        unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
+        try {
+            unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
 
-        //TODO something is destroying the session after a few hours: find out
+            //TODO something is destroying the session after a few hours: find out
 
-        // GET MEMBER'S DATA
-        $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
-        $this->id = checkInput($_SESSION['memberId']);
+            // GET MEMBER'S DATA
+            $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
 
-        $setData = new SingleCustomerData;
+            $this->id = checkInput($_SESSION['memberId']);
 
-        $table = ['personal', 'contact', 'otherFamily', 'post'];
+            $setData = new SingleCustomerData;
 
-        $this->memberData = $setData->getCustomerData($this->id, $table);
+            $table = ['personal', 'contact', 'otherFamily', 'post', 'profile_pics'];
 
-        //GET POST DATA 
+            $this->memberData = $setData->getCustomerData($this->id, $table);
 
-        $this->allPostData = Post::getAllPostProfilePics();
+            //GET POST DATA 
+            $this->allPostData = Post::getAllPostProfilePics();
 
-        // printArr($this->allPostData);
+            //GET ALL EVENTS DATA
+            $this->eventData = DataAll::getEventData();
 
-        //GET ALL EVENTS DATA
-        $this->eventData = DataAll::getEventData();
+            //GET COMMENT DATA
+            $this->allCommentData = Post::getAllCommentProfilePics();
 
-        //GET COMMENT DATA
-        $this->allCommentData = Post::getAllCommentProfilePics();
+            // POST AND ID
+            $this->post2Id = Post::postLink2Id($this->id);
 
-        // POST AND ID
-        $this->post2Id = Post::postLink2Id($this->id);
-
-        // COMMENT AND POST NO 
-        //printArr($this->memberData);
-        //     $postId = $this->allPostData['post_no'];
-        //    $this->comment2Post = Post::commentLink2Post($postId);
-
-        $this->getAllPics = Post::getAllPostPics($this->id);
+            $this->getAllPics = Post::getAllPostPics($this->id);
+        } catch (Exception $e) {
+            showError($e);
+        }
     }
 
     public function index()
     {
-        if (!$_SESSION['loggedIn']) {
-            msgException(404, "How did you get here?");
-            header("location: /login");
-        }
 
         try {
+            if (!$_SESSION['loggedIn']) {
+                // $tokenErr = "Alien! How did you get here?";
+                // view('error/genError', ['error' => $tokenErr]);
+                // msgException(404, "How did you get here?");
+                header("location: /login");
+            }
 
             $_SESSION['id'] = $this->id;
             $_SESSION['fName'] = $this->memberData['firstName'];
@@ -96,12 +95,10 @@ class ProfilePage extends ProcessImg
             // if token is verified
 
             if (!$result) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
+                header("location: /login");
+                // $tokenErr = "Authentication failed";
+                // view('error/genError', ['error' => $tokenErr]);
             }
-
-
-
 
             view('member/profilePage', [
                 'data' => $this->memberData,
@@ -122,7 +119,7 @@ class ProfilePage extends ProcessImg
 
 
         if (!$_POST) {
-            throw new \Exception("There was no post data", 1);
+            throw new Exception("There was no post data", 1);
         }
         // SANITISE THE POST 
         unset($_POST['post_img']);
@@ -243,8 +240,6 @@ class ProfilePage extends ProcessImg
         $comment2Img = Post::commentLink2Img($postId);
 
         // $comment2Post = Post::commentLink2Post($postId);
-
-        // printArr($comment2Post);
 
         view('showImage', [
             'imagePath' => $imagePath,

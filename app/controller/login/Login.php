@@ -47,7 +47,7 @@ class Login extends Select
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
             //1.  token verified
-            CheckToken::tokenCheck('token', '/error/token');
+            CheckToken::tokenCheck('token', '/login/code');
             //2. create min and max limit
             $minMaxData = [
                 'data' => ['email', 'password'],
