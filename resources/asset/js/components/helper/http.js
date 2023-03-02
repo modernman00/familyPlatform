@@ -20,8 +20,11 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
     const processFormDataAction = (addClass, data) => {
 
         id(notificationId).style.display = "block" // unblock the notification
+
         id(notificationId).classList.add(addClass) // add the success class
+
         id('error').innerHTML = data // error element
+
         id('loader').classList.remove('loader') // remove loader
 
     }
@@ -55,30 +58,31 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
     // AXIOS POST FUNCTIONALITY
     await axios.post(url, formEntries, options)
         .then(response => {
-            console.log(response)
 
             // TO DECIDE ON THE NOTIFICATION
             let theClass = addClassByCSS(css, 'green');
 
             processFormDataAction(theClass, response.data.message)
 
-            // set timer to redirect to the homepage
+            //set timer to redirect to the homepage
             if (redirect) {
                 setTimeout(() => {
-                    //window.location.replace(redirect)
                     window.location.assign(redirect)
                 }, 2000)
             }
-            //it clears all the contents
-            // formData.clearHtml()
+            // it clears all the contents
+            formData.clearHtml()
+
         }).catch(error => {
-            // log(error.response.data)
+
             let theClass = addClassByCSS(css, 'red');
 
-            if (error.response.data) {
-                // log("we love" + error)
-                processFormDataAction(theClass, error.response.data.message)
-            }
+            // if (error.response.data.message === "We do not recognise what you are doing") {
+            //     window.location.assign('/login')
+            // }
+
+            processFormDataAction(theClass, error.response.data.message)
+
         })
 }
 

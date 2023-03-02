@@ -546,8 +546,11 @@ var postFormData = /*#__PURE__*/function () {
           notificationId = "".concat(formId, "_notification"); // the notification function
           processFormDataAction = function processFormDataAction(addClass, data) {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).style.display = "block"; // unblock the notification
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).classList.add(addClass); // add the success class
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = data; // error element
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader'); // remove loader
           };
           addClassByCSS = function addClassByCSS(theCss, status) {
@@ -570,28 +573,26 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
-            console.log(response);
-
             // TO DECIDE ON THE NOTIFICATION
             var theClass = addClassByCSS(css, 'green');
             processFormDataAction(theClass, response.data.message);
 
-            // set timer to redirect to the homepage
+            //set timer to redirect to the homepage
             if (redirect) {
               setTimeout(function () {
-                //window.location.replace(redirect)
                 window.location.assign(redirect);
               }, 2000);
             }
-            //it clears all the contents
-            // formData.clearHtml()
+            // it clears all the contents
+            formData.clearHtml();
           })["catch"](function (error) {
-            // log(error.response.data)
             var theClass = addClassByCSS(css, 'red');
-            if (error.response.data) {
-              // log("we love" + error)
-              processFormDataAction(theClass, error.response.data.message);
-            }
+
+            // if (error.response.data.message === "We do not recognise what you are doing") {
+            //     window.location.assign('/login')
+            // }
+
+            processFormDataAction(theClass, error.response.data.message);
           });
         case 12:
         case "end":
@@ -786,7 +787,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
-/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
 
 
 
@@ -812,27 +812,29 @@ var LoginSubmission = function LoginSubmission(e) {
   try {
     e.preventDefault();
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
+
+    formData.clearError(); // empty the error element
 
     // if (id('checkbox').checked) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
+
     formData.emailVal(); // sanitise email
+
     formData.massValidate(); // validate and sanitise data
+
     if (formData.error.length == 0) {
       // display the success information for 10sec
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
+
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
-      localStorage.setItem('redirect', '/member/ProfilePage');
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)('got here');
+
+      localStorage.setItem('redirect', '/member/ProfilePage'); // this gets picked up by the code.js
+
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/login", "loginNow", "/login/code");
     } else {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(formData.error);
       alert('The form cannot be submitted. Please check the errors');
-      process();
     }
-    // } 
-    // else {
-    // 	alert('To continue, you need to agree to the our privacy policy')
-    // }
   } catch (err) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }

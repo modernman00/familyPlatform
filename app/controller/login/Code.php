@@ -32,7 +32,7 @@ class Code extends Select
             $code = checkInput($_POST["code"]);
 
             if (!$_SESSION['identifyCust']) {
-                $this->errorArr[] = "Hmm, we can't seem to find you - try again";
+                // $this->errorArr[] = "Hmm, we can't seem to find you - try again";
                 msgException(401, "Hmm, we can't seem to find you - try again");
             }
 
@@ -40,14 +40,11 @@ class Code extends Select
 
             if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 1000) {
                 $diff = time() - $_SESSION[self::TOKEN_SESSION];
-                $this->errorArr[] = "Invalid or expired Token";
+                // $this->errorArr[] = "Invalid or expired Token";
                 msgException(401, "Invalid or expired Token $diff");
             }
-            //unset($_SESSION[self::TOKEN_SESSION]); // job done! delete
 
             // check if the code is stored in the database
-
-            CheckToken::tokenCheck('token', '/login/code');
 
             $query = Select::formAndMatchQuery(selection: "SELECT_COUNT_TWO", table: 'account', identifier1: 'id', identifier2: 'token');
 
@@ -55,12 +52,13 @@ class Code extends Select
 
             if (!$result) {
 
-                $this->errorArr[] = "There is a problem - Code";
+                // $this->errorArr[] = "There is a problem - Code";
                 msgException(401, "There is a problem - check the Code");
-                // throw new Exception(, 1);
             }
 
-            if (count($this->errorArr) == 0) {
+            CheckToken::tokenCheck('token');
+
+            // if (count($this->errorArr) == 0) {
 
                 // for normal login redirection
                 if (isset($_SESSION['login'])) {
@@ -101,7 +99,7 @@ class Code extends Select
 
                     msgException(401, "You are an alien");
                 }
-            }
+            // }
         } catch (\Throwable $th) {
             showError($th);
         }

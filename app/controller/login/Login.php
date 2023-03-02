@@ -46,8 +46,6 @@ class Login extends Select
             header("Access-Control-Max-Age: 3600");
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-            //1.  token verified
-            CheckToken::tokenCheck('token', '/login/code');
             //2. create min and max limit
             $minMaxData = [
                 'data' => ['email', 'password'],
@@ -63,9 +61,11 @@ class Login extends Select
 
             $_SESSION['ID'] = $data['id'];
 
-
             //5. check password 
             $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
+
+                  //1.  token verified
+            CheckToken::tokenCheck('token');
 
             //4. control for login
             $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
@@ -134,7 +134,7 @@ class Login extends Select
         // header('Location: /admin/reviewApps');
     }
 
-    function adminSignOut()
+    public function adminSignOut()
     {
         $url = $_SESSION[self::LOGIN_TYPE] ?? '/';
         session_regenerate_id();

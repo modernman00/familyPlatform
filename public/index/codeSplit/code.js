@@ -31,6 +31,7 @@ var LoginCode = function LoginCode(e) {
 
     // get the direct from the login script (getstorage)
     var location = localStorage.getItem('redirect');
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(location);
     (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/code", "codeForm", location);
     localStorage.removeItem('redirect');
   } catch (err) {
@@ -99,8 +100,11 @@ var postFormData = /*#__PURE__*/function () {
           notificationId = "".concat(formId, "_notification"); // the notification function
           processFormDataAction = function processFormDataAction(addClass, data) {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).style.display = "block"; // unblock the notification
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).classList.add(addClass); // add the success class
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = data; // error element
+
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader'); // remove loader
           };
           addClassByCSS = function addClassByCSS(theCss, status) {
@@ -123,28 +127,26 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
-            console.log(response);
-
             // TO DECIDE ON THE NOTIFICATION
             var theClass = addClassByCSS(css, 'green');
             processFormDataAction(theClass, response.data.message);
 
-            // set timer to redirect to the homepage
+            //set timer to redirect to the homepage
             if (redirect) {
               setTimeout(function () {
-                //window.location.replace(redirect)
                 window.location.assign(redirect);
               }, 2000);
             }
-            //it clears all the contents
-            // formData.clearHtml()
+            // it clears all the contents
+            formData.clearHtml();
           })["catch"](function (error) {
-            // log(error.response.data)
             var theClass = addClassByCSS(css, 'red');
-            if (error.response.data) {
-              // log("we love" + error)
-              processFormDataAction(theClass, error.response.data.message);
-            }
+
+            // if (error.response.data.message === "We do not recognise what you are doing") {
+            //     window.location.assign('/login')
+            // }
+
+            processFormDataAction(theClass, error.response.data.message);
           });
         case 12:
         case "end":

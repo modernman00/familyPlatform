@@ -21,6 +21,8 @@ const LoginCode = (e) => {
         // get the direct from the login script (getstorage)
         const location = localStorage.getItem('redirect')
 
+        log(location)
+
         postFormData("/login/code", "codeForm", location)
 
         localStorage.removeItem('redirect')

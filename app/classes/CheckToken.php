@@ -2,7 +2,6 @@
 
 namespace App\classes;
 
-
 class CheckToken
 {
 
@@ -14,19 +13,17 @@ class CheckToken
      *
      * @return void
      */
-    public static function tokenCheck($token, $redirect)
+    public static function tokenCheck($token):void
     {
-        try {
+        // try {
             $tokenCheck = $_SESSION[$token] ?? "bad";
             $postToken = $_POST[$token] ?? "bad";
             // invalidate $token stored in session
             unset($_SESSION[$token]);
             if ($tokenCheck != $postToken) {
-                header("Location: $redirect");
-                exit();
-            }
-        } catch (\Throwable $th) {
-            showError($th);
-        }
+
+                msgException(401, "We do not recognise what you are doing");
+              
+      }
     }
 }
