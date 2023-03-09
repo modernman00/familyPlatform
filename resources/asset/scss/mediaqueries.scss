@@ -24,7 +24,7 @@
 @media screen and (max-width: 576px) {
     body {
         // font-size: 0.5em;
-        font-size: 0.5em;
+        font-size: 0.9em;
     }
     .subscribeForm {
         margin-left: 5px;
@@ -39,6 +39,9 @@
         margin-left: 0px;
         margin-right: 0px;
         margin-bottom: 20px;
+    }
+    .allMember_card_content {
+        font-size: 4em;
     }
 }
 

@@ -46,8 +46,6 @@
 {{-- POST MODAL --}}
 <script>
 
-
-
 // const checkTest= @php echo json_encode($allData) @endphp;
 const checkTest= @json($allData);
 
@@ -56,20 +54,15 @@ const processComment = (el) => {
       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
 }
 
-
-
 const postId = checkTest.map(el=> {
 
   return el.id
   
 })
 
-
-
 // checkTest.map(el => {
 //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
 // })
-
 </script>
 
 @endsection

@@ -385,7 +385,7 @@ input::placeholder {
 /* When a screen is 992px or smaller, the background color will be pink */
 @media screen and (max-width: 576px) {
   body {
-    font-size: 0.5em;
+    font-size: 0.9em;
   }
   .subscribeForm {
     margin-left: 5px;
@@ -400,6 +400,9 @@ input::placeholder {
     margin-left: 0px;
     margin-right: 0px;
     margin-bottom: 20px;
+  }
+  .allMember_card_content {
+    font-size: 4em;
   }
 }
 @media only screen and (max-width: 600px) {
@@ -487,7 +490,8 @@ input::placeholder {
   width: 5em;
 }
 
-.inputComment, .submitComment {
+.inputComment,
+.submitComment {
   width: 100%;
   padding: 12px 20px;
   margin: 8px 0;

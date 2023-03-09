@@ -23,7 +23,7 @@ const renderHtml = (el) => {
  
         <div class="card-body">
                     <h4 class='card-title'>${el.firstName} ${el.lastName}</h4>
-                    <p class="card-text"><b>Alias:</b> ${el.alias} 
+                    <p class="card-text allMember_card_content"><b>Alias:</b> ${el.alias} 
                     <br> <b>Father:</b>  ${el.fatherName}
                     <br> <b>Mother:</b> ${el.motherName}
                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
