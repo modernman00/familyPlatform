@@ -10,6 +10,10 @@
         border: none;
         background-color: transparent;
     }
+    .loginNow {
+        margin-left: 15%;
+        margin-right: 15%;
+    }
 }
 
 // @media (min-width: 576px) {
@@ -74,5 +78,16 @@
     }
     .commentInput {
         width: 100%;
+    }
+    .loginNow {
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .loginNow {
+        margin-left: 5%;
+        margin-right: 5%;
     }
 }

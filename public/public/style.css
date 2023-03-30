@@ -381,6 +381,10 @@ input::placeholder {
     border: none;
     background-color: transparent;
   }
+  .loginNow {
+    margin-left: 15%;
+    margin-right: 15%;
+  }
 }
 /* When a screen is 992px or smaller, the background color will be pink */
 @media screen and (max-width: 576px) {
@@ -431,6 +435,16 @@ input::placeholder {
   }
   .commentInput {
     width: 100%;
+  }
+  .loginNow {
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+}
+@media screen and (max-width: 768px) {
+  .loginNow {
+    margin-left: 5%;
+    margin-right: 5%;
   }
 }
 .form__login__logo {

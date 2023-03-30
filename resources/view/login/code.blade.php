@@ -13,7 +13,7 @@
   
 
     <hr class="my-2">
-    <form action="" method="post" id="codeForm" style="margin-left:20%; margin-right:20%;">
+    <form action="" method="post" id="codeForm">
         <div class="form-group">
             <br>
             <div class='row'>

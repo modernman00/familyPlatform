@@ -7,7 +7,7 @@
 
 
     <hr class="my-2">
-    <form action="/login/forgot" id="forgotPassword" method="post" style="margin-left:20%; margin-right:20%;">
+    <form action="/login/forgot" id="forgotPassword" method="post">
         <div class="form-group">
             <br>
             <div class='row'>

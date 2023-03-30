@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
 
     {{-- custom css --}}
-    {{--  <link rel="stylesheet" href="/style.css">  --}}
+     {{-- <link rel="stylesheet" href="/style.css">  --}}
 
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
@@ -85,6 +85,59 @@
     -webkit-animation-duration: 1.5s;
     animation-duration: 1.5s;
   }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media screen and (min-width: 576px) {
+     .loginNow {
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+/* // Medium devices (tablets, 768px and up) */
+@media screen and (min-width: 768px) {
+     .loginNow {
+        margin-left: 15%;
+        margin-right: 15%;
+    }
+
+
+    #forgotPassword, #codeForm {
+      margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+
+@media screen and (min-width: 992px) {
+     .loginNow {
+        margin-left: 15%;
+        margin-right: 15%;
+    }
+
+    #forgotPassword, #codeForm {
+      margin-left: 15%;
+        margin-right: 15%;
+    }
+}
+/* X-Large devices (large desktops, 1200px and up) */
+@media screen and (min-width: 1200px) {
+     .loginNow {
+        margin-left: 30%;
+        margin-right: 30%;
+    }
+     #forgotPassword, #codeForm {
+      margin-left: 30%;
+        margin-right: 30%;
+    }
+}
+/* XX-Large devices (larger desktops, 1400px and up) */
+@media screen and (min-width: 1400px) {
+     .loginNow {
+        margin-left: 30%;
+        margin-right: 30%;
+    }
 }
 
 </style>
