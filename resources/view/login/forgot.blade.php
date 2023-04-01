@@ -3,11 +3,14 @@
 @section('content')
 
 <div class="styleForm" style="margin-top: 4rem;">
-    <h3 style="margin-left:20%; margin-right:20%;">Please, enter the email to verify your identity</h3>
+
+    <div class="styleform_header">
+    <h3>Please, enter the email to verify your identity</h3>
+    </div>
 
 
     <hr class="my-2">
-    <form action="/login/forgot" id="forgotPassword" method="post">
+    <form action="/login/forgot" id="forgotPassword" method="post" class="styleform_form">
         <div class="form-group">
             <br>
             <div class='row'>

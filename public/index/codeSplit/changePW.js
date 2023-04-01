@@ -310,7 +310,7 @@ var name = function name(fullName) {
   return "<h6 id=\"fullName\"><b>".concat(fullName, "</b> </h6>");
 };
 var postedAt = function postedAt(date) {
-  return "<div class=\"timeago w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 var nameImgTiming = function nameImgTiming(data) {
   var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";

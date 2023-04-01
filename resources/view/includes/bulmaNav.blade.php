@@ -1,7 +1,7 @@
 <nav class="navbar" role="navigation" aria-label="main navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="/">
-      <img src={{ getenv("IMG_CONTRACT") }} >
+      <img src={{ getenv("IMG_CONTRACT") }} alt="logo" >
     </a>
 
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
@@ -42,7 +42,7 @@
           </a>
         </div>
       </div>  --}}
-    </div>
+  </div>
 
     <div class="navbar-end">
       <div class="navbar-item">

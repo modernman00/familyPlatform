@@ -4,16 +4,15 @@
 
 <div class="styleForm" style="margin-top: 4rem;">
 
-    <h3 style="margin-left:20%; margin-right:20%;">
+<div class="styleform_header">
+      <h3>
         Please, enter the CODE to verify your identity
     </h3>
 
-    {{-- <p id="codeError"></p> --}}
-
-  
+</div>
 
     <hr class="my-2">
-    <form action="" method="post" id="codeForm">
+    <form action="" method="post" class="styleform_form" id="codeForm">
         <div class="form-group">
             <br>
             <div class='row'>

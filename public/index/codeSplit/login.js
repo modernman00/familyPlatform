@@ -884,7 +884,7 @@ var LoginSubmission = function LoginSubmission(e) {
     e.preventDefault();
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
-
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)(".notification").style.display = "none";
     // if (id('checkbox').checked) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
     formData.emailVal(); // sanitise email

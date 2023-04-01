@@ -20,11 +20,12 @@
     <h4>{{ $data['firstName'] }} {{ $data['lastName'] }}</h4>
     <p>
       {{ $data['firstName'] }} {{ $data['lastName'] }} lives in {{ $data['country'] }}.
-      @if ( $data['gender'] == "male")
+      {{-- @if ( $data['gender'] == "male")
       He
       @else
-      She
-      @endif
+      She  is a/an 
+      @endif --}}
+
 
 
     </p>

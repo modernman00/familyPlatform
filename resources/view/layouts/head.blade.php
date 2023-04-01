@@ -24,6 +24,20 @@
       font-family: "Open Sans", sans-serif
     }
 
+    @media screen and (min-width: 768px) {
+    .postTimeCal {
+        font-size: 1em;
+    }
+}
+
+@media screen and (min-width: 576px) {
+    .postTimeCal {
+        font-size: 1em;
+    }
+}
+
+
+
 
     .loader {
       border: 16px solid #f3f3f3;

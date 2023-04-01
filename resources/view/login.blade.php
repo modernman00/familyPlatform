@@ -10,14 +10,15 @@
   <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" width="72" height="72"
     style="margin-left:40%; margin-bottom:5rem;">
 
-  <form action="{{ $formAction }}" method="POST" class="loginNow" id="loginNow" enctype="multipart/form-data">
+  <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow" enctype="multipart/form-data">
 
     <div id="setLoader">
-      <div id="loader">
+      <div id="loader"></div>
         <div class="notification" id="loginNow_notification">
+      
           <p id="error"></p>
         </div>
-      </div>
+      
     </div>
 
     <div class="form-group">

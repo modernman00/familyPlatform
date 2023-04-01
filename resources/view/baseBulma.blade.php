@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title')</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 
     {{-- custom css --}}
      {{-- <link rel="stylesheet" href="/style.css">  --}}
@@ -18,11 +18,12 @@
 
   <style>
 .loader {
+
     border: 16px solid #11e11b79;
     border-radius: 50%;
     border-top: 16px solid #2092ddf3;
-    width: 350px;
-    height: 350px;
+    width: 120px;
+    height: 120px;
     -webkit-animation: spin 2s linear infinite; /* Safari */
     animation: spin 2s linear infinite;
 }
@@ -88,57 +89,63 @@
 }
 
 /* Small devices (landscape phones, 576px and up) */
+
 @media screen and (min-width: 576px) {
-     .loginNow {
+     .styleform_form{
         margin-left: 5%;
         margin-right: 5%;
     }
 }
 /* // Medium devices (tablets, 768px and up) */
 @media screen and (min-width: 768px) {
-     .loginNow {
+     /* .loginNow {
         margin-left: 15%;
         margin-right: 15%;
-    }
-
-
-    #forgotPassword, #codeForm {
+    } */
+    .styleform_form {
       margin-left: 5%;
-        margin-right: 5%;
+      margin-right: 5%;
     }
 }
 
 /* Large devices (desktops, 992px and up) */
 
 @media screen and (min-width: 992px) {
-     .loginNow {
-        margin-left: 15%;
-        margin-right: 15%;
-    }
 
-    #forgotPassword, #codeForm {
+    .styleform_form{
       margin-left: 15%;
         margin-right: 15%;
     }
 }
 /* X-Large devices (large desktops, 1200px and up) */
 @media screen and (min-width: 1200px) {
-     .loginNow {
+     .styleform_form {
         margin-left: 30%;
         margin-right: 30%;
     }
-     #forgotPassword, #codeForm {
-      margin-left: 30%;
-        margin-right: 30%;
-    }
+   
 }
 /* XX-Large devices (larger desktops, 1400px and up) */
 @media screen and (min-width: 1400px) {
-     .loginNow {
+     .styleform_form {
         margin-left: 30%;
         margin-right: 30%;
     }
+
 }
+
+section {
+  min-height: calc(100vh - 100px);
+}
+
+.footer {
+  height: 50px
+}
+
+
+
+
+
 
 </style>
 
@@ -148,7 +155,7 @@
 
   @include('includes/bulmaNav')
 
-  <section class="section">
+  <section class="section content">
 
     <div class="container">
        @yield('content')
@@ -156,7 +163,7 @@
 
   </section>
 
-  <footer class="footer">
+  <div class="footer">
   <div class="content has-text-centered">
     
       <p>Website developed and maintained by Olawale Olaogun </p>
@@ -171,7 +178,7 @@
       </svg> back to top
     </a>
   </div>
-</footer>
+</div>
 
       <script src="/manifest.js"></script>
      <script src="/vendor.js"></script>
