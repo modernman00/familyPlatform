@@ -139,7 +139,6 @@ export const appendNewPost = (el) => {
 export const commentHTML = (data) => {
 
     const imgURL = (data.img) ? data.img : data.profileImg
-    console.log(imgURL)
 
     const img = (imgURL) ? `/img/profile/${imgURL}` : "/avatar/avatarF.png"
 

@@ -143,6 +143,10 @@ section {
 }
 
 
+.styleform_header{
+  text-align: center;
+}
+
 
 
 
