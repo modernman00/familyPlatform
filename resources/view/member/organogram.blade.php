@@ -66,7 +66,7 @@ na
     <div id="chart_div"></div>
 </div> --}}
 
-<h2 class="myFamilyTree">My family tree</h2>
+<h2 class="myFamilyTree"> {{ $data['firstName'] }}'s  family tree</h2>
 <hr>
 <div class="tree">
     <ul>

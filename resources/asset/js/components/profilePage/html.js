@@ -154,7 +154,9 @@ export const commentHTML = (data) => {
 const showComment = (comment) => {
 
 
-    if (!comment) { return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>` } // only run if there is comment
+    if (!comment) {
+        return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>`
+    } // only run if there is comment
 
     return comment.map(commentElement => {
         return commentHTML(commentElement)
