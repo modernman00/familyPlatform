@@ -36,7 +36,7 @@
         "autocompleter": "^6.1.0",
         "axios": "^0.21.1",
         "axios-retry": "^3.1.9",
-        "babel-core": "^4.7.16",
+        "babel-core": "^6.26.3",
         "babel-loader": "^8.2.2",
         "babel-plugin-syntax-dynamic-import": "^6.18.0",
         "babel-preset-env": "^1.7.0",
