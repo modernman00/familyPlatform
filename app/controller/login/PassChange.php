@@ -36,7 +36,7 @@ class PassChange extends Pass
             $email = checkInputEmail($_SESSION['email']);
 
             //3.  token verified
-            CheckToken::tokenCheck('token', '/login/changePW');
+            CheckToken::tokenCheck('token');
 
             $result = $this->update($this->table, 'password', $cleanData['password'], 'email', $email);
             if (!$result) {

@@ -6,9 +6,7 @@ namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
-    Select,
-    JwtHandler,
-    verifyToken
+    Select
 };
 
 use Exception;
@@ -25,7 +23,6 @@ class Login extends Select
 
         $formAction = self::LOGIN;
         $_SESSION[self::LOGIN_TYPE] = self::LOGIN;
-        // \printArr(\get_defined_constants());
         return view('login', compact('formAction'));
     }
 

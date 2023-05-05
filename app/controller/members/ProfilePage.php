@@ -6,8 +6,7 @@ namespace App\controller\members;
 
 use App\model\{
     SingleCustomerData,
-    Post,
-    Email
+    Post
 };
 
 use App\classes\{
@@ -17,7 +16,7 @@ use App\classes\{
     VerifyToken,
 };
 
-use Pusher\Pusher;
+// use Pusher\Pusher;
 use App\model\AllMembersData as DataAll;
 
 
@@ -89,7 +88,7 @@ class ProfilePage extends ProcessImg
 
             //  verify token
 
-            $tokenVerify = new verifyToken();
+            $tokenVerify = new VerifyToken();
             $result = $tokenVerify->profilePage();
 
             // if token is verified
@@ -173,7 +172,6 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getComment = $this->processPostData();
-            // \printArr($getComment);
             Insert::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);
@@ -190,7 +188,6 @@ class ProfilePage extends ProcessImg
         try {
             // process the image 
             $this->processProfileImage();
-            \printArr($_FILES);
             header(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);

@@ -15,7 +15,7 @@
   
             <p class="eventInfo"><strong>RSVP: </strong>{{ $event['firstName'] }} {{ $event['lastName'] }}</p>
             <p class="eventInfo"><strong>Event: </strong>{{ $event['eventName'] }}</p>
-            <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} |<i style="color: rgba(11, 11, 201, 0.631)"> In {{ number2word($dateDiff) }} Days</i> </p>
+            <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} |<i style="color: rgba(11, 11, 201, 0.631)"> In {{ number2word($dateDiff) }} Day(s)</i> </p>
             <p class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</p>
             <p class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</p>
            <hr>

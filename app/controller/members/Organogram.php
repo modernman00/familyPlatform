@@ -1,5 +1,6 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\controller\members;
 
@@ -15,16 +16,16 @@ class Organogram extends SingleCustomerData
     {
         $id =  checkInput($_GET['id']);
 
-         $table = ['personal', 'profile_pics', 'otherFamily'];
+        $table = ['personal', 'profile_pics', 'otherFamily'];
 
-         $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');
-         $getSibling = Select::selectFn2($siblingQuery, [$id]);
+        $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');
 
+        // get the siblings and their email
+        $getSibling = Select::selectFn2($siblingQuery, [$id]);
         $kidQuery = Select::formAndMatchQuery('SELECT_ONE', 'kids', 'id');
-         $getKids = Select::selectFn2($kidQuery, [$id]);
+        $getKids = Select::selectFn2($kidQuery, [$id]);
 
         $data = $this->getCustomerData($id, $table);
-
 
         // get the kids / spouse  of the siblings
 
@@ -34,22 +35,39 @@ class Organogram extends SingleCustomerData
          * 3. use sibling id to get sibling othefamily table and kids from the kids table
          */
 
-        $newSiblingData= [] ;
 
-        $findSiblingIdQuery = Select::formAndMatchQuery('SELECT_ONE', 'contact', 'email');
+        $newSiblingData = []; // the siblings with their own data
 
-        foreach ($getSibling as $value) {
-            
-            $findSiblingId = Select::selectFn2( $findSiblingIdQuery, [$value['sibling_email']]);
+        $findSiblingIdQuery = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'contact', identifier1: 'email');
 
-            if($findSiblingId){
+        foreach ($getSibling as $getSibling2) {
 
-                array_push($newSiblingData, $findSiblingId);
+            // get the siblings details : sibling id using the email 
+            $findSiblingId = Select::selectFn2($findSiblingIdQuery, [$getSibling2['sibling_email']]);
 
+            unset($getSibling2['id'], $getSibling2['no']);
+
+            if ($findSiblingId[0] != null) {
+                array_push($newSiblingData, $findSiblingId[0]);
             }
         }
-    //    printArr($newSiblingData[0]);
-        
-        view('member/organogram', compact('data','getSibling', 'getKids'));
+
+        // $newSiblingData - the siblings data showing the id and email
+
+        foreach ($newSiblingData as $sib) {
+
+            $getKidsBySib = Select::selectFn2($kidQuery, [$sib['id']]);
+
+            $theKidCount = count($getKidsBySib);
+            $kidCount = ['kidCount' => $theKidCount];
+
+            $siblingKid = array_merge($sib, $getSibling2, $kidCount, $getKidsBySib);
+
+            foreach ($getKidsBySib as $sibKids) {
+            }
+        }
+
+
+        view('member/organogram', compact('data', 'getSibling', 'getKids', 'siblingKid'));
     }
 }

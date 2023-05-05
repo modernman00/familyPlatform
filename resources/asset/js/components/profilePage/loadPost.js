@@ -1,4 +1,3 @@
-
 import { id, log } from '../global'
 import { appendNewPost, allPost, showComment } from '../profilePage/html'
 import { getApiData, getMultipleApiData } from "../helper/http"
@@ -34,7 +33,7 @@ try {
 
             let newData = state.comment.some(com => com.comment_no === commentData.comment_no); // check if the comment no does not already exist
 
-            if (!newData) {   // if it is not available, add to the data state
+            if (!newData) { // if it is not available, add to the data state
                 state.comment.push(commentData)
             }
         }
@@ -51,7 +50,7 @@ try {
 
                 let newData = state.post.some(el => el.post_no === newPostData.post_no); // check if the post no does not already exist
 
-                if (!newData) {   // if it is not available, add to the data state
+                if (!newData) { // if it is not available, add to the data state
                     state.post.push(newPostData)
                 }
             }
@@ -78,9 +77,5 @@ try {
     }).catch(err => log(err))
 
 } catch (error) {
-    console.log(error)
+    //  console.log(error)
 }
-
-
-
-

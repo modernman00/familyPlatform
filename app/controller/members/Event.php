@@ -36,18 +36,16 @@ class Event extends AllMembersData
         }
     }
 
-    static function sendReminder()
+    public static function sendReminder()
     {
         try {
          
             $todayDate =  date('Y-m-d');
             $data = parent::getEventData();
-            // printArr($data);
+          
 
             self::getEventMonth($data);
-            // printArr(self::getEventWeek($data));
-
-            // echo count(self::getEventWeek($data)) . "total number of array";
+        
 
             foreach ($data as $data) {
 
@@ -160,7 +158,7 @@ class Event extends AllMembersData
         return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
 
-    static function getEventData()
+   public static function getEventData()
     {
         $allEventData = allMembersData::getEventData();
 
@@ -169,7 +167,7 @@ class Event extends AllMembersData
         \msgSuccess(201, $allEventData);
     }
 
-    static function getEventByNo()
+   public static function getEventByNo()
     {
 
         try {

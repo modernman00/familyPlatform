@@ -7,7 +7,7 @@
     const dataPull = @json($data, JSON_PRETTY_PRINT);
     const kids = @json($getSibling, JSON_PRETTY_PRINT);
 
-        console.log(kids);
+       // console.log(kids);
     
 
         google.charts.load('current', {packages:["orgchart"]});
@@ -66,7 +66,7 @@ na
     <div id="chart_div"></div>
 </div> --}}
 
-<h2 class="myFamilyTree"> {{ $data['firstName'] }}'s  family tree</h2>
+<h2 class="myFamilyTree"> {{ $data['firstName'] }}'s  family</h2>
 <hr>
 <div class="tree">
     <ul>
@@ -76,10 +76,9 @@ na
             {{--  THE CHILDREN AND GRANDKIDS  --}}
             <ul>
                 <li>
-
                     {{--  check if there is a spouse  --}}
                     @if($data['spouseName'])
-                    <a href="#">
+                    <a href="#"> 
                         {{ $data['spouseName'] }}
                     </a>
                     @else
@@ -101,6 +100,7 @@ na
                         @endforeach
                         @endif
                     </ul>
+                    
                 </li>
 
                 {{--  check if there are siblings  --}}
@@ -109,6 +109,31 @@ na
                 @foreach($getSibling as $siblings)
                 <li>
                     <a href="#">{{ $siblings['sibling_name'] }}</a>
+
+                    @if($siblingKid['sibling_name'] == $siblings['sibling_name'])
+
+                    <ul>
+                        @for ($x = 0; $x < $siblingKid['kidCount']; $x++)
+                           <li>  
+                            <a href="#">{{ $siblingKid[$x]['kid_name'] }}</a> </li>
+                            
+                        @endfor
+                     
+
+                        </ul>
+
+                  
+
+
+                    @endif
+
+
+                    
+                    
+                   
+
+                     
+                    
 
                 </li>
 

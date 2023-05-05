@@ -66,6 +66,8 @@
       <h1 class="cover-heading">THE OLAOGUNS</h1>
       <p class="lead">Social media sites for the Olaoguns and our associates to connect and keep our family tree
         updated.</p>
+
+    
       <p class="lead">
         <a href="/register" class="btn btn-lg btn-secondary">Register</a>
       </p>

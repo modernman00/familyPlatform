@@ -26,7 +26,7 @@ class AllMembersController extends AllMembersData
     public function processApiData()
     {
         try {
-            $tokenVerify = new verifyToken();
+            $tokenVerify = new VerifyToken();
 
             $tokenConfirm = $tokenVerify->profilePage();
 
@@ -52,16 +52,6 @@ class AllMembersController extends AllMembersData
         }
     }
 
-    // public function index2()
-    // {
-    //     try {
-    //         $result = $this->getAllMembers();
-
-    //         view('member/allMembers', compact('result'));
-    //     } catch (\Throwable $th) {
-    //         showError($th);
-    //     }
-    // }
 
     public function setProfile()
     {

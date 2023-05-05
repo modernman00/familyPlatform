@@ -7,9 +7,9 @@ namespace App\controller\login;
 use App\classes\{
     CheckToken,
     Select,
-    jwtHandler
+    JwtHandler
 };
-use Exception;
+
 
 class Code extends Select
 {
@@ -32,7 +32,7 @@ class Code extends Select
             $code = checkInput($_POST["code"]);
 
             if (!$_SESSION['identifyCust']) {
-                // $this->errorArr[] = "Hmm, we can't seem to find you - try again";
+            
                 msgException(401, "Hmm, we can't seem to find you - try again");
             }
 
@@ -40,7 +40,6 @@ class Code extends Select
 
             if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 1000) {
                 $diff = time() - $_SESSION[self::TOKEN_SESSION];
-                // $this->errorArr[] = "Invalid or expired Token";
                 msgException(401, "Invalid or expired Token $diff");
             }
 
@@ -52,7 +51,6 @@ class Code extends Select
 
             if (!$result) {
 
-                // $this->errorArr[] = "There is a problem - Code";
                 msgException(401, "There is a problem - check the Code");
             }
 

@@ -1153,7 +1153,7 @@ try {
     return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
   });
 } catch (error) {
-  console.log(error);
+  //  console.log(error)
 }
 
 /***/ }),

@@ -638,11 +638,11 @@ right connector from last child*/
 
 .tree li a {
   border: 0.3rem solid #ccc;
-  padding: 0.6rem 0.6rem;
+  padding: 0.4rem 0.6rem;
   text-decoration: none;
   color: #666;
   font-family: arial, verdana, tahoma;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   display: inline-block;
   background: white;
   height: 4.4rem;

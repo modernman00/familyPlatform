@@ -34,9 +34,6 @@ class SingleCustomerData extends InnerJoin
 			// remove the first element of the array
 			$firstTable = array_shift($table); 
 			$query = $this->joinParamOr(firstTable:$firstTable, para:$para, table:$table, id:$custId);
-
-			//  printArr($query);
-			// json_encode(["message" => "mesage"]);
 			
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 301);
