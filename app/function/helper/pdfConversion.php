@@ -13,7 +13,6 @@ function htmlToPdf ($x)
       $document->loadHtml($page);
       $document->setPaper('A4', 'portrait');
       $document->render();
-    //  $document->stream();
      $document->stream("Application.pdf", array("Attachment"=>0));
       return $document->output();
       

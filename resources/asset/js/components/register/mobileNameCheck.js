@@ -12,8 +12,6 @@ let mobile = [];
 let motherName = [];
 let checkEmail = [];
 
-console.log(getData);
-
 let fName = id("firstName_id").value;
 let lName = id("lastName_id").value;
 
@@ -303,7 +301,7 @@ document.onkeydown = (e) => {
         };
 
         if (chooseEmail.includes(elementId)) {
-            // console.log(elementId);
+
             id(elementId).addEventListener("keyup", checkFamilyEmail);
         }
     } catch (error) {

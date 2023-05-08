@@ -32,6 +32,7 @@ class SubmitForm extends Db
             showError($e);
         } catch (\Throwable $th) {
             showError($th);
+            return false;
         }
         //
     }

@@ -30,7 +30,7 @@ function notifyCustOfLogIn($data): mixed
 /**
  * It will generate the token, update the login table using the customer No from the $data and send token to customer 
  * @param mixed $data -  must contain customerNo and email
- * @return void 
+ * @return mixed
  * @throws \Exception 
  * @throws \PDOException 
  */
@@ -106,15 +106,6 @@ function returnSuccessCode($msg)
  * @return never 
  * @throws \Exception 
  */
-function returnMsg(int $errCode, string $msg, array $extra = [])
-{
-    http_response_code($errCode); // sets the response to 406
-    echo http_response_code(); // echo the new response code
-    $apiMsg = ['status' => $errCode, 'message' => $msg];
-    return array_merge($apiMsg, $extra);
-}
-
-
 // 8/9/22- i commented out the json code because I want to throw the exception and catch it before using the json
 function msgException(int $errCode, string | int  $msg)
 {

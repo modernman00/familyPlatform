@@ -149,8 +149,8 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
     if ($error) {
 
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
-        msgException(404, $theError);
-        exit;
+        msgException(400, $theError);
+        // exit;
     }
 
     return $sanitisedData;

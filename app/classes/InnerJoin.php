@@ -16,9 +16,8 @@ class InnerJoin extends Db
      * @param string $para the id parameter
      * @param array $table table name
      * @param mixed $id id
-     * @return array
      */
-    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id): array
+    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id)
     {
         try {
             $buildInnerJoinQuery = array_map(
@@ -38,7 +37,8 @@ class InnerJoin extends Db
             return $result->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
-            showError($e);
+             showError($e);
+  
         }
     }
 
@@ -50,11 +50,9 @@ class InnerJoin extends Db
      * @param array $table table names `(do not include the first table)
      * @param string $paraWhere - the para to use with the WHERE keyword
      * @param mixed $bind bind variable
-     *
-     * @return array
      */
 
-    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind): array
+    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind)
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -65,6 +63,7 @@ class InnerJoin extends Db
             return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 

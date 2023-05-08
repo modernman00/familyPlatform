@@ -7,7 +7,7 @@ use PDOException;
 class Delete extends Db
 {
 
-    static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $limit = null)
+    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $limit = null)
     {
         return match ($selection) {
             'DELETE_OR' => "DELETE FROM $table WHERE $identifier1 =? OR $identifier2 = ? $limit",
@@ -21,21 +21,25 @@ class Delete extends Db
     }
 
     /**
-     * 
-     * @param string $table 
-     * @param string $query SELECT * FROM account WHERE id = ? || SELECT * FROM $table WHERE $dev = ? AND $dev2 = ?
-     * @param array|null $bind = ['woguns@ymail.com', "wale@loaneasyfinance.com"]; 
-     * @return array|void 
+     * Executes a DELETE query with the given parameters
+     *
+     * @param string $query The DELETE query to execute
+     * @param array|null $bind An array of parameter values to bind to the query
+     *
+     * @return bool Returns true if the query was executed successfully, false otherwise
+     *
+     * @throws PDOException if an error occurs during query execution
      */
 
-    public static function deleteFn(string $query, array $bind = null): string|int
+    public static function deleteFn(string $query, ?array $bind = null): string|int
     {
         try {
-            $sql = $query;
-            $result = parent::connect2()->prepare($sql);
-            return $result->execute($bind);
+            $statement = parent::connect2()->prepare($query);
+            $statement->execute($bind);
+            return true;
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 }

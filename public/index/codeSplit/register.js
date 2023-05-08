@@ -759,7 +759,6 @@ var fatherName = [];
 var mobile = [];
 var motherName = [];
 var checkEmail = [];
-console.log(getData);
 var fName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("firstName_id").value;
 var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("lastName_id").value;
 
@@ -960,7 +959,6 @@ document.onkeydown = function (e) {
     };
 
     if (chooseEmail.includes(elementId)) {
-      // console.log(elementId);
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).addEventListener("keyup", checkFamilyEmail);
     }
   } catch (error) {

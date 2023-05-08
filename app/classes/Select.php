@@ -62,6 +62,7 @@ class Select extends Db
             return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 
@@ -74,6 +75,7 @@ class Select extends Db
             return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 
@@ -94,6 +96,7 @@ class Select extends Db
             return $result->rowCount();
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 

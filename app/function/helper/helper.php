@@ -164,6 +164,7 @@ function showError($th)
     // $error = $th->getMessage() . " on Line " . $th->getLine() .  " on file " . $th->getFile();
        $error = $th->getMessage();
     echo json_encode(['message' => $error]);
+   
 }
 
 function showErrorExp($th)
