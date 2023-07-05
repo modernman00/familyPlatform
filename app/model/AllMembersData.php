@@ -34,8 +34,8 @@ class AllMembersData extends InnerJoin
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
         if (!$memberData) {
-            http_response_code(400);
-            echo http_response_code();
+            // http_response_code(400);
+            // echo http_response_code();
             throw new Exception(self::ERR_MSG, 400);
         }
 
