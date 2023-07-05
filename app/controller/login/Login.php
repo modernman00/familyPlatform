@@ -20,17 +20,28 @@ class Login extends Select
 
     public function show()
     {
+        try {
 
-        $formAction = self::LOGIN;
-        $_SESSION[self::LOGIN_TYPE] = self::LOGIN;
-        return view('login', compact('formAction'));
+            $formAction = self::LOGIN;
+            $_SESSION[self::LOGIN_TYPE] = self::LOGIN;
+            return view('login', compact('formAction'));
+        } catch (\Throwable $e) {
+
+            showError($e);
+        }
     }
 
     public function showAdmin()
     {
-        $formAction = self::ADMIN;
-        $_SESSION[self::LOGIN_TYPE] = self::ADMIN;
-        return view('login', compact('formAction'));
+        try {
+
+            $formAction = self::ADMIN;
+            $_SESSION[self::LOGIN_TYPE] = self::ADMIN;
+            return view('login', compact('formAction'));
+        } catch (\Throwable $e) {
+
+            showError($e);
+        }
     }
 
     public function login()
@@ -61,7 +72,7 @@ class Login extends Select
             //5. check password 
             $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
-                  //1.  token verified
+            //1.  token verified
             CheckToken::tokenCheck('token');
 
             //4. control for login

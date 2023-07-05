@@ -1,9 +1,7 @@
 <?php
 
 namespace App\controller;
-use App\classes\{
-    Select, InnerJoin
-};
+
 
 class About {
 

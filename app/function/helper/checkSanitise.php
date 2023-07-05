@@ -14,7 +14,7 @@ use App\classes\{
  * @return mixed 
  * @throws \Exception 
  */
-function checkPassword($inputData, $databaseData)
+function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParameter] array $databaseData)
 {
 
     $textPassword = $inputData['password'];

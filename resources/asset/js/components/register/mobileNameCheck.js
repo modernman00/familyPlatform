@@ -6,6 +6,7 @@ import { autocomplete } from "../helper/autocomplete";
 import axios from "axios";
 
 const getData = getAllData();
+
 let firstNameData = [];
 let fatherName = [];
 let mobile = [];
@@ -17,25 +18,40 @@ let lName = id("lastName_id").value;
 
 /**
  *
- * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
- * @param {*} searchElement  the element to search against ("Mango")
+ * @param {* array} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
+ * @param {* string || integer} searchElement  the element to search against ("Mango")
  */
 
 const checkExistence = (baseArray, searchElement) => {
+    if (!Array.isArray(baseArray)) {
+        baseArray = []; // Initialize as an array if it's not already
+    }
     if (baseArray.includes(searchElement) === false) {
         baseArray.push(searchElement);
     }
 };
+// Check if getData is resolved
+if (getData instanceof Promise) {
+    getData
+        .then((el) => {
+            el.forEach((element) => {
+                checkExistence(firstNameData, element.firstName);
+                checkExistence(fatherName, element.fatherName);
+                checkExistence(motherName, element.motherName);
+                checkExistence(mobile, element.mobile);
+                checkExistence(checkEmail, element.email);
+            });
 
-getData.then((el) =>
-    el.map((element) => {
-        checkExistence(firstNameData, element.firstName);
-        checkExistence(fatherName, element.fatherName);
-        checkExistence(motherName, element.motherName);
-        checkExistence(mobile, element.mobile);
-        checkExistence(checkEmail, element.email);
-    }),
-);
+            // Code that relies on the data obtained from getAllData() can be placed here
+        })
+        .catch((error) => {
+            showError(error);
+            // Handle the error appropriately
+        });
+} else {
+    console.log('getData is empty or not resolved');
+    // Handle the case when getData is empty or not resolved
+}
 
 const firstAutoComplete = id("firstName_id");
 const fatherAutoComplete = id("fatherName_id");
@@ -89,7 +105,6 @@ const setInput = (name, value) => {
             })
             .catch((error) => {
                 showNotification(`${name}Mobile_error`, 'is-danger', error.message);
-                // id(`${name}Mobile_error`).innerHTML = error.message;
                 showError(error);
             });
     }
@@ -100,48 +115,73 @@ const setInput = (name, value) => {
     );
 };
 
-/**
- * @param {the idInput to check} the input id
- * @param {the array to check} data
- * @param {this should either be the mother oor father} who
- */
+// *
+// Handle mobile filtering
+// for different individuals.*@param { Object }
+// event - The event object.*@param { string }
+// name - The name of the individual("father", "mother", "spouse").*/
 
 const mobileFilter = (event, name) => {
-    const value = event.target.value;
+    try {
+        const value = event.target.value;
 
-    if (value === "" || value === undefined || value === null)
-        throw new Error("Number value is empty");
+        if (!value) {
+            throw new Error("Number value is empty");
+        }
 
-    if (value.length >= 11) {
-        // mobile value is 10 digits
-        // return mobile.find(el => {
-        return setInput(name, value);
-        // })
+        if (value.length >= 11) {
+            setInput(name, value);
+        }
+    } catch (error) {
+        showError(error);
+        // Perform additional error handling or logging if needed
     }
 };
-const fatherMobile = () => {
+
+const fatherMobile = (event) => {
     const setName = "father";
     mobileFilter(event, setName);
 };
 
-const motherMobile = () => {
+const motherMobile = (event) => {
     const setName = "mother";
     mobileFilter(event, setName);
 };
 
-const spouseMobile = () => {
+const spouseMobile = (event) => {
     const setName = "spouse";
     mobileFilter(event, setName);
 };
 
-id("fatherMobile_id").addEventListener("keyup", fatherMobile);
-id("motherMobile_id").addEventListener("keyup", motherMobile);
-id("spouseMobile_id").addEventListener("keyup", spouseMobile);
+// Add event listeners with error handling
+id("fatherMobile_id").addEventListener("keyup", (event) => {
+    try {
+        fatherMobile(event);
+    } catch (error) {
+        showError(error)
+    }
+});
+
+id("motherMobile_id").addEventListener("keyup", (event) => {
+    try {
+        motherMobile(event);
+    } catch (error) {
+        showError(error)
+    }
+});
+
+id("spouseMobile_id").addEventListener("keyup", (event) => {
+    try {
+        spouseMobile(event);
+    } catch (error) {
+        showError(error)
+    }
+});
 
 // create the data for the function below
 
 const checkEmailObj = {
-    emailInput: [
+    kidEmailInput: [
         "kid_email1",
         "kid_email2",
         "kid_email3",
@@ -153,7 +193,7 @@ const checkEmailObj = {
         "kid_email9",
         "kid_email10",
     ],
-    nameInput: [
+    kidNameInput: [
         "kid_name1",
         "kid_name2",
         "kid_name3",
@@ -203,66 +243,61 @@ document.onkeydown = (e) => {
     try {
         // create an object with the data to check
         const elementId = e.target.id; // id of the element that was clicked or press down
+        const emailInput = e.target.value;
 
-        if (elementId === null) throw new Error("target id is null and empty");
-
-
+        // this phase checks the id of what is being typed
+        if (!elementId) throw new Error("target id is null and empty");
 
         let chooseEmail = [];
         let chooseName = [];
         let helpHTML = "";
-        let checkEmail = "";
+        let errorHTML = ""; // Show error if applicant's email is registered
 
         // check if id / event.id is either kid or sibling
 
-        if (checkEmailObj.emailInput.includes(elementId)) {
-            chooseEmail = checkEmailObj.emailInput;
-            chooseName = checkEmailObj.nameInput;
+        // if the elementId indicate that it is a kid, then choosemail inherits all the kids array from the checkEmailObj and vis a versa
+
+        if (checkEmailObj.kidEmailInput.includes(elementId)) {
+            chooseEmail = checkEmailObj.kidEmailInput;
+            chooseName = checkEmailObj.kidNameInput;
             helpHTML = id(`${elementId}_help`);
         } else if (checkEmailObj.siblingEmail.includes(elementId)) {
             chooseEmail = checkEmailObj.siblingEmail;
             chooseName = checkEmailObj.siblingName;
             helpHTML = id(`${elementId}_help`);
-        } else if (elementId == "email_id") {
-            checkEmail = id(elementId)
-            checkEmail.addEventListener('keyup', checkEmailFn)
         }
 
         const checkFamilyEmail = (event) => {
+            //this checks the value of what is being typed
+
             const emailInput = event.target.value;
 
-            if (emailInput === null || emailInput === "")
-                throw new Error("email input is empty");
+            helpHTML.innerHTML = (emailInput.length > 5 && emailInput.length < 7) ? "Email may be too small" : "";
 
-            if (emailInput.length < 6) throw new Error("email input is SHORT");
 
-            if (chooseEmail === null || chooseEmail == "")
-                throw new Error("choose email is empty");
-
-            // if (chooseEmail) {
+            // use the elementid to find the exact email value and name value
             const index = chooseEmail.indexOf(elementId);
             const email = id(chooseEmail[index]);
             const emailValue = email.value;
             const name = id(chooseName[index]);
             const nameValue = name.value;
 
-            if (emailValue === null || email == "")
-                throw new Error("another round of email is empty");
-            if (nameValue === "") throw new Error("name is empty");
-            if (getData.length === 0) throw new Error("data is faulty");
+            // if (!emailValue)
+            //     throw new Error("another round of email is empty");
+            // if (!nameValue) throw new Error("name is empty");
+            // if (!getData.length) throw new Error("data is faulty");
 
-            // if (emailInput.length > 6) {
 
-            getData.then((el) =>
-                el.map((element) => {
-                    checkExistence(checkEmail, element.email);
-                }),
-            );
 
+            // checking family email 
             helpHTML.style.display = "block";
             helpHTML.innerHTML = checkEmail.includes(emailInput) ?
-                `Great news!${nameValue} is already on the platform` :
+                `Great news! ${nameValue} is already registered on the platform` :
                 `${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform ? ${checkBox(elementId)}`;
+
+
+
+            // send the email to family membersa
 
             const processKidRadio = (ev) => {
                 const postObj = {
@@ -296,8 +331,7 @@ document.onkeydown = (e) => {
 
             id(`${ elementId }No`).addEventListener("click", () => (id(`${ elementId }No`).style.display = "none"));
 
-            // }
-            // }
+
         };
 
         if (chooseEmail.includes(elementId)) {
@@ -305,6 +339,17 @@ document.onkeydown = (e) => {
             id(elementId).addEventListener("keyup", checkFamilyEmail);
         }
     } catch (error) {
-        showError(error.message);
+        showError(error);
     }
 };
+
+const checkPersonalEmail = (e) => {
+    const email = e.target.value;;
+    id("email_error").innerHTML = checkEmail.includes(email) ? `Hello! ${fName} you are already registered on the platform` : ``;
+
+
+
+}
+
+
+id('email_id').addEventListener('keyup', checkPersonalEmail)

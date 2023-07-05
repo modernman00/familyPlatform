@@ -184,8 +184,8 @@ section {
   </div>
 </div>
 
-      <script src="/manifest.js"></script>
-     <script src="/vendor.js"></script>
-      <script src="/index.js"></script>
+      <script type="text/javascript" src="/manifest.js"></script>
+     <script type="text/javascript" src="/vendor.js"></script>
+      <script type="text/javascript" src="/index.js"></script>
   </body>
 </html>

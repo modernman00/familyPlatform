@@ -18,12 +18,24 @@ class Register extends Db
 
     public function index()
     {
-        view('registration/register');
+        try {
+
+            view('registration/register');
+        } catch (\Throwable $e) {
+
+            showError($e);
+        }
     }
 
     public function nextStep()
     {
-        view('registration/nextStep');
+        try {
+
+            view('registration/nextStep');
+        } catch (\Throwable $e) {
+
+            showError($e);
+        }
     }
 
     /**
@@ -66,11 +78,10 @@ class Register extends Db
             // check if the email already exist
             $emailCheck = checkEmailExist($cleanData['email']);
             if ($emailCheck) {
-                $theError = "Your email is already registered";
-                throw new Exception($theError);
+                throw new Exception("Your email is already registered");
             }
 
-            CheckToken::tokenCheck('token', '/register');
+            CheckToken::tokenCheck('token');
 
             // time to submit the input data to database
 
@@ -91,7 +102,7 @@ class Register extends Db
             sendEmailWrapper($sendEmailArray, 'member');
 
             $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
-            
+
             msgSuccess(200, $successMsg);
         } catch (\Throwable $th) {
 
@@ -146,7 +157,7 @@ class Register extends Db
 
     private function tableData(array $cleanPostData): array
     {
-        $profileAvatar = $cleanPostData['gender'] === "male"? "avatarM.jpeg" : "avatarF.png";
+        $profileAvatar = $cleanPostData['gender'] === "male" ? "avatarM.jpeg" : "avatarF.png";
         return [
             [
                 'firstName' => $cleanPostData['firstName'],
@@ -166,24 +177,17 @@ class Register extends Db
                 'id' => $cleanPostData['id']
             ],
             [
-                // 'address' => $cleanPostData['address'],
-                // 'postcode' => $cleanPostData['postcode'],
+
                 'email' => $cleanPostData['email'],
-                // 'region' => $cleanPostData['region'],
+
                 'country' => $cleanPostData['country'],
                 'mobile' => $cleanPostData['mobile'],
                 'id' => $cleanPostData['id'],
             ],
-            // [
-            //     'favSport' => $cleanPostData['favSport'],
-            //     'footballTeam' => $cleanPostData['footballTeam'],
-            //     'passion' => $cleanPostData['passion'],
-            //     'id' => $cleanPostData['id'],
-            // ],
+
             [
                 'email' => $cleanPostData['email'],
                 'password' => $cleanPostData['password'],
-                // 'secretWord' => $cleanPostData['secretWord'],
                 'status' => 'new',
                 'type' => 'member',
                 'id' => $cleanPostData['id'],
@@ -203,14 +207,12 @@ class Register extends Db
             [
                 'fullName' => $cleanPostData['firstName'],
                 'postMessage' => "Hey, welcome to your page",
-                // 'profileImg' => $_SESSION['PROFILE_IMG'],
                 'profileImg' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ],
             [
                 'fullName' => $cleanPostData['firstName'],
                 'comment' => "Your comment will show here",
-                // 'profileImg' => $_SESSION['PROFILE_IMG'],
                 'profileImg' => $profileAvatar,
                 'post_no' => 1000,
                 'id' => $cleanPostData['id']

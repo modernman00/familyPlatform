@@ -1,13 +1,14 @@
 <?php
+declare(strict_types=1);
 
 namespace App\classes;
 
 class ErrorHandler
 {
 
-	protected $logFile;
+	protected mixed $logFile;
 
-	public function __construct($logFileDir = NULL, $logFile = NULL)
+	public function outputError(mixed $logFileDir = NULL, mixed $logFile = NULL)
 	{
 		try {
 			$logFile    = $logFile    ?? date('Ymd') . '.log';
@@ -45,7 +46,7 @@ class ErrorHandler
 			// send_email_self($subject, $message);
 			// log the error
 			$error = ['error' => $message];
-			view('errors/errorGen', compact('error'));
+			view('error/genError', compact('error'));
 		}
 	}
 
@@ -68,7 +69,7 @@ class ErrorHandler
 		} else {
 			$subject = "There is an error on " . get_class($ex);
 			$error = ['error' => $ex->getMessage()];
-			view('errors/errorGen', compact('error'));
+			view('error/genError', compact('error'));
 		}
 	}
 }

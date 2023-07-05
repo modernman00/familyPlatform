@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/register"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["public/codeSplit/register"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
 /*!*****************************************************!*\
@@ -348,23 +348,18 @@ var getAllData = /*#__PURE__*/function () {
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context.prev = 0;
-          _context.next = 3;
-          return axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData2"), config);
-        case 3:
+          _context.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData2"), config)["catch"](function (err) {
+            return err.message;
+          });
+        case 2:
           response = _context.sent;
           return _context.abrupt("return", response.data);
-        case 7:
-          _context.prev = 7;
-          _context.t0 = _context["catch"](0);
-          showError(_context.t0);
-          // You can perform additional error handling actions if needed
-          throw _context.t0;
-        case 11:
+        case 4:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 7]]);
+    }, _callee);
   }));
   return function getAllData() {
     return _ref.apply(this, arguments);
@@ -372,29 +367,20 @@ var getAllData = /*#__PURE__*/function () {
 }();
 var postData = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(url, object) {
-    var response;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          _context2.prev = 0;
-          _context2.next = 3;
-          return axios__WEBPACK_IMPORTED_MODULE_0___default().post(url, object);
-        case 3:
-          response = _context2.sent;
-          console.log(response);
-          _context2.next = 11;
-          break;
-        case 7:
-          _context2.prev = 7;
-          _context2.t0 = _context2["catch"](0);
-          showError(_context2.t0);
-          // You can perform additional error handling actions if needed
-          throw _context2.t0;
-        case 11:
+          _context2.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_0___default().post(url, object).then(function (response) {
+            console.log(response);
+          })["catch"](function (error) {
+            console.log(error);
+          });
+        case 2:
         case "end":
           return _context2.stop();
       }
-    }, _callee2, null, [[0, 7]]);
+    }, _callee2);
   }));
   return function postData(_x, _x2) {
     return _ref2.apply(this, arguments);
@@ -778,40 +764,24 @@ var lName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("lastName_id").value;
 
 /**
  *
- * @param {* array} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
- * @param {* string || integer} searchElement  the element to search against ("Mango")
+ * @param {*} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
+ * @param {*} searchElement  the element to search against ("Mango")
  */
 
 var checkExistence = function checkExistence(baseArray, searchElement) {
-  if (!Array.isArray(baseArray)) {
-    baseArray = []; // Initialize as an array if it's not already
-  }
-
   if (baseArray.includes(searchElement) === false) {
     baseArray.push(searchElement);
   }
 };
-// Check if getData is resolved
-if (getData instanceof Promise) {
-  getData.then(function (el) {
-    el.forEach(function (element) {
-      checkExistence(firstNameData, element.firstName);
-      checkExistence(fatherName, element.fatherName);
-      checkExistence(motherName, element.motherName);
-      checkExistence(mobile, element.mobile);
-      checkExistence(checkEmail, element.email);
-    });
-
-    // Code that relies on the data obtained from getAllData() can be placed here
-  })["catch"](function (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-    // Handle the error appropriately
+getData.then(function (el) {
+  return el.map(function (element) {
+    checkExistence(firstNameData, element.firstName);
+    checkExistence(fatherName, element.fatherName);
+    checkExistence(motherName, element.motherName);
+    checkExistence(mobile, element.mobile);
+    checkExistence(checkEmail, element.email);
   });
-} else {
-  console.log('getData is empty or not resolved');
-  // Handle the case when getData is empty or not resolved
-}
-
+});
 var firstAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("firstName_id");
 var fatherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("fatherName_id");
 var motherAutoComplete = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("motherName_id");
@@ -848,6 +818,7 @@ var setInput = function setInput(name, value) {
       genId.innerHTML = "";
     })["catch"](function (error) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_error"), 'is-danger', error.message);
+      // id(`${name}Mobile_error`).innerHTML = error.message;
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
     });
   }
@@ -857,68 +828,44 @@ var setInput = function setInput(name, value) {
   });
 };
 
-// *
-// Handle mobile filtering
-// for different individuals.*@param { Object }
-// event - The event object.*@param { string }
-// name - The name of the individual("father", "mother", "spouse").*/
+/**
+ * @param {the idInput to check} the input id
+ * @param {the array to check} data
+ * @param {this should either be the mother oor father} who
+ */
 
 var mobileFilter = function mobileFilter(event, name) {
-  try {
-    var value = event.target.value;
-    if (!value) {
-      throw new Error("Number value is empty");
-    }
-    if (value.length >= 11) {
-      setInput(name, value);
-    }
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-    // Perform additional error handling or logging if needed
+  var value = event.target.value;
+  if (value === "" || value === undefined || value === null) throw new Error("Number value is empty");
+  if (value.length >= 11) {
+    // mobile value is 10 digits
+    // return mobile.find(el => {
+    return setInput(name, value);
+    // })
   }
 };
 
-var fatherMobile = function fatherMobile(event) {
+var fatherMobile = function fatherMobile() {
   var setName = "father";
   mobileFilter(event, setName);
 };
-var motherMobile = function motherMobile(event) {
+var motherMobile = function motherMobile() {
   var setName = "mother";
   mobileFilter(event, setName);
 };
-var spouseMobile = function spouseMobile(event) {
+var spouseMobile = function spouseMobile() {
   var setName = "spouse";
   mobileFilter(event, setName);
 };
-
-// Add event listeners with error handling
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("fatherMobile_id").addEventListener("keyup", function (event) {
-  try {
-    fatherMobile(event);
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-  }
-});
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("motherMobile_id").addEventListener("keyup", function (event) {
-  try {
-    motherMobile(event);
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-  }
-});
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("spouseMobile_id").addEventListener("keyup", function (event) {
-  try {
-    spouseMobile(event);
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-  }
-});
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("fatherMobile_id").addEventListener("keyup", fatherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("motherMobile_id").addEventListener("keyup", motherMobile);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("spouseMobile_id").addEventListener("keyup", spouseMobile);
 
 // create the data for the function below
 
 var checkEmailObj = {
-  kidEmailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
-  kidNameInput: ["kid_name1", "kid_name2", "kid_name3", "kid_name4", "kid_name5", "kid_name6", "kid_name7", "kid_name8", "kid_name9", "kid_name10"],
+  emailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
+  nameInput: ["kid_name1", "kid_name2", "kid_name3", "kid_name4", "kid_name5", "kid_name6", "kid_name7", "kid_name8", "kid_name9", "kid_name10"],
   siblingEmail: ["sibling_email1", "sibling_email2", "sibling_email3", "sibling_email4", "sibling_email5", "sibling_email6", "sibling_email7", "sibling_email8", "sibling_email9", "sibling_email10"],
   siblingName: ["sibling_name1", "sibling_name2", "sibling_name3", "sibling_name4", "sibling_name5", "sibling_name6", "sibling_name7", "sibling_name8", "sibling_name9", "sibling_name10"]
 };
@@ -935,52 +882,52 @@ document.onkeydown = function (e) {
   try {
     // create an object with the data to check
     var elementId = e.target.id; // id of the element that was clicked or press down
-    var emailInput = e.target.value;
 
-    // this phase checks the id of what is being typed
-    if (!elementId) throw new Error("target id is null and empty");
+    if (elementId === null) throw new Error("target id is null and empty");
     var chooseEmail = [];
     var chooseName = [];
     var helpHTML = "";
-    var errorHTML = ""; // Show error if applicant's email is registered
+    var _checkEmail = "";
 
     // check if id / event.id is either kid or sibling
 
-    // if the elementId indicate that it is a kid, then choosemail inherits all the kids array from the checkEmailObj and vis a versa
-
-    if (checkEmailObj.kidEmailInput.includes(elementId)) {
-      chooseEmail = checkEmailObj.kidEmailInput;
-      chooseName = checkEmailObj.kidNameInput;
+    if (checkEmailObj.emailInput.includes(elementId)) {
+      chooseEmail = checkEmailObj.emailInput;
+      chooseName = checkEmailObj.nameInput;
       helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
     } else if (checkEmailObj.siblingEmail.includes(elementId)) {
       chooseEmail = checkEmailObj.siblingEmail;
       chooseName = checkEmailObj.siblingName;
       helpHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "_help"));
+    } else if (elementId == "email_id") {
+      _checkEmail = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId);
+      _checkEmail.addEventListener('keyup', checkEmailFn);
     }
     var checkFamilyEmail = function checkFamilyEmail(event) {
-      //this checks the value of what is being typed
-
       var emailInput = event.target.value;
-      helpHTML.innerHTML = emailInput.length > 5 && emailInput.length < 7 ? "Email may be too small" : "";
+      if (emailInput === null || emailInput === "") throw new Error("email input is empty");
+      if (emailInput.length < 6) throw new Error("email input is SHORT");
+      if (chooseEmail === null || chooseEmail == "") throw new Error("choose email is empty");
 
-      // use the elementid to find the exact email value and name value
+      // if (chooseEmail) {
       var index = chooseEmail.indexOf(elementId);
       var email = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(chooseEmail[index]);
       var emailValue = email.value;
       var name = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(chooseName[index]);
       var nameValue = name.value;
+      if (emailValue === null || email == "") throw new Error("another round of email is empty");
+      if (nameValue === "") throw new Error("name is empty");
+      if (getData.length === 0) throw new Error("data is faulty");
 
-      // if (!emailValue)
-      //     throw new Error("another round of email is empty");
-      // if (!nameValue) throw new Error("name is empty");
-      // if (!getData.length) throw new Error("data is faulty");
+      // if (emailInput.length > 6) {
 
-      // checking family email 
+      getData.then(function (el) {
+        return el.map(function (element) {
+          checkExistence(_checkEmail, element.email);
+        });
+      });
       helpHTML.style.display = "block";
-      helpHTML.innerHTML = checkEmail.includes(emailInput) ? "Great news! ".concat(nameValue, " is already registered on the platform") : "".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform ? ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(elementId));
-
-      // send the email to family membersa
-
+      helpHTML.innerHTML = _checkEmail.includes(emailInput) ? "Great news!".concat(nameValue, " is already on the platform") : "".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform ? ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(elementId));
       var processKidRadio = function processKidRadio(ev) {
         var postObj = {
           mobile: "",
@@ -1006,20 +953,18 @@ document.onkeydown = function (e) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).addEventListener("click", function () {
         return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(elementId, "No")).style.display = "none";
       });
+
+      // }
+      // }
     };
+
     if (chooseEmail.includes(elementId)) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).addEventListener("keyup", checkFamilyEmail);
     }
   } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error.message);
   }
 };
-var checkPersonalEmail = function checkPersonalEmail(e) {
-  var email = e.target.value;
-  ;
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("email_error").innerHTML = checkEmail.includes(email) ? "Hello! ".concat(fName, " you are already registered on the platform") : "";
-};
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_id').addEventListener('keyup', checkPersonalEmail);
 
 /***/ }),
 

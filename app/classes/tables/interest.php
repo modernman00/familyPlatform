@@ -3,9 +3,9 @@
 namespace App\classes\tables;
 
 use PDOException;
-use App\classes\allFunctionalities;
+use App\classes\AllFunctionalities;
 
-class Interest extends allFunctionalities
+class Interest extends AllFunctionalities
 {
     public function index()
     {

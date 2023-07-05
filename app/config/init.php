@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/../app/config.php";
+namespace App\config;
 
 if (!session_start()) {
     session_start([
@@ -10,6 +10,14 @@ if (!session_start()) {
     'cookie_secure' => true
     ]);
 }
+
+use App\classes\ErrorHandler;
+
+require_once __DIR__ . "/_env.php";
+
+// Debugger::enable(Debugger::Development);
+
+
 
 define("BR", "<br>");
 
@@ -25,6 +33,8 @@ mb_http_output();
 date_default_timezone_set('Europe/London');
 // SET ERROR HANDLER
 // set_error_handler([new \App\classes\ErrorHandler(__DIR__ . '/log'), 'handleErrors']);
-new \App\classes\ErrorHandler(__DIR__ . '/log');
-require_once __DIR__ . "/../app/router/router.php";
+$errorHandler = new ErrorHandler();
+$errorHandler->outputError(__DIR__ . '/../../bootstrap/log');
+
+// require_once __DIR__ . "/../router/router.php";
 restore_exception_handler();

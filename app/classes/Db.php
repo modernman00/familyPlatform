@@ -9,7 +9,7 @@ use App\classes\CheckToken;
 class Db extends CheckToken
 {
     public const BR = "<br>"; // can't be changed
-    private static function dbVariables()
+    private static function dbVariables() : array
     {
         return [
             'host' => getenv('DB_HOST'),
@@ -57,10 +57,11 @@ class Db extends CheckToken
 
 
 
-    function connectSql()
+    public function connectSql()
     {
+        $dbVar2 = self::dbVariables();
         try {
-            return mysqli_connect($this->serverName, $this->username, $this->password, $this->dbName);
+            return mysqli_connect($dbVar2['host'], $dbVar2['username'], $dbVar2['password'], $dbVar2['name']);
         } catch (\Throwable $e) {
              showError($e);
         }

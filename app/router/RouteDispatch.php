@@ -1,28 +1,38 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\router;
 
 use AltoRouter;
-//require "router.php";
+use PDOException;
+
 class RouteDispatch
 {
     protected $match;
     protected $controller;
     protected $method;
-    function __construct(AltoRouter $router)
+    public function __construct(AltoRouter $router)
     {
-        $this->match = $router->match();
-        if ($this->match) {
-            $controllerAndFunction = explode('@', $this->match['target']);
-            $this->controller = $controllerAndFunction[0];
-            $this->method = $controllerAndFunction[1];
-            if (is_callable($this->controller, $this->method)) {
-                call_user_func_array(array(new $this->controller, $this->method), array($this->match['params']));
-            } else {
-                echo "This method {$this->method} is not defined in this {$this->controller}";
-            }
-        } else {
+        try {
+
+            $this->match = $router->match();
             
-            return view('error/genError');
+            if ($this->match) {
+                $controllerAndFunction = explode('@', $this->match['target']);
+                $this->controller = $controllerAndFunction[0];
+                $this->method = $controllerAndFunction[1];
+                if (method_exists($this->controller, $this->method)) {
+                    call_user_func_array(array(new $this->controller, $this->method), array($this->match['params']));
+                } else {
+                    echo "This method {$this->method} is not defined in this {$this->controller}";
+                }
+            } else {
+
+                view('error/genError');
+            }
+        } catch (PDOException $e) {
+            echo $e->getMessage();
         }
     }
 }

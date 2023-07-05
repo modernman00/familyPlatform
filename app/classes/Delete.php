@@ -7,7 +7,7 @@ use PDOException;
 class Delete extends Db
 {
 
-    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $limit = null)
+    public static function formAndMatchQuery(string $selection, string $table, mixed $identifier1 = null, mixed $identifier2 = null, string $column = null, $limit = null) : string
     {
         return match ($selection) {
             'DELETE_OR' => "DELETE FROM $table WHERE $identifier1 =? OR $identifier2 = ? $limit",
@@ -24,14 +24,14 @@ class Delete extends Db
      * Executes a DELETE query with the given parameters
      *
      * @param string $query The DELETE query to execute
-     * @param array|null $bind An array of parameter values to bind to the query
+     * @param mixed[]|null $bind An array of parameter values to bind to the query
      *
      * @return bool Returns true if the query was executed successfully, false otherwise
      *
      * @throws PDOException if an error occurs during query execution
      */
 
-    public static function deleteFn(string $query, ?array $bind = null): string|int
+    public static function deleteFn(string $query, ?array $bind = null): bool
     {
         try {
             $statement = parent::connect2()->prepare($query);

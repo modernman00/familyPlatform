@@ -2,10 +2,10 @@
 
 namespace App\classes;
 
-use App\classes\allFunctionalities;
+use App\classes\AllFunctionalities;
 use Exception;
 
-class Sanitise extends allFunctionalities
+class Sanitise extends AllFunctionalities
 {
     private $key  = array();
     private $value = array();

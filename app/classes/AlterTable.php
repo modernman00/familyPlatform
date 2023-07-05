@@ -2,9 +2,9 @@
 
 namespace App\classes;
 
-use App\classes\allFunctionalities;
+use App\classes\AllFunctionalities;
 
-class AlterTable extends allFunctionalities
+class AlterTable extends AllFunctionalities
 {
 
 
