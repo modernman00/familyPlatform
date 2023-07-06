@@ -68,7 +68,7 @@ const processFormData = async(url, formElement) => {
 
 }
 
-const processForm = (e) => {
+const processForm = async(e) => {
     try {
         e.preventDefault();
 
@@ -86,7 +86,8 @@ const processForm = (e) => {
             if (formData.error.length <= 0) {
 
                 id('loader').classList.add('loader')
-                return processFormData("/register", 'register')
+                await processFormData("/register", 'register');
+                return;
             } else {
 
                 alert('The form cannot be submitted. Please check the errors')

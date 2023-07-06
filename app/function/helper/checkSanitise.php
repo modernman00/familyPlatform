@@ -100,13 +100,13 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
 
 
     $query = Select::formAndMatchQuery(selection: 'SELECT_TWO_COLS_ID', table: 'account', identifier1: 'email', column: $col, column2: $col2);
-    $data = Select::selectFn2(query: $query, bind: [$colOne, $colTwo]);
+    $result = Select::selectFn2(query: $query, bind: [$colOne, $colTwo]);
 
-    if (!$data) {
+    if (!$result) {
 
         msgException(404, "We cannot locate the information");
     }
-    foreach ($data as $data);
+    foreach ($result as $data);
     return $data;
 }
 
@@ -119,8 +119,6 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
  */
 function findOneColUsingEmail(string $col, array $data): mixed
 {
-    // $outcome = useEmailToFindData($data);
-    // $colOne =  $outcome["$col"];
     $email =  $data['email'];
 
     $query = Select::formAndMatchQuery(selection: 'SELECT_COL_ID', table: 'account', identifier1: 'email', column: $col);
@@ -151,7 +149,6 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
 
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
         msgException(400, $theError);
-        // exit;
     }
 
     return $sanitisedData;

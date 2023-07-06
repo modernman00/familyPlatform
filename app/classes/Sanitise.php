@@ -53,7 +53,7 @@ class Sanitise extends AllFunctionalities
 
             $this->key = array_keys($this->formData);
             $this->value = array_values($this->formData);
-            $this->dataCount = count($this->value);
+            // $this->dataCount = count($this->value);
             // $this->dataLength = $data ?? null;  //code...
         } catch (\Throwable $th) {
             $this->error[] = " Are you human or robot ". $th->getMessage();
@@ -64,7 +64,7 @@ class Sanitise extends AllFunctionalities
     {
         if (isset($this->formData['email']) && !filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
             $this->error[] = "Invalid Email Format ";
-            // throw new Exception("Error Processing Request - Email format", 1);
+   
             
         }
     }
@@ -141,10 +141,6 @@ class Sanitise extends AllFunctionalities
             unset($this->cleanData['confirm_password']);
         }
 
-        //  return true;
-        // if($this->image) {
-        // $this->key2['image_path'] = $this->image;
-        //  }
         return $this->cleanData;
     }
 
@@ -159,20 +155,12 @@ class Sanitise extends AllFunctionalities
     }
 
 
-    /**
-     * either returns an error which it will echo or the sanitised data in an array
-     * @return mixed 
-     */
-
     public function getData(): array
     {
         // try {
             $this->runFunctions();
 
             return $this->cleanData;
-        // } catch (\Throwable $th) {
-        //     // showError($th);
-        //     $this->error[]  = "The $cleanNameKey question is required\n";
-        // } 
+
     }
 }

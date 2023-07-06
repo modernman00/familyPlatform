@@ -6,7 +6,7 @@ import "./mobileNameCheck"
 
 const currentPs = document.getElementById("password_id")
 const confirmPs = document.getElementById("confirm_password_id")
-const secretWd = document.getElementById("secretWord_id")
+
 
 currentPs.setAttribute('autocomplete', 'on')
 confirmPs.setAttribute('autocomplete', 'on')

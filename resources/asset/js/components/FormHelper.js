@@ -1,7 +1,7 @@
 'use strict'
 
 import { matchRegex } from "./helper/general"
-import { showNotification } from './global';
+
 export default class FormHelper {
     constructor(data) {
         this.data = data;
