@@ -11,7 +11,10 @@ use \Rollbar\Payload\Level;
 
 //376306559e2124e72b1577cb75a9a6475
 
-function loggedDetection(string $filename, string $receivingEmail)
+/**
+ * @return true
+ */
+function loggedDetection(string $filename, string $receivingEmail): bool
 {
     //TODO send text to the user with the code
     $emailSender = new EmailData('admin');
@@ -22,7 +25,7 @@ function loggedDetection(string $filename, string $receivingEmail)
     return true;
 }
 
-function notifyCustOfLogIn($data): mixed
+function notifyCustOfLogIn($data)
 {
     $generateEmailArray = genEmailArray("customer/msg/loginDetection", $data, "LOGGED-IN DETECTION", null, null);
     return sendEmailWrapper($generateEmailArray, 'customer');
@@ -64,7 +67,7 @@ function checkInput($data): mixed
     return $data;
 }
 
-function checkInputImage($data)
+function checkInputImage($data): string|null
 {
     $data = trim($data);
     $data = stripslashes($data);
@@ -93,7 +96,7 @@ function returnErrorCode(int $errCode, $errObj)
     return showError($errObj);
 }
 
-function returnSuccessCode($msg)
+function returnSuccessCode($msg): void
 {
     http_response_code(200);
     echo http_response_code();
@@ -119,7 +122,7 @@ function msgException(int $errCode, string | int  $msg)
      throw new Exception($msg, $errCode);
 }
 
-function msgSuccess(int $code, string|array $msg, mixed $token = null)
+function msgSuccess(int $code, string|array $msg, mixed $token = null): void
 {
     http_response_code($code); // sets the response to 406
     // echo http_response_code(); // echo the new response code
@@ -127,7 +130,7 @@ function msgSuccess(int $code, string|array $msg, mixed $token = null)
 
 }
 
-function msgServerSent(string|array $data, string | int $id, string $event)
+function msgServerSent(string|array $data, string | int $id, string $event): void
 {
  
     $get = json_encode($data);

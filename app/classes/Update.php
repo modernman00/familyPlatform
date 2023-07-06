@@ -12,7 +12,13 @@ class Update extends Db
   {
   }
 
-  public function updateTable($column, $columnAnswer, $identifier, $identifierAnswer)
+  /**
+   * @param array|false|null|string $columnAnswer
+   *
+   * @psalm-param 'token' $column
+   * @psalm-param 'id' $identifier
+   */
+  public function updateTable(string $column, array|string|false|null $columnAnswer, string $identifier, string $identifierAnswer)
   {
     try {
       $query = "UPDATE $this->table SET $column =? WHERE $identifier = ?";

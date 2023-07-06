@@ -7,7 +7,7 @@ class About {
 
     //private $var = "delta";
 
-    public function index()
+    public function index(): void
     {
        view('about');
     }

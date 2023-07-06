@@ -4,7 +4,7 @@ namespace App\controller;
 
 class Index
 {
-    public function index()
+    public function index(): void
     {
         view('index');
     }
@@ -19,7 +19,7 @@ class Index
         view('launch');
     }
 
-    public function privacy()
+    public function privacy(): void
     {
         view('privacy');
     }

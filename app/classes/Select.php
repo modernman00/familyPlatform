@@ -12,14 +12,15 @@ class Select extends Db
      *
      * @param [type] $selection - the selection match(SELECT_OR, SELECT_AND, SELECT_ALL, SELECT_COL_ID, SELECT_ONE, SELECT_GREATER, SELECT_GREATER_EQUAL, SELECT_COUNT_TWO, SELECT_COUNT_ONE, SELECT_COL, SELECT_COUNT_ALL, SELECT_DISTINCT, SELECT_AVERAGE, SELECT_AVERAGE_ALL, SELECT_SUM_ALL)
      * @param [type] $table
-     * @param [type] $identifier1 (id) - where id = ?
-     * @param [type] $identifier2 (email) - where email = ?
-     * @param [type] $column use if selecting by column
+     * @param null|string $identifier1
+     * @param null|string $identifier2
+     * @param null|string $column
      * @param [type] $orderBy (example) ORDER BY id DESC; use if you want order by
-     *@param [type] $limit (example) LIMIT 5; use if you want order
-     * @return string
+     * @param [type] $limit (example) LIMIT 5; use if you want order
+     *
+     * @return null|string
      */
-    public static function formAndMatchQuery($selection, $table, $identifier1 = null, $identifier2 = null, $column = null, $column2 = null, $orderBy = null, $limit = null)
+    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null): string|null
     {
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
@@ -46,14 +47,11 @@ class Select extends Db
     }
 
     /**
-     * 
      * @param string $table 
      * @param string $query SELECT * FROM account WHERE id = ? || SELECT * FROM $table WHERE $dev = ? AND $dev2 = ?
      * @param array|null $bind = ['woguns@ymail.com', "wale@loaneasyfinance.com"]; 
-     * @return array|void 
      */
-
-    public function selectFn(string $query, array $bind = null): string|array|int
+    public function selectFn(string $query, array $bind = null): array|int|string
     {
         try {
             $sql = $query;
@@ -65,6 +63,13 @@ class Select extends Db
             return false;
         }
     }
+
+    /**
+     * 
+     * @param string $query 
+     * @param array|null $bind 
+     * @return string|array|int 
+     */
 
      public static function selectFn2(string $query, array $bind = null): string|array|int
     {
@@ -100,6 +105,13 @@ class Select extends Db
         }
     }
 
+    /**
+     * 
+     * @param string $query 
+     * @param array|null $bind 
+     * @return string|array|int 
+     */
+
       public static function selectCountFn2(string $query, array $bind = null): string|array|int
     {
         try {
@@ -109,8 +121,15 @@ class Select extends Db
             return $result->rowCount();
         } catch (PDOException $e) {
             returnErrorCode(505, $e);
+            return false;
         }
     }
+
+    /**
+     * 
+     * @param mixed $table 
+     * @return mixed 
+     */
 
     public function selectCountAll($table)
     {

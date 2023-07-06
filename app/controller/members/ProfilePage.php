@@ -25,12 +25,31 @@ use Exception;
 
 class ProfilePage extends ProcessImg
 {
+    /**
+     * @var array|null
+     */
     public $allPostData;
+
+    /**
+     * @var array|null
+     */
     private $allCommentData;
     private $id;
     private $eventData;
+
+    /**
+     * @var array|null
+     */
     private $memberData;
+
+    /**
+     * @var array|null
+     */
     private $post2Id;
+
+    /**
+     * @var array|null
+     */
     private $getAllPics;
     private const REDIRECT = "Location: /member/ProfilePage";
 
@@ -70,7 +89,7 @@ class ProfilePage extends ProcessImg
         }
     }
 
-    public function index()
+    public function index(): void
     {
 
         try {
@@ -149,7 +168,7 @@ class ProfilePage extends ProcessImg
     }
 
 
-    public function post()
+    public function post(): void
     {
         try {
             header('Content-Type: text/event-stream');
@@ -168,7 +187,7 @@ class ProfilePage extends ProcessImg
     }
 
     // MESSAGE IS SENT THROUGH THE SUBMIT FOR DYNAMIC
-    public function postComment()
+    public function postComment(): void
     {
         try {
             $getComment = $this->processPostData();
@@ -182,8 +201,7 @@ class ProfilePage extends ProcessImg
     /**
      * Process profile image; the function was imported
      */
-
-    function profileImage()
+    function profileImage(): void
     {
         try {
             // process the image 
@@ -197,8 +215,7 @@ class ProfilePage extends ProcessImg
     /**
      * post pictures on the profile page
      */
-
-    public function postPics()
+    public function postPics(): void
     {
         if ($_FILES) {
             if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
@@ -206,10 +223,9 @@ class ProfilePage extends ProcessImg
 
                 // create a file path name for the database
                 $image = $_FILES['photo']['name'];
-                $images = [];
                 // create the post array for the post image
                 for ($i = 0; $i < count($image); $i++) {
-                    $images["photo"] = $image[$i];
+                 
                     $arrData = [
                         'photo' => $image[$i],
                         'id' => checkInput($_SESSION['id'])
@@ -226,8 +242,7 @@ class ProfilePage extends ProcessImg
     /**
      * show post pics when they are clicked on
      */
-
-    public function showPics()
+    public function showPics(): void
     {
         $path = checkInput($_GET['path']);
         $imagePath = ProcessImg::showPostImg($path);

@@ -5,8 +5,11 @@
  * $addBy - could be in days, months, years [ 2 days, 2 months, 2 years]
  * $add_or_sub - two options date_add OR date_sub
  * it returns an array [date, fullDate]
+ *
+ * @return string[]
+ *
+ * @psalm-return array{date: string, fullDate: string}
  */
-
 function modifyDate($date, string $addBy, callable $add_or_sub): array
 {
     $date = (date_create($date));
@@ -17,7 +20,7 @@ function modifyDate($date, string $addBy, callable $add_or_sub): array
     ];
 }
 
-function dateDifference($date1, $date2)
+function dateDifference($date1, $date2): string
 {
     $createDate1 = date_create($date1);
     $createDate2 = date_create($date2);
@@ -39,7 +42,7 @@ function dateDifferenceInt($date1, $date2)
     return (int) $diff->format("%R%a");
 }
 
-function dateFormat($date)
+function dateFormat($date): string
 {
     $stringDate = strtotime($date);
     return date('l jS \of F Y', $stringDate);

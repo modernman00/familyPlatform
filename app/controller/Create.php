@@ -16,7 +16,7 @@ use App\classes\tables\{
 
 class Create extends Db
 {
-    public function index()
+    public function index(): void
     {
         $table = [
             new Personal(),

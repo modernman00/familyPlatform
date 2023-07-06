@@ -1,6 +1,6 @@
 <?php
 
-function Validate (array $array)
+function Validate (array $array): string
 {
     $error = "";
 

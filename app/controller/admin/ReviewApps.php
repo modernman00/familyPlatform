@@ -26,6 +26,7 @@ class ReviewApps extends ReviewAppsData
     {
         $this->id = checkInput($_GET['id']);
         $data = $this->getWithId($this->id);
+        $data2 = null;
         foreach ($data as $data2);
 
         // // Set the customer Id
@@ -39,7 +40,10 @@ class ReviewApps extends ReviewAppsData
 
 
     // // email functionality
-    private function toSendEmail($viewPath, $data, $subject, $emailRoute)
+    /**
+     * @psalm-param 'admin'|'member' $emailRoute
+     */
+    private function toSendEmail(string $viewPath, array $data, string $subject, string $emailRoute)
     {
         // generate the data to send the email
         $sendEmailArray = genEmailArray(
@@ -52,7 +56,7 @@ class ReviewApps extends ReviewAppsData
         return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
     }
     // // update the account status in the decision table 
-    private function updateAccountStatus($acctStatus)
+    private function updateAccountStatus(string $acctStatus)
     {
         $updateClass = new AllFunctionalities();
         $checkUpdateStatus = $updateClass->update('account', 'status', $acctStatus, 'id', $this->id);
@@ -60,7 +64,7 @@ class ReviewApps extends ReviewAppsData
        return $checkUpdateStatus ??= throw new Exception("Error Processing Request - account status");
     }
 
-    public function approve()
+    public function approve(): void
     {
         try {
             $data = $this->getCustomerData();
@@ -74,7 +78,7 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    public function cancel()
+    public function cancel(): void
     {
         try {
             $data = $this->getCustomerData();
@@ -95,7 +99,7 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    public function delete()
+    public function delete(): void
     {
         try {
 
@@ -118,7 +122,7 @@ class ReviewApps extends ReviewAppsData
         }
     }
 
-    public function decline()
+    public function decline(): void
     {
         try {
             $data = $this->getCustomerData();

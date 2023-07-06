@@ -13,19 +13,23 @@ use App\classes\{
 
 class Code extends Select
 {
-    public $table = 'account';
+    public string $table = 'account';
     public $email;
     public $next;
     private $memberId;
     private const TOKEN_SESSION = '2FA_token_ts';
-    private $errorArr = array();
+
+    /**
+     * @var array
+     */
+    private array $errorArr = array();
 
     public function show()
     {
         return view('login/code');
     }
 
-    public function verify()
+    public function verify(): void
     {
         try {
 

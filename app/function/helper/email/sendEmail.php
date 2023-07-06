@@ -9,10 +9,13 @@ define('TYPE', 'application/pdf');
 define('ENCODING', 'base64');
 define('BODY_TEXT', 'This is the body in plain text for non-HTML mail clients');
 
-function errorMsg($mail, $e) {
+function errorMsg($mail, $e): string {
 	return "Mailer Error: {$mail->ErrorInfo} " . showError($e);
 }
 
+/**
+ * @return bool|null
+ */
 function sendEmail($email, $name, $subject, $message, $file =null, $filename=null)
 {
 		$mail = new PHPMailer(true);
@@ -53,6 +56,9 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 }
 
 
+/**
+ * @return bool|null
+ */
 function send_email_pdf($email, $name, $subject, $message, $file, $filename)
 {
 	try {
@@ -80,7 +86,7 @@ function send_email_pdf($email, $name, $subject, $message, $file, $filename)
 }
 
 
-function send_email(string $email, string $name, string $subject, string $message)
+function send_email(string $email, string $name, string $subject, string $message): void
 {
 	try {
 		$mail = new PHPMailer(true);
@@ -105,7 +111,7 @@ function send_email(string $email, string $name, string $subject, string $messag
 	}
 }
 
-function normal_email(string $email, string $name, $subject, string $message)
+function normal_email(string $email, string $name, $subject, string $message): void
 {
 	try {
 		$mail = new PHPMailer(true);
@@ -131,6 +137,9 @@ function normal_email(string $email, string $name, $subject, string $message)
 	}
 }
 
+/**
+ * @return bool|null
+ */
 function send_email_self(string $subject, string $message)
 {
 	try {
@@ -155,6 +164,9 @@ function send_email_self(string $subject, string $message)
 	}
 }
 
+/**
+ * @return bool|null
+ */
 function send_to_self_pdf($subject, $message, $file, $filename)
 {
 	try {

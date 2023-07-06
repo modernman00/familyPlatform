@@ -8,13 +8,14 @@ use App\classes\{
 };
 
 /**
- * 
  * @param mixed $inputData  this is the form data 
  * @param mixed $databaseData this must be database data that already has the database password
- * @return mixed 
+ *
+ * @return true
+ *
  * @throws \Exception 
  */
-function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParameter] array $databaseData)
+function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParameter] array $databaseData): bool
 {
 
     $textPassword = $inputData['password'];
@@ -157,11 +158,10 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
 }
 /**
  * to generate random byte - token
- * @return string|array|null|false 
+ *
  * @throws \Exception 
  */
-
-function generateAuthToken()
+function generateAuthToken(): string
 {
     return mb_strtoupper(bin2hex(random_bytes(4)));
 }

@@ -7,7 +7,7 @@ namespace App\controller\admin;
 class Dashboard
 {
 
-    public function index()
+    public function index(): void
     {
         view('admin/ReviewApps');
     }

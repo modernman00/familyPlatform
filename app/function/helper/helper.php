@@ -5,8 +5,12 @@ declare(strict_types=1);
 use Philo\Blade\Blade;
 use App\classes\Select;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
+ use Rollbar\Rollbar;
+ use Rollbar\Payload\Level; // https://docs.rollbar.com/docs/basic-php-installation-setup
+use Tracy\Debugger;
 
-function view($path, array $data = [])
+
+function view($path, array $data = []): void
 {
     // 1st param = accept the path to the file we actually want to load
     //2nd param array = any data that we want to pass to the view
@@ -19,17 +23,20 @@ function view($path, array $data = [])
     echo $blade->view()->make($path, $data)->render();
 }
 
-function make($fileName, $data)
+/**
+ * @return false|string
+ */
+function make($fileName, $data): string|false
 {
     extract($data);
     ob_start();  // turn on output buffering so no output is sent but store inside the internal buffer
-    include(__DIR__ . "/../../resources/views/emails/" . $fileName . ".php"); // include template
+    include __DIR__ . "/../../resources/views/emails/$fileName.php"; // include template
     $content = ob_get_contents(); //get content out of the file
     ob_end_clean(); // erase output turn off output buffering although stored in $content variable
     return $content;
 }
 
-function printArr(array $data)
+function printArr(array $data): void
 {
     echo "<pre>";
     var_export($data);
@@ -38,7 +45,7 @@ function printArr(array $data)
 
 
 
-function replace_whitespace($string)
+function replace_whitespace($string): string|null
 {
     //Lower case everything
     $string = strtolower($string);
@@ -52,6 +59,9 @@ function replace_whitespace($string)
 }
 
 
+/**
+ * @return null|string
+ */
 function number2word(int $number)
 {
 
@@ -68,7 +78,7 @@ function number2word(int $number)
 
 
 // score application
-function Scoring($postName, $policy1, $policy2, int $score1, int $score2)
+function Scoring(string $postName, string $policy1, string $policy2, int $score1, int $score2): void
 {
     if ($_POST[$postName] == $policy1) {
         ${$postName} = $score1;
@@ -83,7 +93,10 @@ function Scoring($postName, $policy1, $policy2, int $score1, int $score2)
     ${$postName};
 }
 
-function setMinMaxLimit(array $minPolicy, array $maxPolicy, array $post)
+/**
+ * @psalm-return array<empty, empty>|string
+ */
+function setMinMaxLimit(array $minPolicy, array $maxPolicy, array $post): array|string
 {
     $error = [];
     for ($x = 0; $x < count($minPolicy); $x++) {
@@ -100,7 +113,7 @@ function setMinMaxLimit(array $minPolicy, array $maxPolicy, array $post)
 /**
  * compare two variable or use to verify
  */
-function compare($var1, $var2)
+function compare($var1, $var2): bool
 {
     if ($var1 != $var2) {
         return false;
@@ -110,7 +123,7 @@ function compare($var1, $var2)
 
 // GET IP ADDRESS
 
-function getUserIpAddr()
+function getUserIpAddr(): string
 {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
         //ip from share internet
@@ -127,8 +140,12 @@ function getUserIpAddr()
 /**
  * $month is the terms
  * while the date is the month
+ *
+ * @return string[]
+ *
+ * @psalm-return array{fullDate: string, dateFormat: string}
  */
-function addMonthsToDate($months, $date)
+function addMonthsToDate($months, $date): array
 {
 
     $dt = new DateTime($date, new DateTimeZone('Europe/London'));
@@ -148,7 +165,7 @@ function addMonthsToDate($months, $date)
 }
 
 
-function cleanSession($x)
+function cleanSession($x): string|null
 {
     $z = preg_replace('/[^0-9A-Za-z@.]/', '', $x);
     return $z;
@@ -156,18 +173,19 @@ function cleanSession($x)
 
 // SHOW THE ERROR EXCEPTION MESSAGE
 
-function showError($th)
+function showError($th): void
 {
     
     http_response_code(301); // sets the response to 406
-    // echo http_response_code(); it stringify the message in the array
-    // $error = $th->getMessage() . " on Line " . $th->getLine() .  " on file " . $th->getFile();
        $error = $th->getMessage();
     echo json_encode(['message' => $error]);
+    // Rollbar::log(Level::ERROR, $th);
+    Debugger::log($th, Debugger::ERROR);
+    
    
 }
 
-function showErrorExp($th)
+function showErrorExp($th): void
 {
     echo "Error msg - " . $th->getMessage();
     echo "<br>";
@@ -179,7 +197,7 @@ function showErrorExp($th)
 }
 
 
-function spinner()
+function spinner(): string
 {
     return  '<div class="loader"></div>';
 }
@@ -187,7 +205,7 @@ function spinner()
 // FUNCTION TO SEND TEXT TO PHONE
 
 
-function sendText($message, $numbers)
+function sendText($message, $numbers): void
 {
 
     $apiKey = urlencode('y9X1o/Ko6M4-MCz6zJfBeGMv9TMOLG54k0c53EfCfo');
@@ -212,7 +230,7 @@ function sendText($message, $numbers)
  * fileLocation: where you want to save the file
  * formInputName : the input name of the $_file
  */
-function fileUploadMultiple($fileLocation, $formInputName)
+function fileUploadMultiple($fileLocation, $formInputName): void
 {
     // Count total files
     $countFiles = count($_FILES[$formInputName]['name']);
@@ -263,7 +281,7 @@ function fileUploadMultiple($fileLocation, $formInputName)
  * fileLocation: where you want to save the file
  * formInputName : the input name of the $_file
  */
-function fileUpload($fileLocation, $formInputName)
+function fileUpload($fileLocation, $formInputName): void
 {
     // UPLOAD PICTURE
     $fileName = basename($_FILES[$formInputName]['name']); #the fileName
@@ -287,7 +305,6 @@ function fileUpload($fileLocation, $formInputName)
     $fileName_location = "$fileLocation$fileName";
 
     // sanitise the file
-    $picError = "";
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); # use pathinfo to get the file extension
     $fileExtension = strtolower($fileExtension); #turn the extension to a lowercase
     if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
@@ -309,7 +326,7 @@ function fileUpload($fileLocation, $formInputName)
 
 // ADD COUNTRY CODE
 
-function addCountryCode($mobile, $code)
+function addCountryCode($mobile, $code): string
 {
     $telephone = $mobile;
     $telephone = substr($telephone, 1);
@@ -320,8 +337,7 @@ function addCountryCode($mobile, $code)
 /**
  * return a bulma panel row
  */
-
-function bulmaPanelMoney($input, $label, $color)
+function bulmaPanelMoney($input, $label, $color): void
 {
     echo " <div class='column'>
         <div class='panel panel-$color'>
@@ -338,7 +354,7 @@ function bulmaPanelMoney($input, $label, $color)
 }
 
 
-function bulmaPanel($input, $label, $color)
+function bulmaPanel($input, $label, $color): void
 {
     echo " <div class='column'>
         <div class='panel panel-$color'>
@@ -354,7 +370,7 @@ function bulmaPanel($input, $label, $color)
     </div>";
 }
 
-function changeToJs($variableName, $variable)
+function changeToJs($variableName, $variable): void
 {
     echo "<script> const $variableName = $variable </script>";
 }
@@ -392,7 +408,7 @@ function humanTiming($time) : string
 }
 
 
-function milliSeconds()
+function milliSeconds(): string
 {
     $microtime = microtime();
     $comps = explode(' ', $microtime);
@@ -404,7 +420,7 @@ function milliSeconds()
 
 
 
-function checkEmailExist($email)
+function checkEmailExist($email): array|int|string
 {
     $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: 'account', identifier1: 'email');
     return Select::selectFn2(query: $query, bind: [$email]);

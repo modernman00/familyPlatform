@@ -8,8 +8,8 @@ use App\classes\{CheckToken, Select};
 
 class Forgot
 {
-  public $table = 'login';
-  public $email;
+  public string $table = 'login';
+  public string $email;
 
   public function show()
   {
@@ -24,12 +24,12 @@ class Forgot
     }
   }
 
-  public function verify()
+  public function verify(): void
   {
     try {
 
       //1.  token verified
-      CheckToken::tokenCheck('token', '/login/forgot');
+      CheckToken::tokenCheck('token');
 
       //2.  sanitise input   
       $cleanData = getSanitisedInputData($_POST, null);
@@ -57,7 +57,7 @@ class Forgot
       $_SESSION['email'] = $cleanData['email'];
 
       //5. use the forgot class to verify, generate code and send msg
-      generateSendTokenEmail($getData, null);
+      generateSendTokenEmail($getData);
 
       //6. check if the $_SESSION['login'] from the login controller is active if yes, unset and use changePW session
       unset($_SESSION['/loginType']);

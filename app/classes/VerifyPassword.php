@@ -7,41 +7,48 @@ use Exception;
 
 class VerifyPassword extends AllFunctionalities
 {
+    /**
+     * @var null|string
+     *
+     * @psalm-var 'Your password is incorrect!'|null
+     */
     public $error;
-    private $options = array('cost' => 12);
-    private $hash = PASSWORD_DEFAULT;
+    private array $options = ['cost' => 12];
 
-    // if password is successfully verified or not
-    public function __construct($inputPass,  $dbPass, $id, $table)
-    {}
+    /**
+     * @var null|string
+     */
+    private $passwordHash;
 
+    public function __construct(
+        private string $inputPass,
+        private string $dbPass,
+        private int $id,
+        private string $table
+    ) {}
 
-    // hash the password once verified
-    public function hashPassword() : mixed
+    public function hashPassword(): mixed
     {
-    
         if (empty($this->inputPass)) {
-            echo json_encode (['error'=> "Empty password"]);
+            echo json_encode(['error' => "Empty password"]);
             throw new Exception("Empty password");
         }
-     
+
         if (password_verify($this->inputPass, $this->dbPass) === false) {
             $this->error = 'Your password is incorrect!';
-            echo json_encode (['psdError'=> $this->error]);
+            echo json_encode(['psdError' => $this->error]);
             throw new Exception("<h1>Your password is incorrect!</h1>");
         }
-        
-        // check if the password needs rehash.
-        if (password_needs_rehash($this->dbPass, PASSWORD_DEFAULT, $this->options)) : mixed {
+
+        if (password_needs_rehash($this->dbPass, PASSWORD_DEFAULT, $this->options)) {
             $this->passwordHash = password_hash($this->inputPass, PASSWORD_DEFAULT, $this->options);
-            // create the data
             $data = [
                 'password' => $this->passwordHash,
                 'id' => $this->id
             ];
-            // update the database
             return $this->updateMultiplePOST($data, $this->table, 'id');
+        } else {
+            throw new Exception("faulty -- not good passport");
         }
     }
-
 }

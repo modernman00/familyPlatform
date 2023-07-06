@@ -44,7 +44,7 @@ class Login extends Select
         }
     }
 
-    public function login()
+    public function login(): void
     {
         try {
 
@@ -100,7 +100,7 @@ class Login extends Select
         }
     }
 
-    private function customerLogin($data)
+    private function customerLogin(array $data): void
     {
 
         $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
@@ -121,7 +121,14 @@ class Login extends Select
         session_regenerate_id();
     }
 
-    private function adminLogin($sanitisedData)
+    /**
+     * 
+     * @param array $sanitisedData 
+     * @return void 
+     * @throws \Exception 
+     */
+
+    private function adminLogin(array $sanitisedData): void
     {
         $getAdminCode = getenv('CODING');
 
@@ -142,6 +149,9 @@ class Login extends Select
         // header('Location: /admin/reviewApps');
     }
 
+    /**
+     * @return never
+     */
     public function adminSignOut()
     {
         $url = $_SESSION[self::LOGIN_TYPE] ?? '/';

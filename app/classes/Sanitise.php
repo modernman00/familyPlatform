@@ -7,13 +7,33 @@ use Exception;
 
 class Sanitise extends AllFunctionalities
 {
+    /**
+     * @var (int|string)[]
+     *
+     * @psalm-var list<array-key>
+     */
     private $key  = array();
-    private $value = array();
+
+    /**
+     * @var array
+     *
+     * @psalm-var list<mixed>
+     */
+    private array $value = array();
     private $value2 = array();
     public $error = array();
+
+    /**
+     * @var array
+     */
     private $cleanData = array();
-    private $dataCount;
-    private $data;
+
+    /**
+     * @var int|null
+     *
+     * @psalm-var 0|null|positive-int
+     */
+     private $data;
 
 
     /**
@@ -40,7 +60,7 @@ class Sanitise extends AllFunctionalities
         }
     }
 
-    private function emailVal()
+    private function emailVal(): void
     {
         if (isset($this->formData['email']) && !filter_var($this->formData['email'], FILTER_VALIDATE_EMAIL)) {
             $this->error[] = "Invalid Email Format ";
@@ -49,7 +69,7 @@ class Sanitise extends AllFunctionalities
         }
     }
 
-    private function passVal()
+    private function passVal(): static
     {
         if (isset($this->formData['password']) && isset($this->formData['confirm_password']) && $this->formData['password'] !== $this->formData['confirm_password']) {
                 $this->error[] = " Your passwords do not match";
@@ -58,7 +78,7 @@ class Sanitise extends AllFunctionalities
     }
 
 
-    private function checkEmpty()
+    private function checkEmpty(): static
     {
 
         for ($x = 0; $x < count($this->key); $x++) {
@@ -74,10 +94,10 @@ class Sanitise extends AllFunctionalities
      * both arrays data must be of the same length
      *   min is the minimum length expected of the post
      *   Max is the minimum length expected of the post
-    
      */
-    private function checkLength()
+    private function checkLength(): static
     {
+        $dataKey = null;
         if ($this->dataLength) {
             for ($x = 0; $x < count($this->dataLength['data']); $x++) {
                 $dataKey[] = $this->dataLength['data'][$x];
@@ -94,7 +114,7 @@ class Sanitise extends AllFunctionalities
         return $this;
     }
 
-    protected function sanitise()
+    protected function sanitise(): static
     {
         for ($x = 0; $x < count($this->key); $x++) {
             $this->data = $this->value[$x];
@@ -109,7 +129,7 @@ class Sanitise extends AllFunctionalities
         return $this;
     }
 
-    private function setArrayData()
+    private function setArrayData(): array
     {
         $options = array('cost' => 10);
         $this->cleanData = array_combine($this->key, $this->value2);
@@ -128,7 +148,7 @@ class Sanitise extends AllFunctionalities
         return $this->cleanData;
     }
 
-    private function runFunctions()
+    private function runFunctions(): void
     {
         $this->emailVal();
         $this->passVal();

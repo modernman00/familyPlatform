@@ -4,18 +4,13 @@ namespace App\model;
 
 class EmailData
 {
-    private $username;
-    private $password;
-    private $senderEmail;
-    private $senderName;
-    private $testEmail;
+    private null|string $username;
+    private null|string $password;
+    private null|string $senderEmail;
+    private null|string $senderName;
+    private null|string $testEmail;
 
-    /**
-     * 
-     * @param string $sender must be either, self, customer, payment, referral
-     * @return void 
-     */
-    function __construct(string $sender)
+    public function __construct(private string $sender)
     {
         if ($sender === 'member') {
             $this->username = getenv("APP_USERNAME");
@@ -29,12 +24,11 @@ class EmailData
             $this->senderName = getenv('ADMIN_SENDER');
             $this->senderEmail = getenv("ADMIN_EMAIL");
             $this->testEmail = getenv("TEST_EMAIL");
-        } 
+        }
     }
 
-    private function setEmailData()
+    private function setEmailData(): void
     {
-    
         define('USER_APP', $this->username);
         define('PASS', $this->password);
         define('APP_EMAIL', $this->senderEmail);
@@ -42,7 +36,7 @@ class EmailData
         define('TEST_EMAIL', $this->testEmail);
     }
 
-    public function getEmailData()
+    public function getEmailData(): void
     {
         $this->setEmailData();
     }

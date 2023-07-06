@@ -36,7 +36,7 @@ class Event extends AllMembersData
         }
     }
 
-    public static function sendReminder()
+    public static function sendReminder(): void
     {
         try {
          
@@ -76,7 +76,7 @@ class Event extends AllMembersData
     }
 
     // PRIVATE FUNCTION TO SEND EVENT NOTIFICATION
-    private static function sendNotification($data, $subject)
+    private static function sendNotification($data, string $subject): void
     {
 
         $allEmails = getAllEmails();
@@ -93,6 +93,7 @@ class Event extends AllMembersData
 
     private static function getEventMonth($data): array
     {
+        $eventWeek = null;
         foreach ($data as $data) {
             if (date('m') == date('m', strtotime($data['eventDate']))) {
                 $eventWeek[] = $data['eventDate'];
@@ -107,6 +108,7 @@ class Event extends AllMembersData
 
     private static function getEventWeek($data): array
     {
+        $event = null;
         foreach ($data as $data) {
             if (date('l') == "Tuesday") {
 
@@ -158,6 +160,9 @@ class Event extends AllMembersData
         return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
 
+   /**
+    * @return void
+    */
    public static function getEventData()
     {
         $allEventData = allMembersData::getEventData();
@@ -180,6 +185,7 @@ class Event extends AllMembersData
             $result[0]['firstName'] = $_SESSION['fName'];
             $result[0]['lastName'] = $_SESSION['lName'];
 
+            $key = null;
             foreach ($result as $key); // NEEDS INVESTIGATION WHY IT WORKS
             return \msgSuccess(201, $key);
         } catch (\Throwable $th) {

@@ -12,7 +12,7 @@ class AllMembersData extends InnerJoin
 {
     private const ERR_MSG = "Member Data Error";
 
-    public function getAllMembers()
+    public function getAllMembers(): array
     {
         $table = ['personal', 'otherFamily', 'profile_pics', 'contact'];
         $firstTable = array_shift($table);
@@ -27,7 +27,7 @@ class AllMembersData extends InnerJoin
         return $memberData;
     }
 
-    public function getAllMembersNoPics()
+    public function getAllMembersNoPics(): array
     {
         $table = ['personal',"contact","profile_pics", 'otherFamily'];
         $firstTable = array_shift($table);
@@ -55,13 +55,6 @@ class AllMembersData extends InnerJoin
         return $memberData ??= throw new Exception(self::ERR_MSG, 1);
     }
 
-    public static function getMembers($table, $orderBy): array
-    {
-        $firstTable = array_shift($table);
-        $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
-        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
-    }
-
     public static function getEventData()
     {
         try {
@@ -72,5 +65,12 @@ class AllMembersData extends InnerJoin
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+     public static function getMembers($table, $orderBy): array
+    {
+        $firstTable = array_shift($table);
+        $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
+        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
     }
 }

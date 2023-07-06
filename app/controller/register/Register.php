@@ -14,11 +14,17 @@ use Exception;
 
 class Register extends Db
 {
-    private $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment'];
+    /**
+     * @var string[]
+     *
+     * @psalm-var array{0: 'personal', 1: 'work', 2: 'contact', 3: 'account', 4: 'otherFamily', 5: 'post', 6: 'comment'}
+     */
+    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment'];
 
-    public function index()
+    public function index(): void
     {
         try {
+
 
             view('registration/register');
         } catch (\Throwable $e) {
@@ -27,7 +33,7 @@ class Register extends Db
         }
     }
 
-    public function nextStep()
+    public function nextStep(): void
     {
         try {
 
@@ -111,13 +117,11 @@ class Register extends Db
     }
 
     /**
-     * 
      * @param mixed $type is it kids or siblings
      * @param mixed $typeCount the number selected 
      * @param mixed $data cleaned POST data
-     * @return bool|void 
      */
-    private function processKidSibling($type, $typeCount, $data)
+    private function processKidSibling($type, $typeCount, $data): void
     {
         try {
             for ($i = 1; $i <= $typeCount; $i++) {
@@ -137,6 +141,11 @@ class Register extends Db
         }
     }
 
+    /**
+     * @return (int|string)[][]
+     *
+     * @psalm-return array{min: array{0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 7}, max: array{0: 15, 1: 15, 2: 35, 3: 35, 4: 20, 5: 16, 6: 30, 7: 15, 8: 30}, data: array{0: 'firstName', 1: 'lastName', 2: 'fatherName', 3: 'motherName', 4: 'country', 5: 'mobile', 6: 'email', 7: 'occupation', 8: 'password'}}
+     */
     private function dataToCheck(): array
     {
         return [
@@ -151,10 +160,13 @@ class Register extends Db
 
     /**
      * Summary of tableData
+     *
      * @param mixed $cleanPostData - sanitised $_POST data 
-     * @return array
+     *
+     * @return (int|mixed|string)[][]
+     *
+     * @psalm-return array{0: array{firstName: mixed, lastName: mixed, alias: mixed, kids: mixed, gender: mixed, siblings: mixed, day: mixed, month: mixed, year: mixed, id: mixed}, 1: array{employmentStatus: mixed, occupation: mixed, id: mixed}, 2: array{email: mixed, country: mixed, mobile: mixed, id: mixed}, 3: array{email: mixed, password: mixed, status: 'new', type: 'member', id: mixed}, 4: array{spouseName: mixed, spouseMobile: mixed, spouseEmail: mixed, fatherName: mixed, fatherMobile: mixed, fatherEmail: mixed, motherName: mixed, motherMobile: mixed, motherEmail: mixed, id: mixed}, 5: array{fullName: mixed, postMessage: 'Hey, welcome to your page', profileImg: 'avatarF.png'|'avatarM.jpeg', id: mixed}, 6: array{fullName: mixed, comment: 'Your comment will show here', profileImg: 'avatarF.png'|'avatarM.jpeg', post_no: 1000, id: mixed}, 7: array{img: 'avatarF.png'|'avatarM.jpeg', id: mixed}}
      */
-
     private function tableData(array $cleanPostData): array
     {
         $profileAvatar = $cleanPostData['gender'] === "male" ? "avatarM.jpeg" : "avatarF.png";
@@ -232,7 +244,6 @@ class Register extends Db
      * @throws Exception
      * @return array
      */
-
     private function setId(array $postData, string|int $name, string $table): array
     {
 

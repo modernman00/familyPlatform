@@ -14,16 +14,16 @@ use Exception;
 
 class AllMembersController extends AllMembersData
 {
-    public function index()
+    public function index(): void
     {
         try {
-            view('member/allMembers', compact('result'));
+            view('member/allMembers');
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-    public function processApiData()
+    public function processApiData(): void
     {
         try {
             $tokenVerify = new VerifyToken();
@@ -42,7 +42,7 @@ class AllMembersController extends AllMembersData
         }
     }
 
-    public function processApiData2()
+    public function processApiData2(): void
     {
         try {
             $result = $this->getAllMembersNoPics();
@@ -53,6 +53,9 @@ class AllMembersController extends AllMembersData
     }
 
 
+    /**
+     * @return never
+     */
     public function setProfile()
     {
         $id = checkInput($_GET['id']);
@@ -61,7 +64,7 @@ class AllMembersController extends AllMembersData
         die();
     }
 
-    public function getProfile()
+    public function getProfile(): void
     {
         try {
                //  verify token
@@ -85,6 +88,7 @@ class AllMembersController extends AllMembersData
 
         $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
+        $data = null;
         foreach ($result as $data);
 
         view('member/getProfile', compact('data', 'pictures'));

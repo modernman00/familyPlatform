@@ -7,7 +7,7 @@ use App\classes\Select;
 
 class Search extends Base
 {
-    public function index()
+    public function index(): void
     {
         try {
             
@@ -34,7 +34,7 @@ class Search extends Base
         }
     }
 
-    private function checkBox($subject)
+    private function checkBox($subject): string
     {
         return "<div class='form-check form-check-inline'>
             <input class='form-check-input' type='radio' id='{$subject}Yes' name = '{$subject}Checkbox' value=Yes'>

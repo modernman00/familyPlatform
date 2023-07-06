@@ -7,8 +7,6 @@ use App\classes\Db;
 
 class Auth extends JwtHandler
 {
-
-    protected $db;
     protected $headers;
     protected $token;
 
@@ -37,6 +35,11 @@ class Auth extends JwtHandler
         }
     }
 
+    /**
+     * @return null|string
+     *
+     * @psalm-return 'SUCCESSFUL'|null
+     */
     protected function fetchUser($user_id)
     {
         try {

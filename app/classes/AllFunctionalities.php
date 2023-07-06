@@ -7,7 +7,10 @@ use App\classes\Db;
 class AllFunctionalities extends Db
 {
 
-    public function update($table, $column, $column_ans, $identifier, $identifier_ans)
+    /**
+     * @psalm-param 'email'|'id' $identifier
+     */
+    public function update(string $table, string $column, string $column_ans, string $identifier, string $identifier_ans)
     {
         try {
             $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
@@ -20,7 +23,12 @@ class AllFunctionalities extends Db
     }
 
 
-    public static function update2($table, $column, $column_ans, $identifier, $identifier_ans)
+    /**
+     * @psalm-param 'events'|'post' $table
+     * @psalm-param 'eventDate'|'post_likes' $column
+     * @psalm-param 'no'|'post_no' $identifier
+     */
+    public static function update2(string $table, string $column, $column_ans, string $identifier, string $identifier_ans)
     {
         try {
             $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
@@ -32,35 +40,9 @@ class AllFunctionalities extends Db
         }
     }
 
-    public function updateOr($table, $column, $column_ans, $identifier1, $identifier2, $identifier_ans)
-    {
-        try {
-            $query = "UPDATE $table SET $column =? WHERE $identifier1 = ? OR $identifier2 = ?";
-            $result = $this->connect()->prepare($query);
-            return $result->execute([$column_ans, $identifier_ans, $identifier_ans]);
-    
-        } catch (PDOException $e) {
-            showError($e);
-        }
-    }
-
 
 
     // UPDATE MULTIPLE PARAMETER DYNAMICALLY
-
-    public function updateMultiple(array $data, string $table, string $identifier, string $ref)
-    {
-        try {
-            $implodeKey = implode('=?, ', array_keys($data));
-            $implodeKey = rtrim($implodeKey, ", $ref");
-            $implodeValue = array_values($data);
-            $sql = "UPDATE $table SET $implodeKey WHERE $identifier =?";
-            return $this->connect()->prepare($sql)->execute($implodeValue);
-        
-        } catch (PDOException $e) {
-            showError($e);
-        }
-    }
 
     /**
      * Undocumented function
@@ -68,11 +50,10 @@ class AllFunctionalities extends Db
      * @param array $data - the array from the $_POST
      * @param string $table
      * @param [type] $identifier this is either id or email or username
-     * @return void
+     *
+     * @psalm-param 'id' $identifier
      */
-
-    
-    public function updateMultiplePOST(array $data, string $table, $identifier)
+    public function updateMultiplePOST(array $data, string $table, string $identifier):bool
     {
         try {
             if (isset($data['submit'])) {
@@ -88,10 +69,13 @@ class AllFunctionalities extends Db
 
             $sql = "UPDATE $table SET $implodeKey=? WHERE $identifier =?";
             // example - 'UPDATE register SET title=?, first_name=?, second_name=? WHERE id =?'
-            return $this->connect()->prepare($sql)->execute($implodeValue);
+            $stmt = $this->connect()->prepare($sql);
+            return $stmt->execute($implodeValue);
+
 
         } catch (PDOException $e) {
             showError($e);
+            return false;
         }
     }
 }

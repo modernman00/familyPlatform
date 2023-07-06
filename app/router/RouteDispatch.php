@@ -9,8 +9,19 @@ use PDOException;
 
 class RouteDispatch
 {
+    /**
+     * @var array|bool|null
+     */
     protected $match;
+
+    /**
+     * @var null|string
+     */
     protected $controller;
+
+    /**
+     * @var null|string
+     */
     protected $method;
     public function __construct(AltoRouter $router)
     {
@@ -32,7 +43,7 @@ class RouteDispatch
                 view('error/genError');
             }
         } catch (PDOException $e) {
-            echo $e->getMessage();
+            showError($e);
         }
     }
 }

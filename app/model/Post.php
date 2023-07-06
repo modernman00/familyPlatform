@@ -10,38 +10,38 @@ use App\classes\InnerJoin;
 class Post extends Select
 {
 
-    static function commentLink2Post($postNo)
+    static function commentLink2Post($postNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "post_no");
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    public static function commentLink2Img($imgPath)
+    public static function commentLink2Img($imgPath): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "picture");
         return parent::selectFn2(query: $query, bind: [$imgPath]);
     }
 
-    static function commentByNo($commentNo)
+    static function commentByNo(int $commentNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
         return parent::selectFn2(query: $query, bind: [$commentNo]);
     }
 
 
-    static function postByNo($postNo)
+    static function postByNo(int $postNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    static function postLink2Id(string $id): array
+    static function postLink2Id(string $id): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    static function getAllPost(): array
+    static function getAllPost(): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post', orderBy: "ORDER BY post_no DESC");
         return parent::selectFn2(query: $query);
@@ -79,22 +79,21 @@ class Post extends Select
      * Undocumented function
      *
      * @param [type] $custNo this is the id
-     *  get the 
-     * @return array
+     *  get the
      */
-    public static function getAllPostPics($custNo): array
+    public static function getAllPostPics(string $custNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);
     }
 
-    public static function getProfilePics($id): array
+    public static function getProfilePics($id): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'profile_pics', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    static function getAllComments()
+    static function getAllComments(): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
         return parent::selectFn2(query: $query);

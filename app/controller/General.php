@@ -8,14 +8,14 @@ use Exception;
 class General
 {
 
-    public function sendTextToMember()
+    public function sendTextToMember(): void
     {
         $message = "it is well";
         $number = $_POST['number'];
         sendText(message: $message, numbers: $number);
     }
 
-    public function sendEmailToMember()
+    public function sendEmailToMember(): void
     {
         try {
 
@@ -38,7 +38,7 @@ class General
        
     }
 
-      public function sendTextMember()
+      public function sendTextMember(): void
     {
         $data = json_decode(file_get_contents("php://input"), true);
 

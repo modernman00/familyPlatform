@@ -5,19 +5,16 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\model\{
-    SingleCustomerData,
     Post
 };
 
-use App\classes\{
-    Select, InnerJoin
-};
+use App\classes\InnerJoin;
 
 use Pusher\Pusher;
 class PostMessage
 {
 
-    function index()
+    public function index(): void
     {
         try {
 
@@ -33,7 +30,7 @@ class PostMessage
     }
 
 
-    function getComment()
+    public function getComment(): void
     {
         try {
             $message = Post::getAllCommentProfilePics();
@@ -43,7 +40,7 @@ class PostMessage
         }
     }
 
-    function getCommentNo()
+    public function getCommentNo(): void
     {
         try {
 
@@ -51,6 +48,7 @@ class PostMessage
 
             $message = Post::commentByNo($commentNo);
 
+            $data = null;
             foreach ($message as $data);
 
             // GET THE COMMENT PROFILE PICS USING THE COMMENT ID
@@ -68,13 +66,14 @@ class PostMessage
         }
     }
 
-    function getPostNo_t()
+    public function getPostNo_t(): void
     {
         try {
 
             $postNo = checkInput($_GET['postNo']);
 
             $message = Post::postByNo($postNo);
+            $data = null;
             foreach ($message as $data);
             msgSuccess(200, $data);
         } catch (\Throwable $th) {
@@ -82,13 +81,14 @@ class PostMessage
         }
     }
 
-    function getPostNo()
+    public function getPostNo(): void
     {
         try {
 
             $postNo = checkInput($_GET['postNo']);
 
             $message = Post::postByNo($postNo);
+            $data = null;
             foreach ($message as $data);
             $posterName = $data['fullName'];
 
@@ -109,7 +109,7 @@ class PostMessage
         }
     }
 
-    static function update2()
+    public static function update2(): void
     {
         try {
             // session_destroy();
@@ -133,6 +133,7 @@ class PostMessage
 
 
             $messages = Post::postByNo($id);
+            $message = null;
             foreach ($messages as $message);
 
             $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];
@@ -148,7 +149,7 @@ class PostMessage
         }
     }
 
-    static function update()
+    public static function update(): void
     {
         try {
 
@@ -169,6 +170,7 @@ class PostMessage
 
 
             $messages = Post::postByNo($id);
+            $message = null;
             foreach ($messages as $message);
 
             $idComment = (int) $_SESSION['LAST_INSERT_ID_COMMENT'];

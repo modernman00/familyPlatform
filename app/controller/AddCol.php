@@ -9,7 +9,7 @@ use App\classes\AlterTable;
 class AddCol
 {
 
-    public function addCol()
+    public function addCol(): void
     {
         try {
             $cols = ['alias', 'spouse'];
