@@ -1,2 +1,1195 @@
-/*! For license information please see profilePage.js.LICENSE.txt */
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[20,659],{3559:(t,e,n)=>{n.d(e,{Z:()=>s});var r=n(3659);function o(t){return o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},o(t)}function a(t,e){var n="undefined"!=typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(!n){if(Array.isArray(t)||(n=function(t,e){if(!t)return;if("string"==typeof t)return i(t,e);var n=Object.prototype.toString.call(t).slice(8,-1);"Object"===n&&t.constructor&&(n=t.constructor.name);if("Map"===n||"Set"===n)return Array.from(t);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return i(t,e)}(t))||e&&t&&"number"==typeof t.length){n&&(t=n);var r=0,o=function(){};return{s:o,n:function(){return r>=t.length?{done:!0}:{done:!1,value:t[r++]}},e:function(t){throw t},f:o}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var a,c=!0,s=!1;return{s:function(){n=n.call(t)},n:function(){var t=n.next();return c=t.done,t},e:function(t){s=!0,a=t},f:function(){try{c||null==n.return||n.return()}finally{if(s)throw a}}}}function i(t,e){(null==e||e>t.length)&&(e=t.length);for(var n=0,r=new Array(e);n<e;n++)r[n]=t[n];return r}function c(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,(a=r.key,i=void 0,i=function(t,e){if("object"!==o(t)||null===t)return t;var n=t[Symbol.toPrimitive];if(void 0!==n){var r=n.call(t,e||"default");if("object"!==o(r))return r;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===e?String:Number)(t)}(a,"string"),"symbol"===o(i)?i:String(i)),r)}var a,i}var s=function(){function t(e){!function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,t),this.data=e,this.error=[],this.result=0}var e,n,o;return e=t,(n=[{key:"id",value:function(t){return document.getElementById(t)}},{key:"getData",value:function(){return this.data}},{key:"massValidate",value:function(){var t=this;this.data.forEach((function(e){var n,o=a(e);try{for(o.s();!(n=o.n()).done;){var i=n.value,c=t.id("".concat(i.name,"_error"));if("submit"!=i.name&&"button"!=i.name&&"token"!=i.name&&"cancel"!=i.name&&"checkbox_id"!=i.name){var s=i.name.replace("_"," ");"spouseName"!=s&&"spouseMobile"!=s&&"spouseEmail"!=s&&"fatherMobile"!=s&&"fatherEmail"!=s&&"motherMobile"!=s&&"motherEmail"!=s||""===i.value&&(i.value="Not Provided"),""===i.value||"select"===i.value?(c.innerHTML="* cannot be left empty",c.style.color="red",t.error.push("".concat(s.toUpperCase()," cannot be left empty"))):t.result=1,!1===(0,r.matchRegex)(i.value)&&(t.error.push("There is a problem with you entry for ".concat(s.toUpperCase(),"'s question")),c.innerHTML="* There is a problem with you entry for ".concat(s.toUpperCase(),"'s question"))}}}catch(t){o.e(t)}finally{o.f()}}))}},{key:"emailVal",value:function(){var t="<li style=color:'red';> Please enter a valid email</li>";null===this.id("email_id").value.match(/^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/)&&(this.id("email_error").innerHTML=t,this.id("email_error").style.color="red",this.error.push(t))}},{key:"clearError",value:function(){var t=this;this.error=[],this.data.forEach((function(e){var n,r=a(e);try{var o=function(){var e=n.value;if("submit"==e.id||"token"==e.name||"submit"==e.name||"checkbox"==e.name)return"continue";t.id(e.id).addEventListener("change",(function(){t.id("".concat(e.name,"_error")).innerHTML=""})),"select"!=e.value?t.id(e.id).addEventListener("keyup",(function(){t.id("".concat(e.name,"_error")).innerHTML=""})):t.id(e.id).addEventListener("change",(function(){t.id("".concat(e.name,"_error")).innerHTML=""}))};for(r.s();!(n=r.n()).done;)o()}catch(t){r.e(t)}finally{r.f()}}))}},{key:"clearHtml",value:function(){this.data.forEach((function(t){var e,n=a(t);try{for(n.s();!(e=n.n()).done;){var r=e.value;"submit"!=r.id&&"submit"!=r.name&&"checkbox"!=r.name&&(r.value="")}}catch(t){n.e(t)}finally{n.f()}}))}},{key:"realTimeCheckLen",value:function(t,e){var n=this;try{for(var r=function(r){var o=n.id("".concat(t[r],"_id"));if(""==o)throw new Error("empty dataInput");var a=e[r],i=n.id("".concat(t[r],"_error"));o&&(o.maxLength=parseInt(a+1)),o.addEventListener("keyup",(function(){i.innerHTML=o.value.length>a?"You have reach the maximum limit":"",n.id("".concat(t[r],"_help")).style.color="red",n.id("".concat(t[r],"_help")).style.fontSize="10px",i.style.color="red",setTimeout((function(){n.id("".concat(t[r],"_help")).style.display="none"}),5e3)}))},o=0;o<t.length;o++)r(o)}catch(t){console.log(t.message)}}},{key:"matchInput",value:function(t,e){var n,r,o;n=this.id("".concat(e,"_error")),r=this.id(t+"_id"),(o=this.id(e+"_id")).addEventListener("keyup",(function(){n.innerHTML=o.value!==r.value?"Your passwords do not match":""}))}},{key:"injectData",value:function(t,e){for(var n=0;n<t.length;n++)this.id(t[n]).innerHTML=e[n]}},{key:"duplicate",value:function(t,e){var n,r;n=this.id(t),r=this.id(e),n.addEventListener("keyup",(function(){r.value=n.value}))}},{key:"realTimeServer",value:function(t,e,n){var r,o,a;r=this.id(t),a=this.id(n),r.addEventListener("keyup",(function(){if(0!=(o=r.value)){var t=new XMLHttpRequest;t.onreadystatechange=function(){4==this.readyState&&200==this.status&&(a.innerHTML=this.responseText)},t.open("GET","".concat(e,"=").concat(o),!0),t.send()}else a.innerHTML=""}))}},{key:"isChecked",value:function(t,e,n){var r=this,o=function(){r.id(t).checked?(alert("check"),r.id(n).innerHTML="checked"):r.id(e).checked&&(r.id(n).innerHTML="checked")};this.id(t).addEventListener("click",o),this.id(e).addEventListener("click",o)}},{key:"previousAddress",value:function(){var t=this,e=this.id("time_at_address_id"),n=this.id("previous_address_class");e.addEventListener("change",(function(){"3 years+"!=e.value?(n.style.display="block",t.id("previous_address_help").innerHTML="Please enter your full address: House No, Street Name, Town/City and Post Code"):n.style.display="none"}))}}])&&c(e.prototype,n),o&&c(e,o),Object.defineProperty(e,"prototype",{writable:!1}),t}()},3659:(t,e,n)=>{n.r(e),n.d(e,{autoCompleter:()=>m,checkBox:()=>h,checkBox2:()=>v,createAndAppendElement:()=>f,distinctValue:()=>p,isChecked:()=>y,loaderIcon:()=>u,loaderIconBootstrap:()=>s,loaderIconBulma:()=>l,matchInput:()=>b,matchRegex:()=>g,removeDiv:()=>d});var r=n(7658),o=n(7338),a=n.n(o);function i(t){return function(t){if(Array.isArray(t))return c(t)}(t)||function(t){if("undefined"!=typeof Symbol&&null!=t[Symbol.iterator]||null!=t["@@iterator"])return Array.from(t)}(t)||function(t,e){if(!t)return;if("string"==typeof t)return c(t,e);var n=Object.prototype.toString.call(t).slice(8,-1);"Object"===n&&t.constructor&&(n=t.constructor.name);if("Map"===n||"Set"===n)return Array.from(t);if("Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))return c(t,e)}(t)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function c(t,e){(null==e||e>t.length)&&(e=t.length);for(var n=0,r=new Array(e);n<e;n++)r[n]=t[n];return r}var s=function(){return'<div class="spinner-grow text-primary" role="status">\n        <span class="sr-only">Loading...</span>\n        </div>'},u=function(){return'<div class="loader"></div>'},l=function(){return'<div class="is-loading"></div>'},d=function(t){var e=document.getElementById(t);if(e)return e.remove()},f=function(t,e,n){var o=arguments.length>3&&void 0!==arguments[3]?arguments[3]:null,a=document.createElement(t);return a.setAttribute("id",e),a.setAttribute("class","field ".concat(o)),(0,r.id)(n).appendChild(a)},m=function(t,e){a()({input:t,fetch:function(t,n){t=t.toLowerCase(),n(e.filter((function(e){return e.firstName.toLowerCase().startsWith(t)})))},onSelect:function(t){input.value=t.firstName}})},p=function(t){return i(new Set(t))},h=function(t){return'<div class="control"> \n        <label class="radio">\n          <input type="radio" name="send'.concat(t,'" value="yes" id=').concat(t,'Yes > Yes \n        </label>\n        <label class="radio"> \n          <input type="radio" name="send').concat(t,'" value="no" id=').concat(t,"No checked> No \n        </label>\n      </div>")},v=function(t){return'<div class="control"> \n        <label class="checkbox">\n          <input type="checkbox" name="send'.concat(t,'" value="yes" id=').concat(t,'Yes> Yes \n        </label>\n        <label class="checkbox"> \n          <input type="checkbox" name="send').concat(t,'" value="no" id=').concat(t,"No> No \n        </label>\n      </div>")},y=function(t,e){var n="".concat(t,"Yes"),o="".concat(t,"No"),a=function(){(0,r.id)(n).checked?(alert("check"),e()):(0,r.id)(o).checked&&alert("check No")};(0,r.id)(n).addEventListener("click",a),(0,r.id)(o).addEventListener("click",a)},g=function(t){if(t&&"Not Provided"!=t){if(null===t.match(/[<?/>]+/g))return!0}},b=function(t,e,n){var o,a,i;o=(0,r.id)(n),a=(0,r.id)(t),(i=(0,r.id)(e)).addEventListener("keyup",(function(){i.value!==a.value?(o.innerHTML="Your passwords do not match",o.style.color="red"):(o.innerHTML="The password is matched: <i class='fa fa-check' aria-hidden='true'></i>",o.style.color="green")}))}},3421:(t,e,n)=>{n.r(e),n.d(e,{checkCookie:()=>h,getApiData:()=>d,getCookie:()=>p,getMultipleApiData:()=>f,postFormData:()=>l,setCookie:()=>m});var r=n(7658),o=n(9669),a=n.n(o);function i(t){return i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},i(t)}function c(){c=function(){return t};var t={},e=Object.prototype,n=e.hasOwnProperty,r=Object.defineProperty||function(t,e,n){t[e]=n.value},o="function"==typeof Symbol?Symbol:{},a=o.iterator||"@@iterator",s=o.asyncIterator||"@@asyncIterator",u=o.toStringTag||"@@toStringTag";function l(t,e,n){return Object.defineProperty(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}),t[e]}try{l({},"")}catch(t){l=function(t,e,n){return t[e]=n}}function d(t,e,n,o){var a=e&&e.prototype instanceof p?e:p,i=Object.create(a.prototype),c=new S(o||[]);return r(i,"_invoke",{value:_(t,n,c)}),i}function f(t,e,n){try{return{type:"normal",arg:t.call(e,n)}}catch(t){return{type:"throw",arg:t}}}t.wrap=d;var m={};function p(){}function h(){}function v(){}var y={};l(y,a,(function(){return this}));var g=Object.getPrototypeOf,b=g&&g(g(C([])));b&&b!==e&&n.call(b,a)&&(y=b);var w=v.prototype=p.prototype=Object.create(y);function k(t){["next","throw","return"].forEach((function(e){l(t,e,(function(t){return this._invoke(e,t)}))}))}function L(t,e){function o(r,a,c,s){var u=f(t[r],t,a);if("throw"!==u.type){var l=u.arg,d=l.value;return d&&"object"==i(d)&&n.call(d,"__await")?e.resolve(d.__await).then((function(t){o("next",t,c,s)}),(function(t){o("throw",t,c,s)})):e.resolve(d).then((function(t){l.value=t,c(l)}),(function(t){return o("throw",t,c,s)}))}s(u.arg)}var a;r(this,"_invoke",{value:function(t,n){function r(){return new e((function(e,r){o(t,n,e,r)}))}return a=a?a.then(r,r):r()}})}function _(t,e,n){var r="suspendedStart";return function(o,a){if("executing"===r)throw new Error("Generator is already running");if("completed"===r){if("throw"===o)throw a;return N()}for(n.method=o,n.arg=a;;){var i=n.delegate;if(i){var c=E(i,n);if(c){if(c===m)continue;return c}}if("next"===n.method)n.sent=n._sent=n.arg;else if("throw"===n.method){if("suspendedStart"===r)throw r="completed",n.arg;n.dispatchException(n.arg)}else"return"===n.method&&n.abrupt("return",n.arg);r="executing";var s=f(t,e,n);if("normal"===s.type){if(r=n.done?"completed":"suspendedYield",s.arg===m)continue;return{value:s.arg,done:n.done}}"throw"===s.type&&(r="completed",n.method="throw",n.arg=s.arg)}}}function E(t,e){var n=e.method,r=t.iterator[n];if(void 0===r)return e.delegate=null,"throw"===n&&t.iterator.return&&(e.method="return",e.arg=void 0,E(t,e),"throw"===e.method)||"return"!==n&&(e.method="throw",e.arg=new TypeError("The iterator does not provide a '"+n+"' method")),m;var o=f(r,t.iterator,e.arg);if("throw"===o.type)return e.method="throw",e.arg=o.arg,e.delegate=null,m;var a=o.arg;return a?a.done?(e[t.resultName]=a.value,e.next=t.nextLoc,"return"!==e.method&&(e.method="next",e.arg=void 0),e.delegate=null,m):a:(e.method="throw",e.arg=new TypeError("iterator result is not an object"),e.delegate=null,m)}function x(t){var e={tryLoc:t[0]};1 in t&&(e.catchLoc=t[1]),2 in t&&(e.finallyLoc=t[2],e.afterLoc=t[3]),this.tryEntries.push(e)}function T(t){var e=t.completion||{};e.type="normal",delete e.arg,t.completion=e}function S(t){this.tryEntries=[{tryLoc:"root"}],t.forEach(x,this),this.reset(!0)}function C(t){if(t){var e=t[a];if(e)return e.call(t);if("function"==typeof t.next)return t;if(!isNaN(t.length)){var r=-1,o=function e(){for(;++r<t.length;)if(n.call(t,r))return e.value=t[r],e.done=!1,e;return e.value=void 0,e.done=!0,e};return o.next=o}}return{next:N}}function N(){return{value:void 0,done:!0}}return h.prototype=v,r(w,"constructor",{value:v,configurable:!0}),r(v,"constructor",{value:h,configurable:!0}),h.displayName=l(v,u,"GeneratorFunction"),t.isGeneratorFunction=function(t){var e="function"==typeof t&&t.constructor;return!!e&&(e===h||"GeneratorFunction"===(e.displayName||e.name))},t.mark=function(t){return Object.setPrototypeOf?Object.setPrototypeOf(t,v):(t.__proto__=v,l(t,u,"GeneratorFunction")),t.prototype=Object.create(w),t},t.awrap=function(t){return{__await:t}},k(L.prototype),l(L.prototype,s,(function(){return this})),t.AsyncIterator=L,t.async=function(e,n,r,o,a){void 0===a&&(a=Promise);var i=new L(d(e,n,r,o),a);return t.isGeneratorFunction(n)?i:i.next().then((function(t){return t.done?t.value:i.next()}))},k(w),l(w,u,"Generator"),l(w,a,(function(){return this})),l(w,"toString",(function(){return"[object Generator]"})),t.keys=function(t){var e=Object(t),n=[];for(var r in e)n.push(r);return n.reverse(),function t(){for(;n.length;){var r=n.pop();if(r in e)return t.value=r,t.done=!1,t}return t.done=!0,t}},t.values=C,S.prototype={constructor:S,reset:function(t){if(this.prev=0,this.next=0,this.sent=this._sent=void 0,this.done=!1,this.delegate=null,this.method="next",this.arg=void 0,this.tryEntries.forEach(T),!t)for(var e in this)"t"===e.charAt(0)&&n.call(this,e)&&!isNaN(+e.slice(1))&&(this[e]=void 0)},stop:function(){this.done=!0;var t=this.tryEntries[0].completion;if("throw"===t.type)throw t.arg;return this.rval},dispatchException:function(t){if(this.done)throw t;var e=this;function r(n,r){return i.type="throw",i.arg=t,e.next=n,r&&(e.method="next",e.arg=void 0),!!r}for(var o=this.tryEntries.length-1;o>=0;--o){var a=this.tryEntries[o],i=a.completion;if("root"===a.tryLoc)return r("end");if(a.tryLoc<=this.prev){var c=n.call(a,"catchLoc"),s=n.call(a,"finallyLoc");if(c&&s){if(this.prev<a.catchLoc)return r(a.catchLoc,!0);if(this.prev<a.finallyLoc)return r(a.finallyLoc)}else if(c){if(this.prev<a.catchLoc)return r(a.catchLoc,!0)}else{if(!s)throw new Error("try statement without catch or finally");if(this.prev<a.finallyLoc)return r(a.finallyLoc)}}}},abrupt:function(t,e){for(var r=this.tryEntries.length-1;r>=0;--r){var o=this.tryEntries[r];if(o.tryLoc<=this.prev&&n.call(o,"finallyLoc")&&this.prev<o.finallyLoc){var a=o;break}}a&&("break"===t||"continue"===t)&&a.tryLoc<=e&&e<=a.finallyLoc&&(a=null);var i=a?a.completion:{};return i.type=t,i.arg=e,a?(this.method="next",this.next=a.finallyLoc,m):this.complete(i)},complete:function(t,e){if("throw"===t.type)throw t.arg;return"break"===t.type||"continue"===t.type?this.next=t.arg:"return"===t.type?(this.rval=this.arg=t.arg,this.method="return",this.next="end"):"normal"===t.type&&e&&(this.next=e),m},finish:function(t){for(var e=this.tryEntries.length-1;e>=0;--e){var n=this.tryEntries[e];if(n.finallyLoc===t)return this.complete(n.completion,n.afterLoc),T(n),m}},catch:function(t){for(var e=this.tryEntries.length-1;e>=0;--e){var n=this.tryEntries[e];if(n.tryLoc===t){var r=n.completion;if("throw"===r.type){var o=r.arg;T(n)}return o}}throw new Error("illegal catch attempt")},delegateYield:function(t,e,n){return this.delegate={iterator:C(t),resultName:e,nextLoc:n},"next"===this.method&&(this.arg=void 0),m}},t}function s(t,e,n,r,o,a,i){try{var c=t[a](i),s=c.value}catch(t){return void n(t)}c.done?e(s):Promise.resolve(s).then(r,o)}function u(t){return function(){var e=this,n=arguments;return new Promise((function(r,o){var a=t.apply(e,n);function i(t){s(a,r,o,i,c,"next",t)}function c(t){s(a,r,o,i,c,"throw",t)}i(void 0)}))}}(0,n(8662).ZP)(a(),{retries:3});var l=function(){var t=u(c().mark((function t(e,n){var o,i,s,u,l,d,f,m,p=arguments;return c().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return o=p.length>2&&void 0!==p[2]?p[2]:null,i=p.length>3&&void 0!==p[3]?p[3]:null,s="".concat(n,"_notification"),u=function(t,e){(0,r.id)(s).style.display="block",(0,r.id)(s).classList.add(t),(0,r.id)("error").innerHTML=e,(0,r.id)("loader").classList.remove("loader")},l=function(t,e){return"W3css"===t?"green"==e?"w3-green":"w3-red":"green"==e?"is-success":"is-danger"},d=(0,r.id)(n),(f=new FormData(d)).delete("submit"),f.delete("checkbox_id"),m={xsrfCookieName:"XSRF-TOKEN",xsrfHeaderName:"X-XSRF-TOKEN"},t.next=12,a().post(e,f,m).then((function(t){var e=l(i,"green");u(e,t.data.message),o&&setTimeout((function(){window.location.assign(o)}),2e3),formData.clearHtml()})).catch((function(t){var e=l(i,"red");u(e,t.response.data.message)}));case 12:case"end":return t.stop()}}),t)})));return function(e,n){return t.apply(this,arguments)}}(),d=function(){var t=u(c().mark((function t(e){var n,r,o,i=arguments;return c().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return n=i.length>1&&void 0!==i[1]?i[1]:null,t.prev=1,r={headers:{"X-Requested-With":"XMLHttpRequest","Content-Type":"application/json",Accept:"application/json",Authorization:"Bearer "+n}},t.next=5,a().get(e,r);case 5:return o=t.sent,t.abrupt("return",o.data);case 9:return t.prev=9,t.t0=t.catch(1),t.abrupt("return",t.t0);case 12:case"end":return t.stop()}}),t,null,[[1,9]])})));return function(e){return t.apply(this,arguments)}}(),f=function(){var t=u(c().mark((function t(e,n){var r,o,i,s=arguments;return c().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return r=s.length>2&&void 0!==s[2]?s[2]:null,t.prev=1,o={headers:{"X-Requested-With":"XMLHttpRequest","Content-Type":"application/json",Accept:"application/json",Authorization:"Bearer "+r}},t.next=5,a().all([a().get(e,o),a().get(n,o)]);case 5:return i=t.sent,t.abrupt("return",i);case 9:return t.prev=9,t.t0=t.catch(1),t.abrupt("return",t.t0);case 12:case"end":return t.stop()}}),t,null,[[1,9]])})));return function(e,n){return t.apply(this,arguments)}}(),m=function(t,e,n){var r=new Date;r.setTime(r.getTime()+24*n*60*60*1e3);var o="expires="+r.toUTCString();document.cookie=t+"="+e+";"+o+";path=/"},p=function(t){for(var e=t+"=",n=document.cookie.split(";"),r=0;r<n.length;r++){for(var o=n[r];" "==o.charAt(0);)o=o.substring(1);if(0==o.indexOf(e))return o.substring(e.length,o.length)}return""},h=function(){var t=p("username");""!=t?alert("Welcome again "+t):""!=(t=prompt("Please enter your name:",""))&&null!=t&&m("username",t,365)}},9940:(t,e,n)=>{n.d(e,{dR:()=>c,tH:()=>u,us:()=>s});var r=n(3482),o=n(7658),a=function(t){return'<div class="timeago postTimeCal w3-right w3-opacity"  datetime=\''.concat(t.date_created,"' title='").concat((0,r.WU)(t.date_created),"'> ").concat((e=t.post_time,(0,r.WU)(e)),"</div>");var e},i=function(t){var e,n,r,o=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null;return'<div class="w3-container w3-card w3-white w3-round w3-margin"><br>\n\n      '.concat((e=t,r=e.img?"/img/profile/".concat(e.img):"/avatar/avatarF.png",'<a href="/profilepage/img?dir=img&pics='.concat(e.img,"&pID=").concat(e.post_no,"&path=profile&id=").concat(e.id,'"> <img src=').concat(r,' alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">\n        </a>\n        ').concat(a(e)," ").concat((n=e.fullName,'<h6 id="fullName"><b>'.concat(n,"</b> </h6>")))),'\n\n    <hr class="w3-clear">\n\n    <p class="postFont"> ').concat(t.postMessage," </p>\n\n     ").concat(function(t){for(var e=[],n=0;n<6;n++){var r="post_img"+n;t[r]&&e.push(t[r])}return'<div class="w3-row-padding" style="margin:0 -16px">\n\n      '.concat(e.map((function(e,n){return function(t,e,n){return'<a href="/profilepage/img?dir=img&pics='.concat(t,"&pID=").concat(n,'&path=post"> <div class="w3-half">\n            <img src="/img/post/').concat(t,'" style="width:100%" alt="images').concat(e,'"\n              class="w3-margin-bottom w3-hover-sepia" id="postImage').concat(e,'">\n          </div>\n        </a>')}(e,n,t.post_no)})),"\n        <br>\n      </div>")}(t),"\n\n    ").concat(function(t){return'<button type="button" id="likeButton'.concat(t.post_no,'" name="').concat(t.post_no,'"\n    class="w3-button w3-tiny w3-green w3-margin-bottom">\n    <em class="fa fa-thumbs-up"></em>\n     Like <b><span class="likeCounter" id="likeCounter').concat(t.post_no,'">').concat(t.post_likes,'</span></b>\n  </button>\n\n   <button type="button" id="initComment').concat(t.post_no,'"\n    class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>\n    ')}(t),"\n\n    ").concat(function(t){return' <p id="formComment'.concat(t.post_no,'_notification"></p>\n\n  <form action="/postCommentProfile" method="post" id="formComment').concat(t.post_no,'" style="display:none" enctype="multipart/form-data">\n\n    <input name=\'post_no\' type="hidden" name="').concat(t.post_no,'" value=').concat(t.post_no,' />\n\n    <input class="w3-input w3-border w3-round-large inputComment" type="text" placeholder="Write a comment"\n      id="inputComment').concat(t.post_no,"\" value = \"\" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(t.post_no,'" class="w3-button w3-green submitComment">Submit</button><br><br>\n  </form>')}(t),"\n\n    <div id = 'showComment").concat(t.post_no,"'>\n\n      ").concat(l(o),"\n      \n    </div><br>\n  </div>")},c=function(t,e){if(!t)return!1;var n=parseInt(t.post_no),r=e.filter((function(t){return n===parseInt(t.post_no)})),a=i(t,r);(0,o.id)("postIt").insertAdjacentHTML("beforeend",a)},s=function(t){if(!t)return!1;var e=(0,o.id)("formComment".concat(t.post_no)),n=(0,o.id)("formComment".concat(t.post_no)),r=(0,o.id)("formComment".concat(t.post_no));if(!e||!n||!r){var a=i(t);(0,o.id)("postIt").insertAdjacentHTML("afterbegin",a)}},u=function(t){var e=t.img?t.img:t.profileImg,n=e?"/img/profile/".concat(e):"/avatar/avatarF.png";return'<div class="w3-ul w3-border" id="comment'.concat(t.comment_no,'" name=\'commentDiv\'>\n      <div class="w3-container commentDiv">\n      <img src="').concat(n,'" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">\n       <p class="w3-right w3-opacity commentTiming" datetime=\'').concat(t.date_created,"' title='").concat(t.date_created,"'> ").concat((0,r.WU)(t.date_created),' </p> \n         <p class="commentFont"> ').concat(t.comment,"</p>\n    </div>\n</div>")},l=function(t){return t?t.map((function(t){return u(t)})):'<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>'}},948:(t,e,n)=>{n.r(e);var r=n(7658),o=n(9940),a=n(3421),i=n(3482),c=n(9669),s=n.n(c);try{var u={post:[],comment:[]},l=new EventSource("/post/getAllPost/update");(0,a.getMultipleApiData)("/post/getAllPost","/member/pp/comment").then((function(t){u.post=t[0].data.message,u.comment=t[1].data.message,u.post.map((function(t){return(0,o.dR)(t,u.comment)}));l.addEventListener("updateComment",(function(t){return function(t){var e=JSON.parse(t.data);u.comment.some((function(t){return t.comment_no===e.comment_no}))||u.comment.push(e)}(t)}));l.addEventListener("updatePost",(function(t){return function(t){if("http://olaogun.dev.com"!=t.origin)throw new Error("What is your origin?");if(t.data){var e=JSON.parse(t.data);u.post.some((function(t){return t.post_no===e.post_no}))||u.post.push(e)}return u.post.map((function(t){return(0,o.us)(t)}))}(t)}));var e=document.querySelectorAll(".timeago"),n=document.querySelectorAll(".commentTiming");(0,i.sY)(e),(0,i.sY)(n)})).catch((function(t){return(0,r.log)(t)}))}catch(t){}try{(0,r.id)("createEvent").addEventListener("click",(function(){return(0,r.id)("id_event_modal").style.display="block"})),(0,r.id)("postMsg").addEventListener("click",(function(){return(0,r.id)("id01").style.display="block"}))}catch(t){console.log(t.message)}(0,r.id)("profilePics").addEventListener("click",(function(){(0,r.id)("formProfilePics").style.display="block"}));var d=n(6606),f=n.n(d);try{f().logToConsole=!0;var m=new(f())("d1f1e43f3d8afb028a1f",{cluster:"eu"}),p=0,h={xsrfCookieName:"XSRF-TOKEN",xsrfHeaderName:"X-XSRF-TOKEN"};document.onclick=function(t){var e=t.target.id,n=t.target.name;if(e.includes("likeButton")){var i=e.replace("Button","Counter"),c=(0,r.id)(i).innerHTML;(0,a.getApiData)("/profileCard/getLikes?postId=".concat(n,"&count=").concat(c)),p=parseInt(c)+1,(0,r.id)(i).innerHTML=p}else if(e.includes("initComment")){var u=e.replace("init","form");(0,r.id)(u).style.display="block"}else if(e.includes("submitComment")){t.preventDefault();var l=e.replace("submit","form");(0,r.id)(l).style.display="none";var d=(0,r.id)(l),f=new FormData(d),v=l.replace("form","input"),y=(0,r.id)(v);null==y.value||""==y.value?alert("Please enter a comment"):s().post("/postCommentProfile",f,h).then((function(t){s().get("/member/pp/comment/byNumber?commentNo=".concat(t.data.message)).then((function(t){var e,n,a;e=t.data.message,n="showComment".concat(e.post_no),a=(0,o.tH)(e),(0,r.id)(n).insertAdjacentHTML("afterbegin",a)}))})).catch((function(t){(0,r.log)(t)}))}else if(e.includes("submitPost")){var g=(0,r.id)("formPostMessageModal"),b=new FormData(g);s().post("/member/profilePage/post",b,h).then((function(t){s().get("/post/getAllPost/byNumber?postNo=".concat(t.data.message)).then((function(t){(0,o.us)(t.data.message)})),m.subscribe("my-channel").bind("updatePost",(function(t){})),(0,r.id)("id01").style.display="none"}))}}}catch(t){showError(t)}var v=n(3559),y=document.querySelectorAll(".eventModalForm"),g=Array.from(y),b=new v.Z(g),w=function(){return(0,r.id)("id_event_modal").style.display="none"};(0,r.id)("cancelModal").addEventListener("click",w);var k=function(t){var e=function(t){return"<p class='eventInfo'><strong>RSVP: </strong> ".concat(t.firstName," ").concat(t.lastName,"</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(t.eventName,"</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,r.date2String)(t.eventDate),"</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(t.eventType,"</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(t.eventDescription,"</p>\n            <input type='hidden' name='event_no' id='event").concat(t.no,"' value='").concat(t.no,"'>\n            \n           <hr>")}(t);return(0,r.id)("eventList").insertAdjacentHTML("afterbegin",e)},L={xsrfCookieName:"XSRF-TOKEN",xsrfHeaderName:"X-XSRF-TOKEN"};(0,r.id)("submitEventModal").addEventListener("click",(function(t){try{if(t.preventDefault(),(0,r.id)("error").innerHTML="",b.massValidate(),b.error.length<=0){var e=(0,r.id)("eventModalForm"),n=new FormData(e);s().post("/member/profilePage/event",n,L).then((function(t){s().get("/member/getEventByNo?eventNo=".concat(t.data.message)).then((function(t){(0,r.log)(t.data),k(t.data.message)}))})),w()}else alert("The form cannot be submitted. Please check the errors"),b.clearError()}catch(t){(0,r.showError)(t)}}))}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/profilePage"],{
+
+/***/ "./resources/asset/js/components/FormHelper.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/FormHelper.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FormHelper)
+/* harmony export */ });
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
+var FormHelper = /*#__PURE__*/function () {
+  function FormHelper(data) {
+    _classCallCheck(this, FormHelper);
+    this.data = data;
+    this.error = [];
+    this.result = 0;
+  }
+  _createClass(FormHelper, [{
+    key: "id",
+    value: function id(x) {
+      return document.getElementById(x);
+    }
+
+    /**
+     * general validation; check empty status, at least a single input, mobile length, white space
+     */
+  }, {
+    key: "getData",
+    value: function getData() {
+      return this.data;
+    }
+  }, {
+    key: "massValidate",
+    value: function massValidate() {
+      var _this = this;
+      // const reg = /[a-zA-Z0-9./@]/g;
+      this.data.forEach(function (et) {
+        var _iterator = _createForOfIteratorHelper(et),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var post = _step.value;
+            // capture the error to a variable
+            var errMsg = _this.id("".concat(post.name, "_error"));
+            // console.log(post)
+            // rid it off the submit and token
+            if (post.name == 'submit' || post.name == 'button' || post.name == 'token' || post.name == 'cancel' || post.name == "checkbox_id") {
+              continue;
+            }
+
+            // check if there is no value
+
+            var postName = post.name.replace('_', ' ');
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "motherEmail") {
+              if (post.value === "") {
+                post.value = "Not Provided";
+              }
+            }
+            if (post.value === '' || post.value === 'select') {
+              errMsg.innerHTML = "* cannot be left empty";
+              errMsg.style.color = "red";
+              _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
+            } else {
+              _this.result = 1;
+            }
+            var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
+            if (checkRegex === false) {
+              _this.error.push("There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question"));
+              errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    }
+  }, {
+    key: "emailVal",
+    value: function emailVal() {
+      var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+      var msg = "<li style=color:'red';> Please enter a valid email</li>";
+      var email = this.id('email_id').value;
+      if (email.match(emailExp) === null) {
+        this.id('email_error').innerHTML = msg;
+        this.id('email_error').style.color = "red";
+        this.error.push(msg);
+      }
+    }
+  }, {
+    key: "clearError",
+    value: function clearError() {
+      var _this2 = this;
+      this.error = []; // empty the array 
+      this.data.forEach(function (el) {
+        var _iterator2 = _createForOfIteratorHelper(el),
+          _step2;
+        try {
+          var _loop = function _loop() {
+            var post = _step2.value;
+            if (post.id == 'submit' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
+              return "continue";
+            }
+            _this2.id(post.id).addEventListener('change', function () {
+              _this2.id("".concat(post.name, "_error")).innerHTML = '';
+            });
+            if (post.value != 'select') {
+              _this2.id(post.id).addEventListener('keyup', function () {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              });
+            } else {
+              _this2.id(post.id).addEventListener('change', function () {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              });
+            }
+          };
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var _ret = _loop();
+            if (_ret === "continue") continue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      });
+    }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+          _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
+
+    /**
+     *
+     * @param {input is the id of the input/ this is an array [as, it, it]} input
+     * @param {* this is the max policy and it must be an integer} maxi
+     */
+  }, {
+    key: "realTimeCheckLen",
+    value: function realTimeCheckLen(input, maxi) {
+      var _this3 = this;
+      try {
+        var _loop2 = function _loop2(i) {
+          var theData = _this3.id("".concat(input[i], "_id"));
+          if (theData == "") throw new Error("empty dataInput");
+          var max = maxi[i];
+          var error = _this3.id("".concat(input[i], "_error"));
+          if (theData) theData.maxLength = parseInt(max + 1);
+          theData.addEventListener('keyup', function () {
+            error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
+            _this3.id("".concat(input[i], "_help")).style.color = 'red';
+            _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.style.color = 'red';
+            setTimeout(function () {
+              _this3.id("".concat(input[i], "_help")).style.display = 'none';
+            }, 5000);
+          });
+        };
+        for (var i = 0; i < input.length; i++) {
+          _loop2(i);
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
+
+    /**
+     * the id for the password error should be password_help
+     * the id for your confirm pasword should confirm_password
+     * it will return an error message to the password_help input
+     */
+  }, {
+    key: "matchInput",
+    value: function matchInput(first, second) {
+      var error, firstInput, secondInput;
+      error = this.id("".concat(second, "_error"));
+      firstInput = this.id(first + '_id');
+      secondInput = this.id(second + '_id');
+      secondInput.addEventListener('keyup', function () {
+        error.innerHTML = secondInput.value !== firstInput.value ? 'Your passwords do not match' : "";
+      });
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
+  }, {
+    key: "injectData",
+    value: function injectData(idArray, html) {
+      var idData;
+      for (var i = 0; i < idArray.length; i++) {
+        idData = this.id(idArray[i]);
+        idData.innerHTML = html[i];
+      }
+    }
+
+    /**
+     *
+     * @param {this is an id and its value is for duplication} firstInput
+     * @param {* another id that accepts the value of the firstInput} takeFirstInput
+     */
+  }, {
+    key: "duplicate",
+    value: function duplicate(giveInput, takeInput) {
+      var giver, taker;
+      giver = this.id(giveInput);
+      taker = this.id(takeInput);
+      giver.addEventListener('keyup', function () {
+        taker.value = giver.value;
+      });
+    }
+
+    /**
+     *
+     * @param {current input that is being type to. the value is what will be checked realtime. the id is needed} input
+     * @param {* the url to get the info to . example is /search?hint} url
+     * @param {enter the id of the output element} output
+     */
+  }, {
+    key: "realTimeServer",
+    value: function realTimeServer(input, url, outputId) {
+      var theInput, inputVal, output;
+      theInput = this.id(input);
+      output = this.id(outputId);
+      theInput.addEventListener('keyup', function () {
+        inputVal = theInput.value;
+        if (inputVal == 0) {
+          output.innerHTML = "";
+          return;
+        } else {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              output.innerHTML = this.responseText;
+            }
+          };
+          xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+          xmlhttp.send();
+        }
+      });
+    }
+  }, {
+    key: "isChecked",
+    value: function isChecked(yesId, noId, hiddenInput) {
+      var _this4 = this;
+      var checked = function checked() {
+        if (_this4.id(yesId).checked) {
+          alert('check');
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        } else if (_this4.id(noId).checked) {
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        }
+      };
+      this.id(yesId).addEventListener('click', checked);
+      this.id(noId).addEventListener('click', checked);
+    }
+  }, {
+    key: "previousAddress",
+    value: function previousAddress() {
+      var _this5 = this;
+      var timeAddy = this.id('time_at_address_id');
+      var prevAddy = this.id('previous_address_class');
+      var showPrev = function showPrev() {
+        if (timeAddy.value != '3 years+') {
+          prevAddy.style.display = 'block';
+          _this5.id('previous_address_help').innerHTML = "Please enter your full address: House No, Street Name, Town/City and Post Code";
+        } else {
+          prevAddy.style.display = 'none';
+        }
+      };
+      timeAddy.addEventListener('change', showPrev);
+    }
+  }]);
+  return FormHelper;
+}();
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
+/* harmony export */   checkBox: () => (/* binding */ checkBox),
+/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
+/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
+/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
+/* harmony export */   isChecked: () => (/* binding */ isChecked),
+/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
+/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
+/* harmony export */   matchInput: () => (/* binding */ matchInput),
+/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  newDiv.setAttribute('class', "field ".concat(setClass));
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  return parentDiv.appendChild(newDiv);
+};
+
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase();
+      // you can also use AJAX requests instead of preloaded data
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return _toConsumableArray(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[<?/>]+/g;
+      var result = data.match(regex);
+      if (result === null) return true;
+    }
+  }
+};
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/http.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/helper/http.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   checkCookie: () => (/* binding */ checkCookie),
+/* harmony export */   getApiData: () => (/* binding */ getApiData),
+/* harmony export */   getCookie: () => (/* binding */ getCookie),
+/* harmony export */   getMultipleApiData: () => (/* binding */ getMultipleApiData),
+/* harmony export */   postFormData: () => (/* binding */ postFormData),
+/* harmony export */   setCookie: () => (/* binding */ setCookie)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, defineProperty = Object.defineProperty || function (obj, key, desc) { obj[key] = desc.value; }, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return defineProperty(generator, "_invoke", { value: makeInvokeMethod(innerFn, self, context) }), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; defineProperty(this, "_invoke", { value: function value(method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; } function maybeInvokeDelegate(delegate, context) { var methodName = context.method, method = delegate.iterator[methodName]; if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel; var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), defineProperty(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (val) { var object = Object(val), keys = []; for (var key in object) keys.push(key); return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+// import Cookies from 'js-cookie'
+
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_2__["default"])((axios__WEBPACK_IMPORTED_MODULE_1___default()), {
+  retries: 3
+});
+
+/**
+ * 
+ * @param {the url to post the data to} url 
+ * @param {* the id or class of the form} formElement 
+ * @param {* the redirect to another page /code or /admin/register} redirect 
+ NOTICE:::Make sure you set the notification id as the formId_notification
+ */
+var postFormData = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url, formId) {
+    var redirect,
+      css,
+      notificationId,
+      processFormDataAction,
+      addClassByCSS,
+      form,
+      formEntries,
+      options,
+      _args = arguments;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
+          css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
+          notificationId = "".concat(formId, "_notification"); // the notification function
+          processFormDataAction = function processFormDataAction(addClass, data) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).style.display = "block"; // unblock the notification
+
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).classList.add(addClass); // add the success class
+
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = data; // error element
+
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader'); // remove loader
+          };
+          addClassByCSS = function addClassByCSS(theCss, status) {
+            if (theCss === "W3css") {
+              return status == 'green' ? "w3-green" : "w3-red";
+            } else if (theCss === 'bulma') {
+              return status == 'green' ? "is-success" : "is-danger";
+            } else {
+              return status == 'green' ? "is-success" : "is-danger";
+            }
+          }; // extract the form entries
+          form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
+          formEntries = new FormData(form);
+          formEntries["delete"]('submit');
+          formEntries["delete"]('checkbox_id');
+          // formEntries.delete('token')
+          options = {
+            xsrfCookieName: 'XSRF-TOKEN',
+            xsrfHeaderName: 'X-XSRF-TOKEN'
+          }; // AXIOS POST FUNCTIONALITY
+          _context.next = 12;
+          return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
+            // TO DECIDE ON THE NOTIFICATION
+            var theClass = addClassByCSS(css, 'green');
+            processFormDataAction(theClass, response.data.message);
+
+            //set timer to redirect to the homepage
+            if (redirect) {
+              setTimeout(function () {
+                window.location.assign(redirect);
+              }, 2000);
+            }
+            // it clears all the contents
+            formData.clearHtml();
+          })["catch"](function (error) {
+            var theClass = addClassByCSS(css, 'red');
+
+            // if (error.response.data.message === "We do not recognise what you are doing") {
+            //     window.location.assign('/login')
+            // }
+
+            processFormDataAction(theClass, error.response.data.message);
+          });
+        case 12:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee);
+  }));
+  return function postFormData(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+/**
+ * 
+ * @param { the url you want to get} URL 
+ * @returns 
+ // now we can use that data from the outside!
+axiosTest()
+    .then(data => {
+        response.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err))
+ */
+
+var getApiData = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(URL) {
+    var token,
+      config,
+      fetch,
+      _args2 = arguments;
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
+          _context2.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          _context2.next = 5;
+          return axios__WEBPACK_IMPORTED_MODULE_1___default().get(URL, config);
+        case 5:
+          fetch = _context2.sent;
+          return _context2.abrupt("return", fetch.data);
+        case 9:
+          _context2.prev = 9;
+          _context2.t0 = _context2["catch"](1);
+          return _context2.abrupt("return", _context2.t0);
+        case 12:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[1, 9]]);
+  }));
+  return function getApiData(_x3) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+var getMultipleApiData = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(url1, url2) {
+    var token,
+      config,
+      fetch,
+      _args3 = arguments;
+    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          token = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
+          _context3.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          _context3.next = 5;
+          return axios__WEBPACK_IMPORTED_MODULE_1___default().all([axios__WEBPACK_IMPORTED_MODULE_1___default().get(url1, config), axios__WEBPACK_IMPORTED_MODULE_1___default().get(url2, config)]);
+        case 5:
+          fetch = _context3.sent;
+          return _context3.abrupt("return", fetch);
+        case 9:
+          _context3.prev = 9;
+          _context3.t0 = _context3["catch"](1);
+          return _context3.abrupt("return", _context3.t0);
+        case 12:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[1, 9]]);
+  }));
+  return function getMultipleApiData(_x4, _x5) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+/**
+ * 
+ * @param { name} cname 
+ * @param {* value} cvalue 
+ * @param {* no of days 365} exdays 
+ */
+var setCookie = function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+  var expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+};
+var getCookie = function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+};
+var checkCookie = function checkCookie() {
+  var user = getCookie("username");
+  if (user != "") {
+    alert("Welcome again " + user);
+  } else {
+    user = prompt("Please enter your name:", "");
+    if (user != "" && user != null) {
+      setCookie("username", user, 365);
+    }
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/allEvents.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/allEvents.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+
+
+try {
+  (pusher_js__WEBPACK_IMPORTED_MODULE_4___default().logToConsole) = true;
+  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('d1f1e43f3d8afb028a1f', {
+    cluster: 'eu'
+  });
+
+  // getApiData()
+
+  var newLikeCounterVal = 0;
+  var options = {
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN'
+  };
+
+  // let serverConnection = new EventSource("/post/getAllPost/update") 
+
+  // const Pusher = (pushData) => {
+
+  // // open the server sent event
+
+  //     const update = (e) => {
+
+  //         const data = JSON.parse(e.data)
+  //         // log(data)
+
+  //         if( appendNewPost(pushData)) {
+  //             serverConnection.close()
+  //         }
+
+  //     }
+
+  //     serverConnection.addEventListener("updatePost", update)
+
+  // }
+
+  var showTheComment = function showTheComment(commentResponse) {
+    var idDiv = "showComment".concat(commentResponse.post_no);
+    var commentHtml = (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.commentHTML)(commentResponse);
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idDiv).insertAdjacentHTML('afterbegin', commentHtml);
+  };
+
+  // CLICK EVENT get the comment and like button from the document
+  document.onclick = function (e) {
+    var elementId = e.target.id;
+    var postId = e.target.name;
+    if (elementId.includes("likeButton")) {
+      // replace button with Counter to get the span id 
+      var likeCounterId = elementId.replace('Button', 'Counter');
+      var likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML;
+
+      // get the post like using the post id
+
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal));
+
+      // add one to the result 
+      newLikeCounterVal = parseInt(likeCounterVal) + 1;
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal;
+
+      // Make the comment form to appear onclick
+    } else if (elementId.includes("initComment")) {
+      var commentFormId = elementId.replace('init', 'form');
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
+
+      // Submit function for comment using POST API
+    } else if (elementId.includes("submitComment")) {
+      //elementId == submitComment511
+
+      // 0.5 LISTEN FOR THE SUBMIT EVENT
+      // 0.7 GET THE COMMENT FORM ID 
+      // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
+      // 2.  USE IT TO GET THE NEW COMMENT
+      // 3. ADD THE NEW COMMENT TO THE COMMENT DIV 
+      // get the specific form id
+      e.preventDefault();
+
+      // 0.7
+      var idForm = elementId.replace("submit", "form"); //idForm == formComment511
+
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none"; // make the comment form disappear
+
+      // extract the form entries
+      var form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
+      var formEntries = new FormData(form);
+
+      // if the comment form input is empty. Get the input id and check 
+      var inputComment = idForm.replace("form", "input");
+      var idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
+      if (idInputComment.value == null || idInputComment.value == "") {
+        alert("Please enter a comment");
+      } else {
+        // 1.
+        axios__WEBPACK_IMPORTED_MODULE_3___default().post('/postCommentProfile', formEntries, options).then(function (response) {
+          // 2. note. message returns the new post_no from the database
+
+          axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
+            // 3.
+
+            showTheComment(res.data.message);
+          });
+        })["catch"](function (error) {
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
+        });
+      }
+      // SUBMIT THE POST
+    } else if (elementId.includes("submitPost")) {
+      // LISTEN TO THE SUBMIT EVENT 
+      // 2. GET THE FORM id
+      // 3. POST TO THE SERVER USING AXIOS POST
+      //4. GET THE POST FROM THE SERVER USING AXIOS GET 
+      //5. APPEND THE NEW POST TO THE POSTCARD 
+
+      // 2. 
+      var formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
+      var formData = new FormData(formExtra);
+
+      // 3. 
+      axios__WEBPACK_IMPORTED_MODULE_3___default().post("/member/profilePage/post", formData, options).then(function (response) {
+        //  4. 
+        axios__WEBPACK_IMPORTED_MODULE_3___default().get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
+          // 5. 
+
+          //  log(res.data)
+          (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_2__.appendNewPost)(res.data.message);
+
+          // Pusher(res.data.message)
+        });
+        // Enable pusher logging - don't include this in production
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('updatePost', function (data) {
+          // log("checking1")
+          // log(data.message);
+          // log("checking")
+        });
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
+      });
+    }
+  };
+} catch (e) {
+  showError(e);
+}
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/createEvent.js":
+/*!******************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/createEvent.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+
+var formInput = document.querySelectorAll('.eventModalForm');
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_1__["default"](formInputArr);
+var displayNone = function displayNone() {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'none';
+};
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('cancelModal').addEventListener('click', displayNone);
+var eventHtml = function eventHtml(data) {
+  return "<p class='eventInfo'><strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+};
+var checkEventAndAdd = function checkEventAndAdd(data) {
+  var appendEvent = eventHtml(data);
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+};
+var options = {
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN'
+};
+var process = function process(e) {
+  try {
+    e.preventDefault();
+    // id('eventModalForm_notification').classList.remove('w3-red') // remove the danger class from the notification - may not be needed
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = ""; // may not be needed
+    formData.massValidate();
+    // log(formData.error)
+    if (formData.error.length <= 0) {
+      // get the form data
+      var eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm');
+      var eventFormEntries = new FormData(eventForm);
+      // post the form data to the database and get the last posted event no
+      axios__WEBPACK_IMPORTED_MODULE_2___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
+        // use the event no to get the last event from the database
+        axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/getEventByNo?eventNo=".concat(response.data.message)).then(function (res) {
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(res.data);
+          // add new event real time
+          checkEventAndAdd(res.data.message);
+        });
+      });
+      displayNone();
+
+      // window.location.replace("/member/profilePage")
+    } else {
+      alert('The form cannot be submitted. Please check the errors');
+      formData.clearError();
+    }
+  } catch (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+  }
+};
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitEventModal').addEventListener('click', process);
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/html.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/html.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   allPost: () => (/* binding */ allPost),
+/* harmony export */   appendNewPost: () => (/* binding */ appendNewPost),
+/* harmony export */   commentHTML: () => (/* binding */ commentHTML),
+/* harmony export */   html: () => (/* binding */ html)
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+var timeAgo = function timeAgo(x) {
+  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
+};
+var name = function name(fullName) {
+  return "<h6 id=\"fullName\"><b>".concat(fullName, "</b> </h6>");
+};
+var postedAt = function postedAt(date) {
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+};
+var nameImgTiming = function nameImgTiming(data) {
+  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
+};
+var commentForm = function commentForm(data) {
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" value = \"\" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
+};
+var button = function button(data) {
+  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+};
+var showPostImg = function showPostImg(data) {
+  var postImg = [];
+  for (var i = 0; i < 6; i++) {
+    var images = 'post_img' + i;
+    if (data[images]) {
+      postImg.push(data[images]);
+    }
+  }
+  var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
+    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n              class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
+  };
+  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n      ".concat(postImg.map(function (pics, i) {
+    return picsImgHtml(pics, i, data.post_no);
+  }), "\n        <br>\n      </div>");
+};
+var html = function html(el) {
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat(showComment(comment), "\n      \n    </div><br>\n  </div>");
+};
+var allPost = function allPost(el, commentData) {
+  if (!el) {
+    return false;
+  }
+  var postNo = parseInt(el.post_no);
+  var filterComment = commentData.filter(function (comm) {
+    return postNo === parseInt(comm.post_no);
+  }); // filter the comment to an array
+
+  var postHtml = html(el, filterComment);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
+};
+var appendNewPost = function appendNewPost(el) {
+  if (!el) {
+    return false;
+  }
+  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  if (!commentForm1 || !inputComment || !submitComment) {
+    var appendHTML = html(el);
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
+  }
+};
+var commentHTML = function commentHTML(data) {
+  var imgURL = data.img ? data.img : data.profileImg;
+  var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
+  return "<div class=\"w3-ul w3-border\" id=\"comment".concat(data.comment_no, "\" name='commentDiv'>\n      <div class=\"w3-container commentDiv\">\n      <img src=\"").concat(img, "\" alt=\"Avatar\" class=\"w3-left w3-circle w3-margin-right commentImg\" style=\"width:60px; height:60px\">\n       <p class=\"w3-right w3-opacity commentTiming\" datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n         <p class=\"commentFont\"> ").concat(data.comment, "</p>\n    </div>\n</div>");
+};
+var showComment = function showComment(comment) {
+  if (!comment) {
+    return "<div class=\"w3-ul w3-border\" id=\"comment\" name=\"commentDiv\"></div>";
+  } // only run if there is comment
+
+  return comment.map(function (commentElement) {
+    return commentHTML(commentElement);
+  });
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/img.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/img.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePics').addEventListener('click', function () {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formProfilePics').style.display = "block";
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/index.js":
+/*!************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/index.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
+/* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
+/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
+/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
+
+
+
+
+
+
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/loadPost.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/loadPost.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+
+
+
+
+
+
+// set an empty array
+try {
+  var state = {
+    post: [],
+    comment: []
+  };
+  var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
+
+  // 2. get the data from the database to set the inital data
+  var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getMultipleApiData)("/post/getAllPost", '/member/pp/comment');
+  postData.then(function (response) {
+    state.post = response[0].data.message;
+    state.comment = response[1].data.message;
+    state.post.map(function (data) {
+      return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
+    }); // show all the post and comments
+
+    // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
+
+    var updateComment = function updateComment(e) {
+      var commentData = JSON.parse(e.data);
+      var newData = state.comment.some(function (com) {
+        return com.comment_no === commentData.comment_no;
+      }); // check if the comment no does not already exist
+
+      if (!newData) {
+        // if it is not available, add to the data state
+        state.comment.push(commentData);
+      }
+    };
+    serverConnection.addEventListener("updateComment", function (e) {
+      return updateComment(e);
+    });
+    var updatePost = function updatePost(e) {
+      if (e.origin != "http://olaogun.dev.com") {
+        throw new Error("What is your origin?");
+      }
+      if (e.data) {
+        var newPostData = JSON.parse(e.data);
+        var newData = state.post.some(function (el) {
+          return el.post_no === newPostData.post_no;
+        }); // check if the post no does not already exist
+
+        if (!newData) {
+          // if it is not available, add to the data state
+          state.post.push(newPostData);
+        }
+      }
+      return state.post.map(function (ele) {
+        return (0,_profilePage_html__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
+      });
+    };
+    serverConnection.addEventListener("updatePost", function (e) {
+      return updatePost(e);
+    });
+
+    // // serverConnection.close()
+
+    // AUTOMATICALLY UPDATE TIMESTAMP
+
+    var updatePostTiming = document.querySelectorAll(".timeago");
+    var updateCommentTiming = document.querySelectorAll(".commentTiming");
+    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updatePostTiming);
+    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updateCommentTiming);
+  })["catch"](function (err) {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
+  });
+} catch (error) {
+  //  console.log(error)
+}
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/modal.js":
+/*!************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/modal.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+
+// import { postFormData } from "../helper/http"
+
+try {
+  // NEW MESSAGE MODAL
+  var showModal = function showModal() {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
+  };
+
+  // CREATE EVENT MODAL
+  var showEvent = function showEvent() {
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
+  };
+
+  //EVENT ACTION
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent').addEventListener('click', showEvent);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg').addEventListener('click', showModal);
+
+  // handle post message
+} catch (e) {
+  console.log(e.message);
+}
+
+/***/ })
+
+}]);

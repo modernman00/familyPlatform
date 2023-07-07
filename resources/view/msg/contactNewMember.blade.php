@@ -13,12 +13,14 @@ Hello {{ $data['name'] }}, <br> <br>
 
 Trust you are doing well. <br><br> 
 
-{{ $data['yourName'] }} has just joined your family network and recommended that you do the same. On the family network, you will be able to find other family members, exchange messages, see the family tree structure and get alerts on important events <br><br>
+{{ $data['yourName'] }} I hope this message finds you well.<br><br> I wanted to reach out to inform you that OLAOGUN has recently joined your family network and highly recommends that you do the same. Your family network provides a wonderful platform for connecting with other family members, exchanging messages, exploring the family tree structure, and receiving important event alerts. <br><br>
 
-Please, follow the link below to join the family network. <br><br>
+To join the family network and start enjoying these benefits, simply go to our website below: <br><br>
 
 {{ getenv('APP_URL') }}register <br><br>
 
-We will look forward to seeing you join your family network. <br><br>
+We are excited to have you on board and look forward to seeing you become a part of our vibrant family network. Should you have any questions or need assistance with the registration process, please don't hesitate to reach out to our dedicated Admin Team. <br><br>
+
+Thank you for taking the time to strengthen our family bonds. We can't wait to reconnect and share memorable moments together.
 
 @endsection

@@ -9,18 +9,18 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "autoCompleter": () => (/* binding */ autoCompleter),
-/* harmony export */   "checkBox": () => (/* binding */ checkBox),
-/* harmony export */   "checkBox2": () => (/* binding */ checkBox2),
-/* harmony export */   "createAndAppendElement": () => (/* binding */ createAndAppendElement),
-/* harmony export */   "distinctValue": () => (/* binding */ distinctValue),
-/* harmony export */   "isChecked": () => (/* binding */ isChecked),
-/* harmony export */   "loaderIcon": () => (/* binding */ loaderIcon),
-/* harmony export */   "loaderIconBootstrap": () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   "loaderIconBulma": () => (/* binding */ loaderIconBulma),
-/* harmony export */   "matchInput": () => (/* binding */ matchInput),
-/* harmony export */   "matchRegex": () => (/* binding */ matchRegex),
-/* harmony export */   "removeDiv": () => (/* binding */ removeDiv)
+/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
+/* harmony export */   checkBox: () => (/* binding */ checkBox),
+/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
+/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
+/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
+/* harmony export */   isChecked: () => (/* binding */ isChecked),
+/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
+/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
+/* harmony export */   matchInput: () => (/* binding */ matchInput),
+/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");

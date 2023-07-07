@@ -9,13 +9,14 @@
     <div class="hero-body">
         <div class="container has-text-centered">
             <p class="title">
-                NEXT STEP <br> Ref: {{ checkInput($_SESSION['id']) }}
+                Congratulations! Your Application Has Been Successfully Submitted!<br> Ref: {{ checkInput($_SESSION['id']) }}
             </p><br>
             <p class="subtitle">
-                Hello {{ checkInput($_SESSION['firstName']) }}, <br> Your application has been successfully submitted.
-                <br>Once reviewed by the admin team, a decision will be emailed to you within the next 24 hours. <br>If
+                Hello {{ checkInput($_SESSION['firstName']) }}, <br> Thank you for submitting your application. Our admin team will review it, and within 24 hours, you will receive an email with the decision. Once approved, you can log in to your account and access our family social network to connect with relatives and enjoy meaningful interactions. <br><br>If
                 your application approved, then you should be able to log in to your account and access the family
-                social network<br><br>
+                social network<br><br>We appreciate your patience during this review process and look forward to welcoming you into our vibrant community. Get ready to embark on an incredible journey of meaningful connections and cherished family moments.
+
+<br><br>
 
                 Regards,<br>
                 Admin team<br>

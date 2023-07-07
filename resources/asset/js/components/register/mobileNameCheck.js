@@ -76,7 +76,7 @@ const setInput = (name, value) => {
 
     genId.innerHTML = mobile.includes(value) ?
         `Great news that your ${name} is already on the platform` :
-        `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text to register to the platform</i>?</h4>${checkBox(name)}`;
+        `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text/email to register to the platform</i>?</h4>${checkBox(name)}`;
 
 
     function processRadio() {

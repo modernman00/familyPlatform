@@ -188,7 +188,9 @@ var _rollbarConfig = {
 
                                 <tr>
                                     <td align="center" height="70" style="height:70px;">
-                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;"><img src ='{{ getenv("IMG_CONTRACT") }}' width="50" height="50" alt="LOGO" /></a>
+                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;">
+                                        <img src ={{ getenv("MIX_APP_URL2") }}{{ getenv("IMG_CONTRACT") }} width="50" height="50" alt="LOGO" />
+                                        </a>
                                     </td>
                                 </tr>
 
@@ -257,13 +259,7 @@ var _rollbarConfig = {
 
                                            @yield('reference')
 
-                                        {{--  </p>
-
-                                        <p style="line-height: 24px; margin-bottom:15px;"> Hello 
-
-                                           @yield('name'),
-
-                                        </p>  --}}
+                                     
                                         <p style="line-height: 24px;margin-bottom:15px;">
 
                                             @yield('content')

@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Philo\Blade\Blade;
 use App\classes\Select;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
- use Rollbar\Rollbar;
- use Rollbar\Payload\Level; // https://docs.rollbar.com/docs/basic-php-installation-setup
+use Rollbar\Rollbar;
+use Rollbar\Payload\Level; // https://docs.rollbar.com/docs/basic-php-installation-setup
 use Tracy\Debugger;
 
 
@@ -175,14 +175,12 @@ function cleanSession($x): string|null
 
 function showError($th): void
 {
-    
+
     http_response_code(301); // sets the response to 406
-       $error = $th->getMessage();
+    $error = $th->getMessage();
     echo json_encode(['message' => $error]);
-    // Rollbar::log(Level::ERROR, $th);
+    // Rollbar::log(Level::ERROR, $th); could still be considered
     Debugger::log($th, Debugger::ERROR);
-    
-   
 }
 
 function showErrorExp($th): void
@@ -378,10 +376,10 @@ function changeToJs($variableName, $variable): void
 /**
  * 
  * @param mixed $time that is the full date and time e.g 2010-04-28 17:25:43
- * @return string 
+ * @return string | bool
  */
 
-function humanTiming($time) : string
+function humanTiming($time)
 {
     try {
         $time = strtotime($time);
@@ -402,11 +400,12 @@ function humanTiming($time) : string
             $numberOfUnits = floor($time / $unit);
             return $numberOfUnits . ' ' . $text . (($numberOfUnits > 1) ? 's' : '');
         }
+        return 'just now'; // Default fallback if time is not within any unit
     } catch (\Throwable $th) {
         showError($th);
+        return false;
     }
 }
-
 
 function milliSeconds(): string
 {
