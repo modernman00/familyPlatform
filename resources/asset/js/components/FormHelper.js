@@ -87,10 +87,10 @@ export default class FormHelper {
         this.error = [] // empty the array 
         this.data.forEach(el => {
             for (let post of el) {
-                if (post.id == 'submit' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
+                if (post.id == 'submit' || post.id == 'token' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
                     continue
                 }
-
+                // console.log(post.name)
                 this.id(post.id).addEventListener('change', () => {
                     this.id(`${post.name}_error`).innerHTML = ''
                 })

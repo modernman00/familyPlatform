@@ -1,46 +1,35 @@
+import ('../helper/general').then(res => res.matchInput('password_id', 'confirm_password_id', 'changePasswordErr'))
 
-import('../helper/general').then(res => res.matchInput('password_id', 'confirm_password_id', 'changePasswordErr'))
-
-import('../global').then(response => {
+import ('../global').then(response => {
 
     response.id("setLoader").style.display = "none";
 
     const submitChangePW = (e) => {
-    try {
-        e.preventDefault();
+        try {
+            e.preventDefault();
 
-        const password = response.id('password_id').value
+            const password = response.id('password_id').value
 
-        // just in case there was an earlier error notification - remove it
+            // just in case there was an earlier error notification - remove it
 
-        response.id('changePassword_notification').classList.remove('is-danger')
+            response.id('changePassword_notification').classList.remove('is-danger')
 
-        response.id('error').innerHTML = ""
+            response.id('error').innerHTML = ""
 
-        if (password !== null) {
-            response.id("setLoader").style.display = "block";
+            if (password !== null) {
+                response.id("setLoader").style.display = "block";
 
-            response.id('loader').classList.add('loader')
+                response.id('loader').classList.add('loader')
 
-            import('../helper/http').then(res=> res.postFormData("/login/changePW", "changePassword", "/login"))
+                import ('../helper/http').then(res => res.postFormData("/login/changePW", "changePassword", "/login"))
 
-            // window.location.replace("/login")
+                // window.location.replace("/login")
+            }
+        } catch (error) {
+            response.showError(error)
         }
-    } catch (error) {
-        response.showError(error)
     }
-}
 
-response.id('submit').addEventListener('click', submitChangePW)
+    response.id('submit').addEventListener('click', submitChangePW)
 
 })
-
-
-
-
-
-
-
-
-
-

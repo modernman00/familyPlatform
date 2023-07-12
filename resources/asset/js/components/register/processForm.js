@@ -11,21 +11,29 @@ const formData = new FormHelper(formInputArr);
 
 (() => {
 
-    formData.clearError();
+    try {
 
-    // set the maxlength, check the length of the value, raise error
+        formData.clearError();
 
-    formData.realTimeCheckLen(
-        dataToCheckRegister.maxLength.id,
-        dataToCheckRegister.maxLength.max
-    );
+        // set the maxlength, check the length of the value, raise error
 
-    // check if password matches real time
-    formData.matchInput(dataToCheckRegister.password.pwd,
-        dataToCheckRegister.password.pwd2,
-    );
+        formData.realTimeCheckLen(
+            dataToCheckRegister.maxLength.id,
+            dataToCheckRegister.maxLength.max
+        );
 
-    formData.duplicate('firstName_id', 'alias_id')
+        // check if password matches real time
+        formData.matchInput(dataToCheckRegister.password.pwd,
+            dataToCheckRegister.password.pwd2,
+        );
+
+        formData.duplicate('firstName_id', 'alias_id')
+
+    } catch (error) {
+        showError(error)
+
+    }
+
 
 })();
 

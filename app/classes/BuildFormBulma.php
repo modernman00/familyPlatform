@@ -282,7 +282,7 @@ class BuildFormBulma extends AlterTable
                 echo " <div class='field'>
                         <div class='control'>
                         <label class='checkbox'>
-                            <input type='checkbox' id='checkbox' name = '{$nameKey}_id'>
+                            <input type='checkbox' id='checkbox' name = '{$nameKey}'>
                             {$this->EntValue[$i]}
                         </label>
                         <p class='help' id={$nameKey}_error></p>
@@ -308,7 +308,9 @@ class BuildFormBulma extends AlterTable
                 echo " <div class = field>
 
                     <div class= control>
-                    <input type='hidden' class ='input' name='token' value=$this->token>
+                    <input type='hidden' class ='input'
+                    id = 'token' 
+                    name='token' value=$this->token>
 
                     </div></div> ";
             } elseif ($this->EntKey[$i] === 'blank') {

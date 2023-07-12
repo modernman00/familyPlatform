@@ -12,13 +12,13 @@ export const write = (input) => document.write(input)
 export const date2String = (date) => new Date().toDateString(date)
 
 export const showError = (e) => {
-    // console.log(e instanceof TypeError) // true
-    // console.log(e.message) // "null has no properties"
-    // console.log(e.name) // "TypeError"
-    // console.log(e.fileName) // "Scratchpad/1"
-    // console.log(e.lineNumber) // 2
-    // console.log(e.columnNumber) // 2
-    // console.log(e.stack)
+    console.log(e instanceof TypeError) // true
+    console.log(e.message) // "null has no properties"
+    console.log(e.name) // "TypeError"
+    console.log(e.fileName) // "Scratchpad/1"
+    console.log(e.lineNumber) // 2
+    console.log(e.columnNumber) // 2
+    console.log(e.stack)
 }
 
 /**

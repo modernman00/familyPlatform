@@ -221,7 +221,7 @@
   ]
   ],
 
-  'checkbox' => 'By submitting this form, you agree handling your information as outlined in our <a href="/privacy">
+  'checkbox' => 'By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy">
     PRIVACY POLICY </a>',
   'token'=> 'token',
 
