@@ -6,7 +6,7 @@ namespace App\classes;
 class SubmitForm extends Db
 {
 /** @phpstan-ignore-next-line */
-    public static function submitForm($table, $field): bool
+    public static function submitForm($table, $field): bool | string
     {
         try {
             // EXTRACT THE KEY FOR THE COL NAME
@@ -30,6 +30,7 @@ class SubmitForm extends Db
             return $query->execute();
         } catch (\PDOException $e) {
             showError($e);
+            return false;
         } catch (\Throwable $th) {
             showError($th);
             return false;
