@@ -12,8 +12,8 @@
                 Congratulations! Your Application Has Been Successfully Submitted!<br> Ref: {{ checkInput($_SESSION['id']) }}
             </p><br>
             <p class="subtitle">
-                Hello {{ checkInput($_SESSION['firstName']) }}, <br> Thank you for submitting your application. Our admin team will review it, and within 24 hours, you will receive an email with the decision. Once approved, you can log in to your account and access our family social network to connect with relatives and enjoy meaningful interactions. <br><br>If
-                your application approved, then you should be able to log in to your account and access the family
+                Hello {{ checkInput($_SESSION['firstName']) }}, <br> Thank you for submitting your application. Our admin team will review it, and within 24 hours, you will receive an email with the decision. Once approved, you can log in to your account and access our family social network to connect with relatives and enjoy meaningful interactions. <br><br>Once
+                your application is approved, then you should be able to log in to your account and access the family
                 social network<br><br>We appreciate your patience during this review process and look forward to welcoming you into our vibrant community. Get ready to embark on an incredible journey of meaningful connections and cherished family moments.
 
 <br><br>

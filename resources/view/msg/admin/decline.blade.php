@@ -11,7 +11,7 @@
 <p>
 
  Hello
-    {{ $data['firstName'] }} {{ $data['lastName'] }}, <br><br> Your application for membership of the Olaogun family platform has
+    {{ $data['firstName'] }} {{ $data['lastName'] }}, <br><br> Your application for membership of the {{ $data['lastName'] }} family platform has
     been declined.<br><br>Thanks.<br><br>
            
 
