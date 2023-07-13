@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\controller\login;
@@ -30,22 +31,23 @@ class PassChange extends Pass
 
             $result = $this->update($this->table, 'password', $cleanData['password'], 'email', $email);
             if (!$result) {
-                http_response_code(501);
-                echo http_response_code();
-                throw new Exception("Password cannot be updated");
+
+                msgException(401, "Password cannot be updated");
             }
 
-            $emailData = genEmailArray(viewPath: 'msg/pwdChange', data: ['email' => $email], subject: 'PASSWORD CHANGE');
+            $emailData = genEmailArray(
+                viewPath: 'msg/pwdChange',
+                data: ['email' => $email],
+                subject: 'PASSWORD CHANGE'
+            );
+
             sendEmailWrapper(var: $emailData, recipientType: 'member');
 
             session_regenerate_id();
             unset($_SESSION['loginType']);
-            http_response_code(200);
-            echo http_response_code();
-            echo json_encode("Password was successfully changed");
+            msgSuccess(200, "Password was successfully changed");
         } catch (Throwable $e) {
             showError($e);
         }
     }
 }
-

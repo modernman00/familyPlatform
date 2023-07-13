@@ -1,1 +1,237 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[533,659],{7690:(e,n,t)=>{t.r(n);var a=t(9669),r=t.n(a),c=t(7658),i=t(3482),o=t(3659),l=function(e){if(!e)return"<p> Sorry, we could find the data</p>";(0,c.id)("allMembers").classList.remove("loader");var n=e.img?"/img/profile/".concat(e.img):"/avatar/avatarF.png",t='<div class="col-sm-3 mb-3" id='.concat(e.id,'>\n        <div class="card">\n         <img src="').concat(n,'" class="card-img-top allMember_profileImg" width="300" height="300" alt="profile img">\n \n        <div class="card-body">\n                    <h4 class=\'card-title\'>').concat(e.firstName," ").concat(e.lastName,'</h4>\n                    <p class="card-text allMember_card_content"><b>Alias:</b> ').concat(e.alias," \n                    <br> <b>Father:</b>  ").concat(e.fatherName,"\n                    <br> <b>Mother:</b> ").concat(e.motherName,"\n                    <br> <b>Spouse:</b> ").concat(e.spouseName&&"none","\n                    <br> <b>Contact:</b>  ").concat(e.email," | ").concat(e.mobile," \n                    <br> <b>Date joined:</b> ").concat((0,i.WU)(e.date_created),'</p>\n                    <a href="/allMembers/setProfile?id=').concat(e.id,'" class="btn btn-primary stretched-link">See Profile</a>\n                </div>\n                </div>\n            </div>');(0,c.id)("allMembers").insertAdjacentHTML("beforeend",t)};r().get("https://myfamilyplatform.com/allMembers/processApiData",{headers:{"X-Requested-With":"XMLHttpRequest","Content-Type":"application/json",Accept:"application/json"}}).then((function(e){(0,o.loaderIcon)(),(0,c.id)("allMembers").classList.add("loader"),(0,c.id)("allMembers").innerHTML="",e.data.map((function(e){l(e)}));(0,c.id)("searchFamily").addEventListener("keyup",(function(){var n=(0,c.id)("searchFamily").value;if(""==n&&((0,c.id)("allMembers").innerHTML="",e.data.map((function(e){l(e)}))),n){(0,c.id)("allMembers").innerHTML="";var t=e.data.filter((function(e){return e.firstName.toLowerCase().includes(n.toLowerCase())}));(0,c.log)(t),t.map((function(e){l(e)}))}}))})).catch((function(e){return console.error(e.message)}))},3659:(e,n,t)=>{t.r(n),t.d(n,{autoCompleter:()=>f,checkBox:()=>b,checkBox2:()=>h,createAndAppendElement:()=>m,distinctValue:()=>p,isChecked:()=>v,loaderIcon:()=>s,loaderIconBootstrap:()=>l,loaderIconBulma:()=>d,matchInput:()=>g,matchRegex:()=>y,removeDiv:()=>u});var a=t(7658),r=t(7338),c=t.n(r);function i(e){return function(e){if(Array.isArray(e))return o(e)}(e)||function(e){if("undefined"!=typeof Symbol&&null!=e[Symbol.iterator]||null!=e["@@iterator"])return Array.from(e)}(e)||function(e,n){if(!e)return;if("string"==typeof e)return o(e,n);var t=Object.prototype.toString.call(e).slice(8,-1);"Object"===t&&e.constructor&&(t=e.constructor.name);if("Map"===t||"Set"===t)return Array.from(e);if("Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t))return o(e,n)}(e)||function(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function o(e,n){(null==n||n>e.length)&&(n=e.length);for(var t=0,a=new Array(n);t<n;t++)a[t]=e[t];return a}var l=function(){return'<div class="spinner-grow text-primary" role="status">\n        <span class="sr-only">Loading...</span>\n        </div>'},s=function(){return'<div class="loader"></div>'},d=function(){return'<div class="is-loading"></div>'},u=function(e){var n=document.getElementById(e);if(n)return n.remove()},m=function(e,n,t){var r=arguments.length>3&&void 0!==arguments[3]?arguments[3]:null,c=document.createElement(e);return c.setAttribute("id",n),c.setAttribute("class","field ".concat(r)),(0,a.id)(t).appendChild(c)},f=function(e,n){c()({input:e,fetch:function(e,t){e=e.toLowerCase(),t(n.filter((function(n){return n.firstName.toLowerCase().startsWith(e)})))},onSelect:function(e){input.value=e.firstName}})},p=function(e){return i(new Set(e))},b=function(e){return'<div class="control"> \n        <label class="radio">\n          <input type="radio" name="send'.concat(e,'" value="yes" id=').concat(e,'Yes > Yes \n        </label>\n        <label class="radio"> \n          <input type="radio" name="send').concat(e,'" value="no" id=').concat(e,"No checked> No \n        </label>\n      </div>")},h=function(e){return'<div class="control"> \n        <label class="checkbox">\n          <input type="checkbox" name="send'.concat(e,'" value="yes" id=').concat(e,'Yes> Yes \n        </label>\n        <label class="checkbox"> \n          <input type="checkbox" name="send').concat(e,'" value="no" id=').concat(e,"No> No \n        </label>\n      </div>")},v=function(e,n){var t="".concat(e,"Yes"),r="".concat(e,"No"),c=function(){(0,a.id)(t).checked?(alert("check"),n()):(0,a.id)(r).checked&&alert("check No")};(0,a.id)(t).addEventListener("click",c),(0,a.id)(r).addEventListener("click",c)},y=function(e){if(e&&"Not Provided"!=e){if(null===e.match(/[<?/>]+/g))return!0}},g=function(e,n,t){var r,c,i;r=(0,a.id)(t),c=(0,a.id)(e),(i=(0,a.id)(n)).addEventListener("keyup",(function(){i.value!==c.value?(r.innerHTML="Your passwords do not match",r.style.color="red"):(r.innerHTML="The password is matched: <i class='fa fa-check' aria-hidden='true'></i>",r.style.color="green")}))}}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/all_members"],{
+
+/***/ "./resources/asset/js/components/allMembers/api.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/api.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+
+
+
+// import { eventInput } from "./event"
+
+var config = {
+  headers: {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+};
+var renderHtml = function renderHtml(el) {
+  if (el) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
+    var img = el.img ? "/img/profile/".concat(el.img) : "/avatar/avatarF.png";
+    var html = "<div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n        <div class=\"card\">\n         <img src=\"").concat(img, "\" class=\"card-img-top allMember_profileImg\" width=\"300\" height=\"300\" alt=\"profile img\">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text allMember_card_content\"><b>Alias:</b> ").concat(el.alias, " \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Contact:</b>  ").concat(el.email, " | ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "</p>\n                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary stretched-link\">See Profile</a>\n                </div>\n                </div>\n            </div>");
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
+  } else {
+    return "<p> Sorry, we could find the data</p>";
+  }
+};
+var URL = "http://olaogun.test/";
+axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiData', config).then(function (response) {
+  (0,_helper_general__WEBPACK_IMPORTED_MODULE_3__.loaderIcon)();
+
+  // add loader
+
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
+  response.data.map(function (el) {
+    renderHtml(el);
+  });
+  var input = function input() {
+    var inputVal = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').value;
+    if (inputVal == "") {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
+      response.data.map(function (el) {
+        renderHtml(el);
+      });
+    }
+    if (inputVal) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
+      var filter = response.data.filter(function (el) {
+        return el.firstName.toLowerCase().includes(inputVal.toLowerCase());
+      });
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(filter);
+      filter.map(function (el) {
+        renderHtml(el);
+      });
+    }
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('keyup', input);
+
+  // log(searchInput)
+
+  // const filteredData = data.filter(ele => {
+
+  // })
+
+  // response.data.map(el => {
+
+  //     renderHtml(el)
+  // })
+})
+// id('allMembers').classList.remove('loader')
+["catch"](function (err) {
+  return console.error(err.message);
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/index.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/index.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./resources/asset/js/components/allMembers/api.js");
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
+/* harmony export */   checkBox: () => (/* binding */ checkBox),
+/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
+/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
+/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
+/* harmony export */   isChecked: () => (/* binding */ isChecked),
+/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
+/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
+/* harmony export */   matchInput: () => (/* binding */ matchInput),
+/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  newDiv.setAttribute('class', "field ".concat(setClass));
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  return parentDiv.appendChild(newDiv);
+};
+
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase();
+      // you can also use AJAX requests instead of preloaded data
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return _toConsumableArray(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[<?/>]+/g;
+      var result = data.match(regex);
+      if (result === null) return true;
+    }
+  }
+};
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
+
+/***/ })
+
+}]);

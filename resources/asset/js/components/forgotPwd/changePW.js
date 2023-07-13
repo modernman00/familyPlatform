@@ -1,35 +1,49 @@
 import ('../helper/general').then(res => res.matchInput('password_id', 'confirm_password_id', 'changePasswordErr'))
 
 import ('../global').then(response => {
+    // Module imported from '../global'
 
-    response.id("setLoader").style.display = "none";
+    // Hide the loader element initially
+    const loaderElement = response.id('setLoader');
+    loaderElement.style.display = 'none';
 
-    const submitChangePW = (e) => {
+    // Function to handle the submission of change password form
+    const submitChangePW = async(e) => {
+        e.preventDefault();
         try {
-            e.preventDefault();
 
-            const password = response.id('password_id').value
 
-            // just in case there was an earlier error notification - remove it
+            const passwordElement = response.id('password_id');
+            const password = passwordElement.value;
 
-            response.id('changePassword_notification').classList.remove('is-danger')
+            // Remove any previous error notifications
+            const changePasswordNotificationElement = response.id('changePassword_notification');
+            changePasswordNotificationElement.classList.remove('is-danger');
+            response.id('error').innerHTML = '';
 
-            response.id('error').innerHTML = ""
+            if (password) {
+                // Display the loader element
+                loaderElement.style.display = 'block';
+                response.id('loader').classList.add('loader');
 
-            if (password !== null) {
-                response.id("setLoader").style.display = "block";
+                // Dynamically import the '../helper/http' module
+                const httpModule = await
+                import ('../helper/http');
+                const { postFormData } = httpModule;
 
-                response.id('loader').classList.add('loader')
-
-                import ('../helper/http').then(res => res.postFormData("/login/changePW", "changePassword", "/login"))
-
-                // window.location.replace("/login")
+                // Perform the HTTP request to submit the change password form
+                await postFormData('/login/changePW', 'changePassword', '/login');
             }
         } catch (error) {
+            // Show error using the 'showError' function on the 'response' object
             response.showError(error)
+        } finally {
+            // Hide the loader element regardless of success or error
+            loaderElement.style.display = 'none';
         }
     }
 
+    // Add a click event listener to the element with id 'submit'
     response.id('submit').addEventListener('click', submitChangePW)
 
 })
