@@ -15,7 +15,7 @@ class ReviewApps extends ReviewAppsData
     private const REDIRECT = "Location: /admin/reviewApps";
 
     // get the new application page 
-    function get()
+    public function get()
     {
         $result = $this->index();
         return view('admin/ReviewApps', ['result' => $result, 'no' => 1]);

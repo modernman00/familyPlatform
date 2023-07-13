@@ -142,7 +142,10 @@ class Login extends Select
             throw new Exception("Your input to code is not recognised");
         }
 
-        loggedDetection("http://olaogun.dev.com/lasu", $sanitisedData['email']);
+        $url = getenv("MIX_APP_URL2");
+        $url .= "$url lasu";
+
+        loggedDetection( $url, $sanitisedData['email']);
 
         session_regenerate_id();
 

@@ -1,5 +1,6 @@
 <?php
-declare(strict_types =1);
+
+declare(strict_types=1);
 
 namespace App\model;
 
@@ -26,15 +27,15 @@ class SingleCustomerData extends InnerJoin
 	 * @param array $table THE TABLE TO INNERJOIN
 	 * ONLY USE THIS FUNCTION TO GET A SINGLE STATE
 	 * @return array
-	 */ 
-	public function getCustomerData(string $custId, array $table) : array
-	{ 
+	 */
+	public function getCustomerData(string $custId, array $table): array | bool
+	{
 		try {
 			$para = "id";
 			// remove the first element of the array
-			$firstTable = array_shift($table); 
-			$query = $this->joinParamOr(firstTable:$firstTable, para:$para, table:$table, id:$custId);
-			
+			$firstTable = array_shift($table);
+			$query = $this->joinParamOr(firstTable: $firstTable, para: $para, table: $table, id: $custId);
+
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 301);
 			}
@@ -44,40 +45,38 @@ class SingleCustomerData extends InnerJoin
 			return $query;
 		} catch (\PDOException $e) {
 			showError($e);
+			return false;
 		}
 	}
-		/**
+	/**
 	 * Undocumented function
 	 *
 	 * @param string $custId THE ID OF THE CUST
 	 * @param array $table THE TABLE TO INNERJOIN
 	 * WATCH OUT WHEN USING ON THE account table to remove the password key
 	 * @return array
-	 */ 
-	public function getCustomerData2(string $custId, array $table) : array
-	{ 
+	 */
+	public function getCustomerData2(string $custId, array $table): array | bool
+	{
 		try {
-		
+
 			$id = "id";
 			$firstTable = array_shift($table); // remove the first element of the array
-			$query = $this->joinParamOr(firstTable:$firstTable, para:$id, table:$table, id:$custId);
-			
+			$query = $this->joinParamOr(firstTable: $firstTable, para: $id, table: $table, id: $custId);
+
 			if (!$query) {
 				throw new \Exception("Error Processing Request - query", 1);
 			}
 			return $query;
-
 		} catch (\PDOException $e) {
 			showError($e);
+			return false;
 		}
 	}
 
-	  public static function getCustById($custId, $table): array
-    {
-        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
-        return Select::selectFn2(query: $query, bind: [$custId]);
-    }
-
-
-
+	public static function getCustById($custId, $table): array
+	{
+		$query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
+		return Select::selectFn2(query: $query, bind: [$custId]);
+	}
 }

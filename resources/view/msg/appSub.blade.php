@@ -1,7 +1,7 @@
 @extends ('email')
 @section('title', 'email')
 
-@section('subject', 'Applicaton success')
+@section('subject', 'Application success')
 
 @if ( $data['id'])
 
