@@ -120,15 +120,21 @@ var FormHelper = /*#__PURE__*/function () {
             }
             // console.log(post.name)
             _this2.id(post.id).addEventListener('change', function () {
-              _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              if (_this2.id("".concat(post.name, "_error"))) {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              }
             });
             if (post.value != 'select') {
               _this2.id(post.id).addEventListener('keyup', function () {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                if (_this2.id("".concat(post.name, "_error"))) {
+                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                }
               });
             } else {
               _this2.id(post.id).addEventListener('change', function () {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                if (_this2.id("".concat(post.name, "_error"))) {
+                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                }
               });
             }
           };
@@ -484,9 +490,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 /**
  * 
- * @param {the url to post the data to} url 
- * @param {* the id or class of the form} formElement 
- * @param {* the redirect to another page /code or /admin/register} redirect 
+* Sends form data via POST request.
+ * @param {string} url - The URL to post the data to.
+ * @param {string} formId - The ID or class of the form.
+ * @param {string|null} redirect - The page to redirect to after successful submission.
+ * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
 var postFormData = /*#__PURE__*/function () {
@@ -494,36 +502,19 @@ var postFormData = /*#__PURE__*/function () {
     var redirect,
       css,
       notificationId,
-      processFormDataAction,
-      addClassByCSS,
       form,
       formEntries,
       options,
+      response,
+      successClass,
+      errorClass,
       _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
           redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
           css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
-          notificationId = "".concat(formId, "_notification"); // the notification function
-          processFormDataAction = function processFormDataAction(addClass, data) {
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).style.display = "block"; // unblock the notification
-
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationId).classList.add(addClass); // add the success class
-
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = data; // error element
-
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader'); // remove loader
-          };
-          addClassByCSS = function addClassByCSS(theCss, status) {
-            if (theCss === "W3css") {
-              return status == 'green' ? "w3-green" : "w3-red";
-            } else if (theCss === 'bulma') {
-              return status == 'green' ? "is-success" : "is-danger";
-            } else {
-              return status == 'green' ? "is-success" : "is-danger";
-            }
-          }; // extract the form entries
+          notificationId = "".concat(formId, "_notification"); // extract the form entries
           form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
           formEntries = new FormData(form);
           formEntries["delete"]('submit');
@@ -533,39 +524,71 @@ var postFormData = /*#__PURE__*/function () {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN'
           }; // AXIOS POST FUNCTIONALITY
-          _context.next = 12;
-          return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options).then(function (response) {
-            // TO DECIDE ON THE NOTIFICATION
-            var theClass = addClassByCSS(css, 'green');
-            processFormDataAction(theClass, response.data.message);
+          _context.prev = 8;
+          _context.next = 11;
+          return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options);
+        case 11:
+          response = _context.sent;
+          successClass = getNotificationClassByCSS("bulma", 'green'); // console.log(response.data.message)
+          processFormDataAction(successClass, response.data.message, notificationId);
+          if (redirect) {
+            setTimeout(function () {
+              window.location.assign(redirect);
+            }, 2000);
+          }
+          formData.clearHtml();
+          _context.next = 22;
+          break;
+        case 18:
+          _context.prev = 18;
+          _context.t0 = _context["catch"](8);
+          errorClass = getNotificationClassByCSS("bulma", 'red');
+          processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
 
-            //set timer to redirect to the homepage
-            if (redirect) {
-              setTimeout(function () {
-                window.location.assign(redirect);
-              }, 2000);
-            }
-            // it clears all the contents
-            formData.clearHtml();
-          })["catch"](function (error) {
-            var theClass = addClassByCSS(css, 'red');
-
-            // if (error.response.data.message === "We do not recognise what you are doing") {
-            //     window.location.assign('/login')
-            // }
-
-            processFormDataAction(theClass, error.response.data.message);
-          });
-        case 12:
+          // Handle specific error cases
+          // if (error.response.data.message === "We do not recognise what you are doing") {
+          //   window.location.assign('/login');
+          // }
+        case 22:
         case "end":
           return _context.stop();
       }
-    }, _callee);
+    }, _callee, null, [[8, 18]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
   };
 }();
+
+/**
+ * Process form data action.
+ * @param {string} cssClass - The CSS class for the notification.
+ * @param {string} message - The notification message.
+ */
+var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
+  var notificationElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formNotificationId);
+  notificationElement.style.display = 'block';
+  notificationElement.classList.add(cssClass);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = message;
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader');
+};
+
+/**
+ * Get the notification class based on the CSS framework.
+ * @param {string|null} css - The CSS framework to use for notification styling.
+ * @param {string} status - The status of the notification ('green' or 'red').
+ * @returns {string} - The corresponding CSS class.
+ */
+var getNotificationClassByCSS = function getNotificationClassByCSS(css, status) {
+  switch (css) {
+    case 'W3css':
+      return status === 'green' ? 'w3-green' : 'w3-red';
+    case 'bulma':
+      return status === 'green' ? 'is-success' : 'is-danger';
+    default:
+      return status === 'green' ? 'is-success' : 'is-danger';
+  }
+};
 
 /**
  * 

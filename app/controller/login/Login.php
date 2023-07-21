@@ -75,6 +75,8 @@ class Login extends Select
             //1.  token verified
             CheckToken::tokenCheck('token');
 
+          
+
             //4. control for login
             $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
@@ -83,10 +85,13 @@ class Login extends Select
                 // Login now based on login type
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
 
-                    $this->adminLogin($sanitisedData);
+                    $this->adminLogin($data);
+                     unset($data);
+
                 } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
 
                     $this->customerLogin($data);
+                     unset($data);
                 }
                 msgSuccess(201, "Credentials validated");
             } else {
@@ -134,18 +139,17 @@ class Login extends Select
 
         $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
 
-        $outcome = $this->selectFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
+        $outcome = $this->selectCountFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
 
         if (!$outcome) {
-            http_response_code(406); // sets the response to 406
-            echo http_response_code(); // echo the new response code
-            throw new Exception("Your input to code is not recognised");
+
+            msgException(406,"Your input to code is not recognised" );
         }
 
-        $url = getenv("MIX_APP_URL2");
-        $url .= "$url lasu";
+        $url0 = getenv("MIX_APP_URL2");
+        $url = $url0."lasu";
 
-        loggedDetection( $url, $sanitisedData['email']);
+        loggedDetection($url, $sanitisedData['email']);
 
         session_regenerate_id();
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+use DateTime;
+
 use App\classes\{
     AllFunctionalities,
     Insert,
@@ -15,22 +17,20 @@ use App\model\AllMembersData;
 
 class Event extends AllMembersData
 {
-    private const REDIRECT = "Location: /member/ProfilePage";
+    // private const REDIRECT = "Location: /member/ProfilePage";
 
-    static function submitEvent()
+    public static function submitEvent()
     {
         try {
             // SANITISE THE ENTRY
             $cleanData = getSanitisedInputData($_POST);
-            CheckToken::tokenCheck('token', self::REDIRECT);
+            CheckToken::tokenCheck('token');
 
             $cleanData['id'] = checkInput($_SESSION['id']);
 
             // insert the data and return the last event no
 
             return Insert::submitFormDynamicLastId('events', $cleanData, 'no');
-
-
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -39,13 +39,50 @@ class Event extends AllMembersData
     public static function sendReminder(): void
     {
         try {
-         
+
             $todayDate =  date('Y-m-d');
             $data = parent::getEventData();
-          
+            $currentMonth = date("M");
+            $currentDay = date("d");
+
+            dump($data);
+
+            $dateString = "$currentDay $currentMonth";
+
+            // working on the birthday event 
+
+            $dateString1 = "15 Jul";
+
+            $date = DateTime::createFromFormat("d M", $dateString1);
+
+            $currentDate = date_create();
+
+            // dump($date);
+            // dump($currentDate);
+
+            $d=strtotime($dateString1);
+
+            $twoWeeks = strtotime("-2 weeks", $d);
+            $sevenDays = strtotime("-1 weeks", $d);
+            $oneDay = strtotime("-1 day", $d);
+
+            // dump($endDate);
+            // echo BR;
+
+            echo date("Y-m-d", $twoWeeks);
+            echo BR;
+            echo date("Y-m-d", $sevenDays);
+            echo BR;
+            echo date("Y-m-d", $oneDay);
+            echo BR;
+            echo date("Y-m-d", $d);
+
+            // 1) get the date of the birthday and create it in a date format using strtotime $d=strtotime("$day $mon");
+            // 2) get 14 days and 7 day and 1 days and same day of the birthday  14 days = 
+            //3 if the formated date is equal to 14 or 7 or 1 or same day, then send the email / notification 
+
 
             self::getEventMonth($data);
-        
 
             foreach ($data as $data) {
 
@@ -54,6 +91,8 @@ class Event extends AllMembersData
                 $eventName = $data['eventName'];
                 $eventDayFormatted = dateFormat($data['eventDate']);
 
+
+
                 $diffEventAndTodayDate = dateDifference($todayDate, $eventDate);
 
                 if ($diffEventAndTodayDate === "+7 days") {
@@ -61,6 +100,14 @@ class Event extends AllMembersData
                     $subject = "$firstName's $eventName is on $eventDayFormatted";
 
                     self::sendNotification($data, $subject);
+                } elseif ($diffEventAndTodayDate === "+14 days") {
+
+
+                    $subject = "$firstName's $eventName is on $eventDayFormatted";
+
+                    self::sendNotification($data, $subject);
+
+                    self::extendEventByFrequency($data);
                 } elseif ($diffEventAndTodayDate === "+0 days") {
 
                     $subject = "$firstName's $eventName is today, $eventDayFormatted";
@@ -160,10 +207,10 @@ class Event extends AllMembersData
         return AllFunctionalities::update2('events', 'eventDate', $newEventDate, 'no', $no);
     }
 
-   /**
-    * @return void
-    */
-   public static function getEventData()
+    /**
+     * @return void
+     */
+    public static function getEventData()
     {
         $allEventData = allMembersData::getEventData();
 
@@ -172,7 +219,7 @@ class Event extends AllMembersData
         \msgSuccess(201, $allEventData);
     }
 
-   public static function getEventByNo()
+    public static function getEventByNo()
     {
 
         try {

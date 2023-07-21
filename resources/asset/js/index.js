@@ -43,6 +43,7 @@ if (window.location.pathname === '/register') {
     ).then((module) => module.default).catch((err) => showError(err))
 
 } else if (window.location.pathname === '/allMembers') {
+    qSel('.allMemberNav').style.display = "none" //allMemberNav
 
     import (
         /* webpackChunkName: 'codeSplit/all_members' */

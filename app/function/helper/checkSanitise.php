@@ -25,9 +25,9 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
     $options = array('cost' => 12);
 
     if (password_verify($textPassword, $dbPassword) === false) {
-
-        throw new Exception('"There is a problem with your login credential! - Password"');
-    }
+        throw new Exception('There is a problem with your login credential! - Password');
+        }
+    
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
         $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
@@ -37,10 +37,13 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if (!$result) {
-            msgException(404, "Password could not be updated");
+            msgException(404, 'Password could not be updated');
+            return false;
         }
+
+       
     }
-    return true;
+     return true;
 }
 
 
@@ -58,7 +61,7 @@ function useEmailToFindData($inputData)
     $emailData = Select::selectFn2(query: $query, bind: [$email]);
 
     if (empty($emailData)) {
-        throw new Exception('There is a problem with your authentication');
+        throw new Exception('There is a problem with your authentication - Email');
     }
 
     return $emailData[0];

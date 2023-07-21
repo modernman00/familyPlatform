@@ -7,18 +7,18 @@
 
 <div class="styleForm" style="margin-top: 2rem;">
 
-  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" width="72" height="72"
-    style="margin-left:40%; margin-bottom:5rem;">
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
 
-  <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow" enctype="multipart/form-data">
+  <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow"
+    enctype="multipart/form-data">
 
     <div id="setLoader">
       <div id="loader"></div>
-        <div class="notification" id="loginNow_notification">
-      
-          <p id="error"></p>
-        </div>
-      
+      <div class="notification" id="loginNow_notification">
+
+        <p id="error"></p>
+      </div>
+
     </div>
 
     <div class="form-group">
@@ -50,6 +50,13 @@
   </form>
 
 </div>
+
+<script>
+  sessionStorage.setItem('loginURL1', @json($formAction))  
+
+
+
+</script>
 
 
 

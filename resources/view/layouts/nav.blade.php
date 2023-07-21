@@ -1,7 +1,7 @@
 <div class="w3-top">
 
 
-  <div class="w3-bar w3-theme-d2 w3-left-align w3-medium">
+  <div class="w3-bar w3-light-grey w3-left-align w3-medium">
 
     <a href="#" class="w3-bar-item w3-button w3-padding-large "><em
         class="fa fa-home w3-margin-right w3-mobile w3-hide-small"></em><img src={{ getenv("IMG_CONTRACT") }}

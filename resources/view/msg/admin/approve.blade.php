@@ -14,7 +14,7 @@ MEMBERSHIP DECISION NOTIFICATION for {{ strtoupper($data['firstName']) }} {{ $da
     {{ strtoupper($data['firstName']) }} {{ $data['lastName'] }}, <br><br> Your application for membership of the {{ $data['lastName'] }} family platform has
     been approved.<br><br>
 
-    You can now log in with your details and upload your profile pics.
+    You can now log in at {{ getenv('APP_URL') }}login with your details and upload your profile pics.
 
     <br><br>Thanks.<br><br>
 

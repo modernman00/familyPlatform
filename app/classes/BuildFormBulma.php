@@ -13,7 +13,6 @@ class BuildFormBulma extends AlterTable
      * When there is a need for new entries, use the newEnt array
      *
      */
-    private array $question2 = [];
     private array $entKey;
     private string $token;
     private array $entValue;
@@ -51,7 +50,7 @@ class BuildFormBulma extends AlterTable
     }
 
     /**
-     * to creat the year of birth
+     * to create the year of birth
      * set the years and create an array
      */
 
@@ -86,7 +85,7 @@ class BuildFormBulma extends AlterTable
 
     private function getDay(): void
     {
-        $this->setDay = $this->createDay(1, 32);
+        $this->setDay = $this->createDay(01, 32);
         foreach ($this->setDay as $no) {
             echo "<option value=\"$no\">$no</option>";
         }
@@ -96,7 +95,7 @@ class BuildFormBulma extends AlterTable
     /**
      * function to set the key of the form. Keys are the names of questions and the names of the database
      */
-    public function setentKey(): array
+    public function setEntKey(): array
     {
         $this->entKey = array_keys($this->question);
         return $this->entKey;
@@ -117,20 +116,20 @@ class BuildFormBulma extends AlterTable
      * example showError  nameKey => showError - the namekey should be the id of the div or form that will release the error. See Login or Register.js for a clear example
      * @return void 
      */
-   public function genForm(): void
-{
-    $this->setEntValue();
-    $this->setEntKey();
-    $this->setSessionToken();
+    public function genForm(): void
+    {
+        $this->setEntValue();
+        $this->setEntKey();
+        $this->setSessionToken();
 
-    for ($i = 0; $i < $this->entCount; $i++) {
-        $value = isset($_POST['submit']) ? $_POST[$this->entKey[$i]] : '';
+        for ($i = 0; $i < $this->entCount; $i++) {
+            $value = isset($_POST['submit']) ? $_POST[$this->entKey[$i]] : '';
 
-        $var = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $this->entKey[$i]));
-        $nameKey = $this->entKey[$i];
+            $var = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $this->entKey[$i]));
+            $nameKey = $this->entKey[$i];
 
-        if ($this->entValue[$i] === 'text') {
-            echo <<<HTML
+            if ($this->entValue[$i] === 'text') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control has-icons-left has-icons-right">
@@ -140,9 +139,9 @@ class BuildFormBulma extends AlterTable
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'text-icon') {
-            $fontAwesome = $this->entValue[$i][1];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'text-icon') {
+                $fontAwesome = $this->entValue[$i][1];
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control has-icons-left has-icons-right">
@@ -158,8 +157,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'integer') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'integer') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control">
@@ -169,8 +168,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'date') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'date') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control">
@@ -180,19 +179,19 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'select') {
-            $options = $this->entValue[$i];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'select') {
+                $options = $this->entValue[$i];
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control">
         <div class="select">
             <select name="$nameKey">
 HTML;
-            foreach ($options as $option) {
-                echo "<option value=\"$option\">$option</option>";
-            }
-            echo <<<HTML
+                foreach ($options as $option) {
+                    echo "<option value=\"$option\">$option</option>";
+                }
+                echo <<<HTML
             </select>
         </div>
         <p class="help" id="{$nameKey}_help"></p>
@@ -200,19 +199,19 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'select-icon') {
-            $fontAwesome = $this->entValue[$i][1];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'select-icon') {
+                $fontAwesome = $this->entValue[$i][1];
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control has-icons-left">
         <div class="select">
             <select name="$nameKey">
 HTML;
-            for ($y = 1; $y < count($this->entValue[$i]); $y++) {
-                echo "<option>" . $this->entValue[$i][$y] . "</option>";
-            }
-            echo <<<HTML
+                for ($y = 1; $y < count($this->entValue[$i]); $y++) {
+                    echo "<option>" . $this->entValue[$i][$y] . "</option>";
+                }
+                echo <<<HTML
             </select>
         </div>
         <span class="icon is-small is-left">
@@ -223,8 +222,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'textarea') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'textarea') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control">
@@ -234,8 +233,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'email') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'email') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control has-icons-left has-icons-right">
@@ -251,8 +250,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'password') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'password') {
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="control has-icons-left has-icons-right">
@@ -268,8 +267,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entKey[$i] === 'checkbox') {
-            echo <<<HTML
+            } elseif ($this->entKey[$i] === 'checkbox') {
+                echo <<<HTML
 <div class="field">
     <div class="control">
         <label class="checkbox">
@@ -280,8 +279,8 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'button') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'button') {
+                echo <<<HTML
 <div class="field">
     <p class="control">
         <button name="submit" id="submit" type="button" class="button is-success button is-large is-fullwidth submit">
@@ -290,8 +289,8 @@ HTML;
     </p>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'submit') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'submit') {
+                echo <<<HTML
 <div class="field">
     <p class="control">
         <button name="submit" id="submit" type="submit" class="button is-success button is-large is-fullwidth submit">
@@ -300,26 +299,26 @@ HTML;
     </p>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'token') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'token') {
+                echo <<<HTML
 <div class="field">
     <div class="control">
         <input type="hidden" class="input" id="token" name="token" value="{$this->token}">
     </div>
 </div>
 HTML;
-        } elseif ($this->entKey[$i] === 'blank') {
-            echo <<<HTML
+            } elseif ($this->entKey[$i] === 'blank') {
+                echo <<<HTML
 <div class="field"></div>
 HTML;
-            for ($y = 1; $y < count($this->entKey[$i]); $y++) {
-                $name = $this->entValue['type'][$y];
-                $label = $this->entValue['label'][$y];
-                $id = $name . 'id';
-                $error = $name . '_error';
-                $help = $name . '_help';
-                $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
-                echo <<<HTML
+                for ($y = 1; $y < count($this->entKey[$i]); $y++) {
+                    $name = $this->entValue['type'][$y];
+                    $label = $this->entValue['label'][$y];
+                    $id = $name . 'id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
+                    $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
+                    echo <<<HTML
 <div class="field">
     <label class="label" id="$label"><b>$label</b></label>
     <div class="field-body">
@@ -332,10 +331,10 @@ HTML;
     </div>
 </div>
 HTML;
-            }
-        } elseif ($this->entValue[$i] === 'birthday') {
-            $divID = $this->entValue[$i];
-            echo <<<HTML
+                }
+            } elseif ($this->entValue[$i] === 'birthday') {
+                $divID = $this->entValue[$i];
+                echo <<<HTML
 <div class="field" id="$divID">
     <label class="label is-medium" id="$nameKey"><b>$var</b></label>
     <p class="help error" id="{$nameKey}_error"></p>
@@ -346,8 +345,8 @@ HTML;
                     <select name="day" id="day">
                         <option selected value="select">Day</option>
 HTML;
-            echo $this->getDay();
-            echo <<<HTML
+                echo $this->getDay();
+                echo <<<HTML
                     </select>
                 </div>
             </div>
@@ -381,8 +380,8 @@ HTML;
                     <select name="year" id="year">
                         <option selected value="select">Year</option>
 HTML;
-            echo $this->getYear();
-            echo <<<HTML
+                echo $this->getYear();
+                echo <<<HTML
                     </select>
                 </div>
             </div>
@@ -391,11 +390,11 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'slider') {
-            $fAwesome = $this->entValue[$i][1];
-            $sliderId = $this->entValue[$i][2];
-            $inputId = $this->entValue[$i][3];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'slider') {
+                $fAwesome = $this->entValue[$i][1];
+                $sliderId = $this->entValue[$i][2];
+                $inputId = $this->entValue[$i][3];
+                echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
     <div class="field-body">
@@ -416,34 +415,34 @@ HTML;
     </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'mixed') {
-            $divID = $this->entKey[$i];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'mixed') {
+                $divID = $this->entKey[$i];
+                echo <<<HTML
 <div class="field" id="$divID">
     <div class="field-body">
 HTML;
-            for ($y = 0; $y < count($this->entValue[$i]['label']); $y++) {
-                $label = $this->entValue[$i]['label'][$y];
-                $name = $this->entValue[$i]['attribute'][$y];
-                $placeholder = $this->entValue[$i]['placeholder'][$y];
-                $id = $name . '_id';
-                $error = $name . '_error';
-                $help = $name . '_help';
-                $cleanLabel = strtoupper($label);
-                $labelType = $this->entValue[$i]['inputType'][$y];
-                $icon = $this->entValue[$i]['icon'][$y];
-                if ($labelType === 'select') {
-                    echo <<<HTML
+                for ($y = 0; $y < count($this->entValue[$i]['label']); $y++) {
+                    $label = $this->entValue[$i]['label'][$y];
+                    $name = $this->entValue[$i]['attribute'][$y];
+                    $placeholder = $this->entValue[$i]['placeholder'][$y];
+                    $id = $name . '_id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
+                    $cleanLabel = strtoupper($label);
+                    $labelType = $this->entValue[$i]['inputType'][$y];
+                    $icon = $this->entValue[$i]['icon'][$y];
+                    if ($labelType === 'select') {
+                        echo <<<HTML
 <div class="field $name" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
     <div class="control has-icons-left has-icons-right">
         <div class="select is-fullwidth is-medium">
             <select class="input is-medium" id="$id" name="$name">
 HTML;
-                   for ($yii = 0; $yii < count($this->entValue[$i]['options']); $yii++) {
+                        for ($yii = 0; $yii < count($this->entValue[$i]['options']); $yii++) {
                             echo "<option>" . $this->entValue[$i]['options'][$yii] . "</option>";
                         }
-                    echo <<<HTML
+                        echo <<<HTML
             </select>
             <span class="icon is-small is-left">$icon</span>
             <span class="icon is-small is-right">
@@ -455,8 +454,8 @@ HTML;
     </div>
 </div>
 HTML;
-                } elseif ($labelType === 'inputButton') {
-                    echo <<<HTML
+                    } elseif ($labelType === 'inputButton') {
+                        echo <<<HTML
 <div class="field has-addons has-addons-left">
     <div class="control is-expanded">
         <input class="input $name input is-medium" id="{$name}_id" type="text" placeholder="$cleanLabel">
@@ -466,8 +465,8 @@ HTML;
     </div>
 </div>
 HTML;
-                } else {
-                    echo <<<HTML
+                    } else {
+                        echo <<<HTML
 <div class="field $name" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
     <div class="control is-expanded has-icons-left">
@@ -478,37 +477,37 @@ HTML;
     </div>
 </div>
 HTML;
+                    }
                 }
-            }
-            echo <<<HTML
+                echo <<<HTML
 </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'select-many') {
-            $divID = $this->entKey[$i];
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'select-many') {
+                $divID = $this->entKey[$i];
+                echo <<<HTML
 <div class="field" id="$divID">
     <div class="field-body">
 HTML;
-            for ($y = 0; $y < count($this->entValue[$i]['label']); $y++) {
-                $options = $this->entValue[$i]['options'][$y];
-                $label = $this->entValue[$i]['label'][$y];
-                $name = $this->entValue[$i]['attribute'][$y];
-                $id = $name . '_id';
-                $error = $name . '_error';
-                $help = $name . '_help';
-                $cleanLabel = strtoupper($label);
-                $icon = $this->entValue[$i]['icon'][$y];
-                echo <<<HTML
+                for ($y = 0; $y < count($this->entValue[$i]['label']); $y++) {
+                    $options = $this->entValue[$i]['options'][$y];
+                    $label = $this->entValue[$i]['label'][$y];
+                    $name = $this->entValue[$i]['attribute'][$y];
+                    $id = $name . '_id';
+                    $error = $name . '_error';
+                    $help = $name . '_help';
+                    $cleanLabel = strtoupper($label);
+                    $icon = $this->entValue[$i]['icon'][$y];
+                    echo <<<HTML
 <div class="field" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
     <div class="control has-icons-left has-icons-right">
         <select class="input is-medium" id="$id" name="$name">
 HTML;
-                foreach ($options as $option) {
-                    echo "<option value=\"$option\">$option</option>";
-                }
-                echo <<<HTML
+                    foreach ($options as $option) {
+                        echo "<option value=\"$option\">$option</option>";
+                    }
+                    echo <<<HTML
         </select>
         <span class="icon is-small is-left">$icon</span>
         <span class="icon is-small is-right">
@@ -519,23 +518,23 @@ HTML;
     <p class="help error" id="$error"></p>
 </div>
 HTML;
-            }
-            echo <<<HTML
+                }
+                echo <<<HTML
 </div>
 </div>
 HTML;
-        } elseif ($this->entValue[$i] === 'title') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'title') {
+                echo <<<HTML
 <hr><br>
 <p id="{$nameKey}1" class="title is-3 is-spaced has-text-centered has-text-link is-primary the-title">$var</p><br>
 <p class="subtitle is-6 has-text-centered" id="{$nameKey}_help"></p>
 HTML;
-        } elseif ($this->entValue[$i] === 'subtitle') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i] === 'subtitle') {
+                echo <<<HTML
 <h2 class="subtitle has-text-centered is-primary">$var</h2>
 HTML;
-        } elseif ($this->entValue[$i][0] === 'radio') {
-            echo <<<HTML
+            } elseif ($this->entValue[$i][0] === 'radio') {
+                echo <<<HTML
 <hr><br>
 <div class="control">
     <label class="radio">
@@ -551,12 +550,19 @@ HTML;
 </div>
 <br>
 HTML;
-        } elseif ($this->entValue[$i] === 'empty') {
-            echo '';
-        } else {
-            echo "Invalid form element type: {$this->entValue[$i]}";
+            } elseif ($this->entValue[$i] === 'empty') {
+                echo '';
+            } elseif ($this->entValue[$i] === 'showError') {
+               echo "<div id='setLoader' tabindex='-1'>
+                        <div id='loader'>
+                        <div class='notification' id='$nameKey'>
+                        <p id='error'></p>
+                        </div>
+                            </div>
+                    </div>";
+            } else {
+                echo "Invalid form element type: {$this->entValue[$i]}";
+            }
         }
     }
-}
-
 }

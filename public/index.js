@@ -127,6 +127,8 @@ if (window.location.pathname === '/register') {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/allMembers') {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.allMemberNav').style.display = "none"; //allMemberNav
+
   Promise.all(/*! import() | codeSplit/all_members */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/ */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {

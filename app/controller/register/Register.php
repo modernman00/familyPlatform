@@ -25,13 +25,32 @@ class Register extends Db
     {
         try {
 
+            // if($_SESSION['FAMILYCODE'])
+            // {
+                 view('registration/register');
+            // } else {
+            //     view('registration/familyCode');
+            // }
 
-            view('registration/register');
+
+           
         } catch (\Throwable $e) {
 
             showError($e);
         }
     }
+
+    //  public function familyCode()
+    // {
+    //     try {
+    //         // sanitise the code 2) validate the code 3) if successful, create a session that will be validated before the register form can be opened 4) if unsuccessful, 
+
+    //         view('registration/nextStep');
+    //     } catch (\Throwable $e) {
+
+    //         showError($e);
+    //     }
+    // }
 
     public function nextStep(): void
     {

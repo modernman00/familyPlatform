@@ -17,7 +17,7 @@
   <img src="/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="600" height="650">
 
   <div class="w3-content w3-justify" style="max-width:600px">
-    <h4>{{ $data['firstName'] }} {{ $data['lastName'] }}</h4>
+    <h4><b>{{ $data['firstName'] }} {{ $data['lastName'] }}</b></h4>
     <p>
       {{ $data['firstName'] }} {{ $data['lastName'] }} lives in {{ $data['country'] }}.
       {{-- @if ( $data['gender'] == "male")
@@ -32,8 +32,8 @@
     <br>
 
     Contact details:
-    <p>mail: {{ $data['email'] }}</p>
-    <p>tel: {{ $data['mobile'] }}</p>
+    <p>email: <a href="mailto:{{ $data['email'] }}">{{ $data['email'] }}</a></p>
+    <p>tel:  {{ $data['mobile'] }}</p>
     <hr class="w3-opacity">
 
     <div class="w3-white">

@@ -23,4 +23,9 @@ class Index
     {
         view('privacy');
     }
+
+     public function terms(): void
+    {
+        view('termOfUse');
+    }
 }

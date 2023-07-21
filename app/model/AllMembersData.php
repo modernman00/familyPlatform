@@ -29,7 +29,7 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembersNoPics(): array
     {
-        $table = ['personal',"contact","profile_pics", 'otherFamily'];
+        $table = ['personal', "contact", "profile_pics", 'otherFamily'];
         $firstTable = array_shift($table);
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
@@ -67,10 +67,22 @@ class AllMembersData extends InnerJoin
         }
     }
 
-     public static function getMembers($table, $orderBy): array
+    public static function getMembers($table, $orderBy): array
     {
         $firstTable = array_shift($table);
         $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
         return $memberData ??= throw new Exception(self::ERR_MSG, 1);
+    }
+
+    public static function getBirthdayMonth()
+    {
+        try {
+
+            $currentMonth = date("m");
+            $currentDay = date("d");
+            
+        } catch (\Throwable $th) {
+            showError($th);
+        }
     }
 }

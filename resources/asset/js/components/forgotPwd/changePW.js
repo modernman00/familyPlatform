@@ -47,3 +47,13 @@ import ('../global').then(response => {
     response.id('submit').addEventListener('click', submitChangePW)
 
 })
+
+const currentPs = document.getElementById("password_id")
+const emailID = document.getElementById("email_id")
+const confirmPs = document.getElementById("confirm_password_id")
+
+
+currentPs.setAttribute('autocomplete', 'new-password')
+confirmPs.setAttribute('autocomplete', 'new-password')
+emailID.setAttribute('type', 'hidden')
+emailLabel.style.display = "none"

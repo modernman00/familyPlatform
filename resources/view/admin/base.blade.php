@@ -7,34 +7,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title> @yield('title')</title>
 
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
-     
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
-     <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+    <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
 
-      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
-           <link rel="stylesheet" href="/css/index.css">
+    {{--
+    <link rel="stylesheet" href="/css/index.css"> --}}
 
-      {{-- <link rel="stylesheet" href="/css/allcss.css"> --}}
+    {{--
+    <link rel="stylesheet" href="/css/allcss.css"> --}}
 
-      <style>
-          table {
-              font-size: 0.85rem;
-          }
-         #newApp{
+    <style>
+        table {
+            font-size: 0.85rem;
+        }
 
-    color: red;
-  }
+        #newApp {
 
-      </style>
+            color: red;
+        }
+    </style>
 
 </head>
 
 <body>
 
-      <!-- THIS WILL APPEAR IF JAVASCRIPT IS NOT ACTIVATED ON A CUSTOMER COMPUTER -->
+    <!-- THIS WILL APPEAR IF JAVASCRIPT IS NOT ACTIVATED ON A CUSTOMER COMPUTER -->
     <noscript>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <strong>For full functionality of this site it is necessary to enable JavaScript.
@@ -47,34 +49,35 @@
     </noscript>
 
     <!-- START NAV -->
-    <nav class="navbar is-white" role="navigation" aria-label="main navigation">
+    <nav class="navbar" role="navigation" aria-label="main navigation">
 
-            <div class="navbar-brand">
-                  <a class="navbar-item" href="/">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
                 <img src={{ getenv("IMG_LOGO_BLACK") }} width="200" height="600">
             </a>
 
-            <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
+                data-target="navbarBasicExample">
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
                 <span aria-hidden="true"></span>
             </a>
-            </div>
+        </div>
 
-               <div id="navbarBasicExample" class="navbar-menu">
+        <div id="navbarBasicExample" class="navbar-menu">
             <div class="navbar-start">
                 <a href="/admin/dashboard" class="navbar-item">
                     Dashboard
                 </a>
 
-                @php 
+                @php
 
                 // $result = new \App\classes\Select;
                 $array = [
-                    'selection' => "SELECT_COUNT_ONE",
-                    'table' => 'account',
-                    'identifier1'=> 'status',
-                    'bind' => ['new']
+                'selection' => "SELECT_COUNT_ONE",
+                'table' => 'account',
+                'identifier1'=> 'status',
+                'bind' => ['new']
                 ];
                 $callback = "selectCountFn2";
                 $result = \App\classes\Select::combineSelect($array, $callback, "ONE_IDENTIFIER");
@@ -82,126 +85,91 @@
 
                 @endphp
 
-                <a href="/admin/reviewApps" class="navbar-item"  >
+                <a href="/admin/reviewApps" class="navbar-item">
                     Application(<span id='newApp'>{{ $result }}</span>)
                 </a>
 
-                  <a href="/admin/allMembers" class="navbar-item">
+                <a href="/admin/allMembers" class="navbar-item">
                     All Members
                 </a>
 
-                 {{-- <a href="/admin/fca" class="navbar-item">
-                    FCA
-                </a>
-
-                 <a href="/admin/report" class="navbar-item">
-                    Reports
-                </a> --}}
-
-                {{-- <div class="navbar-item has-dropdown is-hoverable"> --}}
-                    {{-- <a class="navbar-link">
-                       Loan Info
-                    </a> --}}
-
-                    {{-- <div class="navbar-dropdown">
-                        <a class="navbar-item" href="/admin/allCust">
-                            All loan
-                        </a>
-                        <a class="navbar-item" href="/admin/SingleCustomerView">
-                           Loan by customer
-                        </a>
-                          <a class="navbar-item" href="/admin/completed">
-                           Closed Loan
-                        </a>
-                         <a class="navbar-item" href="/admin/liveloan">
-                           Live loan
-                        </a>
-                        <a class="navbar-item" href="/admin/loanbyyear">
-                            Loan by year
-                        </a>
-                        <hr class="navbar-divider">
-                        <a class="navbar-item" href="/complaint">
-                            Profit by loan
-                        </a>
-                    </div> --}}
-                {{-- </div> --}}
             </div>
 
             <div class="navbar-end">
                 <div class="navbar-item">
-                    {{-- <div class="buttons"> --}}
-                        <a href="/admin/signout"class="button is-primary">
+                    <div class="buttons">
+                        <a href="/admin/signout" class="button is-primary">
                             <strong>Sign Out</strong>
                         </a>
-                        {{-- <a href="/login" class="button is-light">
-                            Log in
-                        </a> --}}
-                    {{-- </div> --}}
-                   <div class="field">
-                    <p class="control  has-icons-right">
-                        <input class="input" type="text" placeholder="Search">
-                        <span class="icon is-small is-right">
-                        <i class="fa fa-search"></i>
-                        </span>
-                    </p>
-                    </div>
 
+
+                    </div>
                 </div>
             </div>
         </div>
 
     </nav>
-        <br>
+    <br>
     <!-- END NAV -->
 
     {{-- PAGE INFORMATION --}}
 
-       <section class="hero is-info welcome is-small">
-                    <div class="hero-body">
-                        <div class="container">
-                            <h1 class="subtitle">
-                              <b>@yield('content-title')</b>  
-                            </h1>
-                        </div>
-                    </div>
-                </section>
-                <br>
-
-
-
-      <div class="container is-fluid ">
-
-         @yield('content')
-      </div>
-
-
-<br><br><br>
-        <div class="hero-footer">
-    <div class="container is-fluid ">
-        <div class="content has-text-centered">
-
-
-        <img src={{ getenv("IMG_CONTRACT") }}  width="30" height="30"> <br>
-        <span class="copyright">Copyright &copy; {{ getenv("COPYRIGHT_YEAR") }} </span>
-
+    <section class="hero is-info welcome is-small">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="subtitle">
+                    <b>@yield('content-title')</b>
+                </h1>
+            </div>
         </div>
+    </section>
+    <br>
+
+
+
+    <div class="container is-fluid ">
+
+        @yield('content')
     </div>
 
-      <script src="/index.js"></script>
+
+    <br><br><br>
+    <div class="hero-footer">
+        <div class="container is-fluid ">
+            <div class="content has-text-centered">
+
+
+                <img src={{ getenv("IMG_CONTRACT") }} width="30" height="30"> <br>
+                <span class="copyright">Copyright &copy; {{ getenv("COPYRIGHT_YEAR") }} </span>
+
+            </div>
+        </div>
+
+        <script src="/index.js"></script>
         <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Check for click events on the navbar burger icon
-            $(".navbar-burger").click(function() {
-                // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-                $(".navbar-burger").toggleClass("is-active");
-                $(".subNav").toggleClass("is-hoverable");
-                $(".navbar-menu").toggleClass("is-active");
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
 
+  // Get all "navbar-burger" elements
+  const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-            });
-        });
-    </script>
+  // Add a click event on each of them
+  $navbarBurgers.forEach( el => {
+    el.addEventListener('click', () => {
+
+      // Get the target from the "data-target" attribute
+      const target = el.dataset.target;
+      const $target = document.getElementById(target);
+
+      // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+      el.classList.toggle('is-active');
+      $target.classList.toggle('is-active');
+
+    });
+  });
+
+});
+        </script>
 </body>
 
 </html>

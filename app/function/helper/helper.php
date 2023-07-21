@@ -183,6 +183,11 @@ function showError($th): void
     Debugger::log($th, Debugger::ERROR);
 }
 
+/**
+ * Summary of showErrorExp
+ * @param mixed $th
+ * @return void
+ */
 function showErrorExp($th): void
 {
     echo "Error msg - " . $th->getMessage();

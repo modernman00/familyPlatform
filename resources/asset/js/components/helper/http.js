@@ -7,41 +7,17 @@ axiosRetry(axios, { retries: 3 });
 
 /**
  * 
- * @param {the url to post the data to} url 
- * @param {* the id or class of the form} formElement 
- * @param {* the redirect to another page /code or /admin/register} redirect 
+* Sends form data via POST request.
+ * @param {string} url - The URL to post the data to.
+ * @param {string} formId - The ID or class of the form.
+ * @param {string|null} redirect - The page to redirect to after successful submission.
+ * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
 export const postFormData = async(url, formId, redirect = null, css = null) => {
 
     let notificationId = `${formId}_notification`
-
-    // the notification function
-    const processFormDataAction = (addClass, data) => {
-
-        id(notificationId).style.display = "block" // unblock the notification
-
-        id(notificationId).classList.add(addClass) // add the success class
-
-        id('error').innerHTML = data // error element
-
-        id('loader').classList.remove('loader') // remove loader
-
-    }
-
-    const addClassByCSS = (theCss, status) => {
-
-        if (theCss === "W3css") {
-            return (status == 'green') ? "w3-green" : "w3-red"
-        } else if (theCss === 'bulma') {
-            return (status == 'green') ? "is-success" : "is-danger"
-        } else {
-            return (status == 'green') ? "is-success" : "is-danger"
-        }
-
-    }
-
-    // extract the form entries
+        // extract the form entries
     const form = id(formId)
 
     let formEntries = new FormData(form)
@@ -55,36 +31,62 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
+
     // AXIOS POST FUNCTIONALITY
-    await axios.post(url, formEntries, options)
-        .then(response => {
+    try {
+        const response = await axios.post(url, formEntries, options);
+        const successClass = getNotificationClassByCSS("bulma", 'green');
+        // console.log(response.data.message)
+        processFormDataAction(successClass, response.data.message, notificationId);
 
-            // TO DECIDE ON THE NOTIFICATION
-            let theClass = addClassByCSS(css, 'green');
+        if (redirect) {
+            setTimeout(() => {
+                window.location.assign(redirect);
+            }, 2000);
+        }
 
-            processFormDataAction(theClass, response.data.message)
+        formData.clearHtml();
+    } catch (error) {
+        const errorClass = getNotificationClassByCSS("bulma", 'red');
+        processFormDataAction(errorClass, error.response.data.message, notificationId);
 
-            //set timer to redirect to the homepage
-            if (redirect) {
-                setTimeout(() => {
-                    window.location.assign(redirect)
-                }, 2000)
-            }
-            // it clears all the contents
-            formData.clearHtml()
+        // Handle specific error cases
+        // if (error.response.data.message === "We do not recognise what you are doing") {
+        //   window.location.assign('/login');
+        // }
+    }
+};
 
-        }).catch(error => {
+/**
+ * Process form data action.
+ * @param {string} cssClass - The CSS class for the notification.
+ * @param {string} message - The notification message.
+ */
+const processFormDataAction = (cssClass, message, formNotificationId) => {
+    const notificationElement = id(formNotificationId);
+    notificationElement.style.display = 'block';
+    notificationElement.classList.add(cssClass);
+    id('error').innerHTML = message;
+    id('loader').classList.remove('loader');
+};
 
-            let theClass = addClassByCSS(css, 'red');
+/**
+ * Get the notification class based on the CSS framework.
+ * @param {string|null} css - The CSS framework to use for notification styling.
+ * @param {string} status - The status of the notification ('green' or 'red').
+ * @returns {string} - The corresponding CSS class.
+ */
+const getNotificationClassByCSS = (css, status) => {
+    switch (css) {
+        case 'W3css':
+            return status === 'green' ? 'w3-green' : 'w3-red';
+        case 'bulma':
+            return status === 'green' ? 'is-success' : 'is-danger';
+        default:
+            return status === 'green' ? 'is-success' : 'is-danger';
+    }
+};
 
-            // if (error.response.data.message === "We do not recognise what you are doing") {
-            //     window.location.assign('/login')
-            // }
-
-            processFormDataAction(theClass, error.response.data.message)
-
-        })
-}
 
 /**
  * 

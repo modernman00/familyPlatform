@@ -92,15 +92,21 @@ export default class FormHelper {
                 }
                 // console.log(post.name)
                 this.id(post.id).addEventListener('change', () => {
-                    this.id(`${post.name}_error`).innerHTML = ''
+                    if (this.id(`${post.name}_error`)) {
+                        this.id(`${post.name}_error`).innerHTML = ''
+                    }
                 })
                 if (post.value != 'select') {
                     this.id(post.id).addEventListener('keyup', () => {
-                        this.id(`${post.name}_error`).innerHTML = ''
+                        if (this.id(`${post.name}_error`)) {
+                            this.id(`${post.name}_error`).innerHTML = ''
+                        }
                     })
                 } else {
                     this.id(post.id).addEventListener('change', () => {
-                        this.id(`${post.name}_error`).innerHTML = ''
+                        if (this.id(`${post.name}_error`)) {
+                            this.id(`${post.name}_error`).innerHTML = ''
+                        }
                     })
                 }
             }

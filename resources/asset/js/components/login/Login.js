@@ -50,10 +50,14 @@ const LoginSubmission = (e) => {
 
             localStorage.setItem('redirect', '/member/ProfilePage') // this gets picked up by the code.js
 
-            postFormData("/login", "loginNow", "/login/code")
+            const loginURL = sessionStorage.getItem('loginURL1')
+
+            const redirect = (loginURL == "/lasu") ? null : "/login/code"
+
+            postFormData(loginURL, "loginNow", redirect)
 
         } else {
-            log(formData.error)
+            // log(formData.error)
             alert('The form cannot be submitted. Please check the errors')
 
         }
@@ -64,4 +68,5 @@ const LoginSubmission = (e) => {
 }
 
 id('submit').addEventListener('click', LoginSubmission)
+
 id("showPassword_id").addEventListener('click', () => showPassword('password_id'))

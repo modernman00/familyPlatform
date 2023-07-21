@@ -1,6 +1,14 @@
 @extends ('base2')
 @section('title', 'ORGANOGRAM')
 
+<style>
+    p.substitle {
+        text-align: center;
+    }
+
+
+</style>
+
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <script type="text/javascript">
@@ -62,12 +70,11 @@
 na
 <br><br><br><br>
 
-{{-- <div style="margin-left: 30px">
-    <div id="chart_div"></div>
-</div> --}}
 
-<h2 class="myFamilyTree"> {{ $data['firstName'] }}'s  family</h2>
+<h2 class="myFamilyTree"> {{ $data['firstName'] }} {{ $data['lastName'] }}'s  family Tree</h2>
+<p class="organogram_subtitle"> This family tree represents every member of the family who share the same father and mother, symbolising the strong bond and connection within the immediate family. In future updates, we will expand the tree to include other family members who are linked solely through either the mother's or father's side, further encompassing the broader family network. </p>
 <hr>
+
 <div class="tree">
     <ul>
         <li>
@@ -87,7 +94,8 @@ na
 
                     {{--  first and last name  --}}
                     <a href="#">
-                        {{ $data['firstName'] }} {{ $data['lastName'] }}
+                        {{ $data['firstName'] }} 
+                        {{ $data['lastName'] }}
                     </a>
 
                     {{--  check if there are kids  --}}

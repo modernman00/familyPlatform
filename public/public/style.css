@@ -394,15 +394,6 @@ input::placeholder {
   body {
     font-size: 0.9em;
   }
-  .subscribeForm {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 50%;
-  }
-  .homePageSubscribe {
-    font-size: 1.2em;
-    height: 50px;
-  }
   .unhide {
     margin-left: 0px;
     margin-right: 0px;
@@ -410,6 +401,9 @@ input::placeholder {
   }
   .allMember_card_content {
     font-size: 4em;
+  }
+  .organogram_subtitle {
+    font-size: 0.9em;
   }
 }
 @media only screen and (max-width: 600px) {
@@ -448,6 +442,18 @@ input::placeholder {
   .loginNow {
     margin-left: 5%;
     margin-right: 5%;
+  }
+}
+@media (max-width: 576px) {
+  .tree li a {
+    font-size: 1em;
+    color: blue;
+  }
+}
+@media (max-width: 768px) {
+  .tree li a {
+    font-size: 1em;
+    color: blue;
   }
 }
 .form__login__logo {

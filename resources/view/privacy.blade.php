@@ -1,8 +1,11 @@
 @extends('baseBulma')
 
 @section('title','Privacy Policy')
+@section('data-page-id', 'privacy')
 
 @section('content')
+
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
 
 <div class="content">
   <h1>
@@ -198,7 +201,7 @@
     a fee of £10 for this. You will also need to provide identification so that we may verify that you authorised to
     access the personal information you have requested.</p>
   <p>If you have any query, concerns and questions of If your personal information changes, you may update or correct it
-    by making the change by emailing us at <a href="mailto:data@myfamilybase.com">data@myfamilybase.com </a>
+    by making the change by emailing us at <a href="mailto:data@myfamilyplatform.com">data@myfamilybase.com </a>
   </p>
 </div>
 

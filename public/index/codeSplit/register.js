@@ -120,15 +120,21 @@ var FormHelper = /*#__PURE__*/function () {
             }
             // console.log(post.name)
             _this2.id(post.id).addEventListener('change', function () {
-              _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              if (_this2.id("".concat(post.name, "_error"))) {
+                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+              }
             });
             if (post.value != 'select') {
               _this2.id(post.id).addEventListener('keyup', function () {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                if (_this2.id("".concat(post.name, "_error"))) {
+                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                }
               });
             } else {
               _this2.id(post.id).addEventListener('change', function () {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                if (_this2.id("".concat(post.name, "_error"))) {
+                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
+                }
               });
             }
           };
@@ -743,8 +749,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var currentPs = document.getElementById("password_id");
 var confirmPs = document.getElementById("confirm_password_id");
-currentPs.setAttribute('autocomplete', 'on');
-confirmPs.setAttribute('autocomplete', 'on');
+currentPs.setAttribute('autocomplete', 'new-password');
+confirmPs.setAttribute('autocomplete', 'new-password');
 // secretWd.setAttribute('autocomplete', 'on')
 
 /***/ }),

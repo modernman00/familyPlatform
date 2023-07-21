@@ -85,13 +85,12 @@ var _rollbarConfig = {
     </header>
 
     <main role="main" class="inner cover">
-      <h1 class="cover-heading">THE OLAOGUNS</h1>
-      <p class="lead">Social media sites for the Olaoguns and our associates to connect and keep our family tree
-        updated.</p>
+      <h1 class="cover-heading">OUR FAMILY NETWORK</h1>
+      <p class="lead">The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.</p>
 
     
       <p class="lead">
-        <a href="/register" class="btn btn-lg btn-secondary">Register</a>
+        <a href="/register" class="btn btn-lg btn-secondary">Join Now!</a>
       </p>
     </main>
 

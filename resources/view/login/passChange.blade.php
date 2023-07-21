@@ -3,6 +3,8 @@
 @section('title', 'Change Password')
 
 @section('content')
+
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
     
     <hr class="my-2">
     
@@ -18,6 +20,7 @@
 
                     $formArray = [
                         'changePassword_notification' => 'showError',
+                        'email' => 'email',
                         'password' => 'password',
                         'confirm_password' => 'password',
                         'token' => 'token',

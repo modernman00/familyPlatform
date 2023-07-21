@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -75,6 +76,13 @@
   animation: 0.75s linear infinite spinner-grow;
 }
 
+.form__login__logo{
+  height: 4.5em; /* 1em = 16px, 4.5em = 72px */
+    width: 4.5em;  /* 1em = 16px, 4.5em = 72px */
+    margin-bottom: 5rem;
+    margin-left:43%
+}
+
 .spinner-grow-sm {
   width: 1rem;
   height: 1rem;
@@ -90,18 +98,23 @@
 
 /* Small devices (landscape phones, 576px and up) */
 
-@media screen and (min-width: 576px) {
+@media screen and (min-width: 576px)and (max-width: 767px) {
      .styleform_form{
         margin-left: 5%;
         margin-right: 5%;
     }
+
+    .form__login__logo{
+       height: 3.5em; /* 1em = 16px, 4.5em = 72px */
+        width: 3.5em;  /* 1em = 16px, 4.5em = 72px */
+    }
 }
 /* // Medium devices (tablets, 768px and up) */
 @media screen and (min-width: 768px) {
-     /* .loginNow {
-        margin-left: 15%;
-        margin-right: 15%;
-    } */
+     .form__login__logo {
+        height: 4.5em; /* 1em = 16px, 3em = 48px */
+        width: 4.5em;  /* 1em = 16px, 3em = 48px */
+    }
     .styleform_form {
       margin-left: 5%;
       margin-right: 5%;
