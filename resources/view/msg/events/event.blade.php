@@ -7,7 +7,7 @@
 @section('content')
 <p>
 @if ($data)
-   Hurray, {{ $data['firstName'] }} is celebrating {{ $data['eventName'] }} on the {{ $data['eventDate'] }} . <br><br>
+   Hurray, {{ $data['firstName'] }}'s {{ $data['eventName'] }} is on {{ $data['eventDateFormatted'] }}. <br><br>
 @else 
     There is a problem with the authentication.
 @endif

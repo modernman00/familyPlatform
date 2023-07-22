@@ -20,8 +20,14 @@ class Select extends Db
      *
      * @return null|string
      */
-    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null): string|null
+    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null, array $colArray = null): string|null
     {
+        // for col dynamically - 
+        if($colArray) {
+            $implodeColArray = implode(', ', $colArray);
+        }
+        
+
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
             'SELECT_AND' => "SELECT * FROM $table WHERE $identifier1 =? AND $identifier2 = ? $orderBy $limit",
@@ -31,6 +37,7 @@ class Select extends Db
             'SELECT_ALL' => "SELECT * FROM $table $orderBy $limit",
             'SELECT_ONE' => "SELECT * FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_COL' => "SELECT $column FROM $table $orderBy $limit",
+            'SELECT_2COLS' => "SELECT $column, $column2 FROM $table $orderBy $limit",
             'SELECT_COL_ID' => "SELECT $column FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_TWO_COLS_ID' => "SELECT $column, $column2 FROM $table WHERE $identifier1 = ? $orderBy $limit",
             'SELECT_GREATER' => "SELECT * FROM $table WHERE $identifier1 > ? $orderBy $limit",
@@ -42,6 +49,7 @@ class Select extends Db
             'SELECT_AVERAGE' => "SELECT AVG($column) FROM $table WHERE $identifier1 = ?",
             'SELECT_AVERAGE_ALL' => "SELECT AVG($column) as total FROM $table",
             'SELECT_SUM_ALL' => "SELECT SUM($column) as total FROM $table",
+            'SELECT_COL_DYNAMICALLY' => "SELECT $implodeColArray FROM $table",
             default => null
         };
     }

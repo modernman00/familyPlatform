@@ -58,24 +58,32 @@ function generateSendTokenEmail($data): mixed
 
 function checkInput($data): mixed
 {
+    if ($data !== null) {
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
     $data = strip_tags($data);
     $data = htmlentities($data);
     $data = preg_replace('/[^0-9A-Za-z.@-]/', ' ', $data);
-    return $data;
+    return $data;}
+    else{
+        return false;
+    }
 }
 
 function checkInputImage($data): string|null
 {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    $data = strip_tags($data);
-    $data = htmlentities($data);
-    $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
-    return $data;
+    if ($data !== null) {
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data);
+        $data = strip_tags($data);
+        $data = htmlentities($data);
+        $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
+        return $data;
+    } else {
+        exit();
+    }
 }
 
 function checkInputEmail($data): string
@@ -114,12 +122,12 @@ function returnSuccessCode($msg): void
 function msgException(int $errCode, string | int  $msg)
 {
     // http_response_code($errCode); // sets the response to 406
-    
+
     // echo http_response_code(); // echo the new response code
     // echo json_encode(['message' => $msg]);
     // //   echo json_encode($msg);
     // // Rollbar::log(Level::info(), $msg);
-     throw new Exception($msg, $errCode);
+    throw new Exception($msg, $errCode);
 }
 
 function msgSuccess(int $code, string|array $msg, mixed $token = null): void
@@ -127,17 +135,16 @@ function msgSuccess(int $code, string|array $msg, mixed $token = null): void
     http_response_code($code); // sets the response to 406
     // echo http_response_code(); // echo the new response code
     echo json_encode(['message' => $msg, 'token' => $token]);
-
 }
 
 function msgServerSent(string|array $data, string | int $id, string $event): void
 {
- 
+
     $get = json_encode($data);
     echo "retry: 1000\n";   // one seconds
-     echo "id: $id\n";
+    echo "id: $id\n";
     echo "event: $event\n";
     echo "data: {$get}\n\n";
-     ob_flush();
+    ob_flush();
     flush();
 }

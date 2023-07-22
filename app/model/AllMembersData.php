@@ -6,7 +6,9 @@ namespace App\model;
 
 use Exception;
 
-use App\classes\InnerJoin;
+use App\classes\{
+    InnerJoin, Select
+};
 
 class AllMembersData extends InnerJoin
 {
@@ -58,7 +60,8 @@ class AllMembersData extends InnerJoin
     public static function getEventData()
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events 
+            INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
@@ -78,9 +81,9 @@ class AllMembersData extends InnerJoin
     {
         try {
 
-            $currentMonth = date("m");
-            $currentDay = date("d");
-            
+            $select = Select::formAndMatchQuery(selection: "SELECT_COL_DYNAMICALLY", colArray:['day', 'month', 'firstName'], table:"personal");
+            return Select::selectFn2(query: $select);
+
         } catch (\Throwable $th) {
             showError($th);
         }
