@@ -7,7 +7,8 @@ namespace App\model;
 use Exception;
 
 use App\classes\{
-    InnerJoin, Select
+    InnerJoin,
+    Select
 };
 
 class AllMembersData extends InnerJoin
@@ -57,11 +58,17 @@ class AllMembersData extends InnerJoin
         return $memberData ??= throw new Exception(self::ERR_MSG, 1);
     }
 
+// show information of events within 7 days , 1 days and on the current date
     public static function getEventData()
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName FROM events 
-            INNER JOIN personal ON events.id = personal.id ORDER BY eventDate ASC";
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
+            FROM events 
+            INNER JOIN personal ON events.id = personal.id 
+            WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            OR events.eventDate = CURDATE()
+            ORDER BY eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
@@ -81,9 +88,8 @@ class AllMembersData extends InnerJoin
     {
         try {
 
-            $select = Select::formAndMatchQuery(selection: "SELECT_COL_DYNAMICALLY", colArray:['day', 'month', 'firstName'], table:"personal");
+            $select = Select::formAndMatchQuery(selection: "SELECT_COL_DYNAMICALLY", colArray: ['day', 'month', 'firstName'], table: "personal");
             return Select::selectFn2(query: $select);
-
         } catch (\Throwable $th) {
             showError($th);
         }

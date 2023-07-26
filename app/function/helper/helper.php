@@ -10,7 +10,7 @@ use Rollbar\Payload\Level; // https://docs.rollbar.com/docs/basic-php-installati
 use Tracy\Debugger;
 
 
-function view($path, array $data = []): void
+function view($path, array $data = [])
 {
     // 1st param = accept the path to the file we actually want to load
     //2nd param array = any data that we want to pass to the view

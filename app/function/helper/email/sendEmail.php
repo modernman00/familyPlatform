@@ -55,6 +55,50 @@ function sendEmail($email, $name, $subject, $message, $file =null, $filename=nul
 	}
 }
 
+function sendBulkEmail(array $emailAddresses,$subject, $message, $file =null, $filename=null)
+{
+		$mail = new PHPMailer(true);
+	try {
+		//Server settings
+		// $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+		$mail->isSMTP();
+		$mail->Host = getenv('SMTP_HOST');
+		$mail->SMTPAuth = true;
+		$mail->Username = USER_APP ?? throw new Exception("email username not available");
+		$mail->Password = PASS ?? throw new Exception("email password not available");
+		$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+		$mail->Port = 465;
+		$mail->SMTPOptions = array(
+			'ssl' => array(
+				'verify_peer' => false,
+				'verify_peer_name' => false,
+				'allow_self_signed' => true
+			)
+		);
+		//Recipients
+		$mail->setFrom(APP_EMAIL, APP_NAME);
+
+		  foreach ($emailAddresses as $email) {
+         
+						$mail->addBCC($email);
+			}
+
+		if ($file) {
+			$mail->AddStringAttachment($file, $filename, ENCODING, TYPE);
+			}
+		//Content
+		$mail->isHTML(true);                                  // Set email format to HTML
+		$mail->Subject = "$subject";
+		$mail->Body    = $message;
+		$mail->AltBody = BODY_TEXT;
+		return $mail->send();
+		
+	
+	} catch (Exception $e) {
+		errorMsg($mail, $e);
+	}
+}
+
 
 /**
  * @return bool|null

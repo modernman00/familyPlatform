@@ -25,13 +25,20 @@ function sendEmailSelf()
 
 function getAllEmails()
 {
-    $data = ['selection' => 'SELECT_COL_ID', 'column' => 'email', 'table' => 'account', 'identifier1' => 'status', 'bind' => ['approved']];
-    $result = Select::combineSelect($data, 'selectFn2', 'ONE_IDENTIFIER_COLUMN');
-    for ($r = 0; $r < count($result); $r++) {
-        $email1[] = $result[$r]['email'];
-    }
-    return $email1;
+    $queryData = [
+        'selection' => 'SELECT_COL_ID',
+        'column' => 'email',
+        'table' => 'account',
+        'identifier1' => 'status',
+        'bind' => ['approved']
+    ];
+
+    $result = Select::combineSelect($queryData, 'selectFn2', 'ONE_IDENTIFIER_COLUMN');
+
+    return array_column($result, 'email');
 }
+
+
 
 
 
@@ -105,7 +112,7 @@ function sendEmailGeneral($array, $recipient)
 
     if (!defined('PASS')) {
         $notifyCustomer->getEmailData();
-// if it is still not set, then throw an error
+        // if it is still not set, then throw an error
         if (!defined('PASS')) {
             msgException(401, 'Email credentials (constant) not set');
         }
@@ -114,7 +121,7 @@ function sendEmailGeneral($array, $recipient)
 
         ob_start();
         // $emailPage = view($array['viewPath'], compact('data'));
-       view($array['viewPath'], compact('data'));
+        view($array['viewPath'], compact('data'));
 
         $emailContent = ob_get_contents() ?? throw new Exception('email content not available');
 
@@ -131,8 +138,6 @@ function sendEmailGeneral($array, $recipient)
 
         sendEmail($email, $name, $array['subject'], $emailContent);
     }
-
-    
 }
 
 /**
@@ -156,7 +161,7 @@ function sendEmailAll($data, $viewPath, $subject)
             msgException(401, 'Email credentials (constant) not set');
         }
 
-             if (!$data) {
+        if (!$data) {
             $error = "Data not provided";
             echo json_encode($error);
             throw new Exception($error);
@@ -189,7 +194,4 @@ function sendEmailAll($data, $viewPath, $subject)
 
         sendEmail($email, $name, $subject, $emailContent);
     }
-
-    
 }
-

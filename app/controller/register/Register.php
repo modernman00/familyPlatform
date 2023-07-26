@@ -19,7 +19,7 @@ class Register extends Db
      *
      * @psalm-var array{0: 'personal', 1: 'work', 2: 'contact', 3: 'account', 4: 'otherFamily', 5: 'post', 6: 'comment'}
      */
-    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment'];
+    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment', 'events'];
 
     public function index(): void
     {
@@ -27,13 +27,13 @@ class Register extends Db
 
             // if($_SESSION['FAMILYCODE'])
             // {
-                 view('registration/register');
+            view('registration/register');
             // } else {
             //     view('registration/familyCode');
             // }
 
 
-           
+
         } catch (\Throwable $e) {
 
             showError($e);
@@ -92,6 +92,12 @@ class Register extends Db
 
             $cleanData = getSanitisedInputData($generateId, $data);
 
+            // create the event entry for birthday 
+
+            $birthdayEvent = $this->createBirthdayEntry($cleanData['day'], $cleanData['month'], $cleanData['firstName'], $cleanData['id']);
+
+            $cleanData = [...$cleanData, ...$birthdayEvent];
+
             // the database table matched to the POST data
             $tableData = $this->tableData($cleanData);
 
@@ -101,8 +107,8 @@ class Register extends Db
             $firstName = $cleanData['firstName'];
 
             // check if the email already exist
-            $emailCheck = checkEmailExist($cleanData['email']);
-            if ($emailCheck) {
+
+            if (checkEmailExist($cleanData['email'])) {
                 throw new Exception("Your email is already registered");
             }
 
@@ -174,6 +180,32 @@ class Register extends Db
                 'firstName',
                 'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
             ]
+        ];
+    }
+
+    private function createBirthdayEntry($day, $month, $name, $id): array
+    {
+
+        // check if the $month is greater than current month and if yes, increase year by one year
+
+        $currentMonth = date('M');
+
+        $year = date('Y');
+        if ($currentMonth < $month) {
+            // If the current month is greater than $month, extend $year by one year
+            $year++;
+        }
+
+        $birthday = date("Y-m-d", strtotime("$year-$month-$day"));
+        return [
+            'id' => $id,
+            'eventName' => "$name Birthday",
+            'eventDate' => $birthday,
+            'eventType' => 'Birthday',
+            'eventDescription' => "$name is adding another year",
+            'eventFrequency' => 'Annually',
+            'eventGroup' => 'Global'
+
         ];
     }
 
@@ -251,7 +283,17 @@ class Register extends Db
             [
                 'img' => $profileAvatar,
                 'id' => $cleanPostData['id']
+            ],
+            [
+                'eventName' => "{$cleanPostData['firstName']} Birthday",
+                'eventDate' => $cleanPostData['eventDate'],
+                'eventType' => 'Birthday',
+                'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
+                'eventFrequency' => 'Annually',
+                'eventGroup' => 'Global',
+                'id' => $cleanPostData['id']
             ]
+
         ];
     }
 

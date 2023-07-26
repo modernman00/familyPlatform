@@ -1,18 +1,19 @@
 @extends ('email')
 @section('title', 'Token email')
 
-@section('subject', 'SUBJECT: New Event')
+@section('subject', "{$data['firstName']}'s {$data['eventType']}")
 
 
 @section('content')
+
+<img src ={{ getenv("IMG_CELEBRATE") }} width="50" height="50" alt="LOGO" />
 <p>
-@if ($data)
-   Hurray, {{ $data['firstName'] }}'s {{ $data['eventName'] }} is on {{ $data['eventDateFormatted'] }}. <br><br>
-@else 
-    There is a problem with the authentication.
-@endif
+
+   Hurray, {{ $data['emailHTMLContent'] }}. <br><br>
 
 
     <br>
+
+
 
 @endsection

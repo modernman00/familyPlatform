@@ -7,9 +7,9 @@ namespace App\controller\members;
 use App\classes\{
     AllFunctionalities,
     Insert,
-    Select,
     CheckToken
 };
+use App\model\EmailData;
 
 use App\model\AllMembersData;
 
@@ -39,108 +39,53 @@ class Event extends AllMembersData
         try {
 
 
-            $allEvents = parent::getEventData();
+            // show information of events within 7 days , 1 days and on the current date
+            $eventData = parent::getEventData();
 
-           
-            $birthday = parent::getBirthdayMonth();
-       
+            $allEmails = getAllEmails();
 
-            // working on the birthday event 
+            $notifyCustomer = new EmailData('admin');
 
-
-            foreach ($birthday as $birthDateData) {
-
-                // Format the birthday date from 'day' and 'month' data
-                $birthdayFormatted = date("Y-m-d", strtotime("{$birthDateData['day']} {$birthDateData['month']}"));
-
-                // Prepare the data for the notification
-                $notificationData = [
-                    'firstName' => $birthDateData['firstName'],
-                    'eventName' => 'birthday',
-                    'eventDate' => $birthdayFormatted
-                ];
-
-                // Check the event difference and notify
-
-                self::checkEventDiffAndNotifyAll($notificationData);
+            if (!defined('PASS')) {
+                $notifyCustomer->getEmailData();
             }
 
 
-            // dump(self::getEventMonth($allEvents));
+            if ($eventData) {
 
-            foreach ($allEvents as $allEventData) {
-
-                /**
-                 * it checks the difference between the date today and the event date to see if the event is in 14 days, 7 days or same day
-                 */
+                // send other event reminders
+                foreach ($eventData as $allEventData) {
 
 
-                self::checkEventDiffAndNotifyAll($allEventData);
+                    self::checkEventDiffAndNotifyAll($allEventData, $allEmails);
+                }
             }
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-    // PRIVATE FUNCTION TO SEND EVENT NOTIFICATION
-    private static function sendNotification($data, string $subject): void
+    private static function sendBulkNotification($data, $subject, $email)
     {
 
-        $allEmails = getAllEmails();
+        // $allEmails = getAllEmails();
 
-        $view = 'msg/events/event';
+        // $notifyCustomer = new EmailData('admin');
 
-        foreach ($allEmails as $email) {
-            $data['email'] = $email;
-            $emailWrapper = genEmailArray($view, $data, $subject);
-            sendEmailWrapper($emailWrapper, "admin");
-        }
+        // if (!defined('PASS')) {
+        //     $notifyCustomer->getEmailData();
+        // }
+
+        ob_start();
+        $emailPage = view('msg/events/event', compact('data'));
+        $emailContent = ob_get_contents();
+        ob_end_clean();
+
+
+        sendBulkEmail($email, $subject, $emailContent);
     }
 
 
-    // private static function getEventMonth($data): array
-    // {
-    //     $eventWeek = null;
-    //     foreach ($data as $data) {
-    //         if (date('m') == date('m', strtotime($data['eventDate']))) {
-    //             $eventWeek[] = $data['eventDate'];
-    //         }
-    //     }
-    //     return $eventWeek;
-    // }
-
-    /**
-     * this function get the events of the week from Sunday
-     */
-
-    // private static function getEventWeek($data): array
-    // {
-    //     $event = null;
-    //     foreach ($data as $data) {
-    //         if (date('l') == "Tuesday") {
-
-    //             for ($i = 0; $i <= 7; $i++) {
-
-    //                 $dateO = date('Y-m-d');
-
-    //                 $date = modifyDate($dateO, "+ $i days", 'date_add')['date'];
-    //                 echo $date;
-
-    //                 $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'events', identifier1: "eventDate");
-
-    //                 $result = Select::selectFn2(query: $query, bind: [$date]);
-
-    //                 if (!empty($result)) {
-
-    //                     foreach ($result as $key) {
-    //                         $event[] = $key;
-    //                     }
-    //                 }
-    //             }
-    //             return $event;
-    //         }
-    //     }
-    // }
 
     /**
      * this function extends the event date on the due date 
@@ -149,7 +94,7 @@ class Event extends AllMembersData
     private static function extendEventByFrequency($data)
     {
 
-        if ($data['eventName'] !== "birthday") {
+        if ($data['eventFrequency']) {
 
             $no = checkInput($data['no']) ?? null;
 
@@ -186,27 +131,6 @@ class Event extends AllMembersData
         \msgSuccess(201, $allEventData);
     }
 
-    // public static function getEventByNo()
-    // {
-
-    //     try {
-
-    //         $eventNo = checkInput($_GET['eventNo']);
-
-    //         $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'events', identifier1: "no");
-
-    //         $result = Select::selectFn2(query: $query, bind: [$eventNo]);
-    //         $result[0]['firstName'] = $_SESSION['fName'];
-    //         $result[0]['lastName'] = $_SESSION['lName'];
-
-    //         $key = null;
-    //         foreach ($result as $key); // NEEDS INVESTIGATION WHY IT WORKS
-    //         return \msgSuccess(201, $key);
-    //     } catch (\Throwable $th) {
-    //         showErrorExp($th);
-    //     }
-    // }
-
     /**
      * Undocumented function
      *
@@ -214,34 +138,31 @@ class Event extends AllMembersData
      *
      * @return void
      */
-    private static function checkEventDiffAndNotifyAll(array $data)
+    private static function checkEventDiffAndNotifyAll(array $data, array $email)
     {
-        $todayDate = date('Y-m-d');
-        $eventDayFormatted = dateFormat($data['eventDate']);
-        $diffEventAndTodayDate = dateDifference($todayDate, $data['eventDate']);
-        $data['eventDateFormatted'] = $eventDayFormatted;
-      
 
-        $subject = "{$data['firstName']}'s {$data['eventName']}";
+        $diffEventAndTodayDate = dateDifference(date('Y-m-d'), $data['eventDate']);
+        $eventDayFormatted = dateFormat($data['eventDate']);
+
+
+
+        $subject = "{$data['firstName']}'s {$data['eventType']}";
 
         switch ($diffEventAndTodayDate) {
-            case "+14 days":
-                $subject .= " is on $eventDayFormatted";
-                // this should be sending bulk email 
-                self::sendNotification($data, $subject);
-                self::extendEventByFrequency($data);
-                break;
             case "+7 days":
                 $subject .= " is on $eventDayFormatted";
-                self::sendNotification($data, $subject);
+                $data['emailHTMLContent'] = "$subject in seven days";
+                self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+1 days":
                 $subject .= " is tomorrow, $eventDayFormatted";
-                self::sendNotification($data, $subject);
+                $data['emailHTMLContent'] = $subject;
+                self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+0 days":
                 $subject .= " is today, $eventDayFormatted";
-                self::sendNotification($data, $subject);
+                $data['emailHTMLContent'] = $subject;
+                self::sendBulkNotification($data, $subject, $email);
                 self::extendEventByFrequency($data);
                 break;
             default:
