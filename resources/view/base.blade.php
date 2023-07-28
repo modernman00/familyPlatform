@@ -6,6 +6,25 @@
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Olawale Olaogun">
+    <meta name="language" content="English">
+  <meta name="generator" content="Jekyll v4.1.1">
+
+   <!-- OpenGraph meta tags for better sharing on social media -->
+    <meta property="og:title" content="OUR FAMILY NETWORK">
+    <meta property="og:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta property="og:type" content="website">
+      <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}"> <!-- Replace with the URL to your website's logo or featured image -->
+    <meta property="og:url" content="https://www.myfamilyplatform.com"> <!-- Replace with your website URL -->
+
+    <!-- Twitter Card meta tags for better sharing on Twitter -->
+    <meta name="twitter:title" content="OUR FAMILY NETWORK">
+    <meta name="twitter:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}"> <!-- Replace with the URL to your website's logo or featured image -->
+    <meta name="twitter:card" content="summary_large_image">
 
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">

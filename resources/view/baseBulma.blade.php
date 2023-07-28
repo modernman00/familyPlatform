@@ -4,6 +4,28 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Olawale Olaogun">
+    <meta name="language" content="English">
+
+     <!-- OpenGraph meta tags for better sharing on social media -->
+   <!-- OpenGraph meta tags for better sharing on social media -->
+    <meta property="og:title" content="OUR FAMILY NETWORK">
+    <meta property="og:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://www.example.com/og-image.jpg"> <!-- Replace with the URL to your website's logo or featured image -->
+    <meta property="og:url" content="https://www.example.com"> <!-- Replace with your website URL -->
+
+
+    <!-- Twitter Card meta tags for better sharing on Twitter -->
+    <meta name="twitter:title" content="OUR FAMILY NETWORK">
+    <meta name="twitter:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+    <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}">
+    <meta name="twitter:card" content="summary_large_image">
+
+
     <title>@yield('title')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 
