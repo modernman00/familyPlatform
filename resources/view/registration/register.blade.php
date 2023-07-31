@@ -136,7 +136,7 @@
   ],
   'icon' => [
   '<i class="fas fa-child"></i>',
-  '<i class="fas fa-user-friends"></i>',
+  '<i class="fas fa-user-friends"></i>'
   ]
   ],
 
@@ -144,18 +144,6 @@
 
   // CONTACT INFORMATION
   'Contact Information' => 'title',
-  // 'address' => [
-  // 'mixed',
-  // 'label' => ["Address", "Postcode /zip code/area code", 'Region / State / District'],
-  // 'attribute' => ['address', 'postcode', 'region'],
-  // 'placeholder' => ['Your first line of address', 'SN2 3BF / 234', 'London / Lagos / New York'],
-  // 'inputType' => ['text', 'text', 'text'],
-  // 'icon' => [
-  // '<i class="far fa-address-book"></i>',
-  // '<i class="far fa-address-card"></i>',
-  // '<i class="far fa-address-card"></i>',
-  // ]
-  // ],
 
   // COUNTRY, EMAIL N MOBILE
 

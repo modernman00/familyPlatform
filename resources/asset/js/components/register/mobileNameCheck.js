@@ -228,7 +228,7 @@ const checkEmailObj = {
         "sibling_name8",
         "sibling_name9",
         "sibling_name10",
-    ],
+    ]
 };
 
 // check if there is a sibling or kids by email
@@ -243,15 +243,18 @@ document.onkeydown = (e) => {
     try {
         // create an object with the data to check
         const elementId = e.target.id; // id of the element that was clicked or press down
-        const emailInput = e.target.value;
+        // const emailInput = e.target.value;
+
+        console.log(elementId)
 
         // this phase checks the id of what is being typed
         if (!elementId) throw new Error("target id is null and empty");
 
         let chooseEmail = [];
         let chooseName = [];
+
         let helpHTML = "";
-        let errorHTML = ""; // Show error if applicant's email is registered
+        // let errorHTML = ""; // Show error if applicant's email is registered
 
         // check if id / event.id is either kid or sibling
 
@@ -260,10 +263,12 @@ document.onkeydown = (e) => {
         if (checkEmailObj.kidEmailInput.includes(elementId)) {
             chooseEmail = checkEmailObj.kidEmailInput;
             chooseName = checkEmailObj.kidNameInput;
+
             helpHTML = id(`${elementId}_help`);
         } else if (checkEmailObj.siblingEmail.includes(elementId)) {
             chooseEmail = checkEmailObj.siblingEmail;
             chooseName = checkEmailObj.siblingName;
+
             helpHTML = id(`${elementId}_help`);
         }
 
@@ -281,6 +286,7 @@ document.onkeydown = (e) => {
             const emailValue = email.value;
             const name = id(chooseName[index]);
             const nameValue = name.value;
+
 
             // if (!emailValue)
             //     throw new Error("another round of email is empty");
@@ -344,11 +350,8 @@ document.onkeydown = (e) => {
 };
 
 const checkPersonalEmail = (e) => {
-    const email = e.target.value;;
+    const email = e.target.value;
     id("email_error").innerHTML = checkEmail.includes(email) ? `Hello! ${fName} you are already registered on the platform` : ``;
-
-
-
 }
 
 

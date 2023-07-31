@@ -18,6 +18,7 @@ class Register extends Db
      * @var string[]
      *
      * @psalm-var array{0: 'personal', 1: 'work', 2: 'contact', 3: 'account', 4: 'otherFamily', 5: 'post', 6: 'comment'}
+     * if you add a new table, then you should add the data going to the table to this private function tableData(array $cleanPostData)
      */
     private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment', 'events'];
 
@@ -153,10 +154,11 @@ class Register extends Db
                 $dataArr = [
                     "{$type}_name" => $data["{$type}_name$i"],
                     "{$type}_email" => $data["{$type}_email$i"],
+                    "{$type}_linked" => $data["{$type}_option$i"],
                     "id" => $data["id"],
                 ];
 
-                $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, id) VALUES (:{$type}_name, :{$type}_email, :id)";
+                $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) VALUES (:{$type}_name, :{$type}_email, :{$type}_option, :id)";
                 $query = $this->connect()->prepare($sql);
                 $query->execute($dataArr);
             }

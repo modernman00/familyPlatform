@@ -943,14 +943,16 @@ document.onkeydown = function (e) {
   try {
     // create an object with the data to check
     var elementId = e.target.id; // id of the element that was clicked or press down
-    var emailInput = e.target.value;
+    // const emailInput = e.target.value;
+
+    console.log(elementId);
 
     // this phase checks the id of what is being typed
     if (!elementId) throw new Error("target id is null and empty");
     var chooseEmail = [];
     var chooseName = [];
     var helpHTML = "";
-    var errorHTML = ""; // Show error if applicant's email is registered
+    // let errorHTML = ""; // Show error if applicant's email is registered
 
     // check if id / event.id is either kid or sibling
 
@@ -1024,7 +1026,6 @@ document.onkeydown = function (e) {
 };
 var checkPersonalEmail = function checkPersonalEmail(e) {
   var email = e.target.value;
-  ;
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("email_error").innerHTML = checkEmail.includes(email) ? "Hello! ".concat(fName, " you are already registered on the platform") : "";
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_id').addEventListener('keyup', checkPersonalEmail);
@@ -1055,7 +1056,11 @@ __webpack_require__.r(__webpack_exports__);
 var renderHtmlFamily = function renderHtmlFamily(family, no) {
   if (no) {
     var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    return "\n        <div class=\"field-body\">\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"text\" placeholder = \"Enter ".concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                    <i class=\"fas fa-user\"></i>\n                </span>\n                </p>\n               \n            </div>\n\n            <div class=\"field\">\n                <p class=\"control is-expanded has-icons-left\">\n                <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-medium is-rounded\" id=\"").concat(kids_sib, "_email").concat(no, "\">\n                <span class=\"icon is-small is-left\">\n                <i class=\"fas fa-envelope\"></i>\n                </span>\n                <span class=\"icon is-small is-right\">\n                <i class=\"fas fa-check\"></i>\n                </span>\n                </p>\n                 <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n           </div>\n\n        </div><br>");
+    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
+    if (family === "addSiblings") {
+      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same Mother & Father'>Same Mother & Father</option>\n                <option value='Same Father'>Only Same Father</option>\n                <option value='Same Mother'>Only Same Mother</option>";
+    }
+    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
   }
 };
 var show = function show(kids_or_sib) {
@@ -1064,23 +1069,25 @@ var show = function show(kids_or_sib) {
     var value = event.target.value;
 
     // childrenOnchangeValue = value;
-
     var addDiv = kids_or_sib == "kids" ? "addChildren" : "addSiblings";
 
     // remove the div 
     (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.removeDiv)(addDiv);
+    if (value == 0) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help")).innerHTML = "";
+    }
     if (value > 0) {
       // create and append the div element 
       var parent = "".concat(kids_or_sib, "_div");
       (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.createAndAppendElement)('div', addDiv, parent);
-
       // use the loop to generate the number of input
       for (var i = 0; i < value; i++) {
         var no = i + 1;
-        var msg = no > 1 ? "Please, enter their names and emails" : "Please, enter the name and email";
+        var msg = no > 1 ? "Please, enter their names and emails below" : "Please, enter the name and email below";
         var getSelectHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help"));
         getSelectHelp.innerHTML = msg;
         getSelectHelp.style.fontSize = '1rem';
+        getSelectHelp.style.color = '#fc2003';
         var html = renderHtmlFamily(addDiv, no);
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('afterBegin', html);
       }
@@ -1127,6 +1134,7 @@ var injectCountryCode = function injectCountryCode() {
     }
   });
 };
+injectCountryCode();
 injectCountryCode();
 
 /***/ }),

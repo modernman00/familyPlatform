@@ -26,11 +26,11 @@
       @php
 
       $formArray = [
-      'email' => 'email',
-      'password' => 'password',
-      'checkbox'=> 'Remember me',
-      'token' => 'token',
-      'button' => 'submit'
+        'email' => 'email',
+        'password' => 'password',
+        'checkbox'=> 'Remember me',
+        'token' => 'token',
+        'button' => 'submit'
       ];
 
       $form = new App\classes\BuildFormBulma($formArray);
