@@ -1,8 +1,9 @@
 import "./smallinput"
 import "./event"
-import "./onChange"
+import "./onChangeKidSibling"
 import "./processForm"
 import "./mobileNameCheck"
+import "./injectCountryCode"
 
 const currentPs = document.getElementById("password_id")
 const confirmPs = document.getElementById("confirm_password_id")

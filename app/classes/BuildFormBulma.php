@@ -432,22 +432,33 @@ HTML;
                     $labelType = $this->entValue[$i]['inputType'][$y];
                     $icon = $this->entValue[$i]['icon'][$y];
                     if ($labelType === 'select') {
+
                         echo <<<HTML
 <div class="field $name" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
     <div class="control has-icons-left has-icons-right">
         <div class="select is-fullwidth is-medium">
             <select class="input is-medium" id="$id" name="$name">
+            
 HTML;
-                        for ($yii = 0; $yii < count($this->entValue[$i]['options']); $yii++) {
-                            echo "<option>" . $this->entValue[$i]['options'][$yii] . "</option>";
+
+                        if ($this->entValue[$i]['options'][$y]) {
+                            $decide = $this->entValue[$i]['options'][$y];
+
+                            foreach ($decide as $value) {
+
+                                 echo "<option> $value </option>";
+                            }
                         }
+                        // for ($yii = 0; $yii < count($this->entValue[$i]['options'][$yii]); $yii++) {
+                        //     echo "<option>" . $this->entValue[$i]['options'][$yii] . "</option>";
+                        // }
                         echo <<<HTML
             </select>
             <span class="icon is-small is-left">$icon</span>
-            <span class="icon is-small is-right">
+            <!-- <span class="icon is-small is-right">
                 <i class="fas fa-angle-down fasCol"></i>
-            </span>
+            </span> -->
         </div>
         <p class="help" id="$help"></p>
         <p class="help error" id="$error"></p>
@@ -553,7 +564,7 @@ HTML;
             } elseif ($this->entValue[$i] === 'empty') {
                 echo '';
             } elseif ($this->entValue[$i] === 'showError') {
-               echo "<div id='setLoader' tabindex='-1'>
+                echo "<div id='setLoader' tabindex='-1'>
                         <div id='loader'>
                         <div class='notification' id='$nameKey'>
                         <p id='error'></p>

@@ -67,13 +67,13 @@ var FormHelper = /*#__PURE__*/function () {
             // check if there is no value
 
             var postName = post.name.replace('_', ' ');
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "motherEmail") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "maidenName" || postName == "motherEmail") {
               if (post.value === "") {
                 post.value = "Not Provided";
               }
             }
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "* cannot be left empty";
+              errMsg.innerHTML = "*cannot be left empty";
               errMsg.style.color = "red";
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {
@@ -710,23 +710,52 @@ var matchInput = function matchInput(first, second, err) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
-// import { show } from "./onChange"
-
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
-
-// id('children2').style.display = "none";
-
-// ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
-
-var showSpouse = function showSpouse(e) {
-  if (e.target.value === "Yes") {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "block";
+var hideElement = function hideElement(elementId) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).style.display = "none";
+};
+var showElement = function showElement(elementId) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId).style.display = "block";
+};
+var showMaidenName = function showMaidenName() {
+  var gender = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('gender_id').value;
+  var maritalStatus = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').value;
+  if (gender === "Female" && maritalStatus === "Yes") {
+    showElement('maidenName_div');
   } else {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('spouse').style.display = "none";
+    hideElement('maidenName_div');
   }
 };
+var showSpouse = function showSpouse() {
+  var maritalStatus = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').value;
+  if (maritalStatus === "Yes") {
+    showElement('spouse');
+  } else {
+    hideElement('spouse');
+  }
+};
+
+// Add event listeners
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').addEventListener('change', showSpouse);
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('gender_id').addEventListener('change', showMaidenName);
+
+// Hide elements by default
+hideElement('spouse');
+hideElement('maidenName_div');
+
+// Other initializations
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('register_notify_div').style.display = "none";
+
+// inject student after employment status value is student 
+
+var injectStudent = function injectStudent() {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('employmentStatus_id').addEventListener('change', function (e) {
+    var value = e.target.value;
+    if (value === "Student") {
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('occupation_id').value = 'Student';
+    }
+  });
+};
+injectStudent();
 
 /***/ }),
 
@@ -739,9 +768,11 @@ var showSpouse = function showSpouse(e) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _smallinput__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./smallinput */ "./resources/asset/js/components/register/smallinput.js");
 /* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
-/* harmony import */ var _onChange__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./onChange */ "./resources/asset/js/components/register/onChange.js");
+/* harmony import */ var _onChangeKidSibling__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./onChangeKidSibling */ "./resources/asset/js/components/register/onChangeKidSibling.js");
 /* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
 /* harmony import */ var _mobileNameCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mobileNameCheck */ "./resources/asset/js/components/register/mobileNameCheck.js");
+/* harmony import */ var _injectCountryCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./injectCountryCode */ "./resources/asset/js/components/register/injectCountryCode.js");
+
 
 
 
@@ -752,6 +783,228 @@ var confirmPs = document.getElementById("confirm_password_id");
 currentPs.setAttribute('autocomplete', 'new-password');
 confirmPs.setAttribute('autocomplete', 'new-password');
 // secretWd.setAttribute('autocomplete', 'on')
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/injectCountryCode.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/injectCountryCode.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+// inject the country code once one of the country is picked
+
+// Object to map countries to country codes
+
+var countryCodes = {
+  Afghanistan: "93",
+  Albania: "355",
+  Algeria: "213",
+  Andorra: "376",
+  Angola: "244",
+  "Antigua and Barbuda": "1-268",
+  Argentina: "54",
+  Armenia: "374",
+  Australia: "61",
+  Austria: "43",
+  Azerbaijan: "994",
+  Bahamas: "1-242",
+  Bahrain: "973",
+  Bangladesh: "880",
+  Barbados: "1-246",
+  Belarus: "375",
+  Belgium: "32",
+  Belize: "501",
+  Benin: "229",
+  Bhutan: "975",
+  Bolivia: "591",
+  "Bosnia and Herzegovina": "387",
+  Botswana: "267",
+  Brazil: "55",
+  Brunei: "673",
+  Bulgaria: "359",
+  "Burkina Faso": "226",
+  Burundi: "257",
+  Cambodia: "855",
+  Cameroon: "237",
+  Canada: "1",
+  "Cape Verde": "238",
+  "Central African Republic": "236",
+  Chad: "235",
+  Chile: "56",
+  China: "86",
+  Colombia: "57",
+  Comoros: "269",
+  "Congo (Brazzaville)": "242",
+  "Congo (Kinshasa)": "243",
+  "Costa Rica": "506",
+  "Côte d'Ivoire": "225",
+  Croatia: "385",
+  Cuba: "53",
+  Cyprus: "357",
+  "Czech Republic": "420",
+  Denmark: "45",
+  Djibouti: "253",
+  Dominica: "1-767",
+  "Dominican Republic": "1-809, 1-829, 1-849",
+  "East Timor": "670",
+  Ecuador: "593",
+  Egypt: "20",
+  "El Salvador": "503",
+  "Equatorial Guinea": "240",
+  Eritrea: "291",
+  Estonia: "372",
+  Ethiopia: "251",
+  Fiji: "679",
+  Finland: "358",
+  France: "33",
+  Gabon: "241",
+  Gambia: "220",
+  Georgia: "995",
+  Germany: "49",
+  Ghana: "233",
+  Greece: "30",
+  Grenada: "1-473",
+  Guatemala: "502",
+  Guinea: "224",
+  "Guinea-Bissau": "245",
+  Guyana: "592",
+  Haiti: "509",
+  Honduras: "504",
+  Hungary: "36",
+  Iceland: "354",
+  India: "91",
+  Indonesia: "62",
+  Iran: "98",
+  Iraq: "964",
+  Ireland: "353",
+  Israel: "972",
+  Italy: "39",
+  Jamaica: "1-876",
+  Japan: "81",
+  Jordan: "962",
+  Kazakhstan: "7",
+  Kenya: "254",
+  Kiribati: "686",
+  "North Korea": "850",
+  "South Korea": "82",
+  Kosovo: "383",
+  Kuwait: "965",
+  Kyrgyzstan: "996",
+  Laos: "856",
+  Latvia: "371",
+  Lebanon: "961",
+  Lesotho: "266",
+  Liberia: "231",
+  Libya: "218",
+  Liechtenstein: "423",
+  Lithuania: "370",
+  Luxembourg: "352",
+  Macedonia: "389",
+  Madagascar: "261",
+  Malawi: "265",
+  Malaysia: "60",
+  Maldives: "960",
+  Mali: "223",
+  Malta: "356",
+  "Marshall Islands": "692",
+  Mauritania: "222",
+  Mauritius: "230",
+  Mexico: "52",
+  Micronesia: "691",
+  Moldova: "373",
+  Monaco: "377",
+  Mongolia: "976",
+  Montenegro: "382",
+  Morocco: "212",
+  Mozambique: "258",
+  Myanmar: "95",
+  Namibia: "264",
+  Nauru: "674",
+  Nepal: "977",
+  Netherlands: "31",
+  "New Zealand": "64",
+  Nicaragua: "505",
+  Niger: "227",
+  Nigeria: "234",
+  Norway: "47",
+  Oman: "968",
+  Pakistan: "92",
+  Palau: "680",
+  Panama: "507",
+  "Papua New Guinea": "675",
+  Paraguay: "595",
+  Peru: "51",
+  Philippines: "63",
+  Poland: "48",
+  Portugal: "351",
+  Qatar: "974",
+  Romania: "40",
+  Russia: "7",
+  Rwanda: "250",
+  "Saint Kitts and Nevis": "1-869",
+  "Saint Lucia": "1-758",
+  "Saint Vincent and the Grenadines": "1-784",
+  Samoa: "685",
+  "San Marino": "378",
+  "Sao Tome and Principe": "239",
+  "Saudi Arabia": "966",
+  Senegal: "221",
+  Serbia: "381",
+  Seychelles: "248",
+  "Sierra Leone": "232",
+  Singapore: "65",
+  Slovakia: "421",
+  Slovenia: "386",
+  "Solomon Islands": "677",
+  Somalia: "252",
+  "South Africa": "27",
+  "South Sudan": "211",
+  Spain: "34",
+  "Sri Lanka": "94",
+  Sudan: "249",
+  Suriname: "597",
+  Swaziland: "268",
+  Sweden: "46",
+  Switzerland: "41",
+  Syria: "963",
+  Taiwan: "886",
+  Tajikistan: "992",
+  Tanzania: "255",
+  Thailand: "66",
+  Togo: "228",
+  Tonga: "676",
+  "Trinidad and Tobago": "1-868",
+  Tunisia: "216",
+  Turkey: "90",
+  Turkmenistan: "993",
+  Tuvalu: "688",
+  Uganda: "256",
+  Ukraine: "380",
+  "United Arab Emirates": "971",
+  "United Kingdom": "44",
+  "United States": "1",
+  Uruguay: "598",
+  Uzbekistan: "998",
+  Vanuatu: "678",
+  "Vatican City": "379",
+  Venezuela: "58",
+  Vietnam: "84",
+  Yemen: "967",
+  Zambia: "260",
+  Zimbabwe: "263"
+};
+var injectCountryCode = function injectCountryCode() {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('country_id').addEventListener('change', function (e) {
+    var value = e.target.value;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = countryCodes[value] || '';
+  });
+};
+injectCountryCode();
 
 /***/ }),
 
@@ -945,8 +1198,6 @@ document.onkeydown = function (e) {
     var elementId = e.target.id; // id of the element that was clicked or press down
     // const emailInput = e.target.value;
 
-    console.log(elementId);
-
     // this phase checks the id of what is being typed
     if (!elementId) throw new Error("target id is null and empty");
     var chooseEmail = [];
@@ -1026,16 +1277,16 @@ document.onkeydown = function (e) {
 };
 var checkPersonalEmail = function checkPersonalEmail(e) {
   var email = e.target.value;
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("email_error").innerHTML = checkEmail.includes(email) ? "Hello! ".concat(fName, " you are already registered on the platform") : "";
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("email_error").innerHTML = checkEmail.includes(email) ? "YOU HAVE ALREADY REGISTERED ON THE PLATFORM" : "";
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_id').addEventListener('keyup', checkPersonalEmail);
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/onChange.js":
-/*!************************************************************!*\
-  !*** ./resources/asset/js/components/register/onChange.js ***!
-  \************************************************************/
+/***/ "./resources/asset/js/components/register/onChangeKidSibling.js":
+/*!**********************************************************************!*\
+  !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
+  \**********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
@@ -1110,33 +1361,6 @@ var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
 };
 onChangeKidAndSiblings();
 
-// inject the country code once one of the country is picked
-
-var injectCountryCode = function injectCountryCode() {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('country_id').addEventListener('change', function (e) {
-    var value = e.target.value;
-    switch (value) {
-      case 'Nigeria':
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = "234";
-        break;
-      case 'UK':
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = "44";
-        break;
-      case 'Canada':
-      case 'USA':
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = "1";
-        break;
-      case 'China':
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = "86";
-        break;
-      default:
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('mobile_id').value = "";
-    }
-  });
-};
-injectCountryCode();
-injectCountryCode();
-
 /***/ }),
 
 /***/ "./resources/asset/js/components/register/processForm.js":
@@ -1179,14 +1403,19 @@ var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInput
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
   }
 })();
+var notificationDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div');
+var notificationMsg = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg');
 var processFormDataAction = function processFormDataAction(addClass, serverResponse) {
   // display the success information for 10sec
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').style.display = "block"; // unblock the notification
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').classList.add(addClass); // add the success class
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg').innerHTML = serverResponse.message; // error element
+  notificationDiv.style.display = "block"; // unblock the notification
+  notificationDiv.classList.add(addClass); // add the success class
+  notificationMsg.innerHTML = serverResponse.message; // error element
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
+  notificationDiv.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
 };
-
 var processFormData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url, formElement) {
     var form, formEntries, options;
@@ -1227,16 +1456,16 @@ var processFormData = /*#__PURE__*/function () {
 }();
 var processForm = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(e) {
-    var errorData;
+    var emailError, errorData;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
           _context2.prev = 0;
           e.preventDefault();
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div').classList.remove('is-danger'); // remove the danger class from the notification
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg').innerHTML = ""; // empty the error element
+          notificationDiv.classList.remove('is-danger'); // remove the danger class from the notification
+          notificationMsg.innerHTML = ""; // empty the error element
           if (!(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
-            _context2.next = 19;
+            _context2.next = 25;
             break;
           }
           // window.location.hash = '#setLoader';
@@ -1245,37 +1474,50 @@ var processForm = /*#__PURE__*/function () {
           formData.clearError();
           formData.emailVal();
           formData.massValidate();
-          if (!(formData.error.length <= 0)) {
-            _context2.next = 16;
+
+          // CHECK IF EMAIL HAS NOT BEEN REGISTERED ERROR IS NULL
+          emailError = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("email_error").innerHTML;
+          if (!(formData.error.length <= 0 && emailError == "")) {
+            _context2.next = 17;
             break;
           }
           (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader');
-          _context2.next = 13;
+          _context2.next = 14;
           return processFormData("/register", 'register');
-        case 13:
+        case 14:
           return _context2.abrupt("return");
-        case 16:
-          alert('The form cannot be submitted. Please check the errors');
-          // console.log(formData.error)
         case 17:
-          _context2.next = 22;
+          alert("The form cannot be submitted. Please check the errors");
+          //  console.log(formData.error)
+          notificationMsg.innerHTML = "".concat(_global__WEBPACK_IMPORTED_MODULE_1__.warningSign, " Check the errors");
+          notificationDiv.style.display = "block";
+          notificationDiv.style.backgroundColor = "Red";
+          notificationDiv.style.color = "White";
+          //  notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          notificationDiv.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
+        case 23:
+          _context2.next = 28;
           break;
-        case 19:
+        case 25:
           alert('To continue, you need to agree to the our privacy policy');
           errorData = "To continue, you need to agree to the our privacy policy";
           (0,_global__WEBPACK_IMPORTED_MODULE_1__.showNotification)('checkbox_error', 'is-danger', errorData);
-        case 22:
-          _context2.next = 27;
+        case 28:
+          _context2.next = 33;
           break;
-        case 24:
-          _context2.prev = 24;
+        case 30:
+          _context2.prev = 30;
           _context2.t0 = _context2["catch"](0);
           (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(_context2.t0);
-        case 27:
+        case 33:
         case "end":
           return _context2.stop();
       }
-    }, _callee2, null, [[0, 24]]);
+    }, _callee2, null, [[0, 30]]);
   }));
   return function processForm(_x3) {
     return _ref2.apply(this, arguments);

@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log, showError, showNotification } from '../global';
+import { id, log, showError, showNotification, warningSign } from '../global';
 import { dataToCheckRegister } from '../dataToCheck';
 import axios from "axios";
 
@@ -8,11 +8,10 @@ const formInput = document.querySelectorAll('.register');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-
 (() => {
 
     try {
-
+        
         formData.clearError();
 
         // set the maxlength, check the length of the value, raise error
@@ -37,12 +36,16 @@ const formData = new FormHelper(formInputArr);
 
 })();
 
+const notificationDiv = id('register_notify_div')
+const notificationMsg = id('register_notify_div_msg')
+
 const processFormDataAction = (addClass, serverResponse) => {
     // display the success information for 10sec
-    id('register_notify_div').style.display = "block" // unblock the notification
-    id('register_notify_div').classList.add(addClass) // add the success class
-    id('register_notify_div_msg').innerHTML = serverResponse.message // error element
+    notificationDiv.style.display = "block" // unblock the notification
+    notificationDiv.classList.add(addClass) // add the success class
+    notificationMsg.innerHTML = serverResponse.message // error element
     id('loader').classList.remove('loader') // remove loader
+    notificationDiv.scrollIntoView({behavior: 'smooth', block: 'start'})
 }
 
 
@@ -80,8 +83,10 @@ const processForm = async(e) => {
     try {
         e.preventDefault();
 
-        id('register_notify_div').classList.remove('is-danger') // remove the danger class from the notification
-        id('register_notify_div_msg').innerHTML = "" // empty the error element
+
+
+        notificationDiv.classList.remove('is-danger') // remove the danger class from the notification
+        notificationMsg.innerHTML = "" // empty the error element
 
         if (id('checkbox').checked) {
             // window.location.hash = '#setLoader';
@@ -91,15 +96,26 @@ const processForm = async(e) => {
             formData.emailVal()
             formData.massValidate();
 
-            if (formData.error.length <= 0) {
+            // CHECK IF EMAIL HAS NOT BEEN REGISTERED ERROR IS NULL
+
+            const emailError = id("email_error").innerHTML;
+
+            if (formData.error.length <= 0 && emailError=="") {
 
                 id('loader').classList.add('loader')
                 await processFormData("/register", 'register');
                 return;
             } else {
 
-                alert('The form cannot be submitted. Please check the errors')
-                    // console.log(formData.error)
+                alert(`The form cannot be submitted. Please check the errors`)
+                    //  console.log(formData.error)
+                     notificationMsg.innerHTML = `${warningSign} Check the errors` 
+                     notificationDiv.style.display="block"
+                     notificationDiv.style.backgroundColor="Red"
+                     notificationDiv.style.color="White"
+                    //  notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                     notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                     //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
 
             }
 

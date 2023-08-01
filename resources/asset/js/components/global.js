@@ -1,6 +1,7 @@
 export const id = (id) => document.getElementById(id)
 export const idValue = (id) => id(id).value
 export const idInnerHTML = (id) => id(id).innerHTML
+export const warningSign = "\u26A0"; // danger warning sign
 
 export const qSel = (name) => document.querySelector(name)
 export const qSelValue = (name) => qSel(name).value

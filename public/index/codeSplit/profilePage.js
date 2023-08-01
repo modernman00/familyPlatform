@@ -67,13 +67,13 @@ var FormHelper = /*#__PURE__*/function () {
             // check if there is no value
 
             var postName = post.name.replace('_', ' ');
-            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "motherEmail") {
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "maidenName" || postName == "motherEmail") {
               if (post.value === "") {
                 post.value = "Not Provided";
               }
             }
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "* cannot be left empty";
+              errMsg.innerHTML = "*cannot be left empty";
               errMsg.style.color = "red";
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {

@@ -245,8 +245,6 @@ document.onkeydown = (e) => {
         const elementId = e.target.id; // id of the element that was clicked or press down
         // const emailInput = e.target.value;
 
-        console.log(elementId)
-
         // this phase checks the id of what is being typed
         if (!elementId) throw new Error("target id is null and empty");
 
@@ -351,7 +349,7 @@ document.onkeydown = (e) => {
 
 const checkPersonalEmail = (e) => {
     const email = e.target.value;
-    id("email_error").innerHTML = checkEmail.includes(email) ? `Hello! ${fName} you are already registered on the platform` : ``;
+    id("email_error").innerHTML = checkEmail.includes(email) ? `YOU HAVE ALREADY REGISTERED ON THE PLATFORM` : ``;
 }
 
 

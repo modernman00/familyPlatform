@@ -48,6 +48,7 @@ export default class FormHelper {
                     postName == "fatherMobile" ||
                     postName == "fatherEmail" ||
                     postName == "motherMobile" ||
+                    postName == "maidenName" ||
                     postName == "motherEmail"
                 ) {
                     if (post.value === "") {
@@ -56,7 +57,7 @@ export default class FormHelper {
                 }
 
                 if (post.value === '' || post.value === 'select') {
-                    errMsg.innerHTML = `* cannot be left empty`
+                    errMsg.innerHTML = `*cannot be left empty`
                     errMsg.style.color = "red"
                     this.error.push(`${postName.toUpperCase()} cannot be left empty`)
                 } else {

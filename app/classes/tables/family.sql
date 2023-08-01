@@ -458,7 +458,6 @@ CREATE TABLE `otherFamily` (
   `motherName` text,
   `motherMobile` text,
   `motherEmail` varchar(50) DEFAULT NULL,
-  `motherMaiden` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL

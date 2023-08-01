@@ -19,6 +19,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   qSelValue: () => (/* binding */ qSelValue),
 /* harmony export */   showError: () => (/* binding */ showError),
 /* harmony export */   showNotification: () => (/* binding */ showNotification),
+/* harmony export */   warningSign: () => (/* binding */ warningSign),
 /* harmony export */   write: () => (/* binding */ write)
 /* harmony export */ });
 var id = function id(_id) {
@@ -30,6 +31,8 @@ var idValue = function idValue(id) {
 var idInnerHTML = function idInnerHTML(id) {
   return id(id).innerHTML;
 };
+var warningSign = "\u26A0"; // danger warning sign
+
 var qSel = function qSel(name) {
   return document.querySelector(name);
 };

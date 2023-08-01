@@ -1,23 +1,56 @@
-import { id } from '../global'
-// import { show } from "./onChange"
+import { id } from '../global';
 
+const hideElement = (elementId) => {
+  id(elementId).style.display = "none";
+};
 
-id('spouse').style.display = "none";
+const showElement = (elementId) => {
+  id(elementId).style.display = "block";
+};
 
-// id('children2').style.display = "none";
+const showMaidenName = () => {
+  const gender = id('gender_id').value;
+  const maritalStatus = id('maritalStatus_id').value;
+  
+  if (gender === "Female" && maritalStatus === "Yes") {
+    showElement('maidenName_div');
+  } else {
+    hideElement('maidenName_div');
+  }
+};
 
-// ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
+const showSpouse = () => {
+  const maritalStatus = id('maritalStatus_id').value;
+  
+  if (maritalStatus === "Yes") {
+    showElement('spouse');
+  } else {
+    hideElement('spouse');
+  }
+};
 
-const showSpouse = (e) => {
-    if (e.target.value === "Yes") {
+// Add event listeners
+id('maritalStatus_id').addEventListener('change', showSpouse);
+id('gender_id').addEventListener('change', showMaidenName);
 
-        id('spouse').style.display = "block"
-    } else {
-        id('spouse').style.display = "none"
+// Hide elements by default
+hideElement('spouse');
+hideElement('maidenName_div');
+
+// Other initializations
+id('register_notify_div').style.display = "none";
+
+// inject student after employment status value is student 
+
+const injectStudent = () => {
+  id('employmentStatus_id').addEventListener('change', (e) => {
+    const value = e.target.value;
+    if(value === "Student") {
+        id('occupation_id').value = 'Student';
     }
+    
+  });
+};
 
-}
+injectStudent();
 
-id('maritalStatus_id').addEventListener('change', showSpouse)
-
-id('register_notify_div').style.display = "none"

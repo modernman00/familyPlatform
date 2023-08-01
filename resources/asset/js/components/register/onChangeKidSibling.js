@@ -111,33 +111,4 @@ const onChangeKidAndSiblings = () => {
 
 onChangeKidAndSiblings()
 
-// inject the country code once one of the country is picked
 
-const injectCountryCode = () => {
-    id('country_id').addEventListener('change', (e) => {
-        let value = e.target.value;
-        switch (value) {
-            case 'Nigeria':
-                id('mobile_id').value = "234";
-                break;
-            case 'UK':
-                id('mobile_id').value = "44";
-                break;
-            case 'Canada':
-            case 'USA':
-                id('mobile_id').value = "1";
-                break;
-            case 'China':
-                id('mobile_id').value = "86";
-                break;
-            default:
-                id('mobile_id').value = "";
-
-        }
-
-
-    })
-}
-
-injectCountryCode()
-injectCountryCode()

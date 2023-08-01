@@ -11,7 +11,6 @@
 
 Hello {{ $data['name'] }}, <br> <br>
 
-Trust you are doing well. <br><br> 
 
 {{ $data['yourName'] }} I hope this message finds you well.<br><br> I wanted to reach out to inform you that OLAOGUN has recently joined your family network and highly recommends that you do the same. Your family network provides a wonderful platform for connecting with other family members, exchanging messages, exploring the family tree structure, and receiving important event alerts. <br><br>
 

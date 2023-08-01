@@ -20,7 +20,7 @@ class Register extends Db
      * @psalm-var array{0: 'personal', 1: 'work', 2: 'contact', 3: 'account', 4: 'otherFamily', 5: 'post', 6: 'comment'}
      * if you add a new table, then you should add the data going to the table to this private function tableData(array $cleanPostData)
      */
-    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment', 'events'];
+    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment', 'profile_pics', 'events'];
 
     public function index(): void
     {
@@ -110,7 +110,7 @@ class Register extends Db
             // check if the email already exist
 
             if (checkEmailExist($cleanData['email'])) {
-                throw new Exception("Your email is already registered");
+                throw new Exception("Your email-{$cleanData['email']} is already registered");
             }
 
             CheckToken::tokenCheck('token');
@@ -123,8 +123,11 @@ class Register extends Db
                 SubmitForm::submitForm($this->table[$i], $tableData[$i]);
             }
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-            $this->processKidSibling('kid', $cleanData['kids'], $cleanData);
-            $this->processKidSibling('sibling', $cleanData['siblings'], $cleanData);
+
+            $kidsCount = (int) $cleanData['kids'];
+            $siblingsCount = (int) $cleanData['siblings'];
+            $this->processKidSibling('kid', $kidsCount, $cleanData);
+            $this->processKidSibling('sibling', $siblingsCount, $cleanData);
 
             $sendEmailArray = genEmailArray(
                 "msg/appSub",
@@ -144,10 +147,12 @@ class Register extends Db
 
     /**
      * @param mixed $type is it kids or siblings
-     * @param mixed $typeCount the number selected 
-     * @param mixed $data cleaned POST data
+     * 
+     * @param int $typeCount the number selected
+     * @param array $data cleaned POST data
+     * @throws \Throwable
      */
-    private function processKidSibling($type, $typeCount, $data): void
+    private function processKidSibling(string $type, int $typeCount, array $data): void
     {
         try {
             for ($i = 1; $i <= $typeCount; $i++) {
@@ -158,7 +163,7 @@ class Register extends Db
                     "id" => $data["id"],
                 ];
 
-                $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) VALUES (:{$type}_name, :{$type}_email, :{$type}_option, :id)";
+                $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) VALUES (:{$type}_name, :{$type}_email, :{$type}_linked, :id)";
                 $query = $this->connect()->prepare($sql);
                 $query->execute($dataArr);
             }
@@ -244,12 +249,10 @@ class Register extends Db
             [
 
                 'email' => $cleanPostData['email'],
-
                 'country' => $cleanPostData['country'],
                 'mobile' => $cleanPostData['mobile'],
                 'id' => $cleanPostData['id'],
             ],
-
             [
                 'email' => $cleanPostData['email'],
                 'password' => $cleanPostData['password'],
@@ -260,6 +263,7 @@ class Register extends Db
             [
                 'spouseName' => $cleanPostData['spouseName'],
                 'spouseMobile' => $cleanPostData['spouseMobile'],
+                'maidenName' => $cleanPostData['maidenName'],
                 'spouseEmail' => $cleanPostData['spouseEmail'],
                 'fatherName' => $cleanPostData['fatherName'],
                 'fatherMobile' => $cleanPostData['fatherMobile'],

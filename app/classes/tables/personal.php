@@ -23,7 +23,6 @@ class Personal extends Insert
                 `fatherEmail` TEXT NOT NULL,
                 `motherName` TEXT NOT NULL,
                 `motherEmail` TEXT NOT NULL,
-                `motherMaiden` TEXT NOT NULL,
                 `birthDate` DATE NOT NULL,
                 `kids` INT NOT NULL,
                 `gender` TEXT NOT NULL,
