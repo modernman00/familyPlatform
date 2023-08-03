@@ -88,10 +88,11 @@ const setInput = (name, value) => {
                 email: id(`${name}Email_id`).value,
                 mobile: id(`${name}Mobile_id`).value,
                 name: id(`${name}Name_id`).value,
+                familyCode: id(`familyCode_id`).value,
                 yourName: `${fName} ${lName}`,
             },
 
-            subject: `${fName} ${lName} recommended that you join your family network.`,
+            subject: `${fName} ${lName} Wants You: Experience the Magic of your Family Network Today!`,
         };
 
         axios

@@ -1,4 +1,3 @@
-"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/register"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
@@ -7,6 +6,7 @@
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
@@ -325,6 +325,7 @@ var FormHelper = /*#__PURE__*/function () {
   \****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   getAllData: () => (/* binding */ getAllData),
@@ -416,6 +417,7 @@ var postData = /*#__PURE__*/function () {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Login: () => (/* binding */ Login),
@@ -453,6 +455,7 @@ var Login = {
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   autocomplete: () => (/* binding */ autocomplete)
@@ -570,6 +573,7 @@ var autocomplete = function autocomplete(inp, arr) {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
@@ -707,6 +711,7 @@ var matchInput = function matchInput(first, second, err) {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -759,12 +764,57 @@ injectStudent();
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/familyCode.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/register/familyCode.js ***!
+  \**************************************************************/
+/***/ (() => {
+
+var button = document.getElementById("buttonCreateFamilCode");
+button.addEventListener("click", function () {
+  var uniqueNumber = Date.now();
+  var uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
+  var getSurname = document.getElementById('yourSurname').value;
+  var firstFourLetters = getSurname.substring(0, 4);
+  document.getElementById('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
+  button.disabled = true;
+});
+
+// Get references to the HTML output and the copy icon
+
+var copyIcon = document.getElementById('copyIcon');
+
+// Add a click event listener to the copy icon
+copyIcon.addEventListener('click', function () {
+  var htmlOutput = document.getElementById('createFamCode');
+  copyIcon.innerHTML = "";
+  // Create a range object and select the HTML output content
+  var range = document.createRange();
+  range.selectNode(htmlOutput);
+
+  // Add the range to the clipboard
+  try {
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand('copy');
+    selection.removeAllRanges();
+    copyIcon.innerHTML = "copied";
+    location.replace('/register');
+  } catch (e) {
+    console.error('Unable to copy the HTML output: ', e);
+  }
+});
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/index.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/index.js ***!
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _smallinput__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./smallinput */ "./resources/asset/js/components/register/smallinput.js");
 /* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
@@ -772,6 +822,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
 /* harmony import */ var _mobileNameCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mobileNameCheck */ "./resources/asset/js/components/register/mobileNameCheck.js");
 /* harmony import */ var _injectCountryCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./injectCountryCode */ "./resources/asset/js/components/register/injectCountryCode.js");
+/* harmony import */ var _familyCode__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./familyCode */ "./resources/asset/js/components/register/familyCode.js");
+/* harmony import */ var _familyCode__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(_familyCode__WEBPACK_IMPORTED_MODULE_6__);
+
 
 
 
@@ -792,6 +845,7 @@ confirmPs.setAttribute('autocomplete', 'new-password');
   \*********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -1014,6 +1068,7 @@ injectCountryCode();
   \*******************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
@@ -1100,9 +1155,10 @@ var setInput = function setInput(name, value) {
         email: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Email_id")).value,
         mobile: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_id")).value,
         name: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Name_id")).value,
+        familyCode: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("familyCode_id").value,
         yourName: "".concat(fName, " ").concat(lName)
       },
-      subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
+      subject: "".concat(fName, " ").concat(lName, " Wants You: Experience the Magic of your Family Network Today!")
     };
     axios__WEBPACK_IMPORTED_MODULE_4___default().post("/register/contactNewMember", postObj).then(function (response) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_help"), 'is-success', response.data.message);
@@ -1289,6 +1345,7 @@ var checkPersonalEmail = function checkPersonalEmail(e) {
   \**********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   show: () => (/* binding */ show)
@@ -1369,6 +1426,7 @@ onChangeKidAndSiblings();
   \***************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -1398,7 +1456,8 @@ var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInput
 
     // check if password matches real time
     formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
-    formData.duplicate('firstName_id', 'alias_id');
+
+    // formData.duplicate('firstName_id', 'alias_id')
   } catch (error) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
   }
@@ -1533,25 +1592,28 @@ var processForm = /*#__PURE__*/function () {
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
 /**
  * 
- * @param {*} parentId - id of the element string
+ * @param {*} Id - id of the element string
  * @param {*} msg - messages to pass - string
  */
-var showMsg = function showMsg(parentId) {
+var showMsg = function showMsg(Id) {
   var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Please, leave blank if not available";
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parentId).innerHTML = msg;
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(Id).innerHTML = msg;
 };
+var href = "<a href='/createFamilyCode' target='_blank'>here</a>";
 showMsg('fatherMobile_help');
 showMsg('motherMobile_help');
 showMsg('motherEmail_help');
 showMsg('fatherEmail_help');
 showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
 showMsg('password_help', 'Must be 8-20 characters long.');
+showMsg("familyCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href, "."));
 var lastName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value = "OLAOGUN";
 
 /***/ })

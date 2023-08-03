@@ -60,7 +60,11 @@
     </div>
   </div>
 
-</section>    
+</section>   
+
+   <script type="text/javascript" src="/manifest.js"></script>
+     <script type="text/javascript" src="/vendor.js"></script>
+      <script type="text/javascript" src="/index.js"></script>
  
 
 

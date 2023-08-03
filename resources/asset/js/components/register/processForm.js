@@ -26,7 +26,7 @@ const formData = new FormHelper(formInputArr);
             dataToCheckRegister.password.pwd2,
         );
 
-        formData.duplicate('firstName_id', 'alias_id')
+        // formData.duplicate('firstName_id', 'alias_id')
 
     } catch (error) {
         showError(error)

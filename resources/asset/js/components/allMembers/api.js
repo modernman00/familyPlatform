@@ -29,7 +29,7 @@ const renderHtml = (el) => {
                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
                     <br> <b>Contact:</b>  ${el.email} | ${el.mobile} 
                     <br> <b>Date joined:</b> ${format(el.date_created)}</p>
-                    <a href="/allMembers/setProfile?id=${el.id}" class="btn btn-primary stretched-link">See Profile</a>
+
                 </div>
                 </div>
             </div>`

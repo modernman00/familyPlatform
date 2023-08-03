@@ -120,9 +120,18 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/profilepage/img') {
     // qSel('.login').style.display ="none" // navbar mgt
     import (
-        /* webpackChunkName: 'codeSplit/changePW' */
+        /* webpackChunkName: 'codeSplit/img' */
         /* webpackPrefetch: true */
         './components/profilePage/imgViewer'
+    )
+    .then((module) => module.default)
+        .catch((err) => showError(err))
+} else if (window.location.pathname === '/createFamilyCode') {
+
+    import (
+        /* webpackChunkName: 'codeSplit/familyCode' */
+        /* webpackPrefetch: true */
+        './components/register/familyCode'
     )
     .then((module) => module.default)
         .catch((err) => showError(err))

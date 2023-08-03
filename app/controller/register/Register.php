@@ -41,17 +41,16 @@ class Register extends Db
         }
     }
 
-    //  public function familyCode()
-    // {
-    //     try {
-    //         // sanitise the code 2) validate the code 3) if successful, create a session that will be validated before the register form can be opened 4) if unsuccessful, 
+     public function createFamilyCode()
+    {
+        try {
 
-    //         view('registration/nextStep');
-    //     } catch (\Throwable $e) {
+            view('registration/familyCode');
+        } catch (\Throwable $e) {
 
-    //         showError($e);
-    //     }
-    // }
+            showError($e);
+        }
+    }
 
     public function nextStep(): void
     {
@@ -232,7 +231,7 @@ class Register extends Db
             [
                 'firstName' => $cleanPostData['firstName'],
                 'lastName' => $cleanPostData['lastName'],
-                'alias' => $cleanPostData['alias'],
+                'familyCode' => $cleanPostData['familyCode'],
                 'kids' => $cleanPostData['kids'],
                 'gender' => $cleanPostData['gender'],
                 'siblings' => $cleanPostData['siblings'],

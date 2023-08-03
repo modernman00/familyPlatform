@@ -429,8 +429,8 @@ HTML;
                     $error = $name . '_error';
                     $help = $name . '_help';
                     $cleanLabel = strtoupper($label);
-                    $labelType = $this->entValue[$i]['inputType'][$y];
-                    $icon = $this->entValue[$i]['icon'][$y];
+                    $labelType = $this->entValue[$i]['inputType'][$y] ? $this->entValue[$i]['inputType'][$y] : "";
+                    $icon = $this->entValue[$i]['icon'][$y] ? $this->entValue[$i]['icon'][$y] : "";
                     if ($labelType === 'select') {
 
                         echo <<<HTML
@@ -447,7 +447,7 @@ HTML;
 
                             foreach ($decide as $value) {
 
-                                 echo "<option> $value </option>";
+                                echo "<option> $value </option>";
                             }
                         }
                         // for ($yii = 0; $yii < count($this->entValue[$i]['options'][$yii]); $yii++) {
@@ -467,13 +467,19 @@ HTML;
 HTML;
                     } elseif ($labelType === 'inputButton') {
                         echo <<<HTML
-<div class="field has-addons has-addons-left">
-    <div class="control is-expanded">
+                        
+<div class="field $name has-addons has-addons-left" id="{$name}_div">
+    
+
+    <div class="control is-expanded has-icons-left">
         <input class="input $name input is-medium" id="{$name}_id" type="text" placeholder="$cleanLabel">
+        <span class="icon is-small is-left">$icon</span>
+        <p class="help" id="{$name}_help"></p>
     </div>
     <div class="control">
-        <a class="button is-info" id="{$name}_button">Search</a>
+        <button class="button is-success is-medium" id="{$name}_button">Search</button>
     </div>
+   
 </div>
 HTML;
                     } else {

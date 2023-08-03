@@ -8,6 +8,8 @@
     "/index/codeSplit/code.js": "/index/codeSplit/code.js",
     "/index/codeSplit/profilePage.js": "/index/codeSplit/profilePage.js",
     "/index/codeSplit/changePW.js": "/index/codeSplit/changePW.js",
+    "/index/codeSplit/img.js": "/index/codeSplit/img.js",
+    "/index/codeSplit/familyCode.js": "/index/codeSplit/familyCode.js",
     "/style.css": "/style.css",
     "/vendor.js": "/vendor.js"
 }

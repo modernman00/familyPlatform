@@ -37,14 +37,14 @@
 
   'name' => [
   'mixed',
-  'label' => ['first Name', 'last Name', 'alias'],
-  'attribute' => ['firstName', 'lastName', 'alias'],
-  'placeholder' => ['Toyin', 'olaogun', "aka modernman"],
+  'label' => ['first Name', 'last Name', 'Family code'],
+  'attribute' => ['firstName', 'lastName', 'familyCode'],
+  'placeholder' => ['Toyin', 'olaogun', 'check your email for the code '],
   'inputType' => ['text', 'text', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
   '<i class="fas fa-user"></i>',
-  '<i class="fas fa-user"></i>'
+  '<i class="fas fa-barcode"></i>'
   ]
   ],
 

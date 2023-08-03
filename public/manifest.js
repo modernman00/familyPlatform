@@ -145,7 +145,7 @@
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
 /******/ 			if (chunkId === "/vendor") return "" + chunkId + ".js";
-/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1,"codeSplit/forgotPwd":1,"codeSplit/code":1,"codeSplit/profilePage":1,"codeSplit/changePW":1,"resources_asset_js_components_helper_general_js":1}[chunkId]) return "index/" + chunkId + ".js";
+/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1,"codeSplit/forgotPwd":1,"codeSplit/code":1,"codeSplit/profilePage":1,"codeSplit/changePW":1,"codeSplit/img":1,"codeSplit/familyCode":1,"resources_asset_js_components_helper_general_js":1,"resources_asset_js_components_helper_http_js":1}[chunkId]) return "index/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};

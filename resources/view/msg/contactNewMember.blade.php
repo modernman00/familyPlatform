@@ -1,7 +1,7 @@
 @extends ('email')
 @section('title', 'email')
 
-@section('subject', 'Apply to join the OLAOGUN Family Network')
+@section('subject', "Apply to join the {$data['name']} Family Network")
 
 @section('name') 
 {{ $data['name'] }}
@@ -16,7 +16,9 @@ Hello {{ $data['name'] }}, <br> <br>
 
 To join the family network and start enjoying these benefits, simply go to our website below: <br><br>
 
-{{ getenv('APP_URL') }}register <br><br>
+
+<a href={{ getenv('APP_URL') }}register >JOIN YOUR FAMILY NETWORK</a></p>
+<b>Please, use this family code {{ $data['familyCode'] }} in your application</b> <br><br>
 
 We are excited to have you on board and look forward to seeing you become a part of our vibrant family network. Should you have any questions or need assistance with the registration process, please don't hesitate to reach out to our dedicated Admin Team. <br><br>
 

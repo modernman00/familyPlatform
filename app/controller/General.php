@@ -25,6 +25,7 @@ class General
             'viewPath' => $data['viewPath'],
             'data' => $data['data'],
             'subject' => $data['subject'],
+            'familyCode'=> $data['familyCode']
         ];
         sendEmailGeneral($array, 'member');
 
