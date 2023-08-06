@@ -1,6 +1,8 @@
-@extends('baseBulma2')
+@extends('baseBulma')
 
 @section('title','Family Code')
+
+@section('data-page-id', 'familyCode')
 
 @section('content')
 
@@ -8,12 +10,13 @@
    
         /* Target the input placeholder text with the "::placeholder" pseudo-element */
         input::placeholder {
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 0.9rem;
+            /* font-weight: bold; */
             /* Set the desired font size for the input placeholder text */
         }
 body{
   font-size: 1.5rem;
+
 }
      
          @media screen and (max-width: 600px) {
@@ -46,45 +49,49 @@ body{
 
     </style>
 
+    <div class="styleForm" style="margin-top: 2rem;">
+
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
 
 
-<h1 class="title is-responsive">Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you haven't received a Family Code from a registered family member, worry not! You can create one below to bring your family together:</h1>
 
-<br>
+      @php
 
-<p class="subtitle">
-<div class="field has-addons is-expanded has-addons-centered">
-  <div class="control ">
-    <p class="control">
-      <input class="input is-large is-hovered" type="text" id="yourSurname" placeholder="Enter your surname here">
-    </p>
-      </div>
-</div> 
+      $formArray = [
+        'Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you havent received a Family Code from a registered family member, worry not! You can create one below to bring your family together:' => 'title',
 
+        'surname' => 'text',
+
+        'Generate your family code' => 'button'
+      ];
+
+      $form = new App\classes\BuildFormBulma($formArray);
+      $form->genForm();
+      @endphp
+    
     <br>
-    <div class="field has-addons has-addons-centered">
-  <div class="control is-expanded">
-    <p class="control">
-      <button type="button" id="buttonCreateFamilCode" class="button is-large  is-success is-responsive">Click to generate your
-        Family Code</button>
-    </p>
-  </div>
-</div>
+
 
    <div class="field has-addons is-expanded has-addons-centered">
       <div class="control" id="createFamCode">
-        <input class="input is-large" type="text" id="createCode" placeholder="Your family code will appear here" disabled>
+
+        <input class="input is-large" type="text" id="createCode" placeholder="Your family code will appear here" readonly>
+
       </div>
-      {{-- <i id="copyIcon" class="fas fa-copy" style="cursor: pointer;"></i> --}}
+
       <div class="control">
-        <button id="copyIcon" class="button is-primary is-large"><i class="fa fa-copy" style="cursor: pointer;color:red"></i><span id="clipcopy"> copy</span></button>
+        <button id="copyIcon" class="button is-primary is-large">
+          <i class="fa fa-copy" style="cursor: pointer;color:red"></i>
+          <span id="clipcopy"> copy</span>
+          </button>
 
       </div>
     </div>
     <br>
 
-    <h3 class="control">By generating a unique Family Code, you'll unlock the full potential of our platform, allowing your family to share moments, memories, and experiences like never before. Embrace the power of togetherness on the Family Platform today! </h3>
+    <p class="subtitle">By generating a unique Family Code, you'll unlock the full potential of our platform, allowing your family to share moments, memories, and experiences like never before. Embrace the power of togetherness on the Family Platform today! </p>
 </p>
 
+</div>
 
 @endsection

@@ -8,11 +8,12 @@ const showElement = (elementId) => {
   id(elementId).style.display = "block";
 };
 
+
 const showMaidenName = () => {
-  const gender = id('gender_id').value;
-  const maritalStatus = id('maritalStatus_id').value;
+  const gender = id('gender_id');
+  const maritalStatus = id('maritalStatus_id');
   
-  if (gender === "Female" && maritalStatus === "Yes") {
+  if (gender.value === "Female" && maritalStatus.value === "Yes") {
     showElement('maidenName_div');
   } else {
     hideElement('maidenName_div');
@@ -30,6 +31,9 @@ const showSpouse = () => {
 };
 
 // Add event listeners
+
+
+
 id('maritalStatus_id').addEventListener('change', showSpouse);
 id('gender_id').addEventListener('change', showMaidenName);
 

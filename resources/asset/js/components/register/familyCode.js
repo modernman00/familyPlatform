@@ -1,45 +1,65 @@
+import { id } from "../global"
+const button = id("button");
 
-const button = document.getElementById("buttonCreateFamilCode");
 
 
+button.addEventListener("click", function () {
 
-button.addEventListener("click", function() {
+    try {
 
-    const uniqueNumber = Date.now();
+        if (id('surname_id').value !== "") {
+            const uniqueNumber = Date.now();
 
-    const uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber)/ 10000000);
+            const uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
 
-    const getSurname = document.getElementById('yourSurname').value
+            const getSurname = id('surname_id').value
 
-    const firstFourLetters = getSurname.substring(0, 4);
-  
-    document.getElementById('createCode').value = `${firstFourLetters.toUpperCase()}${uniqueNumber1}`;
-    button.disabled= true;
+            const firstFourLetters = getSurname.substring(0, 4);
+
+            id('createCode').value = `${firstFourLetters.toUpperCase()}${uniqueNumber1}`;
+            button.disabled = true;
+        }
+    } catch (error) {
+        id("surname_error").innerHTML = error.messages;
+
+    }
+
+
 });
 
 
 // Get references to the HTML output and the copy icon
 
-const copyIcon = document.getElementById('copyIcon');
+const copyIcon = id('copyIcon');
+const htmlOutputDiv = id('createFamCode');
+const htmlOutput = id('createCode');
 
-// Add a click event listener to the copy icon
-copyIcon.addEventListener('click', () => {
-  const htmlOutput = document.getElementById('createFamCode');
-  copyIcon.innerHTML = ""
-    // Create a range object and select the HTML output content
-    const range = document.createRange();
-    range.selectNode(htmlOutput);
+copyIcon.addEventListener('click', async function () {
+    copyIcon.innerHTML = "";
 
-    // Add the range to the clipboard
     try {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand('copy');
-        selection.removeAllRanges();
-        copyIcon.innerHTML="copied"
 
-       location.replace('/register')
+        // check if the family code has been generated 
+
+        if (htmlOutput.value) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(htmlOutput.value);
+            } else {
+                // Fallback to the deprecated method
+                const range = document.createRange();
+                range.selectNode(htmlOutputDiv);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('copy');
+                selection.removeAllRanges();
+            }
+
+            copyIcon.innerHTML = "copied";
+            location.replace('/register');
+        }
+
+
     } catch (e) {
         console.error('Unable to copy the HTML output: ', e);
     }

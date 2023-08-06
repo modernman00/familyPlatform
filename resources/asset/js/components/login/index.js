@@ -7,3 +7,4 @@ const passwordLabel = document.getElementById("showPassword_id")
 
 currentPs.setAttribute('autocomplete', 'current-password')
 passwordLabel.setAttribute('aria-label', 'Warning: this will display your password on the screen.')
+

@@ -9,6 +9,7 @@ use App\classes\{
     Select
 };
 
+
 use Exception;
 
 class Login extends Select
@@ -54,51 +55,70 @@ class Login extends Select
             header("Access-Control-Max-Age: 3600");
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-            //2. create min and max limit
-            $minMaxData = [
-                'data' => ['email', 'password'],
-                'min' => [5, 3],
-                'max' => [35, 65]
-            ];
+            $recaptchaSecretKey = '6LfBdHsnAAAAAE2ILfaXHI9bBQv9hMC_WsvzPppv';
+            $recaptchaResponse = $_POST['g-recaptcha-response'];
 
-            //3. sanitise the post data 
-            $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
+            $client = new \GuzzleHttp\Client();
+            $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
+                'form_params' => [
+                    'secret' => $recaptchaSecretKey,
+                    'response' => $recaptchaResponse
+                ]
+            ]);
 
-            //4 check if email exist and get the database password
-            $data = useEmailToFindData($sanitisedData);
+            $result = json_decode($response->getBody()->getContents(), true);
 
-            $_SESSION['ID'] = $data['id'];
+            if ($result['success']) {
+                // CAPTCHA validation successful, proceed with login authentication.
+                // Implement your login logic here.
+                //2. create min and max limit
+                $minMaxData = [
+                    'data' => ['email', 'password'],
+                    'min' => [5, 3],
+                    'max' => [35, 65]
+                ];
 
-            //5. check password 
-            $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
+                //3. sanitise the post data 
+                $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
-            //1.  token verified
-            CheckToken::tokenCheck('token');
+                //4 check if email exist and get the database password
+                $data = useEmailToFindData($sanitisedData);
 
-          
+                $_SESSION['ID'] = $data['id'];
 
-            //4. control for login
-            $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
+                //5. check password 
+                $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
-            if ($data && $validatePwd) {
+                //1.  token verified
+                CheckToken::tokenCheck('token');
 
-                // Login now based on login type
-                if ($detectIfAdminOrCustomer === self::ADMIN) {
 
-                    $this->adminLogin($data);
-                     unset($data);
 
-                } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
+                //4. control for login
+                $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
-                    $this->customerLogin($data);
-                     unset($data);
+                if ($data && $validatePwd) {
+
+                    // Login now based on login type
+                    if ($detectIfAdminOrCustomer === self::ADMIN) {
+
+                        $this->adminLogin($data);
+                        unset($data);
+                    } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
+
+                        $this->customerLogin($data);
+                        unset($data);
+                    }
+                    msgSuccess(201, "Credentials validated");
+                } else {
+
+                    session_unset();
+
+                    msgException(401, "Your credential could not be verified");
                 }
-                msgSuccess(201, "Credentials validated");
             } else {
-
-                session_unset();
-
-                msgException(401, "Your credential could not be verified");
+                // CAPTCHA validation failed, show an error message or redirect back to the login page.
+                msgException(301, "CAPTCHA validation failed");
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -143,11 +163,11 @@ class Login extends Select
 
         if (!$outcome) {
 
-            msgException(406,"Your input to code is not recognised" );
+            msgException(406, "Your input to code is not recognised");
         }
 
         $url0 = getenv("MIX_APP_URL2");
-        $url = $url0."lasu";
+        $url = $url0 . "lasu";
 
         loggedDetection($url, $sanitisedData['email']);
 

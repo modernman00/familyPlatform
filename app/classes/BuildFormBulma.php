@@ -132,8 +132,8 @@ class BuildFormBulma extends AlterTable
                 echo <<<HTML
 <div class="field">
     <label class="label" id="$nameKey"><b>$var</b></label>
-    <div class="control has-icons-left has-icons-right">
-        <input type="text" autocomplete="new-$nameKey" class="input" placeholder="$var" required name="$nameKey" value="$value">
+    <div class="control">
+        <input type="text" autocomplete="new-$nameKey" class="input" placeholder="PLEASE ENTER YOUR $var" name="$nameKey"  id="{$nameKey}_id" value="$value"  required>
         <p class="help" id="{$nameKey}_help"></p>
         <p class="help" id="{$nameKey}_error"></p>
     </div>
@@ -283,8 +283,8 @@ HTML;
                 echo <<<HTML
 <div class="field">
     <p class="control">
-        <button name="submit" id="submit" type="button" class="button is-success button is-large is-fullwidth submit">
-            Submit
+        <button name="button" id="button" type="button" class="button is-success button is-large is-fullwidth submit">
+            {$nameKey}
         </button>
     </p>
 </div>
