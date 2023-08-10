@@ -245,6 +245,7 @@ class ProfilePage extends ProcessImg
     public function showPics(): void
     {
         $path = checkInput($_GET['path']);
+     
         $imagePath = ProcessImg::showPostImg($path);
 
         $postId = checkInput($_GET['pID']);

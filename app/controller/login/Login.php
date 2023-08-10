@@ -9,7 +9,6 @@ use App\classes\{
     Select
 };
 
-
 use Exception;
 
 class Login extends Select
@@ -55,22 +54,7 @@ class Login extends Select
             header("Access-Control-Max-Age: 3600");
             header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-            $recaptchaSecretKey = '6LfBdHsnAAAAAE2ILfaXHI9bBQv9hMC_WsvzPppv';
-            $recaptchaResponse = $_POST['g-recaptcha-response'];
-
-            $client = new \GuzzleHttp\Client();
-            $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
-                'form_params' => [
-                    'secret' => $recaptchaSecretKey,
-                    'response' => $recaptchaResponse
-                ]
-            ]);
-
-            $result = json_decode($response->getBody()->getContents(), true);
-
-            if ($result['success']) {
-                // CAPTCHA validation successful, proceed with login authentication.
-                // Implement your login logic here.
+ 
                 //2. create min and max limit
                 $minMaxData = [
                     'data' => ['email', 'password'],
@@ -116,10 +100,7 @@ class Login extends Select
 
                     msgException(401, "Your credential could not be verified");
                 }
-            } else {
-                // CAPTCHA validation failed, show an error message or redirect back to the login page.
-                msgException(301, "CAPTCHA validation failed");
-            }
+        
         } catch (\Throwable $th) {
             showError($th);
         }

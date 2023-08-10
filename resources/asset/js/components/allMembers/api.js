@@ -23,12 +23,16 @@ const renderHtml = (el) => {
  
         <div class="card-body">
                     <h4 class='card-title'>${el.firstName} ${el.lastName}</h4>
-                    <p class="card-text allMember_card_content"><b>Alias:</b> ${el.alias} 
+                    <p class="card-text allMember_card_content">
+        
                     <br> <b>Father:</b>  ${el.fatherName}
                     <br> <b>Mother:</b> ${el.motherName}
                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
-                    <br> <b>Contact:</b>  ${el.email} | ${el.mobile} 
-                    <br> <b>Date joined:</b> ${format(el.date_created)}</p>
+                    <br> <b>Email:</b>  ${el.email} 
+                    <br> <b>Mobile:</b>   ${el.mobile} 
+                    <br> <b>Date joined:</b> ${format(el.date_created)}
+                    </p>
+                    <button class="btn btn-primary"> Add to your family</button>
 
                 </div>
                 </div>
