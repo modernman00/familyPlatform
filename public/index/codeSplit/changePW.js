@@ -18,24 +18,23 @@ Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require
 
   // Hide the loader element initially
   var loaderElement = response.id('setLoader');
-  loaderElement.style.display = 'none';
+  // loaderElement.style.display = 'none';
 
   // Function to handle the submission of change password form
   var submitChangePW = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var passwordElement, password, changePasswordNotificationElement, httpModule, postFormData;
+      var password, changePasswordNotificationElement, httpModule, postFormData;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             e.preventDefault();
             _context.prev = 1;
-            passwordElement = response.id('password_id');
-            password = passwordElement.value; // Remove any previous error notifications
+            password = response.id('password_id').value; // Remove any previous error notifications
             changePasswordNotificationElement = response.id('changePassword_notification');
             changePasswordNotificationElement.classList.remove('is-danger');
             response.id('error').innerHTML = '';
             if (!password) {
-              _context.next = 16;
+              _context.next = 15;
               break;
             }
             // Display the loader element
@@ -43,31 +42,31 @@ Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require
             response.id('loader').classList.add('loader');
 
             // Dynamically import the '../helper/http' module
-            _context.next = 12;
+            _context.next = 11;
             return Promise.all(/*! import() */[__webpack_require__.e("/vendor"), __webpack_require__.e("resources_asset_js_components_helper_http_js")]).then(__webpack_require__.bind(__webpack_require__, /*! ../helper/http */ "./resources/asset/js/components/helper/http.js"));
-          case 12:
+          case 11:
             httpModule = _context.sent;
             postFormData = httpModule.postFormData; // Perform the HTTP request to submit the change password form
-            _context.next = 16;
+            _context.next = 15;
             return postFormData('/login/changePW', 'changePassword', '/login');
-          case 16:
-            _context.next = 21;
+          case 15:
+            _context.next = 20;
             break;
-          case 18:
-            _context.prev = 18;
+          case 17:
+            _context.prev = 17;
             _context.t0 = _context["catch"](1);
             // Show error using the 'showError' function on the 'response' object
             response.showError(_context.t0);
-          case 21:
-            _context.prev = 21;
+          case 20:
+            _context.prev = 20;
             // Hide the loader element regardless of success or error
             loaderElement.style.display = 'none';
-            return _context.finish(21);
-          case 24:
+            return _context.finish(20);
+          case 23:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[1, 18, 21, 24]]);
+      }, _callee, null, [[1, 17, 20, 23]]);
     }));
     return function submitChangePW(_x) {
       return _ref.apply(this, arguments);
@@ -83,7 +82,7 @@ var confirmPs = document.getElementById("confirm_password_id");
 currentPs.setAttribute('autocomplete', 'new-password');
 confirmPs.setAttribute('autocomplete', 'new-password');
 emailID.setAttribute('type', 'hidden');
-emailLabel.style.display = "none";
+// emailLabel.style.display = "none"
 
 /***/ })
 

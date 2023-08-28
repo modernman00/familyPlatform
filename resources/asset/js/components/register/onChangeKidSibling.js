@@ -23,9 +23,9 @@ const renderHtmlFamily = (family, no) => {
         if (family === "addSiblings") {
             optionsHtml = `
                 <option value='Choose'>Choose</option>
-                <option value='Same Mother & Father'>Same Mother & Father</option>
-                <option value='Same Father'>Only Same Father</option>
-                <option value='Same Mother'>Only Same Mother</option>`;
+                <option value='Same_Mother_Father'>Same Mother & Father</option>
+                <option value='Same_Father'>Only Same Father</option>
+                <option value='Same_Mother'>Only Same Mother</option>`;
         }
 
         return `

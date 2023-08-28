@@ -109,7 +109,9 @@ if (window.location.pathname === '/register') {
         .catch((err) => showError(err))
 
 } else if (window.location.pathname === '/login/changePW') {
-    // qSel('.login').style.display ="none" // navbar mgt
+    qSel('.login').style.display ="none" // navbar mgt
+    qSel('.signUp').style.display ="none" // navbar mgt
+    qSel('#loader').style.display ="none" // loader
     import (
         /* webpackChunkName: 'codeSplit/changePW' */
         /* webpackPrefetch: true */
@@ -135,4 +137,8 @@ if (window.location.pathname === '/register') {
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
+}else if (window.location.pathname === '/register/nextStep') {
+      qSel('.login').style.display ="none" // navbar mgt
+    qSel('.signUp').style.display ="none" // navbar mgt
+    
 }

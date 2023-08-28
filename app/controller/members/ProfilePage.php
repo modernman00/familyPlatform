@@ -142,7 +142,7 @@ class ProfilePage extends ProcessImg
         // SANITISE THE POST 
         unset($_POST['post_img']);
         $sanitise = new Sanitise($_POST);
-        $getSanitisePost = $sanitise->getData();
+        $getSanitisePost = $sanitise->getCleanData();
 
         // check if there are images in the post
         if ($_FILES) {

@@ -11,7 +11,8 @@ use App\classes\tables\{
     kids,
     Account,
     Interest,
-    otherFamily
+    otherFamily,
+    friendRequest
 };
 
 class Create extends Db
@@ -37,4 +38,17 @@ class Create extends Db
             echo $e->getMessage();
         }
     }
+
+    public function createFriendRequest(): void {
+
+        try {
+            $fRequest = new friendRequest();
+            $fRequest->index();
+        } catch (\Throwable $e) {
+            echo $e->getMessage();
+        }
+    
+    }
 }
+
+

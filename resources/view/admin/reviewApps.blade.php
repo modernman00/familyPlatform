@@ -34,7 +34,6 @@
               <td> {{ $data['created_at'] }} </td>
                <td> {{ $data['firstName']}} 
                {{ $data['lastName'] }} </td>
-                <td> {{ $data['alias'] }} </td>
                  <td> {{ $data['spouseName'] }} </td>
                   <td> {{ $data['fatherName'] }} </td>
                    <td> {{ $data['motherName'] }} </td>

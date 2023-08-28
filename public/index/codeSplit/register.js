@@ -1,4 +1,3 @@
-"use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/register"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
@@ -7,6 +6,7 @@
   \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ FormHelper)
@@ -324,6 +324,7 @@ var FormHelper = /*#__PURE__*/function () {
   \****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   getAllData: () => (/* binding */ getAllData),
@@ -415,6 +416,7 @@ var postData = /*#__PURE__*/function () {
   \******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Login: () => (/* binding */ Login),
@@ -452,6 +454,7 @@ var Login = {
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   autocomplete: () => (/* binding */ autocomplete)
@@ -569,6 +572,7 @@ var autocomplete = function autocomplete(inp, arr) {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
@@ -706,6 +710,7 @@ var matchInput = function matchInput(first, second, err) {
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -765,6 +770,7 @@ injectStudent();
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
@@ -793,51 +799,60 @@ button.addEventListener("click", function () {
 var copyIcon = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('copyIcon');
 var htmlOutputDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createFamCode');
 var htmlOutput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createCode');
-copyIcon.addEventListener('click', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-  var range, selection;
-  return _regeneratorRuntime().wrap(function _callee$(_context) {
-    while (1) switch (_context.prev = _context.next) {
-      case 0:
-        copyIcon.innerHTML = "";
-        _context.prev = 1;
-        if (!htmlOutput.value) {
-          _context.next = 17;
+copyIcon.addEventListener('click', /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
+    var range, selection;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          copyIcon.innerHTML = "";
+          _context.prev = 1;
+          e.preventDefault();
+
+          // check if the family code has been generated 
+          if (!htmlOutput.value) {
+            _context.next = 18;
+            break;
+          }
+          if (!(navigator.clipboard && navigator.clipboard.writeText)) {
+            _context.next = 9;
+            break;
+          }
+          _context.next = 7;
+          return navigator.clipboard.writeText(htmlOutput.value);
+        case 7:
+          _context.next = 16;
           break;
-        }
-        if (!(navigator.clipboard && navigator.clipboard.writeText)) {
-          _context.next = 8;
+        case 9:
+          // Fallback to the deprecated method
+          range = document.createRange();
+          range.selectNode(htmlOutputDiv);
+          selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('copy');
+          selection.removeAllRanges();
+        case 16:
+          copyIcon.innerHTML = "copied";
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('familyCode_id').value = htmlOutput.value;
+          // location.replace('/register');
+        case 18:
+          _context.next = 23;
           break;
-        }
-        _context.next = 6;
-        return navigator.clipboard.writeText(htmlOutput.value);
-      case 6:
-        _context.next = 15;
-        break;
-      case 8:
-        // Fallback to the deprecated method
-        range = document.createRange();
-        range.selectNode(htmlOutputDiv);
-        selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand('copy');
-        selection.removeAllRanges();
-      case 15:
-        copyIcon.innerHTML = "copied";
-        location.replace('/register');
-      case 17:
-        _context.next = 22;
-        break;
-      case 19:
-        _context.prev = 19;
-        _context.t0 = _context["catch"](1);
-        console.error('Unable to copy the HTML output: ', _context.t0);
-      case 22:
-      case "end":
-        return _context.stop();
-    }
-  }, _callee, null, [[1, 19]]);
-})));
+        case 20:
+          _context.prev = 20;
+          _context.t0 = _context["catch"](1);
+          console.error('Unable to copy the HTML output: ', _context.t0);
+        case 23:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[1, 20]]);
+  }));
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}());
 
 /***/ }),
 
@@ -847,6 +862,7 @@ copyIcon.addEventListener('click', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/
   \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _smallinput__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./smallinput */ "./resources/asset/js/components/register/smallinput.js");
 /* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
@@ -855,6 +871,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mobileNameCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mobileNameCheck */ "./resources/asset/js/components/register/mobileNameCheck.js");
 /* harmony import */ var _injectCountryCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./injectCountryCode */ "./resources/asset/js/components/register/injectCountryCode.js");
 /* harmony import */ var _familyCode__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./familyCode */ "./resources/asset/js/components/register/familyCode.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/register/modal.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_modal__WEBPACK_IMPORTED_MODULE_7__);
+
 
 
 
@@ -876,6 +895,7 @@ confirmPs.setAttribute('autocomplete', 'new-password');
   \*********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -1098,6 +1118,7 @@ injectCountryCode();
   \*******************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
@@ -1175,7 +1196,7 @@ var setInput = function setInput(name, value) {
   var sex = name === "father" ? "him" : "her";
   var genId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(name, "Mobile_error"));
   genId.style.display = "block";
-  genId.innerHTML = mobile.includes(value) ? "Great news that your ".concat(name, " is already on the platform") : "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text/email to register to the platform</i>?</h4>").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name));
+  genId.innerHTML = mobile.includes(value) || email.includes(value) ? "Great news that your ".concat(name, " is already on the platform") : "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text/email to register to the platform</i>?</h4>").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.checkBox)(name));
   function processRadio() {
     var postObj = {
       mobile: value,
@@ -1335,9 +1356,10 @@ document.onkeydown = function (e) {
           data: {
             email: emailValue,
             name: nameValue,
-            yourName: "".concat(fName, " ").concat(lName)
+            yourName: "".concat(fName, " ").concat(lName),
+            familyCode: (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("familyCode_id").value
           },
-          subject: "".concat(fName, " ").concat(lName, " recommended that you join your family network.")
+          subject: "".concat(fName, " ").concat(lName, " Wants You: Experience the Magic of your Family Network Today!")
         };
         axios__WEBPACK_IMPORTED_MODULE_4___default().post("/register/contactNewMember", postObj).then(function (response) {
           helpHTML.innerHTML = response.data.message;
@@ -1368,12 +1390,60 @@ var checkPersonalEmail = function checkPersonalEmail(e) {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/modal.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/modal.js ***!
+  \*********************************************************/
+/***/ (() => {
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Functions to open and close a modal
+  function openModal($el) {
+    $el.classList.add('is-active');
+  }
+  function closeModal($el) {
+    $el.classList.remove('is-active');
+  }
+  function closeAllModals() {
+    (document.querySelectorAll('.modal') || []).forEach(function ($modal) {
+      closeModal($modal);
+    });
+  }
+
+  // Add a click event on buttons to open a specific modal
+  (document.querySelectorAll('.js-modal-trigger') || []).forEach(function ($trigger) {
+    var modal = $trigger.dataset.target;
+    var $target = document.getElementById(modal);
+    $trigger.addEventListener('click', function () {
+      openModal($target);
+    });
+  });
+
+  // Add a click event on various child elements to close the parent modal
+  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(function ($close) {
+    var $target = $close.closest('.modal');
+    $close.addEventListener('click', function () {
+      closeModal($target);
+    });
+  });
+
+  // Add a keyboard event to close all modals
+  document.addEventListener('keydown', function (event) {
+    if (event.code === 'Escape') {
+      closeAllModals();
+    }
+  });
+});
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/onChangeKidSibling.js":
 /*!**********************************************************************!*\
   !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
   \**********************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   show: () => (/* binding */ show)
@@ -1394,7 +1464,7 @@ var renderHtmlFamily = function renderHtmlFamily(family, no) {
     var kids_sib = family == "addChildren" ? "kid" : "sibling";
     var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
     if (family === "addSiblings") {
-      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same Mother & Father'>Same Mother & Father</option>\n                <option value='Same Father'>Only Same Father</option>\n                <option value='Same Mother'>Only Same Mother</option>";
+      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
     }
     return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
   }
@@ -1454,6 +1524,7 @@ onChangeKidAndSiblings();
   \***************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -1619,6 +1690,7 @@ var processForm = /*#__PURE__*/function () {
   \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -1632,14 +1704,16 @@ var showMsg = function showMsg(Id) {
   var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Please, leave blank if not available";
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(Id).innerHTML = msg;
 };
-var href = "<a href='/createFamilyCode' target='_blank'>here</a>";
+
+// const href = "<a href='/createFamilyCode' target='_blank'>here</a>"
+var href = "<button class='js-modal-trigger' data-target='modal-familyCode'>here</button>";
 showMsg('fatherMobile_help');
 showMsg('motherMobile_help');
 showMsg('motherEmail_help');
 showMsg('fatherEmail_help');
 showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
 showMsg('password_help', 'Must be 8-20 characters long.');
-showMsg("familyCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href, "."));
+showMsg("familyCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href));
 var lastName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value = "OLAOGUN";
 
 /***/ })

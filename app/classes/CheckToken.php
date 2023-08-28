@@ -23,7 +23,7 @@ class CheckToken
             unset($_SESSION[$token]);
             if ($tokenCheck != $postToken) {
 
-                msgException(401, "We do not recognise what you are doing");
+                msgException(401, "We are not familiar with the nature of your activities.");
               
       }
     }

@@ -34,14 +34,18 @@ const copyIcon = id('copyIcon');
 const htmlOutputDiv = id('createFamCode');
 const htmlOutput = id('createCode');
 
-copyIcon.addEventListener('click', async function () {
+copyIcon.addEventListener('click', async function (e) {
     copyIcon.innerHTML = "";
 
+   
+
     try {
+           e.preventDefault();
 
         // check if the family code has been generated 
 
         if (htmlOutput.value) {
+           
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(htmlOutput.value);
             } else {
@@ -56,7 +60,8 @@ copyIcon.addEventListener('click', async function () {
             }
 
             copyIcon.innerHTML = "copied";
-            location.replace('/register');
+            id('familyCode_id').value = htmlOutput.value
+            // location.replace('/register');
         }
 
 

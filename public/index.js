@@ -178,7 +178,9 @@ if (window.location.pathname === '/register') {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/login/changePW') {
-  // qSel('.login').style.display ="none" // navbar mgt
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('#loader').style.display = "none"; // loader
   __webpack_require__.e(/*! import() | codeSplit/changePW */ "codeSplit/changePW").then(__webpack_require__.t.bind(__webpack_require__, /*! ./components/forgotPwd/changePW */ "./resources/asset/js/components/forgotPwd/changePW.js", 23)).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
@@ -197,6 +199,9 @@ if (window.location.pathname === '/register') {
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
+} else if (window.location.pathname === '/register/nextStep') {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
 }
 
 /***/ }),

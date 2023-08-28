@@ -309,11 +309,11 @@ var showPostImg = function showPostImg(data) {
     }
   }
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n              class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
+    return "\n        <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
   };
-  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n      ".concat(postImg.map(function (pics, i) {
+  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n            ".concat(postImg.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
-  }), "\n        <br>\n      </div>");
+  }), "\n          <br>\n        </div>");
 };
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;

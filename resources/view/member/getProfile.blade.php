@@ -10,7 +10,7 @@
 
   </div> --}}
 <br><br>
-  <h4> <a href="/organogram?id={{ $data['id'] }}"> SEE {{ $data['firstName'] }} {{ $data['lastName'] }} FAMILY TREE</a>
+  <h4> <a href="/organogram?id={{ $data['id'] }}" class="btn btn-primary">  {{ $data['firstName'] }} {{ $data['lastName'] }}'s Family Tree</a>
   </h4>
 
 

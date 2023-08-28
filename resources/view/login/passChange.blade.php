@@ -15,12 +15,12 @@
         <div class="form-group">
             <br>
             <div class='row'>
+                {{-- <input type="hidden" id="email_id" placeholder="alex@gmail.com" class="input email is-medium" autocomplete="username" name="email" value=""> --}}
 
                 <?php
 
                     $formArray = [
                         'changePassword_notification' => 'showError',
-                        'email' => 'email',
                         'password' => 'password',
                         'confirm_password' => 'password',
                         'token' => 'token',

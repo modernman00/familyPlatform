@@ -797,7 +797,7 @@ try {
       newLikeCounterVal = parseInt(likeCounterVal) + 1;
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal;
 
-      // Make the comment form to appear onclick
+      // Make the comment form to appear onclick. initcomment is the id of the comment button 
     } else if (elementId.includes("initComment")) {
       var commentFormId = elementId.replace('init', 'form');
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
@@ -835,7 +835,6 @@ try {
 
           axios__WEBPACK_IMPORTED_MODULE_3___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
             // 3.
-
             showTheComment(res.data.message);
           });
         })["catch"](function (error) {
@@ -997,11 +996,11 @@ var showPostImg = function showPostImg(data) {
     }
   }
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\"\n              class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
+    return "\n        <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
   };
-  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n\n      ".concat(postImg.map(function (pics, i) {
+  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n            ".concat(postImg.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
-  }), "\n        <br>\n      </div>");
+  }), "\n          <br>\n        </div>");
 };
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
@@ -1079,6 +1078,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 
 
+localStorage.removeItem('redirect');
 
 
 

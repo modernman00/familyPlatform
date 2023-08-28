@@ -5,16 +5,14 @@ import ('../global').then(response => {
 
     // Hide the loader element initially
     const loaderElement = response.id('setLoader');
-    loaderElement.style.display = 'none';
+    // loaderElement.style.display = 'none';
 
     // Function to handle the submission of change password form
     const submitChangePW = async(e) => {
         e.preventDefault();
         try {
 
-
-            const passwordElement = response.id('password_id');
-            const password = passwordElement.value;
+            const password = response.id('password_id').value;
 
             // Remove any previous error notifications
             const changePasswordNotificationElement = response.id('changePassword_notification');
@@ -56,4 +54,4 @@ const confirmPs = document.getElementById("confirm_password_id")
 currentPs.setAttribute('autocomplete', 'new-password')
 confirmPs.setAttribute('autocomplete', 'new-password')
 emailID.setAttribute('type', 'hidden')
-emailLabel.style.display = "none"
+// emailLabel.style.display = "none"

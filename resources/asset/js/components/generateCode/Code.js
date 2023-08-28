@@ -25,7 +25,7 @@ const LoginCode = (e) => {
 
         postFormData("/login/code", "codeForm", location)
 
-        localStorage.removeItem('redirect')
+      
 
     } catch (err) {
         showError(err)

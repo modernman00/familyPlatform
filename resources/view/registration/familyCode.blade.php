@@ -49,7 +49,7 @@ body{
 
     </style>
 
-    <div class="styleForm" style="margin-top: 2rem;">
+<div class="styleForm" style="margin-top: 2rem;">
 
   <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
 
@@ -69,28 +69,29 @@ body{
       $form->genForm();
       @endphp
     
-    <br>
+      <br>
 
 
-   <div class="field has-addons is-expanded has-addons-centered">
-      <div class="control" id="createFamCode">
+    <div class="field has-addons is-expanded has-addons-centered">
+        <div class="control" id="createFamCode">
 
-        <input class="input is-large" type="text" id="createCode" placeholder="Your family code will appear here" readonly>
+          <input class="input is-large" type="text" id="createCode" placeholder="Your family code will appear here" readonly>
 
-      </div>
+        </div>
 
-      <div class="control">
-        <button id="copyIcon" class="button is-primary is-large">
-          <i class="fa fa-copy" style="cursor: pointer;color:red"></i>
-          <span id="clipcopy"> copy</span>
+        <div class="control">
+          <button type ="button" id="copyIcon" class="button is-primary is-large">
+            <i class="fa fa-copy" style="cursor: pointer;color:red"></i>
+            <span id="clipcopy"> copy</span>
           </button>
 
-      </div>
+        </div>
     </div>
-    <br>
+      <br>
 
-    <p class="subtitle">By generating a unique Family Code, you'll unlock the full potential of our platform, allowing your family to share moments, memories, and experiences like never before. Embrace the power of togetherness on the Family Platform today! </p>
-</p>
+    <p class="subtitle">
+        By generating a unique Family Code, you'll unlock the full potential of our platform, allowing your family to share moments, memories, and experiences like never before. Embrace the power of togetherness on the Family Platform today! </p>
+    </p>
 
 </div>
 

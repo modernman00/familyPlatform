@@ -14,42 +14,64 @@ const config = {
 
 const renderHtml = (el) => {
     if (el) {
+        const theImg = `/img/profile/${el.img}`
+        // const avatar = (el.gender === 'Male') ? `/img/profile/avatarM.png` : `/img/profile/avatarF.png`
+
+        // console.log(avatar)
+
+        localStorage.setItem("addFamilyButton", `${el.id}`)
+
         id('allMembers').classList.remove('loader')
-        const img = (el.img) ? `/img/profile/${el.img}` : "/avatar/avatarF.png"
+        // const img = (el.img) 
 
-        const html = `<div class="col-sm-3 mb-3" id=${el.id}>
-        <div class="card">
-         <img src="${img}" class="card-img-top allMember_profileImg" width="300" height="300" alt="profile img">
- 
-        <div class="card-body">
-                    <h4 class='card-title'>${el.firstName} ${el.lastName}</h4>
-                    <p class="card-text allMember_card_content">
-        
-                    <br> <b>Father:</b>  ${el.fatherName}
-                    <br> <b>Mother:</b> ${el.motherName}
-                    <br> <b>Spouse:</b> ${el.spouseName && 'none'}
-                    <br> <b>Email:</b>  ${el.email} 
-                    <br> <b>Mobile:</b>   ${el.mobile} 
-                    <br> <b>Date joined:</b> ${format(el.date_created)}
-                    </p>
-                    <button class="btn btn-primary"> Add to your family</button>
+        const html = `
+        <div class="col-sm-3 mb-3" id=${el.id}>
+            <div class="card">
+                <img src="${theImg}" 
+                    class="card-img-top allMember_profileImg" 
+                    width="200" height="300" alt="profile img">
+    
+                <div class="card-body">
+                            <h5 class='card-title'>${el.firstName} ${el.lastName}</h5>
+                            <p class="card-text allMember_card_content">
+                            <br> <b>Father:</b>  ${el.fatherName}
+                            <br> <b>Mother:</b> ${el.motherName}
+                            <br> <b>Spouse:</b> ${el.spouseName && 'none'}
+                            <br> <b>Email:</b>  ${el.email} 
+                    
+                            <br> <b>Mobile:</b>   ${el.mobile} 
+                            <br> <b>Id:</b>   ${el.id} 
+                            <br> <b>Date joined:</b> ${format(el.date_created)}
+                            </p>
 
+                              <div class="card-body">
+                            <a 
+                            href="/allMembers/setProfile?id=${el.id}" 
+                            class="btn btn-primary card-link" >
+                               See Profile
+                            </a> 
+               
+                            <button type="button" class="btn btn-success" id="addFamily${el.id}">
+                                Add to family
+                            </a>
+                             </div>
+                            
                 </div>
-                </div>
-            </div>`
+                
+             
+            </div>
+        </div>`
 
         id('allMembers').insertAdjacentHTML('beforeend', html)
 
     } else {
 
         return `<p> Sorry, we could find the data</p>`
-
     }
 
 }
 
 const URL = process.env.MIX_APP_URL2
-
 
 axios.get(URL + 'allMembers/processApiData', config)
     .then(function(response) {
@@ -66,7 +88,6 @@ axios.get(URL + 'allMembers/processApiData', config)
 
             renderHtml(el)
         })
-
         const input = () => {
 
             let inputVal = id('searchFamily').value
@@ -81,8 +102,6 @@ axios.get(URL + 'allMembers/processApiData', config)
                 })
             }
 
-
-
             if (inputVal) {
                 id('allMembers').innerHTML = ""
 
@@ -93,7 +112,6 @@ axios.get(URL + 'allMembers/processApiData', config)
                     renderHtml(el)
                 })
             }
-
 
         }
 

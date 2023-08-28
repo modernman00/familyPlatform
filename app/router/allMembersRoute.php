@@ -12,6 +12,8 @@ $router->map('GET', '/allMembers/getProfile', 'App\controller\members\AllMembers
 
 $router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
 
+// $router->map('POST', '/members/addToFamily', 'App\controller\members\FamilyRequest@addToFamily', 'add to family');
+
 
 
 

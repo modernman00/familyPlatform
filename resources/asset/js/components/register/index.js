@@ -5,6 +5,7 @@ import "./processForm"
 import "./mobileNameCheck"
 import "./injectCountryCode"
 import "./familyCode"
+import "./modal"
 
 const currentPs = document.getElementById("password_id")
 const confirmPs = document.getElementById("confirm_password_id")

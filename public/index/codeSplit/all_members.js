@@ -1,6 +1,39 @@
 "use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/all_members"],{
 
+/***/ "./resources/asset/js/components/allMembers/FamilyRequest.js":
+/*!*******************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/FamilyRequest.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+document.onclick = function (e) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e.target.id);
+  var ApproverId = e.target.id;
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(ApproverId).innerHTML = "Request sent";
+  // the request sent should also go to the database and should form the basis of the innerHTML OF THE BUTTON 
+
+  /**
+   * Get the requester's detail (firstName and Surname, profileImg)
+   * Limit requester to people who already have upload their profile pics
+   * Get the approver's details (firstName and Surname, email)
+   * send notification to the requester and approvers homepage
+   *    build a notification button 
+   *    build a pop to show the notification 
+   *    update the notification for new request, new post, events 
+   *     send an email to the approver to approve the request 
+   */
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/allMembers/api.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/allMembers/api.js ***!
@@ -27,9 +60,16 @@ var config = {
 };
 var renderHtml = function renderHtml(el) {
   if (el) {
+    var theImg = "/img/profile/".concat(el.img);
+    // const avatar = (el.gender === 'Male') ? `/img/profile/avatarM.png` : `/img/profile/avatarF.png`
+
+    // console.log(avatar)
+
+    localStorage.setItem("addFamilyButton", "".concat(el.id));
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
-    var img = el.img ? "/img/profile/".concat(el.img) : "/avatar/avatarF.png";
-    var html = "<div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n        <div class=\"card\">\n         <img src=\"").concat(img, "\" class=\"card-img-top allMember_profileImg\" width=\"300\" height=\"300\" alt=\"profile img\">\n \n        <div class=\"card-body\">\n                    <h4 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h4>\n                    <p class=\"card-text allMember_card_content\">\n        \n                    <br> <b>Father:</b>  ").concat(el.fatherName, "\n                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                    <br> <b>Email:</b>  ").concat(el.email, " \n                    <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                    </p>\n                    <button class=\"btn btn-primary\"> Add to your family</button>\n\n                </div>\n                </div>\n            </div>");
+    // const img = (el.img) 
+
+    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                            <br> <b>Father:</b>  ").concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                            <br> <b>Id:</b>   ").concat(el.id, " \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n                            <a \n                            href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\" >\n                               See Profile\n                            </a> \n               \n                            <button type=\"button\" class=\"btn btn-success\" id=\"addFamily").concat(el.id, "\">\n                                Add to family\n                            </a>\n                             </div>\n                            \n                </div>\n                \n             \n            </div>\n        </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
@@ -93,6 +133,8 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiDat
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./resources/asset/js/components/allMembers/api.js");
+/* harmony import */ var _FamilyRequest__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./FamilyRequest */ "./resources/asset/js/components/allMembers/FamilyRequest.js");
+
 
 
 /***/ }),

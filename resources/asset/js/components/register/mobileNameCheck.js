@@ -74,7 +74,7 @@ const setInput = (name, value) => {
     genId.style.display = "block";
 
 
-    genId.innerHTML = mobile.includes(value) ?
+    genId.innerHTML = mobile.includes(value) || email.includes(value) ?
         `Great news that your ${name} is already on the platform` :
         `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text/email to register to the platform</i>?</h4>${checkBox(name)}`;
 
@@ -313,9 +313,11 @@ document.onkeydown = (e) => {
                         email: emailValue,
                         name: nameValue,
                         yourName: `${fName} ${lName}`,
+                         familyCode: id(`familyCode_id`).value
+       
                     },
 
-                    subject: `${fName} ${lName} recommended that you join your family network.`,
+                    subject: `${fName} ${lName} Wants You: Experience the Magic of your Family Network Today!`,
                 };
 
                 axios

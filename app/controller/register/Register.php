@@ -14,38 +14,27 @@ use Exception;
 
 class Register extends Db
 {
-    /**
-     * @var string[]
-     *
-     * @psalm-var array{0: 'personal', 1: 'work', 2: 'contact', 3: 'account', 4: 'otherFamily', 5: 'post', 6: 'comment'}
-     * if you add a new table, then you should add the data going to the table to this private function tableData(array $cleanPostData)
-     */
-    private array $table = ['personal', 'work', 'contact',  'account', 'otherFamily', 'post', 'comment', 'profile_pics', 'events'];
+
 
     public function index(): void
     {
         try {
 
-            // if($_SESSION['FAMILYCODE'])
-            // {
+            $_SESSION['register'] = true;
             view('registration/register');
-            // } else {
-            //     view('registration/familyCode');
-            // }
-
-
-
         } catch (\Throwable $e) {
 
             showError($e);
         }
     }
 
-     public function createFamilyCode()
+    public function createFamilyCode()
     {
         try {
 
-            view('registration/familyCode');
+            if ($_SESSION['register']) {
+                view('registration/familyCode');
+            }
         } catch (\Throwable $e) {
 
             showError($e);
@@ -55,7 +44,7 @@ class Register extends Db
     public function nextStep(): void
     {
         try {
-
+            $_SESSION['register'] = false;
             view('registration/nextStep');
         } catch (\Throwable $e) {
 
@@ -112,32 +101,46 @@ class Register extends Db
                 throw new Exception("Your email-{$cleanData['email']} is already registered");
             }
 
-            CheckToken::tokenCheck('token');
+            // CheckToken::tokenCheck('token');
+
+       
 
             // time to submit the input data to database
 
-            $countTable = count($this->table);
+            $getTableData = $this->tableData($cleanData);
 
-            for ($i = 0; $i < $countTable; $i++) {
-                SubmitForm::submitForm($this->table[$i], $tableData[$i]);
+            try {
+                foreach ($getTableData as $tableName => $tableData) {
+                    if(!SubmitForm::submitForm($tableName, $tableData)){
+                        msgException(406, "$tableName didn't submit");
+                    }
+                    
+                }
+
+                //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
+
+                $kidsCount = (int) $cleanData['kids'];
+                $siblingsCount = (int) $cleanData['siblings'];
+                $this->processKidSibling('kid', $kidsCount, $cleanData);
+                $this->processKidSibling('sibling', $siblingsCount, $cleanData);
+
+
+                $sendEmailArray = genEmailArray(
+                    "msg/appSub",
+                    $cleanData,
+                    "We have received your application",
+                );
+                sendEmailWrapper($sendEmailArray, 'member');
+
+                $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
+
+                msgSuccess(200, $successMsg);
+            } catch (\Throwable $th) {
+                // Roll back the transaction on failure
+                // $connection->rollBack();
+
+                showError($th);
             }
-            //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-
-            $kidsCount = (int) $cleanData['kids'];
-            $siblingsCount = (int) $cleanData['siblings'];
-            $this->processKidSibling('kid', $kidsCount, $cleanData);
-            $this->processKidSibling('sibling', $siblingsCount, $cleanData);
-
-            $sendEmailArray = genEmailArray(
-                "msg/appSub",
-                $cleanData,
-                "We have received your application",
-            );
-            sendEmailWrapper($sendEmailArray, 'member');
-
-            $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
-
-            msgSuccess(200, $successMsg);
         } catch (\Throwable $th) {
 
             showError($th);
@@ -155,22 +158,35 @@ class Register extends Db
     {
         try {
             for ($i = 1; $i <= $typeCount; $i++) {
-                $dataArr = [
-                    "{$type}_name" => $data["{$type}_name$i"],
-                    "{$type}_email" => $data["{$type}_email$i"],
-                    "{$type}_linked" => $data["{$type}_option$i"],
-                    "id" => $data["id"],
-                ];
+                $dataArr = $this->prepareDataArray($type, $i, $data);
 
-                $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) VALUES (:{$type}_name, :{$type}_email, :{$type}_linked, :id)";
-                $query = $this->connect()->prepare($sql);
-                $query->execute($dataArr);
+                $this->insertData($type, $dataArr);
             }
         } catch (\Throwable $th) {
             http_response_code(406);
             showError($th);
         }
     }
+
+    private function prepareDataArray(string $type, int $index, array $data): array
+    {
+        return [
+            "{$type}_name" => $data["{$type}_name$index"],
+            "{$type}_email" => $data["{$type}_email$index"],
+            "{$type}_linked" => $data["{$type}_option$index"],
+            "id" => $data["id"],
+        ];
+    }
+
+    private function insertData(string $type, array $dataArr): void
+    {
+        $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) 
+            VALUES (:{$type}_name, :{$type}_email, :{$type}_linked, :id)";
+
+        $query = $this->connect()->prepare($sql);
+        $query->execute($dataArr);
+    }
+
 
     /**
      * @return (int|string)[][]
@@ -183,8 +199,7 @@ class Register extends Db
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
             'max' => [15, 15, 35, 35, 20, 16, 30, 15, 30],
             'data' => [
-                'firstName',
-                'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
+                'firstName','lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
             ]
         ];
     }
@@ -226,9 +241,9 @@ class Register extends Db
      */
     private function tableData(array $cleanPostData): array
     {
-        $profileAvatar = $cleanPostData['gender'] === "male" ? "avatarM.jpeg" : "avatarF.png";
+        $profileAvatar = $cleanPostData['gender'] === "Male" ? "avatarM.png" : "avatarF.png";
         return [
-            [
+            'personal' =>  [
                 'firstName' => $cleanPostData['firstName'],
                 'lastName' => $cleanPostData['lastName'],
                 'familyCode' => $cleanPostData['familyCode'],
@@ -240,29 +255,28 @@ class Register extends Db
                 'year' => $cleanPostData['year'],
                 'id' => $cleanPostData['id'],
             ],
-            [
+            'work' => [
                 'employmentStatus' => $cleanPostData['employmentStatus'],
                 'occupation' => $cleanPostData['occupation'],
                 'id' => $cleanPostData['id']
             ],
-            [
+            'contact' => [
 
                 'email' => $cleanPostData['email'],
                 'country' => $cleanPostData['country'],
                 'mobile' => $cleanPostData['mobile'],
                 'id' => $cleanPostData['id'],
             ],
-            [
+            'account' => [
                 'email' => $cleanPostData['email'],
                 'password' => $cleanPostData['password'],
                 'status' => 'new',
                 'type' => 'member',
                 'id' => $cleanPostData['id'],
             ],
-            [
+            'otherFamily' => [
                 'spouseName' => $cleanPostData['spouseName'],
                 'spouseMobile' => $cleanPostData['spouseMobile'],
-                'maidenName' => $cleanPostData['maidenName'],
                 'spouseEmail' => $cleanPostData['spouseEmail'],
                 'fatherName' => $cleanPostData['fatherName'],
                 'fatherMobile' => $cleanPostData['fatherMobile'],
@@ -270,26 +284,27 @@ class Register extends Db
                 'motherName' => $cleanPostData['motherName'],
                 'motherMobile' => $cleanPostData['motherMobile'],
                 'motherEmail' => $cleanPostData['motherEmail'],
+                'motherMaiden' => $cleanPostData['maidenName'],
                 'id' => $cleanPostData['id']
             ],
-            [
+            'post' => [
                 'fullName' => $cleanPostData['firstName'],
                 'postMessage' => "Hey, welcome to your page",
                 'profileImg' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ],
-            [
+            'comment' => [
                 'fullName' => $cleanPostData['firstName'],
                 'comment' => "Your comment will show here",
                 'profileImg' => $profileAvatar,
                 'post_no' => 1000,
                 'id' => $cleanPostData['id']
             ],
-            [
+            'profile_pics' => [
                 'img' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ],
-            [
+            'events' => [
                 'eventName' => "{$cleanPostData['firstName']} Birthday",
                 'eventDate' => $cleanPostData['eventDate'],
                 'eventType' => 'Birthday',

@@ -430,4 +430,63 @@
 
   @endphp
 
+{{-- THE FAMILY CODE MODAL --}}
+
+  <div id="modal-familyCode" class="modal">
+  <div class="modal-background"></div>
+
+  <div class="modal-content">
+    <div class="box">
+  
+      <div class="styleForm" style="margin-top: 2rem;">
+
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
+
+
+
+      @php
+
+      $formArray = [
+        'Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you have not received a Code from a registered family member, worry not! You can create one below to bring your family together:' => 'subtitle',
+
+        'surname' => 'text',
+
+        'Generate your family code' => 'button'
+      ];
+
+      $form = new App\classes\BuildFormBulma($formArray);
+      $form->genForm();
+      @endphp
+    
+      <br>
+
+
+    <div class="field has-addons is-expanded has-addons-centered">
+        <div class="control" id="createFamCode">
+
+          <input class="input is-large" type="text" id="createCode" placeholder="Your family code will appear here" readonly>
+
+        </div>
+
+        <div class="control">
+          <button id="copyIcon" class="button is-primary is-large">
+            <i class="fa fa-copy" style="cursor: pointer;color:red"></i>
+            <span id="clipcopy"> copy</span>
+            </button>
+
+        </div>
+    </div>
+      <br>
+
+    <p class="subtitle">
+        By generating a unique Family Code, you'll unlock the full potential of our platform, allowing your family to share moments, memories, and experiences like never before. Embrace the power of togetherness on the Family Platform today! </p>
+    </p>
+
+</div>
+    </div>
+  </div>
+
+  <button type="button" class="modal-close is-large" aria-label="close"></button>
+</div>
+
 </form> @endsection

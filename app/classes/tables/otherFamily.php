@@ -12,8 +12,8 @@ class OtherFamily extends Insert
     {
         try {
             $sql = "CREATE TABLE IF NOT EXISTS  `family`.`otherFamily` ( 
-                    `no` INT NOT NULL AUTO_INCREMENT , 
-                    `id` VARCHAR(255) NOT NULL , 
+                `no` INT NOT NULL AUTO_INCREMENT , 
+                `id` VARCHAR(255) NOT NULL , 
                 `spouse` TEXT NOT NULL ,
                 `spouseEmail` TEXT NOT NULL ,
                 `fatherName` TEXT NOT NULL,

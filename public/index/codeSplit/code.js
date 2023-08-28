@@ -33,7 +33,6 @@ var LoginCode = function LoginCode(e) {
     var location = localStorage.getItem('redirect');
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(location);
     (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/code", "codeForm", location);
-    localStorage.removeItem('redirect');
   } catch (err) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   }

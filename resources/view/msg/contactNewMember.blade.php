@@ -12,7 +12,7 @@
 Hello {{ $data['name'] }}, <br> <br>
 
 
-{{ $data['yourName'] }} I hope this message finds you well.<br><br> I wanted to reach out to inform you that OLAOGUN has recently joined your family network and highly recommends that you do the same. Your family network provides a wonderful platform for connecting with other family members, exchanging messages, exploring the family tree structure, and receiving important event alerts. <br><br>
+I hope this message finds you well.<br><br> {{ $data['yourName'] }} has recently joined your family network and highly recommends that you do the same. Your family network provides a wonderful platform for connecting with other family members, exchanging messages, exploring the family tree structure, and receiving important event alerts. <br><br>
 
 To join the family network and start enjoying these benefits, simply go to our website below: <br><br>
 

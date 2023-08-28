@@ -2,4 +2,6 @@
 
 $router->map('GET', '/createTable', 'App\controller\Create@index', 'create Table');
 
+$router->map('GET', '/createRequest', 'App\controller\Create@createFriendRequest', 'createFriendRequest');
+
 $router->map('GET', '/alterTable', 'App\controller\AddCol@addCol', 'alter Table');

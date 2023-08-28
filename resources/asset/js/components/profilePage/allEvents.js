@@ -73,7 +73,7 @@ try {
             id(likeCounterId).innerHTML = newLikeCounterVal;
 
 
-            // Make the comment form to appear onclick
+            // Make the comment form to appear onclick. initcomment is the id of the comment button 
         } else if (elementId.includes("initComment")) {
 
             const commentFormId = elementId.replace('init', 'form')
@@ -114,11 +114,10 @@ try {
                 axios.post('/postCommentProfile', formEntries, options)
                     .then(response => {
                         // 2. note. message returns the new post_no from the database
-
+                       
                         axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
                             .then(res => {
                                 // 3.
-
                                 showTheComment(res.data.message)
                             })
                     }
@@ -167,8 +166,9 @@ try {
                     id('id01').style.display = 'none'
                 })
 
+        } 
+
         }
-    }
 } catch (e) {
     showError(e)
 }

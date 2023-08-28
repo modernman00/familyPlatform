@@ -127,7 +127,7 @@ function msgException(int $errCode, string | int  $msg)
     // echo json_encode(['message' => $msg]);
     // //   echo json_encode($msg);
     // // Rollbar::log(Level::info(), $msg);
-    throw new Exception($msg, $errCode);
+   throw new Exception($msg, $errCode);
 }
 
 function msgSuccess(int $code, string|array $msg, mixed $token = null): void

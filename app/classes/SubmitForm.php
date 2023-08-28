@@ -9,6 +9,7 @@ class SubmitForm extends Db
     public static function submitForm($table, $field): bool | string
     {
         try {
+            $connection = self::connect2();
             // EXTRACT THE KEY FOR THE COL NAME
             $key = array_keys($field);
             $col = implode(', ', $key);
@@ -17,7 +18,7 @@ class SubmitForm extends Db
             $placeholder = implode(', :', $key);
             // prep statement using placeholder :name
             $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
-            $query = self::connect2()->prepare($stmt);
+            $query = $connection->prepare($stmt);
             if (!$query) {
                 http_response_code(417);
                 throw new \Exception("Not able to insert data", 1);

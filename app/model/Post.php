@@ -22,14 +22,14 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$imgPath]);
     }
 
-    static function commentByNo(int $commentNo): array|int|string
+    static function commentByNo(int|string $commentNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
         return parent::selectFn2(query: $query, bind: [$commentNo]);
     }
 
 
-    static function postByNo(int $postNo): array|int|string
+    static function postByNo(int|string $postNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
         return parent::selectFn2(query: $query, bind: [$postNo]);

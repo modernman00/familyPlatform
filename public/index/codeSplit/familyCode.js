@@ -35,51 +35,60 @@ button.addEventListener("click", function () {
 var copyIcon = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('copyIcon');
 var htmlOutputDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createFamCode');
 var htmlOutput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createCode');
-copyIcon.addEventListener('click', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
-  var range, selection;
-  return _regeneratorRuntime().wrap(function _callee$(_context) {
-    while (1) switch (_context.prev = _context.next) {
-      case 0:
-        copyIcon.innerHTML = "";
-        _context.prev = 1;
-        if (!htmlOutput.value) {
-          _context.next = 17;
+copyIcon.addEventListener('click', /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
+    var range, selection;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          copyIcon.innerHTML = "";
+          _context.prev = 1;
+          e.preventDefault();
+
+          // check if the family code has been generated 
+          if (!htmlOutput.value) {
+            _context.next = 18;
+            break;
+          }
+          if (!(navigator.clipboard && navigator.clipboard.writeText)) {
+            _context.next = 9;
+            break;
+          }
+          _context.next = 7;
+          return navigator.clipboard.writeText(htmlOutput.value);
+        case 7:
+          _context.next = 16;
           break;
-        }
-        if (!(navigator.clipboard && navigator.clipboard.writeText)) {
-          _context.next = 8;
+        case 9:
+          // Fallback to the deprecated method
+          range = document.createRange();
+          range.selectNode(htmlOutputDiv);
+          selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('copy');
+          selection.removeAllRanges();
+        case 16:
+          copyIcon.innerHTML = "copied";
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('familyCode_id').value = htmlOutput.value;
+          // location.replace('/register');
+        case 18:
+          _context.next = 23;
           break;
-        }
-        _context.next = 6;
-        return navigator.clipboard.writeText(htmlOutput.value);
-      case 6:
-        _context.next = 15;
-        break;
-      case 8:
-        // Fallback to the deprecated method
-        range = document.createRange();
-        range.selectNode(htmlOutputDiv);
-        selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        document.execCommand('copy');
-        selection.removeAllRanges();
-      case 15:
-        copyIcon.innerHTML = "copied";
-        location.replace('/register');
-      case 17:
-        _context.next = 22;
-        break;
-      case 19:
-        _context.prev = 19;
-        _context.t0 = _context["catch"](1);
-        console.error('Unable to copy the HTML output: ', _context.t0);
-      case 22:
-      case "end":
-        return _context.stop();
-    }
-  }, _callee, null, [[1, 19]]);
-})));
+        case 20:
+          _context.prev = 20;
+          _context.t0 = _context["catch"](1);
+          console.error('Unable to copy the HTML output: ', _context.t0);
+        case 23:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[1, 20]]);
+  }));
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}());
 
 /***/ })
 
