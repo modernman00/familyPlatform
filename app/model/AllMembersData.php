@@ -26,9 +26,12 @@ class AllMembersData extends InnerJoin
             throw new Exception(self::ERR_MSG, 400);
         }
 
-
+            // dump($memberData);
         return $memberData;
     }
+
+  
+
 
     public function getAllMembersNoPics(): array
     {

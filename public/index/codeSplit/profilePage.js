@@ -906,7 +906,7 @@ var displayNone = function displayNone() {
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('cancelModal').addEventListener('click', displayNone);
 var eventHtml = function eventHtml(data) {
-  return "<p class='eventInfo'><strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+  return "<p class='eventInfo'>\n                    <strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
 };
 var checkEventAndAdd = function checkEventAndAdd(data) {
   var appendEvent = eventHtml(data);
@@ -931,7 +931,7 @@ var process = function process(e) {
       axios__WEBPACK_IMPORTED_MODULE_2___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
         // use the event no to get the last event from the database
         axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/getEventByNo?eventNo=".concat(response.data.message)).then(function (res) {
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(res.data);
+          // log(res.data)
           // add new event real time
           checkEventAndAdd(res.data.message);
         });
@@ -1140,7 +1140,7 @@ try {
       return updateComment(e);
     });
     var updatePost = function updatePost(e) {
-      if (e.origin != "http://olaogun.dev.com") {
+      if (e.origin != "http://olaogun.test/") {
         throw new Error("What is your origin?");
       }
       if (e.data) {
@@ -1210,7 +1210,7 @@ try {
 
   // handle post message
 } catch (e) {
-  console.log(e.message);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(e);
 }
 
 /***/ })

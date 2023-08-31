@@ -14,22 +14,63 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-document.onclick = function (e) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(e.target.id);
-  var ApproverId = e.target.id;
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(ApproverId).innerHTML = "Request sent";
-  // the request sent should also go to the database and should form the basis of the innerHTML OF THE BUTTON 
+// import axios from "axios";
 
-  /**
-   * Get the requester's detail (firstName and Surname, profileImg)
-   * Limit requester to people who already have upload their profile pics
-   * Get the approver's details (firstName and Surname, email)
-   * send notification to the requester and approvers homepage
-   *    build a notification button 
-   *    build a pop to show the notification 
-   *    update the notification for new request, new post, events 
-   *     send an email to the approver to approve the request 
-   */
+// the request sent should also go to the database and should form the basis of the innerHTML OF THE BUTTON 
+
+/**
+ * Get the requester's detail (firstName and Surname, profileImg)
+ * Limit requester to people who already have upload their profile pics
+ * Get the approver's details (firstName and Surname, email)
+ * send notification to the requester and approvers homepage
+ *    build a notification button 
+ *    build a pop to show the notification 
+ *    update the notification for new request, new post, events 
+ *     send an email to the approver to approve the request 
+ */
+
+document.onclick = function (e) {
+  try {
+    // put the target id into a variable
+    var targetId = e.target.id;
+    // check if the id includes addFamily
+    if (targetId.includes('addFamily')) {
+      // change the button HTML to request sent and disable the button so it cant be used again
+      var changedBtnHTML = "Request sent";
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(targetId).innerHTML = changedBtnHTML;
+      if (changedBtnHTML === "Request sent") {
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(targetId).disabled = true;
+      }
+
+      // update the database (profile_pics - buttonHTML)
+
+      var getApproverDetails = localStorage.getItem('approverDetails');
+      var approverDetails = JSON.parse(getApproverDetails);
+
+      // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the personal.blade.php
+      var getRequesterDetails = localStorage.getItem('profile');
+      var requesterDetails = JSON.parse(getRequesterDetails);
+
+      // submit the approver and requester ids to database - RequestTable
+
+      var familyRequestMgt = {
+        requester: requesterDetails,
+        approver: approverDetails,
+        emailPath: "msg/request",
+        subject: "".concat(requesterDetails['firstName'], " ").concat(requesterDetails['lastName'], " sent you a family request")
+      };
+
+      // send for server processing 
+      axios__WEBPACK_IMPORTED_MODULE_0___default().post("/members/familyRequestMgt", familyRequestMgt).then(function (response) {
+        // change the html of the button
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data.message);
+      })["catch"](function (error) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+      });
+    }
+  } catch (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(error);
+  }
 };
 
 /***/ }),
@@ -49,7 +90,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-// import { eventInput } from "./event"
 
 var config = {
   headers: {
@@ -58,69 +98,94 @@ var config = {
     'Accept': 'application/json'
   }
 };
+var famCode = localStorage.getItem('requesterFamCode');
 var renderHtml = function renderHtml(el) {
   if (el) {
     var theImg = "/img/profile/".concat(el.img);
-    // const avatar = (el.gender === 'Male') ? `/img/profile/avatarM.png` : `/img/profile/avatarF.png`
+    var approverObj = {
+      approverFirstName: el.firstName,
+      approverLastName: el.lastName,
+      approverEmail: el.email,
+      approverId: el.id
+    };
+    localStorage.setItem("approverDetails", JSON.stringify(approverObj));
 
-    // console.log(avatar)
+    // only show this button if the famcode and el.familyCode do not match
 
-    localStorage.setItem("addFamilyButton", "".concat(el.id));
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     // const img = (el.img) 
 
-    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                            <br> <b>Father:</b>  ").concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                            <br> <b>Id:</b>   ").concat(el.id, " \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n                            <a \n                            href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\" >\n                               See Profile\n                            </a> \n               \n                            <button type=\"button\" class=\"btn btn-success\" id=\"addFamily").concat(el.id, "\">\n                                Add to family\n                            </a>\n                             </div>\n                            \n                </div>\n                \n             \n            </div>\n        </div>");
+    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n\n                            ").concat(famCode === el.famCode ? "  <br> <b>Father:</b>  ".concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                         \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n\n                            <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\">\n                               See Profile\n                            </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">Add to family</button></div>"), "       \n                </div>\n                \n             \n            </div>\n        </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
   }
 };
 var URL = "http://olaogun.test/";
+var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers');
+var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+var renderMembers = function renderMembers(data, container, noMemberMessage) {
+  container.innerHTML = ""; // Clear container content
+
+  if (data) {
+    data.forEach(renderHtml); // Render data if available
+  } else {
+    container.innerHTML = noMemberMessage; // Display no member message
+  }
+};
+
+/** it will only show all members with the same code but will search the only ecosystem */
+
 axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiData', config).then(function (response) {
   (0,_helper_general__WEBPACK_IMPORTED_MODULE_3__.loaderIcon)();
-
   // add loader
-
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
-  response.data.map(function (el) {
-    renderHtml(el);
-  });
-  var input = function input() {
-    var inputVal = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').value;
-    if (inputVal == "") {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
-      response.data.map(function (el) {
-        renderHtml(el);
-      });
+  // check if the family code is set and if so, filter the data
+  var dataWithFamCode;
+  if (famCode) {
+    dataWithFamCode = response.data.filter(function (el) {
+      return el.famCode == famCode;
+    });
+    renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
+  }
+
+  // this is for the search input 
+  // Define a function to handle input changes
+  var handleInput = function handleInput() {
+    // Get the value of the search input
+    var searchInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily');
+    var inputVal = searchInput.value.trim().toLowerCase();
+    allMembersContainer.innerHTML = "";
+
+    // Clear the content if the input is empty
+    if (inputVal === "") {
+      // Render HTML for all members using forEach
+
+      renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
     }
-    if (inputVal) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
-      var filter = response.data.filter(function (el) {
-        return el.firstName.toLowerCase().includes(inputVal.toLowerCase());
+
+    // If there's an input value
+    else {
+      // Filter data based on input value checking first and last name
+      var filteredData = response.data.filter(function (el) {
+        return el.firstName.toLowerCase().includes(inputVal.toLowerCase()) || el.lastName.toLowerCase().includes(inputVal.toLowerCase());
       });
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(filter);
-      filter.map(function (el) {
-        renderHtml(el);
-      });
+      if (filteredData.length === 0) {
+        allMembersContainer.innerHTML = "No matching name found.";
+      } else {
+        // Render HTML for filtered members using map
+        filteredData.forEach(renderHtml);
+      }
     }
   };
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('keyup', input);
 
-  // log(searchInput)
-
-  // const filteredData = data.filter(ele => {
-
-  // })
-
-  // response.data.map(el => {
-
-  //     renderHtml(el)
-  // })
+  // Attach input event listener to the search input
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('input', handleInput);
 })
 // id('allMembers').classList.remove('loader')
 ["catch"](function (err) {
-  return console.error(err.message);
+  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err.message);
 });
 
 /***/ }),

@@ -127,14 +127,14 @@ function sendEmailGeneral($array, $recipient)
 
         ob_end_clean();
 
-        $email =  checkInputEmail($data['email']);
+        $email =  checkInputEmail($data['email'])?? $array['email'];
 
 
         if (!$email) {
             msgException(401, "Email not provided");
         }
 
-        $name = checkInput($data['name']) ?? 'there';
+        $name = checkInput($data['name']) ?? $array['name'];
 
         sendEmail($email, $name, $array['subject'], $emailContent);
     }

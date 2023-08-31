@@ -246,7 +246,7 @@ class Register extends Db
             'personal' =>  [
                 'firstName' => $cleanPostData['firstName'],
                 'lastName' => $cleanPostData['lastName'],
-                'familyCode' => $cleanPostData['familyCode'],
+                'famCode' => $cleanPostData['familyCode'],
                 'kids' => $cleanPostData['kids'],
                 'gender' => $cleanPostData['gender'],
                 'siblings' => $cleanPostData['siblings'],
@@ -285,6 +285,7 @@ class Register extends Db
                 'motherMobile' => $cleanPostData['motherMobile'],
                 'motherEmail' => $cleanPostData['motherEmail'],
                 'motherMaiden' => $cleanPostData['maidenName'],
+                'theFamCode' => $cleanPostData['familyCode'],
                 'id' => $cleanPostData['id']
             ],
             'post' => [

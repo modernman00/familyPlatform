@@ -1,6 +1,6 @@
 import { id, log } from '../global'
 import { appendNewPost, allPost, showComment } from '../profilePage/html'
-import { getApiData, getMultipleApiData } from "../helper/http"
+import { getMultipleApiData } from "../helper/http"
 import { render } from "timeago.js"
 import axios from "axios"
 
@@ -41,7 +41,7 @@ try {
         serverConnection.addEventListener("updateComment", (e) => updateComment(e))
 
         const updatePost = (e) => {
-            if (e.origin != "http://olaogun.dev.com") {
+            if (e.origin != process.env.MIX_APP_URL2) {
                 throw new Error("What is your origin?")
             }
 

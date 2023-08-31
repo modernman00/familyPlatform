@@ -6,7 +6,7 @@
 <form>
     {{--  <div class="form-group" style="margin-top: 30px;">  --}}
         <div class="mb-3 mt-3">
-               <input type="text" placeholder="search" name="searchFamily" class="form-control" id="searchFamily">
+               <input type="text" placeholder="search the family network" name="searchFamily" class="form-control" id="searchFamily">
          <p id="searchHidden"></p>
         </div>
       

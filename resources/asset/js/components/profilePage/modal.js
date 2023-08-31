@@ -1,5 +1,5 @@
 "use strict";
-import { id } from "../global"
+import { id, showError } from "../global"
 
 // import { postFormData } from "../helper/http"
 
@@ -19,5 +19,5 @@ try{
 // handle post message
 
 } catch (e) {
-    console.log(e.message)
+    showError(e)
 }
