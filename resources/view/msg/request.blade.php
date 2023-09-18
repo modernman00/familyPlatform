@@ -30,15 +30,18 @@ I hope this message finds you well.<br><br>
 
               <p style="font-size: 18px; margin: 0;">{{ $data['requesterFirstName'] }} {{ $data['requesterLastName'] }}</p>
 
+              <br><br>
+
               <div style="display: flex; justify-content: space-between; margin-top: 10px; margin-left: 70px margin-bottom: 10px;">
 
-                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}appr={{ $data['approverId'] }} style="text-decoration: none;background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px;">
+                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}&appr={{ $data['approverId'] }}&dec=50&reqCode={{ $data['requesterCode'] }}  style="text-decoration: none;background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px;">
                  Accept
                 </a>
 
-                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}appr={{ $data['approverId'] }}  
+                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}&appr={{ $data['approverId'] }}&dec=10  
                 style="text-decoration: none;background-color: #FF0000; color: white; border: none; padding: 8px 16px; border-radius: 4px;margin-top: 10px;">Decline
                 </a>
+                <br><br>
               </div>
             </div>
           </td>

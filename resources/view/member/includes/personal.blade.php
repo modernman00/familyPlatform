@@ -91,6 +91,7 @@
 
         };
      localStorage.setItem('requesterFamCode', @json($data['famCode']));
+      localStorage.setItem('requesterId', @json($data['id']));
 
         // Convert the object to a JSON string and store it in localStorage
 localStorage.setItem('profile', JSON.stringify(profile));

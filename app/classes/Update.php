@@ -18,7 +18,7 @@ class Update extends Db
    * @psalm-param 'token' $column
    * @psalm-param 'id' $identifier
    */
-  public function updateTable(string $column, array|string|false|null $columnAnswer, string $identifier, string $identifierAnswer)
+  public function updateTable(string $column, string $columnAnswer, string $identifier, string $identifierAnswer)
   {
     try {
       $query = "UPDATE $this->table SET $column =? WHERE $identifier = ?";
@@ -26,7 +26,70 @@ class Update extends Db
       $result->execute([$columnAnswer, $identifierAnswer]);
       return $result;
     } catch (PDOException $e) {
-      echo $e->getMessage(), PHP_EOL;
+      showError($e); PHP_EOL;
     }
   }
+
+  public function updateTableMulti(string $column, string $columnAnswer, array $identifiers)
+{
+    try {
+        // Build the SET clause for the column to update
+        $setClause = "$column = ?";
+
+        // Build the WHERE clause for each identifier
+        $whereClause = '';
+        $params = [$columnAnswer];
+
+        foreach ($identifiers as $identifier => $value) {
+            if ($whereClause !== '') {
+                $whereClause .= ' AND ';
+            }
+            $whereClause .= "$identifier = ?";
+            $params[] = $value;
+        }
+
+        // Construct the full SQL query
+        $query = "UPDATE $this->table SET $setClause WHERE $whereClause";
+
+        $result = parent::connect2()->prepare($query);
+        $result->execute($params);
+        return $result;
+    } catch (PDOException $e) {
+        showError($e); PHP_EOL;
+    }
+}
+
+public function updateTwoColumns(array $columns, array $columnAnswers, array $identifiers)
+{
+    try {
+        // Build the SET clause for the columns to update
+        $setClause = implode(' = ?, ', $columns) . ' = ?';
+
+        // Build the WHERE clause for each identifier
+        $whereClause = '';
+        $params = array_merge($columnAnswers, array_values($identifiers));
+
+        foreach ($identifiers as $identifier => $value) {
+            if ($whereClause !== '') {
+                $whereClause .= ' AND ';
+            }
+            $whereClause .= "$identifier = ?";
+        }
+
+        // Construct the full SQL query
+        $query = "UPDATE $this->table SET $setClause WHERE $whereClause";
+
+        $result = parent::connect2()->prepare($query);
+        $result->execute($params);
+        return $result;
+    } catch (PDOException $e) {
+        showError($e); PHP_EOL;
+    }
+}
+
+
+
+
+
+
 }

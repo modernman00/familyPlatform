@@ -47,7 +47,7 @@ document.onclick = function (e) {
       var getApproverDetails = localStorage.getItem('approverDetails');
       var approverDetails = JSON.parse(getApproverDetails);
 
-      // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the personal.blade.php
+      // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the member/includes/personal.blade.php
       var getRequesterDetails = localStorage.getItem('profile');
       var requesterDetails = JSON.parse(getRequesterDetails);
 
@@ -99,6 +99,7 @@ var config = {
   }
 };
 var famCode = localStorage.getItem('requesterFamCode');
+var reqId = localStorage.getItem('requesterId');
 var renderHtml = function renderHtml(el) {
   if (el) {
     var theImg = "/img/profile/".concat(el.img);
@@ -106,7 +107,8 @@ var renderHtml = function renderHtml(el) {
       approverFirstName: el.firstName,
       approverLastName: el.lastName,
       approverEmail: el.email,
-      approverId: el.id
+      approverId: el.id,
+      approverCode: el.famCode
     };
     localStorage.setItem("approverDetails", JSON.stringify(approverObj));
 
@@ -115,7 +117,7 @@ var renderHtml = function renderHtml(el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     // const img = (el.img) 
 
-    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n\n                            ").concat(famCode === el.famCode ? "  <br> <b>Father:</b>  ".concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                         \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n\n                            <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\">\n                               See Profile\n                            </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">Add to family</button></div>"), "       \n                </div>\n                \n             \n            </div>\n        </div>");
+    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                             <br> <b>Country:</b>  ").concat(el.country, " \n                             <br> <b>ref:</b>  ").concat(el.id, "\n\n                            ").concat(famCode == el.famCode || famCode == el.requesterCode ? "  <br> <b>Father:</b>  ".concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                            <br> <b>famCode:</b>  ").concat(el.famCode, " \n                             \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                         \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n\n                            <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\">\n                    \n                               See Profile\n                            </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">\n\n                ").concat(reqId == el.id && el.status ? el.status : "Add to family", "\n\n\n                </button></div>"), "       \n                </div>\n                \n             \n            </div>\n        </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we could find the data</p>";
@@ -143,10 +145,14 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiDat
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
   // check if the family code is set and if so, filter the data
   var dataWithFamCode;
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
+  if (!response.data) throw Error(' there is no data');
+  if (!famCode) throw Error(' there is no famCode');
   if (famCode) {
     dataWithFamCode = response.data.filter(function (el) {
-      return el.famCode == famCode;
+      return el.famCode == famCode || el.requesterCode == famCode;
     });
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(dataWithFamCode);
     renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
   }
 

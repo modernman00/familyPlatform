@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+
 use App\model\AllMembersData;
 
 use App\classes\{
@@ -18,6 +19,7 @@ class AllMembersController extends AllMembersData
     {
         try {
             view('member/allMembers');
+      
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -36,6 +38,7 @@ class AllMembersController extends AllMembersData
             }
 
             $result = $this->getAllMembers();
+   
             echo json_encode($result);
         } catch (\Throwable $th) {
             showError($th);

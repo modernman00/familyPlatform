@@ -25,71 +25,69 @@ import { showError } from "../global"
 
 document.onclick = (e) => {
 
-  try {
+    try {
 
-    // put the target id into a variable
-    const targetId = e.target.id;
-    // check if the id includes addFamily
-    if (targetId.includes('addFamily')) {
+        // put the target id into a variable
+        const targetId = e.target.id;
+        // check if the id includes addFamily
+        if (targetId.includes('addFamily')) {
 
-      // change the button HTML to request sent and disable the button so it cant be used again
-      const changedBtnHTML = "Request sent"
-      id(targetId).innerHTML = changedBtnHTML
+            // change the button HTML to request sent and disable the button so it cant be used again
+            const changedBtnHTML = "Request sent"
+            id(targetId).innerHTML = changedBtnHTML
 
-      if (changedBtnHTML === "Request sent") {
-        id(targetId).disabled = true;
-      }
+            if (changedBtnHTML === "Request sent") {
+                id(targetId).disabled = true;
+            }
 
-      // update the database (profile_pics - buttonHTML)
-
-
-      const getApproverDetails = localStorage.getItem('approverDetails');
-      const approverDetails = JSON.parse(getApproverDetails);
+            // update the database (profile_pics - buttonHTML)
 
 
-
-      // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the personal.blade.php
-      const getRequesterDetails = localStorage.getItem('profile');
-      const requesterDetails = JSON.parse(getRequesterDetails);
-
-      // submit the approver and requester ids to database - RequestTable
-
-      const familyRequestMgt = {
-        requester: requesterDetails,
-        approver: approverDetails,
-        emailPath: "msg/request",
-        subject: `${requesterDetails['firstName']} ${requesterDetails['lastName']} sent you a family request`,
-      }
-
-      // send for server processing 
-      axios
-        .post("/members/familyRequestMgt", familyRequestMgt)
-
-        .then((response) => {
-          // change the html of the button
-          log(response.data.message)
-
-        })
-        .catch((error) => {
-
-          showError(error);
-        });
+            const getApproverDetails = localStorage.getItem('approverDetails');
+            const approverDetails = JSON.parse(getApproverDetails);
 
 
+
+            // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the member/includes/personal.blade.php
+            const getRequesterDetails = localStorage.getItem('profile');
+            const requesterDetails = JSON.parse(getRequesterDetails);
+
+            // submit the approver and requester ids to database - RequestTable
+
+            const familyRequestMgt = {
+                requester: requesterDetails,
+                approver: approverDetails,
+                emailPath: "msg/request",
+                subject: `${requesterDetails['firstName']} ${requesterDetails['lastName']} sent you a family request`,
+            }
+
+            // send for server processing 
+            axios
+                .post("/members/familyRequestMgt", familyRequestMgt)
+
+            .then((response) => {
+                    // change the html of the button
+                    log(response.data.message)
+
+                })
+                .catch((error) => {
+
+                    showError(error);
+                });
+
+
+
+        }
+
+
+    } catch (error) {
+
+        log(error)
 
     }
-
-
-  } catch (error) {
-
-    log(error)
-
-  }
 
 
 
 
 
 }
-
-

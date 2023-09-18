@@ -23,6 +23,19 @@ function view($path, array $data = [])
     echo $blade->view()->make($path, $data)->render();
 }
 
+function toSendEmail(string $viewPath, array $data, string $subject, string $emailRoute)
+    {
+        // generate the data to send the email
+        $sendEmailArray = genEmailArray(
+            $viewPath,
+            $data,
+            $subject
+        );
+
+        // send the email
+        return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
+    }
+
 /**
  * @return false|string
  */

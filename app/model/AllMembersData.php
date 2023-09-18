@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\model;
 
 use Exception;
+use PDOException;
 
 use App\classes\{
     InnerJoin,
@@ -15,22 +16,39 @@ class AllMembersData extends InnerJoin
 {
     private const ERR_MSG = "Member Data Error";
 
+    // public function getAllMembers(): array
+    // {
+    //     $table = ['personal', 'otherFamily', 'profile_pics', 'contact', 'requestMgt'];
+    //     $firstTable = array_shift($table);
+    //     $memberData = parent::joinAll2(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
+
+    //     if (!$memberData) {
+
+    //         throw new Exception(self::ERR_MSG, 400);
+    //     }
+    //     return $memberData;
+    // }
+
     public function getAllMembers(): array
     {
-        $table = ['personal', 'otherFamily', 'profile_pics', 'contact'];
-        $firstTable = array_shift($table);
-        $memberData = parent::joinAll2(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
+        try{
+            $query =  "SELECT * FROM personal
+            INNER JOIN otherfamily ON personal.id = otherfamily.id
+            INNER JOIN profile_pics ON personal.id = profile_pics.id
+            INNER JOIN contact ON personal.id = contact.id
+            LEFT JOIN requestMgt ON personal.id = requestMgt.approver_id";
+            $result = self::connect2()->prepare($query);
+            $result->execute();
+            return $result->fetchAll();
 
-        if (!$memberData) {
-
-            throw new Exception(self::ERR_MSG, 400);
+        }catch (PDOException $e) {
+            showError($e);
+            return [];
         }
-
-            // dump($memberData);
-        return $memberData;
+       
     }
 
-  
+
 
 
     public function getAllMembersNoPics(): array
@@ -61,7 +79,7 @@ class AllMembersData extends InnerJoin
         return $memberData ??= throw new Exception(self::ERR_MSG, 1);
     }
 
-// show information of events within 7 days , 1 days and on the current date
+    // show information of events within 7 days , 1 days and on the current date
     public static function getEventData()
     {
         try {

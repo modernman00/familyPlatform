@@ -174,6 +174,7 @@ class Register extends Db
             "{$type}_name" => $data["{$type}_name$index"],
             "{$type}_email" => $data["{$type}_email$index"],
             "{$type}_linked" => $data["{$type}_option$index"],
+            "{$type}_code" => $data["familyCode"],
             "id" => $data["id"],
         ];
     }
@@ -285,7 +286,7 @@ class Register extends Db
                 'motherMobile' => $cleanPostData['motherMobile'],
                 'motherEmail' => $cleanPostData['motherEmail'],
                 'motherMaiden' => $cleanPostData['maidenName'],
-                'theFamCode' => $cleanPostData['familyCode'],
+                'otherFamCode' => $cleanPostData['familyCode'],
                 'id' => $cleanPostData['id']
             ],
             'post' => [
@@ -312,6 +313,7 @@ class Register extends Db
                 'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
                 'eventFrequency' => 'Annually',
                 'eventGroup' => 'Global',
+                'eventCode' => $cleanPostData['familyCode'],
                 'id' => $cleanPostData['id']
             ]
 
