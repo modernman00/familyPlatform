@@ -15,29 +15,29 @@ const famCode = localStorage.getItem('requesterFamCode')
 const reqId = localStorage.getItem('requesterId')
 
 const renderHtml = (el) => {
-        if (el) {
+    if (el) {
 
-            const theImg = `/img/profile/${el.img}`
+        console.log(el)
 
-            const approverObj = {
-                approverFirstName: el.firstName,
-                approverLastName: el.lastName,
-                approverEmail: el.email,
-                approverId: el.id,
-                approverCode: el.famCode
-            }
+        const theImg = `/img/profile/${el.img}`
 
-
-            localStorage.setItem("approverDetails", JSON.stringify(approverObj))
-
-            // only show this button if the famcode and el.familyCode do not match
+        const approverObj = {
+            approverFirstName: el.firstName,
+            approverLastName: el.lastName,
+            approverEmail: el.email,
+            approverId: el.id,
+            approverCode: el.famCode
+        }
 
 
+        localStorage.setItem("approverDetails", JSON.stringify(approverObj))
 
-            id('allMembers').classList.remove('loader')
-                // const img = (el.img) 
+        // only show this button if the famcode and el.familyCode do not match
 
-            const html = `
+        id('allMembers').classList.remove('loader')
+        // const img = (el.img) 
+
+        const html = `
         <div class="col-sm-3 mb-3" id=${el.id}>
             <div class="card">
                 <img src="${theImg}" 
@@ -51,34 +51,23 @@ const renderHtml = (el) => {
                              <br> <b>ref:</b>  ${el.id}
 
                             ${famCode == el.famCode || famCode == el.requesterCode ?
-                `  <br> <b>Father:</b>  ${el.fatherName}
-                            <br> <b>Mother:</b> ${el.motherName}
-                            <br> <b>Spouse:</b> ${el.spouseName && 'none'}
-                            <br> <b>Email:</b>  ${el.email} 
-                            <br> <b>famCode:</b>  ${el.famCode} 
-                             
-                    
-                            <br> <b>Mobile:</b>   ${el.mobile} 
-                         
-                            <br> <b>Date joined:</b> ${format(el.date_created)}
-                            </p>
-
-                              <div class="card-body">
-
-                            <a href="/allMembers/setProfile?id=${el.id}" 
-                            class="btn btn-primary card-link">
-                    
-                               See Profile
-                            </a> </div><div class="card-body">` :
-                `<button type="button" class="btn btn-success" id="addFamily${el.id}">
-
-                ${reqId == el.id && el.status? el.status : `Add to family`}
-
-
-                </button></div>`}       
-                </div>
-                
-             
+                                    `<br> <b>Father:</b>  ${el.fatherName}
+                                    <br> <b>Mother:</b> ${el.motherName}
+                                    <br> <b>Spouse:</b> ${el.spouseName && 'none'}
+                                    <br> <b>Email:</b>  ${el.email} 
+                                    <br> <b>famCode:</b>  ${el.famCode} 
+                                    <br> <b>Mobile:</b>   ${el.mobile} 
+                                    <br> <b>Date joined:</b> ${format(el.date_created)}
+                                    </p>
+                                    <div class="card-body">
+                                    <a href="/allMembers/setProfile?id=${el.id}" 
+                                    class="btn btn-primary card-link">
+                                    See Profile
+                                    </a> </div><div class="card-body">` 
+                                    : `<button type="button" class="btn btn-success" id="addFamily${el.id}">
+                                        ${el.status && el.status !== 'Approved' ? el.status : `Add to family`}
+                                        </button></div>`}       
+                                        </div>
             </div>
         </div>`
 
@@ -87,7 +76,7 @@ const renderHtml = (el) => {
 
     } else {
 
-        return `<p> Sorry, we could find the data</p>`
+        return `<p> Sorry, we couldn't find the data</p>`
     }
 
 }
@@ -115,16 +104,11 @@ axios.get(URL + 'allMembers/processApiData', config)
         id('allMembers').innerHTML = ""
         // check if the family code is set and if so, filter the data
         let dataWithFamCode;
+        if (!response.data) throw Error(' there is no data')
+        if (!famCode) throw Error(' there is no famCode')
 
-        log(response.data)
-
-        if(!response.data) throw Error(' there is no data')
-        if(!famCode) throw Error(' there is no famCode')
- 
         if (famCode) {
-            dataWithFamCode = response.data.filter(el => el.famCode == famCode || el.requesterCode == famCode )
-
-            log(dataWithFamCode)
+            dataWithFamCode = response.data.filter(el => el.famCode == famCode || el.requesterCode == famCode)
 
             renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
         }

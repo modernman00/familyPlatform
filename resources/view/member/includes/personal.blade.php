@@ -5,7 +5,7 @@
     {{-- NAME --}}
 
     <h4 class="w3-center">
-      <b><i>{{ $data['firstName'] }} {{ $data['lastName'] }} <br> FAMILY CODE:  {{ $data['famCode'] }} </i> </b>
+      <b><i>{{ $data['firstName'] }} {{ $data['lastName'] }} <br> FAMILY CODE:  {{ $data['famCode'] }} {{ $data['id'] }} </i> </b>
       {{-- {{ $data['id'] }} --}}
 
     </h4>

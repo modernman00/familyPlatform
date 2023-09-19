@@ -31,7 +31,7 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembers(): array
     {
-        try{
+        try {
             $query =  "SELECT * FROM personal
             INNER JOIN otherfamily ON personal.id = otherfamily.id
             INNER JOIN profile_pics ON personal.id = profile_pics.id
@@ -40,16 +40,11 @@ class AllMembersData extends InnerJoin
             $result = self::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
-
-        }catch (PDOException $e) {
+        } catch (PDOException $e) {
             showError($e);
             return [];
         }
-       
     }
-
-
-
 
     public function getAllMembersNoPics(): array
     {
@@ -93,6 +88,32 @@ class AllMembersData extends InnerJoin
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    public static function getFriendRequestData($id, $status)
+    {
+        try {
+            $result = [];
+            $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
+            $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, $status]);
+            foreach ($getRequesterDataById as $getRequesterDataById) {
+                
+                if($getRequesterDataById['requester_id']){
+                    $custData = new SingleCustomerData();
+                    $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profile_pics']);
+                  
+                     array_push($result, $data);
+
+                } else {
+                    $result = " No Requester Data";
+                }
+            }
+            return $result;
+
+
         } catch (\Throwable $th) {
             showError($th);
         }

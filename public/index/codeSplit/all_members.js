@@ -35,12 +35,15 @@ document.onclick = function (e) {
     var targetId = e.target.id;
     // check if the id includes addFamily
     if (targetId.includes('addFamily')) {
+      var theTargetId = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(targetId);
+
       // change the button HTML to request sent and disable the button so it cant be used again
-      var changedBtnHTML = "Request sent";
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(targetId).innerHTML = changedBtnHTML;
-      if (changedBtnHTML === "Request sent") {
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(targetId).disabled = true;
-      }
+      // const changedBtnHTML = "Request sent"
+      // id(targetId).innerHTML = changedBtnHTML
+
+      // if (changedBtnHTML === "Request sent") {
+      //     theTargetId.disabled = true;
+      // }
 
       // update the database (profile_pics - buttonHTML)
 
@@ -63,7 +66,8 @@ document.onclick = function (e) {
       // send for server processing 
       axios__WEBPACK_IMPORTED_MODULE_0___default().post("/members/familyRequestMgt", familyRequestMgt).then(function (response) {
         // change the html of the button
-        (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data.message);
+        theTargetId.innerHTML = response.data.message;
+        theTargetId.disabled = true;
       })["catch"](function (error) {
         (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
       });
@@ -102,6 +106,7 @@ var famCode = localStorage.getItem('requesterFamCode');
 var reqId = localStorage.getItem('requesterId');
 var renderHtml = function renderHtml(el) {
   if (el) {
+    console.log(el);
     var theImg = "/img/profile/".concat(el.img);
     var approverObj = {
       approverFirstName: el.firstName,
@@ -117,10 +122,10 @@ var renderHtml = function renderHtml(el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     // const img = (el.img) 
 
-    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                             <br> <b>Country:</b>  ").concat(el.country, " \n                             <br> <b>ref:</b>  ").concat(el.id, "\n\n                            ").concat(famCode == el.famCode || famCode == el.requesterCode ? "  <br> <b>Father:</b>  ".concat(el.fatherName, "\n                            <br> <b>Mother:</b> ").concat(el.motherName, "\n                            <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                            <br> <b>Email:</b>  ").concat(el.email, " \n                            <br> <b>famCode:</b>  ").concat(el.famCode, " \n                             \n                    \n                            <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                         \n                            <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                            </p>\n\n                              <div class=\"card-body\">\n\n                            <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                            class=\"btn btn-primary card-link\">\n                    \n                               See Profile\n                            </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">\n\n                ").concat(reqId == el.id && el.status ? el.status : "Add to family", "\n\n\n                </button></div>"), "       \n                </div>\n                \n             \n            </div>\n        </div>");
+    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                             <br> <b>Country:</b>  ").concat(el.country, " \n                             <br> <b>ref:</b>  ").concat(el.id, "\n\n                            ").concat(famCode == el.famCode || famCode == el.requesterCode ? "<br> <b>Father:</b>  ".concat(el.fatherName, "\n                                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                                    <br> <b>Email:</b>  ").concat(el.email, " \n                                    <br> <b>famCode:</b>  ").concat(el.famCode, " \n                                    <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                                    </p>\n                                    <div class=\"card-body\">\n                                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                                    class=\"btn btn-primary card-link\">\n                                    See Profile\n                                    </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">\n                                        ").concat(el.status && el.status !== 'Approved' ? el.status : "Add to family", "\n                                        </button></div>"), "       \n                                        </div>\n            </div>\n        </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
-    return "<p> Sorry, we could find the data</p>";
+    return "<p> Sorry, we couldn't find the data</p>";
   }
 };
 var URL = "http://olaogun.test/";
@@ -145,14 +150,12 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiDat
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
   // check if the family code is set and if so, filter the data
   var dataWithFamCode;
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(response.data);
   if (!response.data) throw Error(' there is no data');
   if (!famCode) throw Error(' there is no famCode');
   if (famCode) {
     dataWithFamCode = response.data.filter(function (el) {
       return el.famCode == famCode || el.requesterCode == famCode;
     });
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(dataWithFamCode);
     renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
   }
 

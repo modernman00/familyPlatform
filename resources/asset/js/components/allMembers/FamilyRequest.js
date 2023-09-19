@@ -4,9 +4,6 @@ import { showError } from "../global"
 // import axios from "axios";
 
 
-
-
-
 // the request sent should also go to the database and should form the basis of the innerHTML OF THE BUTTON 
 
 /**
@@ -32,13 +29,15 @@ document.onclick = (e) => {
         // check if the id includes addFamily
         if (targetId.includes('addFamily')) {
 
-            // change the button HTML to request sent and disable the button so it cant be used again
-            const changedBtnHTML = "Request sent"
-            id(targetId).innerHTML = changedBtnHTML
+            const theTargetId = id(targetId)
 
-            if (changedBtnHTML === "Request sent") {
-                id(targetId).disabled = true;
-            }
+            // change the button HTML to request sent and disable the button so it cant be used again
+            // const changedBtnHTML = "Request sent"
+            // id(targetId).innerHTML = changedBtnHTML
+
+            // if (changedBtnHTML === "Request sent") {
+            //     theTargetId.disabled = true;
+            // }
 
             // update the database (profile_pics - buttonHTML)
 
@@ -67,7 +66,8 @@ document.onclick = (e) => {
 
             .then((response) => {
                     // change the html of the button
-                    log(response.data.message)
+                    theTargetId.innerHTML = response.data.message
+                    theTargetId.disabled = true;
 
                 })
                 .catch((error) => {

@@ -57,7 +57,7 @@ class FamilyRequest extends Select
 
         sendEmailGeneral($emailArray, 'member');
 
-        msgSuccess(200, $emailArray);
+        msgSuccess(200, "Sent");
       }
     } catch (\Throwable $err) {
 
@@ -69,7 +69,7 @@ class FamilyRequest extends Select
   {
 
     // Check if the code has already run in this session
-    if ($_SESSION['preventReload'] != $_GET['appr']) {
+    // if ($_SESSION['preventReload'] != $_GET['appr']) {
 
 
       // Set the session variable to indicate that the code has executed
@@ -130,14 +130,21 @@ class FamilyRequest extends Select
           $app['decision'] = $decision;
           $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
 
-          view('msg/requestApprover', compact('app'));
+          // if the source is from the profile page, refresh the page or use javascript to manage it
+
+          if($_GET['src'] === "pp") {
+            header("location: /member/ProfilePage");
+          } else {
+            view('msg/requestApprover', compact('app'));
+          }
+
         }
       } else {
         msgException(401, "How did you get here?");
       }
-    } else {
+    // } else {
 
-      header('location: /');
-    }
+    //   header('location: /');
+    // }
   }
 }

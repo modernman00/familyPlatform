@@ -33,21 +33,54 @@
     </div>
     <br>
 
-    <div class="w3-card w3-round w3-white w3-center">
+
+
+          @if ($requestData !== null && !is_string($requestData))
+              <div class="w3-card w3-round w3-white w3-center">
         <div class="w3-container">
-          <p>Friend Request</p>
-          <img src="/w3images/avatar6.png" alt="Avatar" style="width:50%"><br>
-          <span>Jane Doe</span>
+          @if (count($requestData) > 1)
+              <p><b>Friend Requests</b></p><br>
+          @else
+          <p><b>Friend Request</b></p><br>
+          @endif
+          
+
+           @foreach ($requestData as $requestData)
+
+           <img src="/img/profile/{{ $requestData['img'] }}" alt="Avatar" style="width:50%"><br>
+          <span>{{ $requestData['firstName'] }} {{ $requestData['lastName'] }}</span>
           <div class="w3-row w3-opacity">
             <div class="w3-half">
-              <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i></button>
+              <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $requestData['id'] }}&appr={{ $data['id'] }}&dec=50&reqCode={{ $requestData['famCode'] }}&src=pp  style="text-decoration: none;"> 
+              
+              <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i>
+              
+              </button>
+              
+              </a>
+             
             </div>
+
             <div class="w3-half">
-              <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
+              <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $requestData['id'] }}&appr={{ $data['id'] }}&dec=10>
+               <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
+              
+              </a>
+             
             </div>
           </div>
-        </div>
+              
+          @endforeach
+             </div>
       </div>
+
+              
+          @endif
+
+         
+
+         
+     
 
        <br>
 

@@ -46,6 +46,7 @@ class ProfilePage extends ProcessImg
      * @var array|null
      */
     private $post2Id;
+    private $friendRequestData;
 
     /**
      * @var array|null
@@ -61,15 +62,16 @@ class ProfilePage extends ProcessImg
             //TODO something is destroying the session after a few hours: find out
 
             // GET MEMBER'S DATA
-            $_SESSION['memberId'] ??= throw new Exception("Error Processing ID request", 1);
-
-            $this->id = checkInput($_SESSION['memberId']);
+            // GET MEMBER'S DATA
+            $this->id = checkInput($_SESSION['memberId'] ?? throw new Exception("Error Processing ID request", 1));
 
             $setData = new SingleCustomerData;
 
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profile_pics'];
 
             $this->memberData = $setData->getCustomerData($this->id, $table);
+
+            $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
 
             //GET POST DATA 
             $this->allPostData = Post::getAllPostProfilePics();
@@ -124,7 +126,8 @@ class ProfilePage extends ProcessImg
                 'comment' => $this->allCommentData,
                 'post2Id' => $this->post2Id,
                 'pics2Id' => $this->getAllPics,
-                'eventData' => $this->eventData
+                'eventData' => $this->eventData,
+                'requestData' => $this->friendRequestData
                 // 'comment2Post' => $this->comment2Post
             ]);
         } catch (\Throwable $th) {
