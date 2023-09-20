@@ -19,7 +19,6 @@ class AllMembersController extends AllMembersData
     {
         try {
             view('member/allMembers');
-      
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -37,9 +36,9 @@ class AllMembersController extends AllMembersData
                 view('error/genError', ['error' => $tokenErr]);
             }
 
-            $result = $this->getAllMembers();
-   
+            $result = $this->getAllMembers("918627OLAWALE");
             echo json_encode($result);
+ 
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -70,35 +69,33 @@ class AllMembersController extends AllMembersData
     public function getProfile(): void
     {
         try {
-               //  verify token
-        $tokenVerify = new verifyToken();
-        $result = $tokenVerify->profilePage();
+            //  verify token
+            $tokenVerify = new verifyToken();
+            $result = $tokenVerify->profilePage();
 
-        // if token is verified
+            // if token is verified
 
-        if (!$result) {
-            $tokenErr = "Authentication failed";
-            view('error/genError', ['error' => $tokenErr]);
-        }
+            if (!$result) {
+                $tokenErr = "Authentication failed";
+                view('error/genError', ['error' => $tokenErr]);
+            }
 
-        $id = checkInput($_SESSION['id']);
-        $result = $this->getAllMembersById($id);
-        if (!$result) {
-            throw new Exception("It could not process the data", 1);
-        }
+            $id = checkInput($_SESSION['id']);
+            $result = $this->getAllMembersById($id);
+            if (!$result) {
+                throw new Exception("It could not process the data", 1);
+            }
 
-        $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
+            $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
 
-        $pictures = Select::selectFn2(query: $query, bind: [$id]);
+            $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
-        $data = null;
-        foreach ($result as $data);
+            $data = null;
+            foreach ($result as $data);
 
-        view('member/getProfile', compact('data', 'pictures'));
-
+            view('member/getProfile', compact('data', 'pictures'));
         } catch (Exception $e) {
             showError($e);
         }
-     
     }
 }

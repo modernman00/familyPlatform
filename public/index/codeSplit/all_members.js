@@ -91,6 +91,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 
 
 
@@ -106,7 +109,6 @@ var famCode = localStorage.getItem('requesterFamCode');
 var reqId = localStorage.getItem('requesterId');
 var renderHtml = function renderHtml(el) {
   if (el) {
-    console.log(el);
     var theImg = "/img/profile/".concat(el.img);
     var approverObj = {
       approverFirstName: el.firstName,
@@ -122,7 +124,7 @@ var renderHtml = function renderHtml(el) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.remove('loader');
     // const img = (el.img) 
 
-    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                             <br> <b>Country:</b>  ").concat(el.country, " \n                             <br> <b>ref:</b>  ").concat(el.id, "\n\n                            ").concat(famCode == el.famCode || famCode == el.requesterCode ? "<br> <b>Father:</b>  ".concat(el.fatherName, "\n                                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                                    <br> <b>Email:</b>  ").concat(el.email, " \n                                    <br> <b>famCode:</b>  ").concat(el.famCode, " \n                                    <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                                    </p>\n                                    <div class=\"card-body\">\n                                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                                    class=\"btn btn-primary card-link\">\n                                    See Profile\n                                    </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">\n                                        ").concat(el.status && el.status !== 'Approved' ? el.status : "Add to family", "\n                                        </button></div>"), "       \n                                        </div>\n            </div>\n        </div>");
+    var html = "\n        <div class=\"col-sm-3 mb-3\" id=".concat(el.id, ">\n            <div class=\"card\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"200\" height=\"300\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                            <h5 class='card-title'>").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                            <p class=\"card-text allMember_card_content\">\n                             <br> <b>Country:</b>  ").concat(el.country, " \n                             <br> <b>ref:</b>  ").concat(el.id, "\n                             <br> <b>requester:</b>  ").concat(reqId, "\n                             <br> <b>famCode:</b>  ").concat(el.famCode, "\n                             <br> <b>Email:</b>  ").concat(el.email, " \n                             <br> <b>Status :</b>  ").concat(el.status, "   \n\n                            ").concat(famCode == el.famCode || famCode == el.requesterCode ? "<br> <b>Father:</b>  ".concat(el.fatherName, "\n                                    <br> <b>Mother:</b> ").concat(el.motherName, "\n                                    <br> <b>Spouse:</b> ").concat(el.spouseName && 'none', "\n                                    <br> <b>Email:</b>  ").concat(el.email, " \n                                    <br> <b>famCode:</b>  ").concat(el.famCode, " \n                                    <br> <b>Mobile:</b>   ").concat(el.mobile, " \n                                    <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_2__.format)(el.date_created), "\n                                    </p>\n                                    <div class=\"card-body\">\n                                    <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" \n                                    class=\"btn btn-primary card-link\">\n                                    See Profile\n                                    </a> </div><div class=\"card-body\">") : "<button type=\"button\" class=\"btn btn-success\" id=\"addFamily".concat(el.id, "\">\n                                        ").concat(el.status && el.status !== 'Approved' ? el.status : "Add to family", "\n                                        </button></div>"), "       \n                                        </div>\n            </div>\n        </div>");
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } else {
     return "<p> Sorry, we couldn't find the data</p>";
@@ -149,15 +151,23 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiDat
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').classList.add('loader');
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
   // check if the family code is set and if so, filter the data
-  var dataWithFamCode;
+  // let dataWithFamCode;
   if (!response.data) throw Error(' there is no data');
   if (!famCode) throw Error(' there is no famCode');
-  if (famCode) {
-    dataWithFamCode = response.data.filter(function (el) {
-      return el.famCode == famCode || el.requesterCode == famCode;
+  var filterMembersByFamCode = function filterMembersByFamCode(data, famCode) {
+    return data.filter(function (el) {
+      return el.id !== reqId && el.famCode === famCode || el.requesterCode === famCode;
     });
-    renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
-  }
+  };
+
+  //  const filterMembersById = (data, id) => {
+  //     return data.filter(el => el.id !== reqId && el.id === id || el.requesterCode === id);
+  // }
+
+  var data = response.data;
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(data);
+  var dataWithFamCode = filterMembersByFamCode(data, famCode);
+  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
 
   // this is for the search input 
   // Define a function to handle input changes
@@ -169,22 +179,52 @@ axios__WEBPACK_IMPORTED_MODULE_0___default().get(URL + 'allMembers/processApiDat
 
     // Clear the content if the input is empty
     if (inputVal === "") {
-      // Render HTML for all members using forEach
+      // Render HTML for all members with the same famcode using forEach
 
       renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
-    }
+    } else {
+      // If there's an input value
 
-    // If there's an input value
-    else {
       // Filter data based on input value checking first and last name
-      var filteredData = response.data.filter(function (el) {
+      var filteredData = data.filter(function (el) {
         return el.firstName.toLowerCase().includes(inputVal.toLowerCase()) || el.lastName.toLowerCase().includes(inputVal.toLowerCase());
       });
       if (filteredData.length === 0) {
         allMembersContainer.innerHTML = "No matching name found.";
       } else {
+        // Function to check if an item is a duplicate in the 'uniqueData' array based on a specified property
+        var isDuplicate = function isDuplicate(uniqueData, item, requesterId) {
+          return uniqueData.some(function (existingItem) {
+            return existingItem.id === item.id || existingItem.requester_id == requesterId;
+          });
+        };
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(filteredData);
         // Render HTML for filtered members using map
-        filteredData.forEach(renderHtml);
+
+        // check if the filtered data has multiple same approver 
+
+        // Function to filter and remove duplicates by 'id' property
+        var filterAndRemoveDuplicates = function filterAndRemoveDuplicates(data, requesterId) {
+          var uniqueData = [];
+          var _iterator = _createForOfIteratorHelper(data),
+            _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              var item = _step.value;
+              if (!isDuplicate(uniqueData, item, requesterId)) {
+                uniqueData.push(item);
+              }
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+          return uniqueData;
+        };
+        var filterDataWithProperty = filterAndRemoveDuplicates(filteredData, reqId);
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(filterDataWithProperty);
+        filterDataWithProperty.forEach(renderHtml);
       }
     }
   };

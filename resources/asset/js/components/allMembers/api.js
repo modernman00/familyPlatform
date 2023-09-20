@@ -17,8 +17,6 @@ const reqId = localStorage.getItem('requesterId')
 const renderHtml = (el) => {
     if (el) {
 
-        console.log(el)
-
         const theImg = `/img/profile/${el.img}`
 
         const approverObj = {
@@ -28,7 +26,6 @@ const renderHtml = (el) => {
             approverId: el.id,
             approverCode: el.famCode
         }
-
 
         localStorage.setItem("approverDetails", JSON.stringify(approverObj))
 
@@ -49,9 +46,13 @@ const renderHtml = (el) => {
                             <p class="card-text allMember_card_content">
                              <br> <b>Country:</b>  ${el.country} 
                              <br> <b>ref:</b>  ${el.id}
+                             <br> <b>requester:</b>  ${reqId}
+                             <br> <b>famCode:</b>  ${el.famCode}
+                             <br> <b>Email:</b>  ${el.email} 
+                             <br> <b>Status :</b>  ${el.status}   
 
                             ${famCode == el.famCode || famCode == el.requesterCode ?
-                                    `<br> <b>Father:</b>  ${el.fatherName}
+                `<br> <b>Father:</b>  ${el.fatherName}
                                     <br> <b>Mother:</b> ${el.motherName}
                                     <br> <b>Spouse:</b> ${el.spouseName && 'none'}
                                     <br> <b>Email:</b>  ${el.email} 
@@ -63,8 +64,8 @@ const renderHtml = (el) => {
                                     <a href="/allMembers/setProfile?id=${el.id}" 
                                     class="btn btn-primary card-link">
                                     See Profile
-                                    </a> </div><div class="card-body">` 
-                                    : `<button type="button" class="btn btn-success" id="addFamily${el.id}">
+                                    </a> </div><div class="card-body">`
+                : `<button type="button" class="btn btn-success" id="addFamily${el.id}">
                                         ${el.status && el.status !== 'Approved' ? el.status : `Add to family`}
                                         </button></div>`}       
                                         </div>
@@ -103,15 +104,23 @@ axios.get(URL + 'allMembers/processApiData', config)
         id('allMembers').classList.add('loader')
         id('allMembers').innerHTML = ""
         // check if the family code is set and if so, filter the data
-        let dataWithFamCode;
+        // let dataWithFamCode;
         if (!response.data) throw Error(' there is no data')
         if (!famCode) throw Error(' there is no famCode')
 
-        if (famCode) {
-            dataWithFamCode = response.data.filter(el => el.famCode == famCode || el.requesterCode == famCode)
-
-            renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
+        const filterMembersByFamCode = (data, famCode) => {
+            return data.filter(el => el.id !== reqId && el.famCode === famCode || el.requesterCode === famCode);
         }
+
+        //  const filterMembersById = (data, id) => {
+        //     return data.filter(el => el.id !== reqId && el.id === id || el.requesterCode === id);
+        // }
+
+        const data = response.data;
+        log(data)
+        const dataWithFamCode = filterMembersByFamCode(data, famCode);
+
+        renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
 
         // this is for the search input 
         // Define a function to handle input changes
@@ -125,23 +134,45 @@ axios.get(URL + 'allMembers/processApiData', config)
             // Clear the content if the input is empty
             if (inputVal === "") {
 
-                // Render HTML for all members using forEach
+                // Render HTML for all members with the same famcode using forEach
 
                 renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
             }
-
-            // If there's an input value
-            else {
+            else {// If there's an input value
 
                 // Filter data based on input value checking first and last name
-                let filteredData = response.data.filter(el =>
+                let filteredData = data.filter(el =>
                     el.firstName.toLowerCase().includes(inputVal.toLowerCase()) || el.lastName.toLowerCase().includes(inputVal.toLowerCase())
                 );
                 if (filteredData.length === 0) {
                     allMembersContainer.innerHTML = "No matching name found.";
                 } else {
+                    log(filteredData)
                     // Render HTML for filtered members using map
-                    filteredData.forEach(renderHtml)
+
+                    // check if the filtered data has multiple same approver 
+
+                    // Function to filter and remove duplicates by 'id' property
+                    const filterAndRemoveDuplicates = (data, requesterId) => {
+                        const uniqueData = [];
+                        for (const item of data) {
+                            if (!isDuplicate(uniqueData, item, requesterId)) {
+                                uniqueData.push(item);
+                            }
+                        }
+                        return uniqueData;
+                    }
+
+
+                    // Function to check if an item is a duplicate in the 'uniqueData' array based on a specified property
+                    function isDuplicate(uniqueData, item, requesterId) {
+                        return uniqueData.some((existingItem) => existingItem.id === item.id || existingItem.requester_id == requesterId);
+                    }
+
+                    const filterDataWithProperty = filterAndRemoveDuplicates(filteredData, reqId)
+                    log(filterDataWithProperty)
+
+                    filterDataWithProperty.forEach(renderHtml)
                 }
 
             }

@@ -38,7 +38,15 @@
 
   <noscript>
     <link rel="stylesheet" href="noscript.css" /></noscript>
-  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+    <!-- Favicons -->
+  <link rel="apple-touch-icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="180x180">
+  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="y" sizes="16x16" type="image/png">
+  <link rel="manifest" href="{{ getenv("IMG_CONTRACT") }}">
+  <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
+  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}">
+  <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
+  <meta name="theme-color" content="#563d7c">
   <!-- Bootstrap Core CSS -->
 
   <link href="/owl-carousel/owl.carousel.css" rel="stylesheet">

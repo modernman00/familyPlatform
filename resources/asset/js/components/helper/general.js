@@ -28,6 +28,8 @@ export const removeDiv = (div_id) => {
 
 }
 
+
+
 export const createAndAppendElement = (elementType, setId, parent, setClass = null) => {
     const newDiv = document.createElement(elementType);
     newDiv.setAttribute('id', setId)

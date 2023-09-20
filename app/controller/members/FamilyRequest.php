@@ -69,7 +69,7 @@ class FamilyRequest extends Select
   {
 
     // Check if the code has already run in this session
-    // if ($_SESSION['preventReload'] != $_GET['appr']) {
+    if ($_SESSION['preventReload'] != $_GET['appr']) {
 
 
       // Set the session variable to indicate that the code has executed
@@ -142,9 +142,9 @@ class FamilyRequest extends Select
       } else {
         msgException(401, "How did you get here?");
       }
-    // } else {
+    } else {
 
-    //   header('location: /');
-    // }
+      header('location: /');
+    }
   }
 }
