@@ -14,6 +14,8 @@ $router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'M
 
 $router->map('POST', '/members/familyRequestMgt', 'App\controller\members\FamilyRequest@request', 'add to family');
 
+$router->map('GET', '/members/familyRequestMgt/getApprover', 'App\controller\members\FamilyRequest@getApprover', 'approver');
+
 $router->map('GET', '/member/request', 'App\controller\members\FamilyRequest@approveDelete', 'approve_request');
 
 

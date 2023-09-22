@@ -3,23 +3,6 @@ import { id, log, } from "../global"
 import { showError } from "../global"
 // import axios from "axios";
 
-
-// the request sent should also go to the database and should form the basis of the innerHTML OF THE BUTTON 
-
-/**
- * Get the requester's detail (firstName and Surname, profileImg)
- * Limit requester to people who already have upload their profile pics
- * Get the approver's details (firstName and Surname, email)
- * send notification to the requester and approvers homepage
- *    build a notification button 
- *    build a pop to show the notification 
- *    update the notification for new request, new post, events 
- *     send an email to the approver to approve the request 
- */
-
-
-
-
 document.onclick = (e) => {
 
     try {
@@ -28,8 +11,6 @@ document.onclick = (e) => {
         const targetId = e.target.id;
         // check if the id includes addFamily
         if (targetId.includes('addFamily')) {
-
-            const theTargetId = id(targetId)
 
             // change the button HTML to request sent and disable the button so it cant be used again
             // const changedBtnHTML = "Request sent"
@@ -40,34 +21,46 @@ document.onclick = (e) => {
             // }
 
             // update the database (profile_pics - buttonHTML)
+            const theTargetId = id(targetId)
+
+            const removedAddFriendFromId = targetId.replace("addFamily", "");
+
+            // use the id of the button to get the approver details
 
 
-            const getApproverDetails = localStorage.getItem('approverDetails');
-            const approverDetails = JSON.parse(getApproverDetails);
 
 
+            async function fetchApproverData() {
+                try {
+                    const result = await axios.get(`/members/familyRequestMgt/getApprover?id=${removedAddFriendFromId}`);
+                    const approverDetails = {
+                        approverFirstName: result.data.message.firstName,
+                        approverLastName: result.data.message.lastName,
+                        approverEmail: result.data.message.email,
+                        approverId: result.data.message.id,
+                        approverCode: result.data.message.famCode
+                    };
 
-            // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the member/includes/personal.blade.php
+                               // Retrieve the requester details JSON string from localStorage and parse it back to an object. it was set on the member/includes/personal.blade.php
             const getRequesterDetails = localStorage.getItem('profile');
             const requesterDetails = JSON.parse(getRequesterDetails);
 
-            // submit the approver and requester ids to database - RequestTable
+                    const familyRequestMgt = {
+                        requester: requesterDetails,
+                        approver: approverDetails,
+                        emailPath: "msg/request",
+                        subject: `${requesterDetails['firstName']} ${requesterDetails['lastName']} sent you a family request`,
+                    }
 
-            const familyRequestMgt = {
-                requester: requesterDetails,
-                approver: approverDetails,
-                emailPath: "msg/request",
-                subject: `${requesterDetails['firstName']} ${requesterDetails['lastName']} sent you a family request`,
-            }
-
-            // send for server processing 
+                      // send for server processing 
             axios
                 .post("/members/familyRequestMgt", familyRequestMgt)
 
-            .then((response) => {
+                .then((response) => {
                     // change the html of the button
                     theTargetId.innerHTML = response.data.message
                     theTargetId.disabled = true;
+                    log(response.data.message)
 
                 })
                 .catch((error) => {
@@ -75,6 +68,14 @@ document.onclick = (e) => {
                     showError(error);
                 });
 
+
+
+
+
+                } catch (error) {
+                    console.error(error);
+                }
+            }
 
 
         }

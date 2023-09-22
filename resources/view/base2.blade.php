@@ -73,8 +73,6 @@
      
         </ul>
 
-
-
         <form class="form-inline my-2 my-sm-0">
           <button class="btn btn-outline-success my-2 my-sm-0">
             <a href="/signout">Sign out</a>

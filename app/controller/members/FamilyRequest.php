@@ -29,35 +29,51 @@ class FamilyRequest extends Select
 
       // form the table data 
 
+      $theApproverID = $dataFromJs['approver']['approverId'];
+      $theRequesterID = $dataFromJs['requester']['requesterId'];
+
       $tableData = [
-        'approver_id' => $dataFromJs['approver']['approverId'],
-        'requester_id' => $dataFromJs['requester']['requesterId'],
+        'approver_id' => $theApproverID,
+        'requester_id' => $theRequesterID,
         'status' => "Request sent"
       ];
-      if (!SubmitForm::submitForm('requestMgt', $tableData)) {
-        msgException(406, "requestMgt didn't submit");
+
+      // check if there is a combination of requester and approved id and the status is request sent
+
+      $query = Select::formAndMatchQuery('SELECT_AND', 'requestMgt', 'approver_id', 'requester_id');
+      $result = Select::selectFn2($query, [$theApproverID, $theRequesterID]);
+
+      if ($result) {
+
+        msgSuccess(200, $result);
       } else {
 
-        $requesterName = "{$dataFromJs['requester']['requesterFirstName']} {$dataFromJs['requester']['requesterLastName']}";
-        $approverName = "{$dataFromJs['approver']['approverFirstName']} {$dataFromJs['approver']['approverLastName']}";
 
-        $emailArray = [
-          'data' => [
-            'name' => $approverName, 
-            'email' => 'waledevtest@gmail.com',
-            ...$dataFromJs['approver'],
-            ...$dataFromJs['requester']
-          ],
-          'subject' => "$requesterName sent you a family request",
-          'viewPath' => $dataFromJs['emailPath'],
-          // 'name' => $approverName,
-          // 'email' => 'waledevtest@gmail.com',
-          // 'email' => $dataFromJs['approver']['email'],
-        ];
+        if (!SubmitForm::submitForm('requestMgt', $tableData)) {
+          msgException(406, "requestMgt didn't submit");
+        } else {
 
-        sendEmailGeneral($emailArray, 'member');
+          $requesterName = "{$dataFromJs['requester']['requesterFirstName']} {$dataFromJs['requester']['requesterLastName']}";
+          $approverName = "{$dataFromJs['approver']['approverFirstName']} {$dataFromJs['approver']['approverLastName']}";
 
-        msgSuccess(200, "Sent");
+          $emailArray = [
+            'data' => [
+              'name' => $approverName,
+              'email' => 'waledevtest@gmail.com',
+              ...$dataFromJs['approver'],
+              ...$dataFromJs['requester']
+            ],
+            'subject' => "$requesterName sent you a family request",
+            'viewPath' => $dataFromJs['emailPath'],
+            // 'name' => $approverName,
+            // 'email' => 'waledevtest@gmail.com',
+            // 'email' => $dataFromJs['approver']['email'],
+          ];
+
+          sendEmailGeneral($emailArray, 'member');
+
+          msgSuccess(200, "Sent");
+        }
       }
     } catch (\Throwable $err) {
 
@@ -69,82 +85,99 @@ class FamilyRequest extends Select
   {
 
     // Check if the code has already run in this session
-    if ($_SESSION['preventReload'] != $_GET['appr']) {
+    // if ($_SESSION['preventReload'] != $_GET['appr']) {
 
 
-      // Set the session variable to indicate that the code has executed
-      $_SESSION['preventReload'] = $_GET['appr'];
+    // Set the session variable to indicate that the code has executed
+    $_SESSION['preventReload'] = $_GET['appr'];
 
-      if (isset($_GET['req']) && isset($_GET['appr'])) {
+    if (isset($_GET['req']) && isset($_GET['appr'])) {
 
-        $requester = checkInput($_GET['req']);
-        $approver = checkInput($_GET['appr']);
-        $getDecision = checkInput($_GET['dec']);
-        $requestCode = checkInput($_GET['reqCode']);
+      $requester = checkInput($_GET['req']);
+      $approver = checkInput($_GET['appr']);
+      $getDecision = checkInput($_GET['dec']);
+      $requestCode = checkInput($_GET['reqCode']);
 
-        // check if the dec is 100 or 10 (50 is approved and 10 is rejection)
+      // check if the dec is 100 or 10 (50 is approved and 10 is rejection)
 
-        $decision = match ($getDecision) {
-          "10" => "rejected",
-          "50" => "approved",
-          default => "Unknown", // Handle other cases or provide a default value
-        };
+      $decision = match ($getDecision) {
+        "10" => "rejected",
+        "50" => "approved",
+        default => "Unknown", // Handle other cases or provide a default value
+      };
 
-        $updateClass = new Update('requestMgt');
+      $updateClass = new Update('requestMgt');
 
-        $identifiers = [
-          'requester_id' => $requester,
-          'approver_id' => $approver
-        ];
+      $identifiers = [
+        'requester_id' => $requester,
+        'approver_id' => $approver
+      ];
 
 
-        if ($decision === "approved") {
-          $updateClass->updateTwoColumns(['status', 'requesterCode'], ['Approved', $requestCode], $identifiers);
-        } elseif ($decision === "rejected") {
-          $updateClass->updateTableMulti('status', 'Rejected', $identifiers);
+      if ($decision === "approved") {
+        $updateClass->updateTwoColumns(['status', 'requesterCode'], ['Approved', $requestCode], $identifiers);
+      } elseif ($decision === "rejected") {
+        $updateClass->updateTableMulti('status', 'Rejected', $identifiers);
+      }
+
+
+      // get requester details with the id 
+
+      if ($decision != "Unknown") {
+
+        $details = new SingleCustomerData;
+        $req = $details->getCustomerData($requester, ['personal', 'contact']);
+        $app = $details->getCustomerData($approver, ['personal', 'contact']);
+
+
+
+
+        // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
+
+        $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
+        $req['decision'] = $decision;
+        $subject = "{$app['firstName']} {$app['lastName']} approved your request";
+
+        // email the requester
+
+        toSendEmail('msg/requestRequest', $req, $subject, 'member');
+
+        // show the approver what they have just done
+        $app['decision'] = $decision;
+        $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
+
+        // if the source is from the profile page, refresh the page or use javascript to manage it
+
+        $getPP = checkInput($_GET['src']) ?? null;
+
+        if ($getPP === "pp") {
+          header("location: /member/ProfilePage");
+        } else {
+          view('msg/requestApprover', compact('app'));
         }
-
-
-        // get requester details with the id 
-
-        if ($decision != "Unknown") {
-
-          $details = new SingleCustomerData;
-          $req = $details->getCustomerData($requester, ['personal', 'contact']);
-          $app = $details->getCustomerData($approver, ['personal', 'contact']);
-
-
-
-
-          // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
-
-          $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
-          $req['decision'] = $decision;
-          $subject = "{$app['firstName']} {$app['lastName']} approved your request";
-
-          // email the requester
-
-          toSendEmail('msg/requestRequest', $req, $subject, 'member');
-
-          // show the approver what they have just done
-          $app['decision'] = $decision;
-          $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
-
-          // if the source is from the profile page, refresh the page or use javascript to manage it
-
-          if($_GET['src'] === "pp") {
-            header("location: /member/ProfilePage");
-          } else {
-            view('msg/requestApprover', compact('app'));
-          }
-
-        }
-      } else {
-        msgException(401, "How did you get here?");
       }
     } else {
+      msgException(401, "How did you get here?");
+    }
+    // } else {
 
-      header('location: /');
+    //   header('location: /');
+    // }
+  }
+
+  public static function getApprover()
+  {
+
+    try {
+
+      $id = checkInput($_GET['id']);
+      $details = new SingleCustomerData;
+      $result = $details->getCustomerData($id, ['personal', 'contact']);
+      if ($result) {
+        \msgSuccess(200, $result);
+      }
+    } catch (\Throwable $err) {
+      \showError($err);
     }
   }
 }

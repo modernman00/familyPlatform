@@ -19,16 +19,6 @@ const renderHtml = (el) => {
 
         const theImg = `/img/profile/${el.img}`
 
-        const approverObj = {
-            approverFirstName: el.firstName,
-            approverLastName: el.lastName,
-            approverEmail: el.email,
-            approverId: el.id,
-            approverCode: el.famCode
-        }
-
-        localStorage.setItem("approverDetails", JSON.stringify(approverObj))
-
         // only show this button if the famcode and el.familyCode do not match
 
         id('allMembers').classList.remove('loader')
@@ -46,7 +36,8 @@ const renderHtml = (el) => {
                             <p class="card-text allMember_card_content">
                              <br> <b>Country:</b>  ${el.country} 
                              <br> <b>ref:</b>  ${el.id}
-                             <br> <b>requester:</b>  ${reqId}
+                             <br> <b>Current User:</b>  ${reqId}
+                             <br> <b>requester_id:</b>  ${el.requester_id}
                              <br> <b>famCode:</b>  ${el.famCode}
                              <br> <b>Email:</b>  ${el.email} 
                              <br> <b>Status :</b>  ${el.status}   
@@ -58,7 +49,7 @@ const renderHtml = (el) => {
                                     <br> <b>Email:</b>  ${el.email} 
                                     <br> <b>famCode:</b>  ${el.famCode} 
                                     <br> <b>Mobile:</b>   ${el.mobile} 
-                                    <br> <b>Date joined:</b> ${format(el.date_created)}
+                                    <br> <b>Date joined:</b> ${format(el.created_at)}
                                     </p>
                                     <div class="card-body">
                                     <a href="/allMembers/setProfile?id=${el.id}" 
@@ -66,7 +57,7 @@ const renderHtml = (el) => {
                                     See Profile
                                     </a> </div><div class="card-body">`
                 : `<button type="button" class="btn btn-success" id="addFamily${el.id}">
-                                        ${el.status && el.status !== 'Approved' ? el.status : `Add to family`}
+                                        ${el.status && el.requester_id === reqId && el.status !== 'Approved'  ? el.status : `Add to family`}
                                         </button></div>`}       
                                         </div>
             </div>
@@ -112,12 +103,8 @@ axios.get(URL + 'allMembers/processApiData', config)
             return data.filter(el => el.id !== reqId && el.famCode === famCode || el.requesterCode === famCode);
         }
 
-        //  const filterMembersById = (data, id) => {
-        //     return data.filter(el => el.id !== reqId && el.id === id || el.requesterCode === id);
-        // }
-
         const data = response.data;
-        log(data)
+        //  log(data)
         const dataWithFamCode = filterMembersByFamCode(data, famCode);
 
         renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
@@ -147,32 +134,24 @@ axios.get(URL + 'allMembers/processApiData', config)
                 if (filteredData.length === 0) {
                     allMembersContainer.innerHTML = "No matching name found.";
                 } else {
-                    log(filteredData)
-                    // Render HTML for filtered members using map
 
-                    // check if the filtered data has multiple same approver 
+                    // log(filteredData);
 
-                    // Function to filter and remove duplicates by 'id' property
-                    const filterAndRemoveDuplicates = (data, requesterId) => {
-                        const uniqueData = [];
-                        for (const item of data) {
-                            if (!isDuplicate(uniqueData, item, requesterId)) {
-                                uniqueData.push(item);
-                            }
+                    // Create an object to store unique items based on id and prioritize "reqId" if there's a duplicate.
+                    const uniqueItems = {};
+
+                    for (const item of filteredData) {
+                        if (!uniqueItems[item.id] || item.requester_id == reqId) {
+                            uniqueItems[item.id] = item;
                         }
-                        return uniqueData;
                     }
 
+                    // Convert the object back to an array.
+                    const filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
 
-                    // Function to check if an item is a duplicate in the 'uniqueData' array based on a specified property
-                    function isDuplicate(uniqueData, item, requesterId) {
-                        return uniqueData.some((existingItem) => existingItem.id === item.id || existingItem.requester_id == requesterId);
-                    }
+                    log(filteredDataByIdAndCurrentUser);
 
-                    const filterDataWithProperty = filterAndRemoveDuplicates(filteredData, reqId)
-                    log(filterDataWithProperty)
-
-                    filterDataWithProperty.forEach(renderHtml)
+                    filteredDataByIdAndCurrentUser.forEach(renderHtml)
                 }
 
             }

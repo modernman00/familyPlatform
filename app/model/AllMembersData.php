@@ -6,7 +6,6 @@ namespace App\model;
 
 use Exception;
 use PDOException;
-use PDO;
 
 use App\classes\{
     InnerJoin,
@@ -33,11 +32,16 @@ class AllMembersData extends InnerJoin
     public function getAllMembers(): array
     {
         try {
-            $query = "SELECT * FROM personal
-                  INNER JOIN otherfamily ON personal.id = otherfamily.id
-                  INNER JOIN profile_pics ON personal.id = profile_pics.id
-                  INNER JOIN contact ON personal.id = contact.id
-                  LEFT JOIN requestMgt ON personal.id = requestMgt.approver_id";
+            $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.fatherName, ofm.motherName, ofm.spouseName, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
+                FROM personal AS p
+                  INNER JOIN otherFamily AS ofm ON p.id = ofm.id
+                  INNER JOIN profile_pics AS pp ON p.id = pp.id
+                  INNER JOIN contact AS c ON p.id = c.id
+                   LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE approver_id IS NOT NULL
+                  ) AS rm ON p.id = rm.approver_id";
 
             $result = self::connect2()->prepare($query);
             $result->execute();
