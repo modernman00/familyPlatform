@@ -1,3 +1,3 @@
 import "./api"
-import "./FamilyRequest"
+import "./sendRequest"
 

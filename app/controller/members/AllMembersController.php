@@ -27,6 +27,7 @@ class AllMembersController extends AllMembersData
     public function processApiData(): void
     {
         try {
+            $id = $_GET['id'];
             $tokenVerify = new VerifyToken();
 
             $tokenConfirm = $tokenVerify->profilePage();
@@ -36,7 +37,7 @@ class AllMembersController extends AllMembersData
                 view('error/genError', ['error' => $tokenErr]);
             }
 
-            $result = $this->getAllMembers("918627OLAWALE");
+            $result = $this->getAllMembers($id);
             echo json_encode($result);
  
         } catch (\Throwable $th) {
