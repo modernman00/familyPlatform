@@ -123,35 +123,18 @@ na
                     <ul>
                         @for ($x = 0; $x < $siblingKid['kidCount']; $x++)
                            <li>  
-                            <a href="#">{{ $siblingKid[$x]['kid_name'] }}</a> </li>
-                            
+                            <a href="#">{{ $siblingKid[$x]['kid_name'] }}</a> </li>   
                         @endfor
-                     
-
                         </ul>
-
-                  
-
-
                     @endif
-
-
-                    
-                    
-                   
-
-                     
-                    
-
                 </li>
-
                 @endforeach
                 @endif
-
             </ul>
         </li>
     </ul>
 </div>
+
 
 
 

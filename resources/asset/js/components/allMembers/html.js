@@ -1,6 +1,8 @@
 import { format } from "timeago.js"
 import { id, showError } from "../global"
 
+
+
 export const renderHtml = (el) => {
 
 const famCode = localStorage.getItem('requesterFamCode')
@@ -26,7 +28,7 @@ try {
             <div class="card">
                 <img src="${theImg}" 
                     class="card-img-top allMember_profileImg" 
-                    width="200" height="300" alt="profile img">
+                    width="100" height="200" alt="profile img">
     
                 <div class="card-body">
                     <h5 class="card-title">${el.firstName} ${el.lastName}</h5>
@@ -37,7 +39,7 @@ try {
                             `<br> <b>Father:</b> ${el.fatherName}
                              <br> <b>Mother:</b> ${el.motherName}
                              <br> <b>Spouse:</b> ${el.spouseName || 'none'}
-                             <br> <b>Email:</b> ${el.email} 
+            
                              <br> <b>famCode:</b> ${el.famCode} 
                              <br> <b>Mobile:</b> ${el.mobile} 
                              <br> <b>Date joined:</b> ${format(el.created_at)}</p>
@@ -45,9 +47,9 @@ try {
                                 <a href="/allMembers/setProfile?id=${el.id}" class="btn btn-primary card-link">
                                     See Profile
                                 </a>
-                            </div>
-                            <div class="card-body">`
-                        :
+                            </div>`
+                            
+                        :`<div class="card-body">`
                             `<button type="button" data-user-id="addFamily${el.id}" class="btn btn-success button" id="addFamily${el.id}" ${disableButton}>
                                 ${statusButtonHTML}
                             </button>

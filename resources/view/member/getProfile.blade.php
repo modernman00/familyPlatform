@@ -10,62 +10,33 @@
 
   </div> --}}
 <br><br>
-  <h4> <a href="/organogram?id={{ $data['id'] }}" class="btn btn-primary">  {{ $data['firstName'] }} {{ $data['lastName'] }}'s Family Tree</a>
+  <h4> <a href="/organogram?id={{ $data['id'] }}">  
+  {{ $data['firstName'] }} {{ $data['lastName'] }}'s FAMILY TREE
+    <i class="fa fa-hand-pointer-o" aria-hidden="true"></i>
+  </a>
+
+
   </h4>
 
 
-  <img src="/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="600" height="650">
+  <img src="/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="400" height="400">
 
-  <div class="w3-content w3-justify" style="max-width:600px">
+
     <h4><b>{{ $data['firstName'] }} {{ $data['lastName'] }}</b></h4>
-    <p>
-      {{ $data['firstName'] }} {{ $data['lastName'] }} lives in {{ $data['country'] }}.
-      {{-- @if ( $data['gender'] == "male")
-      He
-      @else
-      She  is a/an 
-      @endif --}}
+    <h5>
+      {{ $data['firstName'] }} {{ $data['lastName'] }} lives in {{ $data['country'] }}
 
 
-
-    </p>
-    <br>
-
+    </h5>
+  
+     <h5>Father:  {{ $data['fatherName'] }}</h5>
+      <h5>Mother:  {{ $data['motherName'] }}</h5>
+       <h5>Partner:  {{ $data['spouseName'] }}</h5>
+        {{-- <p>Occupation:  {{ $data['occupation'] }}</p> --}}
+         <h5>BirthDate:  {{ $data['day'] }} / {{ $data['month'] }}</h5>
     Contact details:
-    <p>email: <a href="mailto:{{ $data['email'] }}">{{ $data['email'] }}</a></p>
-    <p>tel:  {{ $data['mobile'] }}</p>
-    <hr class="w3-opacity">
-
-    <div class="w3-white">
-
-      <hr class="w3-opacity">
-
-
-    </div>
-  </div>
-  {{--
-  <!-- Contact section -->
-  <div class="w3-container w3-light-grey w3-padding-32 w3-padding-large" id="contact">
-    <div class="w3-content" style="max-width:600px">
-      <h4 class="w3-center"><b>Contact Me</b></h4>
-
-      <form action="/action_page.php" target="_blank">
-        <div class="w3-section">
-          <label>Name</label>
-          <input class="w3-input w3-border" type="text" name="Name" required>
-        </div>
-        <div class="w3-section">
-          <label>Email</label>
-          <input class="w3-input w3-border" type="text" name="Email" required>
-        </div>
-        <div class="w3-section">
-          <label>Message</label>
-          <input class="w3-input w3-border" type="text" name="Message" required>
-        </div>
-        <button type="submit" class="w3-button w3-block w3-black w3-margin-bottom">Send Message</button>
-      </form>
-    </div>
-  </div> --}}
+    <h5>Email: <a href="mailto:{{ $data['email'] }}">{{ $data['email'] }}</a></h5>
+    <h5>Tel:  {{ $data['mobile'] }}</h5>
 
 
 
