@@ -8,7 +8,17 @@
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans'>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+  
+    <!-- Favicons -->
+  <link rel="apple-touch-icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="180x180">
+  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="y" sizes="16x16" type="image/png">
+  <link rel="manifest" href="{{ getenv("IMG_CONTRACT") }}">
+  <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
+  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}">
+  <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
+  <meta name="theme-color" content="#563d7c">
+
   <link rel="stylesheet" type="text/css" href="/profilepage.css">
   <link rel="stylesheet" type="text/css"
     href="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.css" />

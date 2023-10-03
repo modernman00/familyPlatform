@@ -67,10 +67,13 @@
       <div class="inner">
 
         <nav class="nav nav-masthead justify-content-center">
-          <a class="nav-link active" href="/">Home</a>
-          <a class="nav-link" href="register">Register</a>
-          <a class="nav-link" href="/login">Log in</a>
-          <a class="nav-link" href="/aboutus">About us</a>
+
+      
+            <a class="nav-link active" href="/">Home</a>
+            <a class="nav-link" href="register">Register</a>
+            <a class="nav-link" href="/login">Log in</a>
+            <a class="nav-link" href="/aboutus">About us</a>
+         
         </nav>
       </div>
     </header>
@@ -83,6 +86,7 @@
       <p class="lead">
         <a href="/register" class="btn btn-lg btn-secondary">Join Now!</a>
       </p>
+     
     </main>
 
     <footer class="mastfoot mt-auto">
