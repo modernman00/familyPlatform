@@ -1,4 +1,4 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/vendor"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/public/vendor"],{
 
 /***/ "./node_modules/autocompleter/autocomplete.js":
 /*!****************************************************!*\

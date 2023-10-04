@@ -1,0 +1,15 @@
+{
+    "/public/index.js": "/public/index.js",
+    "/public/manifest.js": "/public/manifest.js",
+    "/public/index/codeSplit/register.js": "/public/index/codeSplit/register.js",
+    "/public/index/codeSplit/all_members.js": "/public/index/codeSplit/all_members.js",
+    "/public/index/codeSplit/login.js": "/public/index/codeSplit/login.js",
+    "/public/index/codeSplit/forgotPwd.js": "/public/index/codeSplit/forgotPwd.js",
+    "/public/index/codeSplit/code.js": "/public/index/codeSplit/code.js",
+    "/public/index/codeSplit/profilePage.js": "/public/index/codeSplit/profilePage.js",
+    "/public/index/codeSplit/changePW.js": "/public/index/codeSplit/changePW.js",
+    "/public/index/codeSplit/img.js": "/public/index/codeSplit/img.js",
+    "/public/index/codeSplit/familyCode.js": "/public/index/codeSplit/familyCode.js",
+    "/public/vendor.js": "/public/vendor.js",
+    "/public/css/main.css": "/public/css/main.css"
+}

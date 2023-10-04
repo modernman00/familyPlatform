@@ -5,27 +5,27 @@ import { id, showError } from "../global"
 
 export const renderHtml = (el) => {
 
-const famCode = localStorage.getItem('requesterFamCode')
-const reqId = localStorage.getItem('requesterId')
+        const famCode = localStorage.getItem('requesterFamCode')
+        const reqId = localStorage.getItem('requesterId')
 
-try {
-    if (!el) {
-        // Handle the case where 'el' is falsy, such as when data is not available.
-        throw new Error('there is no data')
-    }
+        try {
+            if (!el) {
+                // Handle the case where 'el' is falsy, such as when data is not available.
+                throw new Error('there is no data')
+            }
 
-    const theImg = `/img/profile/${el.img}`;
-    const isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
-    const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved'
-        ? el.status
-        : 'Add to family';
+            const theImg = `/img/profile/${el.img}`;
+            const isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
+            const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
+                el.status :
+                'Add to family';
 
-   const disableButton =  statusButtonHTML === "Request sent"? "disabled" : "";
+            const disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
 
-    // Create the HTML content based on whether the user is in the same family or not.
-    const html = `
-        <div class="col-sm-3 mb-3" id="${el.id}">
-            <div class="card">
+            // Create the HTML content based on whether the user is in the same family or not.
+            const html = `
+        <div class="col-sm-2 mb-3 d-flex" id="${el.id}">
+            <div class="card flex-grow-1">
                 <img src="${theImg}" 
                     class="card-img-top allMember_profileImg" 
                     width="100" height="200" alt="profile img">
@@ -49,8 +49,8 @@ try {
                                 </a>
                             </div>`
                             
-                        :`<div class="card-body">`
-                            `<button type="button" data-user-id="addFamily${el.id}" class="btn btn-success button" id="addFamily${el.id}" ${disableButton}>
+                        :`<div class="card-body">
+                            <button type="button" data-user-id="addFamily${el.id}" class="btn btn-success button" id="addFamily${el.id}" ${disableButton}>
                                 ${statusButtonHTML}
                             </button>
                             
