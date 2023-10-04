@@ -36,17 +36,10 @@ a:hover {
 }
 
 .jumbotron {
-    font-family: Montserrat, sans-serif;
-}
-
-.navbar {
-    font-family: Montserrat, sans-serif;
-}
-
-.jumbotron {
     background-color: #f4511e;
     color: #ffffff;
     padding: 10rem 2.5rem;
+    font-family: Montserrat, sans-serif;
 }
 
 .container-fluid {
@@ -117,10 +110,6 @@ a:hover {
     background-color: #fff !important;
 }
 
-.panel-footer h3 {
-    font-size: 32px;
-}
-
 .panel-footer h4 {
     font-size: 14px;
     color: #aaa;
@@ -171,10 +160,6 @@ footer .glyphicon {
 
 .footerLogo {
     font-size: 2rem;
-}
-
-.small {
-    color: blue;
 }
 
 .allMember_card {
@@ -473,11 +458,6 @@ textarea {
     font-family: "Playfair Display", serif;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-}
-
 .myFamilyTree {
     text-align: center;
     color: blueviolet;
@@ -554,7 +534,6 @@ textarea {
     border-right: 1px solid #ccc;
     border-radius: 0 5px 0 0;
     transform: translateX(1px);
-    border-radius: 0 5px 0 0;
 }
 
 .tree li:first-child::after {
@@ -582,7 +561,7 @@ textarea {
     padding: 10px 10px;
     text-decoration: none;
     color: #666;
-    font-family: arial, verdana, tahoma;
+    font-family: arial, verdana, tahoma, sans-serif;
     font-size: 17px;
     display: inline-block;
     background: white;
