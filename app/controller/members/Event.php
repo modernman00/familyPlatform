@@ -131,6 +131,20 @@ class Event extends AllMembersData
         \msgSuccess(201, $allEventData);
     }
 
+     /**
+     * @return void
+     */
+    public static function getEventDataByNoController()
+    {
+        $eventNo = $_GET['eventNo'];
+        $allEventData = allMembersData::getEventDataByNo($eventNo);
+        printArr($allEventData);
+
+        // $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
+
+        \msgSuccess(201, $allEventData);
+    }
+
     /**
      * Undocumented function
      *

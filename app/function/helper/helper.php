@@ -189,9 +189,10 @@ function cleanSession($x): string|null
 function showError($th): void
 {
 
-    http_response_code(500); // sets the response to 406
-    $error = 'Error on line '.$th->getLine().' in '.$th->getFile()
-    .BR.BR.':<b> The error msg is  '.$th->getMessage().BR.BR;
+    $errorCode = (int) $th->getCode();
+    http_response_code($errorCode); // sets the response to 406
+    $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n";
+
     echo json_encode(['message' => $error]);
     // Rollbar::log(Level::ERROR, $th); could still be considered
     Debugger::log($th, Debugger::ERROR);

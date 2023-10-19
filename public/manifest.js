@@ -144,8 +144,8 @@
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if (chunkId === "/public/vendor") return "" + chunkId + ".js";
-/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1,"codeSplit/forgotPwd":1,"codeSplit/code":1,"codeSplit/profilePage":1,"codeSplit/changePW":1,"codeSplit/img":1,"codeSplit/familyCode":1,"resources_asset_js_components_helper_general_js":1,"resources_asset_js_components_helper_http_js":1}[chunkId]) return "public/index/" + chunkId + ".js";
+/******/ 			if (chunkId === "/vendor") return "" + chunkId + ".js";
+/******/ 			if ({"codeSplit/register":1,"codeSplit/all_members":1,"codeSplit/login":1,"codeSplit/forgotPwd":1,"codeSplit/code":1,"codeSplit/profilePage":1,"codeSplit/changePW":1,"codeSplit/img":1,"codeSplit/familyCode":1,"resources_asset_js_components_helper_general_js":1,"resources_asset_js_components_helper_http_js":1}[chunkId]) return "index/" + chunkId + ".js";
 /******/ 			// return url for filenames based on template
 /******/ 			return undefined;
 /******/ 		};
@@ -235,8 +235,8 @@
 /******/ 		// undefined = chunk not loaded, null = chunk preloaded/prefetched
 /******/ 		// [resolve, reject, Promise] = chunk loading, 0 = chunk loaded
 /******/ 		var installedChunks = {
-/******/ 			"/public/manifest": 0,
-/******/ 			"public/css/main": 0
+/******/ 			"/manifest": 0,
+/******/ 			"public/style": 0
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.f.j = (chunkId, promises) => {
@@ -248,7 +248,7 @@
 /******/ 					if(installedChunkData) {
 /******/ 						promises.push(installedChunkData[2]);
 /******/ 					} else {
-/******/ 						if(!/^(\/public\/manifest|public\/css\/main)$/.test(chunkId)) {
+/******/ 						if(!/^(\/manifest|public\/style)$/.test(chunkId)) {
 /******/ 							// setup Promise in chunk cache
 /******/ 							var promise = new Promise((resolve, reject) => (installedChunkData = installedChunks[chunkId] = [resolve, reject]));
 /******/ 							promises.push(installedChunkData[2] = promise);
@@ -279,7 +279,7 @@
 /******/ 		};
 /******/ 		
 /******/ 		__webpack_require__.F.j = (chunkId) => {
-/******/ 			if((!__webpack_require__.o(installedChunks, chunkId) || installedChunks[chunkId] === undefined) && !/^(\/public\/manifest|public\/css\/main)$/.test(chunkId)) {
+/******/ 			if((!__webpack_require__.o(installedChunks, chunkId) || installedChunks[chunkId] === undefined) && !/^(\/manifest|public\/style)$/.test(chunkId)) {
 /******/ 				installedChunks[chunkId] = null;
 /******/ 				var link = document.createElement('link');
 /******/ 		

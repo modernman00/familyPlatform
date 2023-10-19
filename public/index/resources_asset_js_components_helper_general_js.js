@@ -20,7 +20,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
 /* harmony export */   matchInput: () => (/* binding */ matchInput),
 /* harmony export */   matchRegex: () => (/* binding */ matchRegex),
-/* harmony export */   removeDiv: () => (/* binding */ removeDiv)
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv),
+/* harmony export */   toSentenceCase: () => (/* binding */ toSentenceCase)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -134,6 +135,14 @@ var matchInput = function matchInput(first, second, err) {
       error.style.color = "green";
     }
   });
+};
+var toSentenceCase = function toSentenceCase(str) {
+  return str.toLowerCase() // Convert the string to lowercase
+  .split(' ') // Split the string into words
+  .map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }) // Capitalize the first letter of each word
+  .join(' '); // Join the words back into a string
 };
 
 /***/ })

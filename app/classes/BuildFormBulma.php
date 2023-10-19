@@ -422,13 +422,14 @@ HTML;
     <div class="field-body">
 HTML;
                 for ($y = 0; $y < count($this->entValue[$i]['label']); $y++) {
-                    $label = $this->entValue[$i]['label'][$y];
-                    $name = $this->entValue[$i]['attribute'][$y];
-                    $placeholder = $this->entValue[$i]['placeholder'][$y];
+                    $label = empty($this->entValue[$i]['label'][$y]) ? '' : $this->entValue[$i]['label'][$y];
+                    $name = empty($this->entValue[$i]['attribute'][$y]) ? '' : $this->entValue[$i]['attribute'][$y];;
+                    $placeholder = empty($this->entValue[$i]['placeholder'][$y]) ? '' : $this->entValue[$i]['placeholder'][$y];
                     $id = $name . '_id';
                     $error = $name . '_error';
                     $help = $name . '_help';
                     $cleanLabel = strtoupper($label);
+                    $value = empty($this->entValue[$i]['value'][$y]) ? '' : $this->entValue[$i]['value'][$y];
                     $labelType = $this->entValue[$i]['inputType'][$y] ? $this->entValue[$i]['inputType'][$y] : "";
                     $icon = $this->entValue[$i]['icon'][$y] ? $this->entValue[$i]['icon'][$y] : "";
                     if ($labelType === 'select') {
@@ -487,7 +488,7 @@ HTML;
 <div class="field $name" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
     <div class="control is-expanded has-icons-left">
-        <input class="input $name input is-medium" type="$labelType" value="" maxlength="30" minlength="1" name="$name" id="$id" placeholder="$placeholder" autocomplete="$name">
+        <input class="input $name input is-medium" type="$labelType" value="$value" maxlength="30" minlength="1" name="$name" id="$id" placeholder="$placeholder" autocomplete="$name">
         <span class="icon is-small is-left">$icon</span>
         <p class="help" id="{$name}_help"></p>
         <p class="help error" id="{$name}_error"></p>
@@ -570,13 +571,13 @@ HTML;
             } elseif ($this->entValue[$i] === 'empty') {
                 echo '';
             } elseif ($this->entValue[$i] === 'showError') {
-                echo "<div id='setLoader' tabindex='-1'>
-                        <div id='loader'>
-                        <div class='notification' id='$nameKey'>
+                echo "<div id='setLoader' class='loader' tabindex='-1' style='display: none;'></div>
+                   
+                        <div class='notification' id='$nameKey' style='display: none;'>
                         <p id='error'></p>
-                        </div>
+                    
                             </div>
-                    </div>";
+                   ";
             } else {
                 echo "Invalid form element type: {$this->entValue[$i]}";
             }

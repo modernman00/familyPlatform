@@ -1,11 +1,15 @@
-@extends ('base2')
-@section('title', 'ORGANOGRAM')
+@extends ('layouts.w3s_member')
+@section('title', 'Organogram')
+@section('data-page-id', 'Organogram')
+@section('content')
+
+  {{-- custom css --}}
+  <link rel="stylesheet" href="/style.css">
 
 <style>
     p.substitle {
         text-align: center;
     }
-
 
 </style>
 
@@ -84,9 +88,9 @@ na
             <ul>
                 <li>
                     {{--  check if there is a spouse  --}}
-                    @if($data['spouseName'])
+                    @if($data['spouseName'] !== "Not Provided")
                     <a href="#"> 
-                        {{ $data['spouseName'] }}
+                      <b>Spouse: </b>  {{ $data['spouseName'] }}
                     </a>
                     @else
 
@@ -111,30 +115,39 @@ na
                     
                 </li>
 
-                {{--  check if there are siblings  --}}
+                 {{--  check if there are siblings  --}}
 
-                @if(isset($getSibling) !== null)
-                @foreach($getSibling as $siblings)
-                <li>
-                    <a href="#">{{ $siblings['sibling_name'] }}</a>
+                @isset($getSiblings)
+                    @foreach($getSiblings as $siblings)
+                    @isset($siblings['sibling_name'])
+                         <li> <a href="#">{{ $siblings['sibling_name'] }}</a>
+                    @endisset
+                       
 
-                    @if($siblingKid['sibling_name'] == $siblings['sibling_name'])
+                            @isset($siblingKid)
+                             @isset($siblingKid['sibling_name'])
+                                @if($siblingKid['sibling_name']) == $siblings['sibling_name'])
 
-                    <ul>
-                        @for ($x = 0; $x < $siblingKid['kidCount']; $x++)
-                           <li>  
-                            <a href="#">{{ $siblingKid[$x]['kid_name'] }}</a> </li>   
-                        @endfor
-                        </ul>
-                    @endif
-                </li>
-                @endforeach
-                @endif
+                                    <ul>
+                                    @isset ($siblingKid['kidCount'])
+
+                                      @for ($x = 0; $x < $siblingKid['kidCount']; $x++)
+                                        <li>  <a href="#">{{ $siblingKid[$x]['kid_name'] }}</a> </li>   
+                                      @endfor
+                                        
+                                    @endisset
+                                  
+                                    </ul>
+                                @endif
+                               @endisset  
+                            @endisset
+                        </li>
+                    @endforeach
+                @endisset
             </ul>
         </li>
     </ul>
 </div>
-
 
 
 

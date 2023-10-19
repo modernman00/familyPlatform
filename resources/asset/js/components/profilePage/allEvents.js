@@ -107,7 +107,7 @@ try {
             const idInputComment = id(inputComment);
 
             if (idInputComment.value == null || idInputComment.value == "") {
-                alert("Please enter a comment")
+                alert("Please enter a comment before submitting")
             } else {
 
                 // 1.
@@ -118,6 +118,7 @@ try {
                         axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
                             .then(res => {
                                 // 3.
+                      
                                 showTheComment(res.data.message)
                             })
                     }

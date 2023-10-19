@@ -25,7 +25,7 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
     $options = array('cost' => 12);
 
     if (password_verify($textPassword, $dbPassword) === false) {
-        throw new Exception('There is a problem with your login credential! - Password');
+        msgException(401, 'There is a problem with your login credential! - Password');
         }
     
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
@@ -37,7 +37,7 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if (!$result) {
-            msgException(404, 'Password could not be updated');
+            msgException(422, 'Password could not be updated');
             return false;
         }
 

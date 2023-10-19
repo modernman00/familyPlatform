@@ -19,6 +19,8 @@
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
 
+  
+
   <link rel="stylesheet" type="text/css" href="/profilepage.css">
   <link rel="stylesheet" type="text/css"
     href="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.css" />
@@ -46,19 +48,65 @@
     }
 }
 
-    .loader {
-      border: 16px solid #f3f3f3;
-      /* Light grey */
-      border-top: 16px solid #3498db;
-      /* Blue */
-      border-radius: 50%;
-      width: 120px;
-      justify-content: center;
-      height: 120px;
-      -webkit-animation: spin 2s linear infinite;
-      /* Safari */
-      animation: spin 2s linear infinite;
-    }
+
+.loader {
+
+    border: 16px solid #11e11b79;
+    border-radius: 50%;
+    border-top: 16px solid #2092ddf3;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinner-grow {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+@keyframes spinner-grow {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.spinner-grow {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: -0.125em;
+  background-color: currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  -webkit-animation: 0.75s linear infinite spinner-grow;
+  animation: 0.75s linear infinite spinner-grow;
+}
+
+
+
   </style>
+
 
 </head>

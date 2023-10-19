@@ -37,7 +37,7 @@ class Code extends Select
 
             if (!$_SESSION['identifyCust']) {
             
-                msgException(401, "Hmm, we can't seem to find you - try again");
+                msgException(401, "Hmm, we can't seem to find you - go back and try again");
             }
 
             $this->memberId = checkInput($_SESSION['identifyCust']);

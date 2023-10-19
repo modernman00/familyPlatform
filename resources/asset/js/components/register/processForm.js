@@ -11,7 +11,7 @@ const formData = new FormHelper(formInputArr);
 (() => {
 
     try {
-        
+
         formData.clearError();
 
         // set the maxlength, check the length of the value, raise error
@@ -45,7 +45,7 @@ const processFormDataAction = (addClass, serverResponse) => {
     notificationDiv.classList.add(addClass) // add the success class
     notificationMsg.innerHTML = serverResponse.message // error element
     id('loader').classList.remove('loader') // remove loader
-    notificationDiv.scrollIntoView({behavior: 'smooth', block: 'start'})
+    notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 
@@ -83,14 +83,13 @@ const processForm = async(e) => {
     try {
         e.preventDefault();
 
-
-
         notificationDiv.classList.remove('is-danger') // remove the danger class from the notification
         notificationMsg.innerHTML = "" // empty the error element
 
         if (id('checkbox').checked) {
             // window.location.hash = '#setLoader';
             id("setLoader").focus(); // focus on the loader element
+
 
             formData.clearError()
             formData.emailVal()
@@ -100,22 +99,25 @@ const processForm = async(e) => {
 
             const emailError = id("email_error").innerHTML;
 
-            if (formData.error.length <= 0 && emailError=="") {
+            if (formData.error.length <= 0 && emailError == "") {
 
-                id('loader').classList.add('loader')
+                id("setLoader").classList.add('loader');
+
                 await processFormData("/register", 'register');
+                id("setLoader").classList.remove('loader');
+
                 return;
             } else {
 
                 alert(`The form cannot be submitted. Please check the errors`)
                     //  console.log(formData.error)
-                     notificationMsg.innerHTML = `${warningSign} Check the errors` 
-                     notificationDiv.style.display="block"
-                     notificationDiv.style.backgroundColor="Red"
-                     notificationDiv.style.color="White"
+                notificationMsg.innerHTML = `${warningSign} Check the errors`
+                notificationDiv.style.display = "block"
+                notificationDiv.style.backgroundColor = "Red"
+                notificationDiv.style.color = "White"
                     //  notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                     notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                     //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
+                notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
 
             }
 
@@ -134,3 +136,4 @@ const processForm = async(e) => {
 }
 
 id('submit').addEventListener('click', processForm)
+// id('submit').addEventListener('click', processForm)

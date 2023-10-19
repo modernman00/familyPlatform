@@ -89,49 +89,46 @@ class Insert extends Db
      * @return mixed 
      */
 
-       public static function submitFormDynamicLastId($table, $field, $lastIdCol)
+    public static function submitFormDynamicLastId($table, $field, $lastIdCol)
     {
-    
         try {
-            $DYNAMIC = strtoupper($table);
+            // Prepare the SQL statement
+            $columns = implode(', ', array_keys($field));
+            $placeholders = ':' . implode(', :', array_keys($field));
+            $query = "INSERT INTO $table ($columns) VALUES ($placeholders)";
 
-            // EXTRACT THE KEY FOR THE COL NAME
-            $key = array_keys($field);
-            $col = implode(', ', $key);
-            $placeholder = implode(', :', $key);
+            $connection = parent::connect2();
+            $stmt = $connection->prepare($query);
 
-            // prep statement using placeholder :name
-            $stmt = "INSERT INTO $table ($col) VALUES (:$placeholder)";
-
-            $query = parent::connect2()->prepare($stmt);
-            if (!$query) {
-                throw new Exception("Not able to insert data", 1);
+            if (!$stmt) {
+                msgException(406, "Unable to prepare the query.");
             }
-            foreach ($field as $keys => $values) {
-                $query->bindValue(":$keys", $values);
+
+            foreach ($field as $key => $value) {
+                $stmt->bindValue(":$key", $value);
             }
-            $outcome = $query->execute();
+
+            $outcome = $stmt->execute();
+
             if (!$outcome) {
-                http_response_code(406); // sets the response to 406
-                echo http_response_code(); // echo the new response code
-                throw new Exception("Not able to execute data", 1);
+                msgException(406, "Unable to execute the query.");
             }
 
-             $returnedLastId = parent::connect2()->lastInsertId($lastIdCol);
+            $lastInsertedId = $connection->lastInsertId($lastIdCol);
 
-            $_SESSION["LAST_INSERT_ID_$DYNAMIC"] = $returnedLastId;
+            $dynamicTable = strtoupper($table);
+            $_SESSION["LAST_INSERT_ID_$dynamicTable"] = $lastInsertedId;
 
-            msgSuccess(200,  $returnedLastId);
+            msgSuccess(200, $lastInsertedId);
 
-            return $returnedLastId;
-
+            return $lastInsertedId;
         } catch (PDOException $e) {
             showError($e);
         } catch (\Throwable $e) {
-            Transaction::rollback();
             showError($e);
         }
     }
+
 
     /**
      * 

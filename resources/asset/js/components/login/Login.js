@@ -27,45 +27,53 @@ const formData = new FormHelper(formInputArr);
 
 
 const LoginSubmission = (e) => {
+    e.preventDefault();
+
+    // Remove the danger class from the notification
+    const loginNotification = id('loginNow_notification');
+    // if (loginNotification.classList.contains('is-danger')) {
+    //     loginNotification.classList.remove('is-danger');
+    // }
+
+    // Clear any previous error messages
+    formData.clearError();
+
     try {
-        e.preventDefault();
+        // Sanitize email
+        formData.emailVal();
 
-        id('loginNow_notification').classList.remove('is-danger') // remove the danger class from the notification
+        // Validate and sanitize data
+        formData.massValidate();
 
-        formData.clearError() // empty the error element
+        if (formData.error.length === 0) {
+             // the notification div and the content
+        id('loginNow_notification').classList.remove('is-danger')
+        id('error').innerHTML = ""
+            // Display the success information for 10 seconds
+            id('setLoader').style.display = "block";
 
-        // if (id('checkbox').checked) {
-        id("setLoader").focus(); // focus on the loader element
+            // Set the redirect URL in localStorage
+            localStorage.setItem('redirect', '/member/ProfilePage');
 
-        formData.emailVal() // sanitise email
+            // Get the login URL from sessionStorage
+            const loginURL = sessionStorage.getItem('loginURL1');
 
-        formData.massValidate(); // validate and sanitise data
+            // Determine the redirect URL based on loginURL
+            const redirect = (loginURL === "/lasu") ? null : "/login/code";
 
-        if (formData.error.length == 0) {
-
-            // display the success information for 10sec
-            id('setLoader').style.display = "block" // unblock the div block at the global.js
-
-            id('loader').classList.add('loader') // start the loader element
-
-            localStorage.setItem('redirect', '/member/ProfilePage') // this gets picked up by the code.js
-
-            const loginURL = sessionStorage.getItem('loginURL1')
-
-            const redirect = (loginURL == "/lasu") ? null : "/login/code"
-
-            postFormData(loginURL, "loginNow", redirect)
+            // Submit the form data
+            postFormData(loginURL, "loginNow", redirect);
 
         } else {
-            // log(formData.error)
-            alert('The form cannot be submitted. Please check the errors')
-
+            // Display an alert for form errors
+            alert('The form cannot be submitted. Please check the errors');
         }
-
     } catch (err) {
-        showError(err)
+        // Handle any unexpected errors
+        showError(err);
     }
 }
+
 
 id('submit').addEventListener('click', LoginSubmission)
 

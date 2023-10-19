@@ -87,6 +87,7 @@ var postFormData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url, formId) {
     var redirect,
       css,
+      notificationForm,
       notificationId,
       form,
       formEntries,
@@ -100,7 +101,8 @@ var postFormData = /*#__PURE__*/function () {
         case 0:
           redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
           css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
-          notificationId = "".concat(formId, "_notification"); // extract the form entries
+          notificationForm = "".concat(formId, "_notification");
+          notificationId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationForm); // extract the form entries
           form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
           formEntries = new FormData(form);
           formEntries["delete"]('submit');
@@ -110,12 +112,12 @@ var postFormData = /*#__PURE__*/function () {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN'
           }; // AXIOS POST FUNCTIONALITY
-          _context.prev = 8;
-          _context.next = 11;
+          _context.prev = 9;
+          _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options);
-        case 11:
+        case 12:
           response = _context.sent;
-          successClass = getNotificationClassByCSS("bulma", 'green'); // console.log(response.data.message)
+          successClass = getNotificationClassByCSS("bulma", 'green');
           processFormDataAction(successClass, response.data.message, notificationId);
           if (redirect) {
             setTimeout(function () {
@@ -123,11 +125,11 @@ var postFormData = /*#__PURE__*/function () {
             }, 2000);
           }
           formData.clearHtml();
-          _context.next = 22;
+          _context.next = 23;
           break;
-        case 18:
-          _context.prev = 18;
-          _context.t0 = _context["catch"](8);
+        case 19:
+          _context.prev = 19;
+          _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS("bulma", 'red');
           processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
 
@@ -135,11 +137,11 @@ var postFormData = /*#__PURE__*/function () {
           // if (error.response.data.message === "We do not recognise what you are doing") {
           //   window.location.assign('/login');
           // }
-        case 22:
+        case 23:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[8, 18]]);
+    }, _callee, null, [[9, 19]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -152,11 +154,10 @@ var postFormData = /*#__PURE__*/function () {
  * @param {string} message - The notification message.
  */
 var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
-  var notificationElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formNotificationId);
-  notificationElement.style.display = 'block';
-  notificationElement.classList.add(cssClass);
+  formNotificationId.style.display = 'block';
+  formNotificationId.classList.add(cssClass);
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = message;
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader');
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
 };
 
 /**

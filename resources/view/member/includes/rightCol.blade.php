@@ -7,21 +7,31 @@
 
         <div class="eventList" id="eventList">
 
-           @foreach($eventData as $event) 
+          @foreach($eventData as $event) 
 
-        @php $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']); @endphp
+              @php 
+                  $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']); 
+                  $getDateDiff = number2word($dateDiff);
 
-          @if($dateDiff > 0 && $dateDiff <= 30)
+                  if($getDateDiff == 'Zero') {
+                    $dateDifference = 'Today';
+                  } else if($getDateDiff == 'One') {
+                    $dateDifference = 'Tomorrow';
+                  } else{
+                    $dateDifference = "in $getDateDiff Days";
+                  }
+              @endphp
+
   
-            <p class="eventInfo"><strong>RSVP: </strong>{{ $event['firstName'] }} {{ $event['lastName'] }}</p>
-            <p class="eventInfo"><strong>Event: </strong>{{ $event['eventName'] }}</p>
-            <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} |<i style="color: rgba(11, 11, 201, 0.631)"> In {{ number2word($dateDiff) }} Day(s)</i> </p>
-            <p class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</p>
-            <p class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</p>
-           <hr>
-          @endif
+              <p class="eventInfo"><strong>RSVP: </strong>{{ $event['firstName'] }} {{ $event['lastName'] }}</p>
+              <p class="eventInfo"><strong>Event: </strong>{{ $event['eventName'] }}</p>
+              <p class="eventInfo"><strong>Date: </strong>{{ dateFormat($event['eventDate']) }} | <b><i style="color: rgba(11, 11, 201, 0.631)"> {{ $dateDifference }} </i></b> </p>
+              <p class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</p>
+              <p class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</p>
+            <hr>
        
-        @endforeach
+       
+          @endforeach
 
 
         </div>

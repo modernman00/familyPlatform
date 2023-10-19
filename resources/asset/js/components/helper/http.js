@@ -16,7 +16,9 @@ axiosRetry(axios, { retries: 3 });
  */
 export const postFormData = async(url, formId, redirect = null, css = null) => {
 
-    let notificationId = `${formId}_notification`
+    let notificationForm = `${formId}_notification`
+    const notificationId = id(notificationForm)
+ 
         // extract the form entries
     const form = id(formId)
 
@@ -36,7 +38,7 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
     try {
         const response = await axios.post(url, formEntries, options);
         const successClass = getNotificationClassByCSS("bulma", 'green');
-        // console.log(response.data.message)
+
         processFormDataAction(successClass, response.data.message, notificationId);
 
         if (redirect) {
@@ -47,7 +49,9 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         formData.clearHtml();
     } catch (error) {
+      
         const errorClass = getNotificationClassByCSS("bulma", 'red');
+        
         processFormDataAction(errorClass, error.response.data.message, notificationId);
 
         // Handle specific error cases
@@ -63,11 +67,10 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
  * @param {string} message - The notification message.
  */
 const processFormDataAction = (cssClass, message, formNotificationId) => {
-    const notificationElement = id(formNotificationId);
-    notificationElement.style.display = 'block';
-    notificationElement.classList.add(cssClass);
+    formNotificationId.style.display = 'block';
+    formNotificationId.classList.add(cssClass);
     id('error').innerHTML = message;
-    id('loader').classList.remove('loader');
+    id('setLoader').classList.remove('loader');
 };
 
 /**

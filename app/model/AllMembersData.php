@@ -104,6 +104,26 @@ class AllMembersData extends InnerJoin
         }
     }
 
+      // show information of events within 7 days , 1 days and on the current date
+    public static function getEventDataByNo($eventNo)
+    {
+        try {
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
+            FROM events 
+            INNER JOIN personal ON events.id = personal.id 
+            WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            OR events.eventDate = CURDATE()
+            AND events.no = $eventNo
+            ORDER BY eventDate ASC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute();
+            return $result->fetchAll();
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
     public static function getFriendRequestData($id, $status)
     {
         try {

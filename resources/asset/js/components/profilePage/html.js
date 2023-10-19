@@ -138,27 +138,25 @@ export const commentHTML = (data) => {
 
   const imgURL = (data.img) ? data.img : data.profileImg
 
-  const img = (imgURL) ? `/img/profile/${imgURL}` : "/avatar/avatarF.png"
+  const img = (imgURL) ? `/img/profile/${imgURL}` : `/avatar/avatarF.png`
 
-  return `<div class="w3-ul w3-border" id="comment${data.comment_no}" name='commentDiv'>
-      <div class="w3-container commentDiv">
-      <img src="${img}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
-       <p class="w3-right w3-opacity commentTiming" datetime='${data.date_created}' title='${data.date_created}'> ${format(data.date_created)} </p> 
-         <p class="commentFont"> ${data.comment}</p>
-    </div>
-</div>`
+  return `<div class='w3-ul w3-border w3-round' id='comment${data.comment_no}' name='commentDiv'>
+            <div class='w3-container commentDiv'>
+              <img src='${img}' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:60px; height:60px'>
+              <p class='w3-right w3-opacity commentTiming' datetime='${data.date_created}' title='${data.date_created}'> ${format(data.date_created)} </p> 
+              <p class='commentFont'> ${data.comment}</p>
+            </div>
+          </div>`
 }
 
 const showComment = (comment) => {
-
-
   if (!comment) {
-    return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>`
+    return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>`;
   } // only run if there is comment
 
-  return comment.map(commentElement => {
-    return commentHTML(commentElement)
-  })
+  const commentHTMLArray = comment.map(commentElement => {
+    return commentHTML(commentElement);
+  });
 
-
+  return commentHTMLArray.join(''); // Join the array elements into a single string
 }

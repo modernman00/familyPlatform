@@ -16,14 +16,15 @@
   <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow"
     enctype="multipart/form-data">
 
-    <div id="setLoader">
-      <div id="loader"></div>
-      <div class="notification" id="loginNow_notification">
+    <div id="setLoader" class="loader" style="display: none;">
+    </div>
+     
+      <div class="notification" id="loginNow_notification" style="display: none;">
 
         <p id="error"></p>
       </div>
 
-    </div>
+
 
     <div class="form-group">
 

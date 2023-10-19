@@ -8,14 +8,14 @@
   <!-- The Grid -->
   <div class="w3-row">
 
-<!-- Left Column -->
+    <!-- Left Column -->
     <div class="w3-col m3">
       
       @include('member/includes/personal')
 
     </div>
 
-  <!-- End Left Column -->
+    <!-- End Left Column -->
 
     {{-- POST MESSAGE --}}
     <div class="w3-col m7" id="postMessages">
@@ -46,23 +46,23 @@
 {{-- POST MODAL --}}
 <script>
 
-// const checkTest= @php echo json_encode($allData) @endphp;
-const checkTest= @json($allData);
+    // const checkTest= @php echo json_encode($allData) @endphp;
+    const checkTest= @json($allData);
 
-const processComment = (el) => {
-      const comment = document.getElementById(el.post_id).value
-      document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
-}
+    const processComment = (el) => {
+          const comment = document.getElementById(el.post_id).value
+          document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
+    }
 
-const postId = checkTest.map(el=> {
+    const postId = checkTest.map(el=> {
+      
+      return el.id
+      
+    })
 
-  return el.id
-  
-})
-
-// checkTest.map(el => {
-//   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
-// })
+    // checkTest.map(el => {
+    //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))
+    // })
 </script>
 
 @endsection

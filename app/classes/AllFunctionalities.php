@@ -59,13 +59,13 @@ class AllFunctionalities extends Db
             if (isset($data['submit'])) {
                 unset($data['submit']); // remove submit if present
             }
-
+            $implodeValue = array_values($data);
             $id = $data[$identifier]; // store $data['id]
             unset($data[$identifier]); // unset id
             $implodeKey = implode('=?, ', array_keys($data));
 
             $data[$identifier] = $id;
-            $implodeValue = array_values($data);
+         
 
             $sql = "UPDATE $table SET $implodeKey=? WHERE $identifier =?";
             // example - 'UPDATE register SET title=?, first_name=?, second_name=? WHERE id =?'

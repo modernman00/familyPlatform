@@ -98,7 +98,7 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
         .catch((err) => showError(err))
 } else if (window.location.pathname === '/member/ProfilePage') {
-    // qSel('.login').style.display ="none" // navbar mgt
+     qSel('.profilePageNav').style.display ="none" // navbar mgt
 
     import (
         /* webpackChunkName: 'codeSplit/profilePage' */
@@ -141,4 +141,17 @@ if (window.location.pathname === '/register') {
       qSel('.login').style.display ="none" // navbar mgt
     qSel('.signUp').style.display ="none" // navbar mgt
     
+}else if (window.location.pathname === '/organogram') {
+      qSel('.familyTreeNav').style.display ="none" // navbar mgt
+  
+    
+} else if (window.location.pathname === '/accountSetting') {
+
+    import (
+        /* webpackChunkName: 'codeSplit/familyCode' */
+        /* webpackPrefetch: true */
+        './components/accountSetting'
+    )
+    .then((module) => module.default)
+        .catch((err) => showError(err))
 }

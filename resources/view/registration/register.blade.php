@@ -15,15 +15,11 @@
 
 </div>
 
-<div id="setLoader">
-  <div id="loader">
-    <div class="notification" id="register_notify_div">
+ <div id="setLoader"></div>
+
+  <div class="notification" id="register_notify_div" style="display: none;">
       <p id="register_notify_div_msg"></p>
     </div>
-  </div>
-</div>
-
-
 
 <form action="/register" method="POST" class="register" id="register" enctype="multipart/form-data" autocomplete="off">
 
@@ -102,7 +98,7 @@
   'inputType' => ['text', 'email', 'text'],
   'icon' => [
   '<i class="fas fa-user"></i>',
-    '<i class="fas fa-envelope-square"></i>',
+  '<i class="fas fa-envelope-square"></i>',
   '<i class="fas fa-mobile-alt"></i>',
 
   ]

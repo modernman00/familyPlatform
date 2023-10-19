@@ -53,7 +53,7 @@ const handleInput = (data, WithFamCode) => {
             }
 
             const filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-            log(filteredDataByIdAndCurrentUser);
+         
             filteredDataByIdAndCurrentUser.forEach(renderHtml);
         }
     }

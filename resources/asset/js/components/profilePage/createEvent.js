@@ -52,11 +52,14 @@ const process = (e) => {
             // post the form data to the database and get the last posted event no
             axios.post("/member/profilePage/event", eventFormEntries, options).then(response => {
             // use the event no to get the last event from the database
-                axios.get(`/member/getEventByNo?eventNo=${response.data.message}`)
+                axios.get(`/member/getEventDataByNo?eventNo=${response.data.message}`)
                 .then(res => {
-                    // log(res.data)
-            // add new event real time
+                
+                     if(res.data.message) {
+
+                          // add new event real time
                     checkEventAndAdd(res.data.message)
+                     }        
                 })
             })
 

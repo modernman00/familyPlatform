@@ -374,7 +374,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
 /* harmony export */   matchInput: () => (/* binding */ matchInput),
 /* harmony export */   matchRegex: () => (/* binding */ matchRegex),
-/* harmony export */   removeDiv: () => (/* binding */ removeDiv)
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv),
+/* harmony export */   toSentenceCase: () => (/* binding */ toSentenceCase)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
@@ -489,6 +490,14 @@ var matchInput = function matchInput(first, second, err) {
     }
   });
 };
+var toSentenceCase = function toSentenceCase(str) {
+  return str.toLowerCase() // Convert the string to lowercase
+  .split(' ') // Split the string into words
+  .map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }) // Capitalize the first letter of each word
+  .join(' '); // Join the words back into a string
+};
 
 /***/ }),
 
@@ -537,6 +546,7 @@ var postFormData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url, formId) {
     var redirect,
       css,
+      notificationForm,
       notificationId,
       form,
       formEntries,
@@ -550,7 +560,8 @@ var postFormData = /*#__PURE__*/function () {
         case 0:
           redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
           css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
-          notificationId = "".concat(formId, "_notification"); // extract the form entries
+          notificationForm = "".concat(formId, "_notification");
+          notificationId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationForm); // extract the form entries
           form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
           formEntries = new FormData(form);
           formEntries["delete"]('submit');
@@ -560,12 +571,12 @@ var postFormData = /*#__PURE__*/function () {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN'
           }; // AXIOS POST FUNCTIONALITY
-          _context.prev = 8;
-          _context.next = 11;
+          _context.prev = 9;
+          _context.next = 12;
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options);
-        case 11:
+        case 12:
           response = _context.sent;
-          successClass = getNotificationClassByCSS("bulma", 'green'); // console.log(response.data.message)
+          successClass = getNotificationClassByCSS("bulma", 'green');
           processFormDataAction(successClass, response.data.message, notificationId);
           if (redirect) {
             setTimeout(function () {
@@ -573,11 +584,11 @@ var postFormData = /*#__PURE__*/function () {
             }, 2000);
           }
           formData.clearHtml();
-          _context.next = 22;
+          _context.next = 23;
           break;
-        case 18:
-          _context.prev = 18;
-          _context.t0 = _context["catch"](8);
+        case 19:
+          _context.prev = 19;
+          _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS("bulma", 'red');
           processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
 
@@ -585,11 +596,11 @@ var postFormData = /*#__PURE__*/function () {
           // if (error.response.data.message === "We do not recognise what you are doing") {
           //   window.location.assign('/login');
           // }
-        case 22:
+        case 23:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[8, 18]]);
+    }, _callee, null, [[9, 19]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -602,11 +613,10 @@ var postFormData = /*#__PURE__*/function () {
  * @param {string} message - The notification message.
  */
 var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
-  var notificationElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formNotificationId);
-  notificationElement.style.display = 'block';
-  notificationElement.classList.add(cssClass);
+  formNotificationId.style.display = 'block';
+  formNotificationId.classList.add(cssClass);
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = message;
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader');
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
 };
 
 /**
@@ -830,35 +840,46 @@ var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInput
   formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.max);
 })();
 var LoginSubmission = function LoginSubmission(e) {
+  e.preventDefault();
+
+  // Remove the danger class from the notification
+  var loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
+  // if (loginNotification.classList.contains('is-danger')) {
+  //     loginNotification.classList.remove('is-danger');
+  // }
+
+  // Clear any previous error messages
+  formData.clearError();
   try {
-    e.preventDefault();
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
+    // Sanitize email
+    formData.emailVal();
 
-    formData.clearError(); // empty the error element
+    // Validate and sanitize data
+    formData.massValidate();
+    if (formData.error.length === 0) {
+      // the notification div and the content
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger');
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = "";
+      // Display the success information for 10 seconds
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block";
 
-    // if (id('checkbox').checked) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
+      // Set the redirect URL in localStorage
+      localStorage.setItem('redirect', '/member/ProfilePage');
 
-    formData.emailVal(); // sanitise email
-
-    formData.massValidate(); // validate and sanitise data
-
-    if (formData.error.length == 0) {
-      // display the success information for 10sec
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
-
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
-
-      localStorage.setItem('redirect', '/member/ProfilePage'); // this gets picked up by the code.js
-
+      // Get the login URL from sessionStorage
       var loginURL = sessionStorage.getItem('loginURL1');
-      var redirect = loginURL == "/lasu" ? null : "/login/code";
+
+      // Determine the redirect URL based on loginURL
+      var redirect = loginURL === "/lasu" ? null : "/login/code";
+
+      // Submit the form data
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)(loginURL, "loginNow", redirect);
     } else {
-      // log(formData.error)
+      // Display an alert for form errors
       alert('The form cannot be submitted. Please check the errors');
     }
   } catch (err) {
+    // Handle any unexpected errors
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }
 };

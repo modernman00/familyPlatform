@@ -10,3 +10,7 @@ $router->map('GET', '/aboutus', 'App\controller\About@index', 'About');
 $router->map('GET', '/privacy', 'App\controller\Index@privacy', 'privacy');
 
 $router->map('GET', '/terms', 'App\controller\Index@terms', 'terms');
+
+$router->map('GET', '/accountSetting', 'App\controller\Index@accountSetting', 'accountSetting'); 
+
+$router->map('POST', '/accountSetting', 'App\controller\Index@accountSettingPost', 'accountSettingPost'); 

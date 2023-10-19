@@ -12,10 +12,14 @@ const process = () => {
 	// clear error from the form
 	formData.clearError()
 	// set the maxlength, check the length of the value, raise error
-	formData.realTimeCheckLen(
-		dataToCheckRegister.maxLength.id,
-		dataToCheckRegister.maxLength.max
-	);
+
+	if (dataToCheckRegister.maxLength.id) {
+		formData.realTimeCheckLen(
+			dataToCheckRegister.maxLength.id,
+			dataToCheckRegister.maxLength.max
+		)
+	}
+
 
 }
 
@@ -24,7 +28,7 @@ process()
 id('submitEventModal').addEventListener('click', () => {
 	try {
 		alert('inside the submitForm.js')
-		
+
 		if (id('email')) {
 			formData.emailVal() // sanitise email
 		}

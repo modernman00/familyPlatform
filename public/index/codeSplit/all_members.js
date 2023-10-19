@@ -72,7 +72,6 @@ var handleInput = function handleInput(data, WithFamCode) {
         _iterator.f();
       }
       var filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(filteredDataByIdAndCurrentUser);
       filteredDataByIdAndCurrentUser.forEach(_html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
     }
   }
@@ -112,6 +111,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+
 
 
 var renderHtml = function renderHtml(el) {
@@ -126,9 +127,12 @@ var renderHtml = function renderHtml(el) {
     var isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Add to family';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
+    var fatherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.fatherName);
+    var motherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.motherName);
+    // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not.
-    var html = "\n        <div class=\"col-sm-2 mb-3 d-flex\" id=\"".concat(el.id, "\">\n            <div class=\"card flex-grow-1\">\n                <img src=\"").concat(theImg, "\" \n                    class=\"card-img-top allMember_profileImg\" \n                    width=\"100\" height=\"200\" alt=\"profile img\">\n    \n                <div class=\"card-body\">\n                    <h5 class=\"card-title\">").concat(el.firstName, " ").concat(el.lastName, "</h5>\n                    <p class=\"card-text allMember_card_content\">\n                        <br> <b>Country:</b> ").concat(el.country, " \n\n                        ").concat(isUserInSameFamily ? "<br> <b>Father:</b> ".concat(el.fatherName, "\n                             <br> <b>Mother:</b> ").concat(el.motherName, "\n                             <br> <b>Spouse:</b> ").concat(el.spouseName || 'none', "\n            \n                             <br> <b>famCode:</b> ").concat(el.famCode, " \n                             <br> <b>Mobile:</b> ").concat(el.mobile, " \n                             <br> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n                             <div class=\"card-body\">\n                                <a href=\"/allMembers/setProfile?id=").concat(el.id, "\" class=\"btn btn-primary card-link\">\n                                    See Profile\n                                </a>\n                            </div>") : "<div class=\"card-body\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"btn btn-success button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                            </div>"), "\n                    </div>\n                </div>\n            </div>\n        </div>");
+    var html = "\n        <div class=\"w3-col l3 m6 w3-margin-bottom w3-round-xlarge\" id=\"".concat(el.id, "\">\n          \n                <img src=\"").concat(theImg, "\" style=\"width:100%; height:300px;\" alt=\"").concat(el.firstName, "\">\n                      <ul class=\"w3-ul w3-border w3-center w3-hover-shadow\">\n    \n                    <li class=\"w3-black w3-large w3-padding-16\">").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</li>\n\n                    <li class=\"w3-padding-8 allMember_card_content\">\n                         <b>Country:</b> ").concat(el.country, " </li>\n\n                        ").concat(isUserInSameFamily ? "    <li class=\"w3-padding-8\"> <b>Father:</b> ".concat(fatherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Mother:</b> ").concat(motherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Spouse:</b> ").concat(el.spouseName || 'none', "</li>\n                             <li class=\"w3-padding-8\"> <b>Mobile:</b> ").concat(el.mobile, " </li>\n                             <li class=\"w3-padding-8\"> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</li>\n\n                             <li class=\"w3-light-grey w3-padding-16\">\n                             <button class=\"w3-button w3-green w3-padding-small\">\n                                <a href=\"/allMembers/setProfile?id=").concat(el.id, "\">\n                                    See Profile\n                                </a>\n                                </button>\n                                \n                            </li>") : "<li class=\"w3-light-grey w3-padding-16\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"w3-button w3-green w3-padding-large button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                        </li>"), "\n                    \n     \n          </ul>\n        </div>");
 
     // Insert the HTML content into the 'allMembers' element.
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
@@ -297,6 +301,152 @@ function updateButton(targetId, newHTML) {
   theTargetId.innerHTML = newHTML;
   theTargetId.disabled = true;
 }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
+/* harmony export */   checkBox: () => (/* binding */ checkBox),
+/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
+/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
+/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
+/* harmony export */   isChecked: () => (/* binding */ isChecked),
+/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
+/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
+/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
+/* harmony export */   matchInput: () => (/* binding */ matchInput),
+/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
+/* harmony export */   removeDiv: () => (/* binding */ removeDiv),
+/* harmony export */   toSentenceCase: () => (/* binding */ toSentenceCase)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
+
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  newDiv.setAttribute('class', "field ".concat(setClass));
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  return parentDiv.appendChild(newDiv);
+};
+
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase();
+      // you can also use AJAX requests instead of preloaded data
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return _toConsumableArray(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[<?/>]+/g;
+      var result = data.match(regex);
+      if (result === null) return true;
+    }
+  }
+};
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
+var toSentenceCase = function toSentenceCase(str) {
+  return str.toLowerCase() // Convert the string to lowercase
+  .split(' ') // Split the string into words
+  .map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }) // Capitalize the first letter of each word
+  .join(' '); // Join the words back into a string
+};
 
 /***/ })
 
