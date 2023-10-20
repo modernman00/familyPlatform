@@ -29,8 +29,8 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
-                    // console.log(post)
-                    // rid it off the submit and token
+                // console.log(post)
+                // rid it off the submit and token
                 if (post.name == 'submit' ||
                     post.name == 'button' ||
                     post.name == 'token' ||
@@ -85,30 +85,39 @@ export default class FormHelper {
     }
 
     clearError() {
-        this.error = [] // empty the array 
+        this.error = []; // Empty the error array
+
+        // Define a function to clear error messages for a given input element
+        const clearErrorForElement = (elementName) => {
+            const errorElement = this.id(`${elementName}_error`);
+            if (errorElement) {
+                errorElement.innerHTML = '';
+            }
+        };
+
         this.data.forEach(el => {
+
             for (let post of el) {
-                if (post.id == 'submit' || post.id == 'token' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
-                    continue
+
+                const { id, name, value } = post;
+
+                // Skip certain input types
+                if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+                    continue;
                 }
-                // console.log(post.name)
-                this.id(post.id).addEventListener('change', () => {
-                    if (this.id(`${post.name}_error`)) {
-                        this.id(`${post.name}_error`).innerHTML = ''
-                    }
-                })
-                if (post.value != 'select') {
-                    this.id(post.id).addEventListener('keyup', () => {
-                        if (this.id(`${post.name}_error`)) {
-                            this.id(`${post.name}_error`).innerHTML = ''
-                        }
-                    })
+                // Add change event listener to clear error message
+                this.id(id).addEventListener('change', () => {
+                    clearErrorForElement(name);
+                });
+                // Add keyup event listener for non-select inputs
+                if (value !== 'select') {
+                    this.id(id).addEventListener('keyup', () => {
+                        clearErrorForElement(name);
+                    });
                 } else {
-                    this.id(post.id).addEventListener('change', () => {
-                        if (this.id(`${post.name}_error`)) {
-                            this.id(`${post.name}_error`).innerHTML = ''
-                        }
-                    })
+                    this.id(id).addEventListener('keyup', () => {
+                        clearErrorForElement(name);
+                    });
                 }
             }
         })
@@ -169,19 +178,19 @@ export default class FormHelper {
      */
 
     matchInput(first, second) {
-            let error, firstInput, secondInput
-            error = this.id(`${second}_error`)
-            firstInput = this.id(first + '_id')
-            secondInput = this.id(second + '_id')
-            secondInput.addEventListener('keyup', () => {
-                error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
-            })
-        }
-        /**
-         *
-         * @param {the id of the input you want to inject to/ this is an array} idArray
-         * @param {*the comment or questions you want o inject} html
-         */
+        let error, firstInput, secondInput
+        error = this.id(`${second}_error`)
+        firstInput = this.id(first + '_id')
+        secondInput = this.id(second + '_id')
+        secondInput.addEventListener('keyup', () => {
+            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
+        })
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
 
     injectData(idArray, html) {
         let idData;
@@ -225,7 +234,7 @@ export default class FormHelper {
                 return;
             } else {
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
+                xmlhttp.onreadystatechange = function () {
                     if (this.readyState == 4 && this.status == 200) {
                         output.innerHTML = this.responseText;
                     }

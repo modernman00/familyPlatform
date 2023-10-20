@@ -31,7 +31,7 @@ class AlterTable extends AllFunctionalities
 
     public function addNewCol($colName, $dataType, $lastData)
     {
-        $query =  " ALTER TABLE $this->table ADD $colName $dataType NULL AFTER $lastData";
+        $query =  "ALTER TABLE $this->table ADD `$colName` $dataType NULL AFTER $lastData";
         $result = $this->connect()->prepare($query);
         return $result->execute();
       

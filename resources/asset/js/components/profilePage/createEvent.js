@@ -1,5 +1,5 @@
 "use strict";
-import { id, showError , log, date2String} from "../global"
+import { id, showError, log, date2String } from "../global"
 import FormHelper from '../FormHelper';
 
 import axios from "axios";
@@ -28,15 +28,29 @@ const eventHtml = (data) => {
 
 const checkEventAndAdd = (data) => {
 
-        const appendEvent = eventHtml(data);
-       return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+    const appendEvent = eventHtml(data);
+    return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
 
 }
 
-  const options = {
-        xsrfCookieName: 'XSRF-TOKEN',
-        xsrfHeaderName: 'X-XSRF-TOKEN',
+const checkNotificationAndAdd = (data) => {
+
+    const notHTML = (data) => {
+
+        return `<a href="#" class="w3-bar-item w3-button">  
+                ${data[0].notification_content}
+            </a>`;
     }
+
+    const appendEvent = notHTML(data);
+    return id('eventNotificationTab').insertAdjacentHTML('afterbegin', appendEvent);
+
+}
+
+const options = {
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+}
 
 const process = (e) => {
     try {
@@ -45,21 +59,38 @@ const process = (e) => {
         id('error').innerHTML = "" // may not be needed
         formData.massValidate();
         // log(formData.error)
-        if (formData.error.length <= 0) {    
+        if (formData.error.length <= 0) {
             // get the form data
             const eventForm = id('eventModalForm');
             let eventFormEntries = new FormData(eventForm);
             // post the form data to the database and get the last posted event no
             axios.post("/member/profilePage/event", eventFormEntries, options).then(response => {
-            // use the event no to get the last event from the database
-                axios.get(`/member/getEventDataByNo?eventNo=${response.data.message}`)
-                .then(res => {
-                
-                     if(res.data.message) {
+                // use the event no to get the last event from the database
 
-                          // add new event real time
-                    checkEventAndAdd(res.data.message)
-                     }        
+                axios.get(`/member/getEventDataByNo?eventNo=${response.data.message}`)
+
+                    .then(res => {
+
+                        if (res.data.message) {
+                            
+                            log(res.data.message)
+
+                            // add new event real time
+                            checkEventAndAdd(res.data.message)
+                        }
+                    })
+
+                // post to the notification 
+
+                axios.post('/member/notification/event', eventFormEntries, options).then(result => {
+
+                    axios.get(`/member/notification/event?notificationNo=${result.data.message}`).then(result2 => {
+
+                        log(result2.data.message)
+
+                       checkNotificationAndAdd(result2.data.message)
+                    })
+
                 })
             })
 

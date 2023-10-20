@@ -106,7 +106,13 @@ input[type="file"] {
     {{-- NAME --}}
 
     <h4 class="w3-center">
-      <b><i>{{ $data['firstName'] }} {{ $data['lastName'] }} <br> FAMILY CODE:  {{ $data['famCode'] }} {{ $data['id'] }} </i> </b>
+      <b>
+        {{ $data['firstName'] }} 
+        {{ $data['lastName'] }} 
+        {{-- <br> FAMILY CODE:  
+        {{ $data['famCode'] }} 
+        {{-- {{ $data['id'] }} </i>  --}}
+        </b> 
       {{-- {{ $data['id'] }} --}}
 
     </h4>
@@ -169,6 +175,9 @@ input[type="file"] {
 
     {{-- COUNTRY --}}
     <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> {{ $data['country'] }}</p>
+
+     {{-- COUNTRY --}}
+    <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Family code: {{ $data['famCode'] }}</p>
 
 
     {{-- DATE OF BIRTH --}}

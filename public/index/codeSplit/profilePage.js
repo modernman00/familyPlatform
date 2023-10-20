@@ -108,33 +108,41 @@ var FormHelper = /*#__PURE__*/function () {
     key: "clearError",
     value: function clearError() {
       var _this2 = this;
-      this.error = []; // empty the array 
+      this.error = []; // Empty the error array
+
+      // Define a function to clear error messages for a given input element
+      var clearErrorForElement = function clearErrorForElement(elementName) {
+        var errorElement = _this2.id("".concat(elementName, "_error"));
+        if (errorElement) {
+          errorElement.innerHTML = '';
+        }
+      };
       this.data.forEach(function (el) {
         var _iterator2 = _createForOfIteratorHelper(el),
           _step2;
         try {
           var _loop = function _loop() {
             var post = _step2.value;
-            if (post.id == 'submit' || post.id == 'token' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
+            var id = post.id,
+              name = post.name,
+              value = post.value;
+
+            // Skip certain input types
+            if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
               return 1; // continue
             }
-            // console.log(post.name)
-            _this2.id(post.id).addEventListener('change', function () {
-              if (_this2.id("".concat(post.name, "_error"))) {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
-              }
+            // Add change event listener to clear error message
+            _this2.id(id).addEventListener('change', function () {
+              clearErrorForElement(name);
             });
-            if (post.value != 'select') {
-              _this2.id(post.id).addEventListener('keyup', function () {
-                if (_this2.id("".concat(post.name, "_error"))) {
-                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
-                }
+            // Add keyup event listener for non-select inputs
+            if (value !== 'select') {
+              _this2.id(id).addEventListener('keyup', function () {
+                clearErrorForElement(name);
               });
             } else {
-              _this2.id(post.id).addEventListener('change', function () {
-                if (_this2.id("".concat(post.name, "_error"))) {
-                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
-                }
+              _this2.id(id).addEventListener('keyup', function () {
+                clearErrorForElement(name);
               });
             }
           };
@@ -923,6 +931,13 @@ var checkEventAndAdd = function checkEventAndAdd(data) {
   var appendEvent = eventHtml(data);
   return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
 };
+var checkNotificationAndAdd = function checkNotificationAndAdd(data) {
+  var notHTML = function notHTML(data) {
+    return "<a href=\"#\" class=\"w3-bar-item w3-button\">  \n                ".concat(data[0].notification_content, "\n            </a>");
+  };
+  var appendEvent = notHTML(data);
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventNotificationTab').insertAdjacentHTML('afterbegin', appendEvent);
+};
 var options = {
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN'
@@ -941,11 +956,23 @@ var process = function process(e) {
       // post the form data to the database and get the last posted event no
       axios__WEBPACK_IMPORTED_MODULE_2___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
         // use the event no to get the last event from the database
+
         axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/getEventDataByNo?eventNo=".concat(response.data.message)).then(function (res) {
           if (res.data.message) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(res.data.message);
+
             // add new event real time
             checkEventAndAdd(res.data.message);
           }
+        });
+
+        // post to the notification 
+
+        axios__WEBPACK_IMPORTED_MODULE_2___default().post('/member/notification/event', eventFormEntries, options).then(function (result) {
+          axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/notification/event?notificationNo=".concat(result.data.message)).then(function (result2) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(result2.data.message);
+            checkNotificationAndAdd(result2.data.message);
+          });
         });
       });
       displayNone();

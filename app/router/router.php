@@ -14,5 +14,6 @@ include_once __DIR__ . "/profile_page.php";
 include_once __DIR__ . "/allMembersRoute.php";
 include_once __DIR__ . "/chat.php";
 include_once __DIR__ . "/Event.php";
+include_once __DIR__ . "/notification.php";
 
-// $router->map('GET', '/php8', 'App\controller\Testphp@index', 'php8');
+$router->map('GET', '/testFunction', 'App\controller\Testphp@testFunction', 'php8');

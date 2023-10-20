@@ -54,6 +54,13 @@
         font-size: 3.5rem;
       }
     }
+
+    .copyright {
+            text-align: center;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+        }
   </style>
 
 
@@ -90,9 +97,20 @@
     </main>
 
     <footer class="mastfoot mt-auto">
-      <div class="inner">
+      {{-- <div class="inner">
         <p>The site is built and maintained by Wale Olaogun<a href="https://twitter.com/modernman">@modernman</a>. </p>
       </div>
+       <br> --}}
+    
+     <div class="copyright">
+        &copy; 2023 {{ getenv("APP_NAME") }}. All rights reserved.
+        {{-- <p>The site is built and maintained by Wale Olaogun<a href="https://twitter.com/modernman">@modernman</a>. </p> --}}
+           <a href="/privacy">Privacy</a> | <a href="/terms">Terms</a> | <a href="/contact">Contact</a> | <a href="/aboutus">About us</a>
+    </div>
+
+  
+
+
     </footer>
   </div>
 

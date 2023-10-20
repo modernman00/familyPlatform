@@ -4,6 +4,7 @@ namespace App\classes;
 
 use PDOException;
 use App\classes\Db;
+USE PDO;
 
 class Select extends Db
 {
@@ -72,6 +73,19 @@ class Select extends Db
         }
     }
 
+    public function selectFn1(string $query, array $bind = null): array|int|string
+    {
+        try {
+            $sql = $query;
+            $result = $this->connect()->prepare($sql);
+            $result->execute($bind);
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            showError($e);
+            return false;
+        }
+    }
+
     /**
      * 
      * @param string $query 
@@ -85,7 +99,7 @@ class Select extends Db
             $sql = $query;
             $result = self::connect2()->prepare($sql);
             $result->execute($bind);
-            return $result->fetchAll();
+            return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             showError($e);
             return false;

@@ -5,11 +5,11 @@
 @section('data-page-id', 'register')
 @section('content')
 
-  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
+  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-3 form__login__logo">
 
 <div class="columns">
-  <div class="column" style="text-align:center; margin-left:20%; margin-right:20%;">
-    <h3 class="title is-2"> Register To Join Your Family Network </h3>
+  <div class="column" style="text-align:center; margin-left:10%; margin-right:10%;">
+    <h3 class="title is-3"> Register To Join Your Family Network </h3>
 
   </div>
 
@@ -25,6 +25,10 @@
 
   @php
 
+  if(isset($registerPostData)) {
+    echo "<h1> IT WORKED SO WELL </h1>";
+  }
+
   $formArray = [
   // PERSONAL
   'Personal Information' => 'title',
@@ -34,9 +38,14 @@
   'name' => [
   'mixed',
   'label' => ['first Name', 'last Name', 'Family code'],
-  'attribute' => ['firstName', 'lastName', 'familyCode'],
+  'attribute' => ['firstName', 'lastName', 'famCode'],
   'placeholder' => ['Toyin', 'olaogun', 'check your email for the code '],
   'inputType' => ['text', 'text', 'text'],
+  'value' => [
+    isset($registerPostData['firstName']) ? $registerPostData['firstName'] : '',
+    isset($registerPostData['lastName']) ? $registerPostData['lastName'] : '',
+    isset($registerPostData['famCode']) ? $registerPostData['famCode'] : ''
+  ],
   'icon' => [
   '<i class="fas fa-user"></i>',
   '<i class="fas fa-user"></i>',

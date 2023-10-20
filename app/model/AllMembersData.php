@@ -64,8 +64,22 @@ class AllMembersData extends InnerJoin
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
         if (!$memberData) {
-            // http_response_code(400);
-            // echo http_response_code();
+
+            throw new Exception(self::ERR_MSG, 400);
+        }
+
+
+        return $memberData;
+    }
+
+    public static function getAllMembersNoPicsStatic(): array
+    {
+        $table = ['personal', "contact", "profile_pics", 'otherFamily'];
+        $firstTable = array_shift($table);
+        $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
+
+        if (!$memberData) {
+
             throw new Exception(self::ERR_MSG, 400);
         }
 
@@ -77,7 +91,7 @@ class AllMembersData extends InnerJoin
     {
 
         $table = ['personal', 'otherFamily', 'profile_pics', 'post',  'contact'];
-        //  $table = ['personal', 'otherFamily', 'profile_pics', 'post', 'contact'];
+
         $firstTable = array_shift($table);
 
         $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id);
@@ -164,4 +178,23 @@ class AllMembersData extends InnerJoin
             showError($th);
         }
     }
+
+    // Just get the member's name
+
+    public static function getMemberName($id)
+{
+    $query = Select::formAndMatchQuery(selection: "SELECT_TWO_COLS_ID", table: "personal", identifier1: "id", column: "firstName", column2: "lastName");
+    $result = Select::selectFn2($query, [$id]);
+    
+    if (isset($result[0]['firstName'], $result[0]['lastName'])) {
+        return [
+            'fName' => $result[0]['firstName'],
+            'lName' => $result[0]['lastName']
+        ];
+    } else {
+        // Handle the case where the query didn't return the expected result.
+        msgException(401, "Member not found");
+    }
+}
+
 }

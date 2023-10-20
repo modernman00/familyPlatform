@@ -13,7 +13,7 @@
 
 </style>
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{{-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <script type="text/javascript">
     const dataPull = @json($data, JSON_PRETTY_PRINT);
@@ -67,7 +67,7 @@
             // Draw the chart, setting the allowHtml option to true for the tooltips.
             chart.draw(data, {'allowHtml':true, width: 1000, height: 1000, title: `${dataPull.firstName} Family Tree`});
         }
-</script>
+</script> --}}
 
 @section('data-page-id', 'Organogram')
 @section('content')
@@ -88,13 +88,20 @@ na
             <ul>
                 <li>
                     {{--  check if there is a spouse  --}}
-                    @if($data['spouseName'] !== "Not Provided")
+                    {{-- @if($data['spouseName'] !== "Not Provided" || isset($data['spouseName']))
                     <a href="#"> 
                       <b>Spouse: </b>  {{ $data['spouseName'] }}
                     </a>
                     @else
 
-                    @endif
+                    @endif --}}
+
+
+                    @isset($data['spouseName'])
+                        @if ($data['spouseName'] !== "Not Provided")
+                            <a href="#"> <b>Spouse: </b>  {{ $data['spouseName'] }} </a>
+                        @endif                        
+                    @endisset
 
                     {{--  first and last name  --}}
                     <a href="#">

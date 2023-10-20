@@ -5,3 +5,5 @@ $router->map('GET', '/sendEventReminder', 'App\controller\members\Event@sendRemi
 $router->map('GET', '/member/getEventDataByNo', 'App\controller\members\Event@getEventDataByNoController', 'new event no');
 
 
+
+

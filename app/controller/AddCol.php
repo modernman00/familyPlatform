@@ -12,9 +12,19 @@ class AddCol
     public function addCol(): void
     {
         try {
-            $cols = ['alias', 'spouse'];
-            $lastData = 'lastName';
-            $add = new AlterTable('personal', $cols);
+            $add = new AlterTable('notification');
+            $add->addNewCol('notification_date', 'TEXT', 'receiver');
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    public function addColArr(): void
+    {
+        try {
+            $cols = ['when'];
+            $lastData = 'receiver';
+            $add = new AlterTable('notification', $cols);
             $add->addNewColArr($lastData);
         } catch (\Throwable $th) {
             showError($th);

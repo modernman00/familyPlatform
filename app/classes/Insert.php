@@ -98,11 +98,9 @@ class Insert extends Db
             $query = "INSERT INTO $table ($columns) VALUES ($placeholders)";
 
             $connection = parent::connect2();
+            
             $stmt = $connection->prepare($query);
 
-            if (!$stmt) {
-                msgException(406, "Unable to prepare the query.");
-            }
 
             foreach ($field as $key => $value) {
                 $stmt->bindValue(":$key", $value);

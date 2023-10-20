@@ -63,7 +63,7 @@
     <h2>5. LIMITATION OF LIABILITY</h2>
 
     <p>
-        In no event shall [Your Company Name] be liable for any indirect, consequential, or incidental damages arising out of or related to the use of the Website.
+        In no event shall myfamilyplatform be liable for any indirect, consequential, or incidental damages arising out of or related to the use of the Website.
     </p>
 
     <h2>6. CHANGES TO THE TERMS</h2>

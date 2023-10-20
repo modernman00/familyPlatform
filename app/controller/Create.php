@@ -12,7 +12,8 @@ use App\classes\tables\{
     Account,
     Interest,
     otherFamily,
-    friendRequest
+    friendRequest,
+    Notification
 };
 
 class Create extends Db
@@ -44,6 +45,16 @@ class Create extends Db
         try {
             $fRequest = new friendRequest();
             $fRequest->index();
+        } catch (\Throwable $e) {
+            echo $e->getMessage();
+        }
+    
+    }
+
+      public function notification(): void {
+
+        try {
+            Notification::index();
         } catch (\Throwable $e) {
             echo $e->getMessage();
         }

@@ -23,7 +23,17 @@ class Register extends Db
         try {
 
             $_SESSION['register'] = true;
-            view('registration/register');
+
+            // to retain values in the input 
+            if(isset($_POST['submit'])){
+                $registerPostData = $_POST; 
+                  view('registration/register', ['registerPostData' => $registerPostData ]);
+            } else{
+                view('registration/register');
+            }
+
+
+          
         } catch (\Throwable $e) {
 
             showError($e);
@@ -161,55 +171,6 @@ class Register extends Db
         }
     }
 
-    /**
-     * @param mixed $type is it kids or siblings
-     * 
-     * @param int $typeCount the number selected
-     * @param array $data cleaned POST data
-     * @throws \Throwable
-     */
-    // private function processKidSibling(string $type, int $typeCount, array $data): void
-    // {
-    //     try {
-    //         for ($i = 1; $i <= $typeCount; $i++) {
-    //             $dataArr = $this->prepareDataArray($type, $i, $data);
-
-    //             $this->insertData($type, $dataArr);
-    //         }
-    //     } catch (\Throwable $th) {
-    //         http_response_code(406);
-    //         showError($th);
-    //     }
-    // }
-
-    // private function prepareDataArray(string $type, int $index, array $data): array
-    // {
-    //     return [
-    //         "{$type}_name" => $data["{$type}_name$index"],
-    //         "{$type}_email" => $data["{$type}_email$index"],
-    //         "{$type}_linked" => $data["{$type}_option$index"],
-    //         // "{$type}_code" => $data["familyCode"],
-    //         "id" => $data["id"],
-    //     ];
-    // }
-
-    // private function insertData(string $type, array $dataArr): void
-    // {
-    //     $sql = "INSERT INTO 
-    //     {$type}s ({$type}_name, 
-    //     {$type}_email, 
-    //     {$type}_linked, 
-    //     id) 
-    //         VALUES (
-    //             :{$type}_name, 
-    //             :{$type}_email, 
-    //             :{$type}_linked, 
-    //             :id)";
-
-    //     $query = $this->connect()->prepare($sql);
-    //     $query->execute($dataArr);
-    // }
-
 
     /**
      * @return (int|string)[][]
@@ -253,94 +214,6 @@ class Register extends Db
         ];
     }
 
-    /**
-     * Summary of tableData
-     *
-     * @param mixed $cleanPostData - sanitised $_POST data 
-     *
-     * @return (int|mixed|string)[][]
-     *
-     * @psalm-return array{0: array{firstName: mixed, lastName: mixed, alias: mixed, kids: mixed, gender: mixed, siblings: mixed, day: mixed, month: mixed, year: mixed, id: mixed}, 1: array{employmentStatus: mixed, occupation: mixed, id: mixed}, 2: array{email: mixed, country: mixed, mobile: mixed, id: mixed}, 3: array{email: mixed, password: mixed, status: 'new', type: 'member', id: mixed}, 4: array{spouseName: mixed, spouseMobile: mixed, spouseEmail: mixed, fatherName: mixed, fatherMobile: mixed, fatherEmail: mixed, motherName: mixed, motherMobile: mixed, motherEmail: mixed, id: mixed}, 5: array{fullName: mixed, postMessage: 'Hey, welcome to your page', profileImg: 'avatarF.png'|'avatarM.jpeg', id: mixed}, 6: array{fullName: mixed, comment: 'Your comment will show here', profileImg: 'avatarF.png'|'avatarM.jpeg', post_no: 1000, id: mixed}, 7: array{img: 'avatarF.png'|'avatarM.jpeg', id: mixed}}
-     */
-    // private function tableData(array $cleanPostData): array
-    // {
-    //     $profileAvatar = $cleanPostData['gender'] === "Male" ? "avatarM.png" : "avatarF.png";
-    //     return [
-    //         'personal' =>  [
-    //             'firstName' => $cleanPostData['firstName'],
-    //             'lastName' => $cleanPostData['lastName'],
-    //             'famCode' => $cleanPostData['familyCode'],
-    //             'kids' => $cleanPostData['kids'],
-    //             'gender' => $cleanPostData['gender'],
-    //             'siblings' => $cleanPostData['siblings'],
-    //             'day' => $cleanPostData['day'],
-    //             'month' => $cleanPostData['month'],
-    //             'year' => $cleanPostData['year'],
-    //             'id' => $cleanPostData['id'],
-    //         ],
-    //         'work' => [
-    //             'employmentStatus' => $cleanPostData['employmentStatus'],
-    //             'occupation' => $cleanPostData['occupation'],
-    //             'id' => $cleanPostData['id']
-    //         ],
-    //         'contact' => [
-
-    //             'email' => $cleanPostData['email'],
-    //             'country' => $cleanPostData['country'],
-    //             'mobile' => $cleanPostData['mobile'],
-    //             'id' => $cleanPostData['id'],
-    //         ],
-    //         'account' => [
-    //             'email' => $cleanPostData['email'],
-    //             'password' => $cleanPostData['password'],
-    //             'status' => 'new',
-    //             'type' => 'member',
-    //             'id' => $cleanPostData['id'],
-    //         ],
-    //         'otherFamily' => [
-    //             'spouseName' => $cleanPostData['spouseName'],
-    //             'spouseMobile' => $cleanPostData['spouseMobile'],
-    //             'spouseEmail' => $cleanPostData['spouseEmail'],
-    //             'fatherName' => $cleanPostData['fatherName'],
-    //             'fatherMobile' => $cleanPostData['fatherMobile'],
-    //             'fatherEmail' => $cleanPostData['fatherEmail'],
-    //             'motherName' => $cleanPostData['motherName'],
-    //             'motherMobile' => $cleanPostData['motherMobile'],
-    //             'motherEmail' => $cleanPostData['motherEmail'],
-    //             'motherMaiden' => $cleanPostData['maidenName'],
-    //             'otherFamCode' => $cleanPostData['familyCode'],
-    //             'id' => $cleanPostData['id']
-    //         ],
-    //         'post' => [
-    //             'fullName' => $cleanPostData['firstName'],
-    //             'postMessage' => "Hey, welcome to your page",
-    //             'profileImg' => $profileAvatar,
-    //             'id' => $cleanPostData['id']
-    //         ],
-    //         'comment' => [
-    //             'fullName' => $cleanPostData['firstName'],
-    //             'comment' => "Your comment will show here",
-    //             'profileImg' => $profileAvatar,
-    //             'post_no' => 1000,
-    //             'id' => $cleanPostData['id']
-    //         ],
-    //         'profile_pics' => [
-    //             'img' => $profileAvatar,
-    //             'id' => $cleanPostData['id']
-    //         ],
-    //         'events' => [
-    //             'eventName' => "{$cleanPostData['firstName']} Birthday",
-    //             'eventDate' => $cleanPostData['eventDate'],
-    //             'eventType' => 'Birthday',
-    //             'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
-    //             'eventFrequency' => 'Annually',
-    //             'eventGroup' => 'Global',
-    //             'eventCode' => $cleanPostData['familyCode'],
-    //             'id' => $cleanPostData['id']
-    //         ]
-
-    //     ];
-    // }
 
     /**
      * Summary of setId

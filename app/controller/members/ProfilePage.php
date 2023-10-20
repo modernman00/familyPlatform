@@ -95,7 +95,7 @@ class ProfilePage extends ProcessImg
     {
 
         try {
-            if (!$_SESSION['loggedIn']) {
+            if (!isset($_SESSION['loggedIn'])) {
                 // $tokenErr = "Alien! How did you get here?";
                 // view('error/genError', ['error' => $tokenErr]);
                 // msgException(404, "How did you get here?");

@@ -8,11 +8,26 @@ use App\classes\Select;
 use DateInterval;
 use DateTime;
 use Iterator;
+use App\model\AllMembersData as Members;
 
 
-class Testphp extends Select implements Iterator
+// class Testphp extends Select implements Iterator
+class Testphp extends Select
 {
     public $time = 90;
+
+
+    public static function testFunction()
+    {
+  
+        // $getAnswer = Members::getMemberName('432292OLAWALE');
+        // $answer = Members::getAllMembersNoPicsStatic();
+        // // printArr($answer);
+        // foreach($getAnswer as $member) {
+        //     $result = $member;
+        // }
+        // printArr($result);
+    }
 
     public function index()
     {

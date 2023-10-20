@@ -119,7 +119,7 @@ function returnSuccessCode($msg): void
  * @throws \Exception 
  */
 // 8/9/22- i commented out the json code because I want to throw the exception and catch it before using the json
-function msgException(int $errCode, string | int  $msg)
+function msgException(int $errCode, string | int  $msg) :void
 {
     // http_response_code($errCode); // sets the response to 406
 

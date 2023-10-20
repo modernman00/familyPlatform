@@ -7,7 +7,8 @@ namespace App\controller\members;
 use App\classes\{
     AllFunctionalities,
     Insert,
-    CheckToken
+    CheckToken,
+    Select
 };
 use App\model\EmailData;
 
@@ -22,13 +23,78 @@ class Event extends AllMembersData
         try {
             // SANITISE THE ENTRY
             $cleanData = getSanitisedInputData($_POST);
-            CheckToken::tokenCheck('token');
 
             $cleanData['id'] = checkInput($_SESSION['id']);
 
-            // insert the data and return the last event no
 
+            // insert the data and return the last event no
+            // if the data is successfully inserted then insert same data to the notification table
+            // CheckToken::tokenCheck('token');
             return Insert::submitFormDynamicLastId('events', $cleanData, 'no');
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    public static function PostEventNotificationBar()
+    {
+        try {
+            $cleanData = getSanitisedInputData($_POST);
+            $cleanData['id'] = checkInput($_SESSION['id']);
+
+            // GET THE SENDER'S NAME 
+
+            $getSenderName = parent::getMemberName($cleanData['id']);
+            $sendName =  "{$getSenderName['fName']} {$getSenderName['lName']}";
+
+            // insert to the notification table
+            // Update the notification tab
+
+            $cleanDataNotification = [
+                'sender_id' => $cleanData['id'],
+                'sender_name' => $sendName,
+                'receiver' => 'Everyone',
+                'notification_name' => $cleanData['eventName'],
+                'notification_date' => $cleanData['eventDate'],
+                'notification_type' => $cleanData['eventType'],
+                'notification_content' => $cleanData['eventDescription']
+            ];
+
+
+            Insert::submitFormDynamicLastId('notification', $cleanDataNotification, 'no');
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+
+    public static function GetEventNotificationBar()
+    {
+        try {
+
+            $notificationNo = $_GET['notificationNo'];
+
+            $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
+
+            $result = Select::selectFn2($query, [$notificationNo]);
+
+            msgSuccess(200, $result);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    public static function GetAllNotificationBar()
+    {
+        try {
+
+            $notificationNo = $_GET['notificationNo'];
+
+            $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
+
+            $result = Select::selectFn2($query, [$notificationNo]);
+
+            msgSuccess(200, $result);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -126,21 +192,16 @@ class Event extends AllMembersData
     {
         $allEventData = allMembersData::getEventData();
 
-        // $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
-
         \msgSuccess(201, $allEventData);
     }
 
-     /**
+    /**
      * @return void
      */
     public static function getEventDataByNoController()
     {
         $eventNo = $_GET['eventNo'];
         $allEventData = allMembersData::getEventDataByNo($eventNo);
-        printArr($allEventData);
-
-        // $dateDiff = dateDifferenceInt(date('Y-m-d'), $allEventData['eventDate']);
 
         \msgSuccess(201, $allEventData);
     }

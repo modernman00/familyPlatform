@@ -221,6 +221,8 @@ section {
           d="M8 10a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-1 0v6.5a.5.5 0 0 0 .5.5zm-4.8 1.6c0-.22.18-.4.4-.4h8.8a.4.4 0 0 1 0 .8H3.6a.4.4 0 0 1-.4-.4z" />
       </svg> back to top
     </a>
+    <br>
+     <a href="/privacy">Privacy</a>| <a href="/terms">Terms</a>| <a href="/contact">Contact</a>| <a href="/aboutus">About us</a>
   </div>
 </div>
 

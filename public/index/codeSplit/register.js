@@ -108,33 +108,41 @@ var FormHelper = /*#__PURE__*/function () {
     key: "clearError",
     value: function clearError() {
       var _this2 = this;
-      this.error = []; // empty the array 
+      this.error = []; // Empty the error array
+
+      // Define a function to clear error messages for a given input element
+      var clearErrorForElement = function clearErrorForElement(elementName) {
+        var errorElement = _this2.id("".concat(elementName, "_error"));
+        if (errorElement) {
+          errorElement.innerHTML = '';
+        }
+      };
       this.data.forEach(function (el) {
         var _iterator2 = _createForOfIteratorHelper(el),
           _step2;
         try {
           var _loop = function _loop() {
             var post = _step2.value;
-            if (post.id == 'submit' || post.id == 'token' || post.name == 'token' || post.name == 'submit' || post.name == 'checkbox') {
+            var id = post.id,
+              name = post.name,
+              value = post.value;
+
+            // Skip certain input types
+            if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
               return 1; // continue
             }
-            // console.log(post.name)
-            _this2.id(post.id).addEventListener('change', function () {
-              if (_this2.id("".concat(post.name, "_error"))) {
-                _this2.id("".concat(post.name, "_error")).innerHTML = '';
-              }
+            // Add change event listener to clear error message
+            _this2.id(id).addEventListener('change', function () {
+              clearErrorForElement(name);
             });
-            if (post.value != 'select') {
-              _this2.id(post.id).addEventListener('keyup', function () {
-                if (_this2.id("".concat(post.name, "_error"))) {
-                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
-                }
+            // Add keyup event listener for non-select inputs
+            if (value !== 'select') {
+              _this2.id(id).addEventListener('keyup', function () {
+                clearErrorForElement(name);
               });
             } else {
-              _this2.id(post.id).addEventListener('change', function () {
-                if (_this2.id("".concat(post.name, "_error"))) {
-                  _this2.id("".concat(post.name, "_error")).innerHTML = '';
-                }
+              _this2.id(id).addEventListener('keyup', function () {
+                clearErrorForElement(name);
               });
             }
           };
@@ -1724,8 +1732,9 @@ showMsg('motherEmail_help');
 showMsg('fatherEmail_help');
 showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
 showMsg('password_help', 'Must be 8-20 characters long.');
-showMsg("familyCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href));
-var lastName = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('lastName_id').value = "OLAOGUN";
+showMsg("famCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href));
+
+// const lastName = id('lastName_id').value = "OLAOGUN"
 
 /***/ })
 
