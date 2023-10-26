@@ -365,7 +365,7 @@ var appendNewPost = function appendNewPost(el) {
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
   var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
-  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:60px; height:60px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
+  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {

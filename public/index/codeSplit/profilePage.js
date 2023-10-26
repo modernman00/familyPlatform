@@ -778,7 +778,7 @@ var postAgoNotification = function postAgoNotification(date) {
   return "<div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "</div>");
 };
 var notificationHTML = function notificationHTML(data) {
-  return "<a href=\"javascript:void(0);\" \n  onclick=".concat(scrollToFriendRequest('data.id'), "\"\n  class=\"w3-bar-item w3-button notification_real_time\" id=#").concat(data.receiver_id, "eventNot>  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
+  return "<a data-id=\"".concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -832,6 +832,20 @@ try {
   // Handle exceptions that occur outside of the promise chain
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
 }
+
+// ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+
+// Add a click event listener to elements with the "linkRequestCard" class
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('linkRequestCard')) {
+    var friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
+    if (friendRequestSection) {
+      friendRequestSection.scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+  }
+});
 
 ///member/notifications
 
@@ -1137,13 +1151,13 @@ var imgFriendRequest = function imgFriendRequest(data) {
 };
 var appUrl = "http://olaogun.test/";
 var buttonFriendRequest = function buttonFriendRequest(data) {
-  return "<div class=\"w3-row w3-opacity\" id=".concat(data.id, "eventNot\">\n            <div class=\"w3-half\">\n              <a href=").concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=50&reqCode=").concat(data.famCode, "&src=pp  style=\"text-decoration: none;\"> \n              \n                <button class=\"w3-button w3-block w3-green w3-section\" title=\"Accept\"><i class=\"fa fa-check\"></i>\n              \n                </button>\n              \n              </a>\n\n            </div>\n\n            <div class=\"w3-half\">\n                  <a href=").concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=10>\n                  <button class=\"w3-button w3-block w3-red w3-section\" title=\"Decline\"><i class=\"fa fa-remove\"></i></button>\n              \n                  </a>\n             \n            </div>\n             \n         </div>");
+  return "<div class=\"w3-row w3-opacity\" >\n            <div class=\"w3-half\">\n              <a href=".concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=50&reqCode=").concat(data.famCode, "&src=pp  style=\"text-decoration: none;\"> \n              \n                <button class=\"w3-button w3-block w3-green w3-section\" title=\"Accept\"><i class=\"fa fa-check\"></i>\n              \n                </button>\n              \n              </a>\n\n            </div>\n\n            <div class=\"w3-half\">\n                  <a href=").concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=10>\n                  <button class=\"w3-button w3-block w3-red w3-section\" title=\"Decline\"><i class=\"fa fa-remove\"></i></button>\n              \n                  </a>\n             \n            </div>\n             \n         </div>");
 };
 var name = function name(data) {
   return "<span>".concat(data.firstName, " ").concat(data.lastName, "</span>");
 };
 var htmlFriendRequest = function htmlFriendRequest(data) {
-  return "\n    ".concat(imgFriendRequest(data), "\n    ").concat(name(data), "\n    ").concat(buttonFriendRequest(data), "\n  ");
+  return "\n    <p id=".concat(data.id, "_linkRequestCard></p>\n    ").concat(imgFriendRequest(data), "\n    ").concat(name(data), "\n    ").concat(buttonFriendRequest(data), "\n  ");
 };
 
 /***/ }),
@@ -1233,7 +1247,7 @@ var appendNewPost = function appendNewPost(el) {
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
   var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
-  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:60px; height:60px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
+  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {

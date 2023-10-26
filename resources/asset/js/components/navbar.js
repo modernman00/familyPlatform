@@ -15,9 +15,8 @@ const postAgoNotification = (date) => {
 const notificationHTML = (data) => {
 
 
-  return `<a href="javascript:void(0);" 
-  onclick=${scrollToFriendRequest('data.id')}"
-  class="w3-bar-item w3-button notification_real_time" id=#${data.receiver_id}eventNot>  
+  return `<a data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
+  
 
   ${postAgoNotification(data.created_at)} -
   <b> ${data.notification_type}</b> -
@@ -28,6 +27,7 @@ const notificationHTML = (data) => {
   
   </a>`
 }
+
 
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -43,7 +43,7 @@ export const increaseNotificationCount = () => {
 }
 
 export const addToNotificationTab = (data) => {
-   return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+  return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
 }
 
 // GET THE ID SET FROM THE LOGIN FILE - HTTPS.JS
@@ -78,8 +78,8 @@ try {
         // Update the timing of notifications
         const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
         render(updateNotificationTiming);
-      } else{
-          id('notification_count').innerHTML = 0;
+      } else {
+        id('notification_count').innerHTML = 0;
       }
     })
     .catch(error => {
@@ -90,6 +90,23 @@ try {
   // Handle exceptions that occur outside of the promise chain
   showError(error);
 }
+
+// ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+
+// Add a click event listener to elements with the "linkRequestCard" class
+document.addEventListener('click', (e) => {
+  
+  if (e.target.classList.contains('linkRequestCard')) {
+    const friendRequestSection = id(`${e.target.getAttribute('data-id')}_linkRequestCard`);
+    if (friendRequestSection) {
+      friendRequestSection.scrollIntoView({ behavior: "smooth" });
+    }
+  } 
+
+
+
+});
+
 
 
 

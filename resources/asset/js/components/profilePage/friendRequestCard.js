@@ -26,7 +26,7 @@ const imgFriendRequest = (data) => {
 const appUrl = process.env.MIX_APP_URL2;
 
 const buttonFriendRequest = (data) => {
-  return `<div class="w3-row w3-opacity" id=${data.id}eventNot">
+  return `<div class="w3-row w3-opacity" >
             <div class="w3-half">
               <a href=${appUrl}member/request?req=${data.id}&appr=${approver_id}&dec=50&reqCode=${data.famCode}&src=pp  style="text-decoration: none;"> 
               
@@ -55,6 +55,7 @@ const name = (data) => {
 
 const htmlFriendRequest = (data) => {
   return `
+    <p id=${data.id}_linkRequestCard></p>
     ${imgFriendRequest(data)}
     ${name(data)}
     ${buttonFriendRequest(data)}

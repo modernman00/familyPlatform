@@ -486,7 +486,7 @@ var postAgoNotification = function postAgoNotification(date) {
   return "<div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "</div>");
 };
 var notificationHTML = function notificationHTML(data) {
-  return "<a href=\"javascript:void(0);\" \n  onclick=".concat(scrollToFriendRequest('data.id'), "\"\n  class=\"w3-bar-item w3-button notification_real_time\" id=#").concat(data.receiver_id, "eventNot>  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
+  return "<a data-id=\"".concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -540,6 +540,20 @@ try {
   // Handle exceptions that occur outside of the promise chain
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
 }
+
+// ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+
+// Add a click event listener to elements with the "linkRequestCard" class
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('linkRequestCard')) {
+    var friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
+    if (friendRequestSection) {
+      friendRequestSection.scrollIntoView({
+        behavior: "smooth"
+      });
+    }
+  }
+});
 
 ///member/notifications
 
