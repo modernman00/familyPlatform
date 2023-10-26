@@ -1,6 +1,10 @@
 @php
 
-$forms = App\controller\NotificationController::index();
+// $forms = App\controller\NotificationController::index();
+
+// if(empty($form)) {
+//   $form['notification_time'] = 'not provided';
+// }
 
 @endphp
 
@@ -40,25 +44,22 @@ $forms = App\controller\NotificationController::index();
 
     {{-- <a href="#" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Messages"><i
         class="fa fa-envelope"></i></a> --}}
-    <div class="w3-dropdown-hover w3-hide-small">
 
-      <button class="w3-button w3-padding-large" title="Notifications">
+        {{-- THE NOTIFICATION NAVBAR --}}
+    <div class="w3-dropdown-hover w3-hide-small w3-small">
+
+      <button class="w3-button w3-padding-large notification_count" title="Notifications">
         
         <i class="fa fa-bell"></i>
-          <span class="w3-badge w3-right w3-small w3-green">{{ count($forms) }}
+          <span class="w3-badge w3-right w3-small w3-green " id="notification_count">
+            
           </span>
       </button>
 
-      <div class="w3-dropdown-content w3-card-4 w3-bar-block" id="NotificationTab" style="width:300px">
+      <div class="w3-dropdown-content w3-card-4 w3-bar-block notification_tab" id="notification_tab" style="width:300px">
 
-        @foreach ($forms as $form )
 
-          <a href='#' class='w3-bar-item w3-button'>
-            @isset($form['sender_name']) 
-              {{ $form['sender_name'] }} posted: {{ $form['notification_content'] }}
-            @endisset
-          </a>
-        @endforeach
+
 
       </div>
 
@@ -84,6 +85,8 @@ $forms = App\controller\NotificationController::index();
     My page</a>
   <a href="/signout" class="w3-bar-item w3-mobile w3-button w3-padding-large">Sign out</a>
 
+  
+
   {{-- <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-large"
     title="Account Settings"><i class="fa fa-tree"></i>Family Tree</a>
 
@@ -92,8 +95,10 @@ $forms = App\controller\NotificationController::index();
 
 </div>
 
-
 <script>
+
+
+
   const openNavBar = () => {
     const x = document.getElementById("navDemo");
     if(x.className.indexOf("w3-show") == -1){

@@ -1,9 +1,9 @@
 import axios from "axios";
-import { id, log, } from "../global"
-import { showError } from "../global"
-// import axios from "axios";
+import { id, log, showError } from "../global"
+import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 
 // Attach a click event listener to the document
+
 document.onclick = async (e) => {
     try {
         // Get the target element's ID
@@ -29,8 +29,13 @@ document.onclick = async (e) => {
             // Send the family request data to the server for processing
             const response = await sendFamilyRequest(familyRequestData);
 
+            // ADD TO THE NOTIFICATION TAB
+            addToNotificationTab(response.data.message);
+
+            increaseNotificationCount();
+
             // Update the button's HTML and disable it
-            updateButton(targetId, response.data.message);
+            updateButton(targetId, 'Sent');
 
         }
     } catch (error) {
@@ -78,3 +83,5 @@ function updateButton(targetId, newHTML) {
     theTargetId.innerHTML = newHTML;
     theTargetId.disabled = true;
 }
+
+// ADD THE NEW EVENT TO THE NOTIFICATION TAB

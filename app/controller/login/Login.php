@@ -9,6 +9,8 @@ use App\classes\{
     Select
 };
 
+use App\model\AllMembersData as AllMembersDataModel;
+
 use Exception;
 
 class Login extends Select
@@ -76,7 +78,9 @@ class Login extends Select
                 //1.  token verified
                 CheckToken::tokenCheck('token');
 
+                // GET THE FAMCODE 
 
+                $getFamCode = AllMembersDataModel::getFamCode($data['id']);
 
                 //4. control for login
                 $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
@@ -93,7 +97,12 @@ class Login extends Select
                         $this->customerLogin($data);
                         unset($data);
                     }
-                    msgSuccess(201, "Credentials validated");
+                    // I added the id because i need to set it as a session for the notification bar
+                    msgSuccess(201, [
+                        'outcome'=> "Account Validated", 
+                        'id'=> $_SESSION['ID'],
+                        'famCode' => $getFamCode['famCode'],
+                        ]);
                 } else {
 
                     session_unset();

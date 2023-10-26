@@ -130,11 +130,12 @@ function msgException(int $errCode, string | int  $msg) :void
    throw new Exception($msg, $errCode);
 }
 
-function msgSuccess(int $code, string|array $msg, mixed $token = null): void
+function msgSuccess(int $code, mixed $msg, mixed $token = null): void
 {
     http_response_code($code); // sets the response to 406
     // echo http_response_code(); // echo the new response code
-    echo json_encode(['message' => $msg, 'token' => $token]);
+    echo json_encode(['message' => $msg, 
+            'token' => $token]);
 }
 
 function msgServerSent(string|array $data, string | int $id, string $event): void

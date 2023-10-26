@@ -141,17 +141,36 @@ if (window.location.pathname === '/register') {
       qSel('.login').style.display ="none" // navbar mgt
     qSel('.signUp').style.display ="none" // navbar mgt
     
-}else if (window.location.pathname === '/organogram') {
-      qSel('.familyTreeNav').style.display ="none" // navbar mgt
-  
-    
-} else if (window.location.pathname === '/accountSetting') {
+}else if (window.location.pathname === '/accountSetting') {
 
     import (
-        /* webpackChunkName: 'codeSplit/familyCode' */
+        /* webpackChunkName: 'codeSplit/accountSetting' */
         /* webpackPrefetch: true */
         './components/accountSetting'
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
+} else if (window.location.pathname === '/organogram') {
+    qSel('.familyTreeNav').style.display ="none" // navbar mgt
+  
+
+    import (
+        /* webpackChunkName: 'codeSplit/organogram' */
+        /* webpackPrefetch: true */
+        './components/familyTree/index.js'
+    )
+    .then((module) => module.default)
+        .catch((err) => showError(err))
+}else if (window.location.pathname === '/allMembers/getProfile') {
+    qSel('.familyTreeNav').style.display ="none" // navbar mgt
+    qSel('.notification_count').style.display ="none" // navbar mgt
+  
+
+    // import (
+    //     /* webpackChunkName: 'codeSplit/getProfile' */
+    //     /* webpackPrefetch: true */
+    //     './components/familyTree/index.js'
+    // )
+    // .then((module) => module.default)
+    //     .catch((err) => showError(err))
 }

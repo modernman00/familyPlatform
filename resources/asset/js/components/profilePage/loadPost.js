@@ -1,8 +1,8 @@
-import { id, log } from '../global'
-import { appendNewPost, allPost, showComment } from '../profilePage/html'
+import { log } from '../global'
+import { appendNewPost, allPost} from '../profilePage/html'
 import { getMultipleApiData } from "../helper/http"
 import { render } from "timeago.js"
-import axios from "axios"
+
 
 // set an empty array
 try {

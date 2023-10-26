@@ -26,11 +26,11 @@ class Event extends AllMembersData
 
             $cleanData['id'] = checkInput($_SESSION['id']);
 
-
             // insert the data and return the last event no
             // if the data is successfully inserted then insert same data to the notification table
             // CheckToken::tokenCheck('token');
-            return Insert::submitFormDynamicLastId('events', $cleanData, 'no');
+            $lastInsertedId = Insert::submitFormDynamicLastId('events', $cleanData, 'no');
+            msgSuccess(200, $lastInsertedId);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -52,16 +52,18 @@ class Event extends AllMembersData
 
             $cleanDataNotification = [
                 'sender_id' => $cleanData['id'],
+                'receiver_id' => $getSenderName['famCode'],
                 'sender_name' => $sendName,
-                'receiver' => 'Everyone',
                 'notification_name' => $cleanData['eventName'],
                 'notification_date' => $cleanData['eventDate'],
+                // 'notification_time' => strtotime(date('Y-m-d H:i:s')),
                 'notification_type' => $cleanData['eventType'],
                 'notification_content' => $cleanData['eventDescription']
             ];
 
+            $lastInsertedId = Insert::submitFormDynamicLastId('notification', $cleanDataNotification, 'no');
 
-            Insert::submitFormDynamicLastId('notification', $cleanDataNotification, 'no');
+            msgSuccess(200, $lastInsertedId);
         } catch (\Throwable $th) {
             showError($th);
         }

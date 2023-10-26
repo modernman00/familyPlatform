@@ -118,25 +118,30 @@ class AllMembersData extends InnerJoin
         }
     }
 
-      // show information of events within 7 days , 1 days and on the current date
+    // show information of events within 7 days , 1 days and on the current date
     public static function getEventDataByNo($eventNo)
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
-            FROM events 
-            INNER JOIN personal ON events.id = personal.id 
-            WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
+        FROM events 
+        INNER JOIN personal ON events.id = personal.id 
+        WHERE (events.no = :eventNo)
+        AND (
+            events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
             OR events.eventDate = CURDATE()
-            AND events.no = $eventNo
-            ORDER BY eventDate ASC";
-            $result = parent::connect2()->prepare($query);
-            $result->execute();
+        )
+        ORDER BY eventDate ASC";
+
+            $conn = parent::connect2();
+            $result = $conn->prepare($query);
+            $result->execute(['eventNo' => $eventNo]);
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);
         }
     }
+
 
     public static function getFriendRequestData($id, $status)
     {
@@ -182,19 +187,52 @@ class AllMembersData extends InnerJoin
     // Just get the member's name
 
     public static function getMemberName($id)
-{
-    $query = Select::formAndMatchQuery(selection: "SELECT_TWO_COLS_ID", table: "personal", identifier1: "id", column: "firstName", column2: "lastName");
-    $result = Select::selectFn2($query, [$id]);
-    
-    if (isset($result[0]['firstName'], $result[0]['lastName'])) {
-        return [
-            'fName' => $result[0]['firstName'],
-            'lName' => $result[0]['lastName']
-        ];
-    } else {
-        // Handle the case where the query didn't return the expected result.
-        msgException(401, "Member not found");
-    }
-}
+    {
 
+        $column = ['firstName', 'lastName', 'famCode'];
+
+        $query = Select::formAndMatchQuery(
+            selection: "SELECT_COL_DYNAMICALLY_ID",
+            colArray: $column,
+            table: "personal",
+            identifier1: "id"
+        );
+
+        $result = Select::selectFn2($query, [$id]);
+
+        if (isset($result[0]['firstName'], $result[0]['lastName'])) {
+            return [
+                'fName' => $result[0]['firstName'],
+                'lName' => $result[0]['lastName'],
+                'famCode' => $result[0]['famCode']
+            ];
+        } else {
+            // Handle the case where the query didn't return the expected result.
+            msgException(401, "Member not found");
+        }
+    }
+
+    public static function getFamCode($id): array 
+    {
+
+        $query = Select::formAndMatchQuery(
+            selection: "SELECT_COL_ID",
+            table: "personal",
+            identifier1: "id",
+            column: 'famCode',
+        );
+
+        $result = Select::selectFn2($query, [$id]);
+
+        // if (isset($result[0]['famCode'])) {
+        // msgSuccess(200, $result[0]['famCode']);
+
+        return [
+            'famCode' => $result[0]['famCode']
+        ];
+        // } else {
+        //     // Handle the case where the query didn't return the expected result.
+        //     msgException(401, "Member not found");
+        // }
+    }
 }

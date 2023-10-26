@@ -4,11 +4,12 @@ namespace App\controller\members;
 
 use App\classes\{
   Select,
-  SubmitForm,
-  Update
+  Update,
+  Insert
 };
 
 use App\model\SingleCustomerData;
+
 
 class FamilyRequest extends Select
 {
@@ -25,12 +26,22 @@ class FamilyRequest extends Select
 
       $dataFromJs = json_decode(file_get_contents("php://input"), true);
 
-      // submit to database table Request
+      // SUBMIT TO THE DATABASE TABLE - requestMgt Table
 
       // form the table data 
 
+      // $dataFromJs('requester') = example 
+      // (
+      // 'requesterFirstName' => 'SEGUN',
+      // 'requesterLastName' => 'OLAOGUN',
+      // 'requesterId' => '117540OLAWALE',
+      // 'requesterEmail' => 'woguns@ymail.com',
+      // 'requesterProfileImg' => 'olutobs_13th.jpeg',
+      // 'requesterFamCode' => 'MODERNMAN',}
+
       $theApproverID = $dataFromJs['approver']['approverId'];
       $theRequesterID = $dataFromJs['requester']['requesterId'];
+      $theApproverCode = $dataFromJs['approver']['approverCode'];
 
       $tableData = [
         'approver_id' => $theApproverID,
@@ -48,32 +59,52 @@ class FamilyRequest extends Select
         msgSuccess(200, $result);
       } else {
 
+        Insert::submitFormDynamicLastId('requestMgt', $tableData, 'no');
 
-        if (!SubmitForm::submitForm('requestMgt', $tableData)) {
-          msgException(406, "requestMgt didn't submit");
-        } else {
+        // SEND EMAIL TO THE APPROVER
 
-          $requesterName = "{$dataFromJs['requester']['requesterFirstName']} {$dataFromJs['requester']['requesterLastName']}";
-          $approverName = "{$dataFromJs['approver']['approverFirstName']} {$dataFromJs['approver']['approverLastName']}";
+        $requesterName = "
+        {$dataFromJs['requester']['requesterFirstName']} 
+        {$dataFromJs['requester']['requesterLastName']}";
 
-          $emailArray = [
-            'data' => [
-              'name' => $approverName,
-              'email' => 'waledevtest@gmail.com',
-              ...$dataFromJs['approver'],
-              ...$dataFromJs['requester']
-            ],
-            'subject' => "$requesterName sent you a family request",
-            'viewPath' => $dataFromJs['emailPath'],
-            // 'name' => $approverName,
-            // 'email' => 'waledevtest@gmail.com',
-            // 'email' => $dataFromJs['approver']['email'],
-          ];
+        $approverName = "
+        {$dataFromJs['approver']['approverFirstName']} 
+        {$dataFromJs['approver']['approverLastName']}";
 
-          sendEmailGeneral($emailArray, 'member');
+        $emailArray = [
+          'data' => [
+            'name' => $approverName,
+            'email' => 'waledevtest@gmail.com',
+            ...$dataFromJs['approver'],
+            ...$dataFromJs['requester']
+          ],
+          'subject' => "$requesterName sent you a family request",
+          'viewPath' => $dataFromJs['emailPath'],
+          // 'name' => $approverName,
+          // 'email' => 'waledevtest@gmail.com',
+          // 'email' => $dataFromJs['approver']['email'],
+        ];
 
-          msgSuccess(200, "Sent");
-        }
+        sendEmailGeneral($emailArray, 'member');
+
+        // SENT NOTIFICATION TO APPROVER TAB
+
+        $notificationData = [
+          'sender_id' => $theRequesterID,
+          'receiver_id' => $theApproverID,
+          'sender_name' => $requesterName,
+          'receiver' => $approverName,
+          'notification_name' => $dataFromJs['eventName'] ?? "Friend Request from $requesterName",
+          'notification_date' => date('Y-m-d'),
+          'notification_type' => 'Friend Request',
+          'notification_content' => "$requesterName sent $approverName a family request"
+        ];
+
+        // SEND BACK THE APPROVER ID
+
+        Insert::submitFormDynamicLastId('notification', $notificationData, 'no');
+
+        msgSuccess(200, $notificationData);
       }
     } catch (\Throwable $err) {
 
@@ -178,6 +209,34 @@ class FamilyRequest extends Select
       }
     } catch (\Throwable $err) {
       \showError($err);
+    }
+  }
+
+
+  public static function getFriendRequestData()
+  {
+    try {
+      $id = checkInput($_GET['id']);
+      $result = [];
+      $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
+      $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, 'Request sent']);
+
+      foreach ($getRequesterDataById as $getRequesterDataById) {
+
+        if ($getRequesterDataById['requester_id']) {
+          $custData = new SingleCustomerData();
+          $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profile_pics']);
+
+          array_push($result, $data);
+        } else {
+          $result = " No Requester Data";
+        }
+      }
+       
+       msgSuccess(200, $result);
+      return $result;
+    } catch (\Throwable $th) {
+      showError($th);
     }
   }
 }

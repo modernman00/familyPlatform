@@ -1,5 +1,5 @@
 import axios from "axios";
-import { id, log, qSel, showError } from "../global";
+import { id, showError } from "../global";
 import { renderHtml } from "./html";
 
 const config = {

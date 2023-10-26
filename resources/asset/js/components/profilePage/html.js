@@ -1,9 +1,11 @@
 import { format } from "timeago.js"
 
-import { id, log } from '../global'
+import { id, log, qSel } from '../global'
 
 const timeAgo = (x) => format(x)
 
+
+// Get the element you want to update
 
 const name = (fullName) => {
   return `<h6 id="fullName"><b>${fullName}</b> </h6>`
@@ -12,6 +14,7 @@ const name = (fullName) => {
 const postedAt = (date) => {
   return `<div class="timeago postTimeCal w3-right w3-opacity"  datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
 }
+
 
 const nameImgTiming = (data) => {
 
@@ -160,3 +163,5 @@ const showComment = (comment) => {
 
   return commentHTMLArray.join(''); // Join the array elements into a single string
 }
+
+

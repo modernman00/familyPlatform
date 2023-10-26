@@ -491,8 +491,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw new Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw new Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
@@ -524,6 +524,9 @@ var postFormData = /*#__PURE__*/function () {
       options,
       response,
       successClass,
+      idSetFromHttp,
+      famCodeSetFromHttp,
+      dbHttpResult,
       errorClass,
       _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
@@ -547,18 +550,30 @@ var postFormData = /*#__PURE__*/function () {
           return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options);
         case 12:
           response = _context.sent;
-          successClass = getNotificationClassByCSS("bulma", 'green');
-          processFormDataAction(successClass, response.data.message, notificationId);
+          successClass = getNotificationClassByCSS("bulma", 'green'); // check if response.data.message is an array
+          idSetFromHttp = null;
+          famCodeSetFromHttp = null;
+          dbHttpResult = null;
+          if (_typeof(response.data.message) === 'object') {
+            idSetFromHttp = response.data.message.id;
+            famCodeSetFromHttp = response.data.message.famCode;
+            dbHttpResult = response.data.message.outcome;
+          } else {
+            dbHttpResult = response.data.message;
+          }
+          sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+          sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
+          processFormDataAction(successClass, dbHttpResult, notificationId);
           if (redirect) {
             setTimeout(function () {
               window.location.assign(redirect);
             }, 2000);
           }
           formData.clearHtml();
-          _context.next = 23;
+          _context.next = 29;
           break;
-        case 19:
-          _context.prev = 19;
+        case 25:
+          _context.prev = 25;
           _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS("bulma", 'red');
           processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
@@ -567,11 +582,11 @@ var postFormData = /*#__PURE__*/function () {
           // if (error.response.data.message === "We do not recognise what you are doing") {
           //   window.location.assign('/login');
           // }
-        case 23:
+        case 29:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 19]]);
+    }, _callee, null, [[9, 25]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -733,6 +748,92 @@ var checkCookie = function checkCookie() {
     }
   }
 };
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/navbar.js":
+/*!*************************************************!*\
+  !*** ./resources/asset/js/components/navbar.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addToNotificationTab: () => (/* binding */ addToNotificationTab),
+/* harmony export */   increaseNotificationCount: () => (/* binding */ increaseNotificationCount)
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+// const timeAgo = (x) => format(x)
+
+
+var postAgoNotification = function postAgoNotification(date) {
+  return "<div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "</div>");
+};
+var notificationHTML = function notificationHTML(data) {
+  return "<a href=\"javascript:void(0);\" \n  onclick=".concat(scrollToFriendRequest('data.id'), "\"\n  class=\"w3-bar-item w3-button notification_real_time\" id=#").concat(data.receiver_id, "eventNot>  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
+};
+
+// CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
+
+var increaseNotificationCount = function increaseNotificationCount() {
+  var currentNotificationCount = parseInt(sessionStorage.getItem('notificationCount')) + 1;
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = currentNotificationCount;
+};
+var addToNotificationTab = function addToNotificationTab(data) {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+};
+
+// GET THE ID SET FROM THE LOGIN FILE - HTTPS.JS
+
+var idSetFromHttp = sessionStorage.getItem('idSetFromHttp');
+var famCodeSetFromHttp = sessionStorage.getItem('famCodeSetFromHttp');
+var notificationURL = "/member/notifications/id?notificationId=".concat(idSetFromHttp, "&famCode=").concat(famCodeSetFromHttp);
+
+// const getData = axios.get(notificationURL);
+
+try {
+  axios__WEBPACK_IMPORTED_MODULE_3___default().get(notificationURL).then(function (res) {
+    // Extract the notifications from the response
+    var data = res.data.message;
+
+    // log(data)
+
+    if (data.length > 0) {
+      // Display the count of notifications
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
+
+      // Store the notification count in session storage
+      sessionStorage.setItem('notificationCount', data.length);
+
+      // Display each notification
+      data.forEach(function (element) {
+        addToNotificationTab(element);
+      });
+
+      // Update the timing of notifications
+      var updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+      (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.render)(updateNotificationTiming);
+    } else {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
+    }
+  })["catch"](function (error) {
+    // Handle any errors that occur during the process
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+  });
+} catch (error) {
+  // Handle exceptions that occur outside of the promise chain
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+}
+
+///member/notifications
 
 /***/ }),
 
@@ -910,8 +1011,12 @@ try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+
+
 
 
 
@@ -924,19 +1029,9 @@ var displayNone = function displayNone() {
   return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'none';
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('cancelModal').addEventListener('click', displayNone);
-var eventHtml = function eventHtml(data) {
-  return "<p class='eventInfo'>\n                    <strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
-};
 var checkEventAndAdd = function checkEventAndAdd(data) {
-  var appendEvent = eventHtml(data);
+  var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_3__.eventHtml)(data);
   return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-};
-var checkNotificationAndAdd = function checkNotificationAndAdd(data) {
-  var notHTML = function notHTML(data) {
-    return "<a href=\"#\" class=\"w3-bar-item w3-button\">  \n                ".concat(data[0].notification_content, "\n            </a>");
-  };
-  var appendEvent = notHTML(data);
-  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventNotificationTab').insertAdjacentHTML('afterbegin', appendEvent);
 };
 var options = {
   xsrfCookieName: 'XSRF-TOKEN',
@@ -953,25 +1048,27 @@ var process = function process(e) {
       // get the form data
       var eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm');
       var eventFormEntries = new FormData(eventForm);
+
       // post the form data to the database and get the last posted event no
-      axios__WEBPACK_IMPORTED_MODULE_2___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
+
+      axios__WEBPACK_IMPORTED_MODULE_4___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
         // use the event no to get the last event from the database
 
-        axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/getEventDataByNo?eventNo=".concat(response.data.message)).then(function (res) {
+        axios__WEBPACK_IMPORTED_MODULE_4___default().get("/member/getEventDataByNo?eventNo=".concat(response.data.message)).then(function (res) {
           if (res.data.message) {
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(res.data.message);
-
             // add new event real time
-            checkEventAndAdd(res.data.message);
+            checkEventAndAdd(res.data.message[0]);
           }
         });
 
-        // post to the notification 
+        // POST THE EVENT TO NOTIFICATION
 
-        axios__WEBPACK_IMPORTED_MODULE_2___default().post('/member/notification/event', eventFormEntries, options).then(function (result) {
-          axios__WEBPACK_IMPORTED_MODULE_2___default().get("/member/notification/event?notificationNo=".concat(result.data.message)).then(function (result2) {
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(result2.data.message);
-            checkNotificationAndAdd(result2.data.message);
+        axios__WEBPACK_IMPORTED_MODULE_4___default().post('/member/notification/event', eventFormEntries, options).then(function (result) {
+          // GET THE POST EVENTS AND ADD THEM TO THE NOTIFICATION
+
+          axios__WEBPACK_IMPORTED_MODULE_4___default().get("/member/notification/event?notificationNo=".concat(result.data.message)).then(function (result2) {
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.addToNotificationTab)(result2.data.message[0]);
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
           });
         });
       });
@@ -987,6 +1084,67 @@ var process = function process(e) {
   }
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitEventModal').addEventListener('click', process);
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/eventHTML.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/eventHTML.js ***!
+  \****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   eventHtml: () => (/* binding */ eventHtml)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+"use static";
+
+
+var eventHtml = function eventHtml(data) {
+  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), "</p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/friendRequestCard.js":
+/*!************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/friendRequestCard.js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+var approver_id = sessionStorage.getItem('idSetFromHttp');
+axios__WEBPACK_IMPORTED_MODULE_0___default().get("/getFriendRequestById?id=".concat(approver_id)).then(function (results) {
+  if (results.data.message) {
+    results.data.message.forEach(function (request) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', htmlFriendRequest(request));
+    });
+  }
+});
+
+// const countFriendRequest = (friend) => {
+//   return friend.length > 1 ? `<p><b>Friend Requests</b></p><br></br>` : `<p><b>Friend Request</b></p><br>`;
+// }
+
+var imgFriendRequest = function imgFriendRequest(data) {
+  return "<img src=\"/img/profile/".concat(data.img, "\" alt=\"Avatar\" style=\"width:50%\"><br>");
+};
+var appUrl = "http://olaogun.test/";
+var buttonFriendRequest = function buttonFriendRequest(data) {
+  return "<div class=\"w3-row w3-opacity\" id=".concat(data.id, "eventNot\">\n            <div class=\"w3-half\">\n              <a href=").concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=50&reqCode=").concat(data.famCode, "&src=pp  style=\"text-decoration: none;\"> \n              \n                <button class=\"w3-button w3-block w3-green w3-section\" title=\"Accept\"><i class=\"fa fa-check\"></i>\n              \n                </button>\n              \n              </a>\n\n            </div>\n\n            <div class=\"w3-half\">\n                  <a href=").concat(appUrl, "member/request?req=").concat(data.id, "&appr=").concat(approver_id, "&dec=10>\n                  <button class=\"w3-button w3-block w3-red w3-section\" title=\"Decline\"><i class=\"fa fa-remove\"></i></button>\n              \n                  </a>\n             \n            </div>\n             \n         </div>");
+};
+var name = function name(data) {
+  return "<span>".concat(data.firstName, " ").concat(data.lastName, "</span>");
+};
+var htmlFriendRequest = function htmlFriendRequest(data) {
+  return "\n    ".concat(imgFriendRequest(data), "\n    ").concat(name(data), "\n    ").concat(buttonFriendRequest(data), "\n  ");
+};
 
 /***/ }),
 
@@ -1010,6 +1168,9 @@ __webpack_require__.r(__webpack_exports__);
 var timeAgo = function timeAgo(x) {
   return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
 };
+
+// Get the element you want to update
+
 var name = function name(fullName) {
   return "<h6 id=\"fullName\"><b>".concat(fullName, "</b> </h6>");
 };
@@ -1116,9 +1277,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
 /* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
-
-
+/* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+// "use strict";
 localStorage.removeItem('redirect');
+
+
 
 
 
@@ -1138,9 +1302,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
-
 
 
 

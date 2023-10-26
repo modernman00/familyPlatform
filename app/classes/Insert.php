@@ -117,7 +117,7 @@ class Insert extends Db
             $dynamicTable = strtoupper($table);
             $_SESSION["LAST_INSERT_ID_$dynamicTable"] = $lastInsertedId;
 
-            msgSuccess(200, $lastInsertedId);
+            // msgSuccess(200, $lastInsertedId);
 
             return $lastInsertedId;
         } catch (PDOException $e) {

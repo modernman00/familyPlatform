@@ -51,6 +51,7 @@ class Select extends Db
             'SELECT_AVERAGE_ALL' => "SELECT AVG($column) as total FROM $table",
             'SELECT_SUM_ALL' => "SELECT SUM($column) as total FROM $table",
             'SELECT_COL_DYNAMICALLY' => "SELECT $implodeColArray FROM $table",
+            'SELECT_COL_DYNAMICALLY_ID' => "SELECT $implodeColArray FROM $table WHERE $identifier1 = ? $orderBy $limit",
             default => null
         };
     }
@@ -99,7 +100,7 @@ class Select extends Db
             $sql = $query;
             $result = self::connect2()->prepare($sql);
             $result->execute($bind);
-            return $result->fetchAll(PDO::FETCH_ASSOC);
+            return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);
             return false;

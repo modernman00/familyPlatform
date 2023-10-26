@@ -1,7 +1,8 @@
 "use strict";
-import { id, showError, log, date2String } from "../global"
+import { id, showError } from "../global"
 import FormHelper from '../FormHelper';
-
+import { addToNotificationTab, increaseNotificationCount } from '../navbar'
+import { eventHtml } from './eventHTML'
 import axios from "axios";
 
 const formInput = document.querySelectorAll('.eventModalForm');
@@ -13,37 +14,10 @@ const displayNone = () => id('id_event_modal').style.display = 'none'
 id('cancelModal').addEventListener('click', displayNone)
 
 
-const eventHtml = (data) => {
-
-    return `<p class='eventInfo'>
-                    <strong>RSVP: </strong> ${data.firstName} ${data.lastName}</p>
-            <p class='eventInfo'><strong>Event: </strong>${data.eventName}</p>
-            <p class='eventInfo'><strong>Date: </strong>${date2String(data.eventDate)}</p>
-            <p class='eventInfo'><strong>Type: </strong>${data.eventType}</p>
-            <p class='eventInfo'><strong>Description: </strong> ${data.eventDescription}</p>
-            <input type='hidden' name='event_no' id='event${data.no}' value='${data.no}'>
-            
-           <hr>`;
-}
-
 const checkEventAndAdd = (data) => {
 
     const appendEvent = eventHtml(data);
     return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-
-}
-
-const checkNotificationAndAdd = (data) => {
-
-    const notHTML = (data) => {
-
-        return `<a href="#" class="w3-bar-item w3-button">  
-                ${data[0].notification_content}
-            </a>`;
-    }
-
-    const appendEvent = notHTML(data);
-    return id('eventNotificationTab').insertAdjacentHTML('afterbegin', appendEvent);
 
 }
 
@@ -63,8 +37,11 @@ const process = (e) => {
             // get the form data
             const eventForm = id('eventModalForm');
             let eventFormEntries = new FormData(eventForm);
+
             // post the form data to the database and get the last posted event no
+
             axios.post("/member/profilePage/event", eventFormEntries, options).then(response => {
+
                 // use the event no to get the last event from the database
 
                 axios.get(`/member/getEventDataByNo?eventNo=${response.data.message}`)
@@ -72,23 +49,24 @@ const process = (e) => {
                     .then(res => {
 
                         if (res.data.message) {
-                            
-                            log(res.data.message)
 
                             // add new event real time
-                            checkEventAndAdd(res.data.message)
+                            checkEventAndAdd(res.data.message[0])
                         }
                     })
 
-                // post to the notification 
+                // POST THE EVENT TO NOTIFICATION
 
                 axios.post('/member/notification/event', eventFormEntries, options).then(result => {
 
+                    // GET THE POST EVENTS AND ADD THEM TO THE NOTIFICATION
+
                     axios.get(`/member/notification/event?notificationNo=${result.data.message}`).then(result2 => {
 
-                        log(result2.data.message)
+                        addToNotificationTab(result2.data.message[0])
 
-                       checkNotificationAndAdd(result2.data.message)
+                        increaseNotificationCount()
+
                     })
 
                 })

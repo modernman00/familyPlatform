@@ -14,19 +14,19 @@ axiosRetry(axios, { retries: 3 });
  * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
-export const postFormData = async(url, formId, redirect = null, css = null) => {
+export const postFormData = async (url, formId, redirect = null, css = null) => {
 
     let notificationForm = `${formId}_notification`
     const notificationId = id(notificationForm)
- 
-        // extract the form entries
+
+    // extract the form entries
     const form = id(formId)
 
     let formEntries = new FormData(form)
 
     formEntries.delete('submit')
     formEntries.delete('checkbox_id')
-        // formEntries.delete('token')
+    // formEntries.delete('token')
 
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
@@ -37,9 +37,31 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
     // AXIOS POST FUNCTIONALITY
     try {
         const response = await axios.post(url, formEntries, options);
+
         const successClass = getNotificationClassByCSS("bulma", 'green');
 
-        processFormDataAction(successClass, response.data.message, notificationId);
+        // check if response.data.message is an array
+
+        let idSetFromHttp = null;
+        let famCodeSetFromHttp = null;
+        let dbHttpResult = null;
+
+        if (typeof response.data.message === 'object') {
+            idSetFromHttp = response.data.message.id;
+            famCodeSetFromHttp = response.data.message.famCode;
+            dbHttpResult = response.data.message.outcome;
+        } else {
+            dbHttpResult = response.data.message;
+        }
+
+        sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+        sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
+
+
+
+
+        processFormDataAction(successClass, dbHttpResult, notificationId);
+
 
         if (redirect) {
             setTimeout(() => {
@@ -49,9 +71,9 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         formData.clearHtml();
     } catch (error) {
-      
+
         const errorClass = getNotificationClassByCSS("bulma", 'red');
-        
+
         processFormDataAction(errorClass, error.response.data.message, notificationId);
 
         // Handle specific error cases
@@ -103,7 +125,7 @@ axiosTest()
     .catch(err => console.log(err))
  */
 
-export const getApiData = async(URL, token = null) => {
+export const getApiData = async (URL, token = null) => {
     try {
 
         const config = {
@@ -128,7 +150,7 @@ export const getApiData = async(URL, token = null) => {
 
 }
 
-export const getMultipleApiData = async(url1, url2, token = null) => {
+export const getMultipleApiData = async (url1, url2, token = null) => {
     try {
 
         const config = {

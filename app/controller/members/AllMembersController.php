@@ -18,6 +18,7 @@ class AllMembersController extends AllMembersData
     public function index(): void
     {
         try {
+
              view('member/showMembers');
             // view('member/allMembers');
         } catch (\Throwable $th) {

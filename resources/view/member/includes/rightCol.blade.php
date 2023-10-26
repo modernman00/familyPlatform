@@ -45,17 +45,18 @@
 
 
 
-          @if ($requestData !== null && !is_string($requestData))
-              <div class="w3-card w3-round w3-white w3-center">
-        <div class="w3-container">
-          @if (count($requestData) > 1)
+          {{-- @if ($requestData !== null && !is_string($requestData)) --}}
+        <div class="w3-card w3-round w3-white w3-center">
+           @if (count($requestData) > 1)
               <p><b>Friend Requests</b></p><br>
           @else
           <p><b>Friend Request</b></p><br>
           @endif
+        <div class="w3-container requestFriendClass">
+         
           
 
-           @foreach ($requestData as $requestData)
+           {{-- @foreach ($requestData as $requestData)
 
            <img src="/img/profile/{{ $requestData['img'] }}" alt="Avatar" style="width:50%"><br>
           <span>{{ $requestData['firstName'] }} {{ $requestData['lastName'] }}</span>
@@ -80,12 +81,12 @@
             </div>
           </div>
               
-          @endforeach
+          @endforeach --}}
              </div>
       </div>
 
               
-          @endif
+          {{-- @endif --}}
 
          
 

@@ -194,7 +194,7 @@ if (window.location.pathname === '/register') {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/createFamilyCode') {
-  Promise.all(/*! import() | codeSplit/familyCode */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/familyCode")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | codeSplit/familyCode */ "codeSplit/familyCode").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -202,14 +202,31 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/register/nextStep') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
-} else if (window.location.pathname === '/organogram') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.familyTreeNav').style.display = "none"; // navbar mgt
 } else if (window.location.pathname === '/accountSetting') {
-  Promise.all(/*! import() | codeSplit/familyCode */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/familyCode")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
+  Promise.all(/*! import() | codeSplit/accountSetting */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
+} else if (window.location.pathname === '/organogram') {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.familyTreeNav').style.display = "none"; // navbar mgt
+
+  Promise.all(/*! import() | codeSplit/organogram */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js")).then(function (module) {
+    return module["default"];
+  })["catch"](function (err) {
+    return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
+  });
+} else if (window.location.pathname === '/allMembers/getProfile') {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.familyTreeNav').style.display = "none"; // navbar mgt
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.notification_count').style.display = "none"; // navbar mgt
+
+  // import (
+  //     /* webpackChunkName: 'codeSplit/getProfile' */
+  //     /* webpackPrefetch: true */
+  //     './components/familyTree/index.js'
+  // )
+  // .then((module) => module.default)
+  //     .catch((err) => showError(err))
 }
 
 /***/ }),
@@ -231,7 +248,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
 /******/ 	__webpack_require__.O(0, ["/index"], () => {
-/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW","codeSplit/img","codeSplit/familyCode"].map(__webpack_require__.E);
+/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW","codeSplit/img","codeSplit/familyCode","codeSplit/accountSetting","codeSplit/organogram"].map(__webpack_require__.E);
 /******/ 	}, 5);
 /******/ })();
 /******/ 

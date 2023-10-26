@@ -11,5 +11,8 @@
     "/index/codeSplit/img.js": "/index/codeSplit/img.js",
     "/index/codeSplit/familyCode.js": "/index/codeSplit/familyCode.js",
     "/style.css": "/style.css",
-    "/vendor.js": "/vendor.js"
+    "/vendor.js": "/vendor.js",
+    "/index/codeSplit/account.js": "/index/codeSplit/account.js",
+    "/index/codeSplit/accountSetting.js": "/index/codeSplit/accountSetting.js",
+    "/index/codeSplit/organogram.js": "/index/codeSplit/organogram.js"
 }
