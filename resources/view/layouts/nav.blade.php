@@ -1,16 +1,4 @@
-@php
-
-// $forms = App\controller\NotificationController::index();
-
-// if(empty($form)) {
-//   $form['notification_time'] = 'not provided';
-// }
-
-@endphp
-
 <div class="w3-top">
-
-
 
   <div class="w3-bar w3-light-grey w3-left-align w3-medium">
 
@@ -95,7 +83,7 @@
 
 </div>
 
-<script>
+<script defer>
 
 
 

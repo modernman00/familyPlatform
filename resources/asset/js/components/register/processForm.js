@@ -1,7 +1,8 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, log, showError, showNotification, warningSign } from '../global';
+import { id, showError, showNotification, warningSign } from '../global';
 import { dataToCheckRegister } from '../dataToCheck';
+import { processFormDataAction } from './helper/notification';
 import axios from "axios";
 
 const formInput = document.querySelectorAll('.register');
@@ -13,7 +14,6 @@ const formData = new FormHelper(formInputArr);
     try {
 
         formData.clearError();
-
         // set the maxlength, check the length of the value, raise error
 
         formData.realTimeCheckLen(
@@ -22,7 +22,8 @@ const formData = new FormHelper(formInputArr);
         );
 
         // check if password matches real time
-        formData.matchInput(dataToCheckRegister.password.pwd,
+        formData.matchInput(
+            dataToCheckRegister.password.pwd,
             dataToCheckRegister.password.pwd2,
         );
 
@@ -32,24 +33,13 @@ const formData = new FormHelper(formInputArr);
         showError(error)
 
     }
-
-
 })();
 
 const notificationDiv = id('register_notify_div')
 const notificationMsg = id('register_notify_div_msg')
 
-const processFormDataAction = (addClass, serverResponse) => {
-    // display the success information for 10sec
-    notificationDiv.style.display = "block" // unblock the notification
-    notificationDiv.classList.add(addClass) // add the success class
-    notificationMsg.innerHTML = serverResponse.message // error element
-    id('loader').classList.remove('loader') // remove loader
-    notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-
 const processFormData = async(url, formElement) => {
+
     const form = id(formElement)
     let formEntries = new FormData(form)
     formEntries.delete('submit')
@@ -61,7 +51,6 @@ const processFormData = async(url, formElement) => {
     }
 
     await axios.post(url, formEntries, options).then(response => {
-
         // get the api message and output it to the form
         processFormDataAction('is-success', response.data)
 
@@ -90,7 +79,6 @@ const processForm = async(e) => {
             // window.location.hash = '#setLoader';
             id("setLoader").focus(); // focus on the loader element
 
-
             formData.clearError()
             formData.emailVal()
             formData.massValidate();
@@ -110,15 +98,13 @@ const processForm = async(e) => {
             } else {
 
                 alert(`The form cannot be submitted. Please check the errors`)
-                    //  console.log(formData.error)
                 notificationMsg.innerHTML = `${warningSign} Check the errors`
                 notificationDiv.style.display = "block"
                 notificationDiv.style.backgroundColor = "Red"
                 notificationDiv.style.color = "White"
-                    //  notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                //notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 notificationDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
-
             }
 
         } else {
@@ -130,8 +116,8 @@ const processForm = async(e) => {
 
         }
 
-    } catch (event) {
-        showError(event)
+    } catch (error) {
+        showError(error)
     }
 }
 

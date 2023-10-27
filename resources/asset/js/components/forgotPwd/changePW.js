@@ -25,12 +25,10 @@ import ('../global').then(response => {
                 response.id('loader').classList.add('loader');
 
                 // Dynamically import the '../helper/http' module
-                const httpModule = await
-                import ('../helper/http');
-                const { postFormData } = httpModule;
-
                 // Perform the HTTP request to submit the change password form
+                const { postFormData } = await import('../helper/http');
                 await postFormData('/login/changePW', 'changePassword', '/login');
+
             }
         } catch (error) {
             // Show error using the 'showError' function on the 'response' object

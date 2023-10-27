@@ -1,15 +1,14 @@
 import { format, render } from "timeago.js"
-
-import { id, log, showError, qSel } from './global'
+import { id, showError, qSel } from './global'
 import { toSentenceCase } from "./helper/general"
-
 // const timeAgo = (x) => format(x)
-
 import axios from "axios"
 
 
 const postAgoNotification = (date) => {
-  return `<div class="notification_timeago w3-left w3-opacity" datetime='${date}' title='${format(date)}'> ${format(date)}</div>`
+  return `
+  <div class="notification_timeago w3-left w3-opacity" datetime='${date}' title='${format(date)}'> ${format(date)}
+  </div>`
 }
 
 const notificationHTML = (data) => {
@@ -28,12 +27,7 @@ const notificationHTML = (data) => {
   </a>`
 }
 
-
-
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
-
-
-
 
 export const increaseNotificationCount = () => {
   const currentNotificationCount = parseInt(

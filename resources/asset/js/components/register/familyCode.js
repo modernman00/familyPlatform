@@ -24,7 +24,6 @@ button.addEventListener("click", function () {
 
     }
 
-
 });
 
 
@@ -36,8 +35,6 @@ const htmlOutput = id('createCode');
 
 copyIcon.addEventListener('click', async function (e) {
     copyIcon.innerHTML = "";
-
-   
 
     try {
            e.preventDefault();

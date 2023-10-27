@@ -12,8 +12,6 @@ export const showPostImg = (data) => {
     </a>
   `;
 
-  
-
   const imgElements = postImagesWithValues.map((pics, i) => picsImgHtml(pics, i, data.post_no)).join('');
 
   return `
