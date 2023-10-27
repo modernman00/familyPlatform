@@ -1,5 +1,5 @@
 import axios from "axios";
-import { id, log, showError } from "../global"
+import { id, showError } from "../global"
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 
 // Attach a click event listener to the document

@@ -1,6 +1,8 @@
 import axios from "axios";
 import { id, showError } from "../global";
 import { renderHtml } from "./html";
+import { filterMembersByFamCode } from "./filterMembersByFamCode";
+import { handleInput } from "./handleInput";
 
 const config = {
     headers: {
@@ -25,39 +27,6 @@ const renderMembers = (data, container, noMemberMessage) => {
     }
 };
 
-const filterMembersByFamCode = (data, famCode) => {
-    return data.filter(el => el.id !== reqId && (el.famCode === famCode || el.requesterCode === famCode));
-};
-
-const handleInput = (data, WithFamCode) => {
-    const searchInput = id('searchFamily');
-    const inputVal = searchInput.value.trim().toLowerCase();
-    allMembersContainer.innerHTML = "";
-
-    if (inputVal === "") {
-        renderMembers(WithFamCode, allMembersContainer, noMemberHTML);
-    } else {
-        let filteredData = data.filter(el =>
-            el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal)
-        );
-
-        if (filteredData.length === 0) {
-            allMembersContainer.innerHTML = "No matching name found.";
-        } else {
-            const uniqueItems = {};
-
-            for (const item of filteredData) {
-                if (!uniqueItems[item.id] || item.requester_id == reqId) {
-                    uniqueItems[item.id] = item;
-                }
-            }
-
-            const filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-         
-            filteredDataByIdAndCurrentUser.forEach(renderHtml);
-        }
-    }
-};
 
 axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
     .then(function(response) {
@@ -83,6 +52,6 @@ axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
 
 
 
-        id('searchFamily').addEventListener('input', () => handleInput(data, dataWithFamCode));
+        id('searchFamily').addEventListener('input', () => handleInput(data, dataWithFamCode, renderMembers));
     })
     .catch(err => showError(err.message));

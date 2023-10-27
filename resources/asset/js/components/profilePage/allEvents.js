@@ -1,7 +1,8 @@
 "use strict";
 import { id, log } from "../global"
-import { postFormData, getApiData } from "../helper/http"
-import { commentHTML, appendNewPost } from '../profilePage/html'
+import { getApiData } from "../helper/http"
+import { commentHTML } from './comment'
+import { appendNewPost } from './post'
 import axios from "axios"
 import Pusher from 'pusher-js';
 

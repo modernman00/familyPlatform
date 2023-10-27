@@ -1,7 +1,7 @@
 
 import axios from 'axios'
 import { log, qSel } from "../global"
-
+const appUrl = process.env.MIX_APP_URL2;
 const approver_id = sessionStorage.getItem('idSetFromHttp')
 
 axios.get(`/getFriendRequestById?id=${approver_id}`)
@@ -23,7 +23,7 @@ const imgFriendRequest = (data) => {
   return `<img src="/img/profile/${data.img}" alt="Avatar" style="width:50%"><br>`
 }
 
-const appUrl = process.env.MIX_APP_URL2;
+
 
 const buttonFriendRequest = (data) => {
   return `<div class="w3-row w3-opacity" >

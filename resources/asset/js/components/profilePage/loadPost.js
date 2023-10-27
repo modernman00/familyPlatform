@@ -1,5 +1,5 @@
 import { log } from '../global'
-import { appendNewPost, allPost} from '../profilePage/html'
+import { appendNewPost, allPost} from './post'
 import { getMultipleApiData } from "../helper/http"
 import { render } from "timeago.js"
 
@@ -60,10 +60,6 @@ try {
         serverConnection.addEventListener("updatePost", (e) => updatePost(e))
 
         // // serverConnection.close()
-
-
-
-
 
 
         // AUTOMATICALLY UPDATE TIMESTAMP

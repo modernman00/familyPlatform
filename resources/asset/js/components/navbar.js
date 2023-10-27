@@ -61,9 +61,8 @@ try {
       // Extract the notifications from the response
       const data = res.data.message;
 
-      // log(data)
-
       if (data.length > 0) {
+    
         // Display the count of notifications
         id('notification_count').innerHTML = data.length;
 

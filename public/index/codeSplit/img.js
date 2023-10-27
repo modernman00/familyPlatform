@@ -280,88 +280,19 @@ var checkCookie = function checkCookie() {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/html.js":
-/*!***********************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/html.js ***!
-  \***********************************************************/
+/***/ "./resources/asset/js/components/profilePage/comment.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/comment.js ***!
+  \**************************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   allPost: () => (/* binding */ allPost),
-/* harmony export */   appendNewPost: () => (/* binding */ appendNewPost),
 /* harmony export */   commentHTML: () => (/* binding */ commentHTML),
-/* harmony export */   html: () => (/* binding */ html)
+/* harmony export */   showComment: () => (/* binding */ showComment)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
-
-var timeAgo = function timeAgo(x) {
-  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
-};
-
-// Get the element you want to update
-
-var name = function name(fullName) {
-  return "<h6 id=\"fullName\"><b>".concat(fullName, "</b> </h6>");
-};
-var postedAt = function postedAt(date) {
-  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
-};
-var nameImgTiming = function nameImgTiming(data) {
-  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
-  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(name(data.fullName));
-};
-var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(data.post_no, "\" style=\"display:none\" enctype=\"multipart/form-data\">\n\n    <input name='post_no' type=\"hidden\" name=\"").concat(data.post_no, "\" value=").concat(data.post_no, " />\n\n    <input class=\"w3-input w3-border w3-round-large inputComment\" type=\"text\" placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" value = \"\" name='comment'>\n\n    <br>\n\n    <button type='submit' id=\"submitComment").concat(data.post_no, "\" class=\"w3-button w3-green submitComment\">Submit</button><br><br>\n  </form>");
-};
-var button = function button(data) {
-  return "<button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
-};
-var showPostImg = function showPostImg(data) {
-  var postImg = [];
-  for (var i = 0; i < 6; i++) {
-    var images = 'post_img' + i;
-    if (data[images]) {
-      postImg.push(data[images]);
-    }
-  }
-  var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n        <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\"> <div class=\"w3-half\">\n            <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n          </div>\n        </a>");
-  };
-  return "<div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n            ".concat(postImg.map(function (pics, i) {
-    return picsImgHtml(pics, i, data.post_no);
-  }), "\n          <br>\n        </div>");
-};
-var html = function html(el) {
-  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat(nameImgTiming(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat(showPostImg(el), "\n\n    ").concat(button(el), "\n\n    ").concat(commentForm(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat(showComment(comment), "\n      \n    </div><br>\n  </div>");
-};
-var allPost = function allPost(el, commentData) {
-  if (!el) {
-    return false;
-  }
-  var postNo = parseInt(el.post_no);
-  var filterComment = commentData.filter(function (comm) {
-    return postNo === parseInt(comm.post_no);
-  }); // filter the comment to an array
-
-  var postHtml = html(el, filterComment);
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
-};
-var appendNewPost = function appendNewPost(el) {
-  if (!el) {
-    return false;
-  }
-  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  if (!commentForm1 || !inputComment || !submitComment) {
-    var appendHTML = html(el);
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
-  }
-};
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
   var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
@@ -376,6 +307,122 @@ var showComment = function showComment(comment) {
     return commentHTML(commentElement);
   });
   return commentHTMLArray.join(''); // Join the array elements into a single string
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/html.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/html.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   html: () => (/* binding */ html)
+/* harmony export */ });
+/* harmony import */ var _htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./htmlFolder/nameImageTiming */ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js");
+/* harmony import */ var _htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./htmlFolder/commentForm */ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js");
+/* harmony import */ var _htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./htmlFolder/likeCommentButton */ "./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js");
+/* harmony import */ var _htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/showPostImages */ "./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js");
+/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
+
+
+
+
+
+var html = function html(el) {
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js":
+/*!*****************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/commentForm.js ***!
+  \*****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   commentForm: () => (/* binding */ commentForm)
+/* harmony export */ });
+var commentForm = function commentForm(data) {
+  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(data.post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(data.post_no, "\" \n      value=").concat(data.post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(data.post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js":
+/*!***********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
+/* harmony export */ });
+var likeCommentButton = function likeCommentButton(data) {
+  return "\n  <button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js":
+/*!*********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   nameImgTiming: () => (/* binding */ nameImgTiming)
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+
+var timeAgo = function timeAgo(x) {
+  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
+};
+var fullName = function fullName(_fullName) {
+  return "<h6 id=\"fullName\"><b>".concat(_fullName, "</b> </h6>");
+};
+var postedAt = function postedAt(date) {
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+};
+var nameImgTiming = function nameImgTiming(data) {
+  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js":
+/*!********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js ***!
+  \********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   showPostImg: () => (/* binding */ showPostImg)
+/* harmony export */ });
+var showPostImg = function showPostImg(data) {
+  // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
+
+  var postImagesWithValues = Object.keys(data).filter(function (key) {
+    return key.startsWith('post_img') && data[key] !== null;
+  }).map(function (el) {
+    return data[el];
+  });
+  var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
+    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>\n  ");
+  };
+  var imgElements = postImagesWithValues.map(function (pics, i) {
+    return picsImgHtml(pics, i, data.post_no);
+  }).join('');
+  return "\n    <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n      ".concat(imgElements, "\n      <br>\n    </div>\n  ");
 };
 
 /***/ }),

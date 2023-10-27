@@ -12,9 +12,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+/* harmony import */ var _filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
+
+
 
 
 
@@ -38,13 +39,70 @@ var renderMembers = function renderMembers(data, container, noMemberMessage) {
     container.innerHTML = noMemberMessage;
   }
 };
+axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData?id=").concat(reqId), config).then(function (response) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
+  if (!response.data) {
+    throw Error('There is no data');
+  }
+  if (!famCode) {
+    throw Error('There is no famCode');
+  }
+  var data = response.data;
+  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__.filterMembersByFamCode)(data, famCode);
+  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
+
+  // Remove the "loader" class after rendering is complete
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').classList.remove('loader');
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('input', function () {
+    return (0,_handleInput__WEBPACK_IMPORTED_MODULE_4__.handleInput)(data, dataWithFamCode, renderMembers);
+  });
+})["catch"](function (err) {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err.message);
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js":
+/*!****************************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/filterMembersByFamCode.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   filterMembersByFamCode: () => (/* binding */ filterMembersByFamCode)
+/* harmony export */ });
+var reqId = localStorage.getItem('requesterId');
 var filterMembersByFamCode = function filterMembersByFamCode(data, famCode) {
   return data.filter(function (el) {
     return el.id !== reqId && (el.famCode === famCode || el.requesterCode === famCode);
   });
 };
-var handleInput = function handleInput(data, WithFamCode) {
-  var searchInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily');
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/handleInput.js":
+/*!*****************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/handleInput.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   handleInput: () => (/* binding */ handleInput)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+
+
+var reqId = localStorage.getItem('requesterId');
+var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
+var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+var handleInput = function handleInput(data, WithFamCode, renderMembers) {
+  var searchInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('searchFamily');
   var inputVal = searchInput.value.trim().toLowerCase();
   allMembersContainer.innerHTML = "";
   if (inputVal === "") {
@@ -72,30 +130,10 @@ var handleInput = function handleInput(data, WithFamCode) {
         _iterator.f();
       }
       var filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-      filteredDataByIdAndCurrentUser.forEach(_html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
+      filteredDataByIdAndCurrentUser.forEach(_html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
     }
   }
 };
-axios__WEBPACK_IMPORTED_MODULE_0___default().get("".concat(URL, "allMembers/processApiData?id=").concat(reqId), config).then(function (response) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
-  if (!response.data) {
-    throw Error('There is no data');
-  }
-  if (!famCode) {
-    throw Error('There is no famCode');
-  }
-  var data = response.data;
-  var dataWithFamCode = filterMembersByFamCode(data, famCode);
-  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
-
-  // Remove the "loader" class after rendering is complete
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').classList.remove('loader');
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('input', function () {
-    return handleInput(data, dataWithFamCode);
-  });
-})["catch"](function (err) {
-  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err.message);
-});
 
 /***/ }),
 
@@ -511,9 +549,6 @@ try {
   axios__WEBPACK_IMPORTED_MODULE_3___default().get(notificationURL).then(function (res) {
     // Extract the notifications from the response
     var data = res.data.message;
-
-    // log(data)
-
     if (data.length > 0) {
       // Display the count of notifications
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
