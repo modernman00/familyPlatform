@@ -23,7 +23,7 @@ Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require
   // Function to handle the submission of change password form
   var submitChangePW = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var password, changePasswordNotificationElement, httpModule, postFormData;
+      var password, changePasswordNotificationElement, _yield$import, postFormData;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -42,11 +42,12 @@ Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require
             response.id('loader').classList.add('loader');
 
             // Dynamically import the '../helper/http' module
+            // Perform the HTTP request to submit the change password form
             _context.next = 11;
             return Promise.all(/*! import() */[__webpack_require__.e("/vendor"), __webpack_require__.e("resources_asset_js_components_helper_http_js")]).then(__webpack_require__.bind(__webpack_require__, /*! ../helper/http */ "./resources/asset/js/components/helper/http.js"));
           case 11:
-            httpModule = _context.sent;
-            postFormData = httpModule.postFormData; // Perform the HTTP request to submit the change password form
+            _yield$import = _context.sent;
+            postFormData = _yield$import.postFormData;
             _context.next = 15;
             return postFormData('/login/changePW', 'changePassword', '/login');
           case 15:

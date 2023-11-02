@@ -365,7 +365,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
 /* harmony export */ });
 var likeCommentButton = function likeCommentButton(data) {
-  return "\n  <button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+  return "\n  <button \n    type=\"button\" \n    id=\"likeButton".concat(data.post_no, "\" \n    name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0   Like \n      <b>\n        <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n          ").concat(data.post_likes, "\n        </span>\n      </b>\n  </button>\n\n   <button \n    type=\"button\" \n    id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\">\n      <em class=\"fa fa-comment\"></em> \n        Comment \n    </button>\n    ");
 };
 
 /***/ }),

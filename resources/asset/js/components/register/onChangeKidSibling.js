@@ -1,7 +1,7 @@
 "use strict";
 // import { getEnvironmentVariable as env} from 'environment-variable-reader'
 import { id, showError } from "../global";
-import { removeDiv, createAndAppendElement } from './helper/general'
+import { removeDiv, createAndAppendElement } from '../helper/general'
 import { renderHtmlFamily } from './html/kids_Sibling'
 
 // let childrenOnchangeValue = 0;

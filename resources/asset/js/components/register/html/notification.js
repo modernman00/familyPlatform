@@ -1,4 +1,4 @@
-import { id } from "../global"
+import { id } from "../../global"
 
 
 export const processFormDataAction = (addClass, serverResponse) => {

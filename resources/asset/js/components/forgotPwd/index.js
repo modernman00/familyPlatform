@@ -29,7 +29,7 @@ const forgotPasswordSubmission = (e) => {
 
         }
     } catch (error) {
-        showError(err)
+        showError(error)
     }
 }
 

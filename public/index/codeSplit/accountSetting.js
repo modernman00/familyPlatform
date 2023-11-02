@@ -529,6 +529,29 @@ var toSentenceCase = function toSentenceCase(str) {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/html/kids_Sibling.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/html/kids_Sibling.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderHtmlFamily: () => (/* binding */ renderHtmlFamily)
+/* harmony export */ });
+var renderHtmlFamily = function renderHtmlFamily(family, no) {
+  if (no) {
+    var kids_sib = family == "addChildren" ? "kid" : "sibling";
+    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
+    if (family === "addSiblings") {
+      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
+    }
+    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/onChangeKidSibling.js":
 /*!**********************************************************************!*\
   !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
@@ -541,26 +564,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html/kids_Sibling */ "./resources/asset/js/components/register/html/kids_Sibling.js");
 
 
 // import { getEnvironmentVariable as env} from 'environment-variable-reader'
 
 
 
+
 // let childrenOnchangeValue = 0;
 // let childrenOnchangeValue = 0;
 
-var renderHtmlFamily = function renderHtmlFamily(family, no) {
-  if (no) {
-    var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
-    if (family === "addSiblings") {
-      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
-    }
-    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
-  }
-};
-var show = function show(kids_or_sib) {
+var show = function show(kids_or_sib, event) {
   try {
     // what was picked or selected
     var value = event.target.value;
@@ -585,7 +600,7 @@ var show = function show(kids_or_sib) {
         getSelectHelp.innerHTML = msg;
         getSelectHelp.style.fontSize = '1rem';
         getSelectHelp.style.color = '#fc2003';
-        var html = renderHtmlFamily(addDiv, no);
+        var html = (0,_html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__.renderHtmlFamily)(addDiv, no);
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('afterBegin', html);
       }
     }
@@ -598,11 +613,11 @@ var show = function show(kids_or_sib) {
 var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
   var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("siblings_id");
   var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("kids_id");
-  kidInput.addEventListener('change', function () {
-    return show('kids');
+  kidInput.addEventListener('change', function (event) {
+    return show('kids', event);
   });
-  sibInput.addEventListener('change', function () {
-    return show('siblings');
+  sibInput.addEventListener('change', function (event) {
+    return show('siblings', event);
   });
 };
 onChangeKidAndSiblings();

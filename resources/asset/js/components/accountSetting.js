@@ -1,6 +1,6 @@
 "use strict";
 import "./register/onChangeKidSibling"
-import { id, showError, log } from "./global"
+import { id, showError } from "./global"
 import FormHelper from './FormHelper';
 
 import axios from "axios";

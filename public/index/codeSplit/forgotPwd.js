@@ -35,7 +35,7 @@ var forgotPasswordSubmission = function forgotPasswordSubmission(e) {
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/forgot", "forgotPassword", "/login/code");
     }
   } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
   }
 };
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submit').addEventListener('click', forgotPasswordSubmission);

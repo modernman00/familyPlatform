@@ -873,6 +873,57 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/register/html/kids_Sibling.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/html/kids_Sibling.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderHtmlFamily: () => (/* binding */ renderHtmlFamily)
+/* harmony export */ });
+var renderHtmlFamily = function renderHtmlFamily(family, no) {
+  if (no) {
+    var kids_sib = family == "addChildren" ? "kid" : "sibling";
+    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
+    if (family === "addSiblings") {
+      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
+    }
+    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/html/notification.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/html/notification.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   processFormDataAction: () => (/* binding */ processFormDataAction)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
+
+var processFormDataAction = function processFormDataAction(addClass, serverResponse) {
+  // display the success information for 10sec
+  notificationDiv.style.display = "block"; // unblock the notification
+  notificationDiv.classList.add(addClass); // add the success class
+  notificationMsg.innerHTML = serverResponse.message; // error element
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.remove('loader'); // remove loader
+  notificationDiv.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+  });
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/register/index.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/index.js ***!
@@ -1467,26 +1518,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html/kids_Sibling */ "./resources/asset/js/components/register/html/kids_Sibling.js");
 
 
 // import { getEnvironmentVariable as env} from 'environment-variable-reader'
 
 
 
+
 // let childrenOnchangeValue = 0;
 // let childrenOnchangeValue = 0;
 
-var renderHtmlFamily = function renderHtmlFamily(family, no) {
-  if (no) {
-    var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
-    if (family === "addSiblings") {
-      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
-    }
-    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
-  }
-};
-var show = function show(kids_or_sib) {
+var show = function show(kids_or_sib, event) {
   try {
     // what was picked or selected
     var value = event.target.value;
@@ -1511,7 +1554,7 @@ var show = function show(kids_or_sib) {
         getSelectHelp.innerHTML = msg;
         getSelectHelp.style.fontSize = '1rem';
         getSelectHelp.style.color = '#fc2003';
-        var html = renderHtmlFamily(addDiv, no);
+        var html = (0,_html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__.renderHtmlFamily)(addDiv, no);
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('afterBegin', html);
       }
     }
@@ -1524,11 +1567,11 @@ var show = function show(kids_or_sib) {
 var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
   var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("siblings_id");
   var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("kids_id");
-  kidInput.addEventListener('change', function () {
-    return show('kids');
+  kidInput.addEventListener('change', function (event) {
+    return show('kids', event);
   });
-  sibInput.addEventListener('change', function () {
-    return show('siblings');
+  sibInput.addEventListener('change', function (event) {
+    return show('siblings', event);
   });
 };
 onChangeKidAndSiblings();
@@ -1546,8 +1589,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _html_notification__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./html/notification */ "./resources/asset/js/components/register/html/notification.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
 
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -1558,13 +1602,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 
 
+
 var formInput = document.querySelectorAll('.register');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
 (function () {
   try {
     formData.clearError();
-
     // set the maxlength, check the length of the value, raise error
 
     formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max);
@@ -1579,17 +1623,6 @@ var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInput
 })();
 var notificationDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div');
 var notificationMsg = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg');
-var processFormDataAction = function processFormDataAction(addClass, serverResponse) {
-  // display the success information for 10sec
-  notificationDiv.style.display = "block"; // unblock the notification
-  notificationDiv.classList.add(addClass); // add the success class
-  notificationMsg.innerHTML = serverResponse.message; // error element
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.remove('loader'); // remove loader
-  notificationDiv.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  });
-};
 var processFormData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(url, formElement) {
     var form, formEntries, options;
@@ -1605,9 +1638,9 @@ var processFormData = /*#__PURE__*/function () {
             xsrfHeaderName: 'X-XSRF-TOKEN'
           };
           _context.next = 7;
-          return axios__WEBPACK_IMPORTED_MODULE_3___default().post(url, formEntries, options).then(function (response) {
+          return axios__WEBPACK_IMPORTED_MODULE_4___default().post(url, formEntries, options).then(function (response) {
             // get the api message and output it to the form
-            processFormDataAction('is-success', response.data);
+            (0,_html_notification__WEBPACK_IMPORTED_MODULE_3__.processFormDataAction)('is-success', response.data);
             setTimeout(function () {
               //window.location.replace(redirect)
               window.location.replace('register/nextStep');
@@ -1616,7 +1649,7 @@ var processFormData = /*#__PURE__*/function () {
             // it clears all the contents
             //  formData.clearHtml();
           })["catch"](function (error) {
-            processFormDataAction('is-danger', error.response.data);
+            (0,_html_notification__WEBPACK_IMPORTED_MODULE_3__.processFormDataAction)('is-danger', error.response.data);
           });
         case 7:
         case "end":
@@ -1663,12 +1696,11 @@ var processForm = /*#__PURE__*/function () {
           return _context2.abrupt("return");
         case 18:
           alert("The form cannot be submitted. Please check the errors");
-          //  console.log(formData.error)
           notificationMsg.innerHTML = "".concat(_global__WEBPACK_IMPORTED_MODULE_1__.warningSign, " Check the errors");
           notificationDiv.style.display = "block";
           notificationDiv.style.backgroundColor = "Red";
           notificationDiv.style.color = "White";
-          //  notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          //notificationMsg.scrollIntoView({ behavior: 'smooth', block: 'start' });
           notificationDiv.scrollIntoView({
             behavior: 'smooth',
             block: 'start'

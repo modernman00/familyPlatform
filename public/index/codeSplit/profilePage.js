@@ -770,12 +770,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 // const timeAgo = (x) => format(x)
 
-
 var postAgoNotification = function postAgoNotification(date) {
-  return "<div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "</div>");
+  return "\n  <div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "\n  </div>");
 };
 var notificationHTML = function notificationHTML(data) {
   return "<a data-id=\"".concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
@@ -1246,7 +1244,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
 /* harmony export */ });
 var likeCommentButton = function likeCommentButton(data) {
-  return "\n  <button type=\"button\" id=\"likeButton".concat(data.post_no, "\" name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0Like <b><span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span></b>\n  </button>\n\n   <button type=\"button\" id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\"><em class=\"fa fa-comment\"></em> Comment </button>\n    ");
+  return "\n  <button \n    type=\"button\" \n    id=\"likeButton".concat(data.post_no, "\" \n    name=\"").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-green w3-margin-bottom\">\n    <em class=\"fa fa-thumbs-up\"></em>\n    \xA0   Like \n      <b>\n        <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n          ").concat(data.post_likes, "\n        </span>\n      </b>\n  </button>\n\n   <button \n    type=\"button\" \n    id=\"initComment").concat(data.post_no, "\"\n    class=\"w3-button w3-tiny w3-theme-d2 w3-margin-bottom\">\n      <em class=\"fa fa-comment\"></em> \n        Comment \n    </button>\n    ");
 };
 
 /***/ }),

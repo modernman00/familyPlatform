@@ -2,7 +2,7 @@
 import FormHelper from '../FormHelper';
 import { id, showError, showNotification, warningSign } from '../global';
 import { dataToCheckRegister } from '../dataToCheck';
-import { processFormDataAction } from './helper/notification';
+import { processFormDataAction } from './html/notification';
 import axios from "axios";
 
 const formInput = document.querySelectorAll('.register');

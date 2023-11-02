@@ -2,8 +2,6 @@
 
 @section('title', 'login')
 
-{{-- <script src="https://www.google.com/recaptcha/enterprise.js?render=6Ld4P5InAAAAAOXcbqWaN3VmT9qXQp0EMEsIcMyS"></script> --}}
-
 @section('data-page-id', 'login')
 @section('content')
 
