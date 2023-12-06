@@ -35,6 +35,8 @@ class Code extends Select
 
             $code = checkInput($_POST["code"]);
 
+            // this SESSION IS set in generateUpdateTableWithToken function in checkSanitise file
+
             if (!$_SESSION['identifyCust']) {
             
                 msgException(401, "Hmm, we can't seem to find you - go back and try again");
@@ -76,7 +78,13 @@ class Code extends Select
 
                     // only set a cookie if not already set
 
-                    if (!isset($_COOKIE['waleToken'])) {
+                    // This sets a cookie named "waleToken" with the value of $token, an expiration time, a path ("/" means it's available across the entire domain), a specific domain, and it's marked as secure and HTTP-only. The cookie is sent to the client's browser, where it will be stored and sent back to the server with subsequent requests, allowing the server to identify the user.
+
+                    // session rememberMe was set when the remember me check box was clicked at the login page
+
+                    if($_SESSION['rememberMe'] === true) {
+
+                        if (!isset($_COOKIE['waleToken'])) {
                         if (getenv("APP_ENV") === "local") {
 
                             setcookie("waleToken", $token, time() + getenv('COOKIE_EXPIRE'), '/', "", false, true);
@@ -85,9 +93,13 @@ class Code extends Select
                         }
                     }
 
+                    }
+
+                    
+
                     // if ($_SESSION['loginType'] = "/login") {
                     session_regenerate_id();
-                    unset($_SESSION['login'], $_SESSION['id']);
+                    unset($_SESSION['login'], $_SESSION['id'], $_SESSION['rememberMe']);
 
                     msgSuccess(200, "Code authentication", $token);
 

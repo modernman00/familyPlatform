@@ -9,6 +9,8 @@ use App\classes\{
     Select
 };
 
+use \Firebase\JWT\JWT;
+
 use App\model\AllMembersData as AllMembersDataModel;
 
 use Exception;
@@ -117,6 +119,10 @@ class Login extends Select
 
     private function customerLogin(array $data): void
     {
+
+        if(isset($_POST['checkbox'])) {
+            $_SESSION['rememberMe'] = true;
+        }
 
         $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
 

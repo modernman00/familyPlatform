@@ -19,8 +19,7 @@ class AllMembersController extends AllMembersData
     {
         try {
 
-             view('member/showMembers');
-            // view('member/allMembers');
+            view('member/showMembers');
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -41,7 +40,6 @@ class AllMembersController extends AllMembersData
 
             $result = $this->getAllMembers($id);
             echo json_encode($result);
- 
         } catch (\Throwable $th) {
             showError($th);
         }

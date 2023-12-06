@@ -2,10 +2,7 @@
 
 namespace App\controller;
 
-use App\classes\{
-    SubmitForm,
-    Update
-};
+use App\classes\Update;
 
 class Index
 {

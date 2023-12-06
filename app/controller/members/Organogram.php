@@ -4,16 +4,22 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\model\{
-    // AllMembersData,
-    SingleCustomerData
-};
-use App\classes\Select;
+use App\model\SingleCustomerData;
+use App\classes\{
+    Select, 
+    VerifyToken
+    };
+
 
 class Organogram extends SingleCustomerData
 {
     public function index()
     {
+
+          //  verify token
+
+            $tokenVerify = new VerifyToken();
+            $result = $tokenVerify->profilePage();
         $id =  checkInput($_GET['id']);
 
         $table = ['personal', 'profile_pics', 'otherFamily'];

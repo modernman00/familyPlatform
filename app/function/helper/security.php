@@ -59,15 +59,15 @@ function generateSendTokenEmail($data): mixed
 function checkInput($data): mixed
 {
     if ($data !== null) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    $data = strip_tags($data);
-    $data = htmlentities($data);
-    $data = preg_replace('/[^0-9A-Za-z.@-]/', ' ', $data);
-    return $data;}
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+        $data = strip_tags($data);
+         $data = preg_replace('/[^0-9A-Za-z.@\s-]/', '', $data);
+        return $data;
+    }
     else{
-        return false;
+        return null;
     }
 }
 
@@ -78,11 +78,10 @@ function checkInputImage($data): string|null
         $data = stripslashes($data);
         $data = htmlspecialchars($data);
         $data = strip_tags($data);
-        $data = htmlentities($data);
-        $data = preg_replace('/[^0-9A-Za-z.@-_]/', ' ', $data);
+         $data = preg_replace('/[^0-9A-Za-z.@\s-]/', '', $data);
         return $data;
     } else {
-        exit();
+        return null;
     }
 }
 
@@ -92,7 +91,6 @@ function checkInputEmail($data): string
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     $data = strip_tags($data);
-    $data = htmlentities($data);
     $data = filter_var($data, FILTER_SANITIZE_EMAIL);
     return $data;
 }

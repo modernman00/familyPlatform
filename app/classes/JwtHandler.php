@@ -60,24 +60,9 @@ class JwtHandler {
                 "data" => $decode->data
             ];
         }
-        catch(\Firebase\JWT\ExpiredException $e){
-            return $this->errMsg($e->getMessage());
-        }
-        catch(\Firebase\JWT\SignatureInvalidException $e){
-            return $this->errMsg($e->getMessage());
-        }
-        catch(\Firebase\JWT\BeforeValidException $e){
-            return $this->errMsg($e->getMessage());
-        }
-        catch(\DomainException $e){
-            return $this->errMsg($e->getMessage());
-        }
-        catch(\InvalidArgumentException $e){
-            return $this->errMsg($e->getMessage());
-        }
-        catch(\UnexpectedValueException $e){
-            return $this->errMsg($e->getMessage());
-        }
+          catch (ExpiredException | SignatureInvalidException | BeforeValidException | \DomainException | \InvalidArgumentException | \UnexpectedValueException $e) {
+        return $this->errMsg($e->getMessage());
+    }
     
     }
 }

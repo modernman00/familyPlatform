@@ -180,7 +180,7 @@ input[type="file"] {
     <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Family code: {{ $data['famCode'] }}</p>
 
        {{-- id --}}
-    <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Membership ID: {{ $data['id'] }}</p>
+    {{-- <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Membership ID: {{ $data['id'] }}</p> --}}
 
 
     {{-- DATE OF BIRTH --}}

@@ -59,8 +59,6 @@ class ProfilePage extends ProcessImg
         try {
             unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
 
-            //TODO something is destroying the session after a few hours: find out
-
             // GET MEMBER'S DATA
             // GET MEMBER'S DATA
             $this->id = checkInput($_SESSION['memberId'] ?? throw new Exception("Error Processing ID request", 1));
@@ -96,9 +94,7 @@ class ProfilePage extends ProcessImg
 
         try {
             if (!isset($_SESSION['loggedIn'])) {
-                // $tokenErr = "Alien! How did you get here?";
-                // view('error/genError', ['error' => $tokenErr]);
-                // msgException(404, "How did you get here?");
+
                 header("location: /login");
             }
 
@@ -112,13 +108,14 @@ class ProfilePage extends ProcessImg
             $tokenVerify = new VerifyToken();
             $result = $tokenVerify->profilePage();
 
-            // if token is verified
+            // if token is not verified
 
             if (!$result) {
                 header("location: /login");
                 // $tokenErr = "Authentication failed";
                 // view('error/genError', ['error' => $tokenErr]);
             }
+
 
             view('member/profilePage', [
                 'data' => $this->memberData,
