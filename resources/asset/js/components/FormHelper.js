@@ -65,7 +65,7 @@ export default class FormHelper {
                 }
                 const checkRegex = matchRegex(post.value)
                 if (checkRegex === false) {
-                    this.error.push(`There is a problem with you entry for ${postName.toUpperCase()}'s question`)
+                    this.error.push(`There is a problem with your entry for ${postName.toUpperCase()}'s question`)
 
                     errMsg.innerHTML = `* There is a problem with you entry for ${postName.toUpperCase()}'s question`
                 }

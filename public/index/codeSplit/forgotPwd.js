@@ -26,11 +26,13 @@ var forgotPasswordSubmission = function forgotPasswordSubmission(e) {
     var email = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_id').value;
 
     // just in case there was an earlier error notification - remove it
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('forgotPassword_notification').classList.remove('is-danger');
+    var forgotPasswordNotification = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('forgotPassword_notification');
+    if (forgotPasswordNotification.classList.contains('is-danger')) {
+      forgotPasswordNotification.classList.remove('is-danger');
+    }
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = "";
     if (!(0,_helper_security__WEBPACK_IMPORTED_MODULE_2__.emailVal)(email)) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("setLoader").style.display = "block";
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('loader').classList.add('loader');
       localStorage.setItem('redirect', '/login/changePW');
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.postFormData)("/login/forgot", "forgotPassword", "/login/code");
     }

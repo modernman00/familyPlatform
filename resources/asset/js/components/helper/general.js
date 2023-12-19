@@ -123,6 +123,7 @@ export const matchInput = (first, second, err) => {
     error = id(err)
     firstInput = id(first)
     secondInput = id(second)
+    
     secondInput.addEventListener('keyup', () => {
 
         if (secondInput.value !== firstInput.value) {

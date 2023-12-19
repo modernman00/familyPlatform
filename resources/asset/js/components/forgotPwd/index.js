@@ -3,7 +3,6 @@ import { id, showError } from '../global'
 import { postFormData } from "../helper/http"
 import { emailVal } from "../helper/security"
 
-
 // block the setLoader div
 
 id("setLoader").style.display = "none";
@@ -11,17 +10,20 @@ id("setLoader").style.display = "none";
 const forgotPasswordSubmission = (e) => {
     try {
         e.preventDefault();
+
         const email = id('email_id').value
 
         // just in case there was an earlier error notification - remove it
-        id('forgotPassword_notification').classList.remove('is-danger')
+        const forgotPasswordNotification = id('forgotPassword_notification');
+
+        if (forgotPasswordNotification.classList.contains('is-danger')) {
+            forgotPasswordNotification.classList.remove('is-danger');
+        }
 
         id('error').innerHTML = ""
 
         if (!emailVal(email)) {
             id("setLoader").style.display = "block";
-
-            id('loader').classList.add('loader')
 
             localStorage.setItem('redirect', '/login/changePW')
 

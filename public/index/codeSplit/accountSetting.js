@@ -81,7 +81,7 @@ var FormHelper = /*#__PURE__*/function () {
             }
             var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
             if (checkRegex === false) {
-              _this.error.push("There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question"));
+              _this.error.push("There is a problem with your entry for ".concat(postName.toUpperCase(), "'s question"));
               errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
             }
           }

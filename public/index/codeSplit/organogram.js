@@ -209,23 +209,25 @@ try {
   axios__WEBPACK_IMPORTED_MODULE_3___default().get(notificationURL).then(function (res) {
     // Extract the notifications from the response
     var data = res.data.message;
-    if (data.length > 0) {
-      // Display the count of notifications
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
+    if (data) {
+      if (data.length > 0) {
+        // Display the count of notifications
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
 
-      // Store the notification count in session storage
-      sessionStorage.setItem('notificationCount', data.length);
+        // Store the notification count in session storage
+        sessionStorage.setItem('notificationCount', data.length);
 
-      // Display each notification
-      data.forEach(function (element) {
-        addToNotificationTab(element);
-      });
+        // Display each notification
+        data.forEach(function (element) {
+          addToNotificationTab(element);
+        });
 
-      // Update the timing of notifications
-      var updateNotificationTiming = document.querySelectorAll(".notification_timeago");
-      (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.render)(updateNotificationTiming);
-    } else {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
+        // Update the timing of notifications
+        var updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+        (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.render)(updateNotificationTiming);
+      } else {
+        (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
+      }
     }
   })["catch"](function (error) {
     // Handle any errors that occur during the process

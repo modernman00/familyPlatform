@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id,  showError } from '../global'
+import { id, showError } from '../global'
 import { Login } from "../dataToCheck";
 import { postFormData } from "../helper/http"
 import { showPassword } from "../helper/security"
@@ -46,9 +46,15 @@ const LoginSubmission = (e) => {
         formData.massValidate();
 
         if (formData.error.length === 0) {
-             // the notification div and the content
-        id('loginNow_notification').classList.remove('is-danger')
-        id('error').innerHTML = ""
+            // the notification div and the content
+
+            id('error').innerHTML = ""
+
+            const loginNotification = id('loginNow_notification');
+
+            if (loginNotification.classList.contains('is-danger')) {
+                loginNotification.classList.remove('is-danger');
+            }
             // Display the success information for 10 seconds
             id('setLoader').style.display = "block";
 

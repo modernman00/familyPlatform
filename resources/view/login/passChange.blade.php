@@ -1,8 +1,8 @@
 @extends ('baseBulma')
-
 @section('title', 'Change Password')
-
 @section('content')
+
+<div class="styleForm" style="margin-top: 4rem;">
 
   <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
     
@@ -36,5 +36,7 @@
             </div>
 
     </form>
+
+    </div>
 
 @endsection

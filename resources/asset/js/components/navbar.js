@@ -55,7 +55,9 @@ try {
       // Extract the notifications from the response
       const data = res.data.message;
 
-      if (data.length > 0) {
+      if(data){
+
+         if (data.length > 0) {
     
         // Display the count of notifications
         id('notification_count').innerHTML = data.length;
@@ -74,6 +76,10 @@ try {
       } else {
         id('notification_count').innerHTML = 0;
       }
+
+      }
+
+     
     })
     .catch(error => {
       // Handle any errors that occur during the process

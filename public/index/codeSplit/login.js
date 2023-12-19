@@ -81,7 +81,7 @@ var FormHelper = /*#__PURE__*/function () {
             }
             var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
             if (checkRegex === false) {
-              _this.error.push("There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question"));
+              _this.error.push("There is a problem with your entry for ".concat(postName.toUpperCase(), "'s question"));
               errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
             }
           }
@@ -881,8 +881,12 @@ var LoginSubmission = function LoginSubmission(e) {
     formData.massValidate();
     if (formData.error.length === 0) {
       // the notification div and the content
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger');
+
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = "";
+      var _loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
+      if (_loginNotification.classList.contains('is-danger')) {
+        _loginNotification.classList.remove('is-danger');
+      }
       // Display the success information for 10 seconds
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block";
 

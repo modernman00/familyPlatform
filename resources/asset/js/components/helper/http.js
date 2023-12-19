@@ -57,11 +57,7 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
         sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
         sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
 
-
-
-
         processFormDataAction(successClass, dbHttpResult, notificationId);
-
 
         if (redirect) {
             setTimeout(() => {

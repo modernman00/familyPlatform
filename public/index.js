@@ -180,8 +180,8 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/changePW') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('#loader').style.display = "none"; // loader
-  __webpack_require__.e(/*! import() | codeSplit/changePW */ "codeSplit/changePW").then(__webpack_require__.t.bind(__webpack_require__, /*! ./components/forgotPwd/changePW */ "./resources/asset/js/components/forgotPwd/changePW.js", 23)).then(function (module) {
+  // qSel('#loader').style.display ="none" // loader
+  Promise.all(/*! import() | codeSplit/changePW */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);

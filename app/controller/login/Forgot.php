@@ -28,16 +28,21 @@ class Forgot
   {
     try {
 
-      //1.  token verified
-      CheckToken::tokenCheck('token');
-
       //2.  sanitise input   
       $cleanData = getSanitisedInputData($_POST, null);
-        $getEmail = $cleanData['email'];
+
+      $getEmail = $cleanData['email'];
+
+          //1.  token verified
+      CheckToken::tokenCheck('token');
 
       $query = Select::formAndMatchQuery(selection:'SELECT_TWO_COLS_ID', table:'account', column:'email', column2:'status', identifier1:'email');
 
       $data = Select::selectFn2($query, [$getEmail]);
+
+      if(!$data){
+          msgException(404, "We don't have a record of this account");
+      }
 
       foreach($data as $data);
 
@@ -47,14 +52,16 @@ class Forgot
 
       }
         // us email to check if account is approve
-
-
       // 3. get database data
       $getData = findOneColUsingEmail(col: "id", data: $cleanData);
 
+      if (!$getData) {
+        msgException(404, "opps - there is a problem");
+      }
+
       $_SESSION['identifyCust'] = checkInput($getData['id']);
-      $getData['email'] = $cleanData['email'];
-      $_SESSION['email'] = $cleanData['email'];
+      $getData['email'] = $getEmail;
+      $_SESSION['email'] = $getEmail;
 
       //5. use the forgot class to verify, generate code and send msg
       generateSendTokenEmail($getData);
@@ -65,8 +72,8 @@ class Forgot
       //7. to be used on the code controller for identification and redirection
       $_SESSION['changePW'] = 1;
 
-  
       msgSuccess(200, "Authentication code has been sent to you");
+
     } catch (\Throwable $th) {
       showError($th);
     }

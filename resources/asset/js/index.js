@@ -111,11 +111,11 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/changePW') {
     qSel('.login').style.display ="none" // navbar mgt
     qSel('.signUp').style.display ="none" // navbar mgt
-    qSel('#loader').style.display ="none" // loader
+    // qSel('#loader').style.display ="none" // loader
     import (
         /* webpackChunkName: 'codeSplit/changePW' */
         /* webpackPrefetch: true */
-        './components/forgotPwd/changePW'
+        './components/changePW/'
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
