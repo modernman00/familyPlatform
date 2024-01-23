@@ -3,7 +3,7 @@ import { qSel, showError } from "./components/global"
 
 
 // to make the bulma navbar menu visible on mobile
-document.addEventListener('DOMContentLoaded', () => {
+
 
     try {
 
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get all "navbar-burger" elements
 
 
-});
+
 
 if (window.location.pathname === '/register') {
     qSel('.signUp').style.display = "none" // navbar mgt

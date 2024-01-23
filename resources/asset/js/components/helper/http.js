@@ -65,7 +65,7 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
             }, 2000);
         }
 
-        formData.clearHtml();
+        // formData.clearHtml();
     } catch (error) {
 
         const errorClass = getNotificationClassByCSS("bulma", 'red');

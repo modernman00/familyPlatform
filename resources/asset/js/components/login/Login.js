@@ -29,12 +29,6 @@ const formData = new FormHelper(formInputArr);
 const LoginSubmission = (e) => {
     e.preventDefault();
 
-    // Remove the danger class from the notification
-    const loginNotification = id('loginNow_notification');
-    // if (loginNotification.classList.contains('is-danger')) {
-    //     loginNotification.classList.remove('is-danger');
-    // }
-
     // Clear any previous error messages
     formData.clearError();
 

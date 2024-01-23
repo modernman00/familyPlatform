@@ -24,23 +24,29 @@
       <div class="w3-section">
 
         <textarea class="w3-input w3-border" style="resize:none" spellcheck="false" name="postMessage" id="postMessage"
-          cols="50" rows="10"></textarea> <br>
+          cols="50" rows="10">
+        </textarea> <br>
 
         <div class="changeProfileDisplay">
 
-          {{--  <button class='w3-button'>    --}}
-          <input class="w3-input" type="file" id="post_img" name="post_img[]" multiple>
-          {{--  </button>  --}}
-        <div class="w3-bar">
-          <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
-             Post</button>
+{{--          
+         <label for="post_img" class="custom-file-upload"></label> --}}
+          {{-- <button class='w3-button'> --}}
+          <input type="file" class="w3-input" id="post_img" name="post_img[]" accept=".jpg, .jpeg, .png" multiple>
+          {{-- </button> --}}
+          
+         
+          <div class="w3-bar">
+            <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
+               Post</button>
 
 
-          <button onclick="document.getElementById('id01').style.display='none'" type="button"
-            class="w3-button w3-red">Cancel</button>
+            <button onclick="document.getElementById('id01').style.display='none'" type="button"
+              class="w3-button w3-red">Cancel</button>
+          </div>
+
         </div>
-
-        </div>
+      </div>
     </form>
 
 

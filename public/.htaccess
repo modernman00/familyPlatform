@@ -19,8 +19,24 @@ RewriteRule ^public/ - [L]
   Header set X-XSS-Protection "1; mode=block"
   Header set Strict-Transport-Security "max-age=31536000"
   Header set X-Content-Type-Options "nosniff"
-  #  Header set Content-Security-Policy "default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';"
-  #  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  # Header set Content-Security-Policy "default-src 'none'; script-src 'self' https://fontawesome.com/ https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js; connect-src 'self'; img-src 'self'; style-src 'self' https://fonts.bunny.net https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css;"
+  # Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Expect-CT "max-age=7776000, enforce"
-  
 </IfModule>
+
+
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/pdf "access plus 1 month"
+  ExpiresByType text/x-javascript "access plus 1 month"
+  ExpiresByType application/x-shockwave-flash "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresDefault "access plus 2 days"
+</IfModule>
+

@@ -61,7 +61,7 @@ function useEmailToFindData($inputData)
     $emailData = Select::selectFn2(query: $query, bind: [$email]);
 
     if (empty($emailData)) {
-        throw new Exception('There is a problem with your authentication - Email');
+        msgException(401, 'We do not recognise your account');
     }
 
     return $emailData[0];
