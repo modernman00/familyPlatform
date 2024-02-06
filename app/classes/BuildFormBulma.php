@@ -431,7 +431,8 @@ HTML;
                     $cleanLabel = strtoupper($label);
                     $value = empty($this->entValue[$i]['value'][$y]) ? '' : $this->entValue[$i]['value'][$y];
                     $labelType = $this->entValue[$i]['inputType'][$y] ? $this->entValue[$i]['inputType'][$y] : "";
-                    $icon = $this->entValue[$i]['icon'][$y] ? $this->entValue[$i]['icon'][$y] : "";
+                     $icon = $this->entValue[$i]['icon'][$y] ?? "";
+                    $hasIconLeft = (isset($this->entValue[$i]['icon'][$y])? 'has-icon-left' : '');
                     if ($labelType === 'select') {
 
                         echo <<<HTML
@@ -472,7 +473,7 @@ HTML;
 <div class="field $name has-addons has-addons-left" id="{$name}_div">
     
 
-    <div class="control is-expanded has-icons-left">
+    <div class="control is-expanded $hasIconLeft">
         <input class="input $name input is-medium" id="{$name}_id" type="text" placeholder="$cleanLabel">
         <span class="icon is-small is-left">$icon</span>
         <p class="help" id="{$name}_help"></p>
@@ -487,7 +488,7 @@ HTML;
                         echo <<<HTML
 <div class="field $name" id="{$name}_div">
     <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
-    <div class="control is-expanded has-icons-left">
+    <div class="control is-expanded $hasIconLeft">
         <input class="input $name input is-medium" type="$labelType" value="$value" maxlength="30" minlength="1" name="$name" id="$id" placeholder="$placeholder" autocomplete="$name">
         <span class="icon is-small is-left">$icon</span>
         <p class="help" id="{$name}_help"></p>

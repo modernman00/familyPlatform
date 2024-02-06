@@ -4,6 +4,7 @@ namespace App\classes;
 
 use App\classes\AllFunctionalities;
 
+
 class ProcessImg extends AllFunctionalities
 {
     public $profileImg;
