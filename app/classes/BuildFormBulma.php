@@ -83,7 +83,7 @@ class BuildFormBulma extends AlterTable
         }
     }
 
-    private function getDay(): void
+    private function getDay()
     {
         $this->setDay = $this->createDay(01, 32);
         foreach ($this->setDay as $no) {
@@ -309,14 +309,11 @@ class BuildFormBulma extends AlterTable
                 HTML;
             } elseif ($this->entKey[$i] === 'blank') {
                 echo <<<HTML
-                <div class="field"></div>
-                HTML;
+                        <div class="field"></div>
+                     HTML;
                 for ($y = 1; $y < count($this->entKey[$i]); $y++) {
                     $name = $this->entValue['type'][$y];
                     $label = $this->entValue['label'][$y];
-                    $id = $name . 'id';
-                    $error = $name . '_error';
-                    $help = $name . '_help';
                     $namePlaceholder = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $name));
                     echo <<<HTML
                     <div class="field">
@@ -331,19 +328,19 @@ class BuildFormBulma extends AlterTable
                         </div>
                     </div>
                     HTML;
-                                    }
+                }
             } elseif ($this->entValue[$i] === 'birthday') {
                 $divID = $this->entValue[$i];
                 echo <<<HTML
-                <div class="field" id="$divID">
-                    <label class="label is-medium" id="$nameKey"><b>$var</b></label>
-                    <p class="help error" id="{$nameKey}_error"></p>
-                    <div class="field-body">
-                        <div class="field">
-                            <div class="control">
-                                <div class="select is-fullwidth is-medium">
-                                    <select name="day" id="day">
-                                        <option selected value="select">Day</option>
+                        <div class="field" id="$divID">
+                            <label class="label is-medium" id="$nameKey"><b>$var</b></label>
+                            <p class="help error" id="{$nameKey}_error"></p>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <div class="select is-fullwidth is-medium">
+                                            <select name="day" id="day">
+                                                <option selected value="select">Day</option>
                 HTML;
                 echo $this->getDay();
                 echo <<<HTML
@@ -455,9 +452,6 @@ class BuildFormBulma extends AlterTable
                                 echo "<option> $value </option>";
                             }
                         }
-                        // for ($yii = 0; $yii < count($this->entValue[$i]['options'][$yii]); $yii++) {
-                        //     echo "<option>" . $this->entValue[$i]['options'][$yii] . "</option>";
-                        // }
                         echo <<<HTML
                                     </select>
                                     <span class="icon is-small is-left">$icon</span>
@@ -489,16 +483,16 @@ class BuildFormBulma extends AlterTable
                         HTML;
                     } else {
                         echo <<<HTML
-                    <div class="field $name" id="{$name}_div">
-                        <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
-                        <div class="control is-expanded $hasIconLeft">
-                            <input class="input $name input is-medium" type="$labelType" value="$value" maxlength="30" minlength="1" name="$name" id="$id" placeholder="$placeholder" autocomplete="$name">
-                            <span class="icon is-small is-left">$icon</span>
-                            <p class="help" id="{$name}_help"></p>
-                            <p class="help error" id="{$name}_error"></p>
+                        <div class="field $name" id="{$name}_div">
+                            <label class="label is-medium" id="$name"><b>$cleanLabel</b></label>
+                            <div class="control is-expanded $hasIconLeft">
+                                <input class="input $name input is-medium" type="$labelType" value="$value" maxlength="30" minlength="1" name="$name" id="$id" placeholder="$placeholder" autocomplete="$name">
+                                <span class="icon is-small is-left">$icon</span>
+                                <p class="help" id="{$name}_help"></p>
+                                <p class="help error" id="{$name}_error"></p>
+                            </div>
                         </div>
-                    </div>
-                    HTML;
+                        HTML;
                     }
                 }
                 echo <<<HTML
