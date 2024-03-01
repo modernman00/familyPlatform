@@ -14,7 +14,7 @@ axiosRetry(axios, { retries: 3 });
  * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
-export const postFormData = async (url, formId, redirect = null, css = null) => {
+export const postFormData = async(url, formId, redirect = null, css = null) => {
 
     let notificationForm = `${formId}_notification`
     const notificationId = id(notificationForm)
@@ -26,7 +26,7 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
 
     formEntries.delete('submit')
     formEntries.delete('checkbox_id')
-    // formEntries.delete('token')
+        // formEntries.delete('token')
 
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
@@ -50,9 +50,24 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
             idSetFromHttp = response.data.message.id;
             famCodeSetFromHttp = response.data.message.famCode;
             dbHttpResult = response.data.message.outcome;
+
+            // check if idSetFromHttp is null, then throw error
+
+            if (!idSetFromHttp) {
+                throw new Error('idSetFromHttp is null');
+            }
+
+            // throw error if famCodeSetFromHttp is null
+
+            if (!famCodeSetFromHttp) {
+                throw new Error('famCodeSetFromHttp is null');
+            }
+
         } else {
             dbHttpResult = response.data.message;
         }
+
+
 
         sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
         sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
@@ -68,9 +83,13 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
         // formData.clearHtml();
     } catch (error) {
 
-        const errorClass = getNotificationClassByCSS("bulma", 'red');
+        const errorClass = getNotificationClassByCSS(css, 'red');
 
-        processFormDataAction(errorClass, error.response.data.message, notificationId);
+        const errorMessage = error ? .response ? .data ? .message ? ? error ? .message ? .message ? ? error ? .message;
+
+        // Process the form data for error
+        processFormDataAction(errorClass, errorMessage, notificationId);
+
 
         // Handle specific error cases
         // if (error.response.data.message === "We do not recognise what you are doing") {
@@ -85,10 +104,14 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
  * @param {string} message - The notification message.
  */
 const processFormDataAction = (cssClass, message, formNotificationId) => {
-    formNotificationId.style.display = 'block';
-    formNotificationId.classList.add(cssClass);
-    id('error').innerHTML = message;
-    id('setLoader').classList.remove('loader');
+    const notificationElement = id(formNotificationId);
+    if (notificationElement) {
+        notificationElement.style.display = 'block';
+        notificationElement.classList.add(cssClass);
+        id('error').scrollIntoView({ behavior: 'smooth' });
+        id('error').innerHTML = message;
+        id('setLoader').classList.remove('loader');
+    }
 };
 
 /**
@@ -103,8 +126,10 @@ const getNotificationClassByCSS = (css, status) => {
             return status === 'green' ? 'w3-green' : 'w3-red';
         case 'bulma':
             return status === 'green' ? 'is-success' : 'is-danger';
+        case 'bootstrap':
+            return status === 'green' ? 'bg-success' : 'bg-danger';
         default:
-            return status === 'green' ? 'is-success' : 'is-danger';
+            return status === 'green' ? 'bg-success' : 'bg-danger';
     }
 };
 
@@ -121,7 +146,7 @@ axiosTest()
     .catch(err => console.log(err))
  */
 
-export const getApiData = async (URL, token = null) => {
+export const getApiData = async(URL, token = null) => {
     try {
 
         const config = {
@@ -146,7 +171,7 @@ export const getApiData = async (URL, token = null) => {
 
 }
 
-export const getMultipleApiData = async (url1, url2, token = null) => {
+export const getMultipleApiData = async(url1, url2, token = null) => {
     try {
 
         const config = {

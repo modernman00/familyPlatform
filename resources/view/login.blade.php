@@ -36,7 +36,7 @@
       'type' => 'text',
       'checkbox'=> 'Remember me',
       'token' => 'token',
-      'button' => 'submit'
+      'button' => 'button'
         ];
       } else {
           $formArray = [
@@ -44,7 +44,7 @@
       'password' => 'password',
       'checkbox'=> 'Remember me',
       'token' => 'token',
-      'button' => 'submit'
+      'button' => 'button'
       ];
       }
 

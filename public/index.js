@@ -155,7 +155,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/forgot') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/forgotPwd */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/forgotPwd")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | codeSplit/forgotPwd */ "codeSplit/forgotPwd").then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -163,7 +163,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/code') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/code */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | codeSplit/code */ "codeSplit/code").then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);

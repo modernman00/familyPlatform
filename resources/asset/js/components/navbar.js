@@ -49,46 +49,43 @@ const notificationURL = `/member/notifications/id?notificationId=${idSetFromHttp
 
 // const getData = axios.get(notificationURL);
 
-try {
-    axios.get(notificationURL)
-        .then(res => {
-            // Extract the notifications from the response
-            const data = res.data.message;
 
-            if (data) {
+axios.get(notificationURL)
+    .then(res => {
+        // Extract the notifications from the response
+        const data = res.data.message;
 
-                if (data.length > 0) {
+        if (data) {
 
-                    // Display the count of notifications
-                    id('notification_count').innerHTML = data.length;
+            if (data.length > 0) {
 
-                    // Store the notification count in session storage
-                    sessionStorage.setItem('notificationCount', data.length);
+                // Display the count of notifications
+                id('notification_count').innerHTML = data.length;
 
-                    // Display each notification
-                    data.forEach(element => {
-                        addToNotificationTab(element);
-                    });
+                // Store the notification count in session storage
+                sessionStorage.setItem('notificationCount', data.length);
 
-                    // Update the timing of notifications
-                    const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
-                    render(updateNotificationTiming);
-                } else {
-                    id('notification_count').innerHTML = 0;
-                }
+                // Display each notification
+                data.forEach(element => {
+                    addToNotificationTab(element);
+                });
 
+                // Update the timing of notifications
+                const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+                render(updateNotificationTiming);
+            } else {
+                id('notification_count').innerHTML = 0;
             }
 
+        }
 
-        })
-        .catch(error => {
-            // Handle any errors that occur during the process
-            showError(error);
-        });
-} catch (error) {
-    // Handle exceptions that occur outside of the promise chain
-    showError(error);
-}
+
+    })
+    .catch(error => {
+        // Handle any errors that occur during the process
+        showError(error);
+    });
+
 
 // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
 

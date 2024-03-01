@@ -36,6 +36,8 @@
         {{-- THE NOTIFICATION NAVBAR --}}
     <div class="w3-dropdown-hover w3-hide-small w3-small">
 
+     {{-- notification_counter --}}
+
       <button class="w3-button w3-padding-large notification_count" title="Notifications">
         
         <i class="fa fa-bell"></i>
@@ -43,6 +45,8 @@
             
           </span>
       </button>
+      {{-- 
+      notification_info_append --}}
 
       <div class="w3-dropdown-content w3-card-4 w3-bar-block notification_tab" id="notification_tab" style="width:300px">
 
