@@ -40,7 +40,8 @@
 
 
   <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
+    <link rel="manifest" href="/webAppFamily.json" />
 
 
 </head>

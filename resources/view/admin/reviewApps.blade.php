@@ -8,8 +8,9 @@
 
 <div class="table-container">
     <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+     <caption>Member Applications</caption>
     <thead class="has-background-primary">
-        <tr class="has-text-white-bis">
+        <tr class="has-text-white">
             <th>No</th>
             <th>ID</th>
             <th>Date</th>
@@ -63,8 +64,8 @@
                           <i class="far fa-window-close fa-lg" style="color:#F00A0A"></i>
                           </a>
                         </td>
-                        <td><a href="/admin/reviewApps/delete?id={{ $data['id'] }}"
-                        data-toggle="tooltip"
+                        <td>
+                          <a href="/admin/reviewApps/delete?id={{ $data['id'] }}" data-toggle="tooltip"
                               onClick="javascript: return confirm('Are you sure you want to delete this application?');"
                               title="Delete">
                             <i class="fas fa-trash-alt fa-lg" style="color:#F00A0A"></i>

@@ -16,7 +16,7 @@
 
 
     <hr class="my-2">
-    <form action="" method="post" class="styleform_form" id="codeForm">
+    <form action="" method="post" class="styleform_form" id="codeForm" class="codeForm">
         <div class="form-group">
             <br>
             <div class='row'>

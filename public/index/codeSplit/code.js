@@ -21,10 +21,11 @@ __webpack_require__.r(__webpack_exports__);
 var LoginCode = function LoginCode(e) {
   try {
     e.preventDefault();
-    // the notification div and the content
-    // id('codeForm_notification').classList.remove('is-danger')
-    // id('error').innerHTML = ""
-    // show notification
+    // just in case there was an earlier error notification - remove it
+    var codeNotification = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('codeForm_notification');
+    if (codeNotification.classList.contains('is-danger')) {
+      codeNotification.classList.remove('is-danger');
+    }
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').style.display = "block";
 
     // get the direct from the login script (getstorage)
@@ -135,11 +136,12 @@ var postFormData = /*#__PURE__*/function () {
               window.location.assign(redirect);
             }, 2000);
           }
-          formData.clearHtml();
-          _context.next = 29;
+
+          // formData.clearHtml();
+          _context.next = 28;
           break;
-        case 25:
-          _context.prev = 25;
+        case 24:
+          _context.prev = 24;
           _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS("bulma", 'red');
           processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
@@ -148,11 +150,11 @@ var postFormData = /*#__PURE__*/function () {
           // if (error.response.data.message === "We do not recognise what you are doing") {
           //   window.location.assign('/login');
           // }
-        case 29:
+        case 28:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 25]]);
+    }, _callee, null, [[9, 24]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);

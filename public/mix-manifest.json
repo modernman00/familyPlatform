@@ -13,5 +13,7 @@
     "/index/codeSplit/accountSetting.js": "/index/codeSplit/accountSetting.js",
     "/index/codeSplit/organogram.js": "/index/codeSplit/organogram.js",
     "/style.css": "/style.css",
-    "/vendor.js": "/vendor.js"
+    "/vendor.js": "/vendor.js",
+    "/index/codeSplit/admin.js": "/index/codeSplit/admin.js",
+    "/index/codeSplit/lasu.js": "/index/codeSplit/lasu.js"
 }

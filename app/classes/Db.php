@@ -24,7 +24,7 @@ class Db extends CheckToken
     {
         try {
             $dbVar = self::dbVariables();
-            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}; charset={$dbVar['charset']}", $dbVar['username'], $dbVar['password'], array(
+            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}; charset={$dbVar['charset']}", $dbVar['username'],  $dbVar['password'], array(
                 PDO::ATTR_PERSISTENT => true
             ));
 

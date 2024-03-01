@@ -14,6 +14,7 @@ const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
 (() => {
+
     //clear error from the form
     formData.clearError()
 
@@ -59,7 +60,7 @@ const LoginSubmission = (e) => {
             const loginURL = sessionStorage.getItem('loginURL1');
 
             // Determine the redirect URL based on loginURL
-            const redirect = (loginURL === "/lasu") ? null : "/login/code";
+            const redirect = (loginURL === "/lasu") ? "/admin/reviewApps" : "/login/code";
 
             // Submit the form data
             postFormData(loginURL, "loginNow", redirect);

@@ -22,7 +22,7 @@ class InnerJoin extends Db
         try {
             $buildInnerJoinQuery = array_map(
                 fn ($tab) =>"
-                INNER JOIN $tab ON $firstTable.$para = $tab.$para",
+                LEFT JOIN $tab ON $firstTable.$para = $tab.$para",
                 $table
             );
 

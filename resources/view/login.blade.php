@@ -28,13 +28,25 @@
 
       @php
 
-      $formArray = [
+      // if $formAction is '/lasu', add code to the input
+      if($formAction === '/lasu') {
+        $formArray = [
+           'email' => 'email',
+      'password' => 'password',
+      'type' => 'text',
+      'checkbox'=> 'Remember me',
+      'token' => 'token',
+      'button' => 'submit'
+        ];
+      } else {
+          $formArray = [
       'email' => 'email',
       'password' => 'password',
       'checkbox'=> 'Remember me',
       'token' => 'token',
       'button' => 'submit'
       ];
+      }
 
       $form = new App\classes\BuildFormBulma($formArray);
       $form->genForm();

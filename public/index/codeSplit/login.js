@@ -606,11 +606,12 @@ var postFormData = /*#__PURE__*/function () {
               window.location.assign(redirect);
             }, 2000);
           }
-          formData.clearHtml();
-          _context.next = 29;
+
+          // formData.clearHtml();
+          _context.next = 28;
           break;
-        case 25:
-          _context.prev = 25;
+        case 24:
+          _context.prev = 24;
           _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS("bulma", 'red');
           processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
@@ -619,11 +620,11 @@ var postFormData = /*#__PURE__*/function () {
           // if (error.response.data.message === "We do not recognise what you are doing") {
           //   window.location.assign('/login');
           // }
-        case 29:
+        case 28:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 25]]);
+    }, _callee, null, [[9, 24]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -865,12 +866,6 @@ var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInput
 var LoginSubmission = function LoginSubmission(e) {
   e.preventDefault();
 
-  // Remove the danger class from the notification
-  var loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
-  // if (loginNotification.classList.contains('is-danger')) {
-  //     loginNotification.classList.remove('is-danger');
-  // }
-
   // Clear any previous error messages
   formData.clearError();
   try {
@@ -883,9 +878,9 @@ var LoginSubmission = function LoginSubmission(e) {
       // the notification div and the content
 
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = "";
-      var _loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
-      if (_loginNotification.classList.contains('is-danger')) {
-        _loginNotification.classList.remove('is-danger');
+      var loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
+      if (loginNotification.classList.contains('is-danger')) {
+        loginNotification.classList.remove('is-danger');
       }
       // Display the success information for 10 seconds
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block";
@@ -897,7 +892,7 @@ var LoginSubmission = function LoginSubmission(e) {
       var loginURL = sessionStorage.getItem('loginURL1');
 
       // Determine the redirect URL based on loginURL
-      var redirect = loginURL === "/lasu" ? null : "/login/code";
+      var redirect = loginURL === "/lasu" ? "/admin/reviewApps" : "/login/code";
 
       // Submit the form data
       (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)(loginURL, "loginNow", redirect);
@@ -907,74 +902,6 @@ var LoginSubmission = function LoginSubmission(e) {
     }
   } catch (err) {
     // Handle any unexpected errors
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
-  }
-};
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', LoginSubmission);
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("showPassword_id").addEventListener('click', function () {
-  return (0,_helper_security__WEBPACK_IMPORTED_MODULE_4__.showPassword)('password_id');
-});
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/login/admin.js":
-/*!******************************************************!*\
-  !*** ./resources/asset/js/components/login/admin.js ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-/* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
-
-
-
-
-
-
-
-
-// block the setLoader div
-
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").style.display = "none";
-var formInput = document.querySelectorAll('.loginNow');
-var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
-var process = function process() {
-  //clear error from the form
-  formData.clearError();
-  // set the maxlength, check the length of the value, raise error
-  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.max);
-};
-process();
-var LoginSubmission = function LoginSubmission(e) {
-  try {
-    e.preventDefault();
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification').classList.remove('is-danger'); // remove the danger class from the notification
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = ""; // empty the error element
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)(".notification").style.display = "none";
-    // if (id('checkbox').checked) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
-    formData.emailVal(); // sanitise email
-    formData.massValidate(); // validate and sanitise data
-    if (formData.error.length == 0) {
-      // display the success information for 10sec
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block"; // unblock the div block at the global.js
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loader').classList.add('loader'); // start the loader element
-      // localStorage.setItem('redirect', '/member/ProfilePage')
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)("/lasu", "loginNow", "/admin/reviewApps");
-    } else {
-      alert('The form cannot be submitted. Please check the errors');
-      process();
-    }
-    // } 
-    // else {
-    // 	alert('To continue, you need to agree to the our privacy policy')
-    // }
-  } catch (err) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }
 };

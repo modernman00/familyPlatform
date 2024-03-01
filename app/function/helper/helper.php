@@ -5,9 +5,6 @@ declare(strict_types=1);
 use Philo\Blade\Blade;
 use App\classes\Select;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
-use Rollbar\Rollbar;
-use Rollbar\Payload\Level; // https://docs.rollbar.com/docs/basic-php-installation-setup
-use Tracy\Debugger;
 
 
 function view($path, array $data = [])
@@ -194,8 +191,7 @@ function showError($th): void
     $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n";
 
     echo json_encode(['message' => $error]);
-    // Rollbar::log(Level::ERROR, $th); could still be considered
-    Debugger::log($th, Debugger::ERROR);
+
 }
 
 /**
@@ -449,3 +445,5 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
+
+

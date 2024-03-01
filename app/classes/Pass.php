@@ -42,7 +42,7 @@ class Pass extends AllFunctionalities
     $_SESSION['email'] = $email;
   }
 
-  protected function change($password, $email, $table)
+  protected function change(#[\SensitiveParameter] $password, $email, $table)
   {
       $email = checkInputEmail($email);
     if (!$password) {

@@ -29,7 +29,7 @@
   <link rel="icon" href="y" sizes="16x16" type="image/png">
   <link rel="manifest" href="{{ getenv("IMG_CONTRACT") }}">
   <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
-  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}">
+  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
 
@@ -37,6 +37,7 @@
 
    <!-- Custom styles for this template -->
   <link href="/css/homePage.css" rel="stylesheet">
+  <link rel="manifest" href="/webAppFamily.json" />
 
 
   <style>

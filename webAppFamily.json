@@ -1,0 +1,34 @@
+{
+    "short_name": "Family Connect",
+    "name": "ConnectWithFamily",
+    "start_url": "/",
+    "icons": [{
+            "src": "/img/favicon/android-chrome-512x512.png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/img/favicon/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "purpose": "maskable"
+        }
+    ],
+    "description": "Connect and strengthen bonds with your family through memories and stories. The ultimate social platform for families.",
+    "screenshots": [{
+        "src": "/img/favicon/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "form_factor": "wide",
+
+        "type": "image/png",
+        "label": "Family Platform"
+    }, {
+        "src": "/img/favicon/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "form_factor": "tall",
+        "type": "image/png",
+        "label": "Family Platform"
+    }],
+    "display": "standalone",
+    "display-override": ["fullscreen"],
+    "theme_color": "#42a5f5",
+    "background_color": "#ffffff"
+}

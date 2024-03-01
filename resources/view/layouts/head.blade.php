@@ -19,6 +19,8 @@
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
 
+    <link rel="manifest" href="/webAppFamily.json" />
+
   
 
   <link rel="stylesheet" type="text/css" href="/profilepage.css">

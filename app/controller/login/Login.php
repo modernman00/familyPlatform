@@ -50,68 +50,69 @@ class Login extends Select
 
     public function login(): void
     {
+
+
+        header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
+        header("Content-Type: application/json; charset=UTF-8");
+        header("Access-Control-Allow-Methods: POST");
+        header("Access-Control-Max-Age: 3600");
+        header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
         try {
 
-            header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
-            header("Content-Type: application/json; charset=UTF-8");
-            header("Access-Control-Allow-Methods: POST");
-            header("Access-Control-Max-Age: 3600");
-            header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
- 
-                //2. create min and max limit
-                $minMaxData = [
-                    'data' => ['email', 'password'],
-                    'min' => [5, 3],
-                    'max' => [35, 65]
-                ];
+            //2. create min and max limit
+            $minMaxData = [
+                'data' => ['email', 'password'],
+                'min' => [5, 3],
+                'max' => [35, 65]
+            ];
 
-                //3. sanitise the post data 
-                $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
+            //3. sanitise the post data 
+            $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
-                //4 check if email exist and get the database password
-                $data = useEmailToFindData($sanitisedData);
+            //4 check if email exist and get the database password
+            $data = useEmailToFindData($sanitisedData);
 
-                $_SESSION['ID'] = $data['id'];
+            $_SESSION['ID'] = $data['id'];
 
-                //5. check password 
-                $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
+            //5. check password 
+            $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
-                //1.  token verified
-                CheckToken::tokenCheck('token');
+            //1.  token verified
+            CheckToken::tokenCheck('token');
 
-                // GET THE FAMCODE 
+            // GET THE FAMCODE 
 
-                $getFamCode = AllMembersDataModel::getFamCode($data['id']);
+            $getFamCode = AllMembersDataModel::getFamCode($data['id']);
 
-                //4. control for login
-                $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
+            //4. control for login
+            $detectIfAdminOrCustomer = $_SESSION[self::LOGIN_TYPE] ?? 0;
 
-                if ($data && $validatePwd) {
+            if ($data && $validatePwd) {
 
-                    // Login now based on login type
-                    if ($detectIfAdminOrCustomer === self::ADMIN) {
+                // Login now based on login type
+                if ($detectIfAdminOrCustomer === self::ADMIN) {
 
-                        $this->adminLogin($data);
-                        unset($data);
-                    } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
+                    $this->adminLogin($data);
+                    unset($data);
+                } elseif ($detectIfAdminOrCustomer === self::LOGIN) {
 
-                        $this->customerLogin($data);
-                        unset($data);
-                    }
-                    // I added the id because i need to set it as a session for the notification bar
-                    msgSuccess(201, [
-                        'outcome'=> "Account Validated", 
-                        'id'=> $_SESSION['ID'],
-                        'famCode' => $getFamCode['famCode'],
-                        ]);
-                } else {
-
-                    session_unset();
-
-                    msgException(401, "Your credential could not be verified");
+                    $this->customerLogin($data);
+                    unset($data);
                 }
-        
+                // I added the id because i need to set it as a session for the notification bar
+                msgSuccess(201, [
+                    'outcome' => "Account Validated",
+                    'id' => $_SESSION['ID'],
+                    'famCode' => $getFamCode['famCode'],
+                ]);
+            } else {
+
+                session_unset();
+
+                msgException(401, "Your credential could not be verified");
+            }
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -120,7 +121,7 @@ class Login extends Select
     private function customerLogin(array $data): void
     {
 
-        if(isset($_POST['checkbox'])) {
+        if (isset($_POST['checkbox'])) {
             $_SESSION['rememberMe'] = true;
         }
 
@@ -153,21 +154,28 @@ class Login extends Select
     {
         $getAdminCode = getenv('CODING');
 
-        $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'type', identifier2: "email");
+        if ($getAdminCode === $sanitisedData['type']) {
 
-        $outcome = $this->selectCountFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
+            $query = parent::formAndMatchQuery(
+                selection: 'SELECT_COUNT_TWO',
+                table: self::ACCOUNT,
+                identifier1: 'type',
+                identifier2: "email"
+            );
 
-        if (!$outcome) {
-
-            msgException(406, "Your input to code is not recognised");
-        }
+               $outcome = $this->selectCountFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
+        $outcome ??  msgException(406, "Your input to code is not recognised");
 
         $url0 = getenv("MIX_APP_URL2");
         $url = $url0 . "lasu";
-
         loggedDetection($url, $sanitisedData['email']);
-
         session_regenerate_id();
+        } else{
+            msgException(406, "Your input to code is not recognised - 2");
+        }
+
+     
+
 
         // header('Location: /admin/reviewApps');
     }

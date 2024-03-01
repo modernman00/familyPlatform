@@ -14,5 +14,6 @@
     // vscode coloring
 
      "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs":"active"
+    "editor.guides.bracketPairs": "active",
+    "php.version": "8.3"
 }

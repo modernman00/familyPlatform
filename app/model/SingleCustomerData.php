@@ -12,8 +12,8 @@ class SingleCustomerData extends InnerJoin
 	public function getPersonalData()
 	{
 		try {
-			$query = "SELECT DISTINCT lastName, firstName, id FROM personal";
-			$result = $this->connect()->query($query);
+			$result = "SELECT DISTINCT lastName, firstName, id FROM personal";
+			$result = $this->connect()->query($result);
 			return $result->fetchAll(\PDO::FETCH_ASSOC);
 		} catch (\PDOException $e) {
 			showError($e);
@@ -34,15 +34,16 @@ class SingleCustomerData extends InnerJoin
 			$para = "id";
 			// remove the first element of the array
 			$firstTable = array_shift($table);
-			$query = $this->joinParamOr(firstTable: $firstTable, para: $para, table: $table, id: $custId);
+			$result = $this->joinParamOr(firstTable: $firstTable, para: $para, table: $table, id: $custId);
 
-			if (!$query) {
-				throw new \Exception("Error Processing Request - query", 301);
-			}
+			$result ?? \msgException(401, 'result not found');
+			$result = $result[0];
+			unset($result['password']);
 
-			foreach ($query as $query);
-			unset($query[0]['password']);
-			return $query;
+
+			// foreach ($result as $result);
+			// unset($result[0]['password']);
+			return $result;
 		} catch (\PDOException $e) {
 			showError($e);
 			return false;
@@ -62,12 +63,12 @@ class SingleCustomerData extends InnerJoin
 
 			$id = "id";
 			$firstTable = array_shift($table); // remove the first element of the array
-			$query = $this->joinParamOr(firstTable: $firstTable, para: $id, table: $table, id: $custId);
+			$result = $this->joinParamOr(firstTable: $firstTable, para: $id, table: $table, id: $custId);
 
-			if (!$query) {
+			if (!$result) {
 				throw new \Exception("Error Processing Request - query", 1);
 			}
-			return $query;
+			return $result;
 		} catch (\PDOException $e) {
 			showError($e);
 			return false;
@@ -76,7 +77,7 @@ class SingleCustomerData extends InnerJoin
 
 	public static function getCustById($custId, $table): array
 	{
-		$query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
-		return Select::selectFn2(query: $query, bind: [$custId]);
+		$result = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
+		return Select::selectFn2(query: $result, bind: [$custId]);
 	}
 }

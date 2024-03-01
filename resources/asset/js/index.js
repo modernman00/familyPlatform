@@ -5,30 +5,30 @@ import { qSel, showError } from "./components/global"
 // to make the bulma navbar menu visible on mobile
 
 
-    try {
+try {
 
-        const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+    const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-        // Add a click event on each of them
-        $navbarBurgers.forEach(el => {
-            el.addEventListener('click', () => {
+    // Add a click event on each of them
+    $navbarBurgers.forEach(el => {
+        el.addEventListener('click', () => {
 
-                // Get the target from the "data-target" attribute
-                const target = el.dataset.target;
-                const $target = document.getElementById(target);
+            // Get the target from the "data-target" attribute
+            const target = el.dataset.target;
+            const $target = document.getElementById(target);
 
-                // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-                el.classList.toggle('is-active');
-                $target.classList.toggle('is-active');
+            // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+            el.classList.toggle('is-active');
+            $target.classList.toggle('is-active');
 
-            });
         });
+    });
 
-    } catch (error) {
-        showError(error)
-    }
+} catch (error) {
+    showError(error)
+}
 
-    // Get all "navbar-burger" elements
+// Get all "navbar-burger" elements
 
 
 
@@ -68,9 +68,9 @@ if (window.location.pathname === '/register') {
     qSel('.login').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/login' */
+        /* webpackChunkName: 'codeSplit/lasu' */
         /* webpackPrefetch: true */
-        './components/login/admin'
+        './components/login'
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
@@ -98,7 +98,7 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
         .catch((err) => showError(err))
 } else if (window.location.pathname === '/member/ProfilePage') {
-     qSel('.profilePageNav').style.display ="none" // navbar mgt
+    qSel('.profilePageNav').style.display = "none" // navbar mgt
 
     import (
         /* webpackChunkName: 'codeSplit/profilePage' */
@@ -109,9 +109,9 @@ if (window.location.pathname === '/register') {
         .catch((err) => showError(err))
 
 } else if (window.location.pathname === '/login/changePW') {
-    qSel('.login').style.display ="none" // navbar mgt
-    qSel('.signUp').style.display ="none" // navbar mgt
-    // qSel('#loader').style.display ="none" // loader
+    qSel('.login').style.display = "none" // navbar mgt
+    qSel('.signUp').style.display = "none" // navbar mgt
+        // qSel('#loader').style.display ="none" // loader
     import (
         /* webpackChunkName: 'codeSplit/changePW' */
         /* webpackPrefetch: true */
@@ -137,11 +137,11 @@ if (window.location.pathname === '/register') {
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
-}else if (window.location.pathname === '/register/nextStep') {
-      qSel('.login').style.display ="none" // navbar mgt
-    qSel('.signUp').style.display ="none" // navbar mgt
-    
-}else if (window.location.pathname === '/accountSetting') {
+} else if (window.location.pathname === '/register/nextStep') {
+    qSel('.login').style.display = "none" // navbar mgt
+    qSel('.signUp').style.display = "none" // navbar mgt
+
+} else if (window.location.pathname === '/accountSetting') {
 
     import (
         /* webpackChunkName: 'codeSplit/accountSetting' */
@@ -151,8 +151,8 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
         .catch((err) => showError(err))
 } else if (window.location.pathname === '/organogram') {
-    qSel('.familyTreeNav').style.display ="none" // navbar mgt
-  
+    qSel('.familyTreeNav').style.display = "none" // navbar mgt
+
 
     import (
         /* webpackChunkName: 'codeSplit/organogram' */
@@ -161,10 +161,10 @@ if (window.location.pathname === '/register') {
     )
     .then((module) => module.default)
         .catch((err) => showError(err))
-}else if (window.location.pathname === '/allMembers/getProfile') {
-    qSel('.familyTreeNav').style.display ="none" // navbar mgt
-    qSel('.notification_count').style.display ="none" // navbar mgt
-  
+} else if (window.location.pathname === '/allMembers/getProfile') {
+    qSel('.familyTreeNav').style.display = "none" // navbar mgt
+    qSel('.notification_count').style.display = "none" // navbar mgt
+
 
     // import (
     //     /* webpackChunkName: 'codeSplit/getProfile' */

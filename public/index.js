@@ -98,28 +98,27 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // to make the bulma navbar menu visible on mobile
-document.addEventListener('DOMContentLoaded', function () {
-  try {
-    var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-    // Add a click event on each of them
-    $navbarBurgers.forEach(function (el) {
-      el.addEventListener('click', function () {
-        // Get the target from the "data-target" attribute
-        var target = el.dataset.target;
-        var $target = document.getElementById(target);
+try {
+  var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
-        // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
-        el.classList.toggle('is-active');
-        $target.classList.toggle('is-active');
-      });
+  // Add a click event on each of them
+  $navbarBurgers.forEach(function (el) {
+    el.addEventListener('click', function () {
+      // Get the target from the "data-target" attribute
+      var target = el.dataset.target;
+      var $target = document.getElementById(target);
+
+      // Toggle the "is-active" class on both the "navbar-burger" and the "navbar-menu"
+      el.classList.toggle('is-active');
+      $target.classList.toggle('is-active');
     });
-  } catch (error) {
-    (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-  }
+  });
+} catch (error) {
+  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+}
 
-  // Get all "navbar-burger" elements
-});
+// Get all "navbar-burger" elements
 
 if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
@@ -140,7 +139,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/login */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  Promise.all(/*! import() | codeSplit/login */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -148,7 +147,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/lasu') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/login */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/admin */ "./resources/asset/js/components/login/admin.js")).then(function (module) {
+  Promise.all(/*! import() | codeSplit/lasu */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -248,7 +247,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
 /******/ 	__webpack_require__.O(0, ["/index"], () => {
-/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/login","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW","codeSplit/img","codeSplit/familyCode","codeSplit/accountSetting","codeSplit/organogram"].map(__webpack_require__.E);
+/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/lasu","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW","codeSplit/img","codeSplit/familyCode","codeSplit/accountSetting","codeSplit/organogram"].map(__webpack_require__.E);
 /******/ 	}, 5);
 /******/ })();
 /******/ 

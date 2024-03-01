@@ -11,19 +11,10 @@ if (!session_start()) {
     ]);
 }
 
-use Tracy\Debugger;  // https://packagist.org/packages/tracy/tracy
 
 use App\classes\ErrorHandler;
 
 require_once __DIR__ . "/_env.php";
-
-Debugger::enable();
-Debugger::$strictMode = true;
-Debugger::$logDirectory = __DIR__ . '/../../bootstrap/log';
-
-Debugger::$email = 'waledevtest@gmail.com';
-
-// Debugger::enable(Debugger::Development);
 
 
 

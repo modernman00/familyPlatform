@@ -13,7 +13,8 @@ const formInput = document.querySelectorAll('.loginNow');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-const process = () => {
+
+(() => {
     //clear error from the form
     formData.clearError()
         // set the maxlength, check the length of the value, raise error
@@ -21,29 +22,36 @@ const process = () => {
         Login.maxLength.id,
         Login.maxLength.max
     );
-}
-
-process()
+})();
 
 const LoginSubmission = (e) => {
     try {
         e.preventDefault();
-        id('loginNow_notification').classList.remove('is-danger') // remove the danger class from the notification
-        id('error').innerHTML = "" // empty the error element
-        qSel(".notification").style.display = "none";
-        // if (id('checkbox').checked) {
-        id("setLoader").focus(); // focus on the loader element
+
+        formData.error = [];
+
         formData.emailVal() // sanitise email
-        formData.massValidate(); // validate and sanitise data
+
+        formData.massValidate();
+
         if (formData.error.length == 0) {
-            // display the success information for 10sec
-            id('setLoader').style.display = "block" // unblock the div block at the global.js
-            id('loader').classList.add('loader') // start the loader element
-                // localStorage.setItem('redirect', '/member/ProfilePage')
+            const loginNotification = id('loginNow_notification');
+
+            if (loginNotification.classList.contains('is-danger')) {
+                loginNotification.classList.remove('is-danger');
+            }
+
+            id('setLoader').style.display = "block"
+
+            localStorage.setItem('redirect', '/member/ProfilePage')
+                // Get the login URL from sessionStorage
+            const loginURL = sessionStorage.getItem('loginURL1');
+
             postFormData("/lasu", "loginNow", "/admin/reviewApps")
+
         } else {
             alert('The form cannot be submitted. Please check the errors')
-            process()
+
         }
         // } 
         // else {

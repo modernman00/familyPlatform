@@ -29,6 +29,18 @@ function dateDifference($date1, $date2): string
 }
 
 /**
+ * The DateInterval represents the differences between two dates in the year, month, day, hour, etc. To format the difference, you use the DateInterval‘s format. For example: 31 years, 6 months, 14 days
+ */
+
+function dateDiff($createDate1, $createDate2): string 
+{   
+    $dob = new DateTime($createDate1);
+    $to_date = new DateTime($createDate2);
+
+    return   $to_date->diff($dob)->format('%Y years, %m months, %d days');
+}
+
+/**
  * 
  * @param mixed $date1 
  * @param mixed $date2 
@@ -46,4 +58,11 @@ function dateFormat($date): string
 {
     $stringDate = strtotime($date);
     return date('l jS \of F Y', $stringDate);
+}
+
+
+function dateToString($date) : string 
+{
+    $datetime = DateTime::createFromFormat('d/m/Y', $date);
+    return $datetime->format('F jS, Y');
 }

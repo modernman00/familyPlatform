@@ -5,7 +5,7 @@ namespace App\controller;
 use App\classes\Update;
 
 class Index
-{
+{   
     public function index(): void
     {
         view('index');
