@@ -29,8 +29,8 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
-                // console.log(post)
-                // rid it off the submit and token
+                    // console.log(post)
+                    // rid it off the submit and token
                 if (post.name == 'submit' ||
                     post.name == 'button' ||
                     post.name == 'token' ||
@@ -95,30 +95,38 @@ export default class FormHelper {
             }
         };
 
-        this.data.forEach(el => {
 
+        this.data.forEach(el => {
             for (let post of el) {
+
+
 
                 const { id, name, value } = post;
 
                 // Skip certain input types
-                if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+                if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
                     continue;
                 }
-                // Add change event listener to clear error message
-                this.id(id).addEventListener('change', () => {
-                    clearErrorForElement(name);
-                });
-                // Add keyup event listener for non-select inputs
-                if (value !== 'select') {
-                    this.id(id).addEventListener('keyup', () => {
-                        clearErrorForElement(name);
+
+                const the_id = this.id(id);
+
+
+                if (the_id) {
+                    // Add keyup event listener to clear errors for non-select inputs
+                    the_id.addEventListener('keyup', () => {
+                        if (value !== 'select') {
+                            clearErrorForElement(name);
+                        }
                     });
                 } else {
-                    this.id(id).addEventListener('keyup', () => {
-                        clearErrorForElement(name);
-                    });
+                    console.error(`Element with ID '${id}' with post name '${post.name}' not found.`);
                 }
+
+                // Add change event listener to clear error message
+                the_id.addEventListener('change', () => {
+                    clearErrorForElement(name);
+                });
+
             }
         })
     }
@@ -145,31 +153,30 @@ export default class FormHelper {
 
     realTimeCheckLen(input, maxi) {
         try {
-
             for (let i = 0; i < input.length; i++) {
                 const theData = this.id(`${input[i]}_id`);
-                if (theData == "") throw new Error("empty dataInput");
+                if (theData === null || theData === undefined || theData === "") {
+                    throw new Error(`Element with ID '${input[i]}_id' not found or is empty`);
+                }
                 const max = maxi[i];
                 const error = this.id(`${input[i]}_error`);
-                if (theData)
-                    theData.maxLength = parseInt(max + 1);
+                theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
                 theData.addEventListener('keyup', () => {
-                    error.innerHTML = (theData.value.length > max) ? `You have reach the maximum limit` : "";
-                    this.id(`${input[i]}_help`).style.color = 'red'
-                    this.id(`${input[i]}_help`).style.fontSize = '10px'
-                    error.style.color = 'red'
-
+                    error.innerHTML = (theData.value.length > max) ? `You have reached the maximum limit` : "";
+                    const help = this.id(`${input[i]}_help`);
+                    help.style.color = 'red';
+                    help.style.fontSize = '10px';
+                    error.style.color = 'red';
                     setTimeout(() => {
-                        this.id(`${input[i]}_help`).style.display = 'none'
+                        help.style.display = 'none';
                     }, 5000);
-                })
-
+                });
             }
-
         } catch (error) {
-            console.log(error.message)
+            console.error(error.message);
         }
     }
+
 
     /**
      * the id for the password error should be password_help
@@ -178,19 +185,19 @@ export default class FormHelper {
      */
 
     matchInput(first, second) {
-        let error, firstInput, secondInput
-        error = this.id(`${second}_error`)
-        firstInput = this.id(first + '_id')
-        secondInput = this.id(second + '_id')
-        secondInput.addEventListener('keyup', () => {
-            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
-        })
-    }
-    /**
-     *
-     * @param {the id of the input you want to inject to/ this is an array} idArray
-     * @param {*the comment or questions you want o inject} html
-     */
+            let error, firstInput, secondInput
+            error = this.id(`${second}_error`)
+            firstInput = this.id(first + '_id')
+            secondInput = this.id(second + '_id')
+            secondInput.addEventListener('keyup', () => {
+                error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
+            })
+        }
+        /**
+         *
+         * @param {the id of the input you want to inject to/ this is an array} idArray
+         * @param {*the comment or questions you want o inject} html
+         */
 
     injectData(idArray, html) {
         let idData;
@@ -234,7 +241,7 @@ export default class FormHelper {
                 return;
             } else {
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function () {
+                xmlhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         output.innerHTML = this.responseText;
                     }

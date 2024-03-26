@@ -75,15 +75,16 @@ na
 <br><br><br><br>
 
 
-<h2 class="myFamilyTree"> {{ $data['firstName'] }} {{ $data['lastName'] }}'s  family Tree</h2>
+<h2 class="myFamilyTree"> {{isset($data['firstName']) ?  $data['firstName'] : "" }} {{ isset($data['lastName'])? $data['lastName'] : "" }}'s  family Tree</h2>
+
 <p class="organogram_subtitle"> This family tree represents every member of the family who share the same father and mother, symbolising the strong bond and connection within the immediate family. In future updates, we will expand the tree to include other family members who are linked solely through either the mother's or father's side, further encompassing the broader family network. </p>
 <hr>
 
 <div class="tree">
     <ul>
         <li>
-            <a href="#"><b>Father: </b>{{ $data['fatherName'] }}<br></a>
-            <a href="#"><b>Mother: </b>{{ $data['motherName'] }}</a>
+              <a href="#"><b>Father: </b>{{ isset($data['fatherName'])? $data['fatherName'] : "" }}<br></a>
+            <a href="#"><b>Mother: </b>{{ isset($data['motherName'])? $data['motherName'] : "" }}</a>
             {{--  THE CHILDREN AND GRANDKIDS  --}}
             <ul>
                 <li>
@@ -104,9 +105,9 @@ na
                     @endisset
 
                     {{--  first and last name  --}}
-                    <a href="#">
-                        {{ $data['firstName'] }} 
-                        {{ $data['lastName'] }}
+                     <a href="#">
+                        {{ isset($data['firstName']) ?  $data['firstName'] : ""  }} 
+                        {{ isset($data['lastName']) ?  $data['lastName'] : "" }}
                     </a>
 
                     {{--  check if there are kids  --}}
@@ -133,7 +134,7 @@ na
 
                             @isset($siblingKid)
                              @isset($siblingKid['sibling_name'])
-                                @if($siblingKid['sibling_name']) == $siblings['sibling_name'])
+                                @if($siblingKid['sibling_name'] == $siblings['sibling_name'])
 
                                     <ul>
                                     @isset ($siblingKid['kidCount'])

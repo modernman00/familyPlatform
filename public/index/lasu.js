@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/admin"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["lasu"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
 /*!*****************************************************!*\
@@ -128,23 +128,25 @@ var FormHelper = /*#__PURE__*/function () {
               value = post.value;
 
             // Skip certain input types
-            if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
               return 1; // continue
             }
-            // Add change event listener to clear error message
-            _this2.id(id).addEventListener('change', function () {
-              clearErrorForElement(name);
-            });
-            // Add keyup event listener for non-select inputs
-            if (value !== 'select') {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
+            var the_id = _this2.id(id);
+            if (the_id) {
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
               });
             } else {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
-              });
+              console.error("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
             }
+
+            // Add change event listener to clear error message
+            the_id.addEventListener('change', function () {
+              clearErrorForElement(name);
+            });
           };
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
             if (_loop()) continue;
@@ -190,17 +192,20 @@ var FormHelper = /*#__PURE__*/function () {
       try {
         var _loop2 = function _loop2(i) {
           var theData = _this3.id("".concat(input[i], "_id"));
-          if (theData == "") throw new Error("empty dataInput");
+          if (theData === null || theData === undefined || theData === "") {
+            throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+          }
           var max = maxi[i];
           var error = _this3.id("".concat(input[i], "_error"));
-          if (theData) theData.maxLength = parseInt(max + 1);
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
           theData.addEventListener('keyup', function () {
-            error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
-            _this3.id("".concat(input[i], "_help")).style.color = 'red';
-            _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+            var help = _this3.id("".concat(input[i], "_help"));
+            help.style.color = 'red';
+            help.style.fontSize = '10px';
             error.style.color = 'red';
             setTimeout(function () {
-              _this3.id("".concat(input[i], "_help")).style.display = 'none';
+              help.style.display = 'none';
             }, 5000);
           });
         };
@@ -208,7 +213,7 @@ var FormHelper = /*#__PURE__*/function () {
           _loop2(i);
         }
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
       }
     }
 
@@ -341,8 +346,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
+    id: ['firstName', 'lastName', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
+    max: [15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
   },
   password: {
     pwd: 'password',
@@ -564,7 +569,12 @@ var postFormData = /*#__PURE__*/function () {
       idSetFromHttp,
       famCodeSetFromHttp,
       dbHttpResult,
+      _ref2,
+      _error$response$data$,
+      _error$response,
+      _error$message,
       errorClass,
+      errorMessage,
       _args = arguments;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
@@ -591,15 +601,35 @@ var postFormData = /*#__PURE__*/function () {
           idSetFromHttp = null;
           famCodeSetFromHttp = null;
           dbHttpResult = null;
-          if (_typeof(response.data.message) === 'object') {
-            idSetFromHttp = response.data.message.id;
-            famCodeSetFromHttp = response.data.message.famCode;
-            dbHttpResult = response.data.message.outcome;
-          } else {
-            dbHttpResult = response.data.message;
+          if (!(_typeof(response.data.message) === 'object')) {
+            _context.next = 27;
+            break;
           }
-          sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
-          sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
+          idSetFromHttp = response.data.message.id;
+          famCodeSetFromHttp = response.data.message.famCode;
+          dbHttpResult = response.data.message.outcome;
+
+          // check if idSetFromHttp is null, then throw error
+          if (idSetFromHttp) {
+            _context.next = 23;
+            break;
+          }
+          throw new Error('idSetFromHttp is null');
+        case 23:
+          if (famCodeSetFromHttp) {
+            _context.next = 25;
+            break;
+          }
+          throw new Error('famCodeSetFromHttp is null');
+        case 25:
+          _context.next = 28;
+          break;
+        case 27:
+          dbHttpResult = response.data.message;
+        case 28:
+          // Set sessionStorage items if not already set
+          if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+          if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
           processFormDataAction(successClass, dbHttpResult, notificationId);
           if (redirect) {
             setTimeout(function () {
@@ -608,23 +638,19 @@ var postFormData = /*#__PURE__*/function () {
           }
 
           // formData.clearHtml();
-          _context.next = 28;
+          _context.next = 39;
           break;
-        case 24:
-          _context.prev = 24;
+        case 34:
+          _context.prev = 34;
           _context.t0 = _context["catch"](9);
-          errorClass = getNotificationClassByCSS("bulma", 'red');
-          processFormDataAction(errorClass, _context.t0.response.data.message, notificationId);
-
-          // Handle specific error cases
-          // if (error.response.data.message === "We do not recognise what you are doing") {
-          //   window.location.assign('/login');
-          // }
-        case 28:
+          errorClass = getNotificationClassByCSS(css, 'red');
+          errorMessage = (_ref2 = (_error$response$data$ = _context.t0 === null || _context.t0 === void 0 || (_error$response = _context.t0.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) !== null && _error$response$data$ !== void 0 ? _error$response$data$ : _context.t0 === null || _context.t0 === void 0 || (_error$message = _context.t0.message) === null || _error$message === void 0 ? void 0 : _error$message.message) !== null && _ref2 !== void 0 ? _ref2 : _context.t0 === null || _context.t0 === void 0 ? void 0 : _context.t0.message; // Process the form data for error
+          processFormDataAction(errorClass, errorMessage, notificationId);
+        case 39:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 24]]);
+    }, _callee, null, [[9, 34]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);
@@ -637,10 +663,19 @@ var postFormData = /*#__PURE__*/function () {
  * @param {string} message - The notification message.
  */
 var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
-  formNotificationId.style.display = 'block';
-  formNotificationId.classList.add(cssClass);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = message;
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
+  // log(formNotificationId)
+  // const notificationElement = id(formNotificationId);
+  if (formNotificationId) {
+    formNotificationId.style.display = 'block';
+    formNotificationId.classList.add(cssClass);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').scrollIntoView({
+      behavior: 'smooth'
+    });
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error').innerHTML = message;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
+  } else {
+    throw new Error('NOTIFICATION NOT FOUND');
+  }
 };
 
 /**
@@ -655,8 +690,10 @@ var getNotificationClassByCSS = function getNotificationClassByCSS(css, status) 
       return status === 'green' ? 'w3-green' : 'w3-red';
     case 'bulma':
       return status === 'green' ? 'is-success' : 'is-danger';
+    case 'bootstrap':
+      return status === 'green' ? 'bg-success' : 'bg-danger';
     default:
-      return status === 'green' ? 'is-success' : 'is-danger';
+      return status === 'green' ? 'bg-success' : 'bg-danger';
   }
 };
 
@@ -673,7 +710,7 @@ axiosTest()
  */
 
 var getApiData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(URL) {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(URL) {
     var token,
       config,
       fetch,
@@ -707,11 +744,11 @@ var getApiData = /*#__PURE__*/function () {
     }, _callee2, null, [[1, 9]]);
   }));
   return function getApiData(_x3) {
-    return _ref2.apply(this, arguments);
+    return _ref3.apply(this, arguments);
   };
 }();
 var getMultipleApiData = /*#__PURE__*/function () {
-  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(url1, url2) {
+  var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(url1, url2) {
     var token,
       config,
       fetch,
@@ -745,7 +782,7 @@ var getMultipleApiData = /*#__PURE__*/function () {
     }, _callee3, null, [[1, 9]]);
   }));
   return function getMultipleApiData(_x4, _x5) {
-    return _ref3.apply(this, arguments);
+    return _ref4.apply(this, arguments);
   };
 }();
 
@@ -895,7 +932,7 @@ var LoginSubmission = function LoginSubmission(e) {
       var redirect = loginURL === "/lasu" ? "/admin/reviewApps" : "/login/code";
 
       // Submit the form data
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)(loginURL, "loginNow", redirect);
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)(loginURL, "loginNow", redirect, 'bulma');
     } else {
       // Display an alert for form errors
       alert('The form cannot be submitted. Please check the errors');
@@ -905,7 +942,7 @@ var LoginSubmission = function LoginSubmission(e) {
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
   }
 };
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', LoginSubmission);
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('button').addEventListener('click', LoginSubmission);
 (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("showPassword_id").addEventListener('click', function () {
   return (0,_helper_security__WEBPACK_IMPORTED_MODULE_4__.showPassword)('password_id');
 });

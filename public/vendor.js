@@ -1,4 +1,4 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/vendor"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/public/vendor"],{
 
 /***/ "./node_modules/autocompleter/autocomplete.js":
 /*!****************************************************!*\
@@ -2453,6 +2453,56 @@ module.exports = {
   trim: trim,
   stripBOM: stripBOM
 };
+
+
+/***/ }),
+
+/***/ "./node_modules/is-retry-allowed/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/is-retry-allowed/index.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+const denyList = new Set([
+	'ENOTFOUND',
+	'ENETUNREACH',
+
+	// SSL errors from https://github.com/nodejs/node/blob/fc8e3e2cdc521978351de257030db0076d79e0ab/src/crypto/crypto_common.cc#L301-L328
+	'UNABLE_TO_GET_ISSUER_CERT',
+	'UNABLE_TO_GET_CRL',
+	'UNABLE_TO_DECRYPT_CERT_SIGNATURE',
+	'UNABLE_TO_DECRYPT_CRL_SIGNATURE',
+	'UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY',
+	'CERT_SIGNATURE_FAILURE',
+	'CRL_SIGNATURE_FAILURE',
+	'CERT_NOT_YET_VALID',
+	'CERT_HAS_EXPIRED',
+	'CRL_NOT_YET_VALID',
+	'CRL_HAS_EXPIRED',
+	'ERROR_IN_CERT_NOT_BEFORE_FIELD',
+	'ERROR_IN_CERT_NOT_AFTER_FIELD',
+	'ERROR_IN_CRL_LAST_UPDATE_FIELD',
+	'ERROR_IN_CRL_NEXT_UPDATE_FIELD',
+	'OUT_OF_MEM',
+	'DEPTH_ZERO_SELF_SIGNED_CERT',
+	'SELF_SIGNED_CERT_IN_CHAIN',
+	'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+	'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+	'CERT_CHAIN_TOO_LONG',
+	'CERT_REVOKED',
+	'INVALID_CA',
+	'PATH_LENGTH_EXCEEDED',
+	'INVALID_PURPOSE',
+	'CERT_UNTRUSTED',
+	'CERT_REJECTED',
+	'HOSTNAME_MISMATCH'
+]);
+
+// TODO: Use `error?.code` when targeting Node.js 14
+module.exports = error => !denyList.has(error && error.code);
 
 
 /***/ }),
@@ -8047,6 +8097,320 @@ function getTimerId(node) {
     return parseInt(node.getAttribute(ATTR_TIMEAGO_TID));
 }
 //# sourceMappingURL=dom.js.map
+
+/***/ }),
+
+/***/ "./node_modules/axios-retry/lib/esm/index.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios-retry/lib/esm/index.js ***!
+  \***************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ axiosRetry),
+/* harmony export */   exponentialDelay: () => (/* binding */ exponentialDelay),
+/* harmony export */   isIdempotentRequestError: () => (/* binding */ isIdempotentRequestError),
+/* harmony export */   isNetworkError: () => (/* binding */ isNetworkError),
+/* harmony export */   isNetworkOrIdempotentRequestError: () => (/* binding */ isNetworkOrIdempotentRequestError),
+/* harmony export */   isRetryableError: () => (/* binding */ isRetryableError),
+/* harmony export */   isSafeRequestError: () => (/* binding */ isSafeRequestError),
+/* harmony export */   namespace: () => (/* binding */ namespace)
+/* harmony export */ });
+/* harmony import */ var is_retry_allowed__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! is-retry-allowed */ "./node_modules/is-retry-allowed/index.js");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+var namespace = 'axios-retry';
+/**
+ * @param  {Error}  error
+ * @return {boolean}
+ */
+
+function isNetworkError(error) {
+  return !error.response && Boolean(error.code) && // Prevents retrying cancelled requests
+  error.code !== 'ECONNABORTED' && // Prevents retrying timed out requests
+  is_retry_allowed__WEBPACK_IMPORTED_MODULE_0__(error); // Prevents retrying unsafe errors
+}
+var SAFE_HTTP_METHODS = ['get', 'head', 'options'];
+var IDEMPOTENT_HTTP_METHODS = SAFE_HTTP_METHODS.concat(['put', 'delete']);
+/**
+ * @param  {Error}  error
+ * @return {boolean}
+ */
+
+function isRetryableError(error) {
+  return error.code !== 'ECONNABORTED' && (!error.response || error.response.status >= 500 && error.response.status <= 599);
+}
+/**
+ * @param  {Error}  error
+ * @return {boolean}
+ */
+
+function isSafeRequestError(error) {
+  if (!error.config) {
+    // Cannot determine if the request can be retried
+    return false;
+  }
+
+  return isRetryableError(error) && SAFE_HTTP_METHODS.indexOf(error.config.method) !== -1;
+}
+/**
+ * @param  {Error}  error
+ * @return {boolean}
+ */
+
+function isIdempotentRequestError(error) {
+  if (!error.config) {
+    // Cannot determine if the request can be retried
+    return false;
+  }
+
+  return isRetryableError(error) && IDEMPOTENT_HTTP_METHODS.indexOf(error.config.method) !== -1;
+}
+/**
+ * @param  {Error}  error
+ * @return {boolean}
+ */
+
+function isNetworkOrIdempotentRequestError(error) {
+  return isNetworkError(error) || isIdempotentRequestError(error);
+}
+/**
+ * @return {number} - delay in milliseconds, always 0
+ */
+
+function noDelay() {
+  return 0;
+}
+/**
+ * Set delayFactor 1000 for an exponential delay to occur on the order
+ * of seconds
+ * @param  {number} [retryNumber=0]
+ * @param  {Error}  error - unused; for existing API of retryDelay callback
+ * @param  {number} [delayFactor=100] milliseconds
+ * @return {number} - delay in milliseconds
+ */
+
+
+function exponentialDelay() {
+  var retryNumber = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var error = arguments.length > 1 ? arguments[1] : undefined;
+  var delayFactor = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
+  var delay = Math.pow(2, retryNumber) * delayFactor;
+  var randomSum = delay * 0.2 * Math.random(); // 0-20% of the delay
+
+  return delay + randomSum;
+}
+/**
+ * Initializes and returns the retry state for the given request/config
+ * @param  {AxiosRequestConfig} config
+ * @return {Object}
+ */
+
+function getCurrentState(config) {
+  var currentState = config[namespace] || {};
+  currentState.retryCount = currentState.retryCount || 0;
+  config[namespace] = currentState;
+  return currentState;
+}
+/**
+ * Returns the axios-retry options for the current request
+ * @param  {AxiosRequestConfig} config
+ * @param  {AxiosRetryConfig} defaultOptions
+ * @return {AxiosRetryConfig}
+ */
+
+
+function getRequestOptions(config, defaultOptions) {
+  return _objectSpread(_objectSpread({}, defaultOptions), config[namespace]);
+}
+/**
+ * @param  {Axios} axios
+ * @param  {AxiosRequestConfig} config
+ */
+
+
+function fixConfig(axios, config) {
+  if (axios.defaults.agent === config.agent) {
+    delete config.agent;
+  }
+
+  if (axios.defaults.httpAgent === config.httpAgent) {
+    delete config.httpAgent;
+  }
+
+  if (axios.defaults.httpsAgent === config.httpsAgent) {
+    delete config.httpsAgent;
+  }
+}
+/**
+ * Checks retryCondition if request can be retried. Handles it's retruning value or Promise.
+ * @param  {number} retries
+ * @param  {Function} retryCondition
+ * @param  {Object} currentState
+ * @param  {Error} error
+ * @return {boolean}
+ */
+
+
+function shouldRetry(_x, _x2, _x3, _x4) {
+  return _shouldRetry.apply(this, arguments);
+}
+/**
+ * Adds response interceptors to an axios instance to retry requests failed due to network issues
+ *
+ * @example
+ *
+ * import axios from 'axios';
+ *
+ * axiosRetry(axios, { retries: 3 });
+ *
+ * axios.get('http://example.com/test') // The first request fails and the second returns 'ok'
+ *   .then(result => {
+ *     result.data; // 'ok'
+ *   });
+ *
+ * // Exponential back-off retry delay between requests
+ * axiosRetry(axios, { retryDelay : axiosRetry.exponentialDelay});
+ *
+ * // Custom retry delay
+ * axiosRetry(axios, { retryDelay : (retryCount) => {
+ *   return retryCount * 1000;
+ * }});
+ *
+ * // Also works with custom axios instances
+ * const client = axios.create({ baseURL: 'http://example.com' });
+ * axiosRetry(client, { retries: 3 });
+ *
+ * client.get('/test') // The first request fails and the second returns 'ok'
+ *   .then(result => {
+ *     result.data; // 'ok'
+ *   });
+ *
+ * // Allows request-specific configuration
+ * client
+ *   .get('/test', {
+ *     'axios-retry': {
+ *       retries: 0
+ *     }
+ *   })
+ *   .catch(error => { // The first request fails
+ *     error !== undefined
+ *   });
+ *
+ * @param {Axios} axios An axios instance (the axios object or one created from axios.create)
+ * @param {Object} [defaultOptions]
+ * @param {number} [defaultOptions.retries=3] Number of retries
+ * @param {boolean} [defaultOptions.shouldResetTimeout=false]
+ *        Defines if the timeout should be reset between retries
+ * @param {Function} [defaultOptions.retryCondition=isNetworkOrIdempotentRequestError]
+ *        A function to determine if the error can be retried
+ * @param {Function} [defaultOptions.retryDelay=noDelay]
+ *        A function to determine the delay between retry requests
+ * @param {Function} [defaultOptions.onRetry=()=>{}]
+ *        A function to get notified when a retry occurs
+ * @return {{ requestInterceptorId: number, responseInterceptorId: number }}
+ *        The ids of the interceptors added to the request and to the response (so they can be ejected at a later time)
+ */
+
+
+function _shouldRetry() {
+  _shouldRetry = _asyncToGenerator(function* (retries, retryCondition, currentState, error) {
+    var shouldRetryOrPromise = currentState.retryCount < retries && retryCondition(error); // This could be a promise
+
+    if (typeof shouldRetryOrPromise === 'object') {
+      try {
+        var shouldRetryPromiseResult = yield shouldRetryOrPromise; // keep return true unless shouldRetryPromiseResult return false for compatibility
+
+        return shouldRetryPromiseResult !== false;
+      } catch (_err) {
+        return false;
+      }
+    }
+
+    return shouldRetryOrPromise;
+  });
+  return _shouldRetry.apply(this, arguments);
+}
+
+function axiosRetry(axios, defaultOptions) {
+  var requestInterceptorId = axios.interceptors.request.use(config => {
+    var currentState = getCurrentState(config);
+    currentState.lastRequestTime = Date.now();
+    return config;
+  });
+  var responseInterceptorId = axios.interceptors.response.use(null, /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator(function* (error) {
+      var {
+        config
+      } = error; // If we have no information to retry the request
+
+      if (!config) {
+        return Promise.reject(error);
+      }
+
+      var {
+        retries = 3,
+        retryCondition = isNetworkOrIdempotentRequestError,
+        retryDelay = noDelay,
+        shouldResetTimeout = false,
+        onRetry = () => {}
+      } = getRequestOptions(config, defaultOptions);
+      var currentState = getCurrentState(config);
+
+      if (yield shouldRetry(retries, retryCondition, currentState, error)) {
+        currentState.retryCount += 1;
+        var delay = retryDelay(currentState.retryCount, error); // Axios fails merging this configuration to the default configuration because it has an issue
+        // with circular structures: https://github.com/mzabriskie/axios/issues/370
+
+        fixConfig(axios, config);
+
+        if (!shouldResetTimeout && config.timeout && currentState.lastRequestTime) {
+          var lastRequestDuration = Date.now() - currentState.lastRequestTime;
+          var timeout = config.timeout - lastRequestDuration - delay;
+
+          if (timeout <= 0) {
+            return Promise.reject(error);
+          }
+
+          config.timeout = timeout;
+        }
+
+        config.transformRequest = [data => data];
+        onRetry(currentState.retryCount, error, config);
+        return new Promise(resolve => setTimeout(() => resolve(axios(config)), delay));
+      }
+
+      return Promise.reject(error);
+    });
+
+    return function (_x5) {
+      return _ref.apply(this, arguments);
+    };
+  }());
+  return {
+    requestInterceptorId,
+    responseInterceptorId
+  };
+} // Compatibility with CommonJS
+
+axiosRetry.isNetworkError = isNetworkError;
+axiosRetry.isSafeRequestError = isSafeRequestError;
+axiosRetry.isIdempotentRequestError = isIdempotentRequestError;
+axiosRetry.isNetworkOrIdempotentRequestError = isNetworkOrIdempotentRequestError;
+axiosRetry.exponentialDelay = exponentialDelay;
+axiosRetry.isRetryableError = isRetryableError;
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 

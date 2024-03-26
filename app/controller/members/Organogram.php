@@ -18,20 +18,18 @@ class Organogram extends SingleCustomerData
 
           //  verify token
 
-            $tokenVerify = new VerifyToken();
-            $result = $tokenVerify->profilePage();
+        $tokenVerify = new VerifyToken();
+        $result = $tokenVerify->profilePage();
         $id =  checkInput($_GET['id']);
-
         $table = ['personal', 'profile_pics', 'otherFamily'];
-
-        $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');
-        
+        $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');       
 
         // get the siblings and their email
         $getSiblings = Select::selectFn2($siblingQuery, [$id]) ?? [];
 
         $kidQuery = Select::formAndMatchQuery('SELECT_ONE', 'kids', 'id');
         $getKids = Select::selectFn2($kidQuery, [$id]) ?? [];
+        
         $siblingKid =[];
 
         $data = $this->getCustomerData($id, $table);  

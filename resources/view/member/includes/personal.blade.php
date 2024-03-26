@@ -8,7 +8,7 @@ input[type="file"] {
 
 .custom-file-upload {
     display: inline-block;
-    padding: 10px 20px;
+    {{--  padding: 10px 20px;  --}}
     background-color: #3498db;
     color: #fff;
     border: none;
@@ -202,9 +202,23 @@ input[type="file"] {
 
 @includeif('member/includes/modalEvent')
 
+{{--  FRIEND REQUESTS  --}}
+
+  <div class="w3-card w3-round w3-white w3-center">
+     @if (count($requestData) > 1)
+     <p><b>Friend Requests</b></p><br>
+     @else
+     <p><b>Friend Request</b></p><br>
+     @endif
+     <div class="w3-container requestFriendClass">
+     </div>
+   </div>
+
 <div class="w3-card w3-round w3-white w3-padding-16 w3-center">
   <p>ADS</p>
 </div>
+
+ 
 
 <script>
   const profile = {

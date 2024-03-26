@@ -41,15 +41,18 @@
   </div>
 
   {{--  LIKE BUTTON  --}}
-  <button type="button" id="likeButton{{ $allData['post_no'] }}" name="{{ $allData['post_no'] }}"
-    class="w3-button w3-tiny w3-green w3-margin-bottom">
+  <button type="submit" id="likeButton{{ $allData['post_no'] }}" name="{{ $allData['post_no'] }}" class="w3-button w3-tiny w3-green w3-margin-bottom">
     <em class="fa fa-thumbs-up"></em>
-     Like <b><span class="likeCounter" id="likeCounter{{ $allData['post_no'] }}">{{ $allData['post_likes'] }}</span></b>
+     Like 
+    <b><span class="likeCounter" id="likeCounter{{ $allData['post_no'] }}">{{ $allData['post_likes'] }}</span></b>
   </button>
 
   {{--  COMMENT BUTTON  --}}
   <button type="button" id="initComment{{ $allData['post_no'] }}"
-    class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom"><em class="fa fa-comment"></em> Comment </button>
+    class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom">
+    <em class="fa fa-comment"></em> 
+    Comment 
+  </button>
 
   {{-- FORM-  PROCESS COMMENT $_POST FORM --}}
 

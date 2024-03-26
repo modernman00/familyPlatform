@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/familyCode"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["familyCode"],{
 
 /***/ "./resources/asset/js/components/register/familyCode.js":
 /*!**************************************************************!*\
@@ -47,7 +47,7 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
 
           // check if the family code has been generated 
           if (!htmlOutput.value) {
-            _context.next = 18;
+            _context.next = 20;
             break;
           }
           if (!(navigator.clipboard && navigator.clipboard.writeText)) {
@@ -70,20 +70,25 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
           selection.removeAllRanges();
         case 16:
           copyIcon.innerHTML = "copied";
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('familyCode_id').value = htmlOutput.value;
-          // location.replace('/register');
-        case 18:
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = htmlOutput.value;
           _context.next = 23;
           break;
         case 20:
-          _context.prev = 20;
+          copyIcon.innerHTML = "copy";
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = "";
+          alert('Please generate the family code first');
+        case 23:
+          _context.next = 28;
+          break;
+        case 25:
+          _context.prev = 25;
           _context.t0 = _context["catch"](1);
           console.error('Unable to copy the HTML output: ', _context.t0);
-        case 23:
+        case 28:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[1, 20]]);
+    }, _callee, null, [[1, 25]]);
   }));
   return function (_x) {
     return _ref.apply(this, arguments);

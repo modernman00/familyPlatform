@@ -2,30 +2,82 @@
     "short_name": "Family Connect",
     "name": "ConnectWithFamily",
     "start_url": "/",
-    "icons": [{
-            "src": "/img/favicon/android-chrome-512x512.png",
-            "sizes": "512x512"
+    "icons": [
+
+        {
+            "src": "/public/pwa/android/android-launchericon-512-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
         },
         {
-            "src": "/img/favicon/android-chrome-192x192.png",
+            "src": "/public/pwa/android/android-launchericon-192-192.png",
             "sizes": "192x192",
-            "purpose": "maskable"
+            "purpose": "maskable",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/android/android-launchericon-144-144.png",
+            "sizes": "144x144",
+            "purpose": "maskable",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/android/android-launchericon-96-96.png",
+            "sizes": "96x96",
+            "purpose": "maskable",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/android/android-launchericon-72-72.png",
+            "sizes": "72x72",
+            "purpose": "maskable",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/android/android-launchericon-48-48.png",
+            "sizes": "48x48",
+            "purpose": "maskable",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/ios/72.png",
+            "sizes": "72x72",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/ios/76.png",
+            "sizes": "76x76",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/ios/256.png",
+            "sizes": "256x256",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/ios/512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "/public/pwa/ios/1024.png",
+            "sizes": "1024x1024",
+            "type": "image/png"
         }
     ],
     "description": "Connect and strengthen bonds with your family through memories and stories. The ultimate social platform for families.",
-    "screenshots": [{
-        "src": "/img/favicon/android-chrome-512x512.png",
-        "sizes": "512x512",
-        "form_factor": "wide",
 
+    "screenshots": [{
+        "src": "/public/pwa/screenshot/2.jpg",
+        "sizes": "1080x1920",
         "type": "image/png",
         "label": "Family Platform"
     }, {
-        "src": "/img/favicon/android-chrome-192x192.png",
-        "sizes": "192x192",
-        "form_factor": "tall",
+        "src": "/public/pwa/screenshot/screenshot2.png",
+        "sizes": "1426x1728",
         "type": "image/png",
-        "label": "Family Platform"
+        "label": "Family Platform",
+        "form_factor": "wide"
     }],
     "display": "standalone",
     "display-override": ["fullscreen"],

@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/index"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/public/index"],{
 
 /***/ "./resources/asset/js/components/global.js":
 /*!*************************************************!*\
@@ -123,7 +123,7 @@ try {
 if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/register */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/ */ "./resources/asset/js/components/register/index.js")).then(function (module) {
+  Promise.all(/*! import() | register */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/ */ "./resources/asset/js/components/register/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -131,7 +131,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/allMembers') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.allMemberNav').style.display = "none"; //allMemberNav
 
-  Promise.all(/*! import() | codeSplit/all_members */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/ */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
+  Promise.all(/*! import() | all_members */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/ */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -139,7 +139,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/login */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  Promise.all(/*! import() | login */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -147,7 +147,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/lasu') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/lasu */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  Promise.all(/*! import() | lasu */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -155,7 +155,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/forgot') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  __webpack_require__.e(/*! import() | codeSplit/forgotPwd */ "codeSplit/forgotPwd").then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
+  Promise.all(/*! import() | forgotPwd */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("forgotPwd")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -163,7 +163,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/code') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  __webpack_require__.e(/*! import() | codeSplit/code */ "codeSplit/code").then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
+  Promise.all(/*! import() | code */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -171,7 +171,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/member/ProfilePage') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.profilePageNav').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/profilePage */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/profilePage")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/ */ "./resources/asset/js/components/profilePage/index.js")).then(function (module) {
+  Promise.all(/*! import() | profilePage */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("profilePage")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/ */ "./resources/asset/js/components/profilePage/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -180,20 +180,20 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
   // qSel('#loader').style.display ="none" // loader
-  Promise.all(/*! import() | codeSplit/changePW */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
+  Promise.all(/*! import() | changePW */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/profilepage/img') {
   // qSel('.login').style.display ="none" // navbar mgt
-  Promise.all(/*! import() | codeSplit/img */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/img")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/imgViewer */ "./resources/asset/js/components/profilePage/imgViewer.js")).then(function (module) {
+  Promise.all(/*! import() | img */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("img")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/imgViewer */ "./resources/asset/js/components/profilePage/imgViewer.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/createFamilyCode') {
-  __webpack_require__.e(/*! import() | codeSplit/familyCode */ "codeSplit/familyCode").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | familyCode */ "familyCode").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -202,7 +202,7 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
 } else if (window.location.pathname === '/accountSetting') {
-  Promise.all(/*! import() | codeSplit/accountSetting */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
+  Promise.all(/*! import() | accountSetting */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -210,7 +210,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/organogram') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.familyTreeNav').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | codeSplit/organogram */[__webpack_require__.e("/vendor"), __webpack_require__.e("codeSplit/organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js")).then(function (module) {
+  Promise.all(/*! import() | organogram */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -220,7 +220,7 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.notification_count').style.display = "none"; // navbar mgt
 
   // import (
-  //     /* webpackChunkName: 'codeSplit/getProfile' */
+  //     /* webpackChunkName: 'getProfile' */
   //     /* webpackPrefetch: true */
   //     './components/familyTree/index.js'
   // )
@@ -246,8 +246,8 @@ __webpack_require__.r(__webpack_exports__);
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
-/******/ 	__webpack_require__.O(0, ["/index"], () => {
-/******/ 		["/vendor","codeSplit/register","codeSplit/all_members","codeSplit/lasu","codeSplit/forgotPwd","codeSplit/code","codeSplit/profilePage","codeSplit/changePW","codeSplit/img","codeSplit/familyCode","codeSplit/accountSetting","codeSplit/organogram"].map(__webpack_require__.E);
+/******/ 	__webpack_require__.O(0, ["/public/index"], () => {
+/******/ 		["/public/vendor","register","all_members","lasu","forgotPwd","code","profilePage","changePW","img","familyCode","accountSetting","organogram"].map(__webpack_require__.E);
 /******/ 	}, 5);
 /******/ })();
 /******/ 

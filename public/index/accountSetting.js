@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/accountSetting"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["accountSetting"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
 /*!*****************************************************!*\
@@ -128,23 +128,25 @@ var FormHelper = /*#__PURE__*/function () {
               value = post.value;
 
             // Skip certain input types
-            if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
               return 1; // continue
             }
-            // Add change event listener to clear error message
-            _this2.id(id).addEventListener('change', function () {
-              clearErrorForElement(name);
-            });
-            // Add keyup event listener for non-select inputs
-            if (value !== 'select') {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
+            var the_id = _this2.id(id);
+            if (the_id) {
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
               });
             } else {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
-              });
+              console.error("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
             }
+
+            // Add change event listener to clear error message
+            the_id.addEventListener('change', function () {
+              clearErrorForElement(name);
+            });
           };
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
             if (_loop()) continue;
@@ -190,17 +192,20 @@ var FormHelper = /*#__PURE__*/function () {
       try {
         var _loop2 = function _loop2(i) {
           var theData = _this3.id("".concat(input[i], "_id"));
-          if (theData == "") throw new Error("empty dataInput");
+          if (theData === null || theData === undefined || theData === "") {
+            throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+          }
           var max = maxi[i];
           var error = _this3.id("".concat(input[i], "_error"));
-          if (theData) theData.maxLength = parseInt(max + 1);
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
           theData.addEventListener('keyup', function () {
-            error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
-            _this3.id("".concat(input[i], "_help")).style.color = 'red';
-            _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+            var help = _this3.id("".concat(input[i], "_help"));
+            help.style.color = 'red';
+            help.style.fontSize = '10px';
             error.style.color = 'red';
             setTimeout(function () {
-              _this3.id("".concat(input[i], "_help")).style.display = 'none';
+              help.style.display = 'none';
             }, 5000);
           });
         };
@@ -208,7 +213,7 @@ var FormHelper = /*#__PURE__*/function () {
           _loop2(i);
         }
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
       }
     }
 

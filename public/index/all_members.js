@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/all_members"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["all_members"],{
 
 /***/ "./resources/asset/js/components/allMembers/api.js":
 /*!*********************************************************!*\

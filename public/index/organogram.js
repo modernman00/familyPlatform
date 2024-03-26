@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/organogram"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["organogram"],{
 
 /***/ "./resources/asset/js/components/familyTree/index.js":
 /*!***********************************************************!*\

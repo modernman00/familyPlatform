@@ -8,7 +8,7 @@
 
 <div class="styleForm" style="margin-top: 2rem;">
 
-  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo"
+  <img src={{ getenv('APP_LOGO')}} alt="logo" class="mb-4 form__login__logo"
     style="margin-left:43%; margin-bottom:5rem;">
 
   <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow"
@@ -36,7 +36,7 @@
       'type' => 'text',
       'checkbox'=> 'Remember me',
       'token' => 'token',
-      'button' => 'button'
+      'submit' => 'button'
         ];
       } else {
           $formArray = [
@@ -44,7 +44,7 @@
       'password' => 'password',
       'checkbox'=> 'Remember me',
       'token' => 'token',
-      'button' => 'button'
+      'submit' => 'button'
       ];
       }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   
 {{-- head --}}
 @include('layouts.head')
@@ -37,10 +37,25 @@ function myFunction(id) {
 // Used to toggle the menu on smaller screens when clicking on the menu button
 
 </script>
-    <script src="/manifest.js"></script>
-     <script src="/vendor.js"></script>
-      <script src="/index.js"></script>
+   <script type="text/javascript" src="/public/manifest.js" defer></script>
+  <script type="text/javascript" src="/public/vendor.js" defer></script>
+  <script type="text/javascript" src="/public/index.js" defer></script>
+      
+        <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    });
+  }
+</script>
       
 
 </body>
 </html> 
+

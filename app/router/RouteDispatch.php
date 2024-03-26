@@ -23,7 +23,7 @@ class RouteDispatch
      * @var null|string
      */
     protected $method;
-    public function __construct(AltoRouter $router)
+    public function dispatch(AltoRouter $router)
     {
         try {
 

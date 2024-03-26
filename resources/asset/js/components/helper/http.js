@@ -48,7 +48,9 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         if (typeof response.data.message === 'object') {
             idSetFromHttp = response.data.message.id;
+
             famCodeSetFromHttp = response.data.message.famCode;
+
             dbHttpResult = response.data.message.outcome;
 
             // check if idSetFromHttp is null, then throw error
@@ -62,15 +64,18 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
             if (!famCodeSetFromHttp) {
                 throw new Error('famCodeSetFromHttp is null');
             }
-
         } else {
             dbHttpResult = response.data.message;
         }
 
+      // Set sessionStorage items if not already set
+if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
 
 
-        sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
-        sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
+
+       
+        
 
         processFormDataAction(successClass, dbHttpResult, notificationId);
 
@@ -85,16 +90,11 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         const errorClass = getNotificationClassByCSS(css, 'red');
 
-        const errorMessage = error ? .response ? .data ? .message ? ? error ? .message ? .message ? ? error ? .message;
+        const errorMessage = error?.response?.data?.message ?? error?.message?.message ?? error?.message;
 
         // Process the form data for error
         processFormDataAction(errorClass, errorMessage, notificationId);
 
-
-        // Handle specific error cases
-        // if (error.response.data.message === "We do not recognise what you are doing") {
-        //   window.location.assign('/login');
-        // }
     }
 };
 
@@ -104,13 +104,16 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
  * @param {string} message - The notification message.
  */
 const processFormDataAction = (cssClass, message, formNotificationId) => {
-    const notificationElement = id(formNotificationId);
-    if (notificationElement) {
-        notificationElement.style.display = 'block';
-        notificationElement.classList.add(cssClass);
+    // log(formNotificationId)
+    // const notificationElement = id(formNotificationId);
+    if (formNotificationId) {
+        formNotificationId.style.display = 'block';
+        formNotificationId.classList.add(cssClass);
         id('error').scrollIntoView({ behavior: 'smooth' });
         id('error').innerHTML = message;
         id('setLoader').classList.remove('loader');
+    }else{
+        throw new Error('NOTIFICATION NOT FOUND')
     }
 };
 

@@ -4,7 +4,6 @@ import { qSel, showError } from "./components/global"
 
 // to make the bulma navbar menu visible on mobile
 
-
 try {
 
     const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
@@ -30,14 +29,11 @@ try {
 
 // Get all "navbar-burger" elements
 
-
-
-
 if (window.location.pathname === '/register') {
     qSel('.signUp').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/register' */
+        /* webpackChunkName: 'register' */
         /* webpackPrefetch: true */
         './components/register/'
     ).then((module) => module.default).catch((err) => showError(err))
@@ -46,7 +42,7 @@ if (window.location.pathname === '/register') {
     qSel('.allMemberNav').style.display = "none" //allMemberNav
 
     import (
-        /* webpackChunkName: 'codeSplit/all_members' */
+        /* webpackChunkName: 'all_members' */
         /* webpackPrefetch: true */
         './components/allMembers/'
     )
@@ -57,7 +53,7 @@ if (window.location.pathname === '/register') {
     qSel('.login').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/login' */
+        /* webpackChunkName: 'login' */
         /* webpackPrefetch: true */
         './components/login/'
     )
@@ -68,7 +64,7 @@ if (window.location.pathname === '/register') {
     qSel('.login').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/lasu' */
+        /* webpackChunkName: 'lasu' */
         /* webpackPrefetch: true */
         './components/login'
     )
@@ -79,7 +75,7 @@ if (window.location.pathname === '/register') {
     qSel('.signup_login').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/forgotPwd' */
+        /* webpackChunkName: 'forgotPwd' */
         /* webpackPrefetch: true */
         './components/forgotPwd/'
     )
@@ -91,7 +87,7 @@ if (window.location.pathname === '/register') {
     qSel('.signup_login').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/code' */
+        /* webpackChunkName: 'code' */
         /* webpackPrefetch: true */
         './components/generateCode/Code'
     )
@@ -101,7 +97,7 @@ if (window.location.pathname === '/register') {
     qSel('.profilePageNav').style.display = "none" // navbar mgt
 
     import (
-        /* webpackChunkName: 'codeSplit/profilePage' */
+        /* webpackChunkName: 'profilePage' */
         /* webpackPrefetch: true */
         './components/profilePage/'
     )
@@ -113,7 +109,7 @@ if (window.location.pathname === '/register') {
     qSel('.signUp').style.display = "none" // navbar mgt
         // qSel('#loader').style.display ="none" // loader
     import (
-        /* webpackChunkName: 'codeSplit/changePW' */
+        /* webpackChunkName: 'changePW' */
         /* webpackPrefetch: true */
         './components/changePW/'
     )
@@ -122,7 +118,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/profilepage/img') {
     // qSel('.login').style.display ="none" // navbar mgt
     import (
-        /* webpackChunkName: 'codeSplit/img' */
+        /* webpackChunkName: 'img' */
         /* webpackPrefetch: true */
         './components/profilePage/imgViewer'
     )
@@ -131,7 +127,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/createFamilyCode') {
 
     import (
-        /* webpackChunkName: 'codeSplit/familyCode' */
+        /* webpackChunkName: 'familyCode' */
         /* webpackPrefetch: true */
         './components/register/familyCode'
     )
@@ -144,7 +140,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/accountSetting') {
 
     import (
-        /* webpackChunkName: 'codeSplit/accountSetting' */
+        /* webpackChunkName: 'accountSetting' */
         /* webpackPrefetch: true */
         './components/accountSetting'
     )
@@ -155,7 +151,7 @@ if (window.location.pathname === '/register') {
 
 
     import (
-        /* webpackChunkName: 'codeSplit/organogram' */
+        /* webpackChunkName: 'organogram' */
         /* webpackPrefetch: true */
         './components/familyTree/index.js'
     )
@@ -167,7 +163,7 @@ if (window.location.pathname === '/register') {
 
 
     // import (
-    //     /* webpackChunkName: 'codeSplit/getProfile' */
+    //     /* webpackChunkName: 'getProfile' */
     //     /* webpackPrefetch: true */
     //     './components/familyTree/index.js'
     // )

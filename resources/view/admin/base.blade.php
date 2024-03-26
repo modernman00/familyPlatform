@@ -139,7 +139,7 @@
             <div class="content has-text-centered">
 
 
-                <img src={{ getenv("IMG_CONTRACT") }} width="30" height="30"> <br>
+                <img src={{ getenv("IMG_CONTRACT") }} width="30" height="30" alt="LOGO"> <br>
                 <span class="copyright">Copyright &copy; {{ getenv("COPYRIGHT_YEAR") }} </span>
 
             </div>

@@ -3,7 +3,7 @@ const button = id("button");
 
 
 
-button.addEventListener("click", function () {
+button.addEventListener("click", function() {
 
     try {
 
@@ -33,16 +33,16 @@ const copyIcon = id('copyIcon');
 const htmlOutputDiv = id('createFamCode');
 const htmlOutput = id('createCode');
 
-copyIcon.addEventListener('click', async function (e) {
+copyIcon.addEventListener('click', async function(e) {
     copyIcon.innerHTML = "";
 
     try {
-           e.preventDefault();
+        e.preventDefault();
 
         // check if the family code has been generated 
 
         if (htmlOutput.value) {
-           
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(htmlOutput.value);
             } else {
@@ -57,8 +57,13 @@ copyIcon.addEventListener('click', async function (e) {
             }
 
             copyIcon.innerHTML = "copied";
-            id('familyCode_id').value = htmlOutput.value
-            // location.replace('/register');
+            id('famCode_id').value = htmlOutput.value
+
+        } else {
+            copyIcon.innerHTML = "copy";
+            id('famCode_id').value = ""
+            alert('Please generate the family code first')
+
         }
 
 
@@ -66,6 +71,3 @@ copyIcon.addEventListener('click', async function (e) {
         console.error('Unable to copy the HTML output: ', e);
     }
 });
-
-
-

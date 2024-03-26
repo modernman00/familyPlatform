@@ -63,7 +63,7 @@ const LoginSubmission = (e) => {
             const redirect = (loginURL === "/lasu") ? "/admin/reviewApps" : "/login/code";
 
             // Submit the form data
-            postFormData(loginURL, "loginNow", redirect);
+            postFormData(loginURL, "loginNow", redirect, 'bulma');
 
         } else {
             // Display an alert for form errors
@@ -76,6 +76,6 @@ const LoginSubmission = (e) => {
 }
 
 
-id('submit').addEventListener('click', LoginSubmission)
+id('button').addEventListener('click', LoginSubmission)
 
 id("showPassword_id").addEventListener('click', () => showPassword('password_id'))

@@ -127,13 +127,14 @@ class BuildFormBulma extends AlterTable
 
             $var = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $this->entKey[$i]));
             $nameKey = $this->entKey[$i];
+            $value = $value ?? "";
 
             if ($this->entValue[$i] === 'text') {
                 echo <<<HTML
                 <div class="field">
                     <label class="label" id="$nameKey"><b>$var</b></label>
                     <div class="control">
-                        <input type="text" autocomplete="new-$nameKey" class="input" placeholder="PLEASE ENTER YOUR $var" name="$nameKey"  id="{$nameKey}_id" value="$value"  required>
+                        <input type="text" autocomplete="new-$nameKey" class="input" placeholder="PLEASE ENTER YOUR $var" name="$nameKey" value="$value"  id="{$nameKey}_id" required>
                         <p class="help" id="{$nameKey}_help"></p>
                         <p class="help" id="{$nameKey}_error"></p>
                     </div>

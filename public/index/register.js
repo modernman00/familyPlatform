@@ -1,4 +1,4 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["codeSplit/register"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["register"],{
 
 /***/ "./resources/asset/js/components/FormHelper.js":
 /*!*****************************************************!*\
@@ -128,23 +128,25 @@ var FormHelper = /*#__PURE__*/function () {
               value = post.value;
 
             // Skip certain input types
-            if (['submit', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
               return 1; // continue
             }
-            // Add change event listener to clear error message
-            _this2.id(id).addEventListener('change', function () {
-              clearErrorForElement(name);
-            });
-            // Add keyup event listener for non-select inputs
-            if (value !== 'select') {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
+            var the_id = _this2.id(id);
+            if (the_id) {
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
               });
             } else {
-              _this2.id(id).addEventListener('keyup', function () {
-                clearErrorForElement(name);
-              });
+              console.error("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
             }
+
+            // Add change event listener to clear error message
+            the_id.addEventListener('change', function () {
+              clearErrorForElement(name);
+            });
           };
           for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
             if (_loop()) continue;
@@ -190,17 +192,20 @@ var FormHelper = /*#__PURE__*/function () {
       try {
         var _loop2 = function _loop2(i) {
           var theData = _this3.id("".concat(input[i], "_id"));
-          if (theData == "") throw new Error("empty dataInput");
+          if (theData === null || theData === undefined || theData === "") {
+            throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+          }
           var max = maxi[i];
           var error = _this3.id("".concat(input[i], "_error"));
-          if (theData) theData.maxLength = parseInt(max + 1);
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
           theData.addEventListener('keyup', function () {
-            error.innerHTML = theData.value.length > max ? "You have reach the maximum limit" : "";
-            _this3.id("".concat(input[i], "_help")).style.color = 'red';
-            _this3.id("".concat(input[i], "_help")).style.fontSize = '10px';
+            error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+            var help = _this3.id("".concat(input[i], "_help"));
+            help.style.color = 'red';
+            help.style.fontSize = '10px';
             error.style.color = 'red';
             setTimeout(function () {
-              _this3.id("".concat(input[i], "_help")).style.display = 'none';
+              help.style.display = 'none';
             }, 5000);
           });
         };
@@ -208,7 +213,7 @@ var FormHelper = /*#__PURE__*/function () {
           _loop2(i);
         }
       } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
       }
     }
 
@@ -434,8 +439,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var dataToCheckRegister = {
   maxLength: {
-    id: ['firstName', 'lastName', 'alias', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
-    max: [15, 15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
+    id: ['firstName', 'lastName', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
+    max: [15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
   },
   password: {
     pwd: 'password',
@@ -828,7 +833,7 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
 
           // check if the family code has been generated 
           if (!htmlOutput.value) {
-            _context.next = 18;
+            _context.next = 20;
             break;
           }
           if (!(navigator.clipboard && navigator.clipboard.writeText)) {
@@ -851,20 +856,25 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
           selection.removeAllRanges();
         case 16:
           copyIcon.innerHTML = "copied";
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('familyCode_id').value = htmlOutput.value;
-          // location.replace('/register');
-        case 18:
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = htmlOutput.value;
           _context.next = 23;
           break;
         case 20:
-          _context.prev = 20;
+          copyIcon.innerHTML = "copy";
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = "";
+          alert('Please generate the family code first');
+        case 23:
+          _context.next = 28;
+          break;
+        case 25:
+          _context.prev = 25;
           _context.t0 = _context["catch"](1);
           console.error('Unable to copy the HTML output: ', _context.t0);
-        case 23:
+        case 28:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[1, 20]]);
+    }, _callee, null, [[1, 25]]);
   }));
   return function (_x) {
     return _ref.apply(this, arguments);
@@ -1757,16 +1767,35 @@ var showMsg = function showMsg(Id) {
 };
 
 // const href = "<a href='/createFamilyCode' target='_blank'>here</a>"
-var href = "<button class='js-modal-trigger' data-target='modal-familyCode'>here</button>";
+var famCodeButton = "<button type='button' class='js-modal-trigger' data-target='modal-familyCode' id='triggerFamCode'>here</button>";
 showMsg('fatherMobile_help');
 showMsg('motherMobile_help');
 showMsg('motherEmail_help');
 showMsg('fatherEmail_help');
 showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
 showMsg('password_help', 'Must be 8-20 characters long.');
-showMsg("famCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(href));
+showMsg("famCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(famCodeButton));
 
 // const lastName = id('lastName_id').value = "OLAOGUN"
+
+// TRIGGER THE MODAL
+
+// Functions to open and close a modal
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+var trigger = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('triggerFamCode');
+var close = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('modal-close-code');
+var modalClass = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('modal-familyCode');
+trigger.addEventListener('click', function () {
+  openModal(modalClass);
+});
+close.addEventListener('click', function () {
+  closeModal(modalClass);
+});
 
 /***/ })
 

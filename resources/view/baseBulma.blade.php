@@ -42,7 +42,7 @@
 
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
-  <link rel="stylesheet" href="noscript.css" />
+  <link rel="stylesheet" href="/public/noscript.css" />
   </noscript>
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
@@ -259,9 +259,25 @@
     </div>
   </div>
 
-  <script type="text/javascript" src="/manifest.js" defer></script>
-  <script type="text/javascript" src="/vendor.js" defer></script>
-  <script type="text/javascript" src="/index.js" defer></script>
-  
+  <script type="text/javascript" src="/public/manifest.js" defer></script>
+  <script type="text/javascript" src="/public/vendor.js" defer></script>
+  <script type="text/javascript" src="/public/index.js" defer></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((registration) => {
+            console.log('Service Worker registered:', registration);
+          })
+          .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+          });
+      });
+    }
+
+  </script>
+
+
 </body>
 </html>

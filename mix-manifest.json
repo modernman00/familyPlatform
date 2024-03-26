@@ -1,15 +1,17 @@
 {
     "/public/index.js": "/public/index.js",
     "/public/manifest.js": "/public/manifest.js",
-    "/public/index/codeSplit/register.js": "/public/index/codeSplit/register.js",
-    "/public/index/codeSplit/all_members.js": "/public/index/codeSplit/all_members.js",
-    "/public/index/codeSplit/login.js": "/public/index/codeSplit/login.js",
-    "/public/index/codeSplit/forgotPwd.js": "/public/index/codeSplit/forgotPwd.js",
-    "/public/index/codeSplit/code.js": "/public/index/codeSplit/code.js",
-    "/public/index/codeSplit/profilePage.js": "/public/index/codeSplit/profilePage.js",
-    "/public/index/codeSplit/changePW.js": "/public/index/codeSplit/changePW.js",
-    "/public/index/codeSplit/img.js": "/public/index/codeSplit/img.js",
-    "/public/index/codeSplit/familyCode.js": "/public/index/codeSplit/familyCode.js",
-    "/public/vendor.js": "/public/vendor.js",
-    "/public/css/main.css": "/public/css/main.css"
+    "/public/index/register.js": "/public/index/register.js",
+    "/public/index/all_members.js": "/public/index/all_members.js",
+    "/public/index/lasu.js": "/public/index/lasu.js",
+    "/public/index/forgotPwd.js": "/public/index/forgotPwd.js",
+    "/public/index/code.js": "/public/index/code.js",
+    "/public/index/profilePage.js": "/public/index/profilePage.js",
+    "/public/index/changePW.js": "/public/index/changePW.js",
+    "/public/index/img.js": "/public/index/img.js",
+    "/public/index/familyCode.js": "/public/index/familyCode.js",
+    "/public/index/accountSetting.js": "/public/index/accountSetting.js",
+    "/public/index/organogram.js": "/public/index/organogram.js",
+    "/public/style.css": "/public/style.css",
+    "/public/vendor.js": "/public/vendor.js"
 }
