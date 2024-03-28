@@ -6,7 +6,7 @@ namespace App\controller\login;
 
 use App\classes\{
     CheckToken,
-    Select
+    Select, Recaptcha
 };
 
 use \Firebase\JWT\JWT;
@@ -58,9 +58,9 @@ class Login extends Select
         header("Access-Control-Max-Age: 3600");
         header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+        Recaptcha::verifyCaptcha('login');
+
         try {
-
-
             //2. create min and max limit
             $minMaxData = [
                 'data' => ['email', 'password'],
@@ -193,4 +193,25 @@ class Login extends Select
         header("Location: $url");
         die();
     }
+
+//  public static function reCaptcha()
+//  {
+//         // Verify reCAPTCHA response
+//     $recaptcha_secret = getenv('SECRET_RECAPTCHA_KEY');
+//     $recaptcha_response = $_POST['g-recaptcha-response'];
+//     $recaptcha_url = 'https://www.google.com/recaptcha/api/siteverify';
+
+//     $recaptcha = file_get_contents($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
+
+//     $recaptcha = json_decode($recaptcha);
+
+//     if ( $recaptcha->success && $recaptcha->score >= 0.5 &&$recaptcha->action == 'login') {
+//             return true;
+//     } else {
+//            // reCAPTCHA verification failed
+//         msgException(500, "reCAPTCHA verification failed. Please try again.");
+//     }
+
+//  }
+
 }

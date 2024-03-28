@@ -8,7 +8,8 @@ use App\classes\{
     SubmitForm,
     Select,
     Db,
-    CheckToken
+    CheckToken,
+    Recaptcha
 };
 use App\model\RegisterTableData;
 
@@ -17,7 +18,6 @@ use Exception;
 class Register extends Db
 {
 
-
     public function index(): void
     {
         try {
@@ -25,15 +25,12 @@ class Register extends Db
             $_SESSION['register'] = true;
 
             // to retain values in the input 
-            if(isset($_POST['submit'])){
-                $registerPostData = $_POST; 
-                  view('registration/register', ['registerPostData' => $registerPostData ]);
-            } else{
+            if (isset($_POST['submit'])) {
+                $registerPostData = $_POST;
+                view('registration/register', ['registerPostData' => $registerPostData]);
+            } else {
                 view('registration/register');
             }
-
-
-          
         } catch (\Throwable $e) {
 
             showError($e);
@@ -73,19 +70,20 @@ class Register extends Db
      */
     public function processForm()
     {
-        try {
-            // required headers
-            header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
-            header("Content-Type: application/json; charset=UTF-8");
-            header("Access-Control-Allow-Methods: POST");
-            header("Access-Control-Max-Age: 3600");
-            // header("Access-Control-Allow-Headers: Content-Type, 
-            // Access-Control-Allow-Headers, Authorization, 
-            // X-Requested-With");
 
+
+        // required headers
+        header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
+        header("Content-Type: application/json; charset=UTF-8");
+        header("Access-Control-Allow-Methods: POST");
+        header("Access-Control-Max-Age: 3600");
+        // header("Access-Control-Allow-Headers: Content-Type, 
+        // Access-Control-Allow-Headers, Authorization, 
+        // X-Requested-With");
+        Recaptcha::verifyCaptcha('register');
+        try {
             // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
-
             // 
             $data = $this->dataToCheck();
 
@@ -98,10 +96,6 @@ class Register extends Db
             $birthdayEvent = $this->createBirthdayEntry($cleanData['day'], $cleanData['month'], $cleanData['firstName'], $cleanData['id']);
 
             $cleanData = [...$cleanData, ...$birthdayEvent];
-
-            // the database table matched to the POST data
-            // $tableData = $this->tableData($cleanData);
-            // $tableData = RegisterTableData::createRegisterTable($cleanData);
 
             // create sessions and some variables
             $_SESSION['id'] = $cleanData['id'];
@@ -116,36 +110,28 @@ class Register extends Db
 
             CheckToken::tokenCheck('token');
 
-       
-
             // time to submit the input data to database
 
             $getTableData = RegisterTableData::createRegisterTable($cleanData);
 
             try {
                 foreach ($getTableData as $tableName => $tableData) {
-                    if(!SubmitForm::submitForm($tableName, $tableData)){
+                    if (!SubmitForm::submitForm($tableName, $tableData)) {
                         msgException(406, "$tableName didn't submit");
                     }
-                    
                 }
 
                 //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
 
                 $kidsCount = (int) $cleanData['kids'];
                 $siblingsCount = (int) $cleanData['siblings'];
-                // $this->processKidSibling('kid', $kidsCount, $cleanData);
-                // $this->processKidSibling('sibling', $siblingsCount, $cleanData);
 
-                    
-
-             if($kidsCount>0){
+                if ($kidsCount > 0) {
                     processKidSibling('kid', $kidsCount, $cleanData);
-
                 }
 
-                if($siblingsCount>0){
-                     processKidSibling('sibling', $siblingsCount, $cleanData);
+                if ($siblingsCount > 0) {
+                    processKidSibling('sibling', $siblingsCount, $cleanData);
                 }
 
 
@@ -183,7 +169,7 @@ class Register extends Db
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
             'max' => [15, 15, 35, 35, 20, 16, 30, 15, 30],
             'data' => [
-                'firstName','lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
+                'firstName', 'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
             ]
         ];
     }
@@ -213,7 +199,6 @@ class Register extends Db
 
         ];
     }
-
 
     /**
      * Summary of setId

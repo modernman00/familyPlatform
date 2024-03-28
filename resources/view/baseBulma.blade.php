@@ -36,6 +36,10 @@
 
   <title>@yield('title')</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+  
 
   {{-- custom css --}}
   {{-- <link rel="stylesheet" href="/style.css">  --}}

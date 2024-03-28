@@ -1,55 +1,375 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["changePW"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["login"],{
 
-/***/ "./resources/asset/js/components/changePW/index.js":
-/*!*********************************************************!*\
-  !*** ./resources/asset/js/components/changePW/index.js ***!
-  \*********************************************************/
+/***/ "./resources/asset/js/components/FormHelper.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/FormHelper.js ***!
+  \*****************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ FormHelper)
+/* harmony export */ });
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 
 
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 
-
-
-(0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchInput)('password_id', 'confirm_password_id', 'changePasswordErr');
-var loaderElement = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader');
-var submitChangePW = function submitChangePW(e) {
-  try {
-    e.preventDefault();
-    var password = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('password_id').value;
-
-    // Remove any previous error notifications
-    var changePasswordNotificationElement = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('changePassword_notification');
-    if (changePasswordNotificationElement.classList.contains('is-danger')) {
-      changePasswordNotificationElement.classList.remove('is-danger');
+var FormHelper = /*#__PURE__*/function () {
+  function FormHelper(data) {
+    _classCallCheck(this, FormHelper);
+    this.data = data;
+    this.error = [];
+    this.result = 0;
+  }
+  _createClass(FormHelper, [{
+    key: "id",
+    value: function id(x) {
+      return document.getElementById(x);
     }
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = '';
-    if (password) {
-      loaderElement.style.display = 'block';
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.postFormData)('/login/changePW', 'changePassword', '/login');
+
+    /**
+     * general validation; check empty status, at least a single input, mobile length, white space
+     */
+  }, {
+    key: "getData",
+    value: function getData() {
+      return this.data;
     }
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
-  } finally {
-    // Hide the loader element regardless of success or error
-    loaderElement.style.display = 'none';
+  }, {
+    key: "massValidate",
+    value: function massValidate() {
+      var _this = this;
+      // const reg = /[a-zA-Z0-9./@]/g;
+      this.data.forEach(function (et) {
+        var _iterator = _createForOfIteratorHelper(et),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var post = _step.value;
+            // capture the error to a variable
+            var errMsg = _this.id("".concat(post.name, "_error"));
+
+            // rid it off the submit and token
+            if (post.name == 'submit' || post.name == 'button' || post.id == 'button' || post.type == 'button' || post.id == 'showPassword_id' || post.id == 'g-recaptcha-response' || post.name == 'cancel' || post.name == "checkbox_id") {
+              continue;
+            }
+
+            // check if there is no value
+
+            var postName = post.name.replace('_', ' ');
+            if (postName == "spouseName" || postName == "spouseMobile" || postName == "spouseEmail" || postName == "fatherMobile" || postName == "fatherEmail" || postName == "motherMobile" || postName == "maidenName" || postName == "motherEmail") {
+              if (post.value === "") {
+                post.value = "Not Provided";
+              }
+            }
+            var asterisk = "*";
+            if (post.value === '' || post.value === 'select') {
+              // CHECK IF ERRMSG EXISTS BEFORE SETTING THE INNERHTML
+              if (errMsg) {
+                var _post$placeholder;
+                errMsg.innerHTML = "".concat((_post$placeholder = post.placeholder) !== null && _post$placeholder !== void 0 ? _post$placeholder : asterisk, " cannot be left empty");
+                errMsg.style.color = "red";
+              }
+              _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
+            } else {
+              _this.result = 1;
+            }
+            var checkRegex = (0,_helper_general__WEBPACK_IMPORTED_MODULE_0__.matchRegex)(post.value);
+            if (checkRegex === false) {
+              _this.error.push("There is a problem with your entry for ".concat(postName.toUpperCase(), "'s question"));
+              errMsg.innerHTML = "* There is a problem with you entry for ".concat(postName.toUpperCase(), "'s question");
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    }
+  }, {
+    key: "emailVal",
+    value: function emailVal() {
+      var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+      var msg = "<li style=color:'red';> Please enter a valid email</li>";
+      var email = this.id('email_id').value;
+      if (email.match(emailExp) === null) {
+        this.id('email_error').innerHTML = msg;
+        this.id('email_error').style.color = "red";
+        this.error.push(msg);
+      }
+    }
+  }, {
+    key: "clearError",
+    value: function clearError() {
+      var _this2 = this;
+      this.error = []; // Empty the error array
+
+      // Define a function to clear error messages for a given input element
+      var clearErrorForElement = function clearErrorForElement(elementName) {
+        var errorElement = _this2.id("".concat(elementName, "_error"));
+        if (errorElement) {
+          errorElement.innerHTML = '';
+        }
+      };
+      this.data.forEach(function (el) {
+        var _iterator2 = _createForOfIteratorHelper(el),
+          _step2;
+        try {
+          var _loop = function _loop() {
+            var post = _step2.value;
+            var id = post.id,
+              name = post.name,
+              value = post.value;
+
+            // Skip certain input types
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+              return 1; // continue
+            }
+            var the_id = _this2.id(id);
+            if (the_id) {
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
+              });
+            } else {
+              console.error("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
+            }
+
+            // Add change event listener to clear error message
+            the_id.addEventListener('change', function () {
+              clearErrorForElement(name);
+            });
+          };
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            if (_loop()) continue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      });
+    }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+          _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
+
+    /**
+     *
+     * @param {input is the id of the input/ this is an array [as, it, it]} input
+     * @param {* this is the max policy and it must be an integer} maxi
+     */
+  }, {
+    key: "realTimeCheckLen",
+    value: function realTimeCheckLen(input, maxi) {
+      var _this3 = this;
+      try {
+        var _loop2 = function _loop2(i) {
+          var theData = _this3.id("".concat(input[i], "_id"));
+          if (theData === null || theData === undefined || theData === "") {
+            throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+          }
+          var max = maxi[i];
+          var error = _this3.id("".concat(input[i], "_error"));
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
+          theData.addEventListener('keyup', function () {
+            error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+            var help = _this3.id("".concat(input[i], "_help"));
+            help.style.color = 'red';
+            help.style.fontSize = '10px';
+            error.style.color = 'red';
+            setTimeout(function () {
+              help.style.display = 'none';
+            }, 5000);
+          });
+        };
+        for (var i = 0; i < input.length; i++) {
+          _loop2(i);
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    /**
+     * the id for the password error should be password_help
+     * the id for your confirm pasword should confirm_password
+     * it will return an error message to the password_help input
+     */
+  }, {
+    key: "matchInput",
+    value: function matchInput(first, second) {
+      var error, firstInput, secondInput;
+      error = this.id("".concat(second, "_error"));
+      firstInput = this.id(first + '_id');
+      secondInput = this.id(second + '_id');
+      secondInput.addEventListener('keyup', function () {
+        error.innerHTML = secondInput.value !== firstInput.value ? 'Your passwords do not match' : "";
+      });
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
+  }, {
+    key: "injectData",
+    value: function injectData(idArray, html) {
+      var idData;
+      for (var i = 0; i < idArray.length; i++) {
+        idData = this.id(idArray[i]);
+        idData.innerHTML = html[i];
+      }
+    }
+
+    /**
+     *
+     * @param {this is an id and its value is for duplication} firstInput
+     * @param {* another id that accepts the value of the firstInput} takeFirstInput
+     */
+  }, {
+    key: "duplicate",
+    value: function duplicate(giveInput, takeInput) {
+      var giver, taker;
+      giver = this.id(giveInput);
+      taker = this.id(takeInput);
+      giver.addEventListener('keyup', function () {
+        taker.value = giver.value;
+      });
+    }
+
+    /**
+     *
+     * @param {current input that is being type to. the value is what will be checked realtime. the id is needed} input
+     * @param {* the url to get the info to . example is /search?hint} url
+     * @param {enter the id of the output element} output
+     */
+  }, {
+    key: "realTimeServer",
+    value: function realTimeServer(input, url, outputId) {
+      var theInput, inputVal, output;
+      theInput = this.id(input);
+      output = this.id(outputId);
+      theInput.addEventListener('keyup', function () {
+        inputVal = theInput.value;
+        if (inputVal == 0) {
+          output.innerHTML = "";
+          return;
+        } else {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              output.innerHTML = this.responseText;
+            }
+          };
+          xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+          xmlhttp.send();
+        }
+      });
+    }
+  }, {
+    key: "isChecked",
+    value: function isChecked(yesId, noId, hiddenInput) {
+      var _this4 = this;
+      var checked = function checked() {
+        if (_this4.id(yesId).checked) {
+          alert('check');
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        } else if (_this4.id(noId).checked) {
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        }
+      };
+      this.id(yesId).addEventListener('click', checked);
+      this.id(noId).addEventListener('click', checked);
+    }
+  }, {
+    key: "previousAddress",
+    value: function previousAddress() {
+      var _this5 = this;
+      var timeAddy = this.id('time_at_address_id');
+      var prevAddy = this.id('previous_address_class');
+      var showPrev = function showPrev() {
+        if (timeAddy.value != '3 years+') {
+          prevAddy.style.display = 'block';
+          _this5.id('previous_address_help').innerHTML = "Please enter your full address: House No, Street Name, Town/City and Post Code";
+        } else {
+          prevAddy.style.display = 'none';
+        }
+      };
+      timeAddy.addEventListener('change', showPrev);
+    }
+  }]);
+  return FormHelper;
+}();
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/dataToCheck.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/dataToCheck.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   Login: () => (/* binding */ Login),
+/* harmony export */   dataToCheckRegister: () => (/* binding */ dataToCheckRegister)
+/* harmony export */ });
+
+
+var dataToCheckRegister = {
+  maxLength: {
+    id: ['firstName', 'lastName', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation'],
+    max: [15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20]
+  },
+  password: {
+    pwd: 'password',
+    pwd2: 'confirm_password'
+  },
+  familyCheck: {
+    father: ["fatherYes", "fatherNo"],
+    mother: ["motherYes", "motherNo"],
+    spouse: ["spouseYes", "spouseNo"]
   }
 };
-
-// Add a click event listener to the element with id 'submit'
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', submitChangePW);
-var currentPs = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("password_id");
-// const emailID = id("email_id")
-var confirmPs = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("confirm_password_id");
-currentPs.setAttribute('autocomplete', 'new-password');
-confirmPs.setAttribute('autocomplete', 'new-password');
-// emailID.setAttribute('type', 'hidden')
-// emailLabel.style.display = "none"
+var Login = {
+  maxLength: {
+    id: ['email', 'password'],
+    max: [35, 35]
+  }
+};
 
 /***/ }),
 
@@ -503,6 +823,147 @@ var checkCookie = function checkCookie() {
     }
   }
 };
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/security.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/helper/security.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   emailVal: () => (/* binding */ emailVal),
+/* harmony export */   showPassword: () => (/* binding */ showPassword)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+var showPassword = function showPassword(inputId) {
+  var y = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputId);
+  if (y.type === "password") {
+    y.type = "text";
+  } else {
+    y.type = "password";
+  }
+};
+
+/**
+ * 
+ * @param {* } email 
+ * @returns 1 if there is an error
+ */
+var emailVal = function emailVal(email) {
+  var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+  var error;
+  var msg = "<li style=color:'red';> Please enter a valid email</li>";
+  if (email.match(emailExp) === null) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').innerHTML = msg;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('email_error').style.color = "red";
+    error = 1;
+    return error;
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/login/Login.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/login/Login.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+/* harmony import */ var _helper_security__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../helper/security */ "./resources/asset/js/components/helper/security.js");
+
+
+
+
+
+
+
+
+// block the setLoader div
+
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").style.display = "none";
+var formInput = document.querySelectorAll('.loginNow');
+var formInputArr = Array.from(formInput);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
+(function () {
+  //clear error from the form
+  formData.clearError();
+
+  // set the maxlength, check the length of the value, raise error
+  formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.Login.maxLength.max);
+})();
+window.LoginSubmission = function (token) {
+  // Clear any previous error messages
+  formData.clearError();
+  try {
+    // Sanitize email
+    formData.emailVal();
+
+    // Validate and sanitize data
+    formData.massValidate();
+    if (formData.error.length === 0) {
+      // the notification div and the content
+
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('error').innerHTML = "";
+      var loginNotification = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('loginNow_notification');
+      if (loginNotification.classList.contains('is-danger')) {
+        loginNotification.classList.remove('is-danger');
+      }
+      // Display the success information for 10 seconds
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').style.display = "block";
+
+      // Set the redirect URL in localStorage
+      localStorage.setItem('redirect', '/member/ProfilePage');
+
+      // Get the login URL from sessionStorage
+      var loginURL = sessionStorage.getItem('loginURL1');
+
+      // Determine the redirect URL based on loginURL
+      var redirect = loginURL === "/lasu" ? "/admin/reviewApps" : "/login/code";
+
+      // Submit the form data
+      (0,_helper_http__WEBPACK_IMPORTED_MODULE_3__.postFormData)(loginURL, "loginNow", redirect, 'bulma');
+    } else {
+      // Display an alert for form errors
+      alert('The form cannot be submitted. Please check the errors');
+    }
+  } catch (err) {
+    // Handle any unexpected errors
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err);
+  }
+  // });
+  // });
+};
+
+// id('button').addEventListener('click', LoginSubmission)
+
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("showPassword_id").addEventListener('click', function () {
+  return (0,_helper_security__WEBPACK_IMPORTED_MODULE_4__.showPassword)('password_id');
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/login/index.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/login/index.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Login__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Login */ "./resources/asset/js/components/login/Login.js");
+
+var currentPs = document.getElementById("password_id");
+var passwordLabel = document.getElementById("showPassword_id");
+currentPs.setAttribute('autocomplete', 'current-password');
+passwordLabel.setAttribute('aria-label', 'Warning: this will display your password on the screen.');
 
 /***/ })
 

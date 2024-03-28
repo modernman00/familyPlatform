@@ -173,8 +173,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
@@ -206,7 +205,7 @@ var notificationURL = "/member/notifications/id?notificationId=".concat(idSetFro
 
 // const getData = axios.get(notificationURL);
 
-axios__WEBPACK_IMPORTED_MODULE_3___default().get(notificationURL).then(function (res) {
+axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function (res) {
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {

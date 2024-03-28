@@ -15,12 +15,10 @@ const formData = new FormHelper(formInputArr);
 
         formData.clearError();
         // set the maxlength, check the length of the value, raise error
-
         formData.realTimeCheckLen(
             dataToCheckRegister.maxLength.id,
             dataToCheckRegister.maxLength.max
         );
-
         // check if password matches real time
         formData.matchInput(
             dataToCheckRegister.password.pwd,
@@ -38,7 +36,7 @@ const formData = new FormHelper(formInputArr);
 const notificationDiv = id('register_notify_div')
 const notificationMsg = id('register_notify_div_msg')
 
-const processFormData = async(url, formElement) => {
+const processFormData = async(url, formElement, token) => {
 
     const form = id(formElement)
     let formEntries = new FormData(form)
@@ -68,10 +66,9 @@ const processFormData = async(url, formElement) => {
 
 }
 
-const processForm = async(e) => {
+window.processForm = async(token) => {
     try {
-        e.preventDefault();
-
+        // e.preventDefault();
         notificationDiv.classList.remove('is-danger') // remove the danger class from the notification
         notificationMsg.innerHTML = "" // empty the error element
 
@@ -121,5 +118,5 @@ const processForm = async(e) => {
     }
 }
 
-id('submit').addEventListener('click', processForm)
+// id('submit').addEventListener('click', processForm)
 // id('submit').addEventListener('click', processForm)

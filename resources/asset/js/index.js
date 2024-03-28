@@ -49,24 +49,13 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
         .catch((err) => showError(err))
 
-} else if (window.location.pathname === '/login') {
+} else if (window.location.pathname === '/login'  || window.location.pathname === '/lasu') {
     qSel('.login').style.display = "none" // navbar mgt
 
     import (
         /* webpackChunkName: 'login' */
         /* webpackPrefetch: true */
         './components/login/'
-    )
-    .then((module) => module.default)
-        .catch((err) => showError(err))
-
-} else if (window.location.pathname === '/lasu') {
-    qSel('.login').style.display = "none" // navbar mgt
-
-    import (
-        /* webpackChunkName: 'lasu' */
-        /* webpackPrefetch: true */
-        './components/login'
     )
     .then((module) => module.default)
         .catch((err) => showError(err))

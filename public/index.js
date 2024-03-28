@@ -136,18 +136,10 @@ if (window.location.pathname === '/register') {
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
-} else if (window.location.pathname === '/login') {
+} else if (window.location.pathname === '/login' || window.location.pathname === '/lasu') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | login */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
-    return module["default"];
-  })["catch"](function (err) {
-    return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
-  });
-} else if (window.location.pathname === '/lasu') {
-  (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
-
-  Promise.all(/*! import() | lasu */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("lasu")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  Promise.all(/*! import() | login */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -247,7 +239,7 @@ __webpack_require__.r(__webpack_exports__);
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
 /******/ 	__webpack_require__.O(0, ["/public/index"], () => {
-/******/ 		["/public/vendor","register","all_members","lasu","forgotPwd","code","profilePage","changePW","img","familyCode","accountSetting","organogram"].map(__webpack_require__.E);
+/******/ 		["/public/vendor","register","all_members","login","forgotPwd","code","profilePage","changePW","img","familyCode","accountSetting","organogram"].map(__webpack_require__.E);
 /******/ 	}, 5);
 /******/ })();
 /******/ 

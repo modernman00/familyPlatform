@@ -3,7 +3,7 @@
     "/public/manifest.js": "/public/manifest.js",
     "/public/index/register.js": "/public/index/register.js",
     "/public/index/all_members.js": "/public/index/all_members.js",
-    "/public/index/lasu.js": "/public/index/lasu.js",
+    "/public/index/login.js": "/public/index/login.js",
     "/public/index/forgotPwd.js": "/public/index/forgotPwd.js",
     "/public/index/code.js": "/public/index/code.js",
     "/public/index/profilePage.js": "/public/index/profilePage.js",

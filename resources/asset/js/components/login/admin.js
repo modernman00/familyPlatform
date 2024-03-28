@@ -1,9 +1,10 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, showError, qSel } from '../global'
+import { id, showError } from '../global'
 import { Login } from "../dataToCheck";
 import { postFormData } from "../helper/http"
 import { showPassword } from "../helper/security"
+
 
 // block the setLoader div
 

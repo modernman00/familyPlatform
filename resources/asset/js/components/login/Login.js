@@ -1,6 +1,6 @@
 "use strict";
 import FormHelper from '../FormHelper';
-import { id, showError } from '../global'
+import { id, showError, log } from '../global'
 import { Login } from "../dataToCheck";
 import { postFormData } from "../helper/http"
 import { showPassword } from "../helper/security"
@@ -25,10 +25,7 @@ const formData = new FormHelper(formInputArr);
     );
 })();
 
-
-
-const LoginSubmission = (e) => {
-    e.preventDefault();
+window.LoginSubmission = (token) => {
 
     // Clear any previous error messages
     formData.clearError();
@@ -73,9 +70,11 @@ const LoginSubmission = (e) => {
         // Handle any unexpected errors
         showError(err);
     }
+    // });
+    // });
 }
 
 
-id('button').addEventListener('click', LoginSubmission)
+// id('button').addEventListener('click', LoginSubmission)
 
 id("showPassword_id").addEventListener('click', () => showPassword('password_id'))

@@ -33,7 +33,6 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
-
     // AXIOS POST FUNCTIONALITY
     try {
         const response = await axios.post(url, formEntries, options);
@@ -68,14 +67,9 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
             dbHttpResult = response.data.message;
         }
 
-      // Set sessionStorage items if not already set
-if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
-if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
-
-
-
-       
-        
+        // Set sessionStorage items if not already set
+        if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+        if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
 
         processFormDataAction(successClass, dbHttpResult, notificationId);
 
@@ -85,14 +79,12 @@ if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCo
             }, 2000);
         }
 
-        // formData.clearHtml();
     } catch (error) {
 
         const errorClass = getNotificationClassByCSS(css, 'red');
 
         const errorMessage = error?.response?.data?.message ?? error?.message?.message ?? error?.message;
-
-        // Process the form data for error
+   // Process the form data for error
         processFormDataAction(errorClass, errorMessage, notificationId);
 
     }
@@ -104,15 +96,14 @@ if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCo
  * @param {string} message - The notification message.
  */
 const processFormDataAction = (cssClass, message, formNotificationId) => {
-    // log(formNotificationId)
-    // const notificationElement = id(formNotificationId);
+
     if (formNotificationId) {
         formNotificationId.style.display = 'block';
         formNotificationId.classList.add(cssClass);
         id('error').scrollIntoView({ behavior: 'smooth' });
         id('error').innerHTML = message;
         id('setLoader').classList.remove('loader');
-    }else{
+    } else {
         throw new Error('NOTIFICATION NOT FOUND')
     }
 };

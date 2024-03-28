@@ -109,11 +109,17 @@ class BuildFormBulma extends AlterTable
 
     /**
      * important ones are mixed, select-many, setError
+     * 
      * example - mixed 'spouse' => ['mixed','label' => ["Spouse's name", "Spouse's mobile", "Spouse's Email"],'attribute' => ['spouseName', 'spouseMobile', 'spouseEmail'],'placeholder' => ['Toyin', '23480364168089', "toyin@gmail.com"], 'inputType' => ['text', 'text', 'email'],'icon' => ['<i class="fas fa-user"></i>','<i class="fas fa-user"></i>','<i class="fas fa-envelope-square"></i>']],
+     * 
      * 
      * example select-many  'married_gender' => ['select-many','label' => ['Marital status', 'gender']'attribute' => ['maritalStatus', 'gender'],'options' => [['select', 'Yes', 'No'],['select', 'Male', 'Female']],'icon' => ['<i class="far fa-kiss-wink-heart"></i>','<i class="fas fa-user-friends"></i>',]],
      * 
+     * 
      * example showError  nameKey => showError - the namekey should be the id of the div or form that will release the error. See Login or Register.js for a clear example
+     * 
+     * example button_captcha  'submit'=> ['button_captcha', 'js'=> 'loginSubmission', 'key'=>getenv('RECAPTCHA_KEY')],
+     * 
      * @return void 
      */
     public function genForm(): void
@@ -284,7 +290,21 @@ class BuildFormBulma extends AlterTable
                 echo <<<HTML
                 <div class="field">
                     <p class="control">
-                        <button name="button" id="button" type="button" class="button is-success button is-large is-fullwidth submit">
+                        <button name="button" id="button" type="button" class="button is-success button is-large is-fullwidth">
+                            {$nameKey}
+                        </button>
+                    </p>
+                </div>
+                HTML;
+            
+            } elseif ($this->entValue[$i][0] === 'button_captcha') {
+                $js = $this->entValue[$i]['js'];
+                $siteKey = $this->entValue[$i]['key'];
+                $action = $this->entValue[$i]['action'];
+                echo <<<HTML
+                <div class="field">
+                    <p class="control">
+                        <button data-sitekey=$siteKey data-callback=$js id="button" data-action=$action class="button is-success button is-large is-fullwidth g-recaptcha">
                             {$nameKey}
                         </button>
                     </p>
@@ -570,13 +590,14 @@ class BuildFormBulma extends AlterTable
             } elseif ($this->entValue[$i] === 'empty') {
                 echo '';
             } elseif ($this->entValue[$i] === 'showError') {
-                echo "<div id='setLoader' class='loader' tabindex='-1' style='display: none;'></div>
-                   
-                        <div class='notification' id='$nameKey' style='display: none;'>
-                        <p id='error'></p>
-                    
-                            </div>
-                   ";
+                echo <<<HTML
+                <div id="setLoader" class="loader" tabindex="-1" style="display: none;"></div>
+                    <div class="notification" id="$nameKey" style="display: none;">
+                        <p id="error"></p>
+                    </div>
+                HTML;
+            } elseif ($this->entValue[$i] === 'captcha') {
+                 echo sprintf('<div class="g-recaptcha" data-sitekey="%s"></div>', getenv('RECAPTCHA_KEY'));
             } else {
                 echo "Invalid form element type: {$this->entValue[$i]}";
             }

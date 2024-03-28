@@ -29,11 +29,14 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
-                    // console.log(post)
+
                     // rid it off the submit and token
                 if (post.name == 'submit' ||
                     post.name == 'button' ||
-                    post.name == 'token' ||
+                    post.id == 'button' ||
+                    post.type == 'button' ||
+                    post.id == 'showPassword_id' ||
+                    post.id == 'g-recaptcha-response' ||
                     post.name == 'cancel' ||
                     post.name == "checkbox_id") {
                     continue;
@@ -55,10 +58,17 @@ export default class FormHelper {
                         post.value = "Not Provided"
                     }
                 }
+   let asterisk = "*";
 
                 if (post.value === '' || post.value === 'select') {
-                    errMsg.innerHTML = `*cannot be left empty`
+
+                    // CHECK IF ERRMSG EXISTS BEFORE SETTING THE INNERHTML
+                    if(errMsg) {
+                         errMsg.innerHTML = `${ post.placeholder ?? asterisk} cannot be left empty`
                     errMsg.style.color = "red"
+                    }
+
+                   
                     this.error.push(`${postName.toUpperCase()} cannot be left empty`)
                 } else {
                     this.result = 1

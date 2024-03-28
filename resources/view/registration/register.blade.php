@@ -423,7 +423,14 @@
     PRIVACY POLICY </a>',
   'token'=> 'token',
 
-  'Submit Application' => 'submit'
+  'Submit form'=> [
+            'button_captcha',
+            'js'=> 'processForm',
+            'key'=>getenv('RECAPTCHA_KEY'),
+            'action'=> 'register'
+          ], // 'submit' => 'button'
+
+  // 'Submit Application' => 'submit'
 
   ];
 

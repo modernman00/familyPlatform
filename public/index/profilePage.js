@@ -58,9 +58,9 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
             // capture the error to a variable
             var errMsg = _this.id("".concat(post.name, "_error"));
-            // console.log(post)
+
             // rid it off the submit and token
-            if (post.name == 'submit' || post.name == 'button' || post.name == 'token' || post.name == 'cancel' || post.name == "checkbox_id") {
+            if (post.name == 'submit' || post.name == 'button' || post.id == 'button' || post.type == 'button' || post.id == 'showPassword_id' || post.id == 'g-recaptcha-response' || post.name == 'cancel' || post.name == "checkbox_id") {
               continue;
             }
 
@@ -72,9 +72,14 @@ var FormHelper = /*#__PURE__*/function () {
                 post.value = "Not Provided";
               }
             }
+            var asterisk = "*";
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "*cannot be left empty";
-              errMsg.style.color = "red";
+              // CHECK IF ERRMSG EXISTS BEFORE SETTING THE INNERHTML
+              if (errMsg) {
+                var _post$placeholder;
+                errMsg.innerHTML = "".concat((_post$placeholder = post.placeholder) !== null && _post$placeholder !== void 0 ? _post$placeholder : asterisk, " cannot be left empty");
+                errMsg.style.color = "red";
+              }
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {
               _this.result = 1;
@@ -493,9 +498,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   setCookie: () => (/* binding */ setCookie)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw new Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw new Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -505,7 +509,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
 // import Cookies from 'js-cookie'
 
-(0,axios_retry__WEBPACK_IMPORTED_MODULE_2__["default"])((axios__WEBPACK_IMPORTED_MODULE_1___default()), {
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_1__["default"])(axios__WEBPACK_IMPORTED_MODULE_2__["default"], {
   retries: 3
 });
 
@@ -557,7 +561,7 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.prev = 9;
           _context.next = 12;
-          return axios__WEBPACK_IMPORTED_MODULE_1___default().post(url, formEntries, options);
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url, formEntries, options);
         case 12:
           response = _context.sent;
           successClass = getNotificationClassByCSS("bulma", 'green'); // check if response.data.message is an array
@@ -599,8 +603,6 @@ var postFormData = /*#__PURE__*/function () {
               window.location.assign(redirect);
             }, 2000);
           }
-
-          // formData.clearHtml();
           _context.next = 39;
           break;
         case 34:
@@ -626,8 +628,6 @@ var postFormData = /*#__PURE__*/function () {
  * @param {string} message - The notification message.
  */
 var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
-  // log(formNotificationId)
-  // const notificationElement = id(formNotificationId);
   if (formNotificationId) {
     formNotificationId.style.display = 'block';
     formNotificationId.classList.add(cssClass);
@@ -692,7 +692,7 @@ var getApiData = /*#__PURE__*/function () {
             }
           };
           _context2.next = 5;
-          return axios__WEBPACK_IMPORTED_MODULE_1___default().get(URL, config);
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(URL, config);
         case 5:
           fetch = _context2.sent;
           return _context2.abrupt("return", fetch.data);
@@ -730,7 +730,7 @@ var getMultipleApiData = /*#__PURE__*/function () {
             }
           };
           _context3.next = 5;
-          return axios__WEBPACK_IMPORTED_MODULE_1___default().all([axios__WEBPACK_IMPORTED_MODULE_1___default().get(url1, config), axios__WEBPACK_IMPORTED_MODULE_1___default().get(url2, config)]);
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].all([axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_2__["default"].get(url2, config)]);
         case 5:
           fetch = _context3.sent;
           return _context3.abrupt("return", fetch);
@@ -803,8 +803,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
@@ -836,7 +835,7 @@ var notificationURL = "/member/notifications/id?notificationId=".concat(idSetFro
 
 // const getData = axios.get(notificationURL);
 
-axios__WEBPACK_IMPORTED_MODULE_3___default().get(notificationURL).then(function (res) {
+axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function (res) {
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
@@ -893,10 +892,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
 
 
 
@@ -906,8 +904,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 try {
-  (pusher_js__WEBPACK_IMPORTED_MODULE_5___default().logToConsole) = true;
-  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_5___default())('d1f1e43f3d8afb028a1f', {
+  (pusher_js__WEBPACK_IMPORTED_MODULE_4___default().logToConsole) = true;
+  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('d1f1e43f3d8afb028a1f', {
     cluster: 'eu'
   });
 
@@ -996,10 +994,10 @@ try {
         alert("Please enter a comment before submitting");
       } else {
         // 1.
-        axios__WEBPACK_IMPORTED_MODULE_4___default().post('/postCommentProfile', formEntries, options).then(function (response) {
+        axios__WEBPACK_IMPORTED_MODULE_5__["default"].post('/postCommentProfile', formEntries, options).then(function (response) {
           // 2. note. message returns the new post_no from the database
 
-          axios__WEBPACK_IMPORTED_MODULE_4___default().get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
+          axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
             // 3.
 
             showTheComment(res.data.message);
@@ -1021,9 +1019,9 @@ try {
       var formData = new FormData(formExtra);
 
       // 3. 
-      axios__WEBPACK_IMPORTED_MODULE_4___default().post("/member/profilePage/post", formData, options).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/post", formData, options).then(function (response) {
         //  4. 
-        axios__WEBPACK_IMPORTED_MODULE_4___default().get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
+        axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
           // 5. 
 
           //  log(res.data)
@@ -1091,8 +1089,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
@@ -1129,10 +1126,10 @@ var process = function process(e) {
 
       // post the form data to the database and get the last posted event no
 
-      axios__WEBPACK_IMPORTED_MODULE_4___default().post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/member/profilePage/event", eventFormEntries, options).then(function (response) {
         // use the event no to get the last event from the database
 
-        axios__WEBPACK_IMPORTED_MODULE_4___default().get("/member/getEventDataByNo?eventNo=".concat(response.data.message)).then(function (res) {
+        axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/member/getEventDataByNo?eventNo=".concat(response.data.message)).then(function (res) {
           if (res.data.message) {
             // add new event real time
             checkEventAndAdd(res.data.message[0]);
@@ -1141,10 +1138,10 @@ var process = function process(e) {
 
         // POST THE EVENT TO NOTIFICATION
 
-        axios__WEBPACK_IMPORTED_MODULE_4___default().post('/member/notification/event', eventFormEntries, options).then(function (result) {
+        axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/member/notification/event', eventFormEntries, options).then(function (result) {
           // GET THE POST EVENTS AND ADD THEM TO THE NOTIFICATION
 
-          axios__WEBPACK_IMPORTED_MODULE_4___default().get("/member/notification/event?notificationNo=".concat(result.data.message)).then(function (result2) {
+          axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/member/notification/event?notificationNo=".concat(result.data.message)).then(function (result2) {
             (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.addToNotificationTab)(result2.data.message[0]);
             (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
           });
@@ -1192,17 +1189,16 @@ var eventHtml = function eventHtml(data) {
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
 var appUrl = "http://olaogun.test/";
 var approver_id = sessionStorage.getItem('idSetFromHttp');
-axios__WEBPACK_IMPORTED_MODULE_0___default().get("/getFriendRequestById?id=".concat(approver_id)).then(function (results) {
+axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/getFriendRequestById?id=".concat(approver_id)).then(function (results) {
   if (results.data.message) {
     results.data.message.forEach(function (request) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', htmlFriendRequest(request));
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', htmlFriendRequest(request));
     });
   }
 });

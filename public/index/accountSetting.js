@@ -58,9 +58,9 @@ var FormHelper = /*#__PURE__*/function () {
             var post = _step.value;
             // capture the error to a variable
             var errMsg = _this.id("".concat(post.name, "_error"));
-            // console.log(post)
+
             // rid it off the submit and token
-            if (post.name == 'submit' || post.name == 'button' || post.name == 'token' || post.name == 'cancel' || post.name == "checkbox_id") {
+            if (post.name == 'submit' || post.name == 'button' || post.id == 'button' || post.type == 'button' || post.id == 'showPassword_id' || post.id == 'g-recaptcha-response' || post.name == 'cancel' || post.name == "checkbox_id") {
               continue;
             }
 
@@ -72,9 +72,14 @@ var FormHelper = /*#__PURE__*/function () {
                 post.value = "Not Provided";
               }
             }
+            var asterisk = "*";
             if (post.value === '' || post.value === 'select') {
-              errMsg.innerHTML = "*cannot be left empty";
-              errMsg.style.color = "red";
+              // CHECK IF ERRMSG EXISTS BEFORE SETTING THE INNERHTML
+              if (errMsg) {
+                var _post$placeholder;
+                errMsg.innerHTML = "".concat((_post$placeholder = post.placeholder) !== null && _post$placeholder !== void 0 ? _post$placeholder : asterisk, " cannot be left empty");
+                errMsg.style.color = "red";
+              }
               _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
             } else {
               _this.result = 1;
@@ -341,8 +346,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _register_onChangeKidSibling__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./register/onChangeKidSibling */ "./resources/asset/js/components/register/onChangeKidSibling.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
@@ -369,7 +373,7 @@ var process = function process(e) {
       var eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('accountSettingForm');
       var eventFormEntries = new FormData(eventForm);
       // post the form data to the database and get the last posted event no
-      axios__WEBPACK_IMPORTED_MODULE_3___default().post("/accountSetting", eventFormEntries, options).then(function (response) {
+      axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/accountSetting", eventFormEntries, options).then(function (response) {
         notificationDiv.style.display = "block"; // unblock the notification
         notificationDiv.classList.add('is-success'); // add the success class
         notificationMsg.innerHTML = response.data.message;
