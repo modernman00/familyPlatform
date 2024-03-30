@@ -106,11 +106,11 @@ class Event extends AllMembersData
     {
         try {
 
+            // Get all members' details including email, famCode, and id
+            $allMembers = self::getAllMembersCodeAndEmail();
 
             // show information of events within 7 days , 1 days and on the current date
-            $eventData = parent::getEventData();
-
-            $allEmails = getAllEmails();
+            $allEventData = parent::getEventData();
 
             $notifyCustomer = new EmailData('admin');
 
@@ -119,14 +119,24 @@ class Event extends AllMembersData
             }
 
 
-            if ($eventData) {
-
+            if ($allEventData) {
                 // send other event reminders
-                foreach ($eventData as $allEventData) {
+                foreach ($allEventData as $eventData) {
+                    // Get the famCode of the event
+                    $eventFamCode = $eventData['famCode'];
 
+                    // Filter members based on the event famCode
+                    $membersToNotify = array_filter($allMembers, function ($member) use ($eventFamCode) {
+                        return $member['famCode'] == $eventFamCode;
+                    });
 
-                    self::checkEventDiffAndNotifyAll($allEventData, $allEmails);
+                    // Extract email addresses from the filtered members
+                    $emailsToNotify = array_column($membersToNotify, 'email');
+
+                    self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify);
                 }
+
+                printArr($emailsToNotify);
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -152,9 +162,6 @@ class Event extends AllMembersData
 
         sendBulkEmail($email, $subject, $emailContent);
     }
-
-
-
     /**
      * this function extends the event date on the due date 
      */
@@ -215,30 +222,31 @@ class Event extends AllMembersData
      *
      * @return void
      */
-    private static function checkEventDiffAndNotifyAll(array $data, array $email)
+    private static function checkEventDiffAndNotifyAll(array $data, array $email): void
     {
 
         $diffEventAndTodayDate = dateDifference(date('Y-m-d'), $data['eventDate']);
         $eventDayFormatted = dateFormat($data['eventDate']);
+        $subject = $data['eventName'];
+        $eventHost = "{$data['firstName']} {$data['lastName']}";
+        $eventDescription = $data['eventDescription'];
+        $eventInformation = "Kindly be informed that this event is scheduled to be held on $eventDayFormatted. Please contact the $eventHost for more information. Event Description: $eventDescription";
 
-
-
-        $subject = "{$data['firstName']}'s {$data['eventType']}";
 
         switch ($diffEventAndTodayDate) {
             case "+7 days":
                 $subject .= " is on $eventDayFormatted";
-                $data['emailHTMLContent'] = "$subject in seven days";
+                $data['emailHTMLContent'] = "$subject in seven days. $eventInformation ";
                 self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+1 days":
                 $subject .= " is tomorrow, $eventDayFormatted";
-                $data['emailHTMLContent'] = $subject;
+                $data['emailHTMLContent'] = "$subject. $eventInformation";
                 self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+0 days":
                 $subject .= " is today, $eventDayFormatted";
-                $data['emailHTMLContent'] = $subject;
+                $data['emailHTMLContent'] = "$subject. $eventInformation";
                 self::sendBulkNotification($data, $subject, $email);
                 self::extendEventByFrequency($data);
                 break;

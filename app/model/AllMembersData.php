@@ -55,6 +55,20 @@ class AllMembersData extends InnerJoin
         }
     }
 
+    public static function getAllMembersCodeAndEmail(): array
+    {
+        try {
+            $query = "SELECT a.email, p.famCode AS famCode, a.id 
+                      FROM account a
+                      INNER JOIN personal p ON a.id = p.id";
+            $statement = parent::connect2()->query($query);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
 
 
     public function getAllMembersNoPics(): array
@@ -103,7 +117,7 @@ class AllMembersData extends InnerJoin
     public static function getEventData()
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
             FROM events 
             INNER JOIN personal ON events.id = personal.id 
             WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -212,7 +226,7 @@ class AllMembersData extends InnerJoin
         }
     }
 
-    public static function getFamCode($id): array 
+    public static function getFamCode($id): array
     {
 
         $query = Select::formAndMatchQuery(
