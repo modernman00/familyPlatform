@@ -136,7 +136,6 @@ class Event extends AllMembersData
                     self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify);
                 }
 
-                printArr($emailsToNotify);
             }
         } catch (\Throwable $th) {
             showError($th);
