@@ -39,6 +39,18 @@ function getAllEmails()
 }
 
 
+function getEmails()
+{
+    $query = Select::formAndMatchQuery(selection:'SELECT_COL_ID', table:'account', identifier1: 'status', column: 'email');
+
+    return Select::selectFn2($query, ['approved']);
+
+}
+
+
+
+
+
 
 
 

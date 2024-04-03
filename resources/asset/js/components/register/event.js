@@ -1,6 +1,6 @@
 import { id } from '../global';
 
-const hideElement = (elementId) => {
+export const hideElement = (elementId) => {
   id(elementId).style.display = "none";
 };
 
@@ -20,7 +20,8 @@ const showMaidenName = () => {
   }
 };
 
-const showSpouse = () => {
+export const showSpouse = () => {
+
   const maritalStatus = id('maritalStatus_id').value;
   
   if (maritalStatus === "Yes") {
@@ -29,6 +30,7 @@ const showSpouse = () => {
     hideElement('spouse');
   }
 };
+
 
 // Add event listeners
 

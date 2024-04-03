@@ -10,6 +10,25 @@ export const qSelInnerHTML = (name) => qSel(name).innerHTML
 export const log = (id) => console.log(id)
 export const write = (input) => document.write(input)
 
+export const hideElement = (elementId) => {
+  id(elementId).style.display = "none";
+};
+
+export const showElement = (elementId) => {
+  id(elementId).style.display = "block";
+};
+
+export const manipulateAttribute = (idName, removeOrSet, attributeType, nameValue =null) => {
+
+    if(removeOrSet === "remove") {
+           id(idName).removeAttribute(attributeType)
+    } else {
+        id(idName).setAttribute(attributeType, nameValue)
+    }
+ 
+  
+}
+
 export const date2String = (date) => new Date().toDateString(date)
 
 export const showError = (e) => {

@@ -48,8 +48,7 @@
   </button>
 
   {{--  COMMENT BUTTON  --}}
-  <button type="button" id="initComment{{ $allData['post_no'] }}"
-    class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom">
+  <button type="button" id="initComment{{ $allData['post_no'] }}" class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom">
     <em class="fa fa-comment"></em> 
     Comment 
   </button>

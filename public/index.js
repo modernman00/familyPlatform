@@ -10,13 +10,16 @@
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   date2String: () => (/* binding */ date2String),
+/* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
 /* harmony export */   idValue: () => (/* binding */ idValue),
 /* harmony export */   log: () => (/* binding */ log),
+/* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
 /* harmony export */   qSel: () => (/* binding */ qSel),
 /* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
 /* harmony export */   qSelValue: () => (/* binding */ qSelValue),
+/* harmony export */   showElement: () => (/* binding */ showElement),
 /* harmony export */   showError: () => (/* binding */ showError),
 /* harmony export */   showNotification: () => (/* binding */ showNotification),
 /* harmony export */   warningSign: () => (/* binding */ warningSign),
@@ -47,6 +50,20 @@ var log = function log(id) {
 };
 var write = function write(input) {
   return document.write(input);
+};
+var hideElement = function hideElement(elementId) {
+  id(elementId).style.display = "none";
+};
+var showElement = function showElement(elementId) {
+  id(elementId).style.display = "block";
+};
+var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attributeType) {
+  var nameValue = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  if (removeOrSet === "remove") {
+    id(idName).removeAttribute(attributeType);
+  } else {
+    id(idName).setAttribute(attributeType, nameValue);
+  }
 };
 var date2String = function date2String(date) {
   return new Date().toDateString(date);

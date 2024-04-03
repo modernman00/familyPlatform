@@ -4,6 +4,8 @@ import { checkBox } from "../helper/general";
 import { getAllData } from "../api/index";
 import { autocomplete } from "../helper/autocomplete";
 import axios from "axios";
+import { processKidsSiblings } from "../kidsAndSiblings"
+
 
 const getData = getAllData();
 
@@ -13,7 +15,7 @@ let mobile = [];
 let motherName = [];
 let checkEmail = [];
 
-let fName = id("firstName_id").value;
+let fName = id("firstName_id").value 
 let lName = id("lastName_id").value;
 
 /**
@@ -181,174 +183,10 @@ id("spouseMobile_id").addEventListener("keyup", (event) => {
 
 // create the data for the function below
 
-const checkEmailObj = {
-    kidEmailInput: [
-        "kid_email1",
-        "kid_email2",
-        "kid_email3",
-        "kid_email4",
-        "kid_email5",
-        "kid_email6",
-        "kid_email7",
-        "kid_email8",
-        "kid_email9",
-        "kid_email10",
-    ],
-    kidNameInput: [
-        "kid_name1",
-        "kid_name2",
-        "kid_name3",
-        "kid_name4",
-        "kid_name5",
-        "kid_name6",
-        "kid_name7",
-        "kid_name8",
-        "kid_name9",
-        "kid_name10",
-    ],
-    siblingEmail: [
-        "sibling_email1",
-        "sibling_email2",
-        "sibling_email3",
-        "sibling_email4",
-        "sibling_email5",
-        "sibling_email6",
-        "sibling_email7",
-        "sibling_email8",
-        "sibling_email9",
-        "sibling_email10",
-    ],
-    siblingName: [
-        "sibling_name1",
-        "sibling_name2",
-        "sibling_name3",
-        "sibling_name4",
-        "sibling_name5",
-        "sibling_name6",
-        "sibling_name7",
-        "sibling_name8",
-        "sibling_name9",
-        "sibling_name10",
-    ]
-};
 
 // check if there is a sibling or kids by email
+processKidsSiblings(checkEmail, fName, lName)
 
-document.onkeydown = (e) => {
-    //. use the onclick to get the id of the element that was clicked
-    // 2. use event listener to get the email value (if it is not empty)
-    // 3. use the email value to check if it is in the array
-    // 4. if it is in the array, show the Yes or No Radio
-    // 5. click yes to send email to the kid or sibling
-
-    try {
-        // create an object with the data to check
-        const elementId = e.target.id; // id of the element that was clicked or press down
-        // const emailInput = e.target.value;
-
-        // this phase checks the id of what is being typed
-        if (!elementId) throw new Error("target id is null and empty");
-
-        let chooseEmail = [];
-        let chooseName = [];
-
-        let helpHTML = "";
-        // let errorHTML = ""; // Show error if applicant's email is registered
-
-        // check if id / event.id is either kid or sibling
-
-        // if the elementId indicate that it is a kid, then choosemail inherits all the kids array from the checkEmailObj and vis a versa
-
-        if (checkEmailObj.kidEmailInput.includes(elementId)) {
-            chooseEmail = checkEmailObj.kidEmailInput;
-            chooseName = checkEmailObj.kidNameInput;
-
-            helpHTML = id(`${elementId}_help`);
-        } else if (checkEmailObj.siblingEmail.includes(elementId)) {
-            chooseEmail = checkEmailObj.siblingEmail;
-            chooseName = checkEmailObj.siblingName;
-
-            helpHTML = id(`${elementId}_help`);
-        }
-
-        const checkFamilyEmail = (event) => {
-            //this checks the value of what is being typed
-
-            const emailInput = event.target.value;
-
-            helpHTML.innerHTML = (emailInput.length > 5 && emailInput.length < 7) ? "Email may be too small" : "";
-
-
-            // use the elementid to find the exact email value and name value
-            const index = chooseEmail.indexOf(elementId);
-            const email = id(chooseEmail[index]);
-            const emailValue = email.value;
-            const name = id(chooseName[index]);
-            const nameValue = name.value;
-
-
-            // if (!emailValue)
-            //     throw new Error("another round of email is empty");
-            // if (!nameValue) throw new Error("name is empty");
-            // if (!getData.length) throw new Error("data is faulty");
-
-
-
-            // checking family email 
-            helpHTML.style.display = "block";
-            helpHTML.innerHTML = checkEmail.includes(emailInput) ?
-                `Great news! ${nameValue} is already registered on the platform` :
-                `${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform ? ${checkBox(elementId)}`;
-
-
-
-            // send the email to family membersa
-
-            const processKidRadio = (ev) => {
-                const postObj = {
-                    mobile: "", // is this needed?
-                    viewPath: "msg/contactNewMember",
-
-                    data: {
-                        email: emailValue,
-                        name: nameValue,
-                        yourName: `${fName} ${lName}`,
-                         familyCode: id(`familyCode_id`).value
-       
-                    },
-
-                    subject: `${fName} ${lName} Wants You: Experience the Magic of your Family Network Today!`,
-                };
-
-                axios
-                    .post("/register/contactNewMember", postObj)
-                    .then((response) => {
-                        helpHTML.innerHTML = response.data.message;
-
-                        setTimeout(() => {
-                            helpHTML.style.display = "none";
-                        }, 5000);
-                    })
-                    .catch((error) => {
-                        showError(error);
-                    });
-            };
-
-            id(`${elementId}Yes`).addEventListener("click", processKidRadio);
-
-            id(`${ elementId }No`).addEventListener("click", () => (id(`${ elementId }No`).style.display = "none"));
-
-
-        };
-
-        if (chooseEmail.includes(elementId)) {
-
-            id(elementId).addEventListener("keyup", checkFamilyEmail);
-        }
-    } catch (error) {
-        showError(error);
-    }
-};
 
 const checkPersonalEmail = (e) => {
     const email = e.target.value;

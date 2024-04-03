@@ -8,89 +8,110 @@
 
 <div class="container">
 
-    <div class="styleForm" style="margin-top: 2rem;">
+  <div class="styleForm" style="margin-top: 2rem; margin-right: 1rem; margin-left: 1rem;">
 
-      <form action="/accountSetting" method="POST" class="accountSetting styleform_form" id="accountSettingForm" enctype="multipart/form-data">
+    <form action="/accountSetting" method="POST" class="accountSetting styleform_form" id="accountSettingForm" enctype="multipart/form-data">
 
-          <div id="setLoader" class="loader" style="display: none;">
-          </div>
-          
-        
-              <p class="subtitle"> Your Account ID : {{ $accountData['id'] }} <br>
-               Your Family Code : {{ $accountData['famCode'] }}</p>
-              
-                <div class="notification" id="accountSettingForm_notification" style="display: none;">
-
-                <p id="accountSettingForm_notification_error"></p>
-            </div>
-
-            <div class="form-group">
-
-              @php
-              $acctId = "Your Account ID:  {$accountData['id']} ";
-
-                  $formArray = [
-                  
-
-                    'Make Account Changes' => 'title',
- 
-
-                    'contact' => [
-                      'mixed', 
-                      'label' => ['mobile number', 'email', 'country'], 
-                      'attribute' => ['mobile', 'email', 'country'], 
-                      'inputType' => ['text', 'email', 'text'], 
-                      'value' => [$accountData['mobile'], $accountData['email'], $accountData['country']],
-                      'icon' => [ 
-                        '<i class="fa fa-envelope-square"></i>', 
-                        '<i class="fa fa-mobile"></i>',
-                        '<i class="fa fa-user"></i>'
-                      ] 
-                    ],
-
-                    // kids
-
-                    'childrenAndSiblings' => [
-                        'mixed',
-                        'label' => ['Add Kids?', 'Add Siblings?'],
-                        'attribute' => ['kids', 'siblings'],
-                        'inputType' => ['select', 'select'],
-                        'options' => [
-                        ['select', 0, 1, 2, 3],
-                        ['select', 0, 1, 2, 3]
-                        ],
-                        'icon' => [
-                        '<i class="fa fa-child"></i>',
-                        '<i class="fa fa-user"></i>'
-                        ]
-                    ],
-
-                    'token' => 'token',
-                    'button' => 'submit'
-
-                
+      <div id="setLoader" class="loader" style="display: none;">
+      </div>
 
 
+      <p class="subtitle"> Your Account ID : {{ $accountData['id'] }} <br>
+        Your Family Code : {{ $accountData['famCode'] }} <br>
+        FirstName : <span id="fName">{{ $_SESSION['fName'] }}</span>  <br>     Lastname :  <span id="lName">{{ $_SESSION['lName'] }}</span>  </p>
+      
+     
+
+      <div class="notification" id="accountSettingForm_notification" style="display: none;">
+
+        <p id="accountSettingForm_notification_error"></p>
+      </div>
+
+      <div class="form-group">
+
+        @php
+        $acctId = "Your Account ID: {$accountData['id']} ";
+
+        $formArray = [
+
+
+        'Make Account Changes' => 'title',
+
+
+        'contact' => [
+        'mixed',
+        'label' => ['mobile number', 'email', 'country'],
+        'attribute' => ['mobile', 'email', 'country'],
+        'inputType' => ['text', 'email', 'text'],
+        'value' => [$accountData['mobile'], $accountData['email'], $accountData['country']],
+        'icon' => [
+        '<i class="fa fa-envelope-square"></i>',
+        '<i class="fa fa-mobile"></i>',
+        '<i class="fa fa-user"></i>'
+        ]
+        ],
+
+        // kids
+
+        'childrenAndSiblings' => [
+        'mixed',
+        'label' => ['Add Kids?', 'Add Siblings?', 'add spouse?'],
+        'attribute' => ['kids', 'siblings', 'maritalStatus'],
+        'inputType' => ['select', 'select', 'select'],
+        'options' => [
+        ['select', 0, 1, 2, 3],
+        ['select', 0, 1, 2, 3],
+        ['select','Yes - Add Husband', 'Yes - Add Wife'],
+        ],
+        'icon' => [
+        '<i class="fa fa-child"></i>',
+        '<i class="fa fa-user"></i>',
+        '<i class="fa fa-user"></i>'
+        ]
+        ],
+
+        // spouse
+
+        'spouse' => [
+        'mixed',
+        'label' => ["Spouse's name", "Spouse's Email","Spouse's mobile", 'maiden name'],
+        'attribute' => ['spouseName', 'spouseEmail', 'spouseMobile', 'spouseMaidenName'],
+        'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089', 'maiden name'],
+        'inputType' => ['text','email', 'text', 'text'],
+        'icon' => [
+        '<i class="fa fa-user"></i>',
+        '<i class="fa fa-envelope-square"></i>',
+        '<i class="fa fa-mobile"></i>',
+        '<i class="fa fa-user"></i>',
+        ]
+        ],
+
+        'token' => 'token',
+        'button' => 'submit'
 
 
 
 
-                  ];
 
 
-                  $form = new App\classes\BuildFormBulma($formArray);
-                  $form->genForm();
-
-              @endphp
-
-            </div>
 
 
-      </form>
+        ];
 
-    </div>
 
-  
+        $form = new App\classes\BuildFormBulma($formArray);
+        $form->genForm();
+
+        @endphp
+
+      </div>
+
+
+    </form>
+
+  </div>
+
+
 </div>
 
 

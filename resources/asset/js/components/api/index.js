@@ -34,3 +34,20 @@ export const postData = async(url, object) => {
         throw error;
     }
 };
+
+export const fetchEmailData = ()=> {
+    // Make a GET request and return the promise
+    return axios.get(`${URL}getEmails`)
+        .then(response => {
+            // Extract the data from the response
+            const data = response.data
+            // Return the data or do further processing
+            return data;
+        })
+        .catch(error => {
+            // Handle any errors that occur during the request
+            console.error('Error fetching data:', error);
+            throw error; // Rethrow the error to be handled by the caller
+        });
+}
+
