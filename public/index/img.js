@@ -323,7 +323,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
-  var img = imgURL ? "/img/profile/".concat(imgURL) : "/avatar/avatarF.png";
+  var img = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
   return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
 };
 var showComment = function showComment(comment) {
@@ -420,7 +420,7 @@ var postedAt = function postedAt(date) {
   return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 var nameImgTiming = function nameImgTiming(data) {
-  var img = data.img ? "/img/profile/".concat(data.img) : "/avatar/avatarF.png";
+  var img = data.img ? "/public/img/profile/".concat(data.img) : "/public/avatar/avatarF.png";
   return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
 };
 
@@ -438,14 +438,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
   // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
-
   var postImagesWithValues = Object.keys(data).filter(function (key) {
     return key.startsWith('post_img') && data[key] !== null;
   }).map(function (el) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>\n  ");
+    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/public/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>\n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);

@@ -149,7 +149,7 @@ class ProfilePage extends ProcessImg
 
             if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
-                fileUploadMultiple("img/post/", 'post_img');
+                fileUploadMultiple("public/img/post/", 'post_img');
 
                 // create a file path name for the database
                 $image = $_FILES['post_img']['name'];
@@ -174,13 +174,14 @@ class ProfilePage extends ProcessImg
             header('Content-Type: text/event-stream');
             header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
-            Insert::submitFormDynamic('post', $getPost);
+            Insert::submitFormDynamic('post', $getPost); // this send the last post id to the JS frontend
 
-            $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
+            // $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
 
-
-            $messages = Post::postByNo($theId);
-            foreach ($messages as $message);
+            // $messages = Post::postByNo($theId);
+        
+            // foreach ($messages as $message);
+         
         } catch (\Throwable $th) {
             showError($th);
         }

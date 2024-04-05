@@ -160,7 +160,7 @@ var renderHtml = function renderHtml(el) {
       // Handle the case where 'el' is falsy, such as when data is not available.
       throw new Error('there is no data');
     }
-    var theImg = "/img/profile/".concat(el.img);
+    var theImg = "/public/img/profile/".concat(el.img);
     var isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Add to family';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";

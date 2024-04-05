@@ -19,7 +19,7 @@
   </h4>
 
 
-  <img src="/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="400" height="400">
+  <img src="/public/img/profile/{{ $data['img'] }}" alt="Me" class="w3-image w3-padding-32" width="400" height="400">
 
 
     <h4><b>{{ $data['firstName'] }} {{ $data['lastName'] }}</b></h4>

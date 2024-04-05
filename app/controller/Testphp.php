@@ -17,16 +17,15 @@ class Testphp extends Select
     public $time = 90;
 
 
-    public static function testFunction()
+    public static function testFunction():void
     {
   
-        // $getAnswer = Members::getMemberName('432292OLAWALE');
-        // $answer = Members::getAllMembersNoPicsStatic();
-        // // printArr($answer);
-        // foreach($getAnswer as $member) {
-        //     $result = $member;
-        // }
-        // printArr($result);
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
+        $result = parent::selectFn2(query: $query, bind: [18]);
+        printArr($result);
+        foreach($result as $results)
+         echo json_encode($results);
+    
     }
 
     public function index()

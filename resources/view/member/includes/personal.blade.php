@@ -33,13 +33,13 @@ input[type="file"] {
 }
 
 .custom-file-upload::before {
-    content: '(1) Upload';
+    content: 'Upload';
     display: inline-block;
     background-color: #3498db;
     color: white;
     border: none;
     border-radius: 5px;
-    padding: 10px 20px;
+    padding: 5px 10px;
     outline: none;
     white-space: nowrap;
     cursor: pointer;
@@ -124,11 +124,11 @@ input[type="file"] {
 
         @isset($data['img'])
 
-        <img src="/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
+        <img src="/public/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
       
 
         @else
-        <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+        <img src="/public/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
 
         @endisset
         <br>

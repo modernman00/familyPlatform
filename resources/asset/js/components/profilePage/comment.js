@@ -4,7 +4,7 @@ export const commentHTML = (data) => {
 
   const imgURL = (data.img) ? data.img : data.profileImg
 
-  const img = (imgURL) ? `/img/profile/${imgURL}` : `/avatar/avatarF.png`
+  const img = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
 
   return `<div class='w3-ul w3-border w3-round' id='comment${data.comment_no}' name='commentDiv'>
             <div class='w3-container commentDiv'>

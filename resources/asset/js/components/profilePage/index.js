@@ -1,8 +1,6 @@
 // "use strict";
 localStorage.removeItem('redirect')
 
-console.log(sessionStorage)
-
 import "./loadPost"
 import "./modal"
 import "./img"

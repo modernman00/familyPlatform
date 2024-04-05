@@ -266,14 +266,14 @@ function fileUploadMultiple($fileLocation, $formInputName): void
 
         if ($fileSize > 102400000) {
             $picError .= 'File size must not exceed 10240kb';
-            throw new Exception("Error Processing Request - post images - $picError", 1);
+            msgException(401, "Error Processing Request - post images - $picError");
         }
         if (file_exists($fileName)) {
             $picError .= "File $fileName already uploaded";
-            throw new Exception("Error Processing Request - post images - $picError", 1);
+            msgException(401, "Error Processing Request - post images - $picError");
         }
         if ($picError) {
-            throw new Exception("Error Processing Request - post images - $picError", 1);
+           msgException(401, "Error Processing Request - post images - $picError");
         }
 
         $uploadFile = move_uploaded_file($fileTemp, $fileLocation . $fileName);

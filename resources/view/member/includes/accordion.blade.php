@@ -26,7 +26,7 @@
 
                 <div class="w3-half">
 
-                  <img src="/img/post/{{ $images["post_img$i"] }}" style="width:100%" class="w3-margin-bottom" alt="{{ $images["post_img$i"] }}">
+                  <img src="/public/img/post/{{ $images["post_img$i"] }}" style="width:100%" class="w3-margin-bottom" alt="{{ $images["post_img$i"] }}">
               
               </div>
 

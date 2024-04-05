@@ -90,6 +90,6 @@ class Organogram extends SingleCustomerData
             } 
         }
 
-        view('member/organogram', compact('data', 'getSiblings', 'getKids', 'siblingKid'));
+        view('member/organogram', compact('data', 'getSiblings', 'getKids', 'siblingKid', 'newSiblingData'));
     }
 }

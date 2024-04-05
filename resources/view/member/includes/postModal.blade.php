@@ -8,9 +8,9 @@
 
       @isset($data['img'])
 
-      <img src="/img/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">
+      <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">
       @else
-      <img src="/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
+      <img src="/public/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
 
       @endisset
 
@@ -29,20 +29,23 @@
 
         <div class="changeProfileDisplay">
 
-{{--          
-         <label for="post_img" class="custom-file-upload"></label> --}}
-          {{-- <button class='w3-button'> --}}
-          <input type="file" class="w3-input" id="post_img" name="post_img[]" accept=".jpg, .jpeg, .png" multiple>
-          {{-- </button> --}}
+            <div class="w3-bar">
+
+         {{-- <label for="post_img" class="custom-file-upload"></label> --}}
+      
+          <input type="file" class="w3-input" id="post_img" name="post_img[]" accept=".jpg, .jpeg, .png" multiple style="display: none;">
+          <button class='w3-button w3-tiny w3-blue' type="button" id="uploadButton"><i class="fa fa-upload"></i> Upload
+          </button>
+          <span id="fileNames"></span>
           
          
-          <div class="w3-bar">
-            <button type="button" id="submitPost" name="submit" class="w3-button w3-green submitPost"><i class="fa fa-pencil"></i>
+       
+            <button type="button" id="submitPost" name="submit" class="w3-button w3-green w3-tiny submitPost"><i class="fa fa-pencil"></i>
                Post</button>
 
 
             <button onclick="document.getElementById('id01').style.display='none'" type="button"
-              class="w3-button w3-red">Cancel</button>
+              class="w3-button w3-red w3-tiny">Cancel</button>
           </div>
 
         </div>
@@ -53,3 +56,14 @@
 
   </div>
 </div>
+
+<script>
+document.getElementById('uploadButton').addEventListener('click', function() {
+  document.getElementById('post_img').click();
+});
+
+document.getElementById('post_img').addEventListener('change', function() {
+  var fileNames = Array.from(this.files).map(file => file.name);
+  document.getElementById('fileNames').innerText = fileNames.join(', ');
+});
+</script>

@@ -5,11 +5,11 @@
 
   <a href="/profilepage/img?dir=img&pics={{ $allData["img"] }}&pID={{ $allData["post_no"] }}&path=profile">
 
-    <img src="/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
+    <img src="/public/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
   </a>
 
   @else
-  <img src="/avatar/avatarF.png" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
+  <img src="/public/avatar/avatarF.png" alt="Avatar" class="w3-left w3-circle w3-margin-right" style="width:60px">
   @endisset
 
   {{--  POST TIME  --}}
@@ -33,7 +33,7 @@
     <a href="/profilepage/img?dir=img&pics={{ $allData["post_img$i"] }}&pID={{ $allData["post_no"] }}&path=post">
 
       <div class="w3-half">
-        <img src="/img/post/{{ $allData["post_img$i"] }}" style="width:100%" alt="images{{ $i }}" class="w3-margin-bottom w3-hover-sepia" id="postImage{{ $i }}">
+        <img src="/public/img/post/{{ $allData["post_img$i"] }}" style="width:100%" alt="images{{ $i }}" class="w3-margin-bottom w3-hover-sepia" id="postImage{{ $i }}">
       </div>
     </a>
     @endfor

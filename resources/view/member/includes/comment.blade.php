@@ -4,7 +4,7 @@
 
         @isset($comment['img'])
      
-        <img src="/img/profile/{{ $comment['img'] }}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
+        <img src="/public/img/profile/{{ $comment['img'] }}" alt="Avatar" class="w3-left w3-circle w3-margin-right commentImg" style="width:60px; height:60px">
 
         @else
 
@@ -14,6 +14,8 @@
 
           {{--  POST TIME  --}}
         <p class="w3-right w3-opacity commentTiming">  {{ humanTiming($comment['date_created'])  }} ago </p> 
+
+        
           
         </span>
 

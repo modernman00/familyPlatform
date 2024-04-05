@@ -1,10 +1,9 @@
 @extends ('layouts.w3s_member')
 @section('title', 'Organogram')
-@section('data-page-id', 'Organogram')
-@section('content')
-
   {{-- custom css --}}
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" type="text/css" href="/public/style.css">
+
+
 
 <style>
     p.substitle {
@@ -13,61 +12,6 @@
 
 </style>
 
-{{-- <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
-<script type="text/javascript">
-    const dataPull = @json($data, JSON_PRETTY_PRINT);
-    const kids = @json($getSibling, JSON_PRETTY_PRINT);
-
-       // console.log(kids);
-    
-
-        google.charts.load('current', {packages:["orgchart"]});
-        
-        google.charts.setOnLoadCallback(drawChart);
-
-        function drawChart() {
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Name');
-            data.addColumn('string', 'Manager');
-            data.addColumn('string', 'ToolTip');
-
-            // For each orgchart box, provide the name, manager, and tooltip to show.
-            data.addRows([
-              // father
-              [
-                  {
-                      'v':dataPull.fatherName, 
-                      'f': dataPull.fatherName + '<div style="color:red; font-style:italic">Father</div>'
-                  }, "", ""
-              ],
-              // mother
-              [
-                  {
-                      'v':dataPull.motherName, 
-                      'f': '<a href=/setProfile?id='+dataPull.id +' >'+ dataPull.motherName + '</a><div style="color:red; font-style:italic">Mother</div>'
-                  }, dataPull.fatherName, 'The Mother'
-              ],
-              // you and your siblings
-              [
-                  {
-                      'v':dataPull.firstName, 'f': dataPull.firstName + '<div style="color:red; font-style:italic">Myself</div>'
-                  }, dataPull.motherName, ''
-              ],
-              [ dataPull.sibling_name, dataPull.motherName, ""],
-              // spouse
-               [ dataPull.spouseName, dataPull.firstName, ""],
-
-              // your children
-              [ dataPull.kid_name, dataPull.spouseName, ""],
-            ]);
-
-            // Create the chart.
-            var chart = new google.visualization.OrgChart(document.getElementById('chart_div'));
-            // Draw the chart, setting the allowHtml option to true for the tooltips.
-            chart.draw(data, {'allowHtml':true, width: 1000, height: 1000, title: `${dataPull.firstName} Family Tree`});
-        }
-</script> --}}
 
 @section('data-page-id', 'Organogram')
 @section('content')

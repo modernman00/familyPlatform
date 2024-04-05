@@ -15,7 +15,7 @@ export const renderHtml = (el) => {
             throw new Error('there is no data')
         }
 
-        const theImg = `/img/profile/${el.img}`;
+        const theImg = `/public/img/profile/${el.img}`;
         const isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
         const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
             el.status :

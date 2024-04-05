@@ -58,6 +58,7 @@ try {
         const elementId = e.target.id
         const postId = e.target.name
 
+
         if (elementId.includes("likeButton")) {
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
@@ -70,7 +71,6 @@ try {
 
             // add one to the result 
             newLikeCounterVal = parseInt(likeCounterVal) + 1;
-
             id(likeCounterId).innerHTML = newLikeCounterVal;
 
 
@@ -144,17 +144,12 @@ try {
             // 3. 
             axios.post("/member/profilePage/post", formData, options)
                 .then(response => {
-
                     //  4. 
                     axios.get(`/post/getAllPost/byNumber?postNo=${response.data.message}`)
                         .then(res => {
                             // 5. 
-
-                            //  log(res.data)
                             appendNewPost(res.data.message)
-
                             // Pusher(res.data.message)
-
                         })
                     // Enable pusher logging - don't include this in production
 
@@ -166,6 +161,9 @@ try {
                         // log("checking")
                     });
                     id('id01').style.display = 'none'
+
+                    id("formPostMessageModal").reset();
+
                 })
 
         } 
