@@ -13,12 +13,14 @@ class ProcessImg extends AllFunctionalities
     {
         try {
             if (!$_FILES) {
-                throw new \Exception("Error Processing Request - PIC NOT ADDED", 1);
+                msgException(401, "Error Processing Request - PIC NOT ADDED");
             }
+        
 
-            fileUpload("img/profile/", 'profileImageFile');
+            fileUpload("public/img/profile/", 'profileImageFile');
             // create a file path name for the database
             $fileName = checkInputImage($_FILES['profileImageFile']['name']);
+
 
             $this->profileImg = $fileName;
 

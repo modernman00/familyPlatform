@@ -159,9 +159,7 @@ class Insert extends Db
             }
             $outcome = $query->execute();
             if (!$outcome) {
-                http_response_code(406); // sets the response to 406
-                echo http_response_code(); // echo the new response code
-                throw new Exception("Not able to execute data", 1);
+                msgException(406, "Unable to execute the query.");
             }
 
             $lastId = parent::connect2()->lastInsertId();

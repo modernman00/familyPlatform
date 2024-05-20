@@ -19,7 +19,7 @@ class Organogram extends SingleCustomerData
           //  verify token
 
         $tokenVerify = new VerifyToken();
-        $result = $tokenVerify->profilePage();
+        $tokenVerify->profilePage();
         $id =  checkInput($_GET['id']);
         $table = ['personal', 'profile_pics', 'otherFamily'];
         $siblingQuery = Select::formAndMatchQuery('SELECT_ONE', 'siblings', 'id');       

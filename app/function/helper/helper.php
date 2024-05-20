@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Philo\Blade\Blade;
 use App\classes\Select;
+use Spatie\ImageOptimizer\Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
 
 
@@ -21,17 +22,17 @@ function view($path, array $data = [])
 }
 
 function toSendEmail(string $viewPath, array $data, string $subject, string $emailRoute)
-    {
-        // generate the data to send the email
-        $sendEmailArray = genEmailArray(
-            $viewPath,
-            $data,
-            $subject
-        );
+{
+    // generate the data to send the email
+    $sendEmailArray = genEmailArray(
+        $viewPath,
+        $data,
+        $subject
+    );
 
-        // send the email
-        return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
-    }
+    // send the email
+    return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
+}
 
 /**
  * @return false|string
@@ -191,7 +192,6 @@ function showError($th): void
     $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n";
 
     echo json_encode(['message' => $error]);
-
 }
 
 /**
@@ -238,6 +238,19 @@ function sendText($message, $numbers): void
     echo $result;
 }
 
+
+// Function to scan file for viruses using ClamAV
+function clamAVScan($filePath)
+{
+    // Execute clamscan command and capture output
+    $output = shell_exec("clamscan --stdout --no-summary $filePath");
+
+    // Check if $output is not null before calling strpos()
+    if ($output == null && strpos($output, 'Infected files: 0') == false) {
+      msgException(500, "virus detected");
+    } 
+}
+
 // return email once logged in
 
 /**
@@ -249,12 +262,15 @@ function fileUploadMultiple($fileLocation, $formInputName): void
     // Count total files
     $countFiles = count($_FILES[$formInputName]['name']);
 
+    ini_set('post_max_size', '20M');
+    ini_set('upload_max_filesize', '20M');
+
     // Looping all files
     for ($i = 0; $i < $countFiles; $i++) {
         $fileName = basename($_FILES[$formInputName]['name'][$i]);
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        // $fileLocation = $fileLocation . $fileName;
+        $pathToImage = $fileLocation . $fileName;
 
         // sanitise the file
         $picError = "";
@@ -268,26 +284,30 @@ function fileUploadMultiple($fileLocation, $formInputName): void
             $picError .= 'File size must not exceed 10240kb';
             msgException(401, "Error Processing Request - post images - $picError");
         }
-        if (file_exists($fileName)) {
-            $picError .= "File $fileName already uploaded";
+        // if (file_exists($pathToImage)) {
+        //     $picError .= "File $fileName already uploaded";
+        //     msgException(401, "Error Processing Request - post images - $picError");
+        // }
+        if ($picError) {
             msgException(401, "Error Processing Request - post images - $picError");
         }
-        if ($picError) {
-           msgException(401, "Error Processing Request - post images - $picError");
-        }
 
-        $uploadFile = move_uploaded_file($fileTemp, $fileLocation . $fileName);
+        $uploadFile = move_uploaded_file($fileTemp, $pathToImage);
+
+           // Check if upload was successful
+        if (!$uploadFile) {
+            $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
+            continue; // Skip optimization if upload failed
+        }
 
         // Optimise the image
 
         $optimizerChain = ImgOptimizer::create();
-        $optimizerChain->optimize($fileLocation . $fileName);
+        $optimizerChain->optimize($pathToImage);
 
-        if ($uploadFile) {
+    
             $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
-        } else {
-            $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
-        }
+   
     }
 }
 
@@ -304,11 +324,25 @@ function fileUpload($fileLocation, $formInputName): void
         throw new Exception("No File Name ", 1);
     }
 
+    $fileError = $_FILES[$formInputName]['error'];
+
+    if ($fileError !== UPLOAD_ERR_OK) {
+
+        throw new Exception('File upload error: ' . $fileError);
+    }
+
     $fileTemp = $_FILES[$formInputName]['tmp_name'];
 
     if (!$fileTemp) {
         throw new Exception("No Temp File", 1);
     }
+
+    // Check for virus using ClamAV
+    $scanResult = clamAVScan($fileTemp);
+    if (!$scanResult) {
+        throw new Exception('Virus detected in the file.');
+    }
+
 
     # the file temp name
     $size = $_FILES[$formInputName]['size'];  # the file size
@@ -316,7 +350,14 @@ function fileUpload($fileLocation, $formInputName): void
         throw new Exception("File has no size", 1);
     }
 
+    // throw exception if fileLocation does not exist  
+    if (!file_exists($fileLocation) || !is_dir($fileLocation)) {
+        throw new \Exception("File location does not exist", 1);
+    }
+
+
     $fileName_location = "$fileLocation$fileName";
+
 
     // sanitise the file
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); # use pathinfo to get the file extension
@@ -445,5 +486,3 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
-
-

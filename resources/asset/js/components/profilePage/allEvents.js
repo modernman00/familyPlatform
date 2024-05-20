@@ -8,6 +8,8 @@ import Pusher from 'pusher-js';
 
 try {
 
+       // Enable pusher logging - don't include this in production
+
     Pusher.logToConsole = true;
 
     const pusher = new Pusher('d1f1e43f3d8afb028a1f', {

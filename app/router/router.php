@@ -18,5 +18,6 @@ include_once __DIR__ . "/notification.php";
 include_once __DIR__ . "/friendRequest.php";
 
 $router->map('GET', '/testFunction', 'App\controller\Testphp@testFunction', 'php8');
+$router->map('GET', '/testOrganogram', 'App\controller\TestClass@organogram', 'TestClass');
 
 $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS');

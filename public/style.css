@@ -531,6 +531,20 @@ textarea {
   transition: all 0.5s;
 }
 
+.tree li a + a {
+  margin-left: 1.25rem;
+  position: relative;
+}
+
+.tree li a + a::before {
+  content: "";
+  position: absolute;
+  border-top: 1px solid #ccc;
+  top: 50%;
+  left: -1.3rem;
+  width: 1.25rem;
+}
+
 /*Time for some hover effects*/
 /*We will apply the hover effect the the lineage of the element also*/
 .tree li a:hover,

@@ -789,6 +789,34 @@ var checkCookie = function checkCookie() {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/helper/images.js":
+/*!********************************************************!*\
+  !*** ./resources/asset/js/components/helper/images.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   showImageFileUploadFn: () => (/* binding */ showImageFileUploadFn)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+// use this in conjunction with the file 
+var showImageFileUploadFn = function showImageFileUploadFn(uploadBtn, inputId, fileName) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(uploadBtn).addEventListener('click', function () {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputId).click();
+  });
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputId).addEventListener('change', function () {
+    var fileNames = Array.from(this.files).map(function (file) {
+      return file.name;
+    });
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(fileName).innerText = fileNames.join(', ');
+  });
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/navbar.js":
 /*!*************************************************!*\
   !*** ./resources/asset/js/components/navbar.js ***!
@@ -904,6 +932,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 try {
+  // Enable pusher logging - don't include this in production
+
   (pusher_js__WEBPACK_IMPORTED_MODULE_4___default().logToConsole) = true;
   var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('d1f1e43f3d8afb028a1f', {
     cluster: 'eu'
@@ -1343,11 +1373,48 @@ var showPostImg = function showPostImg(data) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_images__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/images */ "./resources/asset/js/components/helper/images.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+
+
 
 
 
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePics').addEventListener('click', function () {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formProfilePics').style.display = "block";
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formProfilePics').style.display = "block";
+});
+
+// FOR PROFILE IMAGE CHANGE
+(0,_helper_images__WEBPACK_IMPORTED_MODULE_1__.showImageFileUploadFn)('uploadButtonProfilePics', 'profileImageFile', 'profileImgFileNames');
+
+// FOR POST MODAL IMAGE UPLOAD  
+
+(0,_helper_images__WEBPACK_IMPORTED_MODULE_1__.showImageFileUploadFn)('uploadButton', 'post_img', 'postModalImgFileNames');
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitProfilePics').addEventListener('click', function () {
+  // Get the form element
+  var form = document.getElementById("formProfilePics");
+
+  // Create a FormData object and append the form data to it
+  var formData = new FormData(form);
+  var options = {
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN'
+  };
+  // send form data using axios post method
+
+  axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/member/profilePage/profileImg', formData, options).then(function (response) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data;
+    if (response.data === "Profile image updated") {
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').classList.add('w3-green');
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data;
+      // Reload the page
+      location.reload();
+    }
+  })["catch"](function (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').classList.add('w3-red');
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = error.message;
+  });
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = "";
 });
 
 /***/ }),

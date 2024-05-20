@@ -66,7 +66,7 @@ function checkInput($data): mixed
         $data = preg_replace('/[^0-9A-Za-z.@\s-]/', '', $data);
         return $data;
     } else {
-        return null;
+        return msgException(406, 'problem with your entry');
     }
 }
 
@@ -77,10 +77,10 @@ function checkInputImage($data): string|null
         $data = stripslashes($data);
         $data = htmlspecialchars($data);
         $data = strip_tags($data);
-        $data = preg_replace('/[^0-9A-Za-z.@\s-]/', '', $data);
+        $data = preg_replace('/[^a-zA-Z0-9\-\_\.\s]/', '', $data);
         return $data;
     } else {
-        return null;
+       return msgException(406, 'image name not well formed');
     }
 }
 
@@ -116,7 +116,7 @@ function returnSuccessCode($msg): void
  * @throws \Exception 
  */
 // 8/9/22- i commented out the json code because I want to throw the exception and catch it before using the json
-function msgException(int $errCode, string | int  $msg): void
+function msgException(int $errCode, string | int  $msg)
 {
     // http_response_code($errCode); // sets the response to 406
 

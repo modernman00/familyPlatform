@@ -36,7 +36,7 @@
           <input type="file" class="w3-input" id="post_img" name="post_img[]" accept=".jpg, .jpeg, .png" multiple style="display: none;">
           <button class='w3-button w3-tiny w3-blue' type="button" id="uploadButton"><i class="fa fa-upload"></i> Upload
           </button>
-          <span id="fileNames"></span>
+          <span id="postModalImgFileNames"></span>
           
          
        
@@ -56,14 +56,3 @@
 
   </div>
 </div>
-
-<script>
-document.getElementById('uploadButton').addEventListener('click', function() {
-  document.getElementById('post_img').click();
-});
-
-document.getElementById('post_img').addEventListener('change', function() {
-  var fileNames = Array.from(this.files).map(file => file.name);
-  document.getElementById('fileNames').innerText = fileNames.join(', ');
-});
-</script>

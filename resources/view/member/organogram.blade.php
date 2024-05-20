@@ -1,4 +1,4 @@
-@extends ('layouts.w3s_member')
+@extends ('baseBulma')
 @section('title', 'Organogram')
   {{-- custom css --}}
   <link rel="stylesheet" type="text/css" href="/public/style.css">

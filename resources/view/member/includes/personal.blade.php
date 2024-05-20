@@ -66,7 +66,7 @@ input[type="file"] {
     color: #3498db;
 }
 
-.changeProfileButton{
+/* .changeProfileButton{
   font-size: 0.9em;
   font-weight: bold;
    box-shadow: 0px -1px 0px 0px #3dc21b;
@@ -80,7 +80,7 @@ input[type="file"] {
     padding: 0.5rem 1.1rem;
     text-decoration: none;
     text-shadow: 0px 0px 0px #2f6627;
-}
+} */
 
 .changeProfileButton:hover {
     background-color: #5cbf2a;
@@ -142,8 +142,9 @@ input[type="file"] {
 
     {{-- ADD / CHANGE PROFILE PICS --}}
 
-    <form action='/member/profilePage/profileImg' method='post' enctype='multipart/form-data' id="formProfilePics"
+    <form method='post' enctype='multipart/form-data' id="formProfilePics"
       style="display: none;">
+      <p id="profilePicsNotification"></p>
 
      
       <div class="changeProfileDisplay">
@@ -152,14 +153,15 @@ input[type="file"] {
         <span>Choose a File</span>
         <input type="file" id="profileImageFile" name="file" accept=".jpg, .jpeg, .png">
     </label> --}}
+   <input type="file" class="w3-input" id="profileImageFile"
+          name="profileImageFile" accept=".jpg, .jpeg, .png" style="display: none;">
+           <button class='w3-button w3-tiny w3-blue' type="button" id="uploadButtonProfilePics"><i class="fa fa-upload"></i>Upload
+          </button>
+          <span id="profileImgFileNames"></span>
+
+            <button class='w3-button w3-tiny w3-red' id="submitProfilePics"  type="button">  Submit </button>
 
 
-
-         <label for="profileImageFile" class="custom-file-upload"></label>
-            <button class='changeProfileButton' name='submit' type="submit">(2)  Save </button>
-
-        <input type="file" id="profileImageFile"
-          name="profileImageFile" accept=".jpg, .jpeg, .png">
 
       
 
@@ -235,8 +237,6 @@ input[type="file"] {
 
         // Convert the object to a JSON string and store it in localStorage
 localStorage.setItem('profile', JSON.stringify(profile));
-
-
 
 
 </script>

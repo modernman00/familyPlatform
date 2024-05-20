@@ -207,7 +207,7 @@ class ProfilePage extends ProcessImg
         try {
             // process the image 
             $this->processProfileImage();
-            header(self::REDIRECT);
+            echo json_encode("Profile image updated");
         } catch (\Throwable $th) {
             showError($th);
         }
