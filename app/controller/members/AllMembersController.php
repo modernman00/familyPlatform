@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 
-use App\model\AllMembersData;
-
 use App\classes\{
     Select,
     VerifyToken
 };
+use App\model\AllMembersData;
 use Exception;
 
 class AllMembersController extends AllMembersData

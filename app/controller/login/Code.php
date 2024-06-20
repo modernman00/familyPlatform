@@ -25,13 +25,17 @@ class Code extends Select
 
     public function show()
     {
-
-        if ($_SESSION['login'] || $_SESSION['changePW']) {
-            return view('login/code');
-        }
-
-        return view('error/genError');
+   
+    if ($_SESSION['login']) {
+        return view('login/code');
     }
+
+
+
+    // Otherwise, show the general error view
+    return view('error/genError');
+    }
+
 
     public function verify(): void
     {

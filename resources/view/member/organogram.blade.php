@@ -1,4 +1,4 @@
-@extends ('baseBulma')
+@extends ('layouts.w3s_member')
 @section('title', 'Organogram')
   {{-- custom css --}}
   <link rel="stylesheet" type="text/css" href="/public/style.css">
@@ -15,13 +15,12 @@
 
 @section('data-page-id', 'Organogram')
 @section('content')
-na
 <br><br><br><br>
 
 
 <h2 class="myFamilyTree"> {{isset($data['firstName']) ?  $data['firstName'] : "" }} {{ isset($data['lastName'])? $data['lastName'] : "" }}'s  family Tree</h2>
 
-<p class="organogram_subtitle"> This family tree represents every member of the family who share the same father and mother, symbolising the strong bond and connection within the immediate family. In future updates, we will expand the tree to include other family members who are linked solely through either the mother's or father's side, further encompassing the broader family network. </p>
+<p class="organogram_subtitle"> This family tree represents every member of the family who share the same father and mother. In future updates, we will expand the tree to include other family members who are linked solely through either the mother's or father's side, further encompassing the broader family network. </p>
 <hr>
 
 <div class="tree">
@@ -42,17 +41,18 @@ na
                     @endif --}}
 
 
-                    @isset($data['spouseName'])
-                        @if ($data['spouseName'] !== "Not Provided")
-                            <a href="#"> <b>Spouse: </b>  {{ $data['spouseName'] }} </a>
-                        @endif                        
-                    @endisset
+               
 
                     {{--  first and last name  --}}
                      <a href="#">
                         {{ isset($data['firstName']) ?  $data['firstName'] : ""  }} 
                         {{ isset($data['lastName']) ?  $data['lastName'] : "" }}
                     </a>
+                         @isset($data['spouseName'])
+                        @if ($data['spouseName'] !== "Not Provided")
+                            <a href="#"> <b>Spouse: </b>  {{ $data['spouseName'] }} </a>
+                        @endif                        
+                    @endisset
 
                     {{--  check if there are kids  --}}
                     <ul>

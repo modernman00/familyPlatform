@@ -14,8 +14,8 @@ function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyri
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-var button = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("button");
-button.addEventListener("click", function () {
+var button = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("btnFamCode");
+btnFamCode.addEventListener("click", function () {
   try {
     if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('surname_id').value !== "") {
       var uniqueNumber = Date.now();
@@ -23,7 +23,7 @@ button.addEventListener("click", function () {
       var getSurname = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('surname_id').value;
       var firstFourLetters = getSurname.substring(0, 4);
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
-      button.disabled = true;
+      btnFamCode.disabled = true;
     }
   } catch (error) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("surname_error").innerHTML = error.messages;

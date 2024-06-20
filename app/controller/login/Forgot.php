@@ -70,7 +70,13 @@ class Forgot
       unset($_SESSION['/loginType']);
 
       //7. to be used on the code controller for identification and redirection
-      $_SESSION['changePW'] = 1;
+
+      // check if $s_session['login'], if not set it
+
+    
+      if (!isset($_SESSION['login'])) {
+        $_SESSION['changePW'] = true; // or whatever default value you want
+    }
 
       msgSuccess(200, "Authentication code has been sent to you");
 

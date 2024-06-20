@@ -1,7 +1,7 @@
 <?php
 
-use App\model\EmailData;
 use \Rollbar\Rollbar;
+use App\model\EmailData;
 use \Rollbar\Payload\Level;
 
 // Rollbar::init(array(
@@ -38,7 +38,7 @@ function notifyCustOfLogIn($data)
  * @throws \Exception 
  * @throws \PDOException 
  */
-function generateSendTokenEmail($data): mixed
+function generateSendTokenEmail($data)
 {
     $id = $data['id'];
     // 1. check if email exists 
@@ -52,7 +52,7 @@ function generateSendTokenEmail($data): mixed
     $emailData = ['token' => $deriveToken, 'email' => $email];
     $generateEmailArray = genEmailArray(viewPath: "msg/customer/token", data: $emailData, subject: "TOKEN");
 
-    return sendEmailWrapper(var: $generateEmailArray, recipientType: 'member');
+    sendEmailWrapper(var: $generateEmailArray, recipientType: 'member');
 }
 
 
@@ -66,7 +66,7 @@ function checkInput($data): mixed
         $data = preg_replace('/[^0-9A-Za-z.@\s-]/', '', $data);
         return $data;
     } else {
-        return msgException(406, 'problem with your entry');
+        msgException(406, 'problem with your entry');
     }
 }
 
@@ -80,7 +80,7 @@ function checkInputImage($data): string|null
         $data = preg_replace('/[^a-zA-Z0-9\-\_\.\s]/', '', $data);
         return $data;
     } else {
-       return msgException(406, 'image name not well formed');
+       msgException(406, 'image name not well formed');
     }
 }
 

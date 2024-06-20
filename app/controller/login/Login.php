@@ -136,7 +136,7 @@ class Login extends Select
 
         generateSendTokenEmail($data);  // send token to email 
 
-        $_SESSION['login'] = 1;
+        $_SESSION['login'] = true;
 
         unset($_SESSION['/loginType']); // not needed anymore
 

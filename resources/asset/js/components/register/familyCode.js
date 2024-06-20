@@ -1,9 +1,9 @@
 import { id } from "../global"
-const button = id("button");
+const button = id("btnFamCode");
 
 
 
-button.addEventListener("click", function() {
+btnFamCode.addEventListener("click", function() {
 
     try {
 
@@ -17,7 +17,7 @@ button.addEventListener("click", function() {
             const firstFourLetters = getSurname.substring(0, 4);
 
             id('createCode').value = `${firstFourLetters.toUpperCase()}${uniqueNumber1}`;
-            button.disabled = true;
+            btnFamCode.disabled = true;
         }
     } catch (error) {
         id("surname_error").innerHTML = error.messages;

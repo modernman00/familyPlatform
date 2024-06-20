@@ -456,14 +456,20 @@
           $formArray = [
           // 'Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you have not received a Code from a registered family member, worry not! You can create one below to bring your family together:' => 'p',
 
-          'surname' => 'text',
-
-          'Generate your family code' => 'button'
+          'surname' => 'text'
           ];
 
           $form = new App\classes\BuildFormBulma($formArray);
           $form->genForm();
           @endphp
+
+           <div class="field">
+                    <p class="control">
+                        <button name="btnFamCode" id="btnFamCode" type="button" class="button is-success btnFamCode is-large is-fullwidth">
+                            Generate your family code
+                        </button>
+                    </p>
+                </div>
 
           <br>
 

@@ -10,7 +10,7 @@
 <!-- Navbar -->
 @include('layouts.nav')
 
-@yield('content');
+@yield('content')
 
 
 
