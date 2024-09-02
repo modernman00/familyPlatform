@@ -16,7 +16,7 @@
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
 
-    <link rel="manifest" href="/webAppFamily.json" />
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
 
   
 

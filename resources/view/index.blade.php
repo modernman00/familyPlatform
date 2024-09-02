@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -12,26 +12,31 @@
   <title>OUR FAMILY NETWORK</title>
 
   <!-- OpenGraph meta tags for better sharing on social media -->
-  <meta property="og:title" content="OUR FAMILY NETWORK">
+  <meta property="og:title" content="Your Family Platform - Connect, Share, and Grow Together">
   <meta property="og:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
   <meta property="og:type" content="website">
-  <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}"> <!-- Replace with the URL to your website's logo or featured image -->
-  <meta property="og:url" content="https://www.myfamilyplatform.com"> <!-- Replace with your website URL -->
-  <!-- Replace with your website URL -->
+  <meta property="og:image" content="{{ getenv("IMG_CONTRACT") }}"> 
+  <meta property="og:url" content="https://www.myfamilyplatform.com"> 
+  <meta property="og:site_name" content="OUR FAMILY NETWORK">
+  <meta property="og:locale" content="en_UK">
+
+
+
 
   <!-- Twitter Card meta tags for better sharing on Twitter -->
   <meta name="twitter:title" content="OUR FAMILY NETWORK">
   <meta name="twitter:description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
-  <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}"> <!-- Replace with the URL to your website's logo or featured image -->
+  <meta name="twitter:image" content="{{ getenv("IMG_CONTRACT") }}"> 
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@familyplatform"
 
   <!-- Favicons -->
-  <link rel="apple-touch-icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="180x180">
-  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="180x180" alt="apple-touch-icon">
+  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="32x32" type="image/png" alt="icon-32x32">
   {{-- <link rel="icon" href="y" sizes="16x16" type="image/png"> --}}
   {{-- <link rel="manifest" href="{{ getenv("IMG_CONTRACT") }}"> --}}
   <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
-  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
+  <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }} alt="icon">
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
 
@@ -40,7 +45,7 @@
   <!-- Custom styles for this template -->
   <link href="/public/css/homePage.css" rel="stylesheet">
 
-  <link rel="manifest" href="/webAppFamily.json" />
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
 
 
   <style>
@@ -78,13 +83,13 @@
     <header class="masthead mb-auto">
       <div class="inner">
 
-        <nav class="nav nav-masthead justify-content-center">
+        <nav class="nav nav-masthead justify-content-center" role='navigation' aria-label='Main Navigationb'>
 
 
-          <a class="nav-link active" href="/">Home</a>
-          <a class="nav-link" href="/register">Register</a>
-          <a class="nav-link" href="/login">Log in</a>
-          <a class="nav-link" href="/aboutus">About us</a>
+          <a class="nav-link active" href="/" aria-label="Home page">Home</a>
+          <a class="nav-link" href="/register" aria-label="Register page">Register</a>
+          <a class="nav-link" href="/login" aria-label="Login page">Login</a>
+          <a class="nav-link" href="/aboutus" aria-label="About Us page">About us</a>
 
         </nav>
       </div>

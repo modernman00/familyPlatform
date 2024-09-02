@@ -238,6 +238,21 @@ function sendText($message, $numbers): void
     echo $result;
 }
 
+// function to use php-clamavlib
+if($_POST){
+  $error = '';
+  //print_r($_FILES);
+  if($_FILES['file']['size'] == 0 || !is_file($_FILES['file']['tmp_name'])){
+     $error .= 'Please select a file for upload!';
+  } else {
+    cl_setlimits(5, 1000, 200, 0, 10485760);
+    if($malware = cl_scanfile($_FILES['file']['tmp_name'])) $error .= 'We have Malware: '.$malware.'<br>ClamAV version: '.clam_get_version();
+  }
+  if($error == ''){
+    rename($_FILES['file']['tmp_name'], $upload_dir.$_FILES['file']['name']);
+  }
+}
+
 
 // Function to scan file for viruses using ClamAV
 function clamAVScan($filePath)
@@ -247,8 +262,8 @@ function clamAVScan($filePath)
 
     // Check if $output is not null before calling strpos()
     if ($output == null && strpos($output, 'Infected files: 0') == false) {
-      msgException(500, "virus detected");
-    } 
+        msgException(500, "virus detected");
+    }
 }
 
 // return email once logged in
@@ -294,7 +309,7 @@ function fileUploadMultiple($fileLocation, $formInputName): void
 
         $uploadFile = move_uploaded_file($fileTemp, $pathToImage);
 
-           // Check if upload was successful
+        // Check if upload was successful
         if (!$uploadFile) {
             $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
             continue; // Skip optimization if upload failed
@@ -305,9 +320,8 @@ function fileUploadMultiple($fileLocation, $formInputName): void
         $optimizerChain = ImgOptimizer::create();
         $optimizerChain->optimize($pathToImage);
 
-    
-            $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
-   
+
+        $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
     }
 }
 

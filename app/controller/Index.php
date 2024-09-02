@@ -40,12 +40,14 @@ class Index
             'email' => $_GET['email'],
             'country' => $_GET['country'],
             'famCode' => $_GET['famCode'],
-            'id' => $_GET['id']
+            'id' => $_SESSION['ID']
         ];
 
-        if ($_SESSION['ID'] == $_GET['id']) {
+
+
+        if ($_SESSION['id'] == $_GET['id']) {
             view('accountSetting', ['accountData' => $accountData]);
-        }
+        } 
     }
 
 

@@ -1,25 +1,58 @@
-const Version = "1.0.0";
+const Version = "1.2";
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
     "/",
-    "/index.php",
+    "/index",
+    "/login",
+    "/register",
+    "/allMembers",
+    "/member/ProfilePage",
+    "/organogram",
+    "/allMembers/getProfile",
     "/public/style.css",
     "/public/index.js",
     "/public/img/favicon/android-chrome-192x192.png",
     "/public/img/favicon/android-chrome-512x512.png",
-    "/public/img/favicon/apple-touch-icon.png"
+    "/public/img/favicon/apple-touch-icon.png",
+    "public/img/photos/",
+    "/public/img/post/",
+    "/public/img/profile/",
+    '/public/img/favicon/favicon.ico',
+    "/public/img/celebrate.jpeg",
+    "/public/img/favicon/favicon-32x32.png"
 ];
+
+// get all profile images posted to the server and add them to the cache on install 
+
+//TODO - fix this
+// self.addEventListener("install", (event) => {
+//   event.waitUntil(
+//     (async () => {
+//       const images = await fetch("/public/img/profile/");
+//       const imagesArray = await images.json();
+//       console.log(imagesArray);
+//       imagesArray.forEach(async (image) => {
+//         const response = await fetch(`/public/img/profile/${image}`);
+//         const blob = await response.blob();
+//         const cache = await caches.open(CacheName);
+//         cache.put(`/public/img/profile/${image}`, new Response(blob));
+//       });
+//     })(),
+//   );
+// });
 
 // On install, cache the static resources
 self.addEventListener("install", (event) => {
-    event.waitUntil(
-        caches
-        .open(CacheName)
-        .then(function(cache) {
-            return cache.addAll(CacheFiles);
-        })
-    );
+  console.log("[Service Worker] Install");
+  event.waitUntil(
+    (async () => {
+      const cache = await caches.open(CacheName);
+       console.log("[Service Worker] Caching all: app shell and content");
+      await cache.addAll(CacheFiles);
+    })(),
+  );
 });
+
 
 // delete old caches on activate
 
@@ -29,7 +62,7 @@ self.addEventListener("activate", (event) => {
             const names = await caches.keys();
             await Promise.all(
                 names.map((name) => {
-                    if (name !== CACHE_NAME) {
+                    if (name !== CacheName) {
                         return caches.delete(name);
                     }
                 }),
@@ -49,78 +82,92 @@ const putInCache = async(request, response) => {
     await cache.put(request, response);
 };
 
-const cacheFirst = async({ request, fallbackUrl }) => {
-    // First try to get the resource from the cache.
-    const responseFromCache = await caches.match(request);
-    if (responseFromCache) {
-        return responseFromCache;
-    }
-
-    // If the response was not found in the cache,
-    // try to get the resource from the network.
-    try {
-        const responseFromNetwork = await fetch(request);
-        // If the network request succeeded, clone the response:
-        // - put one copy in the cache, for the next time
-        // - return the original to the app
-        // Cloning is needed because a response can only be consumed once.
-        putInCache(request, responseFromNetwork.clone());
-        return responseFromNetwork;
-    } catch (error) {
-        // If the network request failed,
-        // get the fallback response from the cache.
-        const fallbackResponse = await caches.match(fallbackUrl);
-        if (fallbackResponse) {
-            return fallbackResponse;
+/**
+ * Attempts to retrieve a resource using a cache-first strategy.
+ *
+ * @param {object} options - Options for the cache-first strategy.
+ * @param {Request} options.request - The request to retrieve.
+ * @param {string} options.fallbackUrl - The URL to fall back to if the request fails.
+ * @return {Response} The retrieved response, or a fallback response if the request fails.
+ */
+// Fetch event - stale-while-revalidate strategy
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          caches.open(CacheName).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+          });
         }
-        // When even the fallback response is not available,
-        // there is nothing we can do, but we must always
-        // return a Response object.
-        return new Response("Network error happened", {
-            status: 408,
-            headers: { "Content-Type": "text/plain" },
+        return networkResponse;
+      }).catch((error) => {
+          console.error('Fetch failed; returning cached page instead:', error);
+          // Optional: Serve a fallback page if the network fails
+          return caches.match('/index');
         });
-    }
-};
 
-self.addEventListener("fetch", (event) => {
-    event.respondWith(
-        cacheFirst({
-            request: event.request,
-            fallbackUrl: "/",
-        }),
-    );
+      return cachedResponse || fetchPromise;
+    }).catch((error) => {
+      console.error('Error matching cache or fetching:', error);
+    })
+  );
 });
 
-// THIS IS FIRED WHEN THE APP HAS NETWORK CONNECTIVITY
+// Periodic sync event - sync content
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'content-sync') {
+    event.waitUntil(syncContent());
+  }
+});
 
-// self.addEventListener("sync", (event) => {
-//     if (event.tag == "send-message") {
-//         event.waitUntil(sendMessage());
-//     }
-// });
+async function syncContent() {
+  try {
+    const response = await fetch('/api/get-updates');
+    const data = await response.json();
+    console.log('Periodic content sync completed:', data);
+
+    // Update cache or IndexedDB with the new data
+  } catch (error) {
+    console.error('Error during periodic content sync:', error);
+  }
+}
+
+// Push event - handle notifications
+self.addEventListener('push', (event) => {
+  try {
+    const data = event.data ? JSON.parse(event.data.text()) : {};
+    const options = {
+      body: data.body || 'You have a new notification',
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/badge-72x72.png',
+      data: {
+        url: data.url || '/',
+      },
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(data.title || 'New Notification', options)
+    );
+  } catch (error) {
+    console.error('Error in push event:', error);
+  }
+});
 
 
-
-// self.addEventListener("fetch", (event) => {
-//     // when seeking an HTML page
-//     if (event.request.mode === "navigate") {
-//         // Return to the index.html page
-//         event.respondWith(caches.match("/"));
-//         return;
-//     }
-
-//     // For every other request type
-//     event.respondWith(
-//         (async() => {
-//             const cache = await caches.open(CACHE_NAME);
-//             const cachedResponse = await cache.match(event.request.url);
-//             if (cachedResponse) {
-//                 // Return the cached response if it's available.
-//                 return cachedResponse;
-//             }
-//             // Respond with a HTTP 404 response status.
-//             return new Response(null, { status: 404 });
-//         })(),
-//     );
-// });
+// Notification click event - focus or open a window
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(event.notification.data.url);
+      }
+    })
+  );
+});

@@ -29,6 +29,8 @@
 }
 </style>
 
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
+
   </head>
 
 <body class="w3-light-grey">

@@ -41,7 +41,7 @@ function myFunction(id) {
   <script type="text/javascript" src="/public/vendor.js" defer></script>
   <script type="text/javascript" src="/public/index.js" defer></script>
       
-        <script>
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js')
