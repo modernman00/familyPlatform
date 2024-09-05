@@ -5,7 +5,16 @@
 
   <a href="/profilepage/img?dir=img&pics={{ $allData["img"] }}&pID={{ $allData["post_no"] }}&path=profile">
 
-    <img src="/public/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px">
+    {{-- <img src="/public/img/profile/{{ $allData['img'] }}" alt="img" class="w3-left w3-circle w3-margin-right" style="width:60px"> --}}
+
+
+    {{-- load images using lazy loading --}}
+    <img data-src="/public/img/profile/{{ $allData['img'] }}" 
+    src="/public/avatar/avatarF.png"
+    alt="profile_img" 
+    class="w3-left w3-circle w3-margin-right" 
+    style="width:60px"
+    loading="lazy">
   </a>
 
   @else

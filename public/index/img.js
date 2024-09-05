@@ -88,7 +88,7 @@ var postFormData = /*#__PURE__*/function () {
           famCodeSetFromHttp = null;
           dbHttpResult = null;
           if (!(_typeof(response.data.message) === 'object')) {
-            _context.next = 27;
+            _context.next = 29;
             break;
           }
           idSetFromHttp = response.data.message.id;
@@ -102,17 +102,23 @@ var postFormData = /*#__PURE__*/function () {
           }
           throw new Error('idSetFromHttp is null');
         case 23:
-          if (famCodeSetFromHttp) {
+          if (dbHttpResult) {
             _context.next = 25;
             break;
           }
-          throw new Error('famCodeSetFromHttp is null');
+          throw new Error('dbHttpResult is null');
         case 25:
-          _context.next = 28;
-          break;
+          if (famCodeSetFromHttp) {
+            _context.next = 27;
+            break;
+          }
+          throw new Error('famCodeSetFromHttp is null');
         case 27:
+          _context.next = 30;
+          break;
+        case 29:
           dbHttpResult = response.data.message;
-        case 28:
+        case 30:
           // Set sessionStorage items if not already set
           if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
           if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
@@ -122,19 +128,19 @@ var postFormData = /*#__PURE__*/function () {
               window.location.assign(redirect);
             }, 2000);
           }
-          _context.next = 39;
+          _context.next = 41;
           break;
-        case 34:
-          _context.prev = 34;
+        case 36:
+          _context.prev = 36;
           _context.t0 = _context["catch"](9);
           errorClass = getNotificationClassByCSS(css, 'red');
           errorMessage = (_ref2 = (_error$response$data$ = _context.t0 === null || _context.t0 === void 0 || (_error$response = _context.t0.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) !== null && _error$response$data$ !== void 0 ? _error$response$data$ : _context.t0 === null || _context.t0 === void 0 || (_error$message = _context.t0.message) === null || _error$message === void 0 ? void 0 : _error$message.message) !== null && _ref2 !== void 0 ? _ref2 : _context.t0 === null || _context.t0 === void 0 ? void 0 : _context.t0.message; // Process the form data for error
           processFormDataAction(errorClass, errorMessage, notificationId);
-        case 39:
+        case 41:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[9, 34]]);
+    }, _callee, null, [[9, 36]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);

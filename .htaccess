@@ -1,22 +1,20 @@
 # Remove the question mark from the request but maintain the query string
 RewriteEngine On
-#   RewriteBase /
-
-#if requested file is not a real file
-RewriteCond %{REQUEST_FILENAME} !-f
-
-#   RewriteCond %{REQUEST_FILENAME} !-d
-#   RewriteCond %{REQUEST_FILENAME} !-1
-
-#rewrite rule - redirect to index.php
-RewriteRule . index.php [L]
 
 # Allow access to the public folder
 RewriteRule ^public/ - [L]
 
+# If requested file or directory does not exist, redirect to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+
+
+
 # Remove the question mark from the request but maintain the query string
-RewriteCond %{THE_REQUEST} \?(.*)\ HTTP/
-RewriteRule ^(.*)$ /$1?%1 [L,R=301]
+# RewriteCond %{THE_REQUEST} \?(.*)\ HTTP/
+# RewriteRule ^(.*)$ /$1?%1 [L,R=301]
 
 
 <IfModule mod_headers.c>

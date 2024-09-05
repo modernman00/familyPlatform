@@ -58,7 +58,10 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
                 throw new Error('idSetFromHttp is null');
             }
 
-            // throw error if famCodeSetFromHttp is null
+            //throw error if dbHttpResult is null
+            if (!dbHttpResult) {
+                throw new Error('dbHttpResult is null');
+            }
 
             if (!famCodeSetFromHttp) {
                 throw new Error('famCodeSetFromHttp is null');

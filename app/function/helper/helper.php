@@ -239,19 +239,19 @@ function sendText($message, $numbers): void
 }
 
 // function to use php-clamavlib
-if($_POST){
-  $error = '';
-  //print_r($_FILES);
-  if($_FILES['file']['size'] == 0 || !is_file($_FILES['file']['tmp_name'])){
-     $error .= 'Please select a file for upload!';
-  } else {
-    cl_setlimits(5, 1000, 200, 0, 10485760);
-    if($malware = cl_scanfile($_FILES['file']['tmp_name'])) $error .= 'We have Malware: '.$malware.'<br>ClamAV version: '.clam_get_version();
-  }
-  if($error == ''){
-    rename($_FILES['file']['tmp_name'], $upload_dir.$_FILES['file']['name']);
-  }
-}
+// if($_POST){
+//   $error = '';
+//   //print_r($_FILES);
+//   if($_FILES['file']['size'] == 0 || !is_file($_FILES['file']['tmp_name'])){
+//      $error .= 'Please select a file for upload!';
+//   } else {
+//     cl_setlimits(5, 1000, 200, 0, 10485760);
+//     if($malware = cl_scanfile($_FILES['file']['tmp_name'])) $error .= 'We have Malware: '.$malware.'<br>ClamAV version: '.clam_get_version();
+//   }
+//   if($error == ''){
+//     rename($_FILES['file']['tmp_name'], $upload_dir.$_FILES['file']['name']);
+//   }
+// }
 
 
 // Function to scan file for viruses using ClamAV
