@@ -5,7 +5,8 @@ namespace App\controller\members;
 use App\classes\{
   Select,
   Update,
-  Insert
+  Insert, 
+  PushNotificationClass
 };
 
 use App\model\SingleCustomerData;
@@ -25,6 +26,11 @@ class FamilyRequest extends Select
       // printArr jS DATA 
 
       $dataFromJs = json_decode(file_get_contents("php://input"), true);
+
+       if (!$dataFromJs) {
+        msgException(301, "Invalid request data.");
+      }
+
 
       // SUBMIT TO THE DATABASE TABLE - requestMgt Table
 
@@ -74,7 +80,7 @@ class FamilyRequest extends Select
         $emailArray = [
           'data' => [
             'name' => $approverName,
-            'email' => 'waledevtest@gmail.com',
+            'email' => getenv('TEST_EMAIL'),
             ...$dataFromJs['approver'],
             ...$dataFromJs['requester']
           ],
@@ -103,6 +109,12 @@ class FamilyRequest extends Select
         // SEND BACK THE APPROVER ID
 
         Insert::submitFormDynamicLastId('notification', $notificationData, 'no');
+
+        $url = getenv("MIX_APP_URLS") . "/member/request?req=$theRequesterID&appr=$theApproverID&reqCode=$theApproverCode&dec=50";
+
+        // Send push notification to the receiver about the new friend request
+      PushNotificationClass::sendPushNotification($theApproverID, "Friend Request from $requesterName", $url );
+
 
         msgSuccess(200, $notificationData);
       }
@@ -160,9 +172,6 @@ class FamilyRequest extends Select
         $req = $details->getCustomerData($requester, ['personal', 'contact']);
         $app = $details->getCustomerData($approver, ['personal', 'contact']);
 
-
-
-
         // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
 
         $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
@@ -172,6 +181,9 @@ class FamilyRequest extends Select
         // email the requester
 
         toSendEmail('msg/requestRequest', $req, $subject, 'member');
+
+           // Send push notification to the receiver about the new friend request
+      PushNotificationClass::sendPushNotification($requester, $subject);
 
         // show the approver what they have just done
         $app['decision'] = $decision;
@@ -221,11 +233,11 @@ class FamilyRequest extends Select
       $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
       $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, 'Request sent']);
 
-      foreach ($getRequesterDataById as $getRequesterDataById) {
+      foreach ($getRequesterDataById as $getRequesterDataById1) {
 
-        if ($getRequesterDataById['requester_id']) {
+        if ($getRequesterDataById1['requester_id']) {
           $custData = new SingleCustomerData();
-          $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profile_pics']);
+          $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profile_pics']);
 
           array_push($result, $data);
         } else {

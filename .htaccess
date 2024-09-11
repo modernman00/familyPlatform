@@ -1,13 +1,14 @@
 # Remove the question mark from the request but maintain the query string
 RewriteEngine On
 
-# Allow access to the public folder
-RewriteRule ^public/ - [L]
+
 
 # If requested file or directory does not exist, redirect to index.php
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+# Allow access to the public folder
+# RewriteRule ^public/ - [L]
+RewriteRule . index.php [L]
 
 
 

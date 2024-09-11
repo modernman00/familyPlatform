@@ -40,7 +40,8 @@
         "ps/image-optimizer": "^2.0",
         "rollbar/rollbar": "~1.5",
         "pusher/pusher-php-server": "^7.0",
-        "spatie/image-optimizer": "^1.6"
+        "spatie/image-optimizer": "^1.6",
+        "minishlink/web-push": "^9.0"
     },
 
     "require-dev": {

@@ -8,11 +8,9 @@ use App\classes\{
     AllFunctionalities,
     Insert,
     CheckToken,
-    Select
+    Select, PushNotificationClass
 };
-use App\model\EmailData;
-
-use App\model\AllMembersData;
+use App\model\{EmailData, AllMembersData};
 
 class Event extends AllMembersData
 {
@@ -62,6 +60,8 @@ class Event extends AllMembersData
             ];
 
             $lastInsertedId = Insert::submitFormDynamicLastId('notification', $cleanDataNotification, 'no');
+
+                  // Send push notification to the receiver about the new friend request
 
             msgSuccess(200, $lastInsertedId);
         } catch (\Throwable $th) {
@@ -133,7 +133,11 @@ class Event extends AllMembersData
                     // Extract email addresses from the filtered members
                     $emailsToNotify = array_column($membersToNotify, 'email');
 
-                    self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify);
+                     // Extract id from the filtered members
+                    $idsToNotify = array_column($membersToNotify, 'id');
+
+                   
+                    self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify, $idsToNotify);
                 }
 
             }
@@ -221,7 +225,7 @@ class Event extends AllMembersData
      *
      * @return void
      */
-    private static function checkEventDiffAndNotifyAll(array $data, array $email): void
+    private static function checkEventDiffAndNotifyAll(array $data, array $email, array $id = null): void
     {
 
         $diffEventAndTodayDate = dateDifference(date('Y-m-d'), $data['eventDate']);
@@ -230,22 +234,27 @@ class Event extends AllMembersData
         $eventHost = "{$data['firstName']} {$data['lastName']}";
         $eventDescription = $data['eventDescription'];
         $eventInformation = "Kindly be informed that this event is scheduled to be held on $eventDayFormatted. Please contact the $eventHost for more information. Event Description: $eventDescription";
+        $url = getenv('MIX_APP_URL2') ."/member/ProfilePage";
 
 
         switch ($diffEventAndTodayDate) {
             case "+7 days":
                 $subject .= " is on $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject in seven days. $eventInformation ";
+                PushNotificationClass::sendPushNotification($id, $subject, $url); // this is to push notification for the PWA application 
+
                 self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+1 days":
                 $subject .= " is tomorrow, $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject. $eventInformation";
+                PushNotificationClass::sendPushNotification($id, $subject, $url);
                 self::sendBulkNotification($data, $subject, $email);
                 break;
             case "+0 days":
                 $subject .= " is today, $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject. $eventInformation";
+                PushNotificationClass::sendPushNotification($id, $subject, $url);
                 self::sendBulkNotification($data, $subject, $email);
                 self::extendEventByFrequency($data);
                 break;

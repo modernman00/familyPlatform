@@ -12,7 +12,6 @@ use App\classes\{
 use \Firebase\JWT\JWT;
 
 use App\model\AllMembersData as AllMembersDataModel;
-
 use Exception;
 
 class Login extends Select

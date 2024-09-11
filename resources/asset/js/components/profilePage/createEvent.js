@@ -70,6 +70,22 @@ const process = (e) => {
                     })
 
                 })
+
+                // now trigger push notifications subscription
+                const registration = navigator.serviceWorker.ready;
+                const subscription = registration.pushManager.getSubscription();
+
+                if (!subscription) {
+                    const newSubscription =registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: process.env.VAPID_PUBLIC_KEY
+                    });
+                     console.log('New Push Subscription:', newSubscription);
+                } else {
+                    console.log('Already subscribed for push notifications:', subscription);
+                }
+
+
             })
 
             displayNone();

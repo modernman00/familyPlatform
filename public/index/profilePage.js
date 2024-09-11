@@ -1180,6 +1180,19 @@ var process = function process(e) {
             (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
           });
         });
+
+        // now trigger push notifications subscription
+        var registration = navigator.serviceWorker.ready;
+        var subscription = registration.pushManager.getSubscription();
+        if (!subscription) {
+          var newSubscription = registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: process.env.VAPID_PUBLIC_KEY
+          });
+          console.log('New Push Subscription:', newSubscription);
+        } else {
+          console.log('Already subscribed for push notifications:', subscription);
+        }
       });
       displayNone();
 

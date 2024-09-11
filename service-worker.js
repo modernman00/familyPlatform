@@ -1,25 +1,25 @@
-const Version = "1.2";
+const Version = "1.3";
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
-    "/",
-    "/index",
-    "/login",
-    "/register",
-    "/allMembers",
-    "/member/ProfilePage",
-    "/organogram",
-    "/allMembers/getProfile",
-    "/public/style.css",
-    "/public/index.js",
-    "/public/img/favicon/android-chrome-192x192.png",
-    "/public/img/favicon/android-chrome-512x512.png",
-    "/public/img/favicon/apple-touch-icon.png",
-    "public/img/photos/",
-    "/public/img/post/",
-    "/public/img/profile/",
-    '/public/img/favicon/favicon.ico',
-    "/public/img/celebrate.jpeg",
-    "/public/img/favicon/favicon-32x32.png"
+  "/",
+  "/index",
+  "/login",
+  "/register",
+  "/allMembers",
+  "/member/ProfilePage",
+  "/organogram",
+  "/allMembers/getProfile",
+  "/public/style.css",
+  "/public/index.js",
+  "/public/img/favicon/android-chrome-192x192.png",
+  "/public/img/favicon/android-chrome-512x512.png",
+  "/public/img/favicon/apple-touch-icon.png",
+  "public/img/photos/",
+  "/public/img/post/",
+  "/public/img/profile/",
+  '/public/img/favicon/favicon.ico',
+  "/public/img/celebrate.jpeg",
+  "/public/img/favicon/favicon-32x32.png"
 ];
 
 // get all profile images posted to the server and add them to the cache on install 
@@ -47,7 +47,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CacheName);
-       console.log("[Service Worker] Caching all: app shell and content");
+      console.log("[Service Worker] Caching all: app shell and content");
       await cache.addAll(CacheFiles);
     })(),
   );
@@ -57,19 +57,19 @@ self.addEventListener("install", (event) => {
 // delete old caches on activate
 
 self.addEventListener("activate", (event) => {
-    event.waitUntil(
-        (async() => {
-            const names = await caches.keys();
-            await Promise.all(
-                names.map((name) => {
-                    if (name !== CacheName) {
-                        return caches.delete(name);
-                    }
-                }),
-            );
-            await clients.claim();
-        })(),
-    );
+  event.waitUntil(
+    (async () => {
+      const names = await caches.keys();
+      await Promise.all(
+        names.map((name) => {
+          if (name !== CacheName) {
+            return caches.delete(name);
+          }
+        }),
+      );
+      await clients.claim();
+    })(),
+  );
 });
 
 // On fetch, intercept server requests
@@ -77,9 +77,9 @@ self.addEventListener("activate", (event) => {
 
 // service-worker.js
 
-const putInCache = async(request, response) => {
-    const cache = await caches.open("v1");
-    await cache.put(request, response);
+const putInCache = async (request, response) => {
+  const cache = await caches.open("v1");
+  await cache.put(request, response);
 };
 
 /**
@@ -102,10 +102,10 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch((error) => {
-          console.error('Fetch failed; returning cached page instead:', error);
-          // Optional: Serve a fallback page if the network fails
-          return caches.match('/index');
-        });
+        console.error('Fetch failed; returning cached page instead:', error);
+        // Optional: Serve a fallback page if the network fails
+        return caches.match('/index');
+      });
 
       return cachedResponse || fetchPromise;
     }).catch((error) => {
@@ -127,32 +127,89 @@ async function syncContent() {
     const data = await response.json();
     console.log('Periodic content sync completed:', data);
 
+
+    // Check for new events, friend requests, and handle accordingly
+    if (data.newEvents.length > 0) {
+      for (let event of data.newEvents) {
+        showNotification({
+          title: 'New Event Created!',
+          body: `A new event "${event.title}" has been added.`,
+          url: `/events/${event.id}`,
+        });
+      }
+    }
+
+    if (data.newFriendRequests.length > 0) {
+      for (let request of data.newFriendRequests) {
+        showNotification({
+          title: 'New Friend Request',
+          body: `You have a new friend request from ${request.from}.`,
+          url: `/friend-requests`,
+        });
+      }
+    }
+
+    if (data.friendRequestsAccepted.length > 0) {
+      for (let friend of data.friendRequestsAccepted) {
+        showNotification({
+          title: 'Friend Request Accepted',
+          body: `${friend.name} accepted your friend request!`,
+          url: `/friends/${friend.id}`,
+        });
+      }
+    }
+
+
+
     // Update cache or IndexedDB with the new data
   } catch (error) {
     console.error('Error during periodic content sync:', error);
   }
 }
 
-// Push event - handle notifications
-self.addEventListener('push', (event) => {
-  try {
-    const data = event.data ? JSON.parse(event.data.text()) : {};
-    const options = {
-      body: data.body || 'You have a new notification',
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/badge-72x72.png',
-      data: {
-        url: data.url || '/',
-      },
-    };
+// Utility function to show notification
+function showNotification({ title, body, url }) {
+  const options = {
+    body,
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png',
+    data: {
+      url,
+    },
+  };
 
-    event.waitUntil(
-      self.registration.showNotification(data.title || 'New Notification', options)
-    );
-  } catch (error) {
-    console.error('Error in push event:', error);
-  }
+  self.registration.showNotification(title, options);
+}
+
+// Push event - handle notifications
+self.addEventListener('push', function (event) {
+  let data = event.data ? event.data.json() : {};
+
+  const options = {
+    body: data.body || 'You have a new notification',
+    icon: '/public/img/favicon/android-chrome-192x192.png',
+    badge: '/public/img/favicon/android-chrome-192x192.png',
+    data: {
+      url: data.url || '/',
+    }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'New Notification', options)
+  );
 });
+
+// self.addEventListener('notificationclick', function (event) {
+//   event.notification.close();
+//   event.waitUntil(
+//     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+//       if (clients.openWindow) {
+//         return clients.openWindow(event.notification.data.url);
+//       }
+//     })
+//   );
+// });
+
 
 
 // Notification click event - focus or open a window

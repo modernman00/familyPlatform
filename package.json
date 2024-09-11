@@ -28,7 +28,7 @@
     "parcel": "^2.1.1",
     "resolve-url-loader": "^5.0.0",
     "sass-loader": "^13.2.2",
-    "vue-template-compiler": "^2.6.12",
+    "vue-template-compiler": "^0.1.0",
     "webpack": "^5.9.0"
   },
   "dependencies": {
@@ -36,10 +36,10 @@
     "autocompleter": "^6.1.0",
     "axios": "^1.6.8",
     "axios-retry": "^3.1.9",
-    "babel-core": "^6.26.3",
+    "babel-core": "^4.7.16",
     "babel-loader": "^8.2.2",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
-    "babel-preset-env": "^1.7.0",
+    "babel-preset-env": "^0.0.0",
     "bulma": "^0.8.0",
     "dotenv": "^16.0.3",
     "fibers": "^4.0.2",
@@ -50,14 +50,15 @@
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
     "lodash": "^4.17.21",
-    "mjml": "^4.14.1",
+    "mjml": "^4.7.1",
     "npm": "^7.4.0",
     "path-browserify": "^0.0.1",
     "pusher-js": "^7.0.3",
     "sass": "^1.32.2",
     "svg-gauge": "^1.0.6",
     "timeago.js": "^4.0.2",
-    "validator": "^13.5.2"
+    "validator": "^13.5.2",
+    "web-push": "^3.6.7"
   },
   "keywords": []
 }
