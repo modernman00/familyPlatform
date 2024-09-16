@@ -78,7 +78,7 @@ const process = (e) => {
                 if (!subscription) {
                     const newSubscription =registration.pushManager.subscribe({
                         userVisibleOnly: true,
-                        applicationServerKey: process.env.VAPID_PUBLIC_KEY
+                        applicationServerKey: process.env.MIX_VAPID_PUBLIC_KEY
                     });
                      console.log('New Push Subscription:', newSubscription);
                 } else {

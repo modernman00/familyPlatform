@@ -54,21 +54,21 @@ class NotificationController extends Select
             msgException(300, 'Invalid subscription data');
         }
 
-        $userId = $inputData['user_id'];
+        $userId = $inputData['id'];
         $endpoint = $inputData['subscription']['endpoint'];
         $p256dhKey = $inputData['subscription']['keys']['p256dh'];
         $authKey = $inputData['subscription']['keys']['auth'];
         // Prepare the data to insert
         $data = [
-            'id' => $inputData['id'],
-            'endpoint' => $inputData['subscription']['endpoint'],
+            'id' => $userId,
+            'endpoint' => $endpoint,
             'p256dhKey' => $p256dhKey,
             'authKey' => $authKey
         ];
 
         // Check if the subscription already exists for this user and endpoint
 
-        $existingSubscription = Select::selectFn2('SELECT * FROM push_notifications WHERE id = ? AND endpoint = ?', [$userId, $endpoint]);
+        $existingSubscription = Select::selectFn2('SELECT * FROM push_notification WHERE id = ? AND endpoint = ?', [$userId, $endpoint]);
 
         if ($existingSubscription) {
 

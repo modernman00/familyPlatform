@@ -164,9 +164,9 @@ class PostMessage
             //     '1218019',
             //     $option
             // );
+       
 
-
-            $id = (int) $_SESSION['LAST_INSERT_ID_POST'];
+           $id = isset($_SESSION['LAST_INSERT_ID_POST']) ? (int)$_SESSION['LAST_INSERT_ID_POST'] : null;
 
 
             $messages = Post::postByNo($id);

@@ -232,7 +232,7 @@ class ProfilePage extends ProcessImg
                         'id' => checkInput($_SESSION['id'])
                     ];
                     $insertFile = new Insert();
-                    $insertFile->submitForm('images', $arrData);
+                    $insertFile->submitForm(table: 'images', field: $arrData);
                 }
             }
 
@@ -245,13 +245,13 @@ class ProfilePage extends ProcessImg
      */
     public function showPics(): void
     {
-        $path = checkInput($_GET['path']);
+        $path = checkInput(data: $_GET['path']);
      
-        $imagePath = ProcessImg::showPostImg($path);
+        $imagePath = ProcessImg::showPostImg(picsSource: $path);
 
-        $postId = checkInput($_GET['pID']);
+        $postId = checkInput(data: $_GET['pID']);
 
-        $comment2Img = Post::commentLink2Img($postId);
+        $comment2Img = Post::commentLink2Img(imgPath: $postId);
 
         // $comment2Post = Post::commentLink2Post($postId);
 

@@ -44,9 +44,29 @@ function myFunction(id) {
       
 <script>
 
+    console.log(localStorage)
+
+
+
+    // Utility function to convert VAPID public key to Uint8Array
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
+
+
+
 if ('serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker.register('/service-worker.js').then((swReg) => {
-        console.log('Service Worker registered', swReg);
 
         // Check if the user is already subscribed
         swReg.pushManager.getSubscription().then((subscription) => {
@@ -56,7 +76,10 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
                     if (permission === 'granted') {
                         subscribeUser(swReg);
                     } else {
-                        console.log('Push notifications permission denied.');
+                        subscribeUser(swReg);
+                        console.log('Push notifications permission denied.' );
+                // Handle the case where the user denied permission
+
                     }
                 });
             } else {
@@ -71,7 +94,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 }
 
 function subscribeUser(swReg) {
-    const applicationServerKey = urlBase64ToUint8Array(process.env.VAPID_PUBLIC_KEY);  // Add your public VAPID key here
+    const applicationServerKey = urlBase64ToUint8Array("{{ env('MIX_VAPID_PUBLIC_KEY') }}");  // Access public VAPID key
 
     swReg.pushManager.subscribe({
         userVisibleOnly: true,
@@ -89,8 +112,8 @@ function subscribeUser(swReg) {
 function postSubscriptionToServer(subscription) {
   
     // Prepare the subscription data to be sent to the server
-    const data = {
-        id: localStorage.getItem('id'),  // STILL CHECK IT
+    const subscriptionData = {
+        id: localStorage.getItem('requesterId'),  // STILL CHECK IT
         subscription: {
             endpoint: subscription.endpoint,
             keys: {
@@ -98,32 +121,17 @@ function postSubscriptionToServer(subscription) {
                 auth: subscription.keys.auth
             }
         }
-
-    // Send subscription to the server using axios
-    axios.post('/pushNotification/subscription', subscriptionData)
-        .then(response => {
-            console.log('Subscription data successfully sent to the server:', response.data);
-        })
-        .catch(error => {
-            console.error('Failed to send subscription data to the server:', error);
-        });
-}
-
-// Utility function to convert VAPID public key to Uint8Array
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
     }
-    return outputArray;
+        // Send subscription to the server using axios
+        axios.post('/pushNotification/subscription', subscriptionData)
+            .then(response => {
+                console.log('Subscription data successfully sent to the server:', response.data);
+        })
+            .catch(error => {
+                console.error('Failed to send subscription data to the server:', error);
+        });
+    
 }
-
-
 
 
 
