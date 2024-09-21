@@ -44,9 +44,6 @@ function myFunction(id) {
       
 <script>
 
-    console.log(localStorage)
-
-
 
     // Utility function to convert VAPID public key to Uint8Array
 function urlBase64ToUint8Array(base64String) {

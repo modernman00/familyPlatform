@@ -50,7 +50,7 @@ class NotificationController extends Select
 
              $inputData = json_decode(file_get_contents("php://input"), true);
         // Validate the input data
-        if (!isset($inputData['user_id'], $inputData['subscription']['endpoint'], $inputData['subscription']['keys']['p256dh'], $inputData['subscription']['keys']['auth'])) {
+        if (!isset($inputData['id'], $inputData['subscription']['endpoint'], $inputData['subscription']['keys']['p256dh'], $inputData['subscription']['keys']['auth'])) {
             msgException(300, 'Invalid subscription data');
         }
 

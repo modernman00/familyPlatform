@@ -8,6 +8,11 @@ USE PDO;
 
 class Select extends Db
 {
+    private static function escapeIdentifier($identifier) {
+        // Add logic to escape identifiers or use a whitelist
+        return preg_replace('/[^A-Za-z0-9_]+/', '', $identifier);
+    }
+    
     /**
      * Undocumented function
      *
@@ -27,6 +32,10 @@ class Select extends Db
         if($colArray) {
             $implodeColArray = implode(', ', $colArray);
         }
+
+        $table = self::escapeIdentifier($table);
+        $column = self::escapeIdentifier($column);
+        $column2 = self::escapeIdentifier($column2);
         
 
         return match ($selection) {
