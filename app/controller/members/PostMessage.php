@@ -66,18 +66,18 @@ class PostMessage
         }
     }
 
-    public function getPostNo_t(): void
+    public function getPostByNo(): void
     {
         try {
 
-            $postNo = checkInput($_GET['postNo']);
+            $postNo = checkInput(data: $_GET['postNo']);
 
-            $message = Post::postByNo($postNo);
+            $message = Post::postByNo(postNo: $postNo);
             $data = null;
             foreach ($message as $data);
-            msgSuccess(200, $data);
+            msgSuccess(code: 200, msg: $data);
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            showErrorExp(th: $th);
         }
     }
 

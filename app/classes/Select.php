@@ -8,10 +8,7 @@ USE PDO;
 
 class Select extends Db
 {
-    private static function escapeIdentifier($identifier) {
-        // Add logic to escape identifiers or use a whitelist
-        return preg_replace('/[^A-Za-z0-9_]+/', '', $identifier);
-    }
+
     
     /**
      * Undocumented function
@@ -30,12 +27,16 @@ class Select extends Db
     {
         // for col dynamically - 
         if($colArray) {
-            $implodeColArray = implode(', ', $colArray);
+            $implodeColArray = implode(separator: ', ', array: $colArray);
         }
 
-        $table = self::escapeIdentifier($table);
-        $column = self::escapeIdentifier($column);
-        $column2 = self::escapeIdentifier($column2);
+        // $table = isset($table) ? checkInput(data: $table) : null;
+        // $column = isset($column) ? checkInput(data: $column) : null;
+        // $column2 = isset($column2) ? checkInput(data: $column2) : null;
+        // $identifier1 = isset($identifier1) ? checkInput(data: $identifier1) : null;
+        // $identifier2 = isset($identifier2) ? checkInput(data: $identifier2) : null;
+        // $orderBy = isset($orderBy) ? checkInput(data: $orderBy) : null;
+        // $limit = isset($limit) ? checkInput(data: $limit) : null;
         
 
         return match ($selection) {
@@ -129,11 +130,11 @@ class Select extends Db
     {
         try {
             $sql = $query;
-            $result = $this->connect()->prepare($sql);
-            $result->execute($bind);
+            $result = $this->connect()->prepare(query: $sql);
+            $result->execute(params: $bind);
             return $result->rowCount();
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
             return false;
         }
     }
@@ -149,11 +150,11 @@ class Select extends Db
     {
         try {
             $sql = $query;
-            $result = self::connect2()->prepare($sql);
-            $result->execute($bind);
+            $result = self::connect2()->prepare(query: $sql);
+            $result->execute(params: $bind);
             return $result->rowCount();
         } catch (PDOException $e) {
-            returnErrorCode(505, $e);
+            returnErrorCode(errCode: 505, errObj: $e);
             return false;
         }
     }
@@ -164,14 +165,14 @@ class Select extends Db
      * @return mixed 
      */
 
-    public function selectCountAll($table)
+    public function selectCountAll($table): mixed
     {
 
         try {
             $query = "SELECT COUNT(*) FROM $table";
             return $this->connect()->query($query)->fetchColumn();
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
         }
     }
 
@@ -197,7 +198,7 @@ class Select extends Db
 
             return self::$callback($query, $array['bind']);
         } catch (\Throwable $th) {
-            showError($th);
+            showError(th: $th);
         }
     }
 }

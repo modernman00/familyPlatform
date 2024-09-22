@@ -71,7 +71,7 @@ class Login extends Select
             $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
 
             //4 check if email exist and get the database password
-            $data = useEmailToFindData($sanitisedData);
+            $data = useEmailToFindData(inputData: $sanitisedData);
 
             $_SESSION['ID'] = $data['id'];
 
@@ -79,7 +79,7 @@ class Login extends Select
             $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
 
             //1.  token verified
-            CheckToken::tokenCheck('token');
+            CheckToken::tokenCheck(token: 'token');
 
             // GET THE FAMCODE 
 

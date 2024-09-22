@@ -8,6 +8,9 @@
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderMembers: () => (/* binding */ renderMembers)
+/* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
@@ -30,10 +33,10 @@ var reqId = localStorage.getItem('requesterId');
 var URL = "http://olaogun.test/";
 var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
 var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
-var renderMembers = function renderMembers(data, container, noMemberMessage) {
+var renderMembers = function renderMembers(data, container, noMemberMessage, html) {
   container.innerHTML = "";
   if (data) {
-    data.forEach(_html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
+    data.forEach(html);
   } else {
     container.innerHTML = noMemberMessage;
   }
@@ -48,7 +51,7 @@ axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/pro
   }
   var data = response.data;
   var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__.filterMembersByFamCode)(data, famCode);
-  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
+  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
 
   // Remove the "loader" class after rendering is complete
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');

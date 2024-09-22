@@ -17,20 +17,20 @@ class PushNotificationClass extends VapidClass
       $auth = [
            'VAPID' => array(
                 'subject' => 'mailto:waledevtest@gmail.com',
-                'publicKey' => self::urlBase64ToUint8Array(getenv('VAPID_PUBLIC_KEY')),
-                'privateKey' => self::urlBase64ToUint8Array(getenv('VAPID_PRIVATE_KEY')),
+                'publicKey' => self::urlBase64ToUint8Array(base64String: getenv('VAPID_PUBLIC_KEY')),
+                'privateKey' => self::urlBase64ToUint8Array(base64String: getenv('VAPID_PRIVATE_KEY')),
             ),
       ];
 
-      $webPush = new WebPush($auth);
+      $webPush = new WebPush(auth: $auth);
 
       $webPush->sendOneNotification(
-        $subscription,
-        json_encode([
+        subscription: $subscription,
+        payload: json_encode(value: [
           'title' => 'New Notification',
           'body' => $message,
           'url' => $url,  // Change the URL to where the user should be redirected
-          'icon' => getenv('APP_LOGO')  
+          'icon' => getenv(name: 'APP_LOGO')  
         ])
       );
 
@@ -43,7 +43,7 @@ class PushNotificationClass extends VapidClass
   }
 
   // Fetch the user's push subscription data from the database
-  private static function getUserPushSubscription($userId)
+  private static function getUserPushSubscription($userId): mixed
   {
         $queryData = [
         'selection' => 'SELECT_ONE',
@@ -52,7 +52,7 @@ class PushNotificationClass extends VapidClass
         'bind' => [$userId]
     ];
 
-    return Select::combineSelect($queryData, 'selectFn2', 'ONE_IDENTIFIER');
+    return Select::combineSelect(array: $queryData, callback: 'selectFn2', switch: 'ONE_IDENTIFIER');
 
 
   }

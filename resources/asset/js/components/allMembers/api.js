@@ -18,10 +18,10 @@ const URL = process.env.MIX_APP_URL2;
 const allMembersContainer = id('allMembers');
 const noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
 
-const renderMembers = (data, container, noMemberMessage) => {
+export const renderMembers = (data, container, noMemberMessage, html) => {
     container.innerHTML = "";
     if (data) {
-        data.forEach(renderHtml);
+        data.forEach(html);
     } else {
         container.innerHTML = noMemberMessage;
     }
@@ -45,7 +45,7 @@ axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
 
         const dataWithFamCode = filterMembersByFamCode(data, famCode);
 
-        renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML);
+        renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, renderHtml);
 
         // Remove the "loader" class after rendering is complete
         id('setLoader').classList.remove('loader');

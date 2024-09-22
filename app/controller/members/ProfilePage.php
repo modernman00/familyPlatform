@@ -132,7 +132,7 @@ class ProfilePage extends ProcessImg
         }
     }
 
-    private function processPostData()
+    private function processPostData(): array
     {
 
 
@@ -141,7 +141,7 @@ class ProfilePage extends ProcessImg
         }
         // SANITISE THE POST 
         unset($_POST['post_img']);
-        $sanitise = new Sanitise($_POST);
+        $sanitise = new Sanitise(formData: $_POST);
         $getSanitisePost = $sanitise->getCleanData();
 
         // check if there are images in the post
@@ -149,7 +149,7 @@ class ProfilePage extends ProcessImg
 
             if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
-                fileUploadMultiple("public/img/post/", 'post_img');
+                fileUploadMultiple(fileLocation: "public/img/post/", formInputName: 'post_img');
 
                 // create a file path name for the database
                 $image = $_FILES['post_img']['name'];
@@ -161,7 +161,7 @@ class ProfilePage extends ProcessImg
         }
 
         // get the other post variables id, fullname, time of post
-        $getSanitisePost['id'] = $_SESSION['id'];
+        $getSanitisePost['id'] = checkInput(data: $_SESSION['id']);
         $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
         $getSanitisePost['post_time'] = milliSeconds();
         return $getSanitisePost;
@@ -174,7 +174,7 @@ class ProfilePage extends ProcessImg
             header('Content-Type: text/event-stream');
             header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
-            Insert::submitFormDynamic('post', $getPost); // this send the last post id to the JS frontend
+            Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
             // $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
 

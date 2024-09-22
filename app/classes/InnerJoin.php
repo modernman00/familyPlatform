@@ -17,8 +17,9 @@ class InnerJoin extends Db
      * @param array $table table name
      * @param mixed $id id
      */
-    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id)
+    public function joinParamOr(string $firstTable, string $para, array $table, mixed $id): array|bool
     {
+   
         try {
             $buildInnerJoinQuery = array_map(
                 fn ($tab) =>"
@@ -26,7 +27,10 @@ class InnerJoin extends Db
                 $table
             );
 
-            $innerQueryToString = join(" ", $buildInnerJoinQuery);
+            $innerQueryToString = join(
+                separator: " ", 
+                array: $buildInnerJoinQuery
+            );
 
             $query = "SELECT * FROM $firstTable $innerQueryToString WHERE $firstTable.$para=? OR $table[0].$para = ?";
 
@@ -37,7 +41,8 @@ class InnerJoin extends Db
             return $result->fetchAll(PDO::FETCH_ASSOC);
 
         } catch (PDOException $e) {
-             showError($e);
+             showError(th: $e);
+             return false;
   
         }
     }
@@ -52,8 +57,10 @@ class InnerJoin extends Db
      * @param mixed $bind bind variable
      */
 
-    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind)
+    public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind): array|bool
     {
+   
+ 
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
@@ -67,8 +74,10 @@ class InnerJoin extends Db
         }
     }
 
-    public function joinAll(string $firstTable, string $para, array $table, string $orderBy): array
+    public function joinAll(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
+     
+    
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
@@ -77,7 +86,8 @@ class InnerJoin extends Db
             $result->execute();
             return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
+             return false;
         }
     }
 
@@ -88,8 +98,10 @@ class InnerJoin extends Db
      * orderBy -> the input you want to order it by - date, age etc
      */
 
-    public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy): array
+    public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
+       
+ 
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ", $buildInnerJoinQuery);
@@ -98,12 +110,15 @@ class InnerJoin extends Db
             $result->execute();
             return $result->fetchAll();
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
+            return false;
         }
     }
 
-    public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): array
+    public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
+       
+   
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " RIGHT JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ", $buildInnerJoinQuery);
@@ -112,13 +127,16 @@ class InnerJoin extends Db
             $result->execute();
             return $result->fetchAll();
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
+             return false;
         }
     }
 
 
-    public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy)
+    public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy): void
     {
+      
+
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
@@ -128,13 +146,13 @@ class InnerJoin extends Db
             $jsResult = $result->fetchAll(PDO::FETCH_OBJ);
             echo json_encode($jsResult, JSON_PRETTY_PRINT);
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
         }
     }
 
 
 
-    public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id): array
+    public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id): mixed
     {
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -144,7 +162,8 @@ class InnerJoin extends Db
             $result->execute([$id, $id]);
             return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            showError($e);
+            showError(th: $e);
+             return false;
         }
     }
 }

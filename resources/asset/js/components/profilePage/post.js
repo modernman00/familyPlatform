@@ -1,5 +1,8 @@
 import { html } from "./html"
 import { id } from '../global'
+import { renderMembers } from '../allMembers/api'
+import filterMembersByFamCode from '../allMembers/filterMembersByFamCode'
+S
 
 
 export const allPost = (el, commentData) => {
@@ -14,6 +17,8 @@ export const allPost = (el, commentData) => {
 
   id('postIt').insertAdjacentHTML('beforeend', postHtml)
 }
+
+
 
 
 export const appendNewPost = (el) => {

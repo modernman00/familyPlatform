@@ -335,6 +335,188 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/allMembers/api.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/api.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderMembers: () => (/* binding */ renderMembers)
+/* harmony export */ });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
+/* harmony import */ var _filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
+
+
+
+
+
+var config = {
+  headers: {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+};
+var famCode = localStorage.getItem('requesterFamCode');
+var reqId = localStorage.getItem('requesterId');
+var URL = "http://olaogun.test/";
+var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
+var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+var renderMembers = function renderMembers(data, container, noMemberMessage, html) {
+  container.innerHTML = "";
+  if (data) {
+    data.forEach(html);
+  } else {
+    container.innerHTML = noMemberMessage;
+  }
+};
+axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/processApiData?id=").concat(reqId), config).then(function (response) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers').innerHTML = "";
+  if (!response.data) {
+    throw Error('There is no data');
+  }
+  if (!famCode) {
+    throw Error('There is no famCode');
+  }
+  var data = response.data;
+  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__.filterMembersByFamCode)(data, famCode);
+  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
+
+  // Remove the "loader" class after rendering is complete
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('searchFamily').addEventListener('input', function () {
+    return (0,_handleInput__WEBPACK_IMPORTED_MODULE_3__.handleInput)(data, dataWithFamCode, renderMembers);
+  });
+})["catch"](function (err) {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err.message);
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js":
+/*!****************************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/filterMembersByFamCode.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   filterMembersByFamCode: () => (/* binding */ filterMembersByFamCode)
+/* harmony export */ });
+var reqId = localStorage.getItem('requesterId');
+var filterMembersByFamCode = function filterMembersByFamCode(data, famCode) {
+  return data.filter(function (el) {
+    return el.id !== reqId && (el.famCode === famCode || el.requesterCode === famCode);
+  });
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/handleInput.js":
+/*!*****************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/handleInput.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   handleInput: () => (/* binding */ handleInput)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+
+var reqId = localStorage.getItem('requesterId');
+var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
+var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+var handleInput = function handleInput(data, WithFamCode, renderMembers) {
+  var searchInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('searchFamily');
+  var inputVal = searchInput.value.trim().toLowerCase();
+  allMembersContainer.innerHTML = "";
+  if (inputVal === "") {
+    renderMembers(WithFamCode, allMembersContainer, noMemberHTML);
+  } else {
+    var filteredData = data.filter(function (el) {
+      return el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal);
+    });
+    if (filteredData.length === 0) {
+      allMembersContainer.innerHTML = "No matching name found.";
+    } else {
+      var uniqueItems = {};
+      var _iterator = _createForOfIteratorHelper(filteredData),
+        _step;
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var item = _step.value;
+          if (!uniqueItems[item.id] || item.requester_id == reqId) {
+            uniqueItems[item.id] = item;
+          }
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+      var filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
+      filteredDataByIdAndCurrentUser.forEach(_html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
+    }
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/html.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/html.js ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderHtml: () => (/* binding */ renderHtml)
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+
+
+
+var renderHtml = function renderHtml(el) {
+  var famCode = localStorage.getItem('requesterFamCode');
+  var reqId = localStorage.getItem('requesterId');
+  try {
+    if (!el) {
+      // Handle the case where 'el' is falsy, such as when data is not available.
+      throw new Error('there is no data');
+    }
+    var theImg = "/public/img/profile/".concat(el.img);
+    var isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
+    var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Add to family';
+    var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
+    var fatherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.fatherName);
+    var motherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.motherName);
+    // const spouse = toSentenceCase(el.spouseName);
+
+    // Create the HTML content based on whether the user is in the same family or not.
+    var html = "\n        <div class=\"w3-col l3 m6 w3-margin-bottom w3-round-xlarge\" id=\"".concat(el.id, "\">\n          \n                <img src=\"").concat(theImg, "\" style=\"width:100%; height:300px;\" alt=\"").concat(el.firstName, "\">\n                      <ul class=\"w3-ul w3-border w3-center w3-hover-shadow\">\n    \n                    <li class=\"w3-black w3-large w3-padding-16\">").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</li>\n\n                    <li class=\"w3-padding-8 allMember_card_content\">\n                         <b>Country:</b> ").concat(el.country, " </li>\n\n                        ").concat(isUserInSameFamily ? "    <li class=\"w3-padding-8\"> <b>Father:</b> ".concat(fatherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Mother:</b> ").concat(motherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Spouse:</b> ").concat(el.spouseName || 'none', "</li>\n                             <li class=\"w3-padding-8\"> <b>Mobile:</b> ").concat(el.mobile, " </li>\n                             <li class=\"w3-padding-8\"> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</li>\n\n                             <li class=\"w3-light-grey w3-padding-16\">\n                             <button class=\"w3-button w3-green w3-padding-small\">\n                                <a href=\"/allMembers/setProfile?id=").concat(el.id, "\">\n                                    See Profile\n                                </a>\n                                </button>\n                                \n                            </li>") : "<li class=\"w3-light-grey w3-padding-16\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"w3-button w3-green w3-padding-large button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                        </li>"), "\n                    \n     \n          </ul>\n        </div>");
+
+    // Insert the HTML content into the 'allMembers' element.
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
+  } catch (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/helper/general.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
@@ -1052,6 +1234,10 @@ try {
       // 2. 
       var formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
       var formData = new FormData(formExtra);
+      // get the requesterFamCode from the localStorage 
+      var requesterFamCodeValue = localStorage.getItem('requesterFamCode');
+      // Append the new form entry to the FormData object
+      formData.append('postFamCode', requesterFamCodeValue);
 
       // 3. 
       axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/post", formData, options).then(function (response) {
@@ -1059,15 +1245,16 @@ try {
         axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
           // 5. 
           (0,_post__WEBPACK_IMPORTED_MODULE_3__.appendNewPost)(res.data.message);
+
           // Pusher(res.data.message)
         });
         // Enable pusher logging - don't include this in production
 
         var channel = pusher.subscribe('my-channel');
         channel.bind('updatePost', function (data) {
-          // log("checking1")
-          // log(data.message);
-          // log("checking")
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking1");
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(data.message);
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking");
         });
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
@@ -1601,8 +1788,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _allMembers_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../allMembers/api */ "./resources/asset/js/components/allMembers/api.js");
+/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
 
 
+
+
+S;
 var allPost = function allPost(el, commentData) {
   if (!el) {
     return false;

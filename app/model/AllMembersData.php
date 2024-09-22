@@ -162,8 +162,8 @@ class AllMembersData extends InnerJoin
         try {
             $result = [];
             $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
-            $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, $status]);
-            foreach ($getRequesterDataById as $getRequesterDataById) {
+            $getRequesterDataById1 = Select::selectFn2(query: $select, bind: [$id, $status]);
+            foreach ($getRequesterDataById1 as $getRequesterDataById) {
 
                 if ($getRequesterDataById['requester_id']) {
                     $custData = new SingleCustomerData();

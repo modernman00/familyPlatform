@@ -5,7 +5,7 @@ namespace App\controller\members;
 use App\classes\{
   Select,
   Update,
-  Insert, 
+  Insert,
   PushNotificationClass
 };
 
@@ -27,7 +27,7 @@ class FamilyRequest extends Select
 
       $dataFromJs = json_decode(file_get_contents("php://input"), true);
 
-       if (!$dataFromJs) {
+      if (!$dataFromJs) {
         msgException(301, "Invalid request data.");
       }
 
@@ -49,6 +49,12 @@ class FamilyRequest extends Select
       $theRequesterID = $dataFromJs['requester']['requesterId'];
       $theApproverCode = $dataFromJs['approver']['approverCode'];
 
+      // validate the input 
+
+      if (empty($theApproverID) || empty($theRequesterID) || empty($theApproverCode)) {
+        msgException(errCode: 301, msg: "Invalid request data for Request.");
+      }
+
       $tableData = [
         'approver_id' => $theApproverID,
         'requester_id' => $theRequesterID,
@@ -57,15 +63,28 @@ class FamilyRequest extends Select
 
       // check if there is a combination of requester and approved id and the status is request sent
 
-      $query = Select::formAndMatchQuery('SELECT_AND', 'requestMgt', 'approver_id', 'requester_id');
-      $result = Select::selectFn2($query, [$theApproverID, $theRequesterID]);
+      $query = Select::formAndMatchQuery(
+        selection: 'SELECT_AND',
+        table: 'requestMgt',
+        identifier1: 'approver_id',
+        identifier2: 'requester_id'
+      );
+
+      $result = Select::selectFn2(
+        query: $query,
+        bind: [$theApproverID, $theRequesterID]
+      );
 
       if ($result) {
 
-        msgSuccess(200, $result);
+        msgSuccess(code: 200, msg: $result);
       } else {
 
-        Insert::submitFormDynamicLastId('requestMgt', $tableData, 'no');
+        Insert::submitFormDynamicLastId(
+          table: 'requestMgt',
+          field: $tableData,
+          lastIdCol: 'no'
+        );
 
         // SEND EMAIL TO THE APPROVER
 
@@ -91,7 +110,7 @@ class FamilyRequest extends Select
           // 'email' => $dataFromJs['approver']['email'],
         ];
 
-        sendEmailGeneral($emailArray, 'member');
+        sendEmailGeneral(array: $emailArray, recipient: 'member');
 
         // SENT NOTIFICATION TO APPROVER TAB
 
@@ -103,28 +122,29 @@ class FamilyRequest extends Select
           'notification_name' => $dataFromJs['eventName'] ?? "Friend Request from $requesterName",
           'notification_date' => date('Y-m-d'),
           'notification_type' => 'Friend Request',
-          'notification_content' => "$requesterName sent $approverName a family request"
+          'notification_content' => "$requesterName sent $approverName a family request",
+          'notification_status' => 'new'
         ];
 
         // SEND BACK THE APPROVER ID
 
-        Insert::submitFormDynamicLastId('notification', $notificationData, 'no');
+        Insert::submitFormDynamicLastId(table: 'notification', field: $notificationData, lastIdCol: 'no');
 
         $url = getenv("MIX_APP_URLS") . "/member/request?req=$theRequesterID&appr=$theApproverID&reqCode=$theApproverCode&dec=50";
 
         // Send push notification to the receiver about the new friend request
-      PushNotificationClass::sendPushNotification($theApproverID, "Friend Request from $requesterName", $url );
+        PushNotificationClass::sendPushNotification(userId: $theApproverID, message: "Friend Request from $requesterName", url: $url);
 
 
-        msgSuccess(200, $notificationData);
+        msgSuccess(code: 200, msg: $notificationData);
       }
     } catch (\Throwable $err) {
 
-      showError($err);
+      showError(th: $err);
     }
   }
 
-  public static function approveDelete()
+  public static function approveDelete(): void
   {
 
     // Check if the code has already run in this session
@@ -149,7 +169,7 @@ class FamilyRequest extends Select
         default => "Unknown", // Handle other cases or provide a default value
       };
 
-      $updateClass = new Update('requestMgt');
+      $updateClass = new Update(table: 'requestMgt');
 
       $identifiers = [
         'requester_id' => $requester,
@@ -158,9 +178,9 @@ class FamilyRequest extends Select
 
 
       if ($decision === "approved") {
-        $updateClass->updateTwoColumns(['status', 'requesterCode'], ['Approved', $requestCode], $identifiers);
+        $updateClass->updateTwoColumns(columns: ['status', 'requesterCode'], columnAnswers: ['Approved', $requestCode], identifiers: $identifiers);
       } elseif ($decision === "rejected") {
-        $updateClass->updateTableMulti('status', 'Rejected', $identifiers);
+        $updateClass->updateTableMulti(column: 'status', columnAnswer: 'Rejected', identifiers: $identifiers);
       }
 
 
@@ -169,8 +189,8 @@ class FamilyRequest extends Select
       if ($decision != "Unknown") {
 
         $details = new SingleCustomerData;
-        $req = $details->getCustomerData($requester, ['personal', 'contact']);
-        $app = $details->getCustomerData($approver, ['personal', 'contact']);
+        $req = $details->getCustomerData(custId: $requester, table: ['personal', 'contact']);
+        $app = $details->getCustomerData(custId: $approver, table: ['personal', 'contact']);
 
         // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
 
@@ -180,10 +200,10 @@ class FamilyRequest extends Select
 
         // email the requester
 
-        toSendEmail('msg/requestRequest', $req, $subject, 'member');
+        toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
 
-           // Send push notification to the receiver about the new friend request
-      PushNotificationClass::sendPushNotification($requester, $subject);
+        // Send push notification to the requester about the decision
+        PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
 
         // show the approver what they have just done
         $app['decision'] = $decision;
@@ -244,8 +264,8 @@ class FamilyRequest extends Select
           $result = " No Requester Data";
         }
       }
-       
-       msgSuccess(200, $result);
+
+      msgSuccess(200, $result);
       return $result;
     } catch (\Throwable $th) {
       showError($th);

@@ -12,27 +12,33 @@ class Db extends CheckToken
     private static function dbVariables() : array
     {
         return [
-            'host' => getenv('DB_HOST'),
-            'name' => getenv('DB_NAME'),
-            'username' => getenv('DB_USERNAME'),
-            'password' => getenv("DB_PASSWORD"),
+            'host' => getenv(name: 'DB_HOST'),
+            'name' => getenv(name: 'DB_NAME'),
+            'username' => getenv(name: 'DB_USERNAME'),
+            'password' => getenv(name: "DB_PASSWORD"),
             'charset'=> 'utf8mb4'
         ];
     }
 
     public function connect()
     {
-        try {
+        // apply singleton pattern by checking if db connection is already established before connecting again
+        $conn = null;
+        try {  
+           if (!isset($conn)) {
             $dbVar = self::dbVariables();
-            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}; charset={$dbVar['charset']}", $dbVar['username'],  $dbVar['password'], array(
+            $conn = new PDO("mysql:host={$dbVar['host']}; dbname={$dbVar['name']}; charset={$dbVar['charset']}", username: $dbVar['username'],  password: $dbVar['password'], options: array(
                 PDO::ATTR_PERSISTENT => true
             ));
 
-            $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            $conn->setAttribute(attribute: PDO::ATTR_DEFAULT_FETCH_MODE, value: PDO::FETCH_ASSOC);
+            $conn->setAttribute(attribute: PDO::ATTR_ERRMODE, value: PDO::ERRMODE_EXCEPTION);
+            $conn->setAttribute(attribute: PDO::ATTR_EMULATE_PREPARES, value: false);
 
             return $conn;
+           } else{
+               return $conn;
+           }
         } catch (PDOException $e) {
              showError($e);
         }

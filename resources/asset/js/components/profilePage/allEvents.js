@@ -142,6 +142,10 @@ try {
             // 2. 
             const formExtra = id('formPostMessageModal')
             const formData = new FormData(formExtra)
+            // get the requesterFamCode from the localStorage 
+            const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
+            // Append the new form entry to the FormData object
+            formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
             axios.post("/member/profilePage/post", formData, options)
@@ -151,6 +155,8 @@ try {
                         .then(res => {
                             // 5. 
                             appendNewPost(res.data.message)
+
+                   
                             // Pusher(res.data.message)
                         })
                     // Enable pusher logging - don't include this in production
@@ -158,9 +164,9 @@ try {
                     const channel = pusher.subscribe('my-channel')
 
                     channel.bind('updatePost', function (data) {
-                        // log("checking1")
-                        // log(data.message);
-                        // log("checking")
+                        log("checking1")
+                        log(data.message);
+                        log("checking")
                     });
                     id('id01').style.display = 'none'
 

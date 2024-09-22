@@ -14,7 +14,7 @@ use App\model\{EmailData, AllMembersData};
 
 class Event extends AllMembersData
 {
-    // private const REDIRECT = "Location: /member/ProfilePage";
+
 
     public static function submitEvent()
     {
@@ -26,8 +26,8 @@ class Event extends AllMembersData
 
             // insert the data and return the last event no
             // if the data is successfully inserted then insert same data to the notification table
-            // CheckToken::tokenCheck('token');
-            $lastInsertedId = Insert::submitFormDynamicLastId('events', $cleanData, 'no');
+            CheckToken::tokenCheck(token: 'token');
+            $lastInsertedId = Insert::submitFormDynamicLastId(table: 'events', field: $cleanData, lastIdCol: 'no');
             msgSuccess(200, $lastInsertedId);
         } catch (\Throwable $th) {
             showError($th);
@@ -37,12 +37,12 @@ class Event extends AllMembersData
     public static function PostEventNotificationBar()
     {
         try {
-            $cleanData = getSanitisedInputData($_POST);
-            $cleanData['id'] = checkInput($_SESSION['id']);
+            $cleanData = getSanitisedInputData(inputData: $_POST);
+            $cleanData['id'] = checkInput(data: $_SESSION['id']);
 
             // GET THE SENDER'S NAME 
 
-            $getSenderName = parent::getMemberName($cleanData['id']);
+            $getSenderName = parent::getMemberName(id: $cleanData['id']);
             $sendName =  "{$getSenderName['fName']} {$getSenderName['lName']}";
 
             // insert to the notification table
@@ -59,11 +59,11 @@ class Event extends AllMembersData
                 'notification_content' => $cleanData['eventDescription']
             ];
 
-            $lastInsertedId = Insert::submitFormDynamicLastId('notification', $cleanDataNotification, 'no');
+            $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
 
                   // Send push notification to the receiver about the new friend request
 
-            msgSuccess(200, $lastInsertedId);
+            msgSuccess(code: 200, msg: $lastInsertedId);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -78,11 +78,11 @@ class Event extends AllMembersData
 
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
 
-            $result = Select::selectFn2($query, [$notificationNo]);
+            $result = Select::selectFn2(query: $query, bind: [$notificationNo]);
 
-            msgSuccess(200, $result);
+            msgSuccess(code: 200, msg: $result);
         } catch (\Throwable $th) {
-            showError($th);
+            showError(th: $th);
         }
     }
 
@@ -241,22 +241,22 @@ class Event extends AllMembersData
             case "+7 days":
                 $subject .= " is on $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject in seven days. $eventInformation ";
-                PushNotificationClass::sendPushNotification($id, $subject, $url); // this is to push notification for the PWA application 
+                PushNotificationClass::sendPushNotification(userId: $id, message: $subject, url: $url); // this is to push notification for the PWA application 
 
-                self::sendBulkNotification($data, $subject, $email);
+                self::sendBulkNotification(data: $data, subject: $subject, email: $email);
                 break;
             case "+1 days":
                 $subject .= " is tomorrow, $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject. $eventInformation";
-                PushNotificationClass::sendPushNotification($id, $subject, $url);
-                self::sendBulkNotification($data, $subject, $email);
+                PushNotificationClass::sendPushNotification(userId: $id, message: $subject, url: $url);
+                self::sendBulkNotification(data: $data, subject: $subject, email: $email);
                 break;
             case "+0 days":
                 $subject .= " is today, $eventDayFormatted";
                 $data['emailHTMLContent'] = "$subject. $eventInformation";
-                PushNotificationClass::sendPushNotification($id, $subject, $url);
-                self::sendBulkNotification($data, $subject, $email);
-                self::extendEventByFrequency($data);
+                PushNotificationClass::sendPushNotification(userId: $id, message: $subject, url: $url);
+                self::sendBulkNotification(data: $data, subject: $subject, email: $email);
+                self::extendEventByFrequency(data: $data);
                 break;
             default:
                 break;
