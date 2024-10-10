@@ -51,7 +51,7 @@
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
 
-  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> 
 
 
   <style>
