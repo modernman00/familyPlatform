@@ -2,7 +2,7 @@ import { html } from "./html"
 import { id } from '../global'
 import { renderMembers } from '../allMembers/api'
 import filterMembersByFamCode from '../allMembers/filterMembersByFamCode'
-S
+
 
 
 export const allPost = (el, commentData) => {
