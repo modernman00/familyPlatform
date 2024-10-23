@@ -70,7 +70,7 @@ class RegisterTableData {
                 'post_no' => 1000,
                 'id' => $cleanPostData['id']
             ],
-            'profile_pics' => [
+            'profilePics' => [
                 'img' => $profileAvatar,
                 'id' => $cleanPostData['id']
             ],

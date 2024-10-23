@@ -19,7 +19,7 @@ class AllMembersData extends InnerJoin
 
     // public function getAllMembers(): array
     // {
-    //     $table = ['personal', 'otherFamily', 'profile_pics', 'contact', 'requestMgt'];
+    //     $table = ['personal', 'otherFamily', 'profilePics', 'contact', 'requestMgt'];
     //     $firstTable = array_shift($table);
     //     $memberData = parent::joinAll2(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
@@ -36,7 +36,7 @@ class AllMembersData extends InnerJoin
             $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.fatherName, ofm.motherName, ofm.spouseName, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
                 FROM personal AS p
                   INNER JOIN otherFamily AS ofm ON p.id = ofm.id
-                  INNER JOIN profile_pics AS pp ON p.id = pp.id
+                  INNER JOIN profilePics AS pp ON p.id = pp.id
                   INNER JOIN contact AS c ON p.id = c.id
                    LEFT JOIN (
                       SELECT requester_id, approver_id, status, requesterCode
@@ -73,7 +73,7 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembersNoPics(): array
     {
-        $table = ['personal', "contact", "profile_pics", 'otherFamily'];
+        $table = ['personal', "contact", "profilePics", 'otherFamily'];
         $firstTable = array_shift($table);
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
@@ -88,7 +88,7 @@ class AllMembersData extends InnerJoin
 
     public static function getAllMembersNoPicsStatic(): array
     {
-        $table = ['personal', "contact", "profile_pics", 'otherFamily'];
+        $table = ['personal', "contact", "profilePics", 'otherFamily'];
         $firstTable = array_shift($table);
         $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
 
@@ -104,7 +104,7 @@ class AllMembersData extends InnerJoin
     public function getAllMembersById($id)
     {
 
-        $table = ['personal', 'otherFamily', 'profile_pics', 'post',  'contact'];
+        $table = ['personal', 'otherFamily', 'profilePics', 'post',  'contact'];
 
         $firstTable = array_shift($table);
 
@@ -167,7 +167,7 @@ class AllMembersData extends InnerJoin
 
                 if ($getRequesterDataById['requester_id']) {
                     $custData = new SingleCustomerData();
-                    $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profile_pics']);
+                    $data = $custData->getCustomerData($getRequesterDataById['requester_id'], ['personal', 'contact', 'profilePics']);
 
                     array_push($result, $data);
                 } else {

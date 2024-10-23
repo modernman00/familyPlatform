@@ -362,7 +362,6 @@ var config = {
     'Accept': 'application/json'
   }
 };
-var famCode = localStorage.getItem('requesterFamCode');
 var reqId = localStorage.getItem('requesterId');
 var URL = "http://olaogun.test/";
 var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
@@ -380,11 +379,8 @@ axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/pro
   if (!response.data) {
     throw Error('There is no data');
   }
-  if (!famCode) {
-    throw Error('There is no famCode');
-  }
   var data = response.data;
-  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__.filterMembersByFamCode)(data, famCode);
+  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__["default"])(data);
   renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
 
   // Remove the "loader" class after rendering is complete
@@ -406,14 +402,21 @@ axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/pro
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   filterMembersByFamCode: () => (/* binding */ filterMembersByFamCode)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 var reqId = localStorage.getItem('requesterId');
-var filterMembersByFamCode = function filterMembersByFamCode(data, famCode) {
+var famCode = localStorage.getItem('requesterFamCode');
+console.log(famCode);
+var filterMembersByFamCode = function filterMembersByFamCode(data) {
+  // Check if data is an array before calling filter
+  if (!Array.isArray(data)) {
+    console.error('Error: data is not an array:');
+  }
   return data.filter(function (el) {
-    return el.id !== reqId && (el.famCode === famCode || el.requesterCode === famCode);
+    return el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode;
   });
 };
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (filterMembersByFamCode);
 
 /***/ }),
 
@@ -1332,6 +1335,15 @@ var options = {
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN'
 };
+
+/**
+ * @function process
+ * @description Processes the event modal form data to create a new event
+ * @param {Event} e - The event object
+ * @example
+ * const eventForm = id('eventModalForm');
+ * eventForm.addEventListener('submit', process);
+ */
 var _process = function process(e) {
   try {
     e.preventDefault();
@@ -1661,6 +1673,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+
 
 
 
@@ -1679,7 +1693,8 @@ try {
   postData.then(function (response) {
     state.post = response[0].data.message;
     state.comment = response[1].data.message;
-    state.post.map(function (data) {
+    var filteredPost = (0,_allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__["default"])(state.post);
+    filteredPost.map(function (data) {
       return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
     }); // show all the post and comments
 
@@ -1794,7 +1809,19 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-S;
+
+/**
+ * Renders a post and its associated comments in the DOM.
+ * 
+ * This function takes a post object and an array of comment data,
+ * filters the comments to include only those associated with the 
+ * given post, generates HTML for the post using the `html` function, 
+ * and appends it to the 'postIt' container in the DOM.
+ *
+ * @param {Object} el - The post object containing post data, including post number.
+ * @param {Array} commentData - An array of comment objects associated with posts.
+ * @returns {boolean} - Returns false if the post object is invalid.
+ */
 var allPost = function allPost(el, commentData) {
   if (!el) {
     return false;
@@ -1807,6 +1834,18 @@ var allPost = function allPost(el, commentData) {
   var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el, filterComment);
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
 };
+
+/**
+ * Appends a new post to the DOM if it does not already exist.
+ * 
+ * This function checks for the existence of comment form elements 
+ * associated with the provided post object. If any of these elements 
+ * are missing, it generates HTML for the post using the `html` function 
+ * and inserts it at the beginning of the 'postIt' container.
+ *
+ * @param {Object} el - The post object containing post data, including post number.
+ * @returns {boolean} - Returns false if the post object is invalid.
+ */
 var appendNewPost = function appendNewPost(el) {
   if (!el) {
     return false;

@@ -2,6 +2,7 @@ import { log } from '../global'
 import { appendNewPost, allPost} from './post'
 import { getMultipleApiData } from "../helper/http"
 import { render } from "timeago.js"
+import filterMembersByFamCode from '../allMembers/filterMembersByFamCode';
 
 
 // set an empty array
@@ -22,8 +23,10 @@ try {
         state.post = response[0].data.message;
 
         state.comment = response[1].data.message
+     
+        const filteredPost = filterMembersByFamCode(state.post)
 
-        state.post.map(data => allPost(data, state.comment)) // show all the post and comments
+        filteredPost.map(data => allPost(data, state.comment)) // show all the post and comments
 
         // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 

@@ -30,9 +30,12 @@ class Select extends Db
             $implodeColArray = implode(separator: ', ', array: $colArray);
         }
 
-        // $table = isset($table) ? checkInput(data: $table) : null;
-        // $column = isset($column) ? checkInput(data: $column) : null;
-        // $column2 = isset($column2) ? checkInput(data: $column2) : null;
+        // validate or escape $table and $column
+    
+
+        $table = isset($table) ? checkInput(data: $table) : null;
+        $column = isset($column) ? checkInput(data: $column) : null;
+        $column2 = isset($column2) ? checkInput(data: $column2) : null;
         // $identifier1 = isset($identifier1) ? checkInput(data: $identifier1) : null;
         // $identifier2 = isset($identifier2) ? checkInput(data: $identifier2) : null;
         // $orderBy = isset($orderBy) ? checkInput(data: $orderBy) : null;

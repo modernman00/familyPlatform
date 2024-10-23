@@ -340,10 +340,10 @@ INSERT INTO `post` (`post_no`, `id`, `fullName`, `postMessage`, `profileImg`, `p
 -- --------------------------------------------------------
 
 --
--- Table structure for table `profile_pics`
+-- Table structure for table `profilePics`
 --
 
-CREATE TABLE `profile_pics` (
+CREATE TABLE `profilePics` (
   `no` int(11) NOT NULL,
   `id` varchar(100) NOT NULL,
   `img` text,
@@ -353,10 +353,10 @@ CREATE TABLE `profile_pics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `profile_pics`
+-- Dumping data for table `profilePics`
 --
 
-INSERT INTO `profile_pics` (`no`, `id`, `img`, `date_created`, `date_updated`, `date_deleted`) VALUES
+INSERT INTO `profilePics` (`no`, `id`, `img`, `date_created`, `date_updated`, `date_deleted`) VALUES
 (23, '470258OLAWALE', 'SAM_0083.JPG', '2020-12-04 12:18:27', NULL, NULL),
 (25, '244681DAVID', 'SAM_0678.JPG', '2020-12-04 14:16:03', NULL, NULL),
 (26, '15430JUMOKE', 'SAM_0070.JPG', '2020-12-06 13:47:16', NULL, NULL),
@@ -503,9 +503,9 @@ ALTER TABLE `post`
   ADD PRIMARY KEY (`post_no`);
 
 --
--- Indexes for table `profile_pics`
+-- Indexes for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   ADD PRIMARY KEY (`no`);
 
 --
@@ -588,9 +588,9 @@ ALTER TABLE `post`
   MODIFY `post_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
--- AUTO_INCREMENT for table `profile_pics`
+-- AUTO_INCREMENT for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   MODIFY `no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --

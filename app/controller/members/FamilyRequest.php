@@ -28,7 +28,7 @@ class FamilyRequest extends Select
       $dataFromJs = json_decode(file_get_contents("php://input"), true);
 
       if (!$dataFromJs) {
-        msgException(301, "Invalid request data.");
+        msgException(errCode: 301, msg: "Invalid request data.");
       }
 
 
@@ -202,7 +202,7 @@ class FamilyRequest extends Select
 
         toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
 
-        // Send push notification to the requester about the decision
+        // Send push notification to the requester about the decision - Service Manager JS
         PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
 
         // show the approver what they have just done
@@ -257,7 +257,7 @@ class FamilyRequest extends Select
 
         if ($getRequesterDataById1['requester_id']) {
           $custData = new SingleCustomerData();
-          $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profile_pics']);
+          $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profilePics']);
 
           array_push($result, $data);
         } else {

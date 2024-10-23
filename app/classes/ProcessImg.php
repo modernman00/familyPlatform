@@ -41,7 +41,7 @@ class ProcessImg extends AllFunctionalities
             $insertFile->submitForm('images', $data);
 
             // Update the profile_table
-            return $this->update('profile_pics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
+            return $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
 
         } catch (\Throwable $th) {
             showError($th);

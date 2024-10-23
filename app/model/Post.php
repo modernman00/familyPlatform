@@ -60,19 +60,19 @@ class Post extends Select
 
     public static function getAllPostProfilePics(): array
     {
-        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.post_no');
+        return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['post'], orderBy: 'post.post_no');
     }
 
     public function getAllPostProfilePics2(): array
     {
         $inner = new InnerJoin;
-        return $inner->joinAll(firstTable: 'profile_pics', para: 'id', table: ['post'], orderBy: 'post.date_created');
+        return $inner->joinAll(firstTable: 'profilePics', para: 'id', table: ['post'], orderBy: 'post.date_created');
     }
 
 
     public static function getAllCommentProfilePics(): array
     {
-        return InnerJoin::joinAll2(firstTable: 'profile_pics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
+        return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
     }
 
     /**
@@ -89,7 +89,7 @@ class Post extends Select
 
     public static function getProfilePics($id): array|int|string
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'profile_pics', identifier1: "id");
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'profilePics', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 

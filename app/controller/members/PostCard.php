@@ -5,15 +5,8 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\model\{
-    SingleCustomerData,
-    Post
-};
 
-use App\classes\{
-    Select,
-    Db, AllFunctionalities
-};
+use App\classes\{Select, Db, AllFunctionalities};
 
 
 class PostCard extends Db {

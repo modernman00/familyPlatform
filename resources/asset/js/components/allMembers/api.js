@@ -1,7 +1,7 @@
 import axios from "axios";
 import { id, showError } from "../global";
 import { renderHtml } from "./html";
-import { filterMembersByFamCode } from "./filterMembersByFamCode";
+import  filterMembersByFamCode from "./filterMembersByFamCode";
 import { handleInput } from "./handleInput";
 
 const config = {
@@ -12,7 +12,6 @@ const config = {
     },
 };
 
-const famCode = localStorage.getItem('requesterFamCode');
 const reqId = localStorage.getItem('requesterId');
 const URL = process.env.MIX_APP_URL2;
 const allMembersContainer = id('allMembers');
@@ -37,13 +36,10 @@ axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
             throw Error('There is no data');
         }
 
-        if (!famCode) {
-            throw Error('There is no famCode');
-        }
 
         const data = response.data;
 
-        const dataWithFamCode = filterMembersByFamCode(data, famCode);
+        const dataWithFamCode = filterMembersByFamCode(data);
 
         renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, renderHtml);
 

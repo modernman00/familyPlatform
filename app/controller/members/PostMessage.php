@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+use App\classes\PushNotificationClass;
 use App\model\{
     Post
 };
@@ -66,6 +67,13 @@ class PostMessage
         }
     }
 
+    /**
+     * Get post by postNo
+     * 
+     * Gets a post by the post number
+     * 
+     * @return void
+     */
     public function getPostByNo(): void
     {
         try {
@@ -81,6 +89,14 @@ class PostMessage
         }
     }
 
+    /**
+     * getPostNo
+     *
+     * It retrieves the post with the given postNo and sends an email to all customers
+     * with the name of the user who posted
+     *
+     * @return void
+     */
     public function getPostNo(): void
     {
         try {
@@ -92,13 +108,23 @@ class PostMessage
             foreach ($message as $data);
             $posterName = $data['fullName'];
 
-            $result = InnerJoin::joinAll2('personal', 'id', ['contact'], 'email');
+            $result = InnerJoin::joinAll2(firstTable: 'personal', para: 'id', table: ['contact'], orderBy: 'email');
 
-            foreach ($result as $notifyCustomerData) {
+            $getUrl = getenv('MIX_APP_URL2');
+            // clicking the url will takr you to the post in question
+            $url = "$getUrl/member/ProfilePage?#$postNo";
+
+            foreach ($result as $CustomerData) {
                 // integrate the name of the poster to the data array
-                $notifyCustomerData['poster'] = $posterName;
+                $CustomerData['poster'] = $posterName;
               
-                sendEmailAll($notifyCustomerData, "msg/customer/notifyNewPost", "$posterName has posted a new update");
+                sendEmailAll(data: $CustomerData, viewPath: "msg/customer/notifyNewPost", subject: "$posterName has posted a new update");
+
+                PushNotificationClass::sendPushNotification(
+                    userId: $CustomerData['id'],
+                    message: "$posterName has posted a new update",
+                    url: $url
+                );
 
             };
 
@@ -109,6 +135,15 @@ class PostMessage
         }
     }
 
+    /**
+     * Updates the post and comment data to the client
+     *
+     * It gets the last post id and last comment id from the session and
+     * then sends the data to the client using the msgServerSent function
+     *
+     * @throws \Throwable
+     * @return void
+     */
     public static function update2(): void
     {
         try {

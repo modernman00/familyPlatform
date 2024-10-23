@@ -47,7 +47,7 @@ class PushNotificationClass extends VapidClass
   {
         $queryData = [
         'selection' => 'SELECT_ONE',
-        'table' => 'push_notification',
+        'table' => 'pushNotification',
         'identifier1' => 'id',
         'bind' => [$userId]
     ];

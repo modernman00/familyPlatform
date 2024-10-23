@@ -1297,7 +1297,7 @@ CREATE TABLE `pma__recent` (
 --
 
 INSERT INTO `pma__recent` (`username`, `tables`) VALUES
-('root', '[{\"db\":\"family\",\"table\":\"push_notification\"},{\"db\":\"family\",\"table\":\"personal\"},{\"db\":\"family\",\"table\":\"post\"},{\"db\":\"family\",\"table\":\"notification\"},{\"db\":\"family\",\"table\":\"familyFriend\"},{\"db\":\"family\",\"table\":\"kids\"},{\"db\":\"family\",\"table\":\"otherFamily\"},{\"db\":\"family\",\"table\":\"account\"},{\"db\":\"family\",\"table\":\"contact\"},{\"db\":\"family\",\"table\":\"requestMgt\"}]');
+('root', '[{\"db\":\"family\",\"table\":\"pushNotification\"},{\"db\":\"family\",\"table\":\"personal\"},{\"db\":\"family\",\"table\":\"post\"},{\"db\":\"family\",\"table\":\"notification\"},{\"db\":\"family\",\"table\":\"familyFriend\"},{\"db\":\"family\",\"table\":\"kids\"},{\"db\":\"family\",\"table\":\"otherFamily\"},{\"db\":\"family\",\"table\":\"account\"},{\"db\":\"family\",\"table\":\"contact\"},{\"db\":\"family\",\"table\":\"requestMgt\"}]');
 
 -- --------------------------------------------------------
 
@@ -1361,7 +1361,7 @@ CREATE TABLE `pma__table_info` (
 INSERT INTO `pma__table_info` (`db_name`, `table_name`, `display_field`) VALUES
 ('family', 'events', 'id'),
 ('family', 'notification', 'notification_content'),
-('family', 'push_notification', 'auth_key TEXT');
+('family', 'pushNotification', 'auth_key TEXT');
 
 -- --------------------------------------------------------
 
@@ -1906,10 +1906,10 @@ INSERT INTO `post` (`post_no`, `id`, `fullName`, `postMessage`, `post_likes`, `p
 -- --------------------------------------------------------
 
 --
--- Table structure for table `profile_pics`
+-- Table structure for table `profilePics`
 --
 
-CREATE TABLE `profile_pics` (
+CREATE TABLE `profilePics` (
   `no` int NOT NULL,
   `id` varchar(100) NOT NULL,
   `img` text,
@@ -1920,10 +1920,10 @@ CREATE TABLE `profile_pics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 --
--- Dumping data for table `profile_pics`
+-- Dumping data for table `profilePics`
 --
 
-INSERT INTO `profile_pics` (`no`, `id`, `img`, `buttonHTML`, `date_created`, `date_updated`, `date_deleted`) VALUES
+INSERT INTO `profilePics` (`no`, `id`, `img`, `buttonHTML`, `date_created`, `date_updated`, `date_deleted`) VALUES
 (3, '117540OLAWALE', 'olutobs_13th.jpeg', 'Add friend', '2021-02-15 23:42:31', '2023-10-12 02:00:07', '2023-10-12 02:00:07'),
 (4, '870016OLAWALE', 'femba.jpeg', 'Request sent', '2021-02-15 23:49:09', '2023-08-30 00:35:27', '2023-08-30 00:35:27'),
 (5, '397755OLUSOLA', 'walesoj.jpeg', 'Request Sent', '2021-02-15 23:51:02', '2023-08-30 00:35:54', '2023-08-30 00:35:54'),
@@ -1955,12 +1955,12 @@ INSERT INTO `profile_pics` (`no`, `id`, `img`, `buttonHTML`, `date_created`, `da
 -- --------------------------------------------------------
 
 --
--- Table structure for table `push_notification`
+-- Table structure for table `pushNotification`
 --
 
-CREATE TABLE `push_notification` (
+CREATE TABLE `pushNotification` (
   `no` int NOT NULL,
-  `push_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `endpoint` varchar(255) NOT NULL,
   `p256dh_key` text NOT NULL,
   `auth_key TEXT` text NOT NULL,
@@ -2336,16 +2336,16 @@ ALTER TABLE `post`
   ADD KEY `id` (`id`);
 
 --
--- Indexes for table `profile_pics`
+-- Indexes for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   ADD PRIMARY KEY (`no`),
   ADD KEY `id` (`id`);
 
 --
--- Indexes for table `push_notification`
+-- Indexes for table `pushNotification`
 --
-ALTER TABLE `push_notification`
+ALTER TABLE `pushNotification`
   ADD PRIMARY KEY (`no`);
 
 --
@@ -2482,15 +2482,15 @@ ALTER TABLE `post`
   MODIFY `post_no` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=832;
 
 --
--- AUTO_INCREMENT for table `profile_pics`
+-- AUTO_INCREMENT for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   MODIFY `no` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
--- AUTO_INCREMENT for table `push_notification`
+-- AUTO_INCREMENT for table `pushNotification`
 --
-ALTER TABLE `push_notification`
+ALTER TABLE `pushNotification`
   MODIFY `no` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -2564,10 +2564,10 @@ ALTER TABLE `post`
   ADD CONSTRAINT `post_ibfk_1` FOREIGN KEY (`id`) REFERENCES `personal` (`id`);
 
 --
--- Constraints for table `profile_pics`
+-- Constraints for table `profilePics`
 --
-ALTER TABLE `profile_pics`
-  ADD CONSTRAINT `profile_pics_ibfk_1` FOREIGN KEY (`id`) REFERENCES `personal` (`id`);
+ALTER TABLE `profilePics`
+  ADD CONSTRAINT `profilePics_ibfk_1` FOREIGN KEY (`id`) REFERENCES `personal` (`id`);
 
 --
 -- Constraints for table `siblings`

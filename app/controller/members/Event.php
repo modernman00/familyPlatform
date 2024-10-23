@@ -8,7 +8,8 @@ use App\classes\{
     AllFunctionalities,
     Insert,
     CheckToken,
-    Select, PushNotificationClass
+    Select,
+    PushNotificationClass
 };
 use App\model\{EmailData, AllMembersData};
 
@@ -16,6 +17,14 @@ class Event extends AllMembersData
 {
 
 
+    /**
+     * @throws \Throwable
+     */
+    /**
+     * Submit event form to the database
+     *
+     * @return void
+     */
     public static function submitEvent()
     {
         try {
@@ -34,7 +43,22 @@ class Event extends AllMembersData
         }
     }
 
-    public static function PostEventNotificationBar()
+    /**
+     * @throws \Throwable
+     */
+    /**
+     * Post event notification bar
+     * This PHP function, PostEventNotificationBar, handles posting an event notification to a recipient. It:Sanitizes input data from $_POST and $_SESSION.
+     * Retrieves the sender's name.
+     * Prepares a notification array with sender and event details.
+     * Inserts the notification into the 'notification' table.
+     * Sends a success message with the last inserted ID.
+     * In essence, it creates a new event notification and stores it in the database.
+     *
+     * @return void
+     */
+
+    public static function PostEventNotificationBar(): void
     {
         try {
             $cleanData = getSanitisedInputData(inputData: $_POST);
@@ -61,7 +85,7 @@ class Event extends AllMembersData
 
             $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
 
-                  // Send push notification to the receiver about the new friend request
+            // Send push notification to the receiver about the new event
 
             msgSuccess(code: 200, msg: $lastInsertedId);
         } catch (\Throwable $th) {
@@ -133,13 +157,12 @@ class Event extends AllMembersData
                     // Extract email addresses from the filtered members
                     $emailsToNotify = array_column($membersToNotify, 'email');
 
-                     // Extract id from the filtered members
+                    // Extract id from the filtered members
                     $idsToNotify = array_column($membersToNotify, 'id');
 
-                   
+
                     self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify, $idsToNotify);
                 }
-
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -158,12 +181,12 @@ class Event extends AllMembersData
         // }
 
         ob_start();
-        $emailPage = view('msg/events/event', compact('data'));
+        $emailPage = view(path: 'msg/events/event', data: compact('data'));
         $emailContent = ob_get_contents();
         ob_end_clean();
 
 
-        sendBulkEmail($email, $subject, $emailContent);
+        sendBulkEmail(emailAddresses: $email, subject: $subject, message: $emailContent);
     }
     /**
      * this function extends the event date on the due date 
@@ -179,9 +202,9 @@ class Event extends AllMembersData
             $eventDate = checkInput($data['eventDate']);
 
             return match ($data['eventFrequency']) {
-                "Annually" => self::processEventUpdate($eventDate, '1 year', $no),
-                "Monthly" => self::processEventUpdate($eventDate, '1 month', $no),
-                "Weekly" => self::processEventUpdate($eventDate, '1 week', $no)
+                "Annually" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 year', no: $no),
+                "Monthly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 month', no: $no),
+                "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no)
             };
         } else {
             return false;
@@ -234,7 +257,7 @@ class Event extends AllMembersData
         $eventHost = "{$data['firstName']} {$data['lastName']}";
         $eventDescription = $data['eventDescription'];
         $eventInformation = "Kindly be informed that this event is scheduled to be held on $eventDayFormatted. Please contact the $eventHost for more information. Event Description: $eventDescription";
-        $url = getenv('MIX_APP_URL2') ."/member/ProfilePage";
+        $url = getenv('MIX_APP_URL2') . "/member/ProfilePage";
 
 
         switch ($diffEventAndTodayDate) {

@@ -28,7 +28,6 @@ var config = {
     'Accept': 'application/json'
   }
 };
-var famCode = localStorage.getItem('requesterFamCode');
 var reqId = localStorage.getItem('requesterId');
 var URL = "http://olaogun.test/";
 var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
@@ -46,11 +45,8 @@ axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/pro
   if (!response.data) {
     throw Error('There is no data');
   }
-  if (!famCode) {
-    throw Error('There is no famCode');
-  }
   var data = response.data;
-  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__.filterMembersByFamCode)(data, famCode);
+  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__["default"])(data);
   renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
 
   // Remove the "loader" class after rendering is complete
@@ -72,14 +68,21 @@ axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/pro
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   filterMembersByFamCode: () => (/* binding */ filterMembersByFamCode)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 var reqId = localStorage.getItem('requesterId');
-var filterMembersByFamCode = function filterMembersByFamCode(data, famCode) {
+var famCode = localStorage.getItem('requesterFamCode');
+console.log(famCode);
+var filterMembersByFamCode = function filterMembersByFamCode(data) {
+  // Check if data is an array before calling filter
+  if (!Array.isArray(data)) {
+    console.error('Error: data is not an array:');
+  }
   return data.filter(function (el) {
-    return el.id !== reqId && (el.famCode === famCode || el.requesterCode === famCode);
+    return el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode;
   });
 };
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (filterMembersByFamCode);
 
 /***/ }),
 

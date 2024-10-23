@@ -318,10 +318,10 @@ INSERT INTO `post` (`post_no`, `id`, `fullName`, `postMessage`, `profileImg`, `p
 -- --------------------------------------------------------
 
 --
--- Table structure for table `profile_pics`
+-- Table structure for table `profilePics`
 --
 
-CREATE TABLE `profile_pics` (
+CREATE TABLE `profilePics` (
   `no` int(11) NOT NULL,
   `id` varchar(100) NOT NULL,
   `img` text,
@@ -331,10 +331,10 @@ CREATE TABLE `profile_pics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `profile_pics`
+-- Dumping data for table `profilePics`
 --
 
-INSERT INTO `profile_pics` (`no`, `id`, `img`, `date_created`, `date_updated`, `date_deleted`) VALUES
+INSERT INTO `profilePics` (`no`, `id`, `img`, `date_created`, `date_updated`, `date_deleted`) VALUES
 (1, '267446OLAWALE', 'WhatsApp Image 2021 01 24 at 11.59.09  7 .jpeg', '2021-02-15 23:21:42', NULL, NULL),
 (2, '432292OLAWALE', 'WhatsApp Image 2021 01 24 at 11.59.09  7 .jpeg', '2021-02-15 23:39:15', NULL, NULL),
 (3, '117540OLAWALE', 'WhatsApp Image 2021 01 24 at 11.59.09  7 .jpeg', '2021-02-15 23:42:31', NULL, NULL),
@@ -492,9 +492,9 @@ ALTER TABLE `post`
   ADD PRIMARY KEY (`post_no`);
 
 --
--- Indexes for table `profile_pics`
+-- Indexes for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   ADD PRIMARY KEY (`no`);
 
 --
@@ -577,9 +577,9 @@ ALTER TABLE `post`
   MODIFY `post_no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
--- AUTO_INCREMENT for table `profile_pics`
+-- AUTO_INCREMENT for table `profilePics`
 --
-ALTER TABLE `profile_pics`
+ALTER TABLE `profilePics`
   MODIFY `no` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --

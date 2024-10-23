@@ -26,6 +26,14 @@ const options = {
     xsrfHeaderName: 'X-XSRF-TOKEN',
 }
 
+/**
+ * @function process
+ * @description Processes the event modal form data to create a new event
+ * @param {Event} e - The event object
+ * @example
+ * const eventForm = id('eventModalForm');
+ * eventForm.addEventListener('submit', process);
+ */
 const process = (e) => {
     try {
         e.preventDefault();

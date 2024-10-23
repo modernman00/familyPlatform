@@ -65,7 +65,7 @@ class ProfilePage extends ProcessImg
 
             $setData = new SingleCustomerData;
 
-            $table = ['personal', 'contact', 'otherFamily', 'post', 'profile_pics'];
+            $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
 
             $this->memberData = $setData->getCustomerData($this->id, $table);
 
@@ -132,6 +132,24 @@ class ProfilePage extends ProcessImg
         }
     }
 
+    /**
+     * processPostData
+     * 
+     * @return array
+     * 
+     * Process post data
+     * 
+     * This function takes in post data, sanitise it, and 
+     * checks if there are images in the post
+     * 
+     * If there are images, it uploads them to the public/img/post/ folder
+     * and creates a file path name for the database
+     * 
+     * It also creates the post array for the post image
+     * 
+     * It then gets the other post variables id, fullname, time of post
+     * and returns the sanitised post data
+     */
     private function processPostData(): array
     {
 
@@ -168,6 +186,19 @@ class ProfilePage extends ProcessImg
     }
 
 
+    /**
+     * Handles the post submission
+     * 
+     * It sets the content type to text/event-stream and cache control to no-cache
+     * and then processes the post data using the processPostData method
+     * 
+     * It then sends the post data to the database using the Insert::submitFormDynamic method
+     * and sends the last post id to the JS frontend
+     * 
+     * If there is an exception, it calls the showError function
+     * 
+     * @return void
+     */
     public function post(): void
     {
         try {
@@ -176,11 +207,9 @@ class ProfilePage extends ProcessImg
             $getPost = $this->processPostData();
             Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
-            // $theId = (int) $_SESSION['LAST_INSERT_ID_POST'];
+            // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
 
-            // $messages = Post::postByNo($theId);
-        
-            // foreach ($messages as $message);
+
          
         } catch (\Throwable $th) {
             showError($th);

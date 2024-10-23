@@ -19,12 +19,14 @@ class InnerJoin extends Db
      */
     public function joinParamOr(string $firstTable, string $para, array $table, mixed $id): array|bool
     {
+
+         $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
    
         try {
             $buildInnerJoinQuery = array_map(
-                fn ($tab) =>"
+                callback: fn ($tab): string =>"
                 LEFT JOIN $tab ON $firstTable.$para = $tab.$para",
-                $table
+                array: $table
             );
 
             $innerQueryToString = join(
@@ -59,13 +61,24 @@ class InnerJoin extends Db
 
     public function joinParam(string $firstTable, string $para, string $paraWhere, array $table, mixed $bind): array|bool
     {
-   
+         $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
  
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
-            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
-            $query2 = "SELECT * FROM $firstTable  $innerQueryToString WHERE $firstTable.$paraWhere = ?";
+            $buildInnerJoinQuery = array_map(
+                callback: fn ($tab): string => "
+                INNER JOIN $tab ON $firstTable.$para = $tab.$para ", 
+                array: $table);
+
+            $innerQueryToString = join(
+                separator: " ",   
+                array: $buildInnerJoinQuery
+            );
+
+            $query2 = "SELECT * FROM $firstTable  $innerQueryToString 
+            WHERE $firstTable.$paraWhere = ?";
+
             $result = $this->connect()->prepare($query2);
+
             $result->execute([$bind]);
             return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -77,10 +90,16 @@ class InnerJoin extends Db
     public function joinAll(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
      
-    
+         $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
         try {
-            $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para", $table);
-            $innerQueryToString = join(" ",   $buildInnerJoinQuery);
+            $buildInnerJoinQuery = array_map(callback: fn ($tab): string => 
+            " INNER JOIN $tab ON $firstTable.$para = $tab.$para", 
+            array: $table);
+
+            $innerQueryToString = join(
+                separator: " ",   
+                array: $buildInnerJoinQuery
+            );
             $query2 = "SELECT * FROM $firstTable  $innerQueryToString ORDER BY $orderBy  DESC";
             $result = $this->connect()->prepare($query2);
             $result->execute();
@@ -101,7 +120,7 @@ class InnerJoin extends Db
     public static function joinAll2(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
        
- 
+         $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ", $buildInnerJoinQuery);
@@ -117,7 +136,7 @@ class InnerJoin extends Db
 
     public static function joinAll4(string $firstTable, string $para, array $table, string $orderBy): mixed
     {
-       
+        $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
    
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " RIGHT JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -135,7 +154,7 @@ class InnerJoin extends Db
 
     public static function joinAll3(string $firstTable, string $para, array $table, string $orderBy): void
     {
-      
+       $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
 
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
@@ -154,6 +173,7 @@ class InnerJoin extends Db
 
     public function joinParamAnd(string $firstTable, string $para, array $table, mixed $id): mixed
     {
+         $firstTable = isset($firstTable) ? checkInput(data: $firstTable) : null;
         try {
             $buildInnerJoinQuery = array_map(fn ($tab) => " INNER JOIN $tab ON $firstTable.$para = $tab.$para ", $table);
             $innerQueryToString = join(" ",   $buildInnerJoinQuery);
