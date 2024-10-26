@@ -1,58 +1,56 @@
 
 import axios from 'axios'
-import { log, qSel } from "../global"
-const appUrl = process.env.MIX_APP_URL2;
-const approver_id = sessionStorage.getItem('idSetFromHttp')
+import { log, showError } from "../global"
+const approverId = encodeURIComponent(localStorage.getItem('requesterId')) // means that the user currently working on the UI
+import { friendRequestCard } from './htmlFolder/friendRequestCard';
 
-axios.get(`/getFriendRequestById?id=${approver_id}`)
-  .then(results => {
-      if (results.data.message) {
-        results.data.message.forEach(request => {
-          qSel('.requestFriendClass').insertAdjacentHTML('afterbegin', htmlFriendRequest(request));
-        })
+
+//NOTE - this code worked well 25/10/24
+/**
+ * Fetch friend requests by approver ID and render each request.
+ */
+const fetchFriendRequests = async () => {
+  try{
+
+  const response = await axios.get(`/getFriendRequestById?id=${approverId}`)
+
+      if (response.data.message) {
+        response.data.message.forEach(request => waitForRequestFriendClass(request));
       }
-})
+
+  } catch(error) {showError(error)} ;
+}
+
+// Wait for .requestFriendClass to appear in the DOM
+const waitForRequestFriendClass = (data) => {
+  const observer = new MutationObserver((mutations, obs) => {
+    const requestContainer = document.querySelector('.requestFriendClass');
+    if (requestContainer) {
+       friendRequestCard(data);
+      obs.disconnect(); // Stop observing once .requestFriendClass is found
+    } else{
+      log('there is no requestFriendClass')
+    }
+  });
+
+  // Observe the entire body for changes in child elements
+  observer.observe(document.body, { childList: true, subtree: true });
+};
 
 
+// TODO: Maybe a future enhancement to show count of friend request 
 // const countFriendRequest = (friend) => {
 //   return friend.length > 1 ? `<p><b>Friend Requests</b></p><br></br>` : `<p><b>Friend Request</b></p><br>`;
 // }
 
-const imgFriendRequest = (data) => {
-  return `<img src="/public/img/profile/${data.img}" alt="Avatar" style="width:50%"><br>`
-}
+
+// Fetch and render friend requests on page load
+
+   fetchFriendRequests();
 
 
 
-const buttonFriendRequest = (data) => {
-  return `<div class="w3-row w3-opacity" >
-        <div class="w3-half">
-                <a href=${appUrl}member/request?req=${data.id}&appr=${approver_id}&dec=50&reqCode=${data.famCode}&src=pp  style="text-decoration: none;"> 
-                    <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i>
-                  </button>
-                </a>
-        </div>
 
-        <div class="w3-half">
-                    <a href=${appUrl}member/request?req=${data.id}&appr=${approver_id}&dec=10>
-                      <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
-                    </a>
-        </div>
-      </div>`
-}
-
-const name = (data) => {
-  return `<span>${data.firstName} ${data.lastName}</span>`
-}
-
-const htmlFriendRequest = (data) => {
-  return `
-    <p id=${data.id}_linkRequestCard></p>
-    ${imgFriendRequest(data)}
-    ${name(data)}
-    ${buttonFriendRequest(data)}
-  `;
-}
 
 
 

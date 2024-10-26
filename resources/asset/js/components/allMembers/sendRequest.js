@@ -1,9 +1,16 @@
 import axios from "axios";
 import { id, showError } from "../global"
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
+import { friendRequestCard } from "../profilePage/htmlFolder/friendRequestCard";
 
 // Attach a click event listener to the document
 
+/**
+ * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
+ it returns the notification details for the approvers tab
+ * 
+ * @param {MouseEvent} e - The event object.
+ */
 document.onclick = async (e) => {
     try {
         // Get the target element's ID
@@ -19,6 +26,7 @@ document.onclick = async (e) => {
 
             // Prepare family request data
             const requesterDetails = getLocalStorageProfile();
+
             const familyRequestData = {
                 requester: requesterDetails,
                 approver: approverDetails,
@@ -26,16 +34,21 @@ document.onclick = async (e) => {
                 subject: `${requesterDetails.requesterFirstName} ${requesterDetails.requesterLastName} sent you a family request`,
             };
 
-            // Send the family request data to the server for processing
+
+            // Send the family request data to the server for processing which returns the notification details for the approvers tab
             const response = await sendFamilyRequest(familyRequestData);
 
-            // ADD TO THE NOTIFICATION TAB
-            addToNotificationTab(response.data.message);
 
-            increaseNotificationCount();
+            // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
+            const famCode = localStorage.getItem('requesterFamCode');
+            if (famCode === approverDetails.approverCode) {
+                addToNotificationTab(response.data.message);
+                friendRequestCard(requesterDetails)
+                increaseNotificationCount();
+            }
 
             // Update the button's HTML and disable it
-            updateButton(targetId, 'Sent');
+            updateButton(targetId, 'Request Sent');
 
         }
     } catch (error) {

@@ -48,6 +48,7 @@ class FamilyRequest extends Select
       $theApproverID = $dataFromJs['approver']['approverId'];
       $theRequesterID = $dataFromJs['requester']['requesterId'];
       $theApproverCode = $dataFromJs['approver']['approverCode'];
+        $approverEmail = $dataFromJs['approver']['approverEmail'];
 
       // validate the input 
 
@@ -74,11 +75,13 @@ class FamilyRequest extends Select
         query: $query,
         bind: [$theApproverID, $theRequesterID]
       );
-
+// if request is already made, then ignore the request
       if ($result) {
 
         msgSuccess(code: 200, msg: $result);
       } else {
+
+        // insert the request to the table. 
 
         Insert::submitFormDynamicLastId(
           table: 'requestMgt',
@@ -99,7 +102,7 @@ class FamilyRequest extends Select
         $emailArray = [
           'data' => [
             'name' => $approverName,
-            'email' => getenv('TEST_EMAIL'),
+            'email' =>  $approverEmail,
             ...$dataFromJs['approver'],
             ...$dataFromJs['requester']
           ],
@@ -198,7 +201,7 @@ class FamilyRequest extends Select
         $req['decision'] = $decision;
         $subject = "{$app['firstName']} {$app['lastName']} approved your request";
 
-        // email the requester
+        // email the requester that the request has been approved
 
         toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
 
@@ -209,9 +212,10 @@ class FamilyRequest extends Select
         $app['decision'] = $decision;
         $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
 
-        // if the source is from the profile page, refresh the page or use javascript to manage it
+        // if the source is from the profile page, refresh the page or use javascript to manage it 
 
-        $getPP = checkInput($_GET['src']) ?? null;
+        
+        $getPP = isset($_GET['src'])? checkInput($_GET['src']) : null;
 
         if ($getPP === "pp") {
           header("location: /member/ProfilePage");
@@ -245,17 +249,27 @@ class FamilyRequest extends Select
   }
 
 
+  /**
+   * Gets the friend request data sent to the user identified by the given ID
+   * 
+   * @param int $id The ID of the user
+   * 
+   * @return array An array of the requester data
+   */
   public static function getFriendRequestData()
   {
     try {
       $id = checkInput($_GET['id']);
       $result = [];
+
       $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
+
       $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, 'Request sent']);
 
       foreach ($getRequesterDataById as $getRequesterDataById1) {
 
-        if ($getRequesterDataById1['requester_id']) {
+        if ($getRequesterDataById1['requester_id']) 
+        {
           $custData = new SingleCustomerData();
           $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profilePics']);
 
@@ -269,6 +283,7 @@ class FamilyRequest extends Select
       return $result;
     } catch (\Throwable $th) {
       showError($th);
+      return [];
     }
   }
 }

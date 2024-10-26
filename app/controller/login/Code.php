@@ -26,7 +26,7 @@ class Code extends Select
     public function show()
     {
    
-    if ($_SESSION['login']) {
+    if ($_SESSION['login'] || $_SESSION['changePW']) {
         return view('login/code');
     }
 

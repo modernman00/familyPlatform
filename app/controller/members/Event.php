@@ -25,19 +25,27 @@ class Event extends AllMembersData
      *
      * @return void
      */
+    
     public static function submitEvent()
     {
         try {
             // SANITISE THE ENTRY
             $cleanData = getSanitisedInputData($_POST);
-
-            $cleanData['id'] = checkInput($_SESSION['id']);
+            $cleanData['id'] = checkInput(data: $_SESSION['id']);
+       
+            $cleanData['eventCode'] =self::generateFamCode();
 
             // insert the data and return the last event no
             // if the data is successfully inserted then insert same data to the notification table
             CheckToken::tokenCheck(token: 'token');
-            $lastInsertedId = Insert::submitFormDynamicLastId(table: 'events', field: $cleanData, lastIdCol: 'no');
-            msgSuccess(200, $lastInsertedId);
+
+            $lastInsertedId = Insert::submitFormDynamicLastId(
+                table: 'events', 
+                field: $cleanData, 
+                lastIdCol: 'no'
+            );
+            msgSuccess(code: 200, msg: $lastInsertedId);
+
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -58,32 +66,61 @@ class Event extends AllMembersData
      * @return void
      */
 
+
+    private static function generateFamCode(): string
+    {
+        $getFamCode = parent::getMemberName(id: $_SESSION['id']);
+        return $getFamCode['famCode'];
+    }
+
+    private static function getSenderName (): string
+    {
+        $getSenderName = parent::getMemberName(id: $_SESSION['id']);
+        return $getSenderName['fName']. " ". $getSenderName['lName'];
+    }
+
+
+
+
     public static function PostEventNotificationBar(): void
     {
         try {
             $cleanData = getSanitisedInputData(inputData: $_POST);
             $cleanData['id'] = checkInput(data: $_SESSION['id']);
+            $id = $cleanData['id'];
 
             // GET THE SENDER'S NAME 
 
-            $getSenderName = parent::getMemberName(id: $cleanData['id']);
-            $sendName =  "{$getSenderName['fName']} {$getSenderName['lName']}";
+            $senderName =  self::getSenderName();
+            $eventFamCode = self::generateFamCode();      
+            $eventName = $cleanData['eventName'];
+
 
             // insert to the notification table
             // Update the notification tab
 
             $cleanDataNotification = [
-                'sender_id' => $cleanData['id'],
-                'receiver_id' => $getSenderName['famCode'],
-                'sender_name' => $sendName,
-                'notification_name' => $cleanData['eventName'],
+                'sender_id' => $id,
+                'receiver_id' => $eventFamCode,
+                'sender_name' => $senderName,
+                'notification_name' => $eventName,
                 'notification_date' => $cleanData['eventDate'],
+                'receiver' => 'everyone filtered',
                 // 'notification_time' => strtotime(date('Y-m-d H:i:s')),
                 'notification_type' => $cleanData['eventType'],
-                'notification_content' => $cleanData['eventDescription']
+                'notification_content' => $cleanData['eventDescription'],
+                'notification_status' => 'new'
             ];
 
-            $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
+            $lastInsertedId = Insert::submitFormDynamicLastId(
+                table: 'notification', 
+                field: $cleanDataNotification, 
+                lastIdCol: 'no'
+            );
+
+            // activate the email notification 
+
+            self::sendReminder();
 
             // Send push notification to the receiver about the new event
 
@@ -94,6 +131,11 @@ class Event extends AllMembersData
     }
 
 
+    /**
+     * Get a single event notification by notificationNo.
+     *
+     * @return void
+     */
     public static function GetEventNotificationBar()
     {
         try {
@@ -110,6 +152,16 @@ class Event extends AllMembersData
         }
     }
 
+    /**
+     * Retrieves a notification by its notification number.
+     *
+     * This function fetches a single notification from the 'notification' table 
+     * using the provided notification number from the GET request. 
+     * Upon successful retrieval, it returns the notification data and 
+     * sends a success message. In case of an exception, it handles the error appropriately.
+     *
+     * @return void
+     */
     public static function GetAllNotificationBar()
     {
         try {
@@ -126,6 +178,18 @@ class Event extends AllMembersData
         }
     }
 
+    /**
+     * Sends event reminders to all members whose family code matches the event's family code.
+     *
+     * This method retrieves all members' details and events occurring within the next 7 days,
+     * 1 day, and on the current date. It filters members based on the family code of each event
+     * and sends notifications to those members. If the event data is available, it iterates over
+     * each event, filters the members by family code, and sends reminders to the corresponding
+     * members via email.
+     *
+     * @return void
+     * @throws \Throwable If any error occurs during the operation.
+     */
     public static function sendReminder(): void
     {
         try {
@@ -134,9 +198,11 @@ class Event extends AllMembersData
             $allMembers = self::getAllMembersCodeAndEmail();
 
             // show information of events within 7 days , 1 days and on the current date
-            $allEventData = parent::getEventData();
+            $allEventData = parent::getAllEventData();
 
-            $notifyCustomer = new EmailData('admin');
+            $notifyCustomer = new EmailData(
+                sender: 'admin'
+            );
 
             if (!defined('PASS')) {
                 $notifyCustomer->getEmailData();
@@ -161,7 +227,7 @@ class Event extends AllMembersData
                     $idsToNotify = array_column($membersToNotify, 'id');
 
 
-                    self::checkEventDiffAndNotifyAll($eventData, $emailsToNotify, $idsToNotify);
+                    self::checkEventDiffAndNotifyAll(data: $eventData, email: $emailsToNotify, id: $idsToNotify);
                 }
             }
         } catch (\Throwable $th) {
@@ -201,11 +267,17 @@ class Event extends AllMembersData
 
             $eventDate = checkInput($data['eventDate']);
 
+            if($data['eventFrequency'] != "One-off") {
+
+
             return match ($data['eventFrequency']) {
                 "Annually" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 year', no: $no),
                 "Monthly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 month', no: $no),
                 "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no)
             };
+
+            }
+
         } else {
             return false;
         }
@@ -223,9 +295,9 @@ class Event extends AllMembersData
     /**
      * @return void
      */
-    public static function getEventData()
+    public static function getEventData(): void
     {
-        $allEventData = allMembersData::getEventData();
+        $allEventData = allMembersData::getAllEventData();
 
         \msgSuccess(201, $allEventData);
     }
@@ -238,7 +310,14 @@ class Event extends AllMembersData
         $eventNo = $_GET['eventNo'];
         $allEventData = allMembersData::getEventDataByNo($eventNo);
 
-        \msgSuccess(201, $allEventData);
+        $eventFamCode = self::generateFamCode();
+
+        $filteredEventDataByFamCode = ($eventFamCode === $allEventData[0]['famCode']) ? $allEventData[0] : [];
+
+        msgSuccess(
+            code: 201, 
+            msg: $filteredEventDataByFamCode
+        );
     }
 
     /**
@@ -251,7 +330,10 @@ class Event extends AllMembersData
     private static function checkEventDiffAndNotifyAll(array $data, array $email, array $id = null): void
     {
 
-        $diffEventAndTodayDate = dateDifference(date('Y-m-d'), $data['eventDate']);
+        $diffEventAndTodayDate = dateDifference(
+            date1: date(format: 'Y-m-d'),
+            date2: $data['eventDate']
+        );
         $eventDayFormatted = dateFormat($data['eventDate']);
         $subject = $data['eventName'];
         $eventHost = "{$data['firstName']} {$data['lastName']}";

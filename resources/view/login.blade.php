@@ -55,7 +55,7 @@
         Show Password
       </label><br>
 
-      <a href="/login/forgot"> Forgot password? Please click this link</a>
+      <a href="/login/forgot?verify=1"> Forgot password? Please click this link</a>
       <br><br>
 
     </div>

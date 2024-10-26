@@ -1,25 +1,36 @@
 <?php 
 
 
-$router->map('POST', 
-  '/member/notification/event', 
-  'App\controller\members\Event@PostEventNotificationBar', 
-  'new event notification bar'
+$router->map(
+  method: 'POST', 
+  route: '/member/notification/event', 
+  target: 'App\controller\members\Event@PostEventNotificationBar', 
+  name: 'new event notification bar'
 );
 
-$router->map('GET', '/member/notification/event', 'App\controller\members\Event@GetEventNotificationBar', 'new event notification bar2');
+$router->map(
+  method: 'GET', 
+  route: '/member/notification/event', 
+  target: 'App\controller\members\Event@GetEventNotificationBar', 
+  name: 'new event notification bar2');
 
-$router->map('GET', '/member/notifications', 'App\controller\NotificationController@index', 'all notification bar2');
+$router->map(
+  method: 'GET', 
+  route: '/member/notifications', 
+  target: 'App\controller\NotificationController@index', 
+  name: 'all notification bar2');
 
-$router->map('GET', 
-  '/member/notifications/id', 
-  'App\controller\NotificationController@notificationById',
-  'all notification by id'
+$router->map(
+  method: 'GET', 
+  route: '/member/notifications/id', 
+  target: 'App\controller\NotificationController@notificationById',
+  name: 'all notification by id'
 );
 
-$router->map('POST', 
-  '/pustNotification/subscription', 
-  'App\controller\NotificationController@postSubscriberData',
-  'post subscriber data'
+$router->map(
+  method: 'POST', 
+  route: '/pustNotification/subscription', 
+  target: 'App\controller\NotificationController@postSubscriberData',
+  name: 'post subscriber data'
 );
 

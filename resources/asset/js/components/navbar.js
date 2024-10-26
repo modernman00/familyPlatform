@@ -1,6 +1,7 @@
 import { format, render } from "timeago.js"
-import { id, showError, qSel } from './global'
+import { id, showError, qSel, log } from './global'
 import { toSentenceCase } from "./helper/general"
+
 // const timeAgo = (x) => format(x)
 import axios from "axios"
 
@@ -17,7 +18,7 @@ const notificationHTML = (data) => {
     return `<a data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
   
 
-  ${postAgoNotification(data.created_at)} -
+  ${postAgoNotification(data.created_at)}  - 
   <b> ${data.notification_type}</b> -
   ${data.notification_name} -
   ${data.notification_content} -
@@ -37,18 +38,23 @@ export const increaseNotificationCount = () => {
 }
 
 export const addToNotificationTab = (data) => {
-    return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+  
+        return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+  
 }
 
-// GET THE ID SET FROM THE LOGIN FILE - HTTPS.JS
 
-const idSetFromHttp = sessionStorage.getItem('idSetFromHttp')
-const famCodeSetFromHttp = sessionStorage.getItem('famCodeSetFromHttp')
+const reqId = localStorage.getItem('requesterId');
+const famCode = localStorage.getItem('requesterFamCode');
+const notificationURL = `/member/notifications/id?notificationId=${reqId}&famCode=${famCode}`;
 
-const notificationURL = `/member/notifications/id?notificationId=${idSetFromHttp}&famCode=${famCodeSetFromHttp}`;
 
-// const getData = axios.get(notificationURL);
 
+// get all the notification and display them 
+// they are already filtered by famCode and id 
+// for the family request, connection is done by id
+// for events -birthday etc, the connection is the famCode 
+// so linked notification will be either where id matches or famcode matches
 
 axios.get(notificationURL)
     .then(res => {
@@ -56,6 +62,7 @@ axios.get(notificationURL)
         const data = res.data.message;
 
         if (data) {
+
 
             if (data.length > 0) {
 

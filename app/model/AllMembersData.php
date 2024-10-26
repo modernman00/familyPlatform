@@ -114,7 +114,7 @@ class AllMembersData extends InnerJoin
     }
 
     // show information of events within 7 days , 1 days and on the current date
-    public static function getEventData()
+    public static function getAllEventData(): array
     {
         try {
             $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
@@ -123,20 +123,22 @@ class AllMembersData extends InnerJoin
             WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
             OR events.eventDate = CURDATE()
+           
             ORDER BY eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);
+            return [];
         }
     }
 
     // show information of events within 7 days , 1 days and on the current date
-    public static function getEventDataByNo($eventNo)
+    public static function getEventDataByNo($eventNo): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName 
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
         FROM events 
         INNER JOIN personal ON events.id = personal.id 
         WHERE (events.no = :eventNo)
@@ -153,8 +155,34 @@ class AllMembersData extends InnerJoin
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);
+            return [];
         }
     }
+
+      public static function getEventDataByFamCode($famCode): array
+    {
+        try {
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+        FROM events 
+        INNER JOIN personal ON events.id = personal.id 
+        WHERE (personal.famCode = :famCode)
+        AND (
+            events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+            OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            OR events.eventDate = CURDATE()
+        )
+        ORDER BY eventDate ASC";
+
+            $conn = parent::connect2();
+            $result = $conn->prepare($query);
+            $result->execute(['famCode' => $famCode]);
+            return $result->fetchAll();
+        } catch (\Throwable $th) {
+            showError($th);
+            return [];
+        }
+    }
+
 
 
     public static function getFriendRequestData($id, $status)

@@ -177,6 +177,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 // const timeAgo = (x) => format(x)
 
 var postAgoNotification = function postAgoNotification(date) {
@@ -184,7 +185,7 @@ var postAgoNotification = function postAgoNotification(date) {
 };
 // this is the notification htnl 
 var notificationHTML = function notificationHTML(data) {
-  return "<a data-id=\"".concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n  \n\n  ").concat(postAgoNotification(data.created_at), " -\n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
+  return "<a data-id=\"".concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n  \n\n  ").concat(postAgoNotification(data.created_at), "  - \n  <b> ").concat(data.notification_type, "</b> -\n  ").concat(data.notification_name, " -\n  ").concat(data.notification_content, " -\n  ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n  \n  </a>");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -196,14 +197,15 @@ var increaseNotificationCount = function increaseNotificationCount() {
 var addToNotificationTab = function addToNotificationTab(data) {
   return (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
 };
+var reqId = localStorage.getItem('requesterId');
+var famCode = localStorage.getItem('requesterFamCode');
+var notificationURL = "/member/notifications/id?notificationId=".concat(reqId, "&famCode=").concat(famCode);
 
-// GET THE ID SET FROM THE LOGIN FILE - HTTPS.JS
-
-var idSetFromHttp = sessionStorage.getItem('idSetFromHttp');
-var famCodeSetFromHttp = sessionStorage.getItem('famCodeSetFromHttp');
-var notificationURL = "/member/notifications/id?notificationId=".concat(idSetFromHttp, "&famCode=").concat(famCodeSetFromHttp);
-
-// const getData = axios.get(notificationURL);
+// get all the notification and display them 
+// they are already filtered by famCode and id 
+// for the family request, connection is done by id
+// for events -birthday etc, the connection is the famCode 
+// so linked notification will be either where id matches or famcode matches
 
 axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function (res) {
   // Extract the notifications from the response

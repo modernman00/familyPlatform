@@ -1,7 +1,6 @@
 const reqId = localStorage.getItem('requesterId');
 const famCode = localStorage.getItem('requesterFamCode');
 
-console.log(famCode)
 
 
 const filterMembersByFamCode = (data) => {
@@ -11,7 +10,7 @@ const filterMembersByFamCode = (data) => {
   } 
 
     return data.filter(
-      el => el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode
+      el => el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode || el.eventCode === famCode
       );
 };
 

@@ -1,5 +1,5 @@
 "use strict";
-import { id, showError } from "../global"
+import { id, log, showError } from "../global"
 import FormHelper from '../FormHelper';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { eventHtml } from './eventHTML'
@@ -11,14 +11,26 @@ const formData = new FormHelper(formInputArr);
 
 
 const displayNone = () => id('id_event_modal').style.display = 'none'
+
 id('cancelModal').addEventListener('click', displayNone)
 
+/**
+ * Filters events by family code (famCode) to ensure only relevant events are shown
+ * @param {Object} event - The event data object
+ * @returns {boolean} - Returns true if event is linked to the family code
+ */
 
+
+/**
+ * Adds an event to the event list if it passes the family code filter.
+ * 
+ * @param {Object} data - The event data object to be checked and possibly added.
+ * @returns {void}
+ */
 const checkEventAndAdd = (data) => {
 
     const appendEvent = eventHtml(data);
     return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-
 }
 
 const options = {
@@ -34,81 +46,61 @@ const options = {
  * const eventForm = id('eventModalForm');
  * eventForm.addEventListener('submit', process);
  */
-const process = (e) => {
+const process = async (e) => {
     try {
         e.preventDefault();
-        // id('eventModalForm_notification').classList.remove('w3-red') // remove the danger class from the notification - may not be needed
-        id('error').innerHTML = "" // may not be needed
+        id('error').innerHTML = ""
         formData.massValidate();
-        // log(formData.error)
-        if (formData.error.length <= 0) {
-            // get the form data
-            const eventForm = id('eventModalForm');
-            let eventFormEntries = new FormData(eventForm);
 
-            // post the form data to the database and get the last posted event no
-
-            axios.post("/member/profilePage/event", eventFormEntries, options).then(response => {
-
-                // use the event no to get the last event from the database
-
-                axios.get(`/member/getEventDataByNo?eventNo=${response.data.message}`)
-
-                    .then(res => {
-
-                        if (res.data.message) {
-
-                            // add new event real time
-                            checkEventAndAdd(res.data.message[0])
-                        }
-                    })
-
-                // POST THE EVENT TO NOTIFICATION
-
-                axios.post('/member/notification/event', eventFormEntries, options).then(result => {
-
-                    // GET THE POST EVENTS AND ADD THEM TO THE NOTIFICATION
-
-                    axios.get(`/member/notification/event?notificationNo=${result.data.message}`).then(result2 => {
-
-                        addToNotificationTab(result2.data.message[0])
-
-                        increaseNotificationCount()
-
-                    })
-
-                })
-
-                // now trigger push notifications subscription
-                const registration = navigator.serviceWorker.ready;
-                const subscription = registration.pushManager.getSubscription();
-
-                if (!subscription) {
-                    const newSubscription =registration.pushManager.subscribe({
-                        userVisibleOnly: true,
-                        applicationServerKey: process.env.MIX_VAPID_PUBLIC_KEY
-                    });
-                     console.log('New Push Subscription:', newSubscription);
-                } else {
-                    console.log('Already subscribed for push notifications:', subscription);
-                }
-
-
-            })
-
-            displayNone();
-
-            // window.location.replace("/member/profilePage")
-        } else {
-            alert('The form cannot be submitted. Please check the errors')
-            formData.clearError()
+        if (formData.error.length > 0) {
+            alert('The form cannot be submitted. Please check the errors');
+            formData.clearError();
+            return;
         }
+
+        // get the form data
+        const eventForm = id('eventModalForm');
+        let eventFormEntries = new FormData(eventForm);
+
+        // POST data to create the event and notification in parallel
+        const [eventResponse, notificationResponse] = await Promise.all([
+            axios.post("/member/profilePage/event", eventFormEntries, options),
+            axios.post('/member/notification/event', eventFormEntries, options)
+        ]);
+
+        // Extract the eventNo and notificationNo from the responses
+        const { message: eventNo } = eventResponse.data;
+        const { message: notificationNo } = notificationResponse.data;
+
+        // Use Promise.all to fetch event data and notification data in parallel
+        const [eventDataResponse, notificationDataResponse] = await Promise.all([
+            axios.get(`/member/getEventDataByNo?eventNo=${eventNo}`),
+            axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
+        ]);
+
+        const eventData = eventDataResponse.data.message;
+        const notificationData = notificationDataResponse.data.message;
+
+        // Check if event data exists, then add it to the UI
+        if (eventData) checkEventAndAdd(eventData);
+
+        // Add the notification to the notification tab and increase count
+        if (notificationData?.[0]) {
+            addToNotificationTab(notificationData[0]);
+            increaseNotificationCount();
+        }
+
+        // close the modal
+        displayNone();
+
 
     } catch (error) {
         showError(error)
     }
 
 }
+
+
 
 id('submitEventModal').addEventListener('click', process)
 

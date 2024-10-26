@@ -14,7 +14,7 @@ export const handleInput = (data, WithFamCode, renderMembers) => {
     allMembersContainer.innerHTML = "";
 
     if (inputVal === "") {
-        renderMembers(WithFamCode, allMembersContainer, noMemberHTML);
+        renderMembers(WithFamCode, allMembersContainer, noMemberHTML, renderHtml);
     } else {
         let filteredData = data.filter(el =>
             el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal)

@@ -26,7 +26,7 @@ try {
      
         const filteredPost = filterMembersByFamCode(state.post)
 
-        filteredPost.map(data => allPost(data, state.comment)) // show all the post and comments
+        filteredPost.forEach(data => allPost(data, state.comment)) // show all the post and comments
 
         // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
 
@@ -45,7 +45,8 @@ try {
 
         const updatePost = (e) => {
             if (e.origin != process.env.MIX_APP_URL2) {
-                throw new Error("What is your origin?")
+                console.warn("Invalid origin detected:", e.origin);
+                return; // Exit if origin doesn't match
             }
 
             if (e.data) {

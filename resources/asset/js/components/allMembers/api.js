@@ -1,7 +1,7 @@
 import axios from "axios";
 import { id, showError } from "../global";
 import { renderHtml } from "./html";
-import  filterMembersByFamCode from "./filterMembersByFamCode";
+import filterMembersByFamCode from "./filterMembersByFamCode";
 import { handleInput } from "./handleInput";
 
 const config = {
@@ -18,24 +18,25 @@ const allMembersContainer = id('allMembers');
 const noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
 
 export const renderMembers = (data, container, noMemberMessage, html) => {
-    container.innerHTML = "";
+    // container.innerHTML = "";
     if (data) {
         data.forEach(html);
-    } else {
+    } else if (!data) {
         container.innerHTML = noMemberMessage;
+    } else {
+        data.forEach(html);
     }
 };
 
 
 axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
-    .then(function(response) {
+    .then(function (response) {
 
         id('allMembers').innerHTML = "";
 
         if (!response.data) {
             throw Error('There is no data');
         }
-
 
         const data = response.data;
 
@@ -48,6 +49,14 @@ axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
 
 
 
-        id('searchFamily').addEventListener('input', () => handleInput(data, dataWithFamCode, renderMembers));
+        id('searchFamily').addEventListener('input', () => handleInput(
+            data,
+            dataWithFamCode,
+            renderMembers
+        )
+
+        );
+
+
     })
     .catch(err => showError(err.message));

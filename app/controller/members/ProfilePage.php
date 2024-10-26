@@ -68,6 +68,10 @@ class ProfilePage extends ProcessImg
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
 
             $this->memberData = $setData->getCustomerData($this->id, $table);
+            
+            $getFamCode = checkInput($this->memberData['famCode']);
+            $_SESSION['famCode'] = $getFamCode;
+
 
             $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
 
@@ -75,7 +79,7 @@ class ProfilePage extends ProcessImg
             $this->allPostData = Post::getAllPostProfilePics();
 
             //GET ALL EVENTS DATA
-            $this->eventData = DataAll::getEventData();
+            $this->eventData = DataAll::getEventDataByFamCode($getFamCode);
 
             //GET COMMENT DATA
             $this->allCommentData = Post::getAllCommentProfilePics();

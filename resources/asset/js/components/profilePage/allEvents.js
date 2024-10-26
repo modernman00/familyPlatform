@@ -25,27 +25,6 @@ try {
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
-    // let serverConnection = new EventSource("/post/getAllPost/update") 
-
-
-    // const Pusher = (pushData) => {
-
-    // // open the server sent event
-
-    //     const update = (e) => {
-
-    //         const data = JSON.parse(e.data)
-    //         // log(data)
-
-    //         if( appendNewPost(pushData)) {
-    //             serverConnection.close()
-    //         }
-
-    //     }
-
-    //     serverConnection.addEventListener("updatePost", update)
-
-    // }
 
     const showTheComment = (commentResponse) => {
         const idDiv = `showComment${commentResponse.post_no}`

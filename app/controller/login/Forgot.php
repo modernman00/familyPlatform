@@ -14,11 +14,16 @@ class Forgot
   public function show()
   {
     try {
-      if (!$_SESSION['token']) {
+
+      // check if token session is set or $_GET verify variable is set 
+      // if not, redirect to login page
+      if (!isset($_SESSION['token']) ||!isset($_GET['verify']) || empty($_SESSION['token'])) {
         $login = "login";
         return view('error/notFound', compact('login'));
+      } else {
+        return view('login/forgot');
       }
-      return view('login/forgot');
+
     } catch (\Throwable $th) {
       showError($th);
     }
@@ -33,25 +38,24 @@ class Forgot
 
       $getEmail = $cleanData['email'];
 
-          //1.  token verified
+      //1.  token verified
       CheckToken::tokenCheck('token');
 
-      $query = Select::formAndMatchQuery(selection:'SELECT_TWO_COLS_ID', table:'account', column:'email', column2:'status', identifier1:'email');
+      $query = Select::formAndMatchQuery(selection: 'SELECT_TWO_COLS_ID', table: 'account', column: 'email', column2: 'status', identifier1: 'email');
 
       $data = Select::selectFn2($query, [$getEmail]);
 
-      if(!$data){
-          msgException(404, "We don't have a record of this account");
+      if (!$data) {
+        msgException(404, "We don't have a record of this account");
       }
 
-      foreach($data as $data);
+      foreach ($data as $data);
 
-      if($data['status'] == 'new'){
+      if ($data['status'] == 'new') {
 
         \msgException(404, "We don't have a record of this account");
-
       }
-        // us email to check if account is approve
+      // us email to check if account is approve
       // 3. get database data
       $getData = findOneColUsingEmail(col: "id", data: $cleanData);
 
@@ -73,13 +77,12 @@ class Forgot
 
       // check if $s_session['login'], if not set it
 
-    
+
       if (!isset($_SESSION['login'])) {
         $_SESSION['changePW'] = true; // or whatever default value you want
-    }
+      }
 
       msgSuccess(200, "Authentication code has been sent to you");
-
     } catch (\Throwable $th) {
       showError($th);
     }
