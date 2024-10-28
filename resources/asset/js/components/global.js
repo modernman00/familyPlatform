@@ -7,7 +7,11 @@ export const qSel = (name) => document.querySelector(name)
 export const qSelValue = (name) => qSel(name).value
 export const qSelInnerHTML = (name) => qSel(name).innerHTML
 
-export const log = (id) => console.log(id)
+export const log = (id) => {
+    console.log(' start consoleLog')
+    console.log(id)
+    console.log(' end consoleLog')
+}
 export const write = (input) => document.write(input)
 
 export const hideElement = (elementId) => {

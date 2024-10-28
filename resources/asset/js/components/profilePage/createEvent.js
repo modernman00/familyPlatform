@@ -68,39 +68,64 @@ const process = async (e) => {
             axios.post('/member/notification/event', eventFormEntries, options)
         ]);
 
-        // Extract the eventNo and notificationNo from the responses
-        const { message: eventNo } = eventResponse.data;
+        // Extract and notificationNo from the responses
+
         const { message: notificationNo } = notificationResponse.data;
 
         // Use Promise.all to fetch event data and notification data in parallel
-        const [eventDataResponse, notificationDataResponse] = await Promise.all([
-            axios.get(`/member/getEventDataByNo?eventNo=${eventNo}`),
-            axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
-        ]);
+       
+        // const notificationDataResponse = await axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
 
-        const eventData = eventDataResponse.data.message;
-        const notificationData = notificationDataResponse.data.message;
+        // USING SSE 
 
-        // Check if event data exists, then add it to the UI
-        if (eventData) checkEventAndAdd(eventData);
+        const eventSource = new EventSource(`/member/notification/event?notificationNo=${notificationNo}`);
 
-        // Add the notification to the notification tab and increase count
-        if (notificationData?.[0]) {
-            addToNotificationTab(notificationData[0]);
-            increaseNotificationCount();
-        }
+        eventSource.addEventListener('newNotification', (event) => {
+            const notificationData = JSON.parse(event.data);
 
-        // close the modal
-        displayNone();
+            log(notificationData);
 
+            // Update the UI with the new notification if it matches the family code
+            if (localStorage.getItem('requesterFamCode') === notificationData.receiver_id) {
+                checkEventAndAdd(notificationData);
+
+
+                    addToNotificationTab(notificationData);
+                    increaseNotificationCount();
+
+            }
+          });
+
+          eventSource.onerror = (error) => {
+    console.error("SSE connection error:", error);
+    console.log("Error details:", error.target.readyState);  // Log the readyState of EventSource
+    eventSource.close();
+};
+
+
+        // SECOND OPTION
+      
+        // const notificationData = notificationDataResponse.data.message;
+
+        // const {eventData, member} =notificationData;
+
+        // if(localStorage.getItem('requesterFamCode') == eventData.receiver_id) {
+        //     checkEventAndAdd(eventData)
+
+        //     // Add the notification to the notification tab and increase count
+        //     if (eventData) {
+        //         addToNotificationTab(eventData);
+        //         increaseNotificationCount();
+        //     }
+        // } 
+        // // close the modal
+        // displayNone();
 
     } catch (error) {
         showError(error)
     }
 
 }
-
-
 
 id('submitEventModal').addEventListener('click', process)
 

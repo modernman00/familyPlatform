@@ -137,6 +137,13 @@ function msgSuccess(int $code, mixed $msg, mixed $token = null): void
     ]);
 }
 
+/**
+ * This function sends a server-sent event to the client.
+ * @param string|array $data This is the data to be sent.
+ * @param string|int $id This is the id of the event.
+ * @param string $event This is the event name.
+ * @return void
+ */
 function msgServerSent(string|array $data, string | int $id, string $event): void
 {
 

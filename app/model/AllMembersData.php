@@ -70,7 +70,6 @@ class AllMembersData extends InnerJoin
     }
 
 
-
     public function getAllMembersNoPics(): array
     {
         $table = ['personal', "contact", "profilePics", 'otherFamily'];
@@ -182,6 +181,37 @@ class AllMembersData extends InnerJoin
             return [];
         }
     }
+
+
+/**
+ * Retrieves a list of all members' emails and details associated with a given family code.
+ *
+ * This function executes a database query to fetch email addresses, family codes, 
+ * first names, last names, and IDs of members whose family code matches the provided 
+ * parameter. If an error occurs during the database operation, it logs the error and 
+ * returns an empty array.
+ *
+ * @param string $famCode The family code used to filter members.
+ * @return array An array containing the email, family code, first name, last name, and ID of each member.
+ */
+    public static function AllMembersEmailByFamCode($famCode): array
+    {
+        try {
+            $query = "SELECT a.email, p.famCode AS famCode, p.firstName, p.lastName, a.id 
+                      FROM account a
+                      INNER JOIN personal p ON a.id = p.id
+                      WHERE (p.famCode = :famCode)";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['famCode' => $famCode]);
+            return $result->fetchAll();
+    
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+
 
 
 

@@ -46,7 +46,9 @@ var qSelInnerHTML = function qSelInnerHTML(name) {
   return qSel(name).innerHTML;
 };
 var log = function log(id) {
-  return console.log(id);
+  console.log(' start consoleLog');
+  console.log(id);
+  console.log(' end consoleLog');
 };
 var write = function write(input) {
   return document.write(input);

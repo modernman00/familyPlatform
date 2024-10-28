@@ -206,8 +206,8 @@ class ProfilePage extends ProcessImg
     public function post(): void
     {
         try {
-            header('Content-Type: text/event-stream');
-            header('Cache-Control: no-cache');
+            // header('Content-Type: text/event-stream');
+            // header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
             Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 

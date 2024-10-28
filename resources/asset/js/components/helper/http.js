@@ -180,8 +180,6 @@ export const getMultipleApiData = async(url1, url2, token = null) => {
             },
         }
 
-
-
         const fetch = await axios.all([
             axios.get(url1, config),
             axios.get(url2, config)
@@ -197,6 +195,31 @@ export const getMultipleApiData = async(url1, url2, token = null) => {
 
 }
 
+
+// build a function to post multiple api form data
+
+export const postMultipleApiData = async(url1, url2, formData, token = null) => {
+    try {   
+
+        const config = {
+        headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+        }
+        const fetch = await axios.all([
+            axios.post(url1, formData, config),
+            axios.post(url2, formData, config)              
+        ])
+
+        return fetch
+
+    } catch (error) {
+        return error;
+    }
+}   
 /**
  * 
  * @param { name} cname 

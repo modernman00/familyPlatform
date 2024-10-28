@@ -49,8 +49,8 @@ export const appendNewPost = (el) => {
   if (!el) { return false; }
 
   const commentForm1 = id(`formComment${el.post_no}`);
-  const inputComment = id(`formComment${el.post_no}`)
-  const submitComment = id(`formComment${el.post_no}`);
+  const inputComment = id(`inputComment${el.post_no}`)
+  const submitComment = id(`submitComment${el.post_no}`);
 
   if (!commentForm1 || !inputComment || !submitComment) {
 

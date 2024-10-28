@@ -11,6 +11,13 @@ use App\classes\{Select, Db, AllFunctionalities};
 
 class PostCard extends Db {
 
+    /**
+     * Increments the post likes count and returns the new count.
+     * 
+     * The function is called by the AJAX request in the like button.
+     * 
+     * @return void
+     */
     public static function likeFunction()
     {
         try {
@@ -35,6 +42,14 @@ class PostCard extends Db {
     }
 
 
+    /**
+     * Sets an HTTP cookie for JWT token.
+     * 
+     * Retrieves the token from the GET request and sets a secure, HTTP-only cookie with a one-hour expiry.
+     * Responds with a success message upon completion.
+     * 
+     * @return void
+     */
     public function setHeader()
     {
         $token = $_GET['token'];

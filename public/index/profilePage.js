@@ -680,6 +680,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getCookie: () => (/* binding */ getCookie),
 /* harmony export */   getMultipleApiData: () => (/* binding */ getMultipleApiData),
 /* harmony export */   postFormData: () => (/* binding */ postFormData),
+/* harmony export */   postMultipleApiData: () => (/* binding */ postMultipleApiData),
 /* harmony export */   setCookie: () => (/* binding */ setCookie)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -940,6 +941,46 @@ var getMultipleApiData = /*#__PURE__*/function () {
   };
 }();
 
+// build a function to post multiple api form data
+
+var postMultipleApiData = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(url1, url2, formData) {
+    var token,
+      config,
+      fetch,
+      _args4 = arguments;
+    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          token = _args4.length > 3 && _args4[3] !== undefined ? _args4[3] : null;
+          _context4.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          _context4.next = 5;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].all([axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url2, formData, config)]);
+        case 5:
+          fetch = _context4.sent;
+          return _context4.abrupt("return", fetch);
+        case 9:
+          _context4.prev = 9;
+          _context4.t0 = _context4["catch"](1);
+          return _context4.abrupt("return", _context4.t0);
+        case 12:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4, null, [[1, 9]]);
+  }));
+  return function postMultipleApiData(_x6, _x7, _x8) {
+    return _ref5.apply(this, arguments);
+  };
+}();
 /**
  * 
  * @param { name} cname 
@@ -1350,7 +1391,7 @@ var options = {
  */
 var process = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-    var eventForm, eventFormEntries, _yield$Promise$all, _yield$Promise$all2, eventResponse, notificationResponse, eventNo, notificationNo, _yield$Promise$all3, _yield$Promise$all4, eventDataResponse, notificationDataResponse, eventData, notificationData;
+    var eventForm, eventFormEntries, _yield$Promise$all, _yield$Promise$all2, eventResponse, notificationResponse, notificationNo, eventSource;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
@@ -1376,39 +1417,56 @@ var process = /*#__PURE__*/function () {
           _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
           eventResponse = _yield$Promise$all2[0];
           notificationResponse = _yield$Promise$all2[1];
-          // Extract the eventNo and notificationNo from the responses
-          eventNo = eventResponse.data.message;
+          // Extract and notificationNo from the responses
           notificationNo = notificationResponse.data.message; // Use Promise.all to fetch event data and notification data in parallel
-          _context.next = 20;
-          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/member/getEventDataByNo?eventNo=".concat(eventNo)), axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo))]);
-        case 20:
-          _yield$Promise$all3 = _context.sent;
-          _yield$Promise$all4 = _slicedToArray(_yield$Promise$all3, 2);
-          eventDataResponse = _yield$Promise$all4[0];
-          notificationDataResponse = _yield$Promise$all4[1];
-          eventData = eventDataResponse.data.message;
-          notificationData = notificationDataResponse.data.message; // Check if event data exists, then add it to the UI
-          if (eventData) checkEventAndAdd(eventData);
+          // const notificationDataResponse = await axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
+          // USING SSE 
+          eventSource = new EventSource("/member/notification/event?notificationNo=".concat(notificationNo));
+          eventSource.addEventListener('newNotification', function (event) {
+            var notificationData = JSON.parse(event.data);
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(notificationData);
 
-          // Add the notification to the notification tab and increase count
-          if (notificationData !== null && notificationData !== void 0 && notificationData[0]) {
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.addToNotificationTab)(notificationData[0]);
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
-          }
+            // Update the UI with the new notification if it matches the family code
+            if (localStorage.getItem('requesterFamCode') === notificationData.receiver_id) {
+              checkEventAndAdd(notificationData);
+              (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.addToNotificationTab)(notificationData);
+              (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
+            }
+          });
+          eventSource.onerror = function (error) {
+            console.error("SSE connection error:", error);
+            console.log("Error details:", error.target.readyState); // Log the readyState of EventSource
+            eventSource.close();
+          };
 
-          // close the modal
-          displayNone();
-          _context.next = 34;
+          // SECOND OPTION
+
+          // const notificationData = notificationDataResponse.data.message;
+
+          // const {eventData, member} =notificationData;
+
+          // if(localStorage.getItem('requesterFamCode') == eventData.receiver_id) {
+          //     checkEventAndAdd(eventData)
+
+          //     // Add the notification to the notification tab and increase count
+          //     if (eventData) {
+          //         addToNotificationTab(eventData);
+          //         increaseNotificationCount();
+          //     }
+          // } 
+          // // close the modal
+          // displayNone();
+          _context.next = 25;
           break;
-        case 31:
-          _context.prev = 31;
+        case 22:
+          _context.prev = 22;
           _context.t0 = _context["catch"](0);
           (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context.t0);
-        case 34:
+        case 25:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 31]]);
+    }, _callee, null, [[0, 22]]);
   }));
   return function process(_x) {
     return _ref.apply(this, arguments);
@@ -1433,7 +1491,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var eventHtml = function eventHtml(data) {
-  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.firstName, " ").concat(data.lastName, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.eventName, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.eventDate), " </p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.eventType, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.eventDescription, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.sender_name, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.notification_name, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.notification_date), " </p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.notification_type, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.notification_content, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
 };
 
 /***/ }),
@@ -1726,8 +1784,9 @@ __webpack_require__.r(__webpack_exports__);
 /*!************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/index.js ***!
   \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
 /* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
@@ -1736,7 +1795,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 /* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-// "use strict";
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_loadPost__WEBPACK_IMPORTED_MODULE_0__]);
+_loadPost__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+
+
 localStorage.removeItem('redirect');
 
 
@@ -1745,6 +1807,8 @@ localStorage.removeItem('redirect');
 
 
 
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
@@ -1752,14 +1816,23 @@ localStorage.removeItem('redirect');
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/loadPost.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
 
+__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
 
 
 
@@ -1772,72 +1845,61 @@ try {
     post: [],
     comment: []
   };
-  var serverConnection = new EventSource("/post/getAllPost/update"); // open the server sent event
+  var serverConnection = new EventSource("/post/getAllPost/update");
 
-  // 2. get the data from the database to set the inital data
-  var postData = (0,_helper_http__WEBPACK_IMPORTED_MODULE_2__.getMultipleApiData)("/post/getAllPost", '/member/pp/comment');
-  postData.then(function (response) {
-    state.post = response[0].data.message;
-    state.comment = response[1].data.message;
-    var filteredPost = (0,_allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__["default"])(state.post);
-    filteredPost.forEach(function (data) {
-      return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
-    }); // show all the post and comments
+  // Use Promise.all to fetch allPost and allCOMMENT data in parallel
+  var _await$Promise$all = await Promise.all([axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPost"), axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/member/pp/comment")]),
+    _await$Promise$all2 = _slicedToArray(_await$Promise$all, 2),
+    thePost = _await$Promise$all2[0],
+    allComment = _await$Promise$all2[1];
+  state.post = thePost.data.message;
+  state.comment = allComment.data.message;
+  var filteredPost = (0,_allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__["default"])(state.post);
 
-    // // let serverConnection = new EventSource("/post/getAllPost/update") // open the server sent event
-
-    var updateComment = function updateComment(e) {
-      var commentData = JSON.parse(e.data);
-      var newData = state.comment.some(function (com) {
-        return com.comment_no === commentData.comment_no;
-      }); // check if the comment no does not already exist
-
-      if (!newData) {
-        // if it is not available, add to the data state
-        state.comment.push(commentData);
-      }
-    };
-    serverConnection.addEventListener("updateComment", function (e) {
-      return updateComment(e);
-    });
-    var updatePost = function updatePost(e) {
-      if (e.origin != "http://olaogun.test/") {
-        console.warn("Invalid origin detected:", e.origin);
-        return; // Exit if origin doesn't match
-      }
-      if (e.data) {
-        var newPostData = JSON.parse(e.data);
-        var newData = state.post.some(function (el) {
-          return el.post_no === newPostData.post_no;
-        }); // check if the post no does not already exist
-
-        if (!newData) {
-          // if it is not available, add to the data state
-          state.post.push(newPostData);
-        }
-      }
-      return state.post.map(function (ele) {
-        return (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
-      });
-    };
-    serverConnection.addEventListener("updatePost", function (e) {
-      return updatePost(e);
-    });
-
-    // // serverConnection.close()
-
-    // AUTOMATICALLY UPDATE TIMESTAMP
-
-    var updatePostTiming = document.querySelectorAll(".timeago");
-    var updateCommentTiming = document.querySelectorAll(".commentTiming");
-    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updatePostTiming);
-    (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updateCommentTiming);
-  })["catch"](function (err) {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(err);
+  // show all the post and comments. the allPosts function filtered out the comments with the post_no, this happens once the page is loaded. 
+  filteredPost.forEach(function (data) {
+    return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
   });
+
+  // next - once a new post and comment, function to update the IU real time
+
+  var updateData = function updateData(e, type) {
+    if (e.origin !== "http://olaogun.test/") {
+      console.warn("Invalid origin detected:", e.origin);
+      return; // Exit if origin doesn't match
+    }
+    var stateArray = type === 'comment' ? state.comment : state.post;
+    var uniqueKey = type === "comment" ? "comment_no" : "post_no";
+    var data = JSON.parse(e.data);
+    // check if the post no does not already exist
+    var isExisting = stateArray.some(function (item) {
+      return item[uniqueKey] === data[uniqueKey];
+    });
+    if (!isExisting) {
+      // if it is not available, add to the data state
+      stateArray.push(data);
+    }
+    if (type === "post") return state.post.map(function (ele) {
+      return (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
+    });
+  };
+  serverConnection.addEventListener("updateComment", function (e) {
+    return updateData(e, "comment");
+  });
+  serverConnection.addEventListener("updatePost", function (e) {
+    return updateData(e, "post");
+  });
+
+  // AUTOMATICALLY UPDATE TIMESTAMP
+  var updatePostTiming = document.querySelectorAll(".timeago");
+  var updateCommentTiming = document.querySelectorAll(".commentTiming");
+  (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updatePostTiming);
+  (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updateCommentTiming);
 } catch (error) {
-  //  console.log(error)
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
 }
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
@@ -1938,8 +2000,8 @@ var appendNewPost = function appendNewPost(el) {
     return false;
   }
   var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("inputComment".concat(el.post_no));
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("submitComment".concat(el.post_no));
   if (!commentForm1 || !inputComment || !submitComment) {
     var appendHTML = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el);
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);

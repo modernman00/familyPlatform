@@ -1,6 +1,6 @@
-// "use strict";
-localStorage.removeItem('redirect')
+"use strict";
 
+localStorage.removeItem('redirect')
 
 import "./loadPost"
 import "./modal"
@@ -9,5 +9,6 @@ import "./allEvents"
 import "./createEvent"
 import "./friendRequestCard"
 import "../navbar"
+
 
 

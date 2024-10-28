@@ -531,6 +531,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getCookie: () => (/* binding */ getCookie),
 /* harmony export */   getMultipleApiData: () => (/* binding */ getMultipleApiData),
 /* harmony export */   postFormData: () => (/* binding */ postFormData),
+/* harmony export */   postMultipleApiData: () => (/* binding */ postMultipleApiData),
 /* harmony export */   setCookie: () => (/* binding */ setCookie)
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -791,6 +792,46 @@ var getMultipleApiData = /*#__PURE__*/function () {
   };
 }();
 
+// build a function to post multiple api form data
+
+var postMultipleApiData = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(url1, url2, formData) {
+    var token,
+      config,
+      fetch,
+      _args4 = arguments;
+    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          token = _args4.length > 3 && _args4[3] !== undefined ? _args4[3] : null;
+          _context4.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          _context4.next = 5;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].all([axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url2, formData, config)]);
+        case 5:
+          fetch = _context4.sent;
+          return _context4.abrupt("return", fetch);
+        case 9:
+          _context4.prev = 9;
+          _context4.t0 = _context4["catch"](1);
+          return _context4.abrupt("return", _context4.t0);
+        case 12:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4, null, [[1, 9]]);
+  }));
+  return function postMultipleApiData(_x6, _x7, _x8) {
+    return _ref5.apply(this, arguments);
+  };
+}();
 /**
  * 
  * @param { name} cname 

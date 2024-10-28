@@ -15,40 +15,61 @@ use App\model\{EmailData, AllMembersData};
 
 class Event extends AllMembersData
 {
-
-
     /**
      * @throws \Throwable
      */
     /**
      * Submit event form to the database
+     * /member/profilePage/event
      *
      * @return void
      */
-    
+
     public static function submitEvent()
     {
         try {
             // SANITISE THE ENTRY
             $cleanData = getSanitisedInputData($_POST);
             $cleanData['id'] = checkInput(data: $_SESSION['id']);
-       
-            $cleanData['eventCode'] =self::generateFamCode();
 
-            // insert the data and return the last event no
-            // if the data is successfully inserted then insert same data to the notification table
+            $cleanData['eventCode'] = self::generateFamCode();
+
             CheckToken::tokenCheck(token: 'token');
 
             $lastInsertedId = Insert::submitFormDynamicLastId(
-                table: 'events', 
-                field: $cleanData, 
+                table: 'events',
+                field: $cleanData,
                 lastIdCol: 'no'
             );
             msgSuccess(code: 200, msg: $lastInsertedId);
-
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    private static function generateFamCode(): string
+    {
+        $getFamCode = parent::getMemberName(id: $_SESSION['id']);
+        return $getFamCode['famCode'];
+    }
+
+    private static function getSenderName(): string
+    {
+        $getSenderName = parent::getMemberName(id: $_SESSION['id']);
+        return $getSenderName['fName'] . " " . $getSenderName['lName'];
+    }
+
+    // Filter members based on the event famCode
+    private static function filterMemberByFamCode(string $famCode): array
+    {
+        // Get all members' details including email, famCode, and id
+        $members = self::getAllMembersCodeAndEmail();
+
+        $membersToNotify = array_filter($members, function ($member) use ($famCode) {
+            return $member['famCode'] == $famCode;
+        });
+
+        return $membersToNotify;
     }
 
     /**
@@ -62,28 +83,14 @@ class Event extends AllMembersData
      * Inserts the notification into the 'notification' table.
      * Sends a success message with the last inserted ID.
      * In essence, it creates a new event notification and stores it in the database.
+     * '/member/notification/event
      *
      * @return void
      */
 
-
-    private static function generateFamCode(): string
-    {
-        $getFamCode = parent::getMemberName(id: $_SESSION['id']);
-        return $getFamCode['famCode'];
-    }
-
-    private static function getSenderName (): string
-    {
-        $getSenderName = parent::getMemberName(id: $_SESSION['id']);
-        return $getSenderName['fName']. " ". $getSenderName['lName'];
-    }
-
-
-
-
     public static function PostEventNotificationBar(): void
     {
+
         try {
             $cleanData = getSanitisedInputData(inputData: $_POST);
             $cleanData['id'] = checkInput(data: $_SESSION['id']);
@@ -92,7 +99,7 @@ class Event extends AllMembersData
             // GET THE SENDER'S NAME 
 
             $senderName =  self::getSenderName();
-            $eventFamCode = self::generateFamCode();      
+            $eventFamCode = self::generateFamCode();
             $eventName = $cleanData['eventName'];
 
 
@@ -106,21 +113,20 @@ class Event extends AllMembersData
                 'notification_name' => $eventName,
                 'notification_date' => $cleanData['eventDate'],
                 'receiver' => 'everyone filtered',
-                // 'notification_time' => strtotime(date('Y-m-d H:i:s')),
                 'notification_type' => $cleanData['eventType'],
                 'notification_content' => $cleanData['eventDescription'],
                 'notification_status' => 'new'
             ];
 
             $lastInsertedId = Insert::submitFormDynamicLastId(
-                table: 'notification', 
-                field: $cleanDataNotification, 
+                table: 'notification',
+                field: $cleanDataNotification,
                 lastIdCol: 'no'
             );
 
-            // activate the email notification 
-
-            self::sendReminder();
+            // // activate the email notification 
+            //TODO i DON'T THINK i SHOULD NEED THIS AT ALL
+            // self::sendReminder();
 
             // Send push notification to the receiver about the new event
 
@@ -133,20 +139,36 @@ class Event extends AllMembersData
 
     /**
      * Get a single event notification by notificationNo.
+     * /member/notification/event
      *
      * @return void
      */
     public static function GetEventNotificationBar()
     {
+        header("Content-Type: text/event-stream");
+        header("Cache-Control: no-cache");
+        header("Connection: keep-alive");
+        // Ensure the script runs indefinitely to support the long-running SSE connection
+set_time_limit(0);
         try {
 
-            $notificationNo = $_GET['notificationNo'];
-
+            $notificationNo = checkInput(data: $_GET['notificationNo']);
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
-
             $result = Select::selectFn2(query: $query, bind: [$notificationNo]);
 
-            msgSuccess(code: 200, msg: $result);
+            // $member = self::filterMemberByFamCode(famCode: $result[0]['receiver_id']);
+
+            // msgSuccess(code: 200, msg: [
+            //     'eventData' => $result[0], 
+            //     // 'member' => $member
+            // ]);
+
+            // real time update to the msgServerSent
+            msgServerSent(
+                data: $result[0],
+                id: $notificationNo,
+                event: 'newNotification'
+            );
         } catch (\Throwable $th) {
             showError(th: $th);
         }
@@ -193,10 +215,6 @@ class Event extends AllMembersData
     public static function sendReminder(): void
     {
         try {
-
-            // Get all members' details including email, famCode, and id
-            $allMembers = self::getAllMembersCodeAndEmail();
-
             // show information of events within 7 days , 1 days and on the current date
             $allEventData = parent::getAllEventData();
 
@@ -208,17 +226,13 @@ class Event extends AllMembersData
                 $notifyCustomer->getEmailData();
             }
 
-
             if ($allEventData) {
                 // send other event reminders
                 foreach ($allEventData as $eventData) {
                     // Get the famCode of the event
                     $eventFamCode = $eventData['famCode'];
 
-                    // Filter members based on the event famCode
-                    $membersToNotify = array_filter($allMembers, function ($member) use ($eventFamCode) {
-                        return $member['famCode'] == $eventFamCode;
-                    });
+                    $membersToNotify = self::filterMemberByFamCode(famCode: $eventFamCode);
 
                     // Extract email addresses from the filtered members
                     $emailsToNotify = array_column($membersToNotify, 'email');
@@ -267,17 +281,15 @@ class Event extends AllMembersData
 
             $eventDate = checkInput($data['eventDate']);
 
-            if($data['eventFrequency'] != "One-off") {
+            if ($data['eventFrequency'] != "One-off") {
 
 
-            return match ($data['eventFrequency']) {
-                "Annually" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 year', no: $no),
-                "Monthly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 month', no: $no),
-                "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no)
-            };
-
+                return match ($data['eventFrequency']) {
+                    "Annually" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 year', no: $no),
+                    "Monthly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 month', no: $no),
+                    "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no)
+                };
             }
-
         } else {
             return false;
         }
@@ -304,6 +316,7 @@ class Event extends AllMembersData
 
     /**
      * @return void
+     * /member/getEventDataByNo?eventNo={eventNo}
      */
     public static function getEventDataByNoController()
     {
@@ -315,7 +328,7 @@ class Event extends AllMembersData
         $filteredEventDataByFamCode = ($eventFamCode === $allEventData[0]['famCode']) ? $allEventData[0] : [];
 
         msgSuccess(
-            code: 201, 
+            code: 201,
             msg: $filteredEventDataByFamCode
         );
     }
