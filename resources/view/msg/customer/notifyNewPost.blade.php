@@ -44,7 +44,7 @@
       width: 100%;">
       <a href={{ $data['url'] }}
         login style="text-decoration: none;color: white;">
-        Log in and Check it out here
+        Log in to check it out here
       </a>
     </button>
 

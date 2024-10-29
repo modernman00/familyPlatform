@@ -8,19 +8,26 @@ $router->map('POST', '/member/profilePage/post', 'App\controller\members\Profile
 
 // GET ALL MEMBERS POST
 
-$router->map('GET', '/post/getAllPost', 'App\controller\members\PostMessage@index', 'all_posts');
+$router->map('GET', '/post/getAllPostCommentByFamCode', 'App\controller\members\PostMessage@index', 'all_posts');
 
-// GET ALL MEMBERS POST BY NO
+// GET new post and email
 
-$router->map('GET', '/post/getAllPost/byNumber', 'App\controller\members\PostMessage@getPostNo', 'all_posts_by_last_no');
+$router->map('GET', '/post/getNewPostAndEmail', 'App\controller\members\PostMessage@getNewPostAndEmail', 'get_new_post_email');
+
+// get new post 
+$router->map(
+  method: 'GET', 
+  route: '/post/getNewPost', 
+  target: 'App\controller\members\PostMessage@getNewPost', name: 'get_new_post_FOR_SSE');
+
 
 // GET ALL COMMENT 
-$router->map('GET', '/member/pp/comment', 'App\controller\members\PostMessage@getComment', 'all_comment');
+// $router->map('GET', '/member/pp/comment', 'App\controller\members\PostMessage@getComment', 'all_comment');
 
 //commentByNo
 
 // GET ALL COMMENT  BY NO
-$router->map('GET', '/member/pp/comment/byNumber', 'App\controller\members\PostMessage@getCommentNo', 'all_comment_by_number');
+$router->map('GET', '/comment/newComment', 'App\controller\members\PostMessage@getNewComment', 'get_new_comment');
 
 // GET NEW POST
 $router->map('GET', '/post/getAllPost/update', 'App\controller\members\PostMessage@update', 'all_posts_update');

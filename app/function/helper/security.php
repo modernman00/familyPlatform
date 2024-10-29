@@ -154,4 +154,6 @@ function msgServerSent(string|array $data, string | int $id, string $event): voi
     echo "data: {$get}\n\n";
     ob_flush();
     flush();
+         // Sleep briefly to avoid CPU overload
+                usleep(500000); 
 }

@@ -4,13 +4,14 @@ export const idInnerHTML = (id) => id(id).innerHTML
 export const warningSign = "\u26A0"; // danger warning sign
 
 export const qSel = (name) => document.querySelector(name)
+export const qSelAll = (name) => document.querySelectorAll(name)
 export const qSelValue = (name) => qSel(name).value
 export const qSelInnerHTML = (name) => qSel(name).innerHTML
 
-export const log = (id) => {
-    console.log(' start consoleLog')
+export const log = (id, identifier =null) => {
+    console.log(' start consoleLog'+ "  " + identifier)
     console.log(id)
-    console.log(' end consoleLog')
+    console.log(' end consoleLog'+ "  " +identifier)
 }
 export const write = (input) => document.write(input)
 
@@ -63,6 +64,26 @@ export const showNotification = (elementId, addClass, message, timer = 5000) => 
         id(`${elementId}`).style.backgroundColor = ""
         id(`${elementId}`).style.color = ""
         id(`${elementId}`).innerHTML = ""
-
     }, timer)
 }
+
+    // Function to check for elements and render if they exist
+    export const checkElements = (idOrClass, classString, theFunction = null) => {
+
+        const doesElementExist = (idOrClass === "id") ? id(classString) : qSel(classString)
+        // Check if elements exist before calling render function
+        if (doesElementExist.length) {
+            theFunction(doesElementExist);
+        }
+
+    };
+
+     export const checkManyElements = (idOrClass, classString, theFunction = null) => {
+
+        const doesElementExist = (idOrClass === "id") ? id(classString) : qSelAll(classString)
+        // Check if elements exist before calling render function
+        if (doesElementExist.length > 0) {
+            theFunction(doesElementExist);
+        }
+
+    };

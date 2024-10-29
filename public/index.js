@@ -9,6 +9,8 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   checkElements: () => (/* binding */ checkElements),
+/* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
 /* harmony export */   date2String: () => (/* binding */ date2String),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
@@ -17,6 +19,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
 /* harmony export */   qSel: () => (/* binding */ qSel),
+/* harmony export */   qSelAll: () => (/* binding */ qSelAll),
 /* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
 /* harmony export */   qSelValue: () => (/* binding */ qSelValue),
 /* harmony export */   showElement: () => (/* binding */ showElement),
@@ -39,6 +42,9 @@ var warningSign = "\u26A0"; // danger warning sign
 var qSel = function qSel(name) {
   return document.querySelector(name);
 };
+var qSelAll = function qSelAll(name) {
+  return document.querySelectorAll(name);
+};
 var qSelValue = function qSelValue(name) {
   return qSel(name).value;
 };
@@ -46,9 +52,10 @@ var qSelInnerHTML = function qSelInnerHTML(name) {
   return qSel(name).innerHTML;
 };
 var log = function log(id) {
-  console.log(' start consoleLog');
+  var identifier = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  console.log(' start consoleLog' + "  " + identifier);
   console.log(id);
-  console.log(' end consoleLog');
+  console.log(' end consoleLog' + "  " + identifier);
 };
 var write = function write(input) {
   return document.write(input);
@@ -100,6 +107,24 @@ var showNotification = function showNotification(elementId, addClass, message) {
     id("".concat(elementId)).style.color = "";
     id("".concat(elementId)).innerHTML = "";
   }, timer);
+};
+
+// Function to check for elements and render if they exist
+var checkElements = function checkElements(idOrClass, classString) {
+  var theFunction = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var doesElementExist = idOrClass === "id" ? id(classString) : qSel(classString);
+  // Check if elements exist before calling render function
+  if (doesElementExist.length) {
+    theFunction(doesElementExist);
+  }
+};
+var checkManyElements = function checkManyElements(idOrClass, classString) {
+  var theFunction = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var doesElementExist = idOrClass === "id" ? id(classString) : qSelAll(classString);
+  // Check if elements exist before calling render function
+  if (doesElementExist.length > 0) {
+    theFunction(doesElementExist);
+  }
 };
 
 /***/ }),

@@ -1,20 +1,21 @@
 "use strict";
 import { id, log } from "../global"
 import { getApiData } from "../helper/http"
-import { commentHTML } from './comment'
+import { appendNewComment } from './comment'
 import { appendNewPost } from './post'
 import axios from "axios"
-import Pusher from 'pusher-js';
+import filterMembersByFamCode from '../allMembers/filterMembersByFamCode';
+// import Pusher from 'pusher-js';
 
 try {
 
-       // Enable pusher logging - don't include this in production
+    // Enable pusher logging - don't include this in production
 
-    Pusher.logToConsole = true;
+    // Pusher.logToConsole = true;
 
-    const pusher = new Pusher('d1f1e43f3d8afb028a1f', {
-        cluster: 'eu'
-    });
+    // const pusher = new Pusher('d1f1e43f3d8afb028a1f', {
+    //     cluster: 'eu'
+    // });
 
     // getApiData()
 
@@ -26,15 +27,8 @@ try {
     }
 
 
-    const showTheComment = (commentResponse) => {
-        const idDiv = `showComment${commentResponse.post_no}`
-        const commentHtml = commentHTML(commentResponse)
-        return id(idDiv).insertAdjacentHTML('afterbegin', commentHtml)
-    }
-
-
     // CLICK EVENT get the comment and like button from the document
-    document.onclick = (e) => {
+    document.onclick = async (e) => {
 
         const elementId = e.target.id
         const postId = e.target.name
@@ -68,24 +62,21 @@ try {
             // 0.5 LISTEN FOR THE SUBMIT EVENT
             // 0.7 GET THE COMMENT FORM ID 
             // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
-            // 2.  USE IT TO GET THE NEW COMMENT
-            // 3. ADD THE NEW COMMENT TO THE COMMENT DIV 
-            // get the specific form id
+            // 2. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS
+
             e.preventDefault()
 
-            // 0.7
-            const idForm = elementId.replace("submit", "form") //idForm == formComment511
-
-            id(idForm).style.display = "none"   // make the comment form disappear
-
+            //idForm == formComment511
+            const idForm = elementId.replace("submit", "form")
+            // make the comment form disappear
+            id(idForm).style.display = "none"
             // extract the form entries
             const form = id(idForm)
-           
+
             let formEntries = new FormData(form)
-            
+
             // if the comment form input is empty. Get the input id and check 
             const inputComment = idForm.replace("form", "input")
-        
             const idInputComment = id(inputComment);
 
             if (idInputComment.value == null || idInputComment.value == "") {
@@ -93,20 +84,8 @@ try {
             } else {
 
                 // 1.
-                axios.post('/postCommentProfile', formEntries, options)
-                    .then(response => {
-                        // 2. note. message returns the new post_no from the database
-                       
-                        axios.get(`/member/pp/comment/byNumber?commentNo=${response.data.message}`)
-                            .then(res => {
-                                // 3.
-                      
-                                showTheComment(res.data.message)
-                            })
-                    }
-                    ).catch(error => {
-                        log(error)
-                    })
+                const response = await axios.post('/postCommentProfile', formEntries, options)
+                const result = response.data.message
 
             }
             // SUBMIT THE POST
@@ -116,7 +95,7 @@ try {
             // 2. GET THE FORM id
             // 3. POST TO THE SERVER USING AXIOS POST
             //4. GET THE POST FROM THE SERVER USING AXIOS GET 
-            //5. APPEND THE NEW POST TO THE POSTCARD 
+            //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
 
             // 2. 
             const formExtra = id('formPostMessageModal')
@@ -127,35 +106,22 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            axios.post("/member/profilePage/post", formData, options)
-                .then(response => {
-                    //  4. 
-                    axios.get(`/post/getAllPost/byNumber?postNo=${response.data.message}`)
-                        .then(res => {
-                            // 5. 
-                            appendNewPost(res.data.message)
+            const response = await axios.post("/member/profilePage/post", formData, options)
 
-                   
-                            // Pusher(res.data.message)
-                        })
-                    // Enable pusher logging - don't include this in production
+            const result = response.data.message
 
-                    const channel = pusher.subscribe('my-channel')
+            const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + result);
 
-                    channel.bind('updatePost', function (data) {
-                        log("checking1")
-                        log(data.message);
-                        log("checking")
-                    });
-                    id('id01').style.display = 'none'
+            log(getNewResponse.data.message);
 
-                    id("formPostMessageModal").reset();
+            id('id01').style.display = 'none'
 
-                })
 
-        } 
+            id("formPostMessageModal").reset();
 
         }
+
+    }
 } catch (e) {
     showError(e)
 }

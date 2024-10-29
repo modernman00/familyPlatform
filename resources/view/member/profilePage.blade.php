@@ -46,20 +46,23 @@
 {{-- POST MODAL --}}
 <script>
 
+  // i WANT TO DEFINE THE ENVIRONMENT VARIABLE FOR MIX_APP_URL --}}
+
+     window.appUrl = "{{ env('MIX_APP_URL') }}";
 
     // const checkTest= @php echo json_encode($allData) @endphp;
-    const checkTest= @json($allData);
+    // const checkTest= @json($allData);
 
-    const processComment = (el) => {
-          const comment = document.getElementById(el.post_id).value
-          document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
-    }
+    // const processComment = (el) => {
+    //       const comment = document.getElementById(el.post_id).value
+    //       document.getElementById(`insertComment-${el.post_id}`).insertAdjacentHTML('beforebegin', comment)
+    // }
 
-    const postId = checkTest.map(el=> {
+    // const postId = checkTest.map(el=> {
       
-      return el.id
+    //   return el.id
       
-    })
+    // })
 
     // checkTest.map(el => {
     //   return document.getElementById(el.post_id).addEventListener('keyup', ()=> processComment(el))

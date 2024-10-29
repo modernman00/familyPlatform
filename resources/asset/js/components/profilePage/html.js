@@ -6,7 +6,7 @@ import { showComment } from "./comment"
 
 
 export const html = (el, comment = null) => {
-  return `<div class="w3-container w3-card w3-white w3-round w3-margin"><br>
+  return `<div class="w3-container w3-card w3-white w3-round w3-margin post${el.post_no}"><br>
 
       ${nameImgTiming(el)}
 

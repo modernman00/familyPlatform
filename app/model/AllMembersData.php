@@ -123,7 +123,7 @@ class AllMembersData extends InnerJoin
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
             OR events.eventDate = CURDATE()
            
-            ORDER BY eventDate ASC";
+            ORDER BY events.eventDate ASC";
             $result = parent::connect2()->prepare($query);
             $result->execute();
             return $result->fetchAll();
@@ -146,7 +146,7 @@ class AllMembersData extends InnerJoin
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
             OR events.eventDate = CURDATE()
         )
-        ORDER BY eventDate ASC";
+        ORDER BY events.eventDate ASC";
 
             $conn = parent::connect2();
             $result = $conn->prepare($query);
@@ -170,7 +170,7 @@ class AllMembersData extends InnerJoin
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
             OR events.eventDate = CURDATE()
         )
-        ORDER BY eventDate ASC";
+        ORDER BY events.eventDate ASC";
 
             $conn = parent::connect2();
             $result = $conn->prepare($query);
@@ -210,6 +210,46 @@ class AllMembersData extends InnerJoin
             return [];
         }
     }
+
+        public static function postProfilePicByFamCode($famCode): array
+    {
+        try {
+            $query = "SELECT post.*, profilePics.img, profilePics.id 
+              FROM post
+              INNER JOIN profilePics ON post.id = profilePics.id
+            WHERE (post.postFamCode = :famCode)
+            ORDER BY post.date_created DESC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['famCode' => $famCode]);
+            
+            return $result->fetchAll();
+    
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+            public static function commentProfilePicByPostNo($postNo): array
+    {
+        try {
+            $query = "SELECT comment.*, profilePics.img, profilePics.id 
+              FROM comment
+              INNER JOIN profilePics ON comment.id = profilePics.id
+            WHERE (comment.post_no = :postNo)
+            ORDER BY comment.date_created DESC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['postNo' => $postNo]);
+            
+            return $result->fetchAll();
+    
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+
 
 
 

@@ -176,10 +176,18 @@ function addMonthsToDate($months, $date): array
 }
 
 
-function cleanSession($x): string|null
+function cleanSession($x): string|null|int
 {
-    $z = preg_replace('/[^0-9A-Za-z@.]/', '', $x);
-    return $z;
+    if ($x) {
+        $z = preg_replace(
+            pattern: '/[^0-9A-Za-z@.]/',
+            replacement: '',
+            subject: $x
+        );
+        return $z;
+    } else{
+        return null;
+    }
 }
 
 // SHOW THE ERROR EXCEPTION MESSAGE

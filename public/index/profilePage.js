@@ -335,67 +335,6 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/allMembers/api.js":
-/*!*********************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/api.js ***!
-  \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderMembers: () => (/* binding */ renderMembers)
-/* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
-/* harmony import */ var _filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
-/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
-
-
-
-
-
-var config = {
-  headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
-};
-var reqId = localStorage.getItem('requesterId');
-var URL = "http://olaogun.test/";
-var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
-var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
-var renderMembers = function renderMembers(data, container, noMemberMessage, html) {
-  // container.innerHTML = "";
-  if (data) {
-    data.forEach(html);
-  } else if (!data) {
-    container.innerHTML = noMemberMessage;
-  } else {
-    data.forEach(html);
-  }
-};
-axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("".concat(URL, "allMembers/processApiData?id=").concat(reqId), config).then(function (response) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers').innerHTML = "";
-  if (!response.data) {
-    throw Error('There is no data');
-  }
-  var data = response.data;
-  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_2__["default"])(data);
-  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
-
-  // Remove the "loader" class after rendering is complete
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader').classList.remove('loader');
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('searchFamily').addEventListener('input', function () {
-    return (0,_handleInput__WEBPACK_IMPORTED_MODULE_3__.handleInput)(data, dataWithFamCode, renderMembers);
-  });
-})["catch"](function (err) {
-  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err.message);
-});
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js":
 /*!****************************************************************************!*\
   !*** ./resources/asset/js/components/allMembers/filterMembersByFamCode.js ***!
@@ -418,106 +357,6 @@ var filterMembersByFamCode = function filterMembersByFamCode(data) {
   });
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (filterMembersByFamCode);
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/allMembers/handleInput.js":
-/*!*****************************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/handleInput.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   handleInput: () => (/* binding */ handleInput)
-/* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-
-
-var reqId = localStorage.getItem('requesterId');
-var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
-var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
-var handleInput = function handleInput(data, WithFamCode, renderMembers) {
-  var searchInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('searchFamily');
-  var inputVal = searchInput.value.trim().toLowerCase();
-  allMembersContainer.innerHTML = "";
-  if (inputVal === "") {
-    renderMembers(WithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
-  } else {
-    var filteredData = data.filter(function (el) {
-      return el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal);
-    });
-    if (filteredData.length === 0) {
-      allMembersContainer.innerHTML = "No matching name found.";
-    } else {
-      var uniqueItems = {};
-      var _iterator = _createForOfIteratorHelper(filteredData),
-        _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var item = _step.value;
-          if (!uniqueItems[item.id] || item.requester_id == reqId) {
-            uniqueItems[item.id] = item;
-          }
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      var filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-      filteredDataByIdAndCurrentUser.forEach(_html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
-    }
-  }
-};
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/allMembers/html.js":
-/*!**********************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/html.js ***!
-  \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtml: () => (/* binding */ renderHtml)
-/* harmony export */ });
-/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-
-
-
-var renderHtml = function renderHtml(el) {
-  var famCode = localStorage.getItem('requesterFamCode');
-  var reqId = localStorage.getItem('requesterId');
-  try {
-    if (!el) {
-      // Handle the case where 'el' is falsy, such as when data is not available.
-      throw new Error('there is no data');
-    }
-    var theImg = "/public/img/profile/".concat(el.img);
-    var isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
-    var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Add to family';
-    var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
-    var fatherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.fatherName);
-    var motherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.motherName);
-    // const spouse = toSentenceCase(el.spouseName);
-
-    // Create the HTML content based on whether the user is in the same family or not.
-    var html = "\n        <div class=\"w3-col l3 m6 w3-margin-bottom w3-round-xlarge\" id=\"".concat(el.id, "\">\n          \n                <img src=\"").concat(theImg, "\" style=\"width:100%; height:300px;\" alt=\"").concat(el.firstName, "\">\n                      <ul class=\"w3-ul w3-border w3-center w3-hover-shadow\">\n    \n                    <li class=\"w3-black w3-large w3-padding-16\">").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</li>\n\n                    <li class=\"w3-padding-8 allMember_card_content\">\n                         <b>Country:</b> ").concat(el.country, " </li>\n\n                        ").concat(isUserInSameFamily ? "    <li class=\"w3-padding-8\"> <b>Father:</b> ".concat(fatherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Mother:</b> ").concat(motherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Spouse:</b> ").concat(el.spouseName || 'none', "</li>\n                             <li class=\"w3-padding-8\"> <b>Mobile:</b> ").concat(el.mobile, " </li>\n                             <li class=\"w3-padding-8\"> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</li>\n\n                             <li class=\"w3-light-grey w3-padding-16\">\n                             <button class=\"w3-button w3-green w3-padding-small\">\n                                <a href=\"/allMembers/setProfile?id=").concat(el.id, "\">\n                                    See Profile\n                                </a>\n                                </button>\n                                \n                            </li>") : "<li class=\"w3-light-grey w3-padding-16\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"w3-button w3-green w3-padding-large button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                        </li>"), "\n                    \n     \n          </ul>\n        </div>");
-
-    // Insert the HTML content into the 'allMembers' element.
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
-  }
-};
 
 /***/ }),
 
@@ -1155,23 +994,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
 
 
 
 
 
-
+// import Pusher from 'pusher-js';
 
 try {
   // Enable pusher logging - don't include this in production
 
-  (pusher_js__WEBPACK_IMPORTED_MODULE_4___default().logToConsole) = true;
-  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('d1f1e43f3d8afb028a1f', {
-    cluster: 'eu'
-  });
+  // Pusher.logToConsole = true;
+
+  // const pusher = new Pusher('d1f1e43f3d8afb028a1f', {
+  //     cluster: 'eu'
+  // });
 
   // getApiData()
 
@@ -1180,112 +1025,120 @@ try {
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN'
   };
-  var showTheComment = function showTheComment(commentResponse) {
-    var idDiv = "showComment".concat(commentResponse.post_no);
-    var commentHtml = (0,_comment__WEBPACK_IMPORTED_MODULE_2__.commentHTML)(commentResponse);
-    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idDiv).insertAdjacentHTML('afterbegin', commentHtml);
-  };
 
   // CLICK EVENT get the comment and like button from the document
-  document.onclick = function (e) {
-    var elementId = e.target.id;
-    var postId = e.target.name;
-    if (elementId.includes("likeButton")) {
-      // replace button with Counter to get the span id 
-      var likeCounterId = elementId.replace('Button', 'Counter');
-      var likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML;
+  document.onclick = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
+      var elementId, postId, likeCounterId, likeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, result, formExtra, formData, requesterFamCodeValue, _response, _result, getNewResponse;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            elementId = e.target.id;
+            postId = e.target.name;
+            if (!elementId.includes("likeButton")) {
+              _context.next = 10;
+              break;
+            }
+            // replace button with Counter to get the span id 
+            likeCounterId = elementId.replace('Button', 'Counter');
+            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML; // get the post like using the post id
+            (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal));
 
-      // get the post like using the post id
+            // add one to the result 
+            newLikeCounterVal = parseInt(likeCounterVal) + 1;
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal;
 
-      (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal));
+            // Make the comment form to appear onclick. initcomment is the id of the comment button 
+            _context.next = 48;
+            break;
+          case 10:
+            if (!elementId.includes("initComment")) {
+              _context.next = 15;
+              break;
+            }
+            commentFormId = elementId.replace('init', 'form');
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
-      // add one to the result 
-      newLikeCounterVal = parseInt(likeCounterVal) + 1;
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal;
+            // Submit function for comment using POST API
+            _context.next = 48;
+            break;
+          case 15:
+            if (!elementId.includes("submitComment")) {
+              _context.next = 33;
+              break;
+            }
+            //elementId == submitComment511
 
-      // Make the comment form to appear onclick. initcomment is the id of the comment button 
-    } else if (elementId.includes("initComment")) {
-      var commentFormId = elementId.replace('init', 'form');
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
+            // 0.5 LISTEN FOR THE SUBMIT EVENT
+            // 0.7 GET THE COMMENT FORM ID 
+            // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
+            // 2. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS
 
-      // Submit function for comment using POST API
-    } else if (elementId.includes("submitComment")) {
-      //elementId == submitComment511
+            e.preventDefault();
 
-      // 0.5 LISTEN FOR THE SUBMIT EVENT
-      // 0.7 GET THE COMMENT FORM ID 
-      // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
-      // 2.  USE IT TO GET THE NEW COMMENT
-      // 3. ADD THE NEW COMMENT TO THE COMMENT DIV 
-      // get the specific form id
-      e.preventDefault();
+            //idForm == formComment511
+            idForm = elementId.replace("submit", "form"); // make the comment form disappear
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none";
+            // extract the form entries
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
+            formEntries = new FormData(form); // if the comment form input is empty. Get the input id and check 
+            inputComment = idForm.replace("form", "input");
+            idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
+            if (!(idInputComment.value == null || idInputComment.value == "")) {
+              _context.next = 27;
+              break;
+            }
+            alert("Please enter a comment before submitting");
+            _context.next = 31;
+            break;
+          case 27:
+            _context.next = 29;
+            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post('/postCommentProfile', formEntries, options);
+          case 29:
+            response = _context.sent;
+            result = response.data.message;
+          case 31:
+            _context.next = 48;
+            break;
+          case 33:
+            if (!elementId.includes("submitPost")) {
+              _context.next = 48;
+              break;
+            }
+            // LISTEN TO THE SUBMIT EVENT 
+            // 2. GET THE FORM id
+            // 3. POST TO THE SERVER USING AXIOS POST
+            //4. GET THE POST FROM THE SERVER USING AXIOS GET 
+            //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
+            // 2. 
+            formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
+            formData = new FormData(formExtra); // get the requesterFamCode from the localStorage 
+            requesterFamCodeValue = localStorage.getItem('requesterFamCode'); // Append the new form entry to the FormData object
+            formData.append('postFamCode', requesterFamCodeValue);
 
-      // 0.7
-      var idForm = elementId.replace("submit", "form"); //idForm == formComment511
-
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none"; // make the comment form disappear
-
-      // extract the form entries
-      var form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
-      var formEntries = new FormData(form);
-
-      // if the comment form input is empty. Get the input id and check 
-      var inputComment = idForm.replace("form", "input");
-      var idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
-      if (idInputComment.value == null || idInputComment.value == "") {
-        alert("Please enter a comment before submitting");
-      } else {
-        // 1.
-        axios__WEBPACK_IMPORTED_MODULE_5__["default"].post('/postCommentProfile', formEntries, options).then(function (response) {
-          // 2. note. message returns the new post_no from the database
-
-          axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/member/pp/comment/byNumber?commentNo=".concat(response.data.message)).then(function (res) {
-            // 3.
-
-            showTheComment(res.data.message);
-          });
-        })["catch"](function (error) {
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(error);
-        });
-      }
-      // SUBMIT THE POST
-    } else if (elementId.includes("submitPost")) {
-      // LISTEN TO THE SUBMIT EVENT 
-      // 2. GET THE FORM id
-      // 3. POST TO THE SERVER USING AXIOS POST
-      //4. GET THE POST FROM THE SERVER USING AXIOS GET 
-      //5. APPEND THE NEW POST TO THE POSTCARD 
-
-      // 2. 
-      var formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
-      var formData = new FormData(formExtra);
-      // get the requesterFamCode from the localStorage 
-      var requesterFamCodeValue = localStorage.getItem('requesterFamCode');
-      // Append the new form entry to the FormData object
-      formData.append('postFamCode', requesterFamCodeValue);
-
-      // 3. 
-      axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/post", formData, options).then(function (response) {
-        //  4. 
-        axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPost/byNumber?postNo=".concat(response.data.message)).then(function (res) {
-          // 5. 
-          (0,_post__WEBPACK_IMPORTED_MODULE_3__.appendNewPost)(res.data.message);
-
-          // Pusher(res.data.message)
-        });
-        // Enable pusher logging - don't include this in production
-
-        var channel = pusher.subscribe('my-channel');
-        channel.bind('updatePost', function (data) {
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking1");
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(data.message);
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("checking");
-        });
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-      });
-    }
-  };
+            // 3. 
+            _context.next = 40;
+            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/post", formData, options);
+          case 40:
+            _response = _context.sent;
+            _result = _response.data.message;
+            _context.next = 44;
+            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _result);
+          case 44:
+            getNewResponse = _context.sent;
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(getNewResponse.data.message);
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
+          case 48:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return function (_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
 } catch (e) {
   showError(e);
 }
@@ -1300,10 +1153,13 @@ try {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   appendNewComment: () => (/* binding */ appendNewComment),
 /* harmony export */   commentHTML: () => (/* binding */ commentHTML),
 /* harmony export */   showComment: () => (/* binding */ showComment)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
 
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
@@ -1315,10 +1171,22 @@ var showComment = function showComment(comment) {
     return "<div class=\"w3-ul w3-border\" id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
+  // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
     return commentHTML(commentElement);
   });
   return commentHTMLArray.join(''); // Join the array elements into a single string
+};
+var appendNewComment = function appendNewComment(commentData) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)('comment data', commentData);
+  var idDiv = "showComment".concat(commentData.post_no);
+  var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  var commentHtml = commentHTML(commentData);
+  if (commentContainer) {
+    commentContainer.insertAdjacentHTML('beforeend', commentHtml);
+  } else {
+    console.warn('comment container does not exist' + idDiv);
+  }
 };
 
 /***/ }),
@@ -1606,7 +1474,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(el.post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -1784,9 +1652,8 @@ __webpack_require__.r(__webpack_exports__);
 /*!************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/index.js ***!
   \************************************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _loadPost__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./loadPost */ "./resources/asset/js/components/profilePage/loadPost.js");
 /* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
@@ -1795,8 +1662,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 /* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_loadPost__WEBPACK_IMPORTED_MODULE_0__]);
-_loadPost__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
 
 localStorage.removeItem('redirect');
@@ -1807,8 +1672,6 @@ localStorage.removeItem('redirect');
 
 
 
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
@@ -1816,22 +1679,19 @@ __webpack_async_result__();
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/loadPost.js ***!
   \***************************************************************/
-/***/ ((module, __webpack_exports__, __webpack_require__) => {
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-__webpack_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
 
 
@@ -1841,65 +1701,133 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 // set an empty array
 try {
+  // Global state object with data-fetching and initialization logic
   var state = {
     post: [],
-    comment: []
+    comment: [],
+    // Method to fetch initial data and populate state
+    initialize: function initialize() {
+      var _this = this;
+      return _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        var pullData;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              _context.prev = 0;
+              _context.next = 3;
+              return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPostCommentByFamCode");
+            case 3:
+              pullData = _context.sent;
+              // Assign fetched data to state properties
+              _this.post = pullData.data.message.post;
+              _this.comment = pullData.data.message.comment;
+              _this.comment = _this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
+
+              if (_this.post.length > 0) {
+                // Render posts and comments on the page after data is loaded
+                _this.post.forEach(function (data) {
+                  return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, _this.comment);
+                });
+              } else {
+                (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("No post");
+              }
+              _context.next = 13;
+              break;
+            case 10:
+              _context.prev = 10;
+              _context.t0 = _context["catch"](0);
+              console.error("Error fetching posts and comments:", _context.t0);
+            case 13:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, null, [[0, 10]]);
+      }))();
+    }
   };
-  var serverConnection = new EventSource("/post/getAllPost/update");
 
-  // Use Promise.all to fetch allPost and allCOMMENT data in parallel
-  var _await$Promise$all = await Promise.all([axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPost"), axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/member/pp/comment")]),
-    _await$Promise$all2 = _slicedToArray(_await$Promise$all, 2),
-    thePost = _await$Promise$all2[0],
-    allComment = _await$Promise$all2[1];
-  state.post = thePost.data.message;
-  state.comment = allComment.data.message;
-  var filteredPost = (0,_allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__["default"])(state.post);
+  // initiate the global object
+  state.initialize();
+  var updatePost = function updatePost(e) {
+    if (!e) throw new Error('No update received');
 
-  // show all the post and comments. the allPosts function filtered out the comments with the post_no, this happens once the page is loaded. 
-  filteredPost.forEach(function (data) {
-    return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, state.comment);
-  });
-
-  // next - once a new post and comment, function to update the IU real time
-
-  var updateData = function updateData(e, type) {
-    if (e.origin !== "http://olaogun.test/") {
+    // Validate origin to prevent unauthorized updates
+    if (e.origin != appUrl) {
       console.warn("Invalid origin detected:", e.origin);
       return; // Exit if origin doesn't match
     }
-    var stateArray = type === 'comment' ? state.comment : state.post;
-    var uniqueKey = type === "comment" ? "comment_no" : "post_no";
-    var data = JSON.parse(e.data);
-    // check if the post no does not already exist
-    var isExisting = stateArray.some(function (item) {
-      return item[uniqueKey] === data[uniqueKey];
-    });
-    if (!isExisting) {
-      // if it is not available, add to the data state
-      stateArray.push(data);
+
+    // Parse the incoming data and check if it already exists in state
+    var dataForUse = JSON.parse(e.data);
+
+    // Only append if the comment hasn't been added before
+    if (!appendedPosts.has(dataForUse.post_no)) {
+      appendedPosts.add(dataForUse.post_no);
+      (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
     }
-    if (type === "post") return state.post.map(function (ele) {
-      return (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(ele);
-    });
   };
-  serverConnection.addEventListener("updateComment", function (e) {
-    return updateData(e, "comment");
-  });
-  serverConnection.addEventListener("updatePost", function (e) {
-    return updateData(e, "post");
+  var updateComment = function updateComment(e) {
+    if (!e) throw new Error('No update received');
+
+    // Validate origin to prevent unauthorized updates
+    if (e.origin != appUrl) {
+      console.warn("Invalid origin detected:", e.origin);
+      return; // Exit if origin doesn't match
+    }
+
+    // Parse the incoming data and check if it already exists in state
+    var dataForUse = JSON.parse(e.data);
+
+    // Only append if the comment hasn't been added before
+    if (!appendedComments.has(dataForUse.comment_no)) {
+      appendedComments.add(dataForUse.comment_no);
+      (0,_comment__WEBPACK_IMPORTED_MODULE_4__.appendNewComment)(dataForUse);
+    }
+  };
+  var appendedComments = new Set(); // To track unique comments
+  var appendedPosts = new Set(); // To track unique comments
+
+  // DESTROY THE LOCALSTORAGE
+
+  var serverConnection = new EventSource("/comment/newComment");
+  var serverConnectionPost = new EventSource("/post/getNewPost");
+
+  // Event listener for comment updates
+  serverConnection.addEventListener('updateComment', updateComment);
+
+  // Event listener for post updates
+  serverConnectionPost.addEventListener('updatePost', updatePost);
+  serverConnection.addEventListener("error", function (e) {
+    if (e.target.readyState === EventSource.CLOSED) {
+      console.error("Connection was closed. Retrying...");
+    }
   });
 
   // AUTOMATICALLY UPDATE TIMESTAMP
-  var updatePostTiming = document.querySelectorAll(".timeago");
-  var updateCommentTiming = document.querySelectorAll(".commentTiming");
-  (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updatePostTiming);
-  (0,timeago_js__WEBPACK_IMPORTED_MODULE_3__.render)(updateCommentTiming);
+  // Function to check for elements and render if they exist
+
+  // AUTOMATICALLY UPDATE TIMESTAMP
+  // Function to check for elements and render if they exist every 5 seconds
+  setInterval(function () {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.checkManyElements)('class', ".timeago", timeago_js__WEBPACK_IMPORTED_MODULE_3__.render);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.checkManyElements)('class', ".commentTiming", timeago_js__WEBPACK_IMPORTED_MODULE_3__.render);
+  }, 5000); // Adjust interval as needed
+
+  // const updateTimingElements = () => {
+  //     const updatePostTiming = document.querySelectorAll(".timeago");
+  //     const updateCommentTiming = document.querySelectorAll(".commentTiming");
+
+  //     // Check if elements exist before calling render function
+  //     if (updatePostTiming.length > 0) {
+  //         render(updatePostTiming);
+  //     }
+  //     if (updateCommentTiming.length > 0) {
+  //         render(updateCommentTiming);
+  //     }
+  // };
 } catch (error) {
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
 }
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
@@ -1952,13 +1880,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _allMembers_api__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../allMembers/api */ "./resources/asset/js/components/allMembers/api.js");
-/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
 
 
-
-
-
+var famCode = localStorage.getItem('requesterFamCode');
 /**
  * Renders a post and its associated comments in the DOM.
  * 
@@ -1971,17 +1895,16 @@ __webpack_require__.r(__webpack_exports__);
  * @param {Array} commentData - An array of comment objects associated with posts.
  * @returns {boolean} - Returns false if the post object is invalid.
  */
-var allPost = function allPost(el, commentData) {
-  if (!el) {
-    return false;
-  }
-  var postNo = parseInt(el.post_no);
+var allPost = function allPost(postData, commentData) {
+  var postNo = parseInt(postData.post_no);
+  var postFamCode = postData.postFamCode;
   var filterComment = commentData.filter(function (comm) {
-    return postNo === parseInt(comm.post_no);
+    return parseInt(comm.post_no) === postNo;
   }); // filter the comment to an array
-
-  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el, filterComment);
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
+  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postData, filterComment);
+  if (postFamCode === famCode) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
+  }
 };
 
 /**
@@ -2004,7 +1927,10 @@ var appendNewPost = function appendNewPost(el) {
   var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("submitComment".concat(el.post_no));
   if (!commentForm1 || !inputComment || !submitComment) {
     var appendHTML = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el);
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
+    if (el.postFamCode === famCode) {
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)("from family");
+      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
+    }
   }
 };
 

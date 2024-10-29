@@ -164,6 +164,11 @@ class Insert extends Db
 
             $lastId = parent::connect2()->lastInsertId();
 
+            if(!$lastId) msgException(
+                errCode: 406, 
+                msg: "Unable to connect to"
+            );
+
             $_SESSION["LAST_INSERT_ID_$DYNAMIC"] = $lastId;
 
             msgSuccess(200,  $lastId);

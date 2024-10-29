@@ -1,4 +1,5 @@
 import { format } from "timeago.js"
+import { id, log } from "../global";
 
 export const commentHTML = (data) => {
 
@@ -20,10 +21,28 @@ export const showComment = (comment) => {
     return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>`;
   } // only run if there is comment
 
+
+// USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   const commentHTMLArray = comment.map(commentElement => {
     return commentHTML(commentElement);
   });
 
   return commentHTMLArray.join(''); // Join the array elements into a single string
 }
+
+
+export const appendNewComment = (commentData) => {
+        log('comment data', commentData)
+        const idDiv = `showComment${commentData.post_no}`
+        const commentContainer = id(idDiv);
+        const commentHtml = commentHTML(commentData)
+
+         if(commentContainer) {
+          commentContainer.insertAdjacentHTML('beforeend', commentHtml)
+        } else {
+          console.warn('comment container does not exist' + idDiv)
+        }
+   
+}
+
 

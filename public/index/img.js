@@ -363,10 +363,13 @@ var checkCookie = function checkCookie() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   appendNewComment: () => (/* binding */ appendNewComment),
 /* harmony export */   commentHTML: () => (/* binding */ commentHTML),
 /* harmony export */   showComment: () => (/* binding */ showComment)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
 
 var commentHTML = function commentHTML(data) {
   var imgURL = data.img ? data.img : data.profileImg;
@@ -378,10 +381,22 @@ var showComment = function showComment(comment) {
     return "<div class=\"w3-ul w3-border\" id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
+  // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
     return commentHTML(commentElement);
   });
   return commentHTMLArray.join(''); // Join the array elements into a single string
+};
+var appendNewComment = function appendNewComment(commentData) {
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)('comment data', commentData);
+  var idDiv = "showComment".concat(commentData.post_no);
+  var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  var commentHtml = commentHTML(commentData);
+  if (commentContainer) {
+    commentContainer.insertAdjacentHTML('beforeend', commentHtml);
+  } else {
+    console.warn('comment container does not exist' + idDiv);
+  }
 };
 
 /***/ }),
@@ -408,7 +423,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin\"><br>\n\n      ".concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(el.post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),

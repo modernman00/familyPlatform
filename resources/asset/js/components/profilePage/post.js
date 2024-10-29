@@ -1,10 +1,8 @@
 import { html } from "./html"
-import { id } from '../global'
-import { renderMembers } from '../allMembers/api'
-import filterMembersByFamCode from '../allMembers/filterMembersByFamCode'
+import { id, log, showError } from '../global'
 
 
-
+const famCode = localStorage.getItem('requesterFamCode');
 /**
  * Renders a post and its associated comments in the DOM.
  * 
@@ -17,17 +15,19 @@ import filterMembersByFamCode from '../allMembers/filterMembersByFamCode'
  * @param {Array} commentData - An array of comment objects associated with posts.
  * @returns {boolean} - Returns false if the post object is invalid.
  */
-export const allPost = (el, commentData) => {
+export const allPost = (postData, commentData) => {
 
-  if (!el) { return false; }
+  let postNo = parseInt(postData.post_no)
 
-  let postNo = parseInt(el.post_no)
+  let postFamCode =postData.postFamCode
 
-  const filterComment = commentData.filter(comm => postNo === parseInt(comm.post_no)) // filter the comment to an array
-
-  const postHtml = html(el, filterComment)
-
-  id('postIt').insertAdjacentHTML('beforeend', postHtml)
+  const filterComment = commentData.filter(comm => parseInt(comm.post_no) === postNo ) // filter the comment to an array
+  const postHtml = html(postData, filterComment)
+  if(postFamCode === famCode) {
+    id('postIt').insertAdjacentHTML('beforeend', postHtml)
+  }
+  
+  
 }
 
 
@@ -56,7 +56,14 @@ export const appendNewPost = (el) => {
 
     const appendHTML = html(el);
 
-    id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
+  
+    if (el.postFamCode === famCode) {
+
+      log("from family")
+
+      id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
+
+    }
 
   }
 

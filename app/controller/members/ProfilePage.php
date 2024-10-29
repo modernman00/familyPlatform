@@ -65,6 +65,10 @@ class ProfilePage extends ProcessImg
 
             $setData = new SingleCustomerData;
 
+    
+           $result = Post::getProfilePics($this->id);
+
+
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
 
             $this->memberData = $setData->getCustomerData($this->id, $table);
