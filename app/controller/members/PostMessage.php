@@ -28,7 +28,7 @@ class PostMessage
     {
         try {
             // it works
-            $message = AllMembersData::postProfilePicByFamCode(checkInput($_SESSION['famCode']));
+            $message = AllMembersData::postProfilePicByFamCode(id: $_SESSION['memberId'], famCode: checkInput($_SESSION['famCode']));
 
             if (!$message) msgException(401, "no post msg");
 

@@ -65,8 +65,9 @@ class ProfilePage extends ProcessImg
 
             $setData = new SingleCustomerData;
 
-    
-           $result = Post::getProfilePics($this->id);
+           
+
+
 
 
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
@@ -75,6 +76,7 @@ class ProfilePage extends ProcessImg
             
             $getFamCode = checkInput($this->memberData['famCode']);
             $_SESSION['famCode'] = $getFamCode;
+
 
 
             $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
@@ -297,5 +299,20 @@ class ProfilePage extends ProcessImg
             //'allData' => $this->allPostData,
             'comment' => $comment2Img
         ]);
+    }
+
+        /**
+     * Sets an HTTP cookie for JWT token.
+     * 
+     * Retrieves the token from the GET request and sets a secure, HTTP-only cookie with a one-hour expiry.
+     * Responds with a success message upon completion.
+     * 
+     * @return void
+     */
+    public function setHeader()
+    {
+        $token = $_GET['token'];
+         setCookie(name:'tokenJWT', value:$token, expires_or_options:time() + 3600, path: "/", domain:'', secure: true, httponly: true );
+         msgSuccess(200, "message set");
     }
 }

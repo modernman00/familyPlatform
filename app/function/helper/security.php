@@ -144,7 +144,7 @@ function msgSuccess(int $code, mixed $msg, mixed $token = null): void
  * @param string $event This is the event name.
  * @return void
  */
-function msgServerSent(string|array $data, string | int $id, string $event): void
+function msgServerSent(string|array|int $data, string | int $id, string $event): void
 {
 
     $get = json_encode($data);

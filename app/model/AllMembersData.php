@@ -158,7 +158,7 @@ class AllMembersData extends InnerJoin
         }
     }
 
-      public static function getEventDataByFamCode($famCode): array
+    public static function getEventDataByFamCode($famCode): array
     {
         try {
             $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
@@ -183,17 +183,17 @@ class AllMembersData extends InnerJoin
     }
 
 
-/**
- * Retrieves a list of all members' emails and details associated with a given family code.
- *
- * This function executes a database query to fetch email addresses, family codes, 
- * first names, last names, and IDs of members whose family code matches the provided 
- * parameter. If an error occurs during the database operation, it logs the error and 
- * returns an empty array.
- *
- * @param string $famCode The family code used to filter members.
- * @return array An array containing the email, family code, first name, last name, and ID of each member.
- */
+    /**
+     * Retrieves a list of all members' emails and details associated with a given family code.
+     *
+     * This function executes a database query to fetch email addresses, family codes, 
+     * first names, last names, and IDs of members whose family code matches the provided 
+     * parameter. If an error occurs during the database operation, it logs the error and 
+     * returns an empty array.
+     *
+     * @param string $famCode The family code used to filter members.
+     * @return array An array containing the email, family code, first name, last name, and ID of each member.
+     */
     public static function AllMembersEmailByFamCode($famCode): array
     {
         try {
@@ -204,33 +204,38 @@ class AllMembersData extends InnerJoin
             $result = parent::connect2()->prepare($query);
             $result->execute(['famCode' => $famCode]);
             return $result->fetchAll();
-    
         } catch (PDOException $e) {
             showError($e);
             return [];
         }
     }
 
-        public static function postProfilePicByFamCode($famCode): array
+    // this code picks all the famcode and those who accepted the request. 
+
+    public static function postProfilePicByFamCode($famCode, $id): array
     {
         try {
-            $query = "SELECT post.*, profilePics.img, profilePics.id 
+            $query = "SELECT post.*, profilePics.img, profilePics.id, rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
               FROM post
               INNER JOIN profilePics ON post.id = profilePics.id
-            WHERE (post.postFamCode = :famCode)
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = :id
+                  ) AS rm ON post.id = rm.approver_id
+              WHERE (post.postFamCode = :famCode)
             ORDER BY post.date_created DESC";
             $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode]);
-            
+            $result->execute(['famCode' => $famCode, 'id' => $id]);
+
             return $result->fetchAll();
-    
         } catch (PDOException $e) {
             showError($e);
             return [];
         }
     }
 
-            public static function commentProfilePicByPostNo($postNo): array
+    public static function commentProfilePicByPostNo($postNo): array
     {
         try {
             $query = "SELECT comment.*, profilePics.img, profilePics.id 
@@ -240,9 +245,8 @@ class AllMembersData extends InnerJoin
             ORDER BY comment.date_created DESC";
             $result = parent::connect2()->prepare($query);
             $result->execute(['postNo' => $postNo]);
-            
+
             return $result->fetchAll();
-    
         } catch (PDOException $e) {
             showError($e);
             return [];

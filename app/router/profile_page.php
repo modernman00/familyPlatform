@@ -44,13 +44,18 @@ $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@show
 
 $router->map('POST', '/member/profilePage/event', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
-$router->map('GET', '/member/profilePage/setHeader', 'App\controller\members\PostCard@setHeader', 'HEADER_SET');
+$router->map('GET', '/member/profilePage/setHeader', 'App\controller\members\ProfilePage@setHeader', 'HEADER_SET');
 
 
 
 $router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');
 
-$router->map('GET', '/profileCard/getLikes', 'App\controller\members\PostCard@likeFunction', 'likeCounter');
+$router->map(
+  method: 'GET', 
+  route: '/profileCard/getLikes', 
+  target: 'App\controller\members\PostLikeController@getLikes', name: 'getLikeCounter');
+
+$router->map('PUT', '/profileCard/postLikes', 'App\controller\members\PostLikeController@postLikes', 'postLikeCounter');
 
 $router->map('GET', '/member/getEventData', 'App\controller\members\Event@getEventData', 'getEventData');
 

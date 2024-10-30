@@ -1,25 +1,9 @@
 "use strict";
 import { id, log } from "../global"
-import { getApiData } from "../helper/http"
-import { appendNewComment } from './comment'
-import { appendNewPost } from './post'
 import axios from "axios"
-import filterMembersByFamCode from '../allMembers/filterMembersByFamCode';
-// import Pusher from 'pusher-js';
+
 
 try {
-
-    // Enable pusher logging - don't include this in production
-
-    // Pusher.logToConsole = true;
-
-    // const pusher = new Pusher('d1f1e43f3d8afb028a1f', {
-    //     cluster: 'eu'
-    // });
-
-    // getApiData()
-
-    let newLikeCounterVal = 0;
 
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
@@ -37,17 +21,11 @@ try {
         if (elementId.includes("likeButton")) {
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
+            let likeCounterVal = id(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
+            likeCounterVal = likeCounterVal.replace(/\n/g, '')
+            const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
-            const likeCounterVal = id(likeCounterId).innerHTML;
-
-            // get the post like using the post id
-
-            getApiData(`/profileCard/getLikes?postId=${postId}&count=${likeCounterVal}`);
-
-            // add one to the result 
-            newLikeCounterVal = parseInt(likeCounterVal) + 1;
-            id(likeCounterId).innerHTML = newLikeCounterVal;
-
+            const result = await axios.put(`/profileCard/postLikes?postId=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
 
             // Make the comment form to appear onclick. initcomment is the id of the comment button 
         } else if (elementId.includes("initComment")) {
@@ -97,7 +75,7 @@ try {
             //4. GET THE POST FROM THE SERVER USING AXIOS GET 
             //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
 
-            // 2. 
+            e.preventDefault()
             const formExtra = id('formPostMessageModal')
             const formData = new FormData(formExtra)
             // get the requesterFamCode from the localStorage 

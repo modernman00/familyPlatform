@@ -1,4 +1,4 @@
-import { log, showError, checkManyElements } from '../global'
+import { log, showError, checkManyElements, id } from '../global'
 import { appendNewPost, allPost } from './post'
 import { getMultipleApiData } from "../helper/http"
 import { render } from "timeago.js"
@@ -49,18 +49,10 @@ try {
 
 
   const updatePost = (e) => {
-        if (!e) throw new Error('No update received');
-
-        // Validate origin to prevent unauthorized updates
-        if (e.origin != appUrl) {
-            console.warn("Invalid origin detected:", e.origin);
-            return; // Exit if origin doesn't match
-        }
+       
 
         // Parse the incoming data and check if it already exists in state
-        const dataForUse = JSON.parse(e.data);
-
-  
+        const dataForUse = checkOriginAndParsedData(e);
 
         // Only append if the comment hasn't been added before
         if (!appendedPosts.has(dataForUse.post_no)) {
@@ -71,16 +63,9 @@ try {
     };
 
     const updateComment = (e) => {
-        if (!e) throw new Error('No update received');
-
-        // Validate origin to prevent unauthorized updates
-        if (e.origin != appUrl) {
-            console.warn("Invalid origin detected:", e.origin);
-            return; // Exit if origin doesn't match
-        }
-
+       
         // Parse the incoming data and check if it already exists in state
-        const dataForUse = JSON.parse(e.data);
+        const dataForUse = checkOriginAndParsedData(e);
 
         // Only append if the comment hasn't been added before
         if (!appendedComments.has(dataForUse.comment_no)) {
@@ -90,29 +75,42 @@ try {
 
     };
 
+     const updateLike = (e) => {
+  
+        // Parse the incoming data and check if it already exists in state
+        const dataForUse = checkOriginAndParsedData(e);
+
+         const  newLikeCounterVal = parseInt(dataForUse.likeCounter);
+            id(dataForUse.likeHtmlId).innerHTML = newLikeCounterVal;
+
+    };
+
     const appendedComments = new Set(); // To track unique comments
     const appendedPosts = new Set(); // To track unique comments
 
     // DESTROY THE LOCALSTORAGE
 
-    const serverConnection = new EventSource("/comment/newComment");
+    const sseComment = new EventSource("/comment/newComment");
 
-    const serverConnectionPost = new EventSource("/post/getNewPost");
+    const ssePost = new EventSource("/post/getNewPost");
+
+    const sseLikes = new EventSource("/profileCard/getLikes");
 
     // Event listener for comment updates
-    serverConnection.addEventListener('updateComment', updateComment);
+    sseComment.addEventListener('updateComment', updateComment);
 
      // Event listener for post updates
-    serverConnectionPost.addEventListener('updatePost', updatePost);
+    ssePost.addEventListener('updatePost', updatePost);
 
-    serverConnection.addEventListener("error", (e) => {
+      // Event listener for likes updates
+    sseLikes.addEventListener('updateLike', updateLike);
+
+    sseComment.addEventListener("error", (e) => {
     if (e.target.readyState === EventSource.CLOSED) {
         console.error("Connection was closed. Retrying...");
     }
     })
 
-    // AUTOMATICALLY UPDATE TIMESTAMP
-    // Function to check for elements and render if they exist
 
     // AUTOMATICALLY UPDATE TIMESTAMP
     // Function to check for elements and render if they exist every 5 seconds
@@ -122,19 +120,17 @@ try {
     }, 5000); // Adjust interval as needed
 
 
+    const checkOriginAndParsedData = (data)=> {
+         if (!data) throw new Error('No update received');
 
-    // const updateTimingElements = () => {
-    //     const updatePostTiming = document.querySelectorAll(".timeago");
-    //     const updateCommentTiming = document.querySelectorAll(".commentTiming");
+          if (data.origin != appUrl) {
+            console.warn("Invalid origin detected:");
+            return; // Exit if origin doesn't match
+        }
 
-    //     // Check if elements exist before calling render function
-    //     if (updatePostTiming.length > 0) {
-    //         render(updatePostTiming);
-    //     }
-    //     if (updateCommentTiming.length > 0) {
-    //         render(updateCommentTiming);
-    //     }
-    // };
+        return JSON.parse(data.data)
+    }
+
 
 
 

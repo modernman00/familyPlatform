@@ -335,31 +335,6 @@ var FormHelper = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js":
-/*!****************************************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/filterMembersByFamCode.js ***!
-  \****************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-var reqId = localStorage.getItem('requesterId');
-var famCode = localStorage.getItem('requesterFamCode');
-var filterMembersByFamCode = function filterMembersByFamCode(data) {
-  // Check if data is an array before calling filter
-  if (!Array.isArray(data)) {
-    console.error('Error: data is not an array:');
-  }
-  return data.filter(function (el) {
-    return el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode || el.eventCode === famCode;
-  });
-};
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (filterMembersByFamCode);
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/helper/general.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
@@ -990,11 +965,7 @@ document.addEventListener('click', function (e) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
-/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
-/* harmony import */ var _post__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./post */ "./resources/asset/js/components/profilePage/post.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _allMembers_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../allMembers/filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -1003,24 +974,7 @@ function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
 
-
-
-
-
-// import Pusher from 'pusher-js';
-
 try {
-  // Enable pusher logging - don't include this in production
-
-  // Pusher.logToConsole = true;
-
-  // const pusher = new Pusher('d1f1e43f3d8afb028a1f', {
-  //     cluster: 'eu'
-  // });
-
-  // getApiData()
-
-  var newLikeCounterVal = 0;
   var options = {
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN'
@@ -1029,42 +983,41 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.onclick = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, result, formExtra, formData, requesterFamCodeValue, _response, _result, getNewResponse;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, _result, formExtra, formData, requesterFamCodeValue, _response, _result2, getNewResponse;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             elementId = e.target.id;
             postId = e.target.name;
             if (!elementId.includes("likeButton")) {
-              _context.next = 10;
+              _context.next = 12;
               break;
             }
             // replace button with Counter to get the span id 
             likeCounterId = elementId.replace('Button', 'Counter');
-            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML; // get the post like using the post id
-            (0,_helper_http__WEBPACK_IMPORTED_MODULE_1__.getApiData)("/profileCard/getLikes?postId=".concat(postId, "&count=").concat(likeCounterVal));
-
-            // add one to the result 
-            newLikeCounterVal = parseInt(likeCounterVal) + 1;
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML = newLikeCounterVal;
-
-            // Make the comment form to appear onclick. initcomment is the id of the comment button 
-            _context.next = 48;
+            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
+            likeCounterVal = likeCounterVal.replace(/\n/g, '');
+            encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
+            _context.next = 9;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put("/profileCard/postLikes?postId=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
+          case 9:
+            result = _context.sent;
+            _context.next = 51;
             break;
-          case 10:
+          case 12:
             if (!elementId.includes("initComment")) {
-              _context.next = 15;
+              _context.next = 17;
               break;
             }
             commentFormId = elementId.replace('init', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Submit function for comment using POST API
-            _context.next = 48;
+            _context.next = 51;
             break;
-          case 15:
+          case 17:
             if (!elementId.includes("submitComment")) {
-              _context.next = 33;
+              _context.next = 35;
               break;
             }
             //elementId == submitComment511
@@ -1085,24 +1038,24 @@ try {
             inputComment = idForm.replace("form", "input");
             idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 27;
+              _context.next = 29;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 31;
+            _context.next = 33;
             break;
-          case 27:
-            _context.next = 29;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post('/postCommentProfile', formEntries, options);
           case 29:
-            response = _context.sent;
-            result = response.data.message;
+            _context.next = 31;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post('/postCommentProfile', formEntries, options);
           case 31:
-            _context.next = 48;
-            break;
+            response = _context.sent;
+            _result = response.data.message;
           case 33:
+            _context.next = 51;
+            break;
+          case 35:
             if (!elementId.includes("submitPost")) {
-              _context.next = 48;
+              _context.next = 51;
               break;
             }
             // LISTEN TO THE SUBMIT EVENT 
@@ -1110,26 +1063,27 @@ try {
             // 3. POST TO THE SERVER USING AXIOS POST
             //4. GET THE POST FROM THE SERVER USING AXIOS GET 
             //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
-            // 2. 
+
+            e.preventDefault();
             formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
             formData = new FormData(formExtra); // get the requesterFamCode from the localStorage 
             requesterFamCodeValue = localStorage.getItem('requesterFamCode'); // Append the new form entry to the FormData object
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 40;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/post", formData, options);
-          case 40:
+            _context.next = 43;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post("/member/profilePage/post", formData, options);
+          case 43:
             _response = _context.sent;
-            _result = _response.data.message;
-            _context.next = 44;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _result);
-          case 44:
+            _result2 = _response.data.message;
+            _context.next = 47;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _result2);
+          case 47:
             getNewResponse = _context.sent;
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(getNewResponse.data.message);
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-          case 48:
+          case 51:
           case "end":
             return _context.stop();
         }
@@ -1749,16 +1703,8 @@ try {
   // initiate the global object
   state.initialize();
   var updatePost = function updatePost(e) {
-    if (!e) throw new Error('No update received');
-
-    // Validate origin to prevent unauthorized updates
-    if (e.origin != appUrl) {
-      console.warn("Invalid origin detected:", e.origin);
-      return; // Exit if origin doesn't match
-    }
-
     // Parse the incoming data and check if it already exists in state
-    var dataForUse = JSON.parse(e.data);
+    var dataForUse = checkOriginAndParsedData(e);
 
     // Only append if the comment hasn't been added before
     if (!appendedPosts.has(dataForUse.post_no)) {
@@ -1767,16 +1713,8 @@ try {
     }
   };
   var updateComment = function updateComment(e) {
-    if (!e) throw new Error('No update received');
-
-    // Validate origin to prevent unauthorized updates
-    if (e.origin != appUrl) {
-      console.warn("Invalid origin detected:", e.origin);
-      return; // Exit if origin doesn't match
-    }
-
     // Parse the incoming data and check if it already exists in state
-    var dataForUse = JSON.parse(e.data);
+    var dataForUse = checkOriginAndParsedData(e);
 
     // Only append if the comment hasn't been added before
     if (!appendedComments.has(dataForUse.comment_no)) {
@@ -1784,27 +1722,34 @@ try {
       (0,_comment__WEBPACK_IMPORTED_MODULE_4__.appendNewComment)(dataForUse);
     }
   };
+  var updateLike = function updateLike(e) {
+    // Parse the incoming data and check if it already exists in state
+    var dataForUse = checkOriginAndParsedData(e);
+    var newLikeCounterVal = parseInt(dataForUse.likeCounter);
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(dataForUse.likeHtmlId).innerHTML = newLikeCounterVal;
+  };
   var appendedComments = new Set(); // To track unique comments
   var appendedPosts = new Set(); // To track unique comments
 
   // DESTROY THE LOCALSTORAGE
 
-  var serverConnection = new EventSource("/comment/newComment");
-  var serverConnectionPost = new EventSource("/post/getNewPost");
+  var sseComment = new EventSource("/comment/newComment");
+  var ssePost = new EventSource("/post/getNewPost");
+  var sseLikes = new EventSource("/profileCard/getLikes");
 
   // Event listener for comment updates
-  serverConnection.addEventListener('updateComment', updateComment);
+  sseComment.addEventListener('updateComment', updateComment);
 
   // Event listener for post updates
-  serverConnectionPost.addEventListener('updatePost', updatePost);
-  serverConnection.addEventListener("error", function (e) {
+  ssePost.addEventListener('updatePost', updatePost);
+
+  // Event listener for likes updates
+  sseLikes.addEventListener('updateLike', updateLike);
+  sseComment.addEventListener("error", function (e) {
     if (e.target.readyState === EventSource.CLOSED) {
       console.error("Connection was closed. Retrying...");
     }
   });
-
-  // AUTOMATICALLY UPDATE TIMESTAMP
-  // Function to check for elements and render if they exist
 
   // AUTOMATICALLY UPDATE TIMESTAMP
   // Function to check for elements and render if they exist every 5 seconds
@@ -1813,18 +1758,14 @@ try {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.checkManyElements)('class', ".commentTiming", timeago_js__WEBPACK_IMPORTED_MODULE_3__.render);
   }, 5000); // Adjust interval as needed
 
-  // const updateTimingElements = () => {
-  //     const updatePostTiming = document.querySelectorAll(".timeago");
-  //     const updateCommentTiming = document.querySelectorAll(".commentTiming");
-
-  //     // Check if elements exist before calling render function
-  //     if (updatePostTiming.length > 0) {
-  //         render(updatePostTiming);
-  //     }
-  //     if (updateCommentTiming.length > 0) {
-  //         render(updateCommentTiming);
-  //     }
-  // };
+  var checkOriginAndParsedData = function checkOriginAndParsedData(data) {
+    if (!data) throw new Error('No update received');
+    if (data.origin != appUrl) {
+      console.warn("Invalid origin detected:");
+      return; // Exit if origin doesn't match
+    }
+    return JSON.parse(data.data);
+  };
 } catch (error) {
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
 }
