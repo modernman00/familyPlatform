@@ -8,7 +8,8 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 # Allow access to the public folder
 # RewriteRule ^public/ - [L]
-RewriteRule . index.php [L]
+RewriteRule ^ index.php [L]
+
 
 
 

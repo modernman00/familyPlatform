@@ -48,7 +48,7 @@ class FamilyRequest extends Select
       $theApproverID = $dataFromJs['approver']['approverId'];
       $theRequesterID = $dataFromJs['requester']['requesterId'];
       $theApproverCode = $dataFromJs['approver']['approverCode'];
-        $approverEmail = $dataFromJs['approver']['approverEmail'];
+      $approverEmail = $dataFromJs['approver']['approverEmail'];
 
       // validate the input 
 
@@ -75,7 +75,7 @@ class FamilyRequest extends Select
         query: $query,
         bind: [$theApproverID, $theRequesterID]
       );
-// if request is already made, then ignore the request
+      // if request is already made, then ignore the request
       if ($result) {
 
         msgSuccess(code: 200, msg: $result);
@@ -125,7 +125,7 @@ class FamilyRequest extends Select
           'notification_name' => $dataFromJs['eventName'] ?? "Friend Request from $requesterName",
           'notification_date' => date('Y-m-d'),
           'notification_type' => 'Friend Request',
-          'notification_content' => "$requesterName sent $approverName a family request",
+          'notification_content' => "",
           'notification_status' => 'new'
         ];
 
@@ -147,7 +147,7 @@ class FamilyRequest extends Select
     }
   }
 
-  public static function approveDelete(): void
+  public static function approveDelete($req, $appr, $dec, $reqCode, $src): void
   {
 
     // Check if the code has already run in this session
@@ -157,12 +157,11 @@ class FamilyRequest extends Select
     // Set the session variable to indicate that the code has executed
     $_SESSION['preventReload'] = $_GET['appr'];
 
-    if (isset($_GET['req']) && isset($_GET['appr'])) {
-
-      $requester = checkInput($_GET['req']);
-      $approver = checkInput($_GET['appr']);
-      $getDecision = checkInput($_GET['dec']);
-      $requestCode = checkInput($_GET['reqCode']);
+    if (isset($req) && isset($appr)) {
+      $requester = checkInput($req);
+      $approver = checkInput($appr);
+      $getDecision = checkInput($dec);
+      $requestCode = checkInput($reqCode);
 
       // check if the dec is 100 or 10 (50 is approved and 10 is rejection)
 
@@ -172,56 +171,95 @@ class FamilyRequest extends Select
         default => "Unknown", // Handle other cases or provide a default value
       };
 
-      $updateClass = new Update(table: 'requestMgt');
+      // check the requestMgt table for the requester and the approver where status is approved or rejected
+      $query = Select::formAndMatchQuery(
+        selection: 'SELECT_ALL3',
+        table: 'requestMgt',
+        identifier1: 'approver_id',
+        identifier2: 'requester_id',
+        identifier3: 'status'
+      );
 
-      $identifiers = [
-        'requester_id' => $requester,
-        'approver_id' => $approver
-      ];
+      $result = Select::selectFn2(
+        query: $query,
+        bind: [$approver, $requester, 'Approved']
+      );
+
+      if (!$result) {
+
+        $updateClass = new Update(table: 'requestMgt');
+
+        $identifiers = [
+          'requester_id' => $requester,
+          'approver_id' => $approver
+        ];
 
 
-      if ($decision === "approved") {
-        $updateClass->updateTwoColumns(columns: ['status', 'requesterCode'], columnAnswers: ['Approved', $requestCode], identifiers: $identifiers);
-      } elseif ($decision === "rejected") {
-        $updateClass->updateTableMulti(column: 'status', columnAnswer: 'Rejected', identifiers: $identifiers);
-      }
-
-
-      // get requester details with the id 
-
-      if ($decision != "Unknown") {
-
-        $details = new SingleCustomerData;
-        $req = $details->getCustomerData(custId: $requester, table: ['personal', 'contact']);
-        $app = $details->getCustomerData(custId: $approver, table: ['personal', 'contact']);
-
-        // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
-
-        $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
-        $req['decision'] = $decision;
-        $subject = "{$app['firstName']} {$app['lastName']} approved your request";
-
-        // email the requester that the request has been approved
-
-        toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
-
-        // Send push notification to the requester about the decision - Service Manager JS
-        PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
-
-        // show the approver what they have just done
-        $app['decision'] = $decision;
-        $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
-
-        // if the source is from the profile page, refresh the page or use javascript to manage it 
-
-        
-        $getPP = isset($_GET['src'])? checkInput($_GET['src']) : null;
-
-        if ($getPP === "pp") {
-          header("location: /member/ProfilePage");
-        } else {
-          view('msg/requestApprover', compact('app'));
+        if ($decision === "approved") {
+          $updateClass->updateTwoColumns(columns: ['status', 'requesterCode'], columnAnswers: ['Approved', $requestCode], identifiers: $identifiers);
+        } elseif ($decision === "rejected") {
+          $updateClass->updateTableMulti(column: 'status', columnAnswer: 'Rejected', identifiers: $identifiers);
         }
+
+
+        // get requester and approver details with the id 
+
+        if ($decision != "Unknown") {
+
+          $details = new SingleCustomerData;
+          $req = $details->getCustomerData(custId: $requester, table: ['personal', 'contact']);
+          $app = $details->getCustomerData(custId: $approver, table: ['personal', 'contact']);
+
+          // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
+
+          $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
+          $req['decision'] = $decision;
+          $subject = "{$app['firstName']} {$app['lastName']} approved your request";
+
+          // email the requester that the request has been approved
+
+          toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
+
+           $cleanDataNotification = [
+                'sender_id' => $approver,
+                'receiver_id' => $requester,
+                'sender_name' => cleanSession($req['approverName']),
+                'notification_name' => "Request approval",
+                'notification_date' => date("Y-m-d H:i:s"),
+                'receiver' => 'everyone filtered',
+                'notification_type' => "Request",
+                'notification_content' => $subject,
+                'notification_status' => 'new'
+          ];
+
+
+          $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
+
+
+          msgSuccess(code: 200, msg: $lastInsertedId);
+
+
+          // Send push notification to the requester about the decision - Service Manager JS
+          PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
+
+          // show the approver what they have just done
+          $app['decision'] = $decision;
+          $app['requesterName'] = "{$req['firstName']} {$req['lastName']}";
+
+          // if the source is from the profile page, refresh the page or use javascript to manage it 
+
+
+          $requestApprovalFromProfilePage = isset($_GET['src']) ? checkInput($_GET['src']) : null;
+
+          if ($requestApprovalFromProfilePage === "pp") {
+            header("location: /member/ProfilePage");
+          } else {
+            view('msg/requestApprover', compact('app'));
+          }
+        }
+      } else{
+        // redirect to the login page 
+        header('location: /login');
       }
     } else {
       msgException(401, "How did you get here?");
@@ -268,8 +306,7 @@ class FamilyRequest extends Select
 
       foreach ($getRequesterDataById as $getRequesterDataById1) {
 
-        if ($getRequesterDataById1['requester_id']) 
-        {
+        if ($getRequesterDataById1['requester_id']) {
           $custData = new SingleCustomerData();
           $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profilePics']);
 
@@ -285,5 +322,22 @@ class FamilyRequest extends Select
       showError($th);
       return [];
     }
+  }
+
+
+
+  public static function test($req, $res)
+  {
+    echo $req;
+    echo BR;
+    echo $res;
+
+    view('test');
+  }
+
+  public static function testURL()
+  {
+
+    view('test');
   }
 }

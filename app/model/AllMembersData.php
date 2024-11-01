@@ -55,6 +55,61 @@ class AllMembersData extends InnerJoin
         }
     }
 
+
+
+       // this code picks all the famcode and those who accepted the request. 
+
+    public static function postProfilePicByFamCode($famCode, $id): array
+    {
+        try {
+            $query = "SELECT post.*, profilePics.img, profilePics.id, rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
+              FROM post
+              INNER JOIN profilePics ON post.id = profilePics.id
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = :id
+                  ) AS rm ON post.id = rm.approver_id
+            WHERE (post.postFamCode = :famCode || post.id = rm.approver_id)
+            ORDER BY post.date_created DESC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['famCode' => $famCode, 'id' => $id]);
+
+            return $result->fetchAll();
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+        /**
+     * Retrieves a list of all members' emails and details associated with a given family code.
+     *
+     * This function executes a database query to fetch email addresses, family codes, 
+     * first names, last names, and IDs of members whose family code matches the provided 
+     * parameter. If an error occurs during the database operation, it logs the error and 
+     * returns an empty array.
+     *
+     * @param string $famCode The family code used to filter members.
+     * @return array An array containing the email, family code, first name, last name, and ID of each member.
+     */
+    public static function AllMembersEmailByFamCode($famCode): array
+    {
+        try {
+            $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id, 
+                      FROM account a
+                      INNER JOIN personal p ON a.id = p.id
+                      
+                      WHERE (p.famCode = :famCode)";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['famCode' => $famCode]);
+            return $result->fetchAll();
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
     public static function getAllMembersCodeAndEmail(): array
     {
         try {
@@ -182,58 +237,6 @@ class AllMembersData extends InnerJoin
         }
     }
 
-
-    /**
-     * Retrieves a list of all members' emails and details associated with a given family code.
-     *
-     * This function executes a database query to fetch email addresses, family codes, 
-     * first names, last names, and IDs of members whose family code matches the provided 
-     * parameter. If an error occurs during the database operation, it logs the error and 
-     * returns an empty array.
-     *
-     * @param string $famCode The family code used to filter members.
-     * @return array An array containing the email, family code, first name, last name, and ID of each member.
-     */
-    public static function AllMembersEmailByFamCode($famCode): array
-    {
-        try {
-            $query = "SELECT a.email, p.famCode AS famCode, p.firstName, p.lastName, a.id 
-                      FROM account a
-                      INNER JOIN personal p ON a.id = p.id
-                      WHERE (p.famCode = :famCode)";
-            $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode]);
-            return $result->fetchAll();
-        } catch (PDOException $e) {
-            showError($e);
-            return [];
-        }
-    }
-
-    // this code picks all the famcode and those who accepted the request. 
-
-    public static function postProfilePicByFamCode($famCode, $id): array
-    {
-        try {
-            $query = "SELECT post.*, profilePics.img, profilePics.id, rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
-              FROM post
-              INNER JOIN profilePics ON post.id = profilePics.id
-              LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = :id
-                  ) AS rm ON post.id = rm.approver_id
-              WHERE (post.postFamCode = :famCode)
-            ORDER BY post.date_created DESC";
-            $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode, 'id' => $id]);
-
-            return $result->fetchAll();
-        } catch (PDOException $e) {
-            showError($e);
-            return [];
-        }
-    }
 
     public static function commentProfilePicByPostNo($postNo): array
     {

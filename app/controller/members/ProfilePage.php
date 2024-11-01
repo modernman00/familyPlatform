@@ -65,10 +65,6 @@ class ProfilePage extends ProcessImg
 
             $setData = new SingleCustomerData;
 
-           
-
-
-
 
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
 
@@ -77,6 +73,7 @@ class ProfilePage extends ProcessImg
             $getFamCode = checkInput($this->memberData['famCode']);
             $_SESSION['famCode'] = $getFamCode;
 
+            // printArr(DataAll::getAllMembers2($this->id));
 
 
             $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");

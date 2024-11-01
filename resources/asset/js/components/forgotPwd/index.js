@@ -35,4 +35,14 @@ const forgotPasswordSubmission = (e) => {
     }
 }
 
-id('submit').addEventListener('click', forgotPasswordSubmission)
+
+// CHECK IF ID(SUBMIT) before submitting form
+
+document.addEventListener('DOMContentLoaded', function () {
+    const submitForm = document.getElementById('submit');
+    if (submitForm) {
+        submitForm.addEventListener('click', forgotPasswordSubmission);
+    }
+});
+
+

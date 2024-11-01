@@ -7,7 +7,7 @@ namespace App\controller\members;
 
 use App\classes\{
     Select,
-    VerifyToken
+    VerifyToken, Delete
 };
 use App\model\AllMembersData;
 use Exception;
@@ -38,6 +38,7 @@ class AllMembersController extends AllMembersData
             }
 
             $result = $this->getAllMembers($id);
+
             echo json_encode($result);
         } catch (\Throwable $th) {
             showError($th);
@@ -58,15 +59,15 @@ class AllMembersController extends AllMembersData
     /**
      * @return never
      */
-    public function setProfile()
-    {
-        $id = checkInput($_GET['id']);
-        $_SESSION['id'] = $id;
-        header("Location: /allMembers/getProfile");
-        die();
-    }
-
-    public function getProfile(): void
+    // public function setProfile($id)
+    // {
+    //     $id = checkInput($id);
+    //     $_SESSION['id'] = $id;
+    //     header("Location: /allMembers/getProfile");
+    //     die();
+    // }
+// /allMembers/setProfile?id
+    public function getProfile($id): void
     {
         try {
             //  verify token
@@ -80,7 +81,7 @@ class AllMembersController extends AllMembersData
                 view('error/genError', ['error' => $tokenErr]);
             }
 
-            $id = checkInput($_SESSION['id']);
+            $id = checkInput($id);
             $result = $this->getAllMembersById($id);
             if (!$result) {
                 throw new Exception("It could not process the data", 1);
@@ -94,6 +95,46 @@ class AllMembersController extends AllMembersData
             foreach ($result as $data);
 
             view('member/getProfile', compact('data', 'pictures'));
+        } catch (Exception $e) {
+            showError($e);
+        }
+    }
+
+// /allMembers/removeProfile?removeProfile
+       public function removeProfile($apr, $req): void
+    {
+        try {
+            //  verify token
+            $tokenVerify = new verifyToken();
+            $result = $tokenVerify->profilePage();
+
+            // if token is verified
+
+            if (!$result) {
+                $tokenErr = "Authentication failed";
+                view('error/genError', ['error' => $tokenErr]);
+            }
+
+              $apr = checkInput($apr);
+
+              $query = Delete::formAndMatchQuery(
+                selection: "DELETE_AND",
+                table: 'requestMgt',
+                identifier1: 'approver_id',
+                identifier2: 'requester_id'
+              );
+
+              $deleteProfile = Delete::deleteFn(
+                query: $query, 
+                bind: [$apr, $req, ]
+                );
+
+                if($deleteProfile){
+                    msgSuccess(200, "success");
+                }
+
+           
+           
         } catch (Exception $e) {
             showError($e);
         }

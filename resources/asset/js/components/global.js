@@ -37,13 +37,13 @@ export const manipulateAttribute = (idName, removeOrSet, attributeType, nameValu
 export const date2String = (date) => new Date().toDateString(date)
 
 export const showError = (e) => {
-    console.log(e instanceof TypeError) // true
-    console.log(e.message) // "null has no properties"
-    console.log(e.name) // "TypeError"
-    console.log(e.fileName) // "Scratchpad/1"
-    console.log(e.lineNumber) // 2
-    console.log(e.columnNumber) // 2
-    console.log(e.stack)
+  
+    log(e.message, " ERROR MESSAGE") // "null has no properties"
+    log(e.name, " ERROR NAME") // "TypeError"
+    log(e.fileName,  " ERROR FILENAME") // "Scratchpad/1"
+    log(e.lineNumber, " ERROR LINENUMBER") // 2
+
+    log(e.stack)
 }
 
 /**

@@ -23,9 +23,9 @@ export const allPost = (postData, commentData) => {
 
   const filterComment = commentData.filter(comm => parseInt(comm.post_no) === postNo ) // filter the comment to an array
   const postHtml = html(postData, filterComment)
-  if(postFamCode === famCode) {
+  // if(postFamCode === famCode) {
     id('postIt').insertAdjacentHTML('beforeend', postHtml)
-  }
+  
   
   
 }

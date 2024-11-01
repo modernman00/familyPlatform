@@ -21,3 +21,20 @@ $router->map('GET', '/testFunction', 'App\controller\Testphp@testFunction', 'php
 $router->map('GET', '/testOrganogram', 'App\controller\TestClass@organogram', 'TestClass');
 
 $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS');
+
+
+// example of new parameter based url
+$router->map(
+  method: 'GET', 
+  route: '/member/test/[a:req]/[a:res]', 
+  target: 'App\controller\members\FamilyRequest@test', 
+  name: 'testing new route method'
+);
+
+// example of new parameter based url
+$router->map(
+  method: 'GET', 
+  route: '/member/testURL', 
+  target: 'App\controller\members\FamilyRequest@testURL', 
+  name: 'testing new route method2'
+);

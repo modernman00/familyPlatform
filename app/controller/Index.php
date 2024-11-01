@@ -31,21 +31,22 @@ class Index
         view('termOfUse');
     }
 
-    public function accountSetting(): void
+    public function accountSetting($id, $mobile, $email, $country, $famCode): void
     {
 
+
         $accountData = [
-            'name' => $_GET['id'],
-            'mobile' => $_GET['mobile'],
-            'email' => $_GET['email'],
-            'country' => $_GET['country'],
-            'famCode' => $_GET['famCode'],
-            'id' => $_SESSION['ID']
+            'name' => checkInput($id),
+            'mobile' => checkInput($mobile),
+            'email' => checkInput($email),
+            'country' => checkInput($country),
+            'famCode' => checkInput($famCode),
+            'id' => checkInput($_SESSION['ID'])
         ];
 
 
 
-        if ($_SESSION['id'] == $_GET['id']) {
+        if ($_SESSION['id'] == $id) {
             view('accountSetting', ['accountData' => $accountData]);
         } 
     }

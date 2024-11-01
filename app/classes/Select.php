@@ -23,7 +23,7 @@ class Select extends Db
      *
      * @return null|string
      */
-    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null, array $colArray = null): string|null
+    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, $identifier3 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null, array $colArray = null): string|null
     {
         // for col dynamically - 
         if($colArray) {
@@ -45,6 +45,8 @@ class Select extends Db
         return match ($selection) {
             'SELECT_OR' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? $orderBy $limit",
             'SELECT_AND' => "SELECT * FROM $table WHERE $identifier1 =? AND $identifier2 = ? $orderBy $limit",
+            'SELECT_ALL3' => "SELECT * FROM $table WHERE $identifier1 =? AND $identifier2 = ? AND $identifier3 = ? $orderBy $limit",
+            'SELECT_OR_AND' => "SELECT * FROM $table WHERE $identifier1 =? OR $identifier2 = ? AND $identifier3 = ? $orderBy $limit",
             'SELECT_NOT' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 = ? $orderBy $limit",
             'SELECT_NOT_AND' => "SELECT * FROM $table WHERE $identifier1 !=? AND $identifier2 != ? $orderBy $limit",
             'SELECT_NOT_OR' => "SELECT * FROM $table WHERE $identifier1 !=? OR $identifier2 != ? $orderBy $limit",

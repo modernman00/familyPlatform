@@ -4,6 +4,11 @@ import { qSel, showError } from "./components/global"
 
 // to make the bulma navbar menu visible on mobile
 
+const checkURL = (url) => {
+    const regex = new RegExp(`^/${url}(\/[^/]+)*$`);
+    return regex.test(window.location.pathname);
+};
+
 try {
 
     const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
@@ -126,7 +131,7 @@ if (window.location.pathname === '/register') {
     qSel('.login').style.display = "none" // navbar mgt
     qSel('.signUp').style.display = "none" // navbar mgt
 
-} else if (window.location.pathname === '/accountSetting') {
+} else if (checkURL('accountSetting')) {
 
     import (
         /* webpackChunkName: 'accountSetting' */

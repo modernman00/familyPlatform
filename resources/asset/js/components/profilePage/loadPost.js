@@ -27,6 +27,9 @@ try {
                 this.post = pullData.data.message.post;
                 this.comment = pullData.data.message.comment;
 
+                log(this.post)
+
+                log(localStorage.getItem('requesterId'))
 
                 this.comment = this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
 

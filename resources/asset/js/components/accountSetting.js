@@ -14,6 +14,8 @@ const options = {
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
 }
+
+
 const process = (e) => {
   try {
     e.preventDefault();

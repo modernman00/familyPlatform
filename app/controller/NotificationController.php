@@ -33,13 +33,21 @@ class NotificationController extends Select
      * creation date in ascending order. Upon successful retrieval, it returns the data and
      * sends a success message. In case of an exception, it handles the error appropriately.
      */
-    public static function notificationById()
+    public static function notificationById($id, $famCode)
     {
         try {
-            $notificationId = $_GET['notificationId'] ?? null;
-            $famCode = $_GET['famCode'] ?? null;
-            $query = Select::formAndMatchQuery(selection: 'SELECT_OR', table: 'notification', identifier1: 'receiver_id', identifier2: 'receiver_id', orderBy: 'ORDER BY created_at ASC');
-            $result = Select::selectFn2($query, [$notificationId, $famCode]);
+            $notificationId = checkInput($id) ?? null;
+            $famCode = checkInput($famCode) ?? null;
+
+            if ($notificationId === null && $famCode === null) {
+                msgException(400, 'Either notification ID or family code must be provided');
+            }
+
+            $query = "SELECT * FROM notification 
+                WHERE (receiver_id = ? OR receiver_id = ?) 
+                AND notification_status = ? 
+                ORDER BY created_at ASC";
+            $result = Select::selectFn2($query, [$notificationId, $famCode, "new"]);
 
             // Call msgSuccess after returning the result
             msgSuccess(200, $result);
@@ -125,16 +133,31 @@ class NotificationController extends Select
 
 
     // TODO Auto-generated Not used yet
-    public static function markAsRead(int $notificationId): void
+    public static function markAsRead($youId, $famCode, $senderId): bool
     {
-        try {
-            Update::table('notifications')
-                ->where('id', $notificationId)
-                ->update(['status' => 'read']);
+        $youId = checkInput($youId);
+        $famCode = checkInput($famCode);
+        $senderId = checkInput($senderId);
 
-            echo json_encode(['status' => 'success', 'message' => 'Notification marked as read.']);
+        if (!$youId || !$famCode || !$senderId) {
+            msgException(400, 'Invalid parameters');
+            return false;
+        }
+
+        try {
+            $query = "UPDATE notification SET notification_status = 'clicked' WHERE (receiver_id = ? OR receiver_id = ?) AND sender_id = ?";
+            $statement = parent::connect2()->prepare($query);
+
+            if ($statement->execute([$youId, $famCode, $senderId])) {
+                msgSuccess(200, "success");
+                return true;
+            } else {
+                msgException(500, "Database update failed");
+                return false;
+            }
         } catch (\Exception $e) {
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            showError($e);
+            return false;
         }
     }
 }

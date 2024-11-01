@@ -208,7 +208,7 @@ input[type="file"] {
 
   <div class="w3-card w3-round w3-white w3-center">
      @if (count($requestData) > 1)
-     <p><b>Friend Requests</b></p><br>
+     <p><b>{{ count($requestData)}} Friend Requests </b></p><br>
      @else
      <p><b>Friend Request</b></p><br>
      @endif

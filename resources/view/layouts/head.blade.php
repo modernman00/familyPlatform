@@ -47,6 +47,14 @@
     }
 }
 
+.icon-button .fa-trash {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: inherit;
+}
+
 
 .loader {
 

@@ -78,13 +78,12 @@ var date2String = function date2String(date) {
   return new Date().toDateString(date);
 };
 var showError = function showError(e) {
-  console.log(e instanceof TypeError); // true
-  console.log(e.message); // "null has no properties"
-  console.log(e.name); // "TypeError"
-  console.log(e.fileName); // "Scratchpad/1"
-  console.log(e.lineNumber); // 2
-  console.log(e.columnNumber); // 2
-  console.log(e.stack);
+  log(e.message, " ERROR MESSAGE"); // "null has no properties"
+  log(e.name, " ERROR NAME"); // "TypeError"
+  log(e.fileName, " ERROR FILENAME"); // "Scratchpad/1"
+  log(e.lineNumber, " ERROR LINENUMBER"); // 2
+
+  log(e.stack);
 };
 
 /**
@@ -143,6 +142,10 @@ __webpack_require__.r(__webpack_exports__);
 
 // to make the bulma navbar menu visible on mobile
 
+var checkURL = function checkURL(url) {
+  var regex = new RegExp("^/".concat(url, "(/[^/]+)*$"));
+  return regex.test(window.location.pathname);
+};
 try {
   var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
 
@@ -237,7 +240,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/register/nextStep') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
-} else if (window.location.pathname === '/accountSetting') {
+} else if (checkURL('accountSetting')) {
   Promise.all(/*! import() | accountSetting */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {

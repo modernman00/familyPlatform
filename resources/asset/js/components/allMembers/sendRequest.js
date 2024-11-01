@@ -1,10 +1,10 @@
 import axios from "axios";
-import { id, showError } from "../global"
+import { id, showError, qSel } from "../global"
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { friendRequestCard } from "../profilePage/htmlFolder/friendRequestCard";
 
 // Attach a click event listener to the document
-
+const reqId = localStorage.getItem('requesterId')
 /**
  * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
  it returns the notification details for the approvers tab
@@ -50,6 +50,38 @@ document.onclick = async (e) => {
             // Update the button's HTML and disable it
             updateButton(targetId, 'Request Sent');
 
+        } else if (targetId.includes('removeProfile')) {
+
+            // include a console to confirm if they truly want to delete the profile
+            if (confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
+               
+          
+          
+               // Extract the user ID from the target ID
+            const userId = targetId.replace("removeProfile", "");
+
+            const response = await axios.delete(`/allMembers/removeProfile/${userId}/${reqId}`)
+
+            if(response.data.message === "success") {
+            
+                // remove a html element with call member_profile
+                qSel(`.member_profile_${userId}`).remove();
+            } else{
+                alert ('An error occurred' + response.data.message)
+            }
+            }
+        }
+
+        else if (targetId.includes('seeProfile'))
+        {
+        
+               // Extract the user ID from the target ID
+            const userId = targetId.replace("seeProfile", "");
+
+            // redirect to 'allMembers/setProfile/'+userId
+            window.location.href = `/allMembers/setProfile/${userId}`;
+
+        
         }
     } catch (error) {
         // Handle any errors that occur during execution

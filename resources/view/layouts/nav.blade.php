@@ -22,9 +22,14 @@
 
     @if (isset($data['mobile']) && !empty($data['email']) && !empty($data['country']) && !empty($data['famCode']))
 
-    <a href="/accountSetting?id={{ $data['id'] }}&mobile={{ $data['mobile'] }}&email={{ $data['email'] }}&country={{ $data['country'] }}&famCode={{$data['famCode']}}"
-      class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings"><i
-        class="fa fa-cog"></i>Account Setting</a>
+    <a href="/accountSetting/{{ urlencode(trim($data['id'])) }}/{{ urlencode(trim($data['mobile'])) }}/{{ trim($data['email']) }}/{{ urlencode(trim($data['country'])) }}/{{ urlencode(trim($data['famCode'])) }}" 
+   class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white" title="Account Settings">
+   <i class="fa fa-cog"></i>Account Setting
+</a>
+
+</a>
+
+
 
     @endif
 

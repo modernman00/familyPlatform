@@ -39,9 +39,10 @@ const waitForRequestFriendClass = (data) => {
 
 
 // TODO: Maybe a future enhancement to show count of friend request 
-// const countFriendRequest = (friend) => {
-//   return friend.length > 1 ? `<p><b>Friend Requests</b></p><br></br>` : `<p><b>Friend Request</b></p><br>`;
-// }
+const countFriendRequest = (friend) => {
+  return friend.length > 1 ? `<p><b>Friend Requests - ${friend.length}</b></p>
+  <br></br>` : `<p><b>Friend Request</b></p><br>`;
+}
 
 
 // Fetch and render friend requests on page load

@@ -22,13 +22,13 @@ export const friendRequestCard = (data) => {
 
     <div class="w3-row w3-opacity">
       <div class="w3-half">
-        <a href="${appUrl}member/request?req=${requestId}&appr=${approverId}&dec=50&reqCode=${requestCode}&src=pp" style="text-decoration: none;">
+        <a href="${appUrl}member/request/${requestId}/${approverId}/50/${requestCode}/pp" style="text-decoration: none;">
           <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i></button>
         </a>
       </div>
       
       <div class="w3-half">
-        <a href="${appUrl}member/request?req=${requestId}&appr=${approverId}&dec=10" style="text-decoration: none;">
+        <a href="${appUrl}member/request/${requestId}/${approverId}/10" style="text-decoration: none;">
           <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
         </a>
       </div>

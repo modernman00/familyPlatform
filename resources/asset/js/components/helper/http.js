@@ -76,6 +76,8 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         processFormDataAction(successClass, dbHttpResult, notificationId);
 
+        
+
         if (redirect) {
             setTimeout(() => {
                 window.location.assign(redirect);

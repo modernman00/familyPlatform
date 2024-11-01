@@ -29,7 +29,7 @@ export const renderHtml = (el) => {
 
         // Create the HTML content based on whether the user is in the same family or not.
         const html = `
-        <div class="w3-col l3 m6 w3-margin-bottom w3-round-xlarge" id="${el.id}">
+        <div class="w3-col l3 m6 w3-margin-bottom w3-round-xlarge member_profile_${el.id}" id="${el.id}">
           
                 <img src="${theImg}" style="width:100%; height:300px;" alt="${el.firstName}">
                       <ul class="w3-ul w3-border w3-center w3-hover-shadow">
@@ -47,11 +47,16 @@ export const renderHtml = (el) => {
                              <li class="w3-padding-8"> <b>Date joined:</b> ${format(el.created_at)}</li>
 
                              <li class="w3-light-grey w3-padding-16">
-                             <button class="w3-button w3-green w3-padding-small">
-                                <a href="/allMembers/setProfile?id=${el.id}">
-                                    See Profile
-                                </a>
-                                </button>
+                             <button class="w3-button w3-green w3-padding-small" id=seeProfile${el.id}>
+                              
+                                    Profile
+
+                                    </button>
+                              
+                               
+                              
+                                    <button class="w3-button w3-red w3-padding-small" id=removeProfile${el.id} > Remove</button>
+                          
                                 
                             </li>`
 

@@ -47,11 +47,19 @@ function make($fileName, $data): string|false
     return $content;
 }
 
-function printArr(array $data): void
+function printArr( $data): void
 {
-    echo "<pre>";
+
+    if($data === array()) {
+         echo "<pre>";
     var_export($data);
     echo "</pre>";
+    } else{
+        echo "<pre>";
+        print_r($data);
+        echo "</pre>";
+    }
+   
 }
 
 

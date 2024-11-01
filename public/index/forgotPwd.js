@@ -40,7 +40,15 @@ var forgotPasswordSubmission = function forgotPasswordSubmission(e) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
   }
 };
-(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submit').addEventListener('click', forgotPasswordSubmission);
+
+// CHECK IF ID(SUBMIT) before submitting form
+
+document.addEventListener('DOMContentLoaded', function () {
+  var submitForm = document.getElementById('submit');
+  if (submitForm) {
+    submitForm.addEventListener('click', forgotPasswordSubmission);
+  }
+});
 
 /***/ }),
 

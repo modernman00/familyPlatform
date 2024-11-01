@@ -75,7 +75,9 @@ class Code extends Select
 
                 // generate a jwt token
                 $jwt = new JwtHandler();
-                $token = $jwt->jwtEncodeData(getenv('APP_URL'), ['id' => $this->memberId]);
+                $token = $jwt->jwtEncodeData(
+                    serverName: getenv(name: 'APP_URL'), 
+                    data: ['id' => $this->memberId]);
                 // 86400 = 1 day
 
                 // only set a cookie if not already set

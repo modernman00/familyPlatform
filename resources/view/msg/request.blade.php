@@ -32,14 +32,15 @@ I hope this message finds you well.<br><br>
 
               <br><br>
 
+
               <div style="display: flex; justify-content: space-between; margin-top: 10px; margin-left: 70px margin-bottom: 10px;">
 
-                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}&appr={{ $data['approverId'] }}&dec=50&reqCode={{ $data['requesterFamCode'] }}  style="text-decoration: none;background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px;">
+                <a href="{{ getenv('MIX_APP_URL2') }}member/request/{{ $data['requesterId'] }}/{{ $data['approverId'] }}/50/{{ $data['requesterFamCode'] }}/email" style="text-decoration: none; background-color: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px;">
                  Accept
                 </a>
 
-                <a href={{ getenv("MIX_APP_URL2") }}member/request?req={{ $data['requesterId'] }}&appr={{ $data['approverId'] }}&dec=10  
-                style="text-decoration: none;background-color: #FF0000; color: white; border: none; padding: 8px 16px; border-radius: 4px;margin-top: 10px;">Decline
+                <a href="{{ getenv("MIX_APP_URL2") }}member/request/{{ $data['requesterId'] }}/{{ $data['approverId'] }}/10/request/email"  
+                style="text-decoration: none;background-color: #FF0000; color: rgb(157, 15, 15); border: none; padding: 8px 16px; border-radius: 4px;margin-top: 10px;">Decline
                 </a>
                 <br><br>
               </div>

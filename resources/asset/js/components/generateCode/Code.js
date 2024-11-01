@@ -7,8 +7,10 @@ import { postFormData } from "../helper/http"
 id("setLoader").style.display = "none";
 
 
+
 const LoginCode = (e) => {
     try {
+       
         e.preventDefault();
         // just in case there was an earlier error notification - remove it
         const codeNotification = id('codeForm_notification');
