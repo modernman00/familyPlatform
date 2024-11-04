@@ -1,5 +1,5 @@
 import { format, render } from "timeago.js"
-import { id, showError, qSel, log } from './global'
+import { id, showError, qSel, log, msgException } from './global'
 import { toSentenceCase } from "./helper/general"
 
 // const timeAgo = (x) => format(x)
@@ -8,22 +8,21 @@ import { html } from './profilePage/html';
 
 
 const postAgoNotification = (date) => {
-        return `
+    return `
   <div class="notification_timeago w3-left w3-opacity" datetime='${date}' title='${format(date)}'> ${format(date)}
   </div>`
-    }
-    // this is the notification htnl 
+}
+// this is the notification htnl 
 const notificationHTML = (data) => {
 
 
     return `<a id = "notificationBar${data.sender_id}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
-  
 
-  ${postAgoNotification(data.created_at)}  - 
-  <b> ${data.notification_type}</b> -
-  ${data.notification_name} -
-  ${data.notification_content} -
-  ${toSentenceCase(data.sender_name)}
+        ${postAgoNotification(data.created_at)}  - 
+        <b> ${data.notification_type}</b> -
+        ${data.notification_name} -
+        ${data.notification_content} -
+        ${toSentenceCase(data.sender_name)}
 
     <hr>
   </a>
@@ -41,9 +40,9 @@ export const increaseNotificationCount = () => {
 }
 
 export const addToNotificationTab = (data) => {
-  
-        return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
-  
+
+    return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+
 }
 
 
@@ -62,13 +61,11 @@ const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
 
 axios.get(notificationURL)
     .then(res => {
-        log(res, 'res')
+
         // Extract the notifications from the response
         const data = res.data.message;
 
         if (data) {
-            log(data, 'notification');
-
 
             if (data.length > 0) {
 
@@ -100,73 +97,8 @@ axios.get(notificationURL)
     });
 
 
-// ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
-
-// Add a click event listener to elements with the "linkRequestCard" class
-document.addEventListener('click', (e) => {
-
-    if (e.target.classList.contains('linkRequestCard')) {
-        const friendRequestSection = id(`${e.target.getAttribute('data-id')}_linkRequestCard`);
-        if (friendRequestSection) {
-            friendRequestSection.scrollIntoView({ behavior: "smooth" });
-        }
-    }
 
 
-
-});
-
-
-document.onclick = async  (e) => {  
-
-    try { 
-
-          const targetId = e.target.id;
-
-        // Check if the ID includes 'addFamily'
-        if (targetId && targetId.includes('notificationBar')) {
-            // Extract the user ID from the target ID
-            const senderId = targetId.replace("notificationBar", "");
-
-            // change the background of the clicked element 
-            const element = id(`notificationBar${senderId}`);
-            element.style.backgroundColor = "red";
-
-            // change the font color to white 
-            element.style.color = "white";
-
-             // Make sure required variables are defined before using them
-            if (typeof yourId === 'undefined' || typeof famCode === 'undefined') {
-                throw new Error("Required parameters (yourId or famCode) are not defined");
-            }
-
-            const response = await axios.put(`/removeNotification/${yourId}/${famCode}/${senderId}`)
-
-            if(response.data.message === "success") {
-    
-                // remove a html element with notificationBar after 2 mins 
-                setTimeout(() => {
-                    const element = id(`notificationBar${senderId}`);
-                    if (element) element.remove();
-                   }, 4000);
-
-        // reduce the notification count as you have deleted the notification
-               const notificationCountValue= id('notification_count').innerHTML
-               const newValues = parseInt( notificationCountValue - 1)
-               id('notification_count').innerHTML = newValues;
-            } 
-        }
-
-
-
-    
-    } catch (e) {
-console.error("An error occurred:", error);
-        showError(e);
-    }
-
-
-}
 
 
 

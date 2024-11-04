@@ -18,6 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   idValue: () => (/* binding */ idValue),
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
+/* harmony export */   msgException: () => (/* binding */ msgException),
 /* harmony export */   qSel: () => (/* binding */ qSel),
 /* harmony export */   qSelAll: () => (/* binding */ qSelAll),
 /* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
@@ -84,6 +85,9 @@ var showError = function showError(e) {
   log(e.lineNumber, " ERROR LINENUMBER"); // 2
 
   log(e.stack);
+};
+var msgException = function msgException(errorMessage) {
+  throw new Error(errorMessage);
 };
 
 /**

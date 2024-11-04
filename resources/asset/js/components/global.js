@@ -46,6 +46,12 @@ export const showError = (e) => {
     log(e.stack)
 }
 
+export const msgException = (errorMessage) => {
+  
+    throw new Error(errorMessage)
+}
+
+
 /**
  * 
  * @param {*} elementId - element id

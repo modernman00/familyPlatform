@@ -9,16 +9,19 @@ try {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
-
+const yourId = localStorage.getItem('requesterId');
+const famCode = localStorage.getItem('requesterFamCode');
 
     // CLICK EVENT get the comment and like button from the document
     document.onclick = async (e) => {
 
         const elementId = e.target.id
         const postId = e.target.name
-
+log(elementId, 'allEvent')
 
         if (elementId.includes("likeButton")) {
+
+      
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
             let likeCounterVal = id(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
@@ -97,7 +100,50 @@ try {
 
             id("formPostMessageModal").reset();
 
+        }     // add/delete to/from the notificatn bar 
+        else if (elementId && elementId.includes('notificationBar')) {
+            // Extract the user ID from the target ID
+            const senderId = targetId.replace("notificationBar", "");
+
+            // change the background of the clicked element 
+            const element = id(`notificationBar${senderId}`);
+            element.style.backgroundColor = "red";
+
+            // change the font color to white 
+            element.style.color = "white";
+
+            // Make sure required variables are defined before using them
+            if (
+                typeof yourId === 'undefined' || 
+                typeof famCode === 'undefined'
+                ) {
+                msgException("Required parameters (yourId or famCode) are not defined");
+            }
+
+            const response = await axios.put(`/removeNotification/${yourId}/${famCode}/${senderId}`)
+
+            if (response.data.message === "success") {
+
+                // remove a html element with notificationBar after 2 mins 
+                setTimeout(() => {
+                  element.remove()
+                }, 4000);
+
+                // reduce the notification count as you have deleted the notification
+
+                const newValues = parseInt(sessionStorage.setItem('notificationCount') - 1)
+                id('notification_count').innerHTML = newValues;
+            }
+        } // take you to the request card for approval or denial
+        else if (e.target.classList.contains('linkRequestCard')) {
+            // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+
+            const friendRequestSection = id(`${e.target.getAttribute('data-id')}_linkRequestCard`);
+            if (friendRequestSection) {
+                friendRequestSection.scrollIntoView({ behavior: "smooth" });
+            }
         }
+
 
     }
 } catch (e) {

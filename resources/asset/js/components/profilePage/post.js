@@ -1,5 +1,5 @@
 import { html } from "./html"
-import { id, log, showError } from '../global'
+import { id, log, msgException, showError } from '../global'
 
 
 const famCode = localStorage.getItem('requesterFamCode');
@@ -17,9 +17,13 @@ const famCode = localStorage.getItem('requesterFamCode');
  */
 export const allPost = (postData, commentData) => {
 
+  if (!postData ||!Array.isArray(commentData)) {
+    msgException('Invalid post data');
+   
+  }
+
   let postNo = parseInt(postData.post_no)
 
-  let postFamCode =postData.postFamCode
 
   const filterComment = commentData.filter(comm => parseInt(comm.post_no) === postNo ) // filter the comment to an array
   const postHtml = html(postData, filterComment)
@@ -46,7 +50,10 @@ export const allPost = (postData, commentData) => {
  */
 export const appendNewPost = (el) => {
 
-  if (!el) { return false; }
+  if (!el) { 
+    msgException('Invalid post');
+ 
+    }
 
   const commentForm1 = id(`formComment${el.post_no}`);
   const inputComment = id(`inputComment${el.post_no}`)
@@ -63,6 +70,8 @@ export const appendNewPost = (el) => {
 
       id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
 
+    } else{
+      return false
     }
 
   }

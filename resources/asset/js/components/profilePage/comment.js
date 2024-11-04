@@ -22,7 +22,7 @@ export const showComment = (comment) => {
   } // only run if there is comment
 
 
-// USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
+  // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   const commentHTMLArray = comment.map(commentElement => {
     return commentHTML(commentElement);
   });
@@ -32,17 +32,28 @@ export const showComment = (comment) => {
 
 
 export const appendNewComment = (commentData) => {
-        log('comment data', commentData)
-        const idDiv = `showComment${commentData.post_no}`
-        const commentContainer = id(idDiv);
-        const commentHtml = commentHTML(commentData)
 
-         if(commentContainer) {
-          commentContainer.insertAdjacentHTML('beforeend', commentHtml)
-        } else {
-          console.warn('comment container does not exist' + idDiv)
-        }
-   
+  // check if commentData is valid
+  if (!commentData) {
+    throw new Error('No comment update received');
+  }
+
+  const idDiv = `showComment${commentData.post_no}`
+  // check if the div has been created by the DOM 
+
+  if (!idDiv) {
+    throw new Error('The comment div id does not exist')
+  }
+
+  const commentContainer = id(idDiv);
+
+
+  const commentHtml = commentHTML(commentData)
+
+
+  commentContainer.insertAdjacentHTML('beforeend', commentHtml)
+
+
 }
 
 

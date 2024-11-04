@@ -128,7 +128,8 @@ try {
 
           if (data.origin != appUrl) {
             console.warn("Invalid origin detected:");
-            return; // Exit if origin doesn't match
+            throw new Error('No update received');
+            
         }
 
         return JSON.parse(data.data)

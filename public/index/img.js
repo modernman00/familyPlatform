@@ -388,15 +388,19 @@ var showComment = function showComment(comment) {
   return commentHTMLArray.join(''); // Join the array elements into a single string
 };
 var appendNewComment = function appendNewComment(commentData) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)('comment data', commentData);
+  // check if commentData is valid
+  if (!commentData) {
+    throw new Error('No comment update received');
+  }
   var idDiv = "showComment".concat(commentData.post_no);
+  // check if the div has been created by the DOM 
+
+  if (!idDiv) {
+    throw new Error('The comment div id does not exist');
+  }
   var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
   var commentHtml = commentHTML(commentData);
-  if (commentContainer) {
-    commentContainer.insertAdjacentHTML('beforeend', commentHtml);
-  } else {
-    console.warn('comment container does not exist' + idDiv);
-  }
+  commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
 
 /***/ }),
