@@ -4,7 +4,7 @@ import { toSentenceCase } from "./helper/general"
 
 // const timeAgo = (x) => format(x)
 import axios from "axios"
-import { html } from './profilePage/html';
+// import { html } from './profilePage/html';
 
 
 const postAgoNotification = (date) => {
@@ -15,14 +15,18 @@ const postAgoNotification = (date) => {
 // this is the notification htnl 
 const notificationHTML = (data) => {
 
+    // generate random numbers to make the notification unique
 
-    return `<a id = "notificationBar${data.sender_id}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
+    let randomNumber = Math.floor(100 + Math.random() * 900);
+
+    return `<a id = "notificationBar${data.sender_id}${randomNumber}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
 
         ${postAgoNotification(data.created_at)}  - 
         <b> ${data.notification_type}</b> -
         ${data.notification_name} -
         ${data.notification_content} -
         ${toSentenceCase(data.sender_name)}
+        <button class='w3-button w3-hover-grey w3-tiny w3-border' data-id="${data.sender_id}" id="deleteNotification${data.sender_id}${randomNumber}"> delete</button>
 
     <hr>
   </a>
@@ -67,6 +71,8 @@ axios.get(notificationURL)
 
         if (data) {
 
+            log(data, "notification")
+
             if (data.length > 0) {
 
                 // Display the count of notifications
@@ -95,6 +101,9 @@ axios.get(notificationURL)
         // Handle any errors that occur during the process
         showError(error);
     });
+
+
+
 
 
 

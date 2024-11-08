@@ -1,5 +1,5 @@
 "use strict";
-import { id, log } from "../global"
+import { id, log, msgException } from "../global"
 import axios from "axios"
 
 
@@ -9,19 +9,18 @@ try {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
-const yourId = localStorage.getItem('requesterId');
-const famCode = localStorage.getItem('requesterFamCode');
+    const yourId = localStorage.getItem('requesterId');
+    const famCode = localStorage.getItem('requesterFamCode');
 
     // CLICK EVENT get the comment and like button from the document
     document.onclick = async (e) => {
 
         const elementId = e.target.id
         const postId = e.target.name
-log(elementId, 'allEvent')
 
         if (elementId.includes("likeButton")) {
 
-      
+
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
             let likeCounterVal = id(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
@@ -101,38 +100,42 @@ log(elementId, 'allEvent')
             id("formPostMessageModal").reset();
 
         }     // add/delete to/from the notificatn bar 
-        else if (elementId && elementId.includes('notificationBar')) {
+        else if (elementId && elementId.includes('deleteNotification')) {
             // Extract the user ID from the target ID
-            const senderId = targetId.replace("notificationBar", "");
+            const senderId = elementId.replace("deleteNotification", "notificationBar");
+
+            const elementData = id(elementId)
+            const data = elementData.getAttribute("data-id");
 
             // change the background of the clicked element 
-            const element = id(`notificationBar${senderId}`);
-            element.style.backgroundColor = "red";
 
-            // change the font color to white 
-            element.style.color = "white";
+ 
+            const notificationHTML = id(senderId);
 
             // Make sure required variables are defined before using them
             if (
-                typeof yourId === 'undefined' || 
+                typeof yourId === 'undefined' ||
                 typeof famCode === 'undefined'
-                ) {
+            ) {
                 msgException("Required parameters (yourId or famCode) are not defined");
             }
 
-            const response = await axios.put(`/removeNotification/${yourId}/${famCode}/${senderId}`)
+            const url = `/removeNotification/${yourId}/${famCode}/${data}`
+ 
+
+            const response = await axios.put(url)
 
             if (response.data.message === "success") {
 
                 // remove a html element with notificationBar after 2 mins 
-                setTimeout(() => {
-                  element.remove()
-                }, 4000);
-
+                    notificationHTML.remove()
+            
                 // reduce the notification count as you have deleted the notification
 
-                const newValues = parseInt(sessionStorage.setItem('notificationCount') - 1)
+                const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
                 id('notification_count').innerHTML = newValues;
+            } else {
+                msgException("Error removing notification");
             }
         } // take you to the request card for approval or denial
         else if (e.target.classList.contains('linkRequestCard')) {
@@ -146,7 +149,7 @@ log(elementId, 'allEvent')
 
 
     }
-} catch (e) {
+} catch (e) { 
     showError(e)
 }
 

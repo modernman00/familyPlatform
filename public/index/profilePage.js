@@ -877,21 +877,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _profilePage_html__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./profilePage/html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
 
 // const timeAgo = (x) => format(x)
 
+// import { html } from './profilePage/html';
 
 var postAgoNotification = function postAgoNotification(date) {
   return "\n  <div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "\n  </div>");
 };
 // this is the notification htnl 
 var notificationHTML = function notificationHTML(data) {
-  return "<a id = \"notificationBar".concat(data.sender_id, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n\n    <hr>\n  </a>\n\n  ");
+  // generate random numbers to make the notification unique
+
+  var randomNumber = Math.floor(100 + Math.random() * 900);
+  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button class='w3-button w3-hover-grey w3-tiny w3-border' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n\n    <hr>\n  </a>\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -913,10 +916,11 @@ var notificationURL = "/member/notifications/id/".concat(yourId, "/").concat(fam
 // for events -birthday etc, the connection is the famCode 
 // so linked notification will be either where id matches or famcode matches
 
-axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(notificationURL).then(function (res) {
+axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function (res) {
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(data, "notification");
     if (data.length > 0) {
       // Display the count of notifications
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
@@ -973,15 +977,14 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.onclick = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, _result, formExtra, formData, requesterFamCodeValue, _response, _result2, getNewResponse, senderId, element, _response2, newValues, friendRequestSection;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, _result, formExtra, formData, requesterFamCodeValue, _response, _result2, getNewResponse, senderId, elementData, data, notificationHTML, url, _response2, newValues, friendRequestSection;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             elementId = e.target.id;
             postId = e.target.name;
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(elementId, 'allEvent');
             if (!elementId.includes("likeButton")) {
-              _context.next = 13;
+              _context.next = 12;
               break;
             }
             // replace button with Counter to get the span id 
@@ -989,15 +992,15 @@ try {
             likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
             likeCounterVal = likeCounterVal.replace(/\n/g, '');
             encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
-            _context.next = 10;
+            _context.next = 9;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put("/profileCard/postLikes?postId=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
-          case 10:
+          case 9:
             result = _context.sent;
             _context.next = 67;
             break;
-          case 13:
+          case 12:
             if (!elementId.includes("initComment")) {
-              _context.next = 18;
+              _context.next = 17;
               break;
             }
             commentFormId = elementId.replace('init', 'form');
@@ -1006,9 +1009,9 @@ try {
             // Submit function for comment using POST API
             _context.next = 67;
             break;
-          case 18:
+          case 17:
             if (!elementId.includes("submitComment")) {
-              _context.next = 36;
+              _context.next = 35;
               break;
             }
             //elementId == submitComment511
@@ -1029,24 +1032,24 @@ try {
             inputComment = idForm.replace("form", "input");
             idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 30;
+              _context.next = 29;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 34;
+            _context.next = 33;
             break;
-          case 30:
-            _context.next = 32;
+          case 29:
+            _context.next = 31;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post('/postCommentProfile', formEntries, options);
-          case 32:
+          case 31:
             response = _context.sent;
             _result = response.data.message;
-          case 34:
+          case 33:
             _context.next = 67;
             break;
-          case 36:
+          case 35:
             if (!elementId.includes("submitPost")) {
-              _context.next = 54;
+              _context.next = 53;
               break;
             }
             // LISTEN TO THE SUBMIT EVENT 
@@ -1062,50 +1065,47 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 44;
+            _context.next = 43;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post("/member/profilePage/post", formData, options);
-          case 44:
+          case 43:
             _response = _context.sent;
             _result2 = _response.data.message;
-            _context.next = 48;
+            _context.next = 47;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _result2);
-          case 48:
+          case 47:
             getNewResponse = _context.sent;
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(getNewResponse.data.message);
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
             _context.next = 67;
             break;
-          case 54:
-            if (!(elementId && elementId.includes('notificationBar'))) {
+          case 53:
+            if (!(elementId && elementId.includes('deleteNotification'))) {
               _context.next = 66;
               break;
             }
             // Extract the user ID from the target ID
-            senderId = targetId.replace("notificationBar", ""); // change the background of the clicked element 
-            element = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("notificationBar".concat(senderId));
-            element.style.backgroundColor = "red";
-
-            // change the font color to white 
-            element.style.color = "white";
-
-            // Make sure required variables are defined before using them
+            senderId = elementId.replace("deleteNotification", "notificationBar");
+            elementData = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId);
+            data = elementData.getAttribute("data-id"); // change the background of the clicked element 
+            notificationHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(senderId); // Make sure required variables are defined before using them
             if (typeof yourId === 'undefined' || typeof famCode === 'undefined') {
-              msgException("Required parameters (yourId or famCode) are not defined");
+              (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
+            url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
             _context.next = 62;
-            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put("/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(senderId));
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put(url);
           case 62:
             _response2 = _context.sent;
             if (_response2.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
-              setTimeout(function () {
-                element.remove();
-              }, 4000);
+              notificationHTML.remove();
 
               // reduce the notification count as you have deleted the notification
-              newValues = parseInt(sessionStorage.setItem('notificationCount') - 1);
+              newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('notification_count').innerHTML = newValues;
+            } else {
+              (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
             _context.next = 67;
             break;

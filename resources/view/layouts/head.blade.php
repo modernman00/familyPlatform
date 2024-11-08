@@ -111,6 +111,38 @@
   animation: 0.75s linear infinite spinner-grow;
 }
 
+/* Default styles for larger screens */
+@media (min-width: 1024px) {
+  .profileImg {
+    width: 18vh;
+    height: 18vh;
+  }
+}
+
+/* iPad Mini (2021) - 8.3 inches, and similar sizes */
+@media (min-width: 744px) and (max-width: 834px) {
+  .profileImg {
+    width: 16vh;
+    height: 16vh;
+  }
+}
+
+/* iPad Pro 11-inch (2021), iPad Air (10.9-inch), and similar */
+@media (min-width: 810px) and (max-width: 1194px) {
+  .profileImg {
+    width: 17vh;
+    height: 17vh;
+  }
+}
+
+/* iPad Pro 12.9-inch (2021) */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .profileImg {
+    width: 18vh;
+    height: 18vh;
+  }
+}
+
 
 
   </style>

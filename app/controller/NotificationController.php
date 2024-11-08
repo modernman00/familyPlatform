@@ -147,8 +147,9 @@ class NotificationController extends Select
         try {
             $query = "UPDATE notification SET notification_status = 'clicked' WHERE (receiver_id = ? OR receiver_id = ?) AND sender_id = ?";
             $statement = parent::connect2()->prepare($query);
+            $result = $statement->execute([$youId, $famCode, $senderId]);
 
-            if ($statement->execute([$youId, $famCode, $senderId])) {
+            if ($result) {
                 msgSuccess(200, "success");
                 return true;
             } else {
