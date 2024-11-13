@@ -36,10 +36,10 @@ class Delete extends Db
         try {
             $statement = parent::connect2()->prepare($query);
             $statement->execute($bind);
-            return true;
+            return $statement->rowCount();
         } catch (PDOException $e) {
             showError($e);
-            return false;
+            return 0;
         }
     }
 }

@@ -92,8 +92,6 @@ try {
 
             const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + result);
 
-            log(getNewResponse.data.message);
-
             id('id01').style.display = 'none'
 
 

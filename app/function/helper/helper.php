@@ -6,6 +6,8 @@ use Philo\Blade\Blade;
 use App\classes\Select;
 use Spatie\ImageOptimizer\Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
+use App\classes\VirusScan as ScanVirus;
+
 
 
 function view($path, array $data = [])
@@ -25,9 +27,9 @@ function toSendEmail(string $viewPath, array $data, string $subject, string $ema
 {
     // generate the data to send the email
     $sendEmailArray = genEmailArray(
-        $viewPath,
-        $data,
-        $subject
+        viewPath: $viewPath,
+        data: $data,
+        subject: $subject
     );
 
     // send the email
@@ -47,19 +49,18 @@ function make($fileName, $data): string|false
     return $content;
 }
 
-function printArr( $data): void
+function printArr($data): void
 {
 
-    if($data === array()) {
-         echo "<pre>";
-    var_export($data);
-    echo "</pre>";
-    } else{
+    if ($data === array()) {
+        echo "<pre>";
+        var_export($data);
+        echo "</pre>";
+    } else {
         echo "<pre>";
         print_r($data);
         echo "</pre>";
     }
-   
 }
 
 
@@ -193,7 +194,7 @@ function cleanSession($x): string|null|int
             subject: $x
         );
         return $z;
-    } else{
+    } else {
         return null;
     }
 }
@@ -269,18 +270,24 @@ function sendText($message, $numbers): void
 //   }
 // }
 
+//NOTE: Ensure Socket Path: Verify the ClamAV socket path in getClamavSocket matches your server's configuration.
 
 // Function to scan file for viruses using ClamAV
-function clamAVScan($filePath)
-{
-    // Execute clamscan command and capture output
-    $output = shell_exec("clamscan --stdout --no-summary $filePath");
+// function scanFileForVirus($file)
+// {
 
-    // Check if $output is not null before calling strpos()
-    if ($output == null && strpos($output, 'Infected files: 0') == false) {
-        msgException(500, "virus detected");
-    }
-}
+
+//     $validator = new ClamClient();
+
+//     // printArr($file);
+
+//     // // always check this code as originally it accepts three arguments
+//     // $validateFile = $validator->validate($file);
+
+//     if (!$validateFile) {
+//         msgException(500, "virus detected");
+//     }
+// }
 
 // return email once logged in
 
@@ -290,6 +297,7 @@ function clamAVScan($filePath)
  */
 function fileUploadMultiple($fileLocation, $formInputName): void
 {
+    // scanFileForVirus($_FILES[$formInputName]);
     // Count total files
     $countFiles = count($_FILES[$formInputName]['name']);
 
@@ -301,26 +309,29 @@ function fileUploadMultiple($fileLocation, $formInputName): void
         $fileName = basename($_FILES[$formInputName]['name'][$i]);
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        $pathToImage = $fileLocation . $fileName;
+        $pathToImage = "$fileLocation$fileName";
+
+        new ScanVirus(tempFileLocation: $fileTemp);
 
         // sanitise the file
         $picError = "";
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
         $fileExtension = strtolower($fileExtension);
+
         if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
             $picError .= 'Format must be PNG, JPG, or GIF';
         }
 
         if ($fileSize > 102400000) {
             $picError .= 'File size must not exceed 10240kb';
-            msgException(401, "Error Processing Request - post images - $picError");
+            msgException(400, "Error Processing Request - post images - $picError");
         }
         // if (file_exists($pathToImage)) {
         //     $picError .= "File $fileName already uploaded";
         //     msgException(401, "Error Processing Request - post images - $picError");
         // }
         if ($picError) {
-            msgException(401, "Error Processing Request - post images - $picError");
+            msgException(400, "Error Processing Request - post images - $picError");
         }
 
         $uploadFile = move_uploaded_file($fileTemp, $pathToImage);
@@ -367,12 +378,8 @@ function fileUpload($fileLocation, $formInputName): void
         throw new Exception("No Temp File", 1);
     }
 
-    // Check for virus using ClamAV
-    $scanResult = clamAVScan($fileTemp);
-    if (!$scanResult) {
-        throw new Exception('Virus detected in the file.');
-    }
-
+       // Check for virus using ClamAV
+    new ScanVirus(tempFileLocation: $fileTemp);
 
     # the file temp name
     $size = $_FILES[$formInputName]['size'];  # the file size
@@ -385,9 +392,7 @@ function fileUpload($fileLocation, $formInputName): void
         throw new \Exception("File location does not exist", 1);
     }
 
-
     $fileName_location = "$fileLocation$fileName";
-
 
     // sanitise the file
     $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION); # use pathinfo to get the file extension

@@ -1,4 +1,4 @@
 import "../navbar"
 import "./api"
-import "./sendRequest"
+import "./allEvents"
 

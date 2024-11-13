@@ -920,7 +920,6 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(data, "notification");
     if (data.length > 0) {
       // Display the count of notifications
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
@@ -996,7 +995,7 @@ try {
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put("/profileCard/postLikes?postId=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
           case 9:
             result = _context.sent;
-            _context.next = 67;
+            _context.next = 66;
             break;
           case 12:
             if (!elementId.includes("initComment")) {
@@ -1007,7 +1006,7 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Submit function for comment using POST API
-            _context.next = 67;
+            _context.next = 66;
             break;
           case 17:
             if (!elementId.includes("submitComment")) {
@@ -1045,11 +1044,11 @@ try {
             response = _context.sent;
             _result = response.data.message;
           case 33:
-            _context.next = 67;
+            _context.next = 66;
             break;
           case 35:
             if (!elementId.includes("submitPost")) {
-              _context.next = 53;
+              _context.next = 52;
               break;
             }
             // LISTEN TO THE SUBMIT EVENT 
@@ -1074,14 +1073,13 @@ try {
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _result2);
           case 47:
             getNewResponse = _context.sent;
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(getNewResponse.data.message);
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 67;
+            _context.next = 66;
             break;
-          case 53:
+          case 52:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 66;
+              _context.next = 65;
               break;
             }
             // Extract the user ID from the target ID
@@ -1093,9 +1091,9 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 62;
+            _context.next = 61;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].put(url);
-          case 62:
+          case 61:
             _response2 = _context.sent;
             if (_response2.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
@@ -1107,9 +1105,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 67;
+            _context.next = 66;
             break;
-          case 66:
+          case 65:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -1119,7 +1117,7 @@ try {
                 });
               }
             }
-          case 67:
+          case 66:
           case "end":
             return _context.stop();
         }
@@ -1627,9 +1625,10 @@ __webpack_require__.r(__webpack_exports__);
 
   axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/member/profilePage/profileImg', formData, options).then(function (response) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data;
-    if (response.data === "Profile image updated") {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(response.data, "profilePicsNotification");
+    if (response.data.message === "Profile image updated") {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').classList.add('w3-green');
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data;
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data.message;
       // Reload the page
       location.reload();
     }
@@ -1715,8 +1714,6 @@ try {
               // Assign fetched data to state properties
               _this.post = pullData.data.message.post;
               _this.comment = pullData.data.message.comment;
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(_this.post);
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(localStorage.getItem('requesterId'));
               _this.comment = _this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
 
               if (_this.post.length > 0) {
@@ -1727,17 +1724,17 @@ try {
               } else {
                 (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("No post");
               }
-              _context.next = 15;
+              _context.next = 13;
               break;
-            case 12:
-              _context.prev = 12;
+            case 10:
+              _context.prev = 10;
               _context.t0 = _context["catch"](0);
               console.error("Error fetching posts and comments:", _context.t0);
-            case 15:
+            case 13:
             case "end":
               return _context.stop();
           }
-        }, _callee, null, [[0, 12]]);
+        }, _callee, null, [[0, 10]]);
       }))();
     }
   };

@@ -14,6 +14,7 @@ class ProcessImg extends AllFunctionalities
         try {
             if (!$_FILES) {
                 msgException(401, "Error Processing Request - PIC NOT ADDED");
+                
             }
         
 
@@ -41,7 +42,9 @@ class ProcessImg extends AllFunctionalities
             $insertFile->submitForm('images', $data);
 
             // Update the profile_table
-            return $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
+            $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
+
+             msgSuccess(200, "Profile image updated");
 
         } catch (\Throwable $th) {
             showError($th);

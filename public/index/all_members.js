@@ -1,6 +1,208 @@
 "use strict";
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["all_members"],{
 
+/***/ "./resources/asset/js/components/allMembers/allEvents.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/allEvents.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
+
+
+
+
+// Attach a click event listener to the document
+var reqId = localStorage.getItem('requesterId');
+/**
+ * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
+ it returns the notification details for the approvers tab
+ * 
+ * @param {MouseEvent} e - The event object.
+ */
+document.onclick = /*#__PURE__*/function () {
+  var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
+    var targetId, userId, approverDetails, requesterDetails, familyRequestData, response, famCode, _userId, url, notificationHTML, _response, _userId2;
+    return _regeneratorRuntime().wrap(function _callee$(_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          // Get the target element's ID
+          targetId = e.target.id; // Check if the ID includes 'addFamily'
+          if (!targetId.includes('addFamily')) {
+            _context.next = 17;
+            break;
+          }
+          // Extract the user ID from the target ID
+          userId = targetId.replace("addFamily", ""); // Fetch approver details for the user
+          _context.next = 6;
+          return fetchApproverData(userId);
+        case 6:
+          approverDetails = _context.sent;
+          // Prepare family request data
+          requesterDetails = getLocalStorageProfile();
+          familyRequestData = {
+            requester: requesterDetails,
+            approver: approverDetails,
+            emailPath: "msg/request",
+            subject: "".concat(requesterDetails.requesterFirstName, " ").concat(requesterDetails.requesterLastName, " sent you a family request")
+          }; // Send the family request data to the server for processing which returns the notification details for the approvers tab
+          _context.next = 11;
+          return sendFamilyRequest(familyRequestData);
+        case 11:
+          response = _context.sent;
+          // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
+          famCode = localStorage.getItem('requesterFamCode');
+          if (famCode === approverDetails.approverCode) {
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_1__.addToNotificationTab)(response.data.message);
+            (0,_profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_2__.friendRequestCard)(requesterDetails);
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_1__.increaseNotificationCount)();
+          }
+
+          // Update the button's HTML and disable it
+          updateButton(targetId, 'Request Sent');
+          _context.next = 30;
+          break;
+        case 17:
+          if (!targetId.includes('removeProfile')) {
+            _context.next = 29;
+            break;
+          }
+          // Extract the user ID from the target ID
+          _userId = targetId.replace("removeProfile", "");
+          url = "/allMembers/removeProfile/".concat(_userId, "/").concat(reqId);
+          alert(url);
+
+          // include a console to confirm if they truly want to delete the profile
+          if (!confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
+            _context.next = 27;
+            break;
+          }
+          notificationHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)(".member_profile_".concat(_userId));
+          _context.next = 25;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"]["delete"](url);
+        case 25:
+          _response = _context.sent;
+          if (_response.data.message === "success") {
+            // remove a html element with call member_profile
+            notificationHTML.remove();
+          } else {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error deleting profile");
+          }
+        case 27:
+          _context.next = 30;
+          break;
+        case 29:
+          if (targetId.includes('seeProfile')) {
+            // Extract the user ID from the target ID
+            _userId2 = targetId.replace("seeProfile", ""); // redirect to 'allMembers/setProfile/'+userId
+            window.location.href = "/allMembers/setProfile/".concat(_userId2);
+          }
+        case 30:
+          _context.next = 35;
+          break;
+        case 32:
+          _context.prev = 32;
+          _context.t0 = _context["catch"](0);
+          // Handle any errors that occur during execution
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context.t0);
+        case 35:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 32]]);
+  }));
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+// Function to fetch approver data based on user ID
+function fetchApproverData(_x2) {
+  return _fetchApproverData.apply(this, arguments);
+} // Function to retrieve requester details from local storage
+function _fetchApproverData() {
+  _fetchApproverData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(userId) {
+    var result, approverDetails;
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _context2.next = 3;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
+        case 3:
+          result = _context2.sent;
+          approverDetails = {
+            approverFirstName: result.data.message.firstName,
+            approverLastName: result.data.message.lastName,
+            approverEmail: result.data.message.email,
+            approverId: result.data.message.id,
+            approverCode: result.data.message.famCode
+          };
+          return _context2.abrupt("return", approverDetails);
+        case 8:
+          _context2.prev = 8;
+          _context2.t0 = _context2["catch"](0);
+          console.error(_context2.t0);
+          throw _context2.t0;
+        case 12:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[0, 8]]);
+  }));
+  return _fetchApproverData.apply(this, arguments);
+}
+function getLocalStorageProfile() {
+  var getRequesterDetails = localStorage.getItem('profile');
+  return JSON.parse(getRequesterDetails);
+}
+
+// Function to send family request data to the server
+function sendFamilyRequest(_x3) {
+  return _sendFamilyRequest.apply(this, arguments);
+} // Function to update the button's HTML and disable it
+function _sendFamilyRequest() {
+  _sendFamilyRequest = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(data) {
+    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 3;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/members/familyRequestMgt", data);
+        case 3:
+          return _context3.abrupt("return", _context3.sent);
+        case 6:
+          _context3.prev = 6;
+          _context3.t0 = _context3["catch"](0);
+          (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context3.t0);
+        case 9:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[0, 6]]);
+  }));
+  return _sendFamilyRequest.apply(this, arguments);
+}
+function updateButton(targetId, newHTML) {
+  var theTargetId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(targetId);
+  theTargetId.innerHTML = newHTML;
+  theTargetId.disabled = true;
+}
+
+// ADD THE NEW EVENT TO THE NOTIFICATION TAB
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/allMembers/api.js":
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/allMembers/api.js ***!
@@ -168,7 +370,8 @@ var renderHtml = function renderHtml(el) {
       throw new Error('there is no data');
     }
     var theImg = "/public/img/profile/".concat(el.img);
-    var isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
+    var areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
+    var related = famCode == el.famCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Add to family';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
     var fatherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.fatherName);
@@ -176,7 +379,7 @@ var renderHtml = function renderHtml(el) {
     // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not.
-    var html = "\n        <div class=\"w3-col l3 m6 w3-margin-bottom w3-round-xlarge member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n          \n                <img src=\"").concat(theImg, "\" style=\"width:100%; height:300px;\" alt=\"").concat(el.firstName, "\">\n                      <ul class=\"w3-ul w3-border w3-center w3-hover-shadow\">\n    \n                    <li class=\"w3-black w3-large w3-padding-16\">").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</li>\n\n                    <li class=\"w3-padding-8 allMember_card_content\">\n                         <b>Country:</b> ").concat(el.country, " </li>\n\n                        ").concat(isUserInSameFamily ? "    <li class=\"w3-padding-8\"> <b>Father:</b> ".concat(fatherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Mother:</b> ").concat(motherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Spouse:</b> ").concat(el.spouseName || 'none', "</li>\n                             <li class=\"w3-padding-8\"> <b>Mobile:</b> ").concat(el.mobile, " </li>\n                             <li class=\"w3-padding-8\"> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</li>\n\n                             <li class=\"w3-light-grey w3-padding-16\">\n                             <button class=\"w3-button w3-green w3-padding-small\" id=seeProfile").concat(el.id, ">\n                              \n                                    Profile\n\n                                    </button>\n                              \n                               \n                              \n                                    <button class=\"w3-button w3-red w3-padding-small\" id=removeProfile").concat(el.id, " > Remove</button>\n                          \n                                \n                            </li>") : "<li class=\"w3-light-grey w3-padding-16\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"w3-button w3-green w3-padding-large button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                        </li>"), "\n                    \n     \n          </ul>\n        </div>");
+    var html = "\n        <div class=\"w3-col l3 m6 w3-margin-bottom w3-round-xlarge member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n          \n                <img src=\"").concat(theImg, "\" style=\"width:100%; height:300px;\" alt=\"").concat(el.firstName, "\">\n                      <ul class=\"w3-ul w3-border w3-center w3-hover-shadow\">\n    \n                    <li class=\"w3-black w3-large w3-padding-16\">").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</li>\n\n                    <li class=\"w3-padding-8 allMember_card_content\">\n                         <b>Country:</b> ").concat(el.country, " </li>\n\n                        ").concat(areTheyLinked ? "    <li class=\"w3-padding-8\"> <b>Father:</b> ".concat(fatherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Mother:</b> ").concat(motherName, "</li>\n                             <li class=\"w3-padding-8\"> <b>Spouse:</b> ").concat(el.spouseName || 'none', "</li>\n                             <li class=\"w3-padding-8\"> <b>Mobile:</b> ").concat(el.mobile, " </li>\n                             <li class=\"w3-padding-8\"> <b>Date joined:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</li>\n\n                             <li class=\"w3-light-grey w3-padding-16\">\n                             <button class=\"w3-button w3-green w3-padding-small\" id=seeProfile").concat(el.id, ">\n                              \n                                    Profile\n\n                                    </button>\n                              \n                               ").concat(related ? '' : "<button class=\"w3-button w3-red w3-padding-small\" id=removeProfile".concat(el.id, " > Remove</button>"), "\n                            </li>") : "<li class=\"w3-light-grey w3-padding-16\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" class=\"w3-button w3-green w3-padding-large button\" id=\"addFamily").concat(el.id, "\" ").concat(disableButton, ">\n                                ").concat(statusButtonHTML, "\n                            </button>\n                            \n                        </li>"), "\n                    \n     \n          </ul>\n        </div>");
 
     // Insert the HTML content into the 'allMembers' element.
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
@@ -196,207 +399,10 @@ var renderHtml = function renderHtml(el) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./api */ "./resources/asset/js/components/allMembers/api.js");
-/* harmony import */ var _sendRequest__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sendRequest */ "./resources/asset/js/components/allMembers/sendRequest.js");
+/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/allMembers/allEvents.js");
 
 
 
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/allMembers/sendRequest.js":
-/*!*****************************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/sendRequest.js ***!
-  \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-
-
-
-
-
-// Attach a click event listener to the document
-var reqId = localStorage.getItem('requesterId');
-/**
- * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
- it returns the notification details for the approvers tab
- * 
- * @param {MouseEvent} e - The event object.
- */
-document.onclick = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-    var targetId, userId, approverDetails, requesterDetails, familyRequestData, response, famCode, _userId, _response, _userId2;
-    return _regeneratorRuntime().wrap(function _callee$(_context) {
-      while (1) switch (_context.prev = _context.next) {
-        case 0:
-          _context.prev = 0;
-          // Get the target element's ID
-          targetId = e.target.id; // Check if the ID includes 'addFamily'
-          if (!targetId.includes('addFamily')) {
-            _context.next = 17;
-            break;
-          }
-          // Extract the user ID from the target ID
-          userId = targetId.replace("addFamily", ""); // Fetch approver details for the user
-          _context.next = 6;
-          return fetchApproverData(userId);
-        case 6:
-          approverDetails = _context.sent;
-          // Prepare family request data
-          requesterDetails = getLocalStorageProfile();
-          familyRequestData = {
-            requester: requesterDetails,
-            approver: approverDetails,
-            emailPath: "msg/request",
-            subject: "".concat(requesterDetails.requesterFirstName, " ").concat(requesterDetails.requesterLastName, " sent you a family request")
-          }; // Send the family request data to the server for processing which returns the notification details for the approvers tab
-          _context.next = 11;
-          return sendFamilyRequest(familyRequestData);
-        case 11:
-          response = _context.sent;
-          // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
-          famCode = localStorage.getItem('requesterFamCode');
-          if (famCode === approverDetails.approverCode) {
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_1__.addToNotificationTab)(response.data.message);
-            (0,_profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_2__.friendRequestCard)(requesterDetails);
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_1__.increaseNotificationCount)();
-          }
-
-          // Update the button's HTML and disable it
-          updateButton(targetId, 'Request Sent');
-          _context.next = 27;
-          break;
-        case 17:
-          if (!targetId.includes('removeProfile')) {
-            _context.next = 26;
-            break;
-          }
-          if (!confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
-            _context.next = 24;
-            break;
-          }
-          // Extract the user ID from the target ID
-          _userId = targetId.replace("removeProfile", "");
-          _context.next = 22;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"]["delete"]("/allMembers/removeProfile/".concat(_userId, "/").concat(reqId));
-        case 22:
-          _response = _context.sent;
-          if (_response.data.message === "success") {
-            // remove a html element with call member_profile
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)(".member_profile_".concat(_userId)).remove();
-          } else {
-            alert('An error occurred' + _response.data.message);
-          }
-        case 24:
-          _context.next = 27;
-          break;
-        case 26:
-          if (targetId.includes('seeProfile')) {
-            // Extract the user ID from the target ID
-            _userId2 = targetId.replace("seeProfile", ""); // redirect to 'allMembers/setProfile/'+userId
-            window.location.href = "/allMembers/setProfile/".concat(_userId2);
-          }
-        case 27:
-          _context.next = 32;
-          break;
-        case 29:
-          _context.prev = 29;
-          _context.t0 = _context["catch"](0);
-          // Handle any errors that occur during execution
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context.t0);
-        case 32:
-        case "end":
-          return _context.stop();
-      }
-    }, _callee, null, [[0, 29]]);
-  }));
-  return function (_x) {
-    return _ref.apply(this, arguments);
-  };
-}();
-
-// Function to fetch approver data based on user ID
-function fetchApproverData(_x2) {
-  return _fetchApproverData.apply(this, arguments);
-} // Function to retrieve requester details from local storage
-function _fetchApproverData() {
-  _fetchApproverData = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(userId) {
-    var result, approverDetails;
-    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-      while (1) switch (_context2.prev = _context2.next) {
-        case 0:
-          _context2.prev = 0;
-          _context2.next = 3;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
-        case 3:
-          result = _context2.sent;
-          approverDetails = {
-            approverFirstName: result.data.message.firstName,
-            approverLastName: result.data.message.lastName,
-            approverEmail: result.data.message.email,
-            approverId: result.data.message.id,
-            approverCode: result.data.message.famCode
-          };
-          return _context2.abrupt("return", approverDetails);
-        case 8:
-          _context2.prev = 8;
-          _context2.t0 = _context2["catch"](0);
-          console.error(_context2.t0);
-          throw _context2.t0;
-        case 12:
-        case "end":
-          return _context2.stop();
-      }
-    }, _callee2, null, [[0, 8]]);
-  }));
-  return _fetchApproverData.apply(this, arguments);
-}
-function getLocalStorageProfile() {
-  var getRequesterDetails = localStorage.getItem('profile');
-  return JSON.parse(getRequesterDetails);
-}
-
-// Function to send family request data to the server
-function sendFamilyRequest(_x3) {
-  return _sendFamilyRequest.apply(this, arguments);
-} // Function to update the button's HTML and disable it
-function _sendFamilyRequest() {
-  _sendFamilyRequest = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(data) {
-    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-      while (1) switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.prev = 0;
-          _context3.next = 3;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/members/familyRequestMgt", data);
-        case 3:
-          return _context3.abrupt("return", _context3.sent);
-        case 6:
-          _context3.prev = 6;
-          _context3.t0 = _context3["catch"](0);
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context3.t0);
-        case 9:
-        case "end":
-          return _context3.stop();
-      }
-    }, _callee3, null, [[0, 6]]);
-  }));
-  return _sendFamilyRequest.apply(this, arguments);
-}
-function updateButton(targetId, newHTML) {
-  var theTargetId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(targetId);
-  theTargetId.innerHTML = newHTML;
-  theTargetId.disabled = true;
-}
-
-// ADD THE NEW EVENT TO THE NOTIFICATION TAB
 
 /***/ }),
 
@@ -603,7 +609,6 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(data, "notification");
     if (data.length > 0) {
       // Display the count of notifications
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;

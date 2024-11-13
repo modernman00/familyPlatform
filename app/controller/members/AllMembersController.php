@@ -7,7 +7,8 @@ namespace App\controller\members;
 
 use App\classes\{
     Select,
-    VerifyToken, Delete
+    VerifyToken,
+    Delete
 };
 use App\model\AllMembersData;
 use Exception;
@@ -66,7 +67,7 @@ class AllMembersController extends AllMembersData
     //     header("Location: /allMembers/getProfile");
     //     die();
     // }
-// /allMembers/setProfile?id
+    // /allMembers/setProfile?id
     public function getProfile($id): void
     {
         try {
@@ -100,8 +101,8 @@ class AllMembersController extends AllMembersData
         }
     }
 
-// /allMembers/removeProfile?removeProfile
-       public function removeProfile($apr, $req): void
+    // /allMembers/removeProfile?removeProfile
+    public function removeProfile($apr, $req): bool
     {
         try {
             //  verify token
@@ -113,30 +114,35 @@ class AllMembersController extends AllMembersData
             if (!$result) {
                 $tokenErr = "Authentication failed";
                 view('error/genError', ['error' => $tokenErr]);
+                return false; // Ensure the function exits if authentication fails
             }
 
-              $apr = checkInput($apr);
+            // Sanitize inputs 
+            $apr = checkInput($apr); 
+            $req = checkInput($req);
 
-              $query = Delete::formAndMatchQuery(
+            $query = Delete::formAndMatchQuery(
                 selection: "DELETE_AND",
                 table: 'requestMgt',
                 identifier1: 'approver_id',
                 identifier2: 'requester_id'
-              );
+            );
 
-              $deleteProfile = Delete::deleteFn(
-                query: $query, 
-                bind: [$apr, $req, ]
-                );
+            $deleteProfile = Delete::deleteFn(
+                query: $query,
+                bind: [$apr, $req,]
+            );
 
-                if($deleteProfile){
-                    msgSuccess(200, "success");
-                }
-
-           
-           
+            if ($deleteProfile > 0) {
+                msgSuccess(200, "success");
+                return true;
+            } else {
+                msgException(500, "Database update failed");
+                return false;
+            }
         } catch (Exception $e) {
             showError($e);
+            return false;
         }
     }
 }

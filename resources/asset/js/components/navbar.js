@@ -71,8 +71,6 @@ axios.get(notificationURL)
 
         if (data) {
 
-            log(data, "notification")
-
             if (data.length > 0) {
 
                 // Display the count of notifications

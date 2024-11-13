@@ -216,7 +216,6 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.log)(data, "notification");
     if (data.length > 0) {
       // Display the count of notifications
       (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;

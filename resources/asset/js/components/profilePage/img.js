@@ -1,10 +1,10 @@
 "use strict";
-import { id } from "../global"
+import { id, log } from "../global"
 import { showImageFileUploadFn } from "../helper/images"
 import  axios from "axios"
 
-id('profilePics').addEventListener(
-  'click', ()=> id('formProfilePics').style.display ="block"
+id('profilePics').addEventListener('click', ()=> id('formProfilePics').style.display ="block"
+
 );
 
 // FOR PROFILE IMAGE CHANGE
@@ -33,10 +33,11 @@ id('submitProfilePics').addEventListener('click', ()=> {
     .then((response) => {
 
       id('profilePicsNotification').innerHTML = response.data
+      log(response.data, "profilePicsNotification")
 
-      if(response.data === "Profile image updated") {
+      if(response.data.message === "Profile image updated") {
         id('profilePicsNotification').classList.add('w3-green')
-        id('profilePicsNotification').innerHTML = response.data
+        id('profilePicsNotification').innerHTML = response.data.message
         // Reload the page
         location.reload();
 

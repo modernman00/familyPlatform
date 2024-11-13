@@ -16,7 +16,8 @@ export const renderHtml = (el) => {
         }
 
         const theImg = `/public/img/profile/${el.img}`;
-        const isUserInSameFamily = famCode == el.famCode || famCode == el.requesterCode;
+        const areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
+        const related = famCode == el.famCode
         const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
             el.status :
             'Add to family';
@@ -39,7 +40,7 @@ export const renderHtml = (el) => {
                     <li class="w3-padding-8 allMember_card_content">
                          <b>Country:</b> ${el.country} </li>
 
-                        ${isUserInSameFamily ?
+                        ${areTheyLinked ?
                         `    <li class="w3-padding-8"> <b>Father:</b> ${fatherName}</li>
                              <li class="w3-padding-8"> <b>Mother:</b> ${motherName}</li>
                              <li class="w3-padding-8"> <b>Spouse:</b> ${el.spouseName || 'none'}</li>
@@ -53,12 +54,10 @@ export const renderHtml = (el) => {
 
                                     </button>
                               
-                               
-                              
-                                    <button class="w3-button w3-red w3-padding-small" id=removeProfile${el.id} > Remove</button>
-                          
-                                
+                               ${related ? '' :  `<button class="w3-button w3-red w3-padding-small" id=removeProfile${el.id} > Remove</button>`}
                             </li>`
+                              
+      
 
                     :   `<li class="w3-light-grey w3-padding-16">
                             <button type="button" data-user-id="addFamily${el.id}" class="w3-button w3-green w3-padding-large button" id="addFamily${el.id}" ${disableButton}>

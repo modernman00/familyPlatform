@@ -26,6 +26,7 @@ class PostMessage
      */
     public static function index()
     {
+
         try {
             // it works
             $message = AllMembersData::postProfilePicByFamCode(id: $_SESSION['memberId'], famCode: checkInput($_SESSION['famCode']));
@@ -60,67 +61,77 @@ class PostMessage
 
     public static function getNewComment()
     {
-               // Broadcast to all clients
+        // Broadcast to all clients
         ignore_user_abort(true);
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         set_time_limit(0);
-        try {
 
-            $commentNo =  cleanSession($_SESSION['LAST_INSERT_ID_COMMENT']);
+        while (true) {
+            try {
 
-            unset($_SESSION['LAST_INSERT_ID_COMMENT']);
+                $commentNo =  cleanSession($_SESSION['LAST_INSERT_ID_COMMENT']);
 
-            if ($commentNo) {
+                unset($_SESSION['LAST_INSERT_ID_COMMENT']);
 
-                $message = Post::commentByNo($commentNo);
+                if ($commentNo) {
 
-                $data = $message[0];
+                    $message = Post::commentByNo($commentNo);
 
-                // GET THE COMMENT PROFILE PICS USING THE COMMENT ID
-                if ($data) {
+                    $data = $message[0];
 
-                    $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
+                    // GET THE COMMENT PROFILE PICS USING THE COMMENT ID
+                    if ($data) {
 
-                    \msgServerSent($data, $commentNo, 'updateComment');
+                        $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
+
+                        \msgServerSent($data, $commentNo, 'updateComment');
+                    }
                 }
+                usleep(500000); // 0.5 seconds
+            } catch (\Throwable $th) {
+                showErrorExp($th);
+                break;
             }
-        } catch (\Throwable $th) {
-            showErrorExp($th);
         }
     }
 
     public static function getNewPost()
     {
 
-       // Broadcast to all clients
+        // Broadcast to all clients
         ignore_user_abort(true);
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         set_time_limit(0);
-        try {
 
-            $postNo = cleanSession($_SESSION['LAST_INSERT_ID_POST']);
+        while (true) {
+            try {
 
-            unset($_SESSION['LAST_INSERT_ID_POST']);
+                $postNo = cleanSession($_SESSION['LAST_INSERT_ID_POST']);
 
-            if ($postNo) {
-                $message = Post::postByNo($postNo);
-                $data = $message[0];
+                unset($_SESSION['LAST_INSERT_ID_POST']);
 
-                if ($data) {
+                if ($postNo) {
+                    $message = Post::postByNo($postNo);
+                    $data = $message[0];
 
-                    $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
+                    if ($data) {
+
+                        $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
 
 
-                    msgServerSent($data, $postNo, 'updatePost');
+                        msgServerSent($data, $postNo, 'updatePost');
+                    }
                 }
+                // Sleep to prevent CPU overload
+                usleep(500000); // 0.5 seconds
+            } catch (\Throwable $th) {
+                showErrorExp($th);
+                break;
             }
-            // msgSuccess(200, $data);
-        } catch (\Throwable $th) {
-            showErrorExp($th);
         }
     }
 

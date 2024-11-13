@@ -1,5 +1,5 @@
 import axios from "axios";
-import { id, showError, qSel } from "../global"
+import { id, showError, qSel, msgException } from "../global"
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { friendRequestCard } from "../profilePage/htmlFolder/friendRequestCard";
 
@@ -52,22 +52,31 @@ document.onclick = async (e) => {
 
         } else if (targetId.includes('removeProfile')) {
 
-            // include a console to confirm if they truly want to delete the profile
-            if (confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
-               
-          
-          
-               // Extract the user ID from the target ID
+                     // Extract the user ID from the target ID
             const userId = targetId.replace("removeProfile", "");
 
-            const response = await axios.delete(`/allMembers/removeProfile/${userId}/${reqId}`)
+           const url = `/allMembers/removeProfile/${userId}/${reqId}`
+
+           alert(url)
+
+            // include a console to confirm if they truly want to delete the profile
+            if (confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
+
+
+        
+
+           const notificationHTML = qSel(`.member_profile_${userId}`);
+          
+          
+
+            const response = await axios.delete(url)
 
             if(response.data.message === "success") {
             
                 // remove a html element with call member_profile
-                qSel(`.member_profile_${userId}`).remove();
+                notificationHTML.remove();
             } else{
-                alert ('An error occurred' + response.data.message)
+                msgException(`Error deleting profile`)
             }
             }
         }
