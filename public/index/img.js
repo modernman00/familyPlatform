@@ -372,7 +372,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var commentHTML = function commentHTML(data) {
-  var imgURL = data.img ? data.img : data.profileImg;
+  var imgURL = data.profileImg ? data.img : data.profileImg;
   var img = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
   return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
 };
@@ -486,7 +486,7 @@ var postedAt = function postedAt(date) {
   return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
 var nameImgTiming = function nameImgTiming(data) {
-  var img = data.img ? "/public/img/profile/".concat(data.img) : "/public/avatar/avatarF.png";
+  var img = data.profileImg ? "/public/img/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png";
   return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
 };
 

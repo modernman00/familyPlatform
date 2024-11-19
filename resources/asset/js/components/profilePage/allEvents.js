@@ -1,6 +1,7 @@
 "use strict";
 import { id, log, msgException } from "../global"
 import axios from "axios"
+import { appendNewPost } from "./post";
 
 
 try {
@@ -27,7 +28,9 @@ try {
             likeCounterVal = likeCounterVal.replace(/\n/g, '')
             const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
-            const result = await axios.put(`/profileCard/postLikes?postId=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
+            const result = await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
+
+            result.data.message
 
             // Make the comment form to appear onclick. initcomment is the id of the comment button 
         } else if (elementId.includes("initComment")) {
@@ -79,6 +82,7 @@ try {
 
             e.preventDefault()
             const formExtra = id('formPostMessageModal')
+         
             const formData = new FormData(formExtra)
             // get the requesterFamCode from the localStorage 
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
@@ -88,9 +92,8 @@ try {
             // 3. 
             const response = await axios.post("/member/profilePage/post", formData, options)
 
-            const result = response.data.message
+            const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
 
-            const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + result);
 
             id('id01').style.display = 'none'
 

@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 
-use App\classes\{Db, AllFunctionalities};
+use App\classes\{Db, AllFunctionalities, EventEmitter};
 use App\model\Post;
 
 
@@ -23,47 +23,115 @@ class PostLikeController extends Db
     public static function postLikes()
     {
         try {
-            $id = cleanSession($_GET['postId']);
+            $postNo = cleanSession($_GET['postNo']);
             $count = (int) cleanSession($_GET['count']);
             $count += 1;
-            AllFunctionalities::update2('post', 'post_likes', $count, 'post_no', $id);
 
-            $_SESSION['POST_NO_FOR_LIKES'] =$id;
-            $_SESSION['HTML_ID_FOR_LIKES'] =cleanSession($_GET['likeCounterId']);
+            // Update both post_likes and likes_updated_at
+
+            AllFunctionalities::updateWithTimestamp(
+                table: 'post',
+                likesColumn: 'post_likes',
+                likesValue: $count,
+                timestampColumn: 'likes_updated_at',
+                whereColumn: 'post_no',
+                whereValue: $postNo
+            );
 
             msgSuccess(200, 'success');
         } catch (\Throwable $th) {
+
             returnErrorCode(505, $th);
         }
     }
 
-    public static function getLikes()
+    /**
+     * Broadcasts the like count for a specific post to all clients.
+     * 
+     * @param int $postId
+     * @param int $likeCount
+     * @param string $likeCounterId
+     */
+
+    public static function getLikesInterim()
     {
-          // Broadcast to all clients
+        // Broadcast to all clients
         ignore_user_abort(true);
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         set_time_limit(0);
-        try {
-            $id = cleanSession($_SESSION['POST_NO_FOR_LIKES']);
-            unset($_SESSION['POST_NO_FOR_LIKES']);
-            
-            $message = $message = Post::postByNo($id);
-                $result = $message[0];;
-            
-            $outcome = [
-                'likeCounter' => $result['post_likes'],
-                'likeHtmlId' => $_SESSION['HTML_ID_FOR_LIKES'],
-                ];
 
-        msgServerSent($outcome, $id, 'updateLike');
-              
-            
+
+        try {
+            // Fetch updated like counts from the database
+            $updatedLikes = Post::fetchUpdatedLikes();
+
+            // Emit the event 
+            EventEmitter::emit('likesUpdated', $updatedLikes);
+
+            EventEmitter::on('likesUpdated', function ($updatedLikes) {
+                foreach ($updatedLikes as $postLikes) {
+                    $likeCount = $postLikes['post_likes'];
+                    $postNo = $postLikes['post_no'];
+                    $likeHTMLId = "likeCounter$postNo";
+                    $data = ['likeCounter' => $likeCount, 'likeHtmlId' => $likeHTMLId,];
+
+                    msgServerSent($data, $postNo, 'updateLike');
+                }
+            });
+
+
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            showSSEError($th);
+        }
+
+        // Keep the connection open 
+        while (true) {
+            usleep(500000); // 0.5 seconds to keep the connection alive }
         }
     }
+
+    public static function getLikes()
+    {
+        // Broadcast to all clients
+        ignore_user_abort(true);
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
+        set_time_limit(0);
+
+        while (true) {
+            try {
+                // Fetch updated like counts from the database
+                $updatedLikes = Post::fetchUpdatedLikes();
+
+                if ($updatedLikes) {
+                    foreach ($updatedLikes as $postLikes) {
+                        $likeCount = $postLikes['post_likes'];
+                        $postNo = $postLikes['post_no'];
+                        $likeHTMLId = "likeCounter$postNo";
+
+                        // Data to broadcast
+                        $data = [
+                            'likeCounter' => $likeCount,
+                            'likeHtmlId' => $likeHTMLId,
+                        ];
+
+                        msgServerSent($data, $postNo, 'updateLike');
+                    }
+                } else {
+                    exit();
+                }
+                  if (connection_aborted()) break;
+                sleep(5);
+            } catch (\Throwable $th) {
+                showSSEError($th);
+                break;
+            }
+        }
+    }
+
 
 
     /**

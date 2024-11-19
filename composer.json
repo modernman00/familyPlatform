@@ -44,7 +44,11 @@
         "minishlink/web-push": "^9.0",
         "sunspikes/clamav-validator": "^3.0",
         "xenolope/quahog": "^3.0",
-        "cloudmersive/cloudmersive_virusscan_api_client": "^3.1"
+        "cloudmersive/cloudmersive_virusscan_api_client": "^3.1",
+        "react/event-loop": "^1.5",
+        "react/stream": "^1.4",
+        "react/http": "^1.10",
+        "ratchet/pawl": "^0.4.1"
     },
 
     "require-dev": {

@@ -6,6 +6,8 @@ namespace App\model;
 
 use App\classes\Select;
 use App\classes\InnerJoin;
+use App\classes\Update;
+
 
 class Post extends Select
 {
@@ -25,14 +27,16 @@ class Post extends Select
     public static function commentByNo(int|string $commentNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
-        return parent::selectFn2(query: $query, bind: [$commentNo]);
+        $result = parent::selectFn2(query: $query, bind: [$commentNo]);
+        return $result[0];
     }
 
 
     static function postByNo(int|string $postNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
-        return parent::selectFn2(query: $query, bind: [$postNo]);
+        $result = parent::selectFn2(query: $query, bind: [$postNo]);
+        return $result[0];
     }
 
     static function postLink2Id(string $id): array|int|string
@@ -75,6 +79,13 @@ class Post extends Select
         return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
     }
 
+    public static function getProfilePicsById($id): string
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_COL_ID", table: 'profilePics', column: 'img', identifier1: "id");
+        $result =  parent::selectFn2(query: $query, bind: [$id]);
+        return $result[0]['img'];
+    }
+
     /**
      * Undocumented function
      *
@@ -99,4 +110,103 @@ class Post extends Select
         return parent::selectFn2(query: $query);
     }
 
+    static function getUnpublishedPost(): array|int|string
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: 'post_status', orderBy: "ORDER BY post_no DESC");
+        $result = parent::selectFn2(query: $query, bind: ["new"]);
+        return $result;
+    }
+
+    static function getUnpublishedComment(): array|int|string
+    {
+        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: 'comment_status', orderBy: "ORDER BY comment_no DESC");
+        $result = parent::selectFn2(query: $query, bind: ["new"]);
+        return $result;
+    }
+
+    static function updatePostByStatusAsPublished($id): bool
+    {
+        $newUpdate = new Update('post');
+        $result =  $newUpdate->updateTable(column: 'post_status', columnAnswer: "published", identifier: 'id', identifierAnswer: $id);
+        if (!$result) {
+            msgException(500, "Database update failed");
+            return false;
+        }
+        return $result;
+    }
+
+    static function updateCommentByStatusAsPublished($postNo): bool
+    {
+        $newUpdate = new Update('comment');
+        $result =  $newUpdate->updateTable(column: 'comment_status', columnAnswer: "published", identifier: 'post_no', identifierAnswer: $postNo);
+        if (!$result) {
+            msgException(500, "Database update failed");
+            return false;
+        }
+        return $result;
+    }
+
+
+    static function fetchUpdatedLikes()
+    {
+        // Define a recent time window in seconds, e.g., 10 seconds
+        $recentTimeWindow = 4;
+
+        $stmt = parent::connect2()->prepare("SELECT post_no, postFamCode, post_likes 
+                FROM post
+                WHERE TIMESTAMPDIFF(SECOND, likes_updated_at, NOW()) <= :recentTimeWindow
+            ");
+
+        $stmt->bindParam(':recentTimeWindow', $recentTimeWindow);
+        $stmt->execute();
+
+        // Fetch and return all matching rows
+        return $stmt->fetchAll();
+    }
+
+
+    // TEST THE CODE 
+
+    // static function getNewPost()
+    // {
+    //     $getUnpublishedPost = self::getUnpublishedPost();
+
+    //     if ($getUnpublishedPost) {
+
+    //         foreach ($getUnpublishedPost as $post) {
+    //             $postNo = $post['id'];
+
+    //             // printArr($post);
+
+    //             // msgServerSent($post, $post['id'], 'updatePost');
+
+    //             // self::updatePostByStatusAsPublished($postNo);
+
+    //             // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+    //         }
+    //     }
+    // }
+
+    // static function getNewComment()
+    // {
+    //     $getUnpublishedComment = self::getUnpublishedComment();
+
+    //     if ($getUnpublishedComment) {
+
+    //         foreach ($getUnpublishedComment as $comment) {
+    //             $commentNo = $comment['post_no'];
+
+    //             printArr($comment);
+
+
+    //             // msgServerSent($comment, $commentNo, 'updateComment');
+
+    //             // self::updateCommentByStatusAsPublished($commentNo);
+
+    //             // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+    //         }
+    //     }
+    // }
 }

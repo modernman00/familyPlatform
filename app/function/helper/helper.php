@@ -227,6 +227,18 @@ function showErrorExp($th): void
     echo "Error File- " . $th->getFile();
 }
 
+function showSSEError($th): void
+{
+    error_log("SSE Error: " . $th->getMessage());
+    echo "Error msg - " . $th->getMessage() . $th->getFile(). $th->getLine();
+    echo "<br>";
+    echo "data: Error occurred\n\n";
+    ob_flush();
+    flush();
+
+
+}
+
 
 function spinner(): string
 {

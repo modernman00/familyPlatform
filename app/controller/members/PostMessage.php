@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\classes\PushNotificationClass;
+use App\classes\{PushNotificationClass};
+
 use App\model\{
     Post,
     AllMembersData,
 };
+
+use React\EventLoop\Loop;
+use Ratchet\Client\Connector;
+use Ratchet\Client\WebSocket;
 
 
 
@@ -29,15 +34,15 @@ class PostMessage
 
         try {
             // it works
-            $message = AllMembersData::postProfilePicByFamCode(id: $_SESSION['memberId'], famCode: checkInput($_SESSION['famCode']));
+            $message = AllMembersData::postProfilePicByFamCode(
+                id: $_SESSION['memberId'], 
+                famCode: checkInput($_SESSION['famCode']));
 
             if (!$message) msgException(401, "no post msg");
 
-
-
             $count = count($message);
 
-            $newCommentArray = array();
+            $newCommentArray = [];
 
             foreach ($message as $msg) {
 
@@ -59,6 +64,51 @@ class PostMessage
     }
 
 
+    // public static function getNewCommentInterim() {
+    //     // Use WebSocket for broadcasting updates
+    //     ignore_user_abort(true);
+    //     set_time_limit(0);
+
+    //     while (true) {
+    //         try {
+    //             $getUnpublishedComment = Post::getUnpublishedPost();
+
+    //             if ($getUnpublishedComment) {
+    //                 foreach ($getUnpublishedComment as $comment) {
+    //                     $commentNo = $comment['post_no'];
+    //                     $comment['img'] = AllMembersData::commentProfilePicByPostNo($commentNo);
+
+    //                     self::broadcastUpdate(['type' => 'updateComment', 'data' => $comment]);
+
+    //                     Post::updateCommentByStatusAsPublished($commentNo);
+    //                 }
+    //             } else {
+    //                 exit();
+    //             }
+    //             sleep(5);
+    //         } catch (\Throwable $th) {
+    //             showSSEError($th);
+    //             break;
+    //         }
+    //     }
+    // }
+
+    // public static function broadcastUpdate($updateData) {
+    //     $loop = Loop::get();
+    //     $connector = new Connector($loop);
+
+    //     $connector('ws://'.URL.':8080')->then(function(WebSocket $conn) use ($updateData) {
+    //         $conn->send(json_encode($updateData));
+    //         $conn->close();
+    //     }, function($e) {
+    //         echo "Could not connect: {$e->getMessage()}\n";
+    //     });
+
+    //     $loop->run();
+    // }
+
+
+
     public static function getNewComment()
     {
         // Broadcast to all clients
@@ -70,28 +120,27 @@ class PostMessage
 
         while (true) {
             try {
+                $getUnpublishedComment = Post::getUnpublishedComment();
 
-                $commentNo =  cleanSession($_SESSION['LAST_INSERT_ID_COMMENT']);
+                if ($getUnpublishedComment) {
 
-                unset($_SESSION['LAST_INSERT_ID_COMMENT']);
+                    foreach ($getUnpublishedComment as $comment) {
+                        $commentNo = $comment['post_no'];
 
-                if ($commentNo) {
+                        msgServerSent($comment, $commentNo, 'updateComment');
 
-                    $message = Post::commentByNo($commentNo);
+                        // Post::updateCommentByStatusAsPublished($commentNo);
 
-                    $data = $message[0];
+                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
 
-                    // GET THE COMMENT PROFILE PICS USING THE COMMENT ID
-                    if ($data) {
-
-                        $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
-
-                        \msgServerSent($data, $commentNo, 'updateComment');
                     }
                 }
-                usleep(500000); // 0.5 seconds
+                if (connection_aborted()) break;
+
+                // Sleep briefly to avoid CPU overload
+                sleep(5); // 0.5 seconds
             } catch (\Throwable $th) {
-                showErrorExp($th);
+                showSSEError($th);
                 break;
             }
         }
@@ -107,33 +156,106 @@ class PostMessage
         header('Connection: keep-alive');
         set_time_limit(0);
 
-        while (true) {
+        $maxDuration = 300; // 5 minutes
+        $startTime = time();
+
+        while (time() - $startTime < $maxDuration) {
+
             try {
 
-                $postNo = cleanSession($_SESSION['LAST_INSERT_ID_POST']);
+                $getUnpublishedPost = Post::getUnpublishedPost();
 
-                unset($_SESSION['LAST_INSERT_ID_POST']);
+                if ($getUnpublishedPost) {
 
-                if ($postNo) {
-                    $message = Post::postByNo($postNo);
-                    $data = $message[0];
+                    foreach ($getUnpublishedPost as $post) {
+                        $postNo = $post['id'];
 
-                    if ($data) {
+                        msgServerSent($post, $postNo, 'updatePost');
 
-                        $data['img'] = self::getProfilePicsForPostAndComment($data['id']);
+                        // Post::updatePostByStatusAsPublished($postNo);
 
+                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
 
-                        msgServerSent($data, $postNo, 'updatePost');
                     }
                 }
-                // Sleep to prevent CPU overload
-                usleep(500000); // 0.5 seconds
+                if (connection_aborted()) break;
+
+                // Sleep briefly to avoid CPU overload
+                sleep(5); // 0.5 seconds
+
             } catch (\Throwable $th) {
-                showErrorExp($th);
+                showSSEError($th);
                 break;
             }
         }
     }
+
+     public static function getNewPostPolling()
+    {
+       
+        header('Content-Type: application/json');
+  
+            try {
+
+                $getUnpublishedPost = Post::getUnpublishedPost();
+
+                if ($getUnpublishedPost) {
+
+                    foreach ($getUnpublishedPost as $post) {
+                        $postNo = $post['id'];
+
+                        msgSuccess(200, $post);
+
+
+                        // Post::updatePostByStatusAsPublished($postNo);
+
+                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+                    }
+                } 
+             
+
+
+            } catch (\Throwable $th) {
+                showError($th);
+        
+            }
+     
+    }
+
+     public static function getNewCommentPolling()
+    {
+       
+        header('Content-Type: application/json');
+  
+            try {
+
+                $getUnpublishedComment = Post::getUnpublishedComment();
+
+                if ($getUnpublishedComment) {
+
+                    foreach ($getUnpublishedComment as $comment) {
+                        $commentNo = $comment['id'];
+
+                        msgSuccess(200, $comment);
+
+
+                        // Post::updatePostByStatusAsPublished($postNo);
+
+                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+                    }
+                }
+             
+
+
+            } catch (\Throwable $th) {
+                showError($th);
+        
+            }
+     
+    }
+
 
 
 
@@ -143,8 +265,7 @@ class PostMessage
 
             $postNo = cleanSession($_GET['newCommentNo']);
 
-            $message = Post::postByNo($postNo);
-            $data = $message[0];
+            $data = Post::postByNo($postNo);
 
             $postOriginName = $data['fullName'];
 

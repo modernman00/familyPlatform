@@ -12,18 +12,7 @@ $router->map('DELETE', '/allMembers/removeProfile/[a:apr]/[a:req]', 'App\control
 
 $router->map('GET', '/allMembers/getProfile', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_GET');
 
-$router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
 
-$router->map('POST', '/members/familyRequestMgt', 'App\controller\members\FamilyRequest@request', 'add to family');
-
-$router->map('GET', '/members/familyRequestMgt/getApprover', 'App\controller\members\FamilyRequest@getApprover', 'approver');
-
-$router->map(
-  method: 'GET', 
-  route: '/member/request/[a:req]/[a:appr]/[a:dec]/[a:reqCode]/[a:src]', 
-  target: 'App\controller\members\FamilyRequest@approveDelete', 
-  name: 'approve_request'
-);
 
 
 

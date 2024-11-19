@@ -66,7 +66,7 @@ export const appendNewPost = (el) => {
   
     if (el.postFamCode === famCode) {
 
-      log("from family")
+
 
       id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
 

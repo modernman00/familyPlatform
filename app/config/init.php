@@ -19,6 +19,9 @@ require_once __DIR__ . "/_env.php";
 
 
 define("BR", "<br>");
+define("URL", getenv("APP_URL2"));
+
+
 
 
 /**

@@ -57,7 +57,7 @@ class AllMembersData extends InnerJoin
 
 
 
-       // this code picks all the famcode and those who accepted the request. 
+    // this code picks all the famcode and those who accepted the request. 
 
     public static function postProfilePicByFamCode($famCode, $id): array
     {
@@ -82,7 +82,7 @@ class AllMembersData extends InnerJoin
         }
     }
 
-        /**
+    /**
      * Retrieves a list of all members' emails and details associated with a given family code.
      *
      * This function executes a database query to fetch email addresses, family codes, 
@@ -96,10 +96,9 @@ class AllMembersData extends InnerJoin
     public static function AllMembersEmailByFamCode($famCode): array
     {
         try {
-            $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id, 
+            $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id 
                       FROM account a
-                      INNER JOIN personal p ON a.id = p.id
-                      
+                      INNER JOIN personal p ON a.id = p.id                    
                       WHERE (p.famCode = :famCode)";
             $result = parent::connect2()->prepare($query);
             $result->execute(['famCode' => $famCode]);

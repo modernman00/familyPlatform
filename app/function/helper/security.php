@@ -148,12 +148,14 @@ function msgServerSent(string|array|int $data, string | int $id, string $event):
 {
 
     $get = json_encode($data);
-    echo "retry: 1000\n";   // one seconds
+    error_log("Sending message: retry: 2000, id: $id, event: $event, data: $get");
+    echo "retry: 2000\n";   // one seconds
     echo "id: $id\n";
     echo "event: $event\n";
     echo "data: {$get}\n\n";
     ob_flush();
     flush();
-         // Sleep briefly to avoid CPU overload
-                usleep(500000); 
+    
 }
+
+// BREAK A LOOP IF THE CLIENT ABORTED THE CONNECTION 

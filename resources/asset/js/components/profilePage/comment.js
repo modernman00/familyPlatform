@@ -3,7 +3,9 @@ import { id, log } from "../global";
 
 export const commentHTML = (data) => {
 
-  const imgURL = (data.img) ? data.img : data.profileImg
+  const imgURL = (data.profileImg) ? data.img : data.profileImg
+
+  
 
   const img = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
 

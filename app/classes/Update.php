@@ -8,28 +8,40 @@ use \PDOException;
 class Update extends Db
 {
 
-    public function __construct(public string $table)
-    {
-    }
+public function __construct(public string $table)
+{
+}
 
-    /**
-     * @param array|false|null|string $columnAnswer
-     *
-     * @psalm-param 'token' $column
-     * @psalm-param 'id' $identifier
-     */
-    public function updateTable(string $column, string $columnAnswer, string $identifier, string $identifierAnswer)
-    {
-        try {
-            $query = "UPDATE $this->table SET $column =? WHERE $identifier = ?";
-            $result = parent::connect2()->prepare($query);
-            $result->execute([$columnAnswer, $identifierAnswer]);
-            return $result;
-        } catch (PDOException $e) {
-            showError($e);
-            PHP_EOL;
-        }
+ /**
+  * Update a specific column in the table based on an identifier
+  *
+  * @param string $column The column to update
+  * @param int|string|array $columnAnswer The new value for the column
+  * @param string $identifier The condition column
+  * @param string $identifierAnswer The value to match in the identifier column
+  *
+  * @return bool True if the update was successful, false otherwise
+  */
+public function updateTable(string $column, int|string|array $columnAnswer, string $identifier, int|string $identifierAnswer): bool
+{
+    try {
+        // Prepare the query with parameterized values
+        $query = "UPDATE $this->table SET $column = :columnValue WHERE $identifier = :identifierValue";
+        $stmt = parent::connect2()->prepare($query);
+        
+        // Bind parameters for security
+        $stmt->bindParam(':columnValue', $columnAnswer);
+        $stmt->bindParam(':identifierValue', $identifierAnswer);
+
+        // Execute the statement and return the result as a bool
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        // Log or handle the exception as needed
+        showError($e);
+        return false;
     }
+}
+
 
     public function updateTableMulti(string $column, string $columnAnswer, array $identifiers)
     {

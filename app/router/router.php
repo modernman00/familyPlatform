@@ -16,6 +16,10 @@ include_once __DIR__ . "/chat.php";
 include_once __DIR__ . "/Event.php";
 include_once __DIR__ . "/notification.php";
 include_once __DIR__ . "/friendRequest.php";
+include_once __DIR__ . "/webSocket.php";
+
+
+$router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
 
 $router->map('GET', '/testFunction', 'App\controller\Testphp@testFunction', 'php8');
 $router->map('GET', '/testOrganogram', 'App\controller\TestClass@organogram', 'TestClass');
@@ -27,7 +31,7 @@ $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS'
 $router->map(
   method: 'GET', 
   route: '/member/test/[a:req]/[a:res]', 
-  target: 'App\controller\members\FamilyRequest@test', 
+  target: 'App\controller\members\FamilyRequestController@test', 
   name: 'testing new route method'
 );
 

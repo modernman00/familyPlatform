@@ -12,7 +12,7 @@ const postedAt = (date) => {
 
 export const nameImgTiming = (data) => {
 
-    const img = (data.img) ? `/public/img/profile/${data.img}` : "/public/avatar/avatarF.png"
+    const img = (data.profileImg) ? `/public/img/profile/${data.profileImg}` : "/public/avatar/avatarF.png"
 
     return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}"> <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">
         </a>

@@ -16,6 +16,11 @@ use App\classes\{
     VerifyToken,
 };
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 // use Pusher\Pusher;
 use App\model\AllMembersData as DataAll;
 
@@ -73,7 +78,11 @@ class ProfilePage extends ProcessImg
             $getFamCode = checkInput($this->memberData['famCode']);
             $_SESSION['famCode'] = $getFamCode;
 
-            // printArr(DataAll::getAllMembers2($this->id));
+           
+          
+          
+            //  printArr(Post::getProfilePics($this->id)[0]['img']);
+           
 
 
             $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
@@ -122,6 +131,11 @@ class ProfilePage extends ProcessImg
                 // $tokenErr = "Authentication failed";
                 // view('error/genError', ['error' => $tokenErr]);
             }
+
+
+            // printArr(DataAll::commentProfilePicByPostNo((917)));
+            //  Post::getNewComment();
+            //  Post::getNewPost();
 
 
             view('member/profilePage', [
@@ -212,6 +226,7 @@ class ProfilePage extends ProcessImg
             // header('Content-Type: text/event-stream');
             // header('Cache-Control: no-cache');
             $getPost = $this->processPostData();
+            $getPost['profileImg'] = Post::getProfilePicsById($getPost['id']);
             Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
             // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
@@ -228,6 +243,14 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getComment = $this->processPostData();
+
+            // get the profile pics of the commenter 
+            
+            $getComment['profileImg'] = Post::getProfilePicsById($getComment['id']);
+       
+    
+
+
             Insert::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
             returnErrorCode(401, $th);

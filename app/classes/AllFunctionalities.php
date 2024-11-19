@@ -1,8 +1,10 @@
 <?php
 
 namespace App\classes;
+
 use PDOException;
 use App\classes\Db;
+use PDO;
 
 class AllFunctionalities extends Db
 {
@@ -16,7 +18,6 @@ class AllFunctionalities extends Db
             $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
             $result = $this->connect()->prepare($query);
             return $result->execute([$column_ans, $identifier_ans]);
-    
         } catch (PDOException $e) {
             showError($e);
         }
@@ -34,7 +35,6 @@ class AllFunctionalities extends Db
             $query = "UPDATE $table SET $column =? WHERE $identifier = ?";
             $result = parent::connect2()->prepare($query);
             return $result->execute([$column_ans, $identifier_ans]);
-    
         } catch (PDOException $e) {
             showError($e);
         }
@@ -53,7 +53,7 @@ class AllFunctionalities extends Db
      *
      * @psalm-param 'id' $identifier
      */
-    public function updateMultiplePOST(array $data, string $table, string $identifier):bool
+    public function updateMultiplePOST(array $data, string $table, string $identifier): bool
     {
         try {
             if (isset($data['submit'])) {
@@ -65,17 +65,34 @@ class AllFunctionalities extends Db
             $implodeKey = implode('=?, ', array_keys($data));
 
             $data[$identifier] = $id;
-         
+
 
             $sql = "UPDATE $table SET $implodeKey=? WHERE $identifier =?";
             // example - 'UPDATE register SET title=?, first_name=?, second_name=? WHERE id =?'
             $stmt = $this->connect()->prepare($sql);
             return $stmt->execute($implodeValue);
-
-
         } catch (PDOException $e) {
             showError($e);
             return false;
         }
+    }
+
+    public static function updateWithTimestamp($table, $likesColumn, $likesValue, $timestampColumn, $whereColumn, $whereValue)
+    {
+        $query = "UPDATE $table
+        SET $likesColumn = :likesValue, $timestampColumn = CURRENT_TIMESTAMP
+        WHERE $whereColumn = :whereValue
+    ";
+        $stmt = parent::connect2()->prepare($query);
+
+        if(!$stmt){
+            msgException(502, "Could not connect");
+        }
+
+        $stmt->bindParam(':likesValue', $likesValue, PDO::PARAM_INT);
+        $stmt->bindParam(':whereValue', $whereValue, PDO::PARAM_INT);
+        if(!$stmt->execute()){
+            msgException(503, "Could not execute query");
+        };
     }
 }

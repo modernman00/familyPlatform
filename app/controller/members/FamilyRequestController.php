@@ -12,7 +12,7 @@ use App\classes\{
 use App\model\SingleCustomerData;
 
 
-class FamilyRequest extends Select
+class FamilyRequestController extends Select
 {
 
   public static function addToFamily(): void
