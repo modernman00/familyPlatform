@@ -6,13 +6,14 @@ import { showComment } from "./comment"
 
 
 export const html = (el, comment = null) => {
-  return `<div class="w3-container w3-card w3-white w3-round w3-margin post${el.post_no}"><br>
+  const { post_no, postMessage } = el
+  return `<div class="w3-container w3-card w3-white w3-round w3-margin post${post_no}"><br>
 
       ${nameImgTiming(el)}
 
     <hr class="w3-clear">
 
-    <p class="postFont"> ${el.postMessage} </p>
+    <p class="postFont"> ${postMessage} </p>
 
      ${showPostImg(el)}
 
@@ -20,7 +21,7 @@ export const html = (el, comment = null) => {
 
     ${commentForm(el)}
 
-    <div id = 'showComment${el.post_no}'>
+    <div id = 'showComment${post_no}'>
 
       ${showComment(comment)}
       

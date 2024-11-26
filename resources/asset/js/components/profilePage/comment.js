@@ -3,17 +3,18 @@ import { id, log } from "../global";
 
 export const commentHTML = (data) => {
 
-  const imgURL = (data.profileImg) ? data.img : data.profileImg
+  const {profileImg, date_created, img, comment, comment_no} = data
+
+  const imgURL = profileImg || img 
 
   
+  const image = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
 
-  const img = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
-
-  return `<div class='w3-ul w3-border w3-round' id='comment${data.comment_no}' name='commentDiv'>
+  return `<div class='w3-ul w3-border w3-round' id='comment${comment_no}' name='commentDiv'>
             <div class='w3-container commentDiv'>
-              <img src='${img}' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>
-              <p class='w3-right w3-opacity commentTiming' datetime='${data.date_created}' title='${data.date_created}'> ${format(data.date_created)} </p> 
-              <p class='commentFont'> ${data.comment}</p>
+              <img src='${image}' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>
+              <p class='w3-right w3-opacity commentTiming' datetime='${date_created}' title='${date_created}'> ${format(date_created)} </p> 
+              <p class='commentFont'> ${comment}</p>
             </div>
           </div>`
 }
@@ -43,11 +44,10 @@ export const appendNewComment = (commentData) => {
   const idDiv = `showComment${commentData.post_no}`
   // check if the div has been created by the DOM 
 
-  if (!idDiv) {
-    throw new Error('The comment div id does not exist')
-  }
-
   const commentContainer = id(idDiv);
+    if (!commentContainer) {
+    throw new Error(`The comment div id does not exist `)
+  }
 
 
   const commentHtml = commentHTML(commentData)

@@ -23,7 +23,29 @@ $router->map(
 
 $router->map(
   method: 'GET', 
-  route: '/getNewCommentLikesPolling', 
-  target: 'App\controller\members\PostMessage@getNewCommentLikesPolling', 
-  name: 'polling-comment-likes'
+  route: '/getNewLikesPolling', 
+  target: 'App\controller\members\PostLikeController@getNewLikesPolling', 
+  name: 'post-likes-polling'
 );
+
+$router->map(
+  method: 'PUT', 
+  route: '/updateCommentByStatusAsPublished/[a:commentNo]', 
+  target: 'App\controller\members\PostMessage@updateCommentAsPublished', 
+  name: 'updateCommentByStatus'
+);
+
+$router->map(
+  method: 'PUT', 
+  route: '/updatePostByStatusAsPublished/[a:postNo]', 
+  target: 'App\controller\members\PostMessage@updatePostAsPublished', 
+  name: 'updatePostByStatus'
+);
+
+
+// $router->map(
+//   method: 'GET', 
+//   route: '/getNewCommentLikesPolling', 
+//   target: 'App\controller\members\PostMessage@getNewCommentLikesPolling', 
+//   name: 'polling-comment-likes'
+// );

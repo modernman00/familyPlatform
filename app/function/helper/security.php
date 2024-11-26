@@ -129,8 +129,7 @@ function msgException(int $errCode, string | int  $msg): never
 
 function msgSuccess(int $code, mixed $msg, mixed $token = null): void
 {
-    http_response_code($code); // sets the response to 406
-    // echo http_response_code(); // echo the new response code
+    http_response_code($code); 
     echo json_encode([
         'message' => $msg,
         'token' => $token

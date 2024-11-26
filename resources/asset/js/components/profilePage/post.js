@@ -29,13 +29,8 @@ export const allPost = (postData, commentData) => {
   const postHtml = html(postData, filterComment)
   // if(postFamCode === famCode) {
     id('postIt').insertAdjacentHTML('beforeend', postHtml)
-  
-  
-  
+   
 }
-
-
-
 
 /**
  * Appends a new post to the DOM if it does not already exist.
@@ -49,30 +44,27 @@ export const allPost = (postData, commentData) => {
  * @returns {boolean} - Returns false if the post object is invalid.
  */
 export const appendNewPost = (el) => {
+ const {post_no} = el 
+// Generate the IDs for the comment form and its components const 
+const commentFormId = `formComment${post_no}`; 
+const inputCommentId = `inputComment${post_no}`; 
+const submitCommentId = `submitComment${post_no}`;
 
-  if (!el) { 
-    msgException('Invalid post');
- 
-    }
+// Check if the comment form components exist in the DOM
+  const commentForm1 = id(commentFormId);
+  const inputComment = id(inputCommentId)
+  const submitComment = id(submitCommentId);
 
-  const commentForm1 = id(`formComment${el.post_no}`);
-  const inputComment = id(`inputComment${el.post_no}`)
-  const submitComment = id(`submitComment${el.post_no}`);
-
+// If the comment form components do not exist, create and append the new post
   if (!commentForm1 || !inputComment || !submitComment) {
-
     const appendHTML = html(el);
 
-  
-    if (el.postFamCode === famCode) {
-
-
-
+  // Ensure the post belongs to the correct family code
+    // if (el.postFamCode === famCode) {
       id('postIt').insertAdjacentHTML('afterbegin', appendHTML)
-
-    } else{
-      return false
-    }
+    // } else{
+    //   return false
+    // }
 
   }
 

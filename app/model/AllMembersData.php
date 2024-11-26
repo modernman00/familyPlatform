@@ -82,6 +82,28 @@ class AllMembersData extends InnerJoin
         }
     }
 
+    public static function getUnpublishedPostByFamCode($famCode, $id): array
+    {
+        try {
+            $query = "SELECT post.*, rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
+              FROM post
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = :id
+                  ) AS rm ON post.id = rm.approver_id
+            WHERE ((post.postFamCode = :famCode || post.id = rm.approver_id) AND post.post_status = 'new')
+            ORDER BY post.date_created DESC";
+            $result = parent::connect2()->prepare($query);
+            $result->execute(['famCode' => $famCode, 'id' => $id]);
+
+            return $result->fetchAll();
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
     /**
      * Retrieves a list of all members' emails and details associated with a given family code.
      *

@@ -81,7 +81,11 @@ class ProfilePage extends ProcessImg
            
           
           
-            //  printArr(Post::getProfilePics($this->id)[0]['img']);
+            // $rest = Post::getUnpublishedPost();
+
+            //  foreach($rest as $rest){
+            //     printArr($rest);
+            //  }
            
 
 

@@ -372,9 +372,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var commentHTML = function commentHTML(data) {
-  var imgURL = data.profileImg ? data.img : data.profileImg;
-  var img = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
+  var profileImg = data.profileImg,
+    date_created = data.date_created,
+    img = data.img,
+    comment = data.comment,
+    comment_no = data.comment_no;
+  var imgURL = profileImg || img;
+  var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
+  return "<div class='w3-ul w3-border w3-round' id='comment".concat(comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(image, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(date_created, "' title='").concat(date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), " </p> \n              <p class='commentFont'> ").concat(comment, "</p>\n            </div>\n          </div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {
@@ -395,10 +400,10 @@ var appendNewComment = function appendNewComment(commentData) {
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
 
-  if (!idDiv) {
-    throw new Error('The comment div id does not exist');
-  }
   var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  if (!commentContainer) {
+    throw new Error("The comment div id does not exist ");
+  }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
@@ -427,7 +432,9 @@ __webpack_require__.r(__webpack_exports__);
 
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(el.post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+  var post_no = el.post_no,
+    postMessage = el.postMessage;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -443,7 +450,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   commentForm: () => (/* binding */ commentForm)
 /* harmony export */ });
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(data.post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(data.post_no, "\" \n      value=").concat(data.post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(data.post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
+  var post_no = data.post_no;
+  return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
 };
 
 /***/ }),

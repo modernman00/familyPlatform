@@ -622,55 +622,45 @@ try {
   var famCode = localStorage.getItem('requesterFamCode');
 
   // CLICK EVENT get the comment and like button from the document
-  document.onclick = /*#__PURE__*/function () {
+  document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, _result, formExtra, formData, requesterFamCodeValue, _response, getNewResponse, senderId, elementData, data, notificationHTML, url, _response2, newValues, friendRequestSection;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, formExtra, formData, requesterFamCodeValue, _response, getNewResponse, senderId, elementData, data, notificationHTML, url, _response2, newValues, friendRequestSection;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
+            //document.onclick = async (e) => {
             elementId = e.target.id;
-            postId = e.target.name;
+            postId = e.target.name; // Handle Like Button Click
             if (!elementId.includes("likeButton")) {
-              _context.next = 13;
+              _context.next = 11;
               break;
             }
             // replace button with Counter to get the span id 
-            likeCounterId = elementId.replace('Button', 'Counter');
-            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
-            likeCounterVal = likeCounterVal.replace(/\n/g, '');
+            likeCounterId = elementId.replace('Button', 'Counter'); // trim removes leading and trailing spaces
+            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
-            _context.next = 9;
+            _context.next = 8;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
-          case 9:
+          case 8:
             result = _context.sent;
-            result.data.message;
-
-            // Make the comment form to appear onclick. initcomment is the id of the comment button 
-            _context.next = 66;
+            _context.next = 63;
             break;
-          case 13:
+          case 11:
             if (!elementId.includes("initComment")) {
-              _context.next = 18;
+              _context.next = 16;
               break;
             }
             commentFormId = elementId.replace('init', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
-            // Submit function for comment using POST API
-            _context.next = 66;
+            // Handle Comment Submission
+            _context.next = 63;
             break;
-          case 18:
+          case 16:
             if (!elementId.includes("submitComment")) {
-              _context.next = 36;
+              _context.next = 33;
               break;
             }
-            //elementId == submitComment511
-
-            // 0.5 LISTEN FOR THE SUBMIT EVENT
-            // 0.7 GET THE COMMENT FORM ID 
-            // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
-            // 2. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS
-
             e.preventDefault();
 
             //idForm == formComment511
@@ -682,32 +672,25 @@ try {
             inputComment = idForm.replace("form", "input");
             idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 30;
+              _context.next = 28;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 34;
+            _context.next = 31;
             break;
-          case 30:
-            _context.next = 32;
+          case 28:
+            _context.next = 30;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/postCommentProfile', formEntries, options);
-          case 32:
+          case 30:
             response = _context.sent;
-            _result = response.data.message;
-          case 34:
-            _context.next = 66;
+          case 31:
+            _context.next = 63;
             break;
-          case 36:
+          case 33:
             if (!elementId.includes("submitPost")) {
-              _context.next = 52;
+              _context.next = 49;
               break;
             }
-            // LISTEN TO THE SUBMIT EVENT 
-            // 2. GET THE FORM id
-            // 3. POST TO THE SERVER USING AXIOS POST
-            //4. GET THE POST FROM THE SERVER USING AXIOS GET 
-            //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
-
             e.preventDefault();
             formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal');
             formData = new FormData(formExtra); // get the requesterFamCode from the localStorage 
@@ -715,21 +698,21 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 44;
+            _context.next = 41;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post("/member/profilePage/post", formData, options);
-          case 44:
+          case 41:
             _response = _context.sent;
-            _context.next = 47;
+            _context.next = 44;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _response.data.message);
-          case 47:
+          case 44:
             getNewResponse = _context.sent;
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 66;
+            _context.next = 63;
             break;
-          case 52:
+          case 49:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 65;
+              _context.next = 62;
               break;
             }
             // Extract the user ID from the target ID
@@ -741,9 +724,9 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 61;
+            _context.next = 58;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 61:
+          case 58:
             _response2 = _context.sent;
             if (_response2.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
@@ -755,9 +738,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 66;
+            _context.next = 63;
             break;
-          case 65:
+          case 62:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -767,7 +750,7 @@ try {
                 });
               }
             }
-          case 66:
+          case 63:
           case "end":
             return _context.stop();
         }
@@ -776,7 +759,7 @@ try {
     return function (_x) {
       return _ref.apply(this, arguments);
     };
-  }();
+  }());
 } catch (e) {
   showError(e);
 }
@@ -800,9 +783,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var commentHTML = function commentHTML(data) {
-  var imgURL = data.profileImg ? data.img : data.profileImg;
-  var img = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class='w3-ul w3-border w3-round' id='comment".concat(data.comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(img, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(data.date_created, "' title='").concat(data.date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(data.date_created), " </p> \n              <p class='commentFont'> ").concat(data.comment, "</p>\n            </div>\n          </div>");
+  var profileImg = data.profileImg,
+    date_created = data.date_created,
+    img = data.img,
+    comment = data.comment,
+    comment_no = data.comment_no;
+  var imgURL = profileImg || img;
+  var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
+  return "<div class='w3-ul w3-border w3-round' id='comment".concat(comment_no, "' name='commentDiv'>\n            <div class='w3-container commentDiv'>\n              <img src='").concat(image, "' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>\n              <p class='w3-right w3-opacity commentTiming' datetime='").concat(date_created, "' title='").concat(date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), " </p> \n              <p class='commentFont'> ").concat(comment, "</p>\n            </div>\n          </div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {
@@ -823,10 +811,10 @@ var appendNewComment = function appendNewComment(commentData) {
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
 
-  if (!idDiv) {
-    throw new Error('The comment div id does not exist');
-  }
   var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  if (!commentContainer) {
+    throw new Error("The comment div id does not exist ");
+  }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
@@ -1116,7 +1104,9 @@ __webpack_require__.r(__webpack_exports__);
 
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(el.post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(el.postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(el.post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+  var post_no = el.post_no,
+    postMessage = el.postMessage;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -1132,7 +1122,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   commentForm: () => (/* binding */ commentForm)
 /* harmony export */ });
 var commentForm = function commentForm(data) {
-  return " <p id=\"formComment".concat(data.post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(data.post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(data.post_no, "\" \n      value=").concat(data.post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(data.post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(data.post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
+  var post_no = data.post_no;
+  return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
 };
 
 /***/ }),
@@ -1389,36 +1380,85 @@ try {
 
   // initiate the global object
   state.initialize();
-  var updatePost = function updatePost(e) {
-    // Parse the incoming data and check if it already exists in state
-    var dataForUse = checkOriginAndParsedData(e);
-
-    // Only append if the comment hasn't been added before
-    if (!appendedPosts.has(dataForUse.post_no)) {
-      appendedPosts.add(dataForUse.post_no);
-      (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
-    }
-  };
-  var updateComment = function updateComment(e) {
-    // Parse the incoming data and check if it already exists in state
-    var dataForUse = checkOriginAndParsedData(e);
-
-    // Only append if the comment hasn't been added before
-    if (!appendedComments.has(dataForUse.comment_no)) {
-      appendedComments.add(dataForUse.comment_no);
-      (0,_comment__WEBPACK_IMPORTED_MODULE_3__.appendNewComment)(dataForUse);
-    }
-  };
+  var updatePost = /*#__PURE__*/function () {
+    var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(e) {
+      var dataForUse, response;
+      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            // Parse the incoming data and check if it already exists in state
+            dataForUse = checkOriginAndParsedData(e); // Only append if the comment hasn't been added before
+            if (appendedPosts.has(dataForUse.post_no)) {
+              _context2.next = 14;
+              break;
+            }
+            appendedPosts.add(dataForUse.post_no);
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(dataForUse);
+            (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
+            _context2.prev = 5;
+            _context2.next = 8;
+            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
+              post_status: 'published'
+            });
+          case 8:
+            response = _context2.sent;
+            _context2.next = 14;
+            break;
+          case 11:
+            _context2.prev = 11;
+            _context2.t0 = _context2["catch"](5);
+            console.error("Failed to update comment status: ".concat(_context2.t0.message));
+          case 14:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[5, 11]]);
+    }));
+    return function updatePost(_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+  var updateComment = /*#__PURE__*/function () {
+    var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(e) {
+      var dataForUse, response;
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
+          case 0:
+            // Parse the incoming data and check if it already exists in state
+            dataForUse = checkOriginAndParsedData(e); //   log(dataForUse)
+            // Only append if the comment hasn't been added before
+            if (appendedComments.has(dataForUse.comment_no)) {
+              _context3.next = 13;
+              break;
+            }
+            appendedComments.add(dataForUse.comment_no);
+            (0,_comment__WEBPACK_IMPORTED_MODULE_3__.appendNewComment)(dataForUse);
+            _context3.prev = 4;
+            _context3.next = 7;
+            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
+              comment_status: 'published'
+            });
+          case 7:
+            response = _context3.sent;
+            _context3.next = 13;
+            break;
+          case 10:
+            _context3.prev = 10;
+            _context3.t0 = _context3["catch"](4);
+            console.error("Failed to update comment status: ".concat(_context3.t0.message));
+          case 13:
+          case "end":
+            return _context3.stop();
+        }
+      }, _callee3, null, [[4, 10]]);
+    }));
+    return function updateComment(_x2) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
   var updateLike = function updateLike(e) {
     // Parse the incoming data and check if it already exists in state
     var dataForUse = checkOriginAndParsedData(e);
-
-    // Check if data contains the expected properties
-    if (!dataForUse || !dataForUse.likeCounter || !dataForUse.likeHtmlId) {
-      throw new Error("Invalid data format received for like update:");
-    }
-
-    // // Update the like count in the targeted HTML element
     var likeElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(dataForUse.likeHtmlId);
     if (likeElement) {
       likeElement.innerHTML = parseInt(dataForUse.likeCounter);
@@ -1436,6 +1476,7 @@ try {
   //     sse.onerror = (err) => {
   //         console.warn("SSE connection lost, reconnecting...", err);
   //         sse.close();
+  //         // startLongPolling();
   //         // Correctly pass the arguments on reconnect
   //         setTimeout(() => connectSSE(url, event, callbackFn), 5000); // Attempt to reconnect after 5 seconds
   //     };
@@ -1445,61 +1486,77 @@ try {
   // connectSSE("/comment/newComment", "updateComment", updateComment);
   // connectSSE("/profileCard/getLikes", "updateLike", updateLike);
 
-  // const sseComment = new EventSource("/comment/newComment");
-  // sseComment.addEventListener('updateComment', updateComment);
-
-  // const ssePost = new EventSource("/post/getNewPost");
-  // ssePost.addEventListener('updatePost', updatePost);
-
-  // const sseLikes = new EventSource("/profileCard/getLikes");
-  // // Event listener for likes updates
-  // sseLikes.addEventListener('updateLike', updateLike);
-
-  // sseComment.addEventListener("error", (e) => {
-  //     if (e.target.readyState === EventSource.CLOSED) {
-  //         console.error("Connection was closed. Retrying...");
-  //     }
-  // })
-
   // POLLING FUNCTION 
 
-  var startPolling = function startPolling() {
-    setInterval(/*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
-      var getPostPolling, getCommentPolling;
-      return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
+  // Function to perform long polling for a given endpoint
+  var fetchPollingData = /*#__PURE__*/function () {
+    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(endpoint, updateFunction) {
+      var response;
+      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
           case 0:
-            _context2.prev = 0;
-            _context2.next = 3;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get('/getNewPostPolling');
+            _context4.prev = 0;
+            _context4.next = 3;
+            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(endpoint, {
+              timeout: 30000
+            });
           case 3:
-            getPostPolling = _context2.sent;
-            if (getPostPolling.data.message) {
-              console.log(getPostPolling.data.message);
-              updatePost(getPostPolling.data.message);
+            response = _context4.sent;
+            if (Array.isArray(response.data.message)) {
+              (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(response.data.message);
+              response.data.message.forEach(function (item) {
+                return updateFunction(item);
+              });
             }
-            _context2.next = 7;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get('/getNewCommentPolling');
-          case 7:
-            getCommentPolling = _context2.sent;
-            if (getCommentPolling.data.message) {
-              console.log(getCommentPolling.data.message);
-              updatePost(getCommentPolling.data.message);
-            }
-            _context2.next = 14;
+            _context4.next = 10;
             break;
-          case 11:
-            _context2.prev = 11;
-            _context2.t0 = _context2["catch"](0);
-            console.error('Error during polling:', _context2.t0);
-          case 14:
+          case 7:
+            _context4.prev = 7;
+            _context4.t0 = _context4["catch"](0);
+            if (_context4.t0.code === 'ECONNABORTED') {
+              console.warn("Long polling connection timed out for ".concat(endpoint, ". Retrying..."));
+            } else {
+              console.error("Error fetching data from ".concat(endpoint, ":"), _context4.t0);
+            }
+          case 10:
           case "end":
-            return _context2.stop();
+            return _context4.stop();
         }
-      }, _callee2, null, [[0, 11]]);
-    })), 10000);
-  };
-  startPolling();
+      }, _callee4, null, [[0, 7]]);
+    }));
+    return function fetchPollingData(_x3, _x4) {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+
+  // Main long polling function
+  (function () {
+    var _startLongPolling = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+        while (1) switch (_context5.prev = _context5.next) {
+          case 0:
+            if (false) {}
+            _context5.next = 3;
+            return Promise.all([fetchPollingData('/getNewPostPolling', updatePost), fetchPollingData('/getNewCommentPolling', updateComment), fetchPollingData('/getNewLikesPolling', updateLike)]);
+          case 3:
+            _context5.next = 5;
+            return new Promise(function (resolve) {
+              return setTimeout(resolve, 3000);
+            });
+          case 5:
+            _context5.next = 0;
+            break;
+          case 7:
+          case "end":
+            return _context5.stop();
+        }
+      }, _callee5);
+    }));
+    function startLongPolling() {
+      return _startLongPolling.apply(this, arguments);
+    }
+    return startLongPolling;
+  })()();
 
   // AUTOMATICALLY UPDATE TIMESTAMP
   // Function to check for elements and render if they exist every 5 seconds
@@ -1509,12 +1566,15 @@ try {
   }, 5000); // Adjust interval as needed
 
   var checkOriginAndParsedData = function checkOriginAndParsedData(data) {
-    if (!data) throw new Error('No update received');
-    if (data.origin != appUrl) {
-      console.warn("Invalid origin detected:");
-      throw new Error('No update received');
+    // if (!data) throw new Error('No update received');
+    if (data) {
+      if (data.origin != appUrl) {
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)('Invalid Origin');
+      }
+      return data;
     }
-    return JSON.parse(data.data);
+    // check if data is a valid jason object
+    // return JSON.parse(data)
   };
 } catch (error) {
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
@@ -1611,19 +1671,27 @@ var allPost = function allPost(postData, commentData) {
  * @returns {boolean} - Returns false if the post object is invalid.
  */
 var appendNewPost = function appendNewPost(el) {
-  if (!el) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.msgException)('Invalid post');
-  }
-  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("formComment".concat(el.post_no));
-  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("inputComment".concat(el.post_no));
-  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("submitComment".concat(el.post_no));
+  var post_no = el.post_no;
+  // Generate the IDs for the comment form and its components const 
+  var commentFormId = "formComment".concat(post_no);
+  var inputCommentId = "inputComment".concat(post_no);
+  var submitCommentId = "submitComment".concat(post_no);
+
+  // Check if the comment form components exist in the DOM
+  var commentForm1 = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(commentFormId);
+  var inputComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(inputCommentId);
+  var submitComment = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(submitCommentId);
+
+  // If the comment form components do not exist, create and append the new post
   if (!commentForm1 || !inputComment || !submitComment) {
     var appendHTML = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el);
-    if (el.postFamCode === famCode) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
-    } else {
-      return false;
-    }
+
+    // Ensure the post belongs to the correct family code
+    // if (el.postFamCode === famCode) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('afterbegin', appendHTML);
+    // } else{
+    //   return false
+    // }
   }
 };
 

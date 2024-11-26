@@ -53,43 +53,30 @@ class PostLikeController extends Db
      * @param string $likeCounterId
      */
 
-    public static function getLikesInterim()
+    public static function getNewLikesPolling()
     {
-        // Broadcast to all clients
-        ignore_user_abort(true);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        set_time_limit(0);
-
-
+        header('Content-Type: application/json');
         try {
             // Fetch updated like counts from the database
             $updatedLikes = Post::fetchUpdatedLikes();
-
-            // Emit the event 
-            EventEmitter::emit('likesUpdated', $updatedLikes);
-
-            EventEmitter::on('likesUpdated', function ($updatedLikes) {
+            if ($updatedLikes) {
                 foreach ($updatedLikes as $postLikes) {
-                    $likeCount = $postLikes['post_likes'];
                     $postNo = $postLikes['post_no'];
-                    $likeHTMLId = "likeCounter$postNo";
-                    $data = ['likeCounter' => $likeCount, 'likeHtmlId' => $likeHTMLId,];
+                    // Data to broadcast
+                    $data = [
+                        'origin' => getenv("APP_URL2"),
+                        'likeCounter' => $postLikes['post_likes'],
+                        'likeHtmlId' => "likeCounter$postNo",
+                    ];
 
-                    msgServerSent($data, $postNo, 'updateLike');
+                    msgSuccess(200, $data);
                 }
-            });
-
-
+            }
         } catch (\Throwable $th) {
-            showSSEError($th);
+            showError($th);
         }
 
-        // Keep the connection open 
-        while (true) {
-            usleep(500000); // 0.5 seconds to keep the connection alive }
-        }
+   
     }
 
     public static function getLikes()
@@ -123,7 +110,7 @@ class PostLikeController extends Db
                 } else {
                     exit();
                 }
-                  if (connection_aborted()) break;
+                if (connection_aborted()) break;
                 sleep(5);
             } catch (\Throwable $th) {
                 showSSEError($th);

@@ -1,4 +1,4 @@
-import { log, showError, checkManyElements, id } from '../global'
+import { log, showError, checkManyElements, id, msgException } from '../global'
 import { appendNewPost, allPost } from './post'
 import { render } from "timeago.js"
 import { appendNewComment } from './comment'
@@ -26,10 +26,10 @@ try {
                 this.post = pullData.data.message.post;
                 this.comment = pullData.data.message.comment;
 
-
                 this.comment = this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
 
                 if (this.post.length > 0) {
+
                     // Render posts and comments on the page after data is loaded
                     this.post.forEach(data => allPost(data, this.comment));
                 } else {
@@ -46,47 +46,49 @@ try {
     // initiate the global object
     state.initialize();
 
-
-    const updatePost = (e) => {
+    const updatePost = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
-
         // Only append if the comment hasn't been added before
         if (!appendedPosts.has(dataForUse.post_no)) {
             appendedPosts.add(dataForUse.post_no);
-            appendNewPost(dataForUse);
-        }
 
+            log(dataForUse)
+
+            appendNewPost(dataForUse)
+
+             try { 
+                const response = await axios.put(`/updatePostByStatusAsPublished/${dataForUse.post_no}`, { post_status: 'published' }); 
+       
+            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
+    
+
+
+        }
     };
 
-    const updateComment = (e) => {
-
+    const updateComment = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
-
+        //   log(dataForUse)
         // Only append if the comment hasn't been added before
         if (!appendedComments.has(dataForUse.comment_no)) {
             appendedComments.add(dataForUse.comment_no);
-            appendNewComment(dataForUse);
-        }
 
+            appendNewComment(dataForUse)
+
+            try { 
+                const response = await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' }); 
+
+            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
+
+        }
     };
 
     const updateLike = (e) => {
-
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
-
-
-        // Check if data contains the expected properties
-        if (!dataForUse || !dataForUse.likeCounter || !dataForUse.likeHtmlId) {
-            throw new Error("Invalid data format received for like update:");
-
-        }
-
-        // // Update the like count in the targeted HTML element
         const likeElement = id(dataForUse.likeHtmlId);
-
         if (likeElement) {
             likeElement.innerHTML = parseInt(dataForUse.likeCounter)
         }
@@ -104,6 +106,7 @@ try {
     //     sse.onerror = (err) => {
     //         console.warn("SSE connection lost, reconnecting...", err);
     //         sse.close();
+    //         // startLongPolling();
     //         // Correctly pass the arguments on reconnect
     //         setTimeout(() => connectSSE(url, event, callbackFn), 5000); // Attempt to reconnect after 5 seconds
     //     };
@@ -114,50 +117,39 @@ try {
     // connectSSE("/comment/newComment", "updateComment", updateComment);
     // connectSSE("/profileCard/getLikes", "updateLike", updateLike);
 
-
-
-    // const sseComment = new EventSource("/comment/newComment");
-    // sseComment.addEventListener('updateComment', updateComment);
-
-    // const ssePost = new EventSource("/post/getNewPost");
-    // ssePost.addEventListener('updatePost', updatePost);
-
-    // const sseLikes = new EventSource("/profileCard/getLikes");
-    // // Event listener for likes updates
-    // sseLikes.addEventListener('updateLike', updateLike);
-
-
-    // sseComment.addEventListener("error", (e) => {
-    //     if (e.target.readyState === EventSource.CLOSED) {
-    //         console.error("Connection was closed. Retrying...");
-    //     }
-    // })
-
     // POLLING FUNCTION 
 
-   const startPolling = () => {
-    setInterval(async () => {
+    // Function to perform long polling for a given endpoint
+    const fetchPollingData = async (endpoint, updateFunction) => {
         try {
-            const getPostPolling = await axios.get('/getNewPostPolling');
-            if (getPostPolling.data.message) {
-                console.log(getPostPolling.data.message);
-                updatePost(getPostPolling.data.message);
-            }
+            const response = await axios.get(endpoint, { timeout: 30000 });
 
-            const getCommentPolling = await axios.get('/getNewCommentPolling');
-            if (getCommentPolling.data.message) {
-                console.log(getCommentPolling.data.message);
-                updatePost(getCommentPolling.data.message);
+            if (Array.isArray(response.data.message)) {
+                log(response.data.message)
+                response.data.message.forEach(item => updateFunction(item))
+
             }
         } catch (error) {
-            console.error('Error during polling:', error);
+            if (error.code === 'ECONNABORTED') {
+                console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
+            } else {
+                console.error(`Error fetching data from ${endpoint}:`, error);
+            }
         }
-    }, 10000);
-}
+    };
 
-startPolling();
+    // Main long polling function
+    (async function startLongPolling() {
+        while (true) {
+            await Promise.all([
+                fetchPollingData('/getNewPostPolling', updatePost),
+                fetchPollingData('/getNewCommentPolling', updateComment),
+                fetchPollingData('/getNewLikesPolling', updateLike)
+            ]);
 
-
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 5 seconds before retrying
+        }
+    })()
 
     // AUTOMATICALLY UPDATE TIMESTAMP
     // Function to check for elements and render if they exist every 5 seconds
@@ -168,20 +160,14 @@ startPolling();
 
 
     const checkOriginAndParsedData = (data) => {
-        if (!data) throw new Error('No update received');
-
-        if (data.origin != appUrl) {
-            console.warn("Invalid origin detected:");
-            throw new Error('No update received');
-
+        // if (!data) throw new Error('No update received');
+        if (data) {
+            if (data.origin != appUrl) { msgException('Invalid Origin'); }
+            return data
         }
-
-        return JSON.parse(data.data)
+        // check if data is a valid jason object
+        // return JSON.parse(data)
     }
-
-
-
-
 
 } catch (error) {
     showError(error)

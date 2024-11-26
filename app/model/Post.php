@@ -112,22 +112,34 @@ class Post extends Select
 
     static function getUnpublishedPost(): array|int|string
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: 'post_status', orderBy: "ORDER BY post_no DESC");
+        $query = parent::formAndMatchQuery(
+            selection: "SELECT_ONE", 
+            table: 'post', 
+            identifier1: 'post_status', 
+            orderBy: "ORDER BY post_no DESC"
+        );
         $result = parent::selectFn2(query: $query, bind: ["new"]);
         return $result;
     }
+
+    
 
     static function getUnpublishedComment(): array|int|string
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: 'comment_status', orderBy: "ORDER BY comment_no DESC");
-        $result = parent::selectFn2(query: $query, bind: ["new"]);
-        return $result;
+        $query = parent::formAndMatchQuery(
+            selection: "SELECT_ONE", 
+            table: 'comment', 
+            identifier1: 'comment_status', 
+            orderBy: "ORDER BY comment_no DESC"
+        );
+        return parent::selectFn2(query: $query, bind: ["new"]);
+ 
     }
 
-    static function updatePostByStatusAsPublished($id): bool
+    static function updatePostByStatusAsPublished($postNo): bool
     {
         $newUpdate = new Update('post');
-        $result =  $newUpdate->updateTable(column: 'post_status', columnAnswer: "published", identifier: 'id', identifierAnswer: $id);
+        $result =  $newUpdate->updateTable(column: 'post_status', columnAnswer: "published", identifier: 'post_no', identifierAnswer: $postNo);
         if (!$result) {
             msgException(500, "Database update failed");
             return false;
@@ -135,10 +147,10 @@ class Post extends Select
         return $result;
     }
 
-    static function updateCommentByStatusAsPublished($postNo): bool
+    static function updateCommentByStatusAsPublished($commentNo): bool
     {
         $newUpdate = new Update('comment');
-        $result =  $newUpdate->updateTable(column: 'comment_status', columnAnswer: "published", identifier: 'post_no', identifierAnswer: $postNo);
+        $result =  $newUpdate->updateTable(column: 'comment_status', columnAnswer: "published", identifier: 'comment_no', identifierAnswer: $commentNo);
         if (!$result) {
             msgException(500, "Database update failed");
             return false;

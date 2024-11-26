@@ -203,12 +203,12 @@ function cleanSession($x): string|null|int
 
 function showError($th): void
 {
-
+    error_log("Error: " . $th->getMessage());
     $errorCode = (int) $th->getCode();
     http_response_code($errorCode); // sets the response to 406
     $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n";
 
-    echo json_encode(['message' => $error]);
+    echo json_encode(['error' => $error]);
 }
 
 /**
@@ -533,3 +533,7 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
+
+
+
+

@@ -3,6 +3,7 @@
 namespace App\controller;
 
 use App\classes\{Update, Select};
+use App\model\Post;
 
 class Index
 {
@@ -48,7 +49,7 @@ class Index
 
         if ($_SESSION['id'] == $id) {
             view('accountSetting', ['accountData' => $accountData]);
-        } 
+        }
     }
 
 
@@ -61,7 +62,9 @@ class Index
             'min' => [2, 2, 2],
             'max' => [20, 16, 30],
             'data' => [
-                'country', 'mobile', 'email'
+                'country',
+                'mobile',
+                'email'
             ]
         ];
 
@@ -132,5 +135,76 @@ class Index
 
         return $result;
     }
-    
+
+    public static function checking()
+{
+    header('Content-Type: text/event-stream');
+    header('Cache-Control: no-cache');
+    header('Connection: keep-alive');
+
+       $maxDuration = 300; // 5 minutes
+        $startTime = time();
+
+        while(true) {
+                $getUnpublishedPost = Post::getUnpublishedPost();
+                printArr($getUnpublishedPost);
+                echo ": heartbeat\n\n";
+
+        }
+
+     
+
+    // Infinite loop to keep the connection alive
+    // while (time() - $startTime < $maxDuration) {
+    //     // Check if the client has disconnected
+    //     if (connection_aborted()) {
+    //         break;
+    //     }
+
+    //     // // Fetch unpublished posts
+    //     // $getUnpublishedPost = Post::getUnpublishedPost();
+
+    //     // foreach ($getUnpublishedPost as $post) {
+    //     //     $response = $post;
+    //     //     $postNo = $post['id'];
+
+    //     //     // Send the event
+    //     //     self::msgServerSent(
+    //     //         data: $response,
+    //     //         id: $postNo,
+    //     //         event: 'updatePost'
+    //     //     );
+
+    //     // Post::updatePostByStatusAsPublished($postNo);
+    //     // }
+
+    //     // Sleep for a short time before the next iteration to prevent overloading
+     
+
+    //     // Send a heartbeat to keep the connection alive
+       
+        // ob_flush();
+        // flush();
+
+    //        sleep(1);
+    // }
+}
+
+// Helper function to send SSE messages
+private static function msgServerSent(array $data, string $id = null, string $event = null)
+{
+    if ($id) {
+        echo "id: $id\n";
+    }
+
+    if ($event) {
+        echo "event: $event\n";
+    }
+
+    echo "data: " . json_encode($data) . "\n\n";
+
+    ob_flush();
+    flush();
+}
+
 }

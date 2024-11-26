@@ -6,7 +6,8 @@ $router = new AltoRouter;
 include_once __DIR__ ."/home.php";
 include_once __DIR__ ."/dbTable.php";
 include_once __DIR__ . "/register.php";
-
+include_once __DIR__ . "/post.php";
+include_once __DIR__ . "/comment.php";
 include_once __DIR__ . "/login.php";
 include_once __DIR__ . "/realtime.php";
 include_once __DIR__ . "/admin.php";
@@ -21,8 +22,8 @@ include_once __DIR__ . "/webSocket.php";
 
 $router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
 
-$router->map('GET', '/testFunction', 'App\controller\Testphp@testFunction', 'php8');
-$router->map('GET', '/testOrganogram', 'App\controller\TestClass@organogram', 'TestClass');
+$router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');
+
 
 $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS');
 

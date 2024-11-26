@@ -14,38 +14,30 @@ try {
     const famCode = localStorage.getItem('requesterFamCode');
 
     // CLICK EVENT get the comment and like button from the document
-    document.onclick = async (e) => {
+    document.addEventListener('click', async (e) => {  //document.onclick = async (e) => {
 
         const elementId = e.target.id
         const postId = e.target.name
 
+        // Handle Like Button Click
         if (elementId.includes("likeButton")) {
-
 
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
-            let likeCounterVal = id(likeCounterId).innerHTML.trim(); // trim removes leading and trailing spaces
-            likeCounterVal = likeCounterVal.replace(/\n/g, '')
+            // trim removes leading and trailing spaces
+            let likeCounterVal = id(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
             const result = await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
 
-            result.data.message
 
-            // Make the comment form to appear onclick. initcomment is the id of the comment button 
+            // Make the comment form to appear onclick. 
         } else if (elementId.includes("initComment")) {
-
             const commentFormId = elementId.replace('init', 'form')
-
             id(commentFormId).style.display = "block"
 
-            // Submit function for comment using POST API
-        } else if (elementId.includes("submitComment")) {      //elementId == submitComment511
-
-            // 0.5 LISTEN FOR THE SUBMIT EVENT
-            // 0.7 GET THE COMMENT FORM ID 
-            // 1. POST SENDS BACK THE LAST COMMENT NO POSTED
-            // 2. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS
+           // Handle Comment Submission
+        } else if (elementId.includes("submitComment")) {     
 
             e.preventDefault()
 
@@ -55,7 +47,6 @@ try {
             id(idForm).style.display = "none"
             // extract the form entries
             const form = id(idForm)
-
             let formEntries = new FormData(form)
 
             // if the comment form input is empty. Get the input id and check 
@@ -66,23 +57,15 @@ try {
                 alert("Please enter a comment before submitting")
             } else {
 
-                // 1.
                 const response = await axios.post('/postCommentProfile', formEntries, options)
-                const result = response.data.message
+                
 
             }
             // SUBMIT THE POST
         } else if (elementId.includes("submitPost")) {
 
-            // LISTEN TO THE SUBMIT EVENT 
-            // 2. GET THE FORM id
-            // 3. POST TO THE SERVER USING AXIOS POST
-            //4. GET THE POST FROM THE SERVER USING AXIOS GET 
-            //5. SEND IT TO THE EVENT SOURCE OBJECT AT LOADPOST.JS 
-
             e.preventDefault()
-            const formExtra = id('formPostMessageModal')
-         
+            const formExtra = id('formPostMessageModal')        
             const formData = new FormData(formExtra)
             // get the requesterFamCode from the localStorage 
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
@@ -91,13 +74,10 @@ try {
 
             // 3. 
             const response = await axios.post("/member/profilePage/post", formData, options)
-
             const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
 
 
             id('id01').style.display = 'none'
-
-
             id("formPostMessageModal").reset();
 
         }     // add/delete to/from the notificatn bar 
@@ -149,7 +129,7 @@ try {
         }
 
 
-    }
+    })
 } catch (e) { 
     showError(e)
 }
