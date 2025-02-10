@@ -7,6 +7,20 @@ $router->map(
   name: 'startServer'
 );
 
+// $router->map(
+//   method: 'GET', 
+//   route: '/sse', 
+//   target: 'App\controller\WebSocketController@sendSSEResponse', 
+//   name: 'sse'
+// );
+
+// $router->map(
+//   method: 'GET', 
+//   route: '/getsse', 
+//   target: 'App\controller\WebSocketController@getSSEResponse', 
+//   name: 'sseget'
+// );
+
 $router->map(
   method: 'GET', 
   route: '/getNewPostPolling', 

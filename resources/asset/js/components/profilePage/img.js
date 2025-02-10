@@ -15,7 +15,7 @@ showImageFileUploadFn('uploadButtonProfilePics', 'profileImageFile', 'profileImg
 showImageFileUploadFn('uploadButton', 'post_img', 'postModalImgFileNames')
 
 
-id('submitProfilePics').addEventListener('click', ()=> {
+id('submitProfilePics').addEventListener('click', ()=> {23
 
   // Get the form element
     const form = document.getElementById("formProfilePics");

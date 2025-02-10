@@ -57,7 +57,7 @@ try {
                 alert("Please enter a comment before submitting")
             } else {
 
-                const response = await axios.post('/postCommentProfile', formEntries, options)
+                await axios.post('/postCommentProfile', formEntries, options)
                 
 
             }
@@ -74,7 +74,7 @@ try {
 
             // 3. 
             const response = await axios.post("/member/profilePage/post", formData, options)
-            const getNewResponse = await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
+            await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
 
 
             id('id01').style.display = 'none'

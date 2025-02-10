@@ -8,8 +8,8 @@ import axios from "axios"
 
 // set an empty array
 try {
-
-
+    const appendedComments = new Set(); // To track unique comments
+    const appendedPosts = new Set(); // To track unique comments
 
     // Global state object with data-fetching and initialization logic
     const state = {
@@ -47,22 +47,19 @@ try {
     state.initialize();
 
     const updatePost = async (e) => {
+        log("wear")
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
         // Only append if the comment hasn't been added before
         if (!appendedPosts.has(dataForUse.post_no)) {
             appendedPosts.add(dataForUse.post_no);
 
-            log(dataForUse)
-
             appendNewPost(dataForUse)
 
-             try { 
-                const response = await axios.put(`/updatePostByStatusAsPublished/${dataForUse.post_no}`, { post_status: 'published' }); 
-       
-            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
-    
+            try {
+                await axios.put(`/updatePostByStatusAsPublished/${dataForUse.post_no}`, { post_status: 'published' });
 
+            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
 
         }
     };
@@ -75,13 +72,15 @@ try {
         if (!appendedComments.has(dataForUse.comment_no)) {
             appendedComments.add(dataForUse.comment_no);
 
-            appendNewComment(dataForUse)
+            // check if dataForUse length is greater than 0 and if yes foreach to lop 
 
-            try { 
-                const response = await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' }); 
+                    appendNewComment(dataForUse)
 
-            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
+                try {
+                    await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' });
 
+                } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
+         
         }
     };
 
@@ -94,8 +93,9 @@ try {
         }
     };
 
-    const appendedComments = new Set(); // To track unique comments
-    const appendedPosts = new Set(); // To track unique comments
+    
+
+  
 
     // Establish an EventSource for receiving like updates
     // const connectSSE = (url, event, callbackFn) => {
@@ -141,30 +141,32 @@ try {
     // Main long polling function
     (async function startLongPolling() {
         while (true) {
+
             await Promise.all([
                 fetchPollingData('/getNewPostPolling', updatePost),
                 fetchPollingData('/getNewCommentPolling', updateComment),
                 fetchPollingData('/getNewLikesPolling', updateLike)
             ]);
 
-            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 5 seconds before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 5 seconds before retrying
         }
-    })()
+    })();
 
     // AUTOMATICALLY UPDATE TIMESTAMP
     // Function to check for elements and render if they exist every 5 seconds
     setInterval(() => {
         checkManyElements('class', ".timeago", render);
         checkManyElements('class', ".commentTiming", render);
-    }, 5000); // Adjust interval as needed
+    }, 2000); // Adjust interval as needed
 
 
     const checkOriginAndParsedData = (data) => {
-        // if (!data) throw new Error('No update received');
+        if (!data) throw new Error('No update received');
         if (data) {
             if (data.origin != appUrl) { msgException('Invalid Origin'); }
             return data
         }
+        
         // check if data is a valid jason object
         // return JSON.parse(data)
     }

@@ -624,7 +624,7 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, response, formExtra, formData, requesterFamCodeValue, _response, getNewResponse, senderId, elementData, data, notificationHTML, url, _response2, newValues, friendRequestSection;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, senderId, elementData, data, notificationHTML, url, _response, newValues, friendRequestSection;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -643,7 +643,7 @@ try {
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
           case 8:
             result = _context.sent;
-            _context.next = 63;
+            _context.next = 61;
             break;
           case 11:
             if (!elementId.includes("initComment")) {
@@ -654,11 +654,11 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.next = 63;
+            _context.next = 61;
             break;
           case 16:
             if (!elementId.includes("submitComment")) {
-              _context.next = 33;
+              _context.next = 32;
               break;
             }
             e.preventDefault();
@@ -676,19 +676,17 @@ try {
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 31;
+            _context.next = 30;
             break;
           case 28:
             _context.next = 30;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/postCommentProfile', formEntries, options);
           case 30:
-            response = _context.sent;
-          case 31:
-            _context.next = 63;
+            _context.next = 61;
             break;
-          case 33:
+          case 32:
             if (!elementId.includes("submitPost")) {
-              _context.next = 49;
+              _context.next = 47;
               break;
             }
             e.preventDefault();
@@ -698,21 +696,20 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 41;
+            _context.next = 40;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post("/member/profilePage/post", formData, options);
-          case 41:
-            _response = _context.sent;
-            _context.next = 44;
-            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + _response.data.message);
-          case 44:
-            getNewResponse = _context.sent;
+          case 40:
+            response = _context.sent;
+            _context.next = 43;
+            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
+          case 43:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 63;
+            _context.next = 61;
             break;
-          case 49:
+          case 47:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 62;
+              _context.next = 60;
               break;
             }
             // Extract the user ID from the target ID
@@ -724,11 +721,11 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 58;
+            _context.next = 56;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 58:
-            _response2 = _context.sent;
-            if (_response2.data.message === "success") {
+          case 56:
+            _response = _context.sent;
+            if (_response.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
               notificationHTML.remove();
 
@@ -738,9 +735,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 63;
+            _context.next = 61;
             break;
-          case 62:
+          case 60:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -750,7 +747,7 @@ try {
                 });
               }
             }
-          case 63:
+          case 61:
           case "end":
             return _context.stop();
         }
@@ -1253,6 +1250,8 @@ __webpack_require__.r(__webpack_exports__);
 
 (0,_helper_images__WEBPACK_IMPORTED_MODULE_1__.showImageFileUploadFn)('uploadButton', 'post_img', 'postModalImgFileNames');
 (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitProfilePics').addEventListener('click', function () {
+  23;
+
   // Get the form element
   var form = document.getElementById("formProfilePics");
 
@@ -1333,6 +1332,9 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 // set an empty array
 try {
+  var appendedComments = new Set(); // To track unique comments
+  var appendedPosts = new Set(); // To track unique comments
+
   // Global state object with data-fetching and initialization logic
   var state = {
     post: [],
@@ -1382,18 +1384,18 @@ try {
   state.initialize();
   var updatePost = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(e) {
-      var dataForUse, response;
+      var dataForUse;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("wear");
             // Parse the incoming data and check if it already exists in state
             dataForUse = checkOriginAndParsedData(e); // Only append if the comment hasn't been added before
             if (appendedPosts.has(dataForUse.post_no)) {
-              _context2.next = 14;
+              _context2.next = 13;
               break;
             }
             appendedPosts.add(dataForUse.post_no);
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(dataForUse);
             (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
             _context2.prev = 5;
             _context2.next = 8;
@@ -1401,18 +1403,17 @@ try {
               post_status: 'published'
             });
           case 8:
-            response = _context2.sent;
-            _context2.next = 14;
+            _context2.next = 13;
             break;
-          case 11:
-            _context2.prev = 11;
+          case 10:
+            _context2.prev = 10;
             _context2.t0 = _context2["catch"](5);
             console.error("Failed to update comment status: ".concat(_context2.t0.message));
-          case 14:
+          case 13:
           case "end":
             return _context2.stop();
         }
-      }, _callee2, null, [[5, 11]]);
+      }, _callee2, null, [[5, 10]]);
     }));
     return function updatePost(_x) {
       return _ref.apply(this, arguments);
@@ -1420,7 +1421,7 @@ try {
   }();
   var updateComment = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3(e) {
-      var dataForUse, response;
+      var dataForUse;
       return _regeneratorRuntime().wrap(function _callee3$(_context3) {
         while (1) switch (_context3.prev = _context3.next) {
           case 0:
@@ -1428,10 +1429,13 @@ try {
             dataForUse = checkOriginAndParsedData(e); //   log(dataForUse)
             // Only append if the comment hasn't been added before
             if (appendedComments.has(dataForUse.comment_no)) {
-              _context3.next = 13;
+              _context3.next = 12;
               break;
             }
             appendedComments.add(dataForUse.comment_no);
+
+            // check if dataForUse length is greater than 0 and if yes foreach to lop 
+
             (0,_comment__WEBPACK_IMPORTED_MODULE_3__.appendNewComment)(dataForUse);
             _context3.prev = 4;
             _context3.next = 7;
@@ -1439,18 +1443,17 @@ try {
               comment_status: 'published'
             });
           case 7:
-            response = _context3.sent;
-            _context3.next = 13;
+            _context3.next = 12;
             break;
-          case 10:
-            _context3.prev = 10;
+          case 9:
+            _context3.prev = 9;
             _context3.t0 = _context3["catch"](4);
             console.error("Failed to update comment status: ".concat(_context3.t0.message));
-          case 13:
+          case 12:
           case "end":
             return _context3.stop();
         }
-      }, _callee3, null, [[4, 10]]);
+      }, _callee3, null, [[4, 9]]);
     }));
     return function updateComment(_x2) {
       return _ref2.apply(this, arguments);
@@ -1464,8 +1467,6 @@ try {
       likeElement.innerHTML = parseInt(dataForUse.likeCounter);
     }
   };
-  var appendedComments = new Set(); // To track unique comments
-  var appendedPosts = new Set(); // To track unique comments
 
   // Establish an EventSource for receiving like updates
   // const connectSSE = (url, event, callbackFn) => {
@@ -1541,7 +1542,7 @@ try {
           case 3:
             _context5.next = 5;
             return new Promise(function (resolve) {
-              return setTimeout(resolve, 3000);
+              return setTimeout(resolve, 2000);
             });
           case 5:
             _context5.next = 0;
@@ -1563,16 +1564,17 @@ try {
   setInterval(function () {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.checkManyElements)('class', ".timeago", timeago_js__WEBPACK_IMPORTED_MODULE_2__.render);
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.checkManyElements)('class', ".commentTiming", timeago_js__WEBPACK_IMPORTED_MODULE_2__.render);
-  }, 5000); // Adjust interval as needed
+  }, 2000); // Adjust interval as needed
 
   var checkOriginAndParsedData = function checkOriginAndParsedData(data) {
-    // if (!data) throw new Error('No update received');
+    if (!data) throw new Error('No update received');
     if (data) {
       if (data.origin != appUrl) {
         (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)('Invalid Origin');
       }
       return data;
     }
+
     // check if data is a valid jason object
     // return JSON.parse(data)
   };

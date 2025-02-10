@@ -29,4 +29,9 @@ $router->map(
   target: 'App\controller\members\PostMessage@getNewPostSSE', name: 'get_new_post_FOR_SSE');
 
   // GET NEW POST
-$router->map('GET', '/post/getAllPost/update', 'App\controller\members\PostMessage@update', 'all_posts_update');
+$router->map(
+  method: 'GET', 
+  route: '/post/getAllPost/update', 
+  target: 'App\controller\members\PostMessage@update', 
+  name: 'all_posts_update'
+);

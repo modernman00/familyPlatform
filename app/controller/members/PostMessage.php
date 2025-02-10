@@ -201,14 +201,14 @@ class PostMessage
 
     public static function getNewCommentPolling()
     {
-        self::fetchAndRespond(fetchFunction: [Post::class, 'getUnpublishedComment']);
+        self::fetchAndRespond( fetchFunction: [Post::class, 'getUnpublishedComment']);
     }
 
-    private static function fetchAndRespond(callable $fetchFunction, array $params): void
+    private static function fetchAndRespond(callable $fetchFunction, array $params = null): void
     {
         header('Content-Type: application/json');
         try {
-            $items = $fetchFunction(...$params);
+            $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
             $response = [];
             if ($items) {
                 foreach ($items as $item) {
