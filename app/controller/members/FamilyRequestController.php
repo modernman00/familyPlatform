@@ -155,7 +155,7 @@ class FamilyRequestController extends Select
 
 
     // Set the session variable to indicate that the code has executed
-    $_SESSION['preventReload'] = $_GET['appr'];
+    $_SESSION['preventReload'] = checkInput($appr);
 
     if (isset($req) && isset($appr)) {
       $requester = checkInput($req);
@@ -249,7 +249,7 @@ class FamilyRequestController extends Select
           // if the source is from the profile page, refresh the page or use javascript to manage it 
 
 
-          $requestApprovalFromProfilePage = isset($_GET['src']) ? checkInput($_GET['src']) : null;
+          $requestApprovalFromProfilePage = $src ?? null;
 
           if ($requestApprovalFromProfilePage === "pp") {
             header("location: /member/ProfilePage");
