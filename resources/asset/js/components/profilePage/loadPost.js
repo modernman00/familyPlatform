@@ -8,6 +8,7 @@ import axios from "axios"
 
 // set an empty array
 try {
+    const MAX_APPENDED_POSTS = 1000; // Set a maximum limit
     const appendedComments = new Set(); // To track unique comments
     const appendedPosts = new Set(); // To track unique comments
 
@@ -47,12 +48,18 @@ try {
     state.initialize();
 
     const updatePost = async (e) => {
-        log("wear")
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
         // Only append if the comment hasn't been added before
         if (!appendedPosts.has(dataForUse.post_no)) {
             appendedPosts.add(dataForUse.post_no);
+
+            // Clean up old entries if the set exceeds the limit
+        if (appendedPosts.size > MAX_APPENDED_POSTS) {
+            const oldestPost = appendedPosts.values().next().value;
+            appendedPosts.delete(oldestPost);
+        }
+
 
             appendNewPost(dataForUse)
 
@@ -74,13 +81,13 @@ try {
 
             // check if dataForUse length is greater than 0 and if yes foreach to lop 
 
-                    appendNewComment(dataForUse)
+            appendNewComment(dataForUse)
 
-                try {
-                    await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' });
+            try {
+                await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' });
 
-                } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
-         
+            } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
+
         }
     };
 
@@ -93,9 +100,9 @@ try {
         }
     };
 
-    
 
-  
+
+
 
     // Establish an EventSource for receiving like updates
     // const connectSSE = (url, event, callbackFn) => {
@@ -125,7 +132,7 @@ try {
             const response = await axios.get(endpoint, { timeout: 30000 });
 
             if (Array.isArray(response.data.message)) {
-                log(response.data.message)
+
                 response.data.message.forEach(item => updateFunction(item))
 
             }
@@ -135,20 +142,26 @@ try {
             } else {
                 console.error(`Error fetching data from ${endpoint}:`, error);
             }
+
+            // Retry the request after a delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            fetchPollingData(endpoint, updateFunction); // Recursive call
         }
     };
 
     // Main long polling function
     (async function startLongPolling() {
         while (true) {
-
-            await Promise.all([
-                fetchPollingData('/getNewPostPolling', updatePost),
-                fetchPollingData('/getNewCommentPolling', updateComment),
-                fetchPollingData('/getNewLikesPolling', updateLike)
-            ]);
-
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 5 seconds before retrying
+            try {
+                await Promise.all([
+                    fetchPollingData('/getNewPostPolling', updatePost),
+                    fetchPollingData('/getNewCommentPolling', updateComment),
+                    fetchPollingData('/getNewLikesPolling', updateLike)
+                ]);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
         }
     })();
 
@@ -166,7 +179,7 @@ try {
             if (data.origin != appUrl) { msgException('Invalid Origin'); }
             return data
         }
-        
+
         // check if data is a valid jason object
         // return JSON.parse(data)
     }

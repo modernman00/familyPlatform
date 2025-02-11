@@ -1332,6 +1332,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 // set an empty array
 try {
+  var MAX_APPENDED_POSTS = 1000; // Set a maximum limit
   var appendedComments = new Set(); // To track unique comments
   var appendedPosts = new Set(); // To track unique comments
 
@@ -1384,11 +1385,10 @@ try {
   state.initialize();
   var updatePost = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(e) {
-      var dataForUse;
+      var dataForUse, oldestPost;
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("wear");
             // Parse the incoming data and check if it already exists in state
             dataForUse = checkOriginAndParsedData(e); // Only append if the comment hasn't been added before
             if (appendedPosts.has(dataForUse.post_no)) {
@@ -1396,6 +1396,12 @@ try {
               break;
             }
             appendedPosts.add(dataForUse.post_no);
+
+            // Clean up old entries if the set exceeds the limit
+            if (appendedPosts.size > MAX_APPENDED_POSTS) {
+              oldestPost = appendedPosts.values().next().value;
+              appendedPosts["delete"](oldestPost);
+            }
             (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
             _context2.prev = 5;
             _context2.next = 8;
@@ -1490,7 +1496,7 @@ try {
   // POLLING FUNCTION 
 
   // Function to perform long polling for a given endpoint
-  var fetchPollingData = /*#__PURE__*/function () {
+  var _fetchPollingData = /*#__PURE__*/function () {
     var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(endpoint, updateFunction) {
       var response;
       return _regeneratorRuntime().wrap(function _callee4$(_context4) {
@@ -1504,12 +1510,11 @@ try {
           case 3:
             response = _context4.sent;
             if (Array.isArray(response.data.message)) {
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(response.data.message);
               response.data.message.forEach(function (item) {
                 return updateFunction(item);
               });
             }
-            _context4.next = 10;
+            _context4.next = 13;
             break;
           case 7:
             _context4.prev = 7;
@@ -1519,7 +1524,15 @@ try {
             } else {
               console.error("Error fetching data from ".concat(endpoint, ":"), _context4.t0);
             }
-          case 10:
+
+            // Retry the request after a delay
+            _context4.next = 12;
+            return new Promise(function (resolve) {
+              return setTimeout(resolve, 2000);
+            });
+          case 12:
+            _fetchPollingData(endpoint, updateFunction); // Recursive call
+          case 13:
           case "end":
             return _context4.stop();
         }
@@ -1537,21 +1550,29 @@ try {
         while (1) switch (_context5.prev = _context5.next) {
           case 0:
             if (false) {}
-            _context5.next = 3;
-            return Promise.all([fetchPollingData('/getNewPostPolling', updatePost), fetchPollingData('/getNewCommentPolling', updateComment), fetchPollingData('/getNewLikesPolling', updateLike)]);
-          case 3:
-            _context5.next = 5;
+            _context5.prev = 1;
+            _context5.next = 4;
+            return Promise.all([_fetchPollingData('/getNewPostPolling', updatePost), _fetchPollingData('/getNewCommentPolling', updateComment), _fetchPollingData('/getNewLikesPolling', updateLike)]);
+          case 4:
+            _context5.next = 9;
+            break;
+          case 6:
+            _context5.prev = 6;
+            _context5.t0 = _context5["catch"](1);
+            console.error('Error fetching data:', _context5.t0);
+          case 9:
+            _context5.next = 11;
             return new Promise(function (resolve) {
               return setTimeout(resolve, 2000);
             });
-          case 5:
+          case 11:
             _context5.next = 0;
             break;
-          case 7:
+          case 13:
           case "end":
             return _context5.stop();
         }
-      }, _callee5);
+      }, _callee5, null, [[1, 6]]);
     }));
     function startLongPolling() {
       return _startLongPolling.apply(this, arguments);

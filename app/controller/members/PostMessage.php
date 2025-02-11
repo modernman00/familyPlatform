@@ -231,8 +231,6 @@ class PostMessage
     }
 
 
-
-
     public static function getNewPostAndEmail()
     {
         try {
