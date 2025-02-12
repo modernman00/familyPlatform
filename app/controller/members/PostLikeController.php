@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 
-use App\classes\{Db, AllFunctionalities, EventEmitter};
+use App\classes\{Db, AllFunctionalities, EventEmitter, Pusher};
 use App\model\Post;
 
 
@@ -79,45 +79,71 @@ class PostLikeController extends Db
    
     }
 
-    public static function getLikes()
+    public static function getNewLikesPusher()
     {
-        // Broadcast to all clients
-        ignore_user_abort(true);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        set_time_limit(0);
-
-        while (true) {
-            try {
-                // Fetch updated like counts from the database
-                $updatedLikes = Post::fetchUpdatedLikes();
-
-                if ($updatedLikes) {
-                    foreach ($updatedLikes as $postLikes) {
-                        $likeCount = $postLikes['post_likes'];
-                        $postNo = $postLikes['post_no'];
-                        $likeHTMLId = "likeCounter$postNo";
-
-                        // Data to broadcast
-                        $data = [
-                            'likeCounter' => $likeCount,
-                            'likeHtmlId' => $likeHTMLId,
-                        ];
-
-                        msgServerSent($data, $postNo, 'updateLike');
-                    }
-                } else {
-                    exit();
+        try {
+            // Fetch updated like counts from the database
+            $updatedLikes = Post::fetchUpdatedLikes();
+            $response = [];
+            if ($updatedLikes) {
+                foreach ($updatedLikes as $postLikes) {
+                    $postNo = $postLikes['post_no'];
+                    // Data to broadcast
+                    $data = [
+                        'origin' => getenv("APP_URL2"),
+                        'likeCounter' => $postLikes['post_likes'],
+                        'likeHtmlId' => "likeCounter$postNo",
+                    ];
+                    $response[] = $data;
                 }
-                if (connection_aborted()) break;
-                sleep(5);
-            } catch (\Throwable $th) {
-                showSSEError($th);
-                break;
+                Pusher::broadcast('likes-channel', 'like-event', $response);
             }
+        } catch (\Throwable $th) {
+            showError($th);
         }
+
+   
     }
+
+    // public static function getLikes()
+    // {
+    //     // Broadcast to all clients
+    //     ignore_user_abort(true);
+    //     header('Content-Type: text/event-stream');
+    //     header('Cache-Control: no-cache');
+    //     header('Connection: keep-alive');
+    //     set_time_limit(0);
+
+    //     while (true) {
+    //         try {
+    //             // Fetch updated like counts from the database
+    //             $updatedLikes = Post::fetchUpdatedLikes();
+
+    //             if ($updatedLikes) {
+    //                 foreach ($updatedLikes as $postLikes) {
+    //                     $likeCount = $postLikes['post_likes'];
+    //                     $postNo = $postLikes['post_no'];
+    //                     $likeHTMLId = "likeCounter$postNo";
+
+    //                     // Data to broadcast
+    //                     $data = [
+    //                         'likeCounter' => $likeCount,
+    //                         'likeHtmlId' => $likeHTMLId,
+    //                     ];
+
+    //                     msgServerSent($data, $postNo, 'updateLike');
+    //                 }
+    //             } else {
+    //                 exit();
+    //             }
+    //             if (connection_aborted()) break;
+    //             sleep(5);
+    //         } catch (\Throwable $th) {
+    //             showSSEError($th);
+    //             break;
+    //         }
+    //     }
+    // }
 
 
 

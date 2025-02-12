@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\classes\{PushNotificationClass};
+use App\classes\{PushNotificationClass, Pusher};
 
 use App\model\{
     Post,
@@ -83,130 +83,146 @@ class PostMessage
         }
     }
 
+    // public static function getNewCommentSSE()
+    // {
+    //     // Broadcast to all clients
+    //     ignore_user_abort(true);
+    //     header('Content-Type: text/event-stream');
+    //     header('Cache-Control: no-cache');
+    //     header('Connection: keep-alive');
+    //     set_time_limit(0);
+
+    //     try {
+    //         $noNewCommentCount = 0; // Counter for loop cycles without new posts 
+    //         while (true) {
+
+    //             $getUnpublishedComment = Post::getUnpublishedComment();
 
 
-    public static function getNewCommentSSE()
+    //             if ($getUnpublishedComment) {
+
+    //                 foreach ($getUnpublishedComment as $comment) {
+    //                     $commentNo = $comment['post_no'];
+
+    //                     msgServerSent(
+    //                         data: $comment,
+    //                         id: $commentNo,
+    //                         event: 'updateComment'
+    //                     );
+
+    //                     // Post::updateCommentByStatusAsPublished($commentNo);
+
+    //                     // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+    //                 }
+    //             } else {
+
+    //                 $noNewCommentCount++;
+    //                 if ($noNewCommentCount >= 10) {
+    //                     break;
+    //                 }
+    //             }
+    //             if (connection_aborted()) break;
+
+    //             // Sleep briefly to avoid CPU overload
+    //             sleep(5); // 0.5 seconds
+    //         }
+    //     } catch (\Throwable $th) {
+    //         showSSEError($th);
+    //     }
+    // }
+
+    // public static function getNewPostSSE()
+    // {
+
+    //     // Broadcast to all clients
+    //     ignore_user_abort(true);
+    //     header('Content-Type: text/event-stream');
+    //     header('Cache-Control: no-cache');
+    //     header('Connection: keep-alive');
+    //     set_time_limit(0);
+
+    //     $maxDuration = 300; // 5 minutes
+    //     $startTime = time();
+    //     $noNewPostsCount = 0; // Counter for loop cycles without new posts  
+    //     $response = [];
+
+    //     try {
+
+    //         while (time() - $startTime < $maxDuration) {
+
+    //             $getUnpublishedPost = Post::getUnpublishedPost();
+
+    //             if ($getUnpublishedPost) {
+    //                 $noNewPostsCount = 0;
+
+    //                 foreach ($getUnpublishedPost as $post) {
+    //                     $response = $post;
+    //                     $postNo = $post['id'];
+
+    //                     msgServerSent(
+    //                         data: $response,
+    //                         id: $postNo,
+    //                         event: 'updatePost'
+    //                     );
+
+    //                     // Post::updatePostByStatusAsPublished($postNo);
+
+    //                     // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
+
+    //                 }
+    //             } else {
+    //                 $noNewPostsCount++;
+    //                 if ($noNewPostsCount >= 10) {
+    //                     break;
+    //                 }
+    //             }
+    //             if (connection_aborted()) break;
+
+    //             // Sleep briefly to avoid CPU overload
+    //             sleep(10); // 0.5 seconds
+    //         }
+    //     } catch (\Throwable $th) {
+    //         showSSEError($th);
+    //     }
+    // }
+
+    // public static function getNewPostPolling()
+    // {
+    //     $id = cleanSession($_SESSION['memberId']);
+    //     $famCode = checkInput($_SESSION['famCode']);
+    //     self::fetchAndRespond(
+    //         fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],   
+    //         params: [$famCode, $id]
+    //     );
+    // }
+
+    // public static function getNewCommentPolling()
+    // {
+    //     self::fetchAndRespond( fetchFunction: [Post::class, 'getUnpublishedComment']);
+    // }
+
+    // private static function fetchAndRespond(callable $fetchFunction, array $params = null): void
+    // {
+    //     header('Content-Type: application/json');
+    //     try {
+    //         $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
+    //         $response = [];
+    //         if ($items) {
+    //             foreach ($items as $item) {
+    //                 $item['origin'] = getenv("APP_URL2");
+    //                 $response[] = $item;
+    //             }
+    //             msgSuccess(code: 200, msg: $response);
+    //         }
+    //     } catch (\Throwable $th) {
+    //         showError($th);
+    //     }
+    // }
+
+    // build for Pusher library
+    private static function fetchNewMsg(callable $fetchFunction, array $params = null): array
     {
-        // Broadcast to all clients
-        ignore_user_abort(true);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        set_time_limit(0);
-
-        try {
-            $noNewCommentCount = 0; // Counter for loop cycles without new posts 
-            while (true) {
-
-                $getUnpublishedComment = Post::getUnpublishedComment();
-
-
-                if ($getUnpublishedComment) {
-
-                    foreach ($getUnpublishedComment as $comment) {
-                        $commentNo = $comment['post_no'];
-
-                        msgServerSent(
-                            data: $comment,
-                            id: $commentNo,
-                            event: 'updateComment'
-                        );
-
-                        // Post::updateCommentByStatusAsPublished($commentNo);
-
-                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-                    }
-                } else {
-
-                    $noNewCommentCount++;
-                    if ($noNewCommentCount >= 10) {
-                        break;
-                    }
-                }
-                if (connection_aborted()) break;
-
-                // Sleep briefly to avoid CPU overload
-                sleep(5); // 0.5 seconds
-            }
-        } catch (\Throwable $th) {
-            showSSEError($th);
-        }
-    }
-
-    public static function getNewPostSSE()
-    {
-
-        // Broadcast to all clients
-        ignore_user_abort(true);
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        set_time_limit(0);
-
-        $maxDuration = 300; // 5 minutes
-        $startTime = time();
-        $noNewPostsCount = 0; // Counter for loop cycles without new posts  
-        $response = [];
-
-        try {
-
-            while (time() - $startTime < $maxDuration) {
-
-                $getUnpublishedPost = Post::getUnpublishedPost();
-
-                if ($getUnpublishedPost) {
-                    $noNewPostsCount = 0;
-
-                    foreach ($getUnpublishedPost as $post) {
-                        $response = $post;
-                        $postNo = $post['id'];
-
-                        msgServerSent(
-                            data: $response,
-                            id: $postNo,
-                            event: 'updatePost'
-                        );
-
-                        // Post::updatePostByStatusAsPublished($postNo);
-
-                        // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-                    }
-                } else {
-                    $noNewPostsCount++;
-                    if ($noNewPostsCount >= 10) {
-                        break;
-                    }
-                }
-                if (connection_aborted()) break;
-
-                // Sleep briefly to avoid CPU overload
-                sleep(10); // 0.5 seconds
-            }
-        } catch (\Throwable $th) {
-            showSSEError($th);
-        }
-    }
-
-    public static function getNewPostPolling()
-    {
-        $id = cleanSession($_SESSION['memberId']);
-        $famCode = checkInput($_SESSION['famCode']);
-        self::fetchAndRespond(
-            fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],   
-            params: [$famCode, $id]
-        );
-    }
-
-    public static function getNewCommentPolling()
-    {
-        self::fetchAndRespond( fetchFunction: [Post::class, 'getUnpublishedComment']);
-    }
-
-    private static function fetchAndRespond(callable $fetchFunction, array $params = null): void
-    {
-        header('Content-Type: application/json');
         try {
             $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
             $response = [];
@@ -215,13 +231,31 @@ class PostMessage
                     $item['origin'] = getenv("APP_URL2");
                     $response[] = $item;
                 }
-                msgSuccess(code: 200, msg: $response);
+                return $response;
             }
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
+    public static function getNewPostPusher()
+    {
+        $id = cleanSession($_SESSION['memberId']);
+        $famCode = checkInput($_SESSION['famCode']);
+        $newPost = self::fetchNewMsg(
+            fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],   
+            params: [$famCode, $id]
+        );
+
+        Pusher::broadcast('posts-channel', 'new-post' ,$newPost);
+    }
+
+    public static function getNewCommentPusher()
+    {
+        $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
+
+        Pusher::broadcast('comments-channel', 'new-comment' ,$newComment);
+    }
 
     public static function updateCommentByStatusAsPublished($commentNo)
     {
@@ -229,7 +263,6 @@ class PostMessage
 
         return Post::updateCommentByStatusAsPublished($commentNo);
     }
-
 
     public static function getNewPostAndEmail()
     {

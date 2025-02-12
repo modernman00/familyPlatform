@@ -2,7 +2,7 @@ import { log, showError, checkManyElements, id, msgException } from '../global'
 import { appendNewPost, allPost } from './post'
 import { render } from "timeago.js"
 import { appendNewComment } from './comment'
-
+import Pusher from "pusher-js"
 import axios from "axios"
 
 
@@ -11,6 +11,12 @@ try {
     const MAX_APPENDED_POSTS = 1000; // Set a maximum limit
     const appendedComments = new Set(); // To track unique comments
     const appendedPosts = new Set(); // To track unique comments
+
+    // Initialize Pusher
+    const pusher = new Pusher('your-app-key', {
+        cluster: 'eu', // Replace with your cluster
+        encrypted: true,
+    });
 
     // Global state object with data-fetching and initialization logic
     const state = {
@@ -55,10 +61,10 @@ try {
             appendedPosts.add(dataForUse.post_no);
 
             // Clean up old entries if the set exceeds the limit
-        if (appendedPosts.size > MAX_APPENDED_POSTS) {
-            const oldestPost = appendedPosts.values().next().value;
-            appendedPosts.delete(oldestPost);
-        }
+            if (appendedPosts.size > MAX_APPENDED_POSTS) {
+                const oldestPost = appendedPosts.values().next().value;
+                appendedPosts.delete(oldestPost);
+            }
 
 
             appendNewPost(dataForUse)
@@ -99,6 +105,30 @@ try {
             likeElement.innerHTML = parseInt(dataForUse.likeCounter)
         }
     };
+
+    // Subscribe to the posts channel
+const postsChannel = pusher.subscribe('posts-channel');
+postsChannel.bind('new-post', (data) => {
+    console.log('New post:', data);
+    const postsDiv = document.getElementById('posts');
+    postsDiv.innerHTML += `<p>New Post: ${data.content}</p>`;
+});
+
+// Subscribe to the comments channel
+const commentsChannel = pusher.subscribe('comments-channel');
+commentsChannel.bind('new-comment', (data) => {
+    console.log('New comment:', data);
+    const commentsDiv = document.getElementById('comments');
+    commentsDiv.innerHTML += `<p>New Comment: ${data.content}</p>`;
+});
+
+// Subscribe to the likes channel
+const likesChannel = pusher.subscribe('likes-channel');
+likesChannel.bind('new-like', (data) => {
+    console.log('New like:', data);
+    const likesDiv = document.getElementById('likes');
+    likesDiv.innerHTML += `<p>New Like on Post ID: ${data.postId}</p>`;
+});
 
 
 
