@@ -54,9 +54,9 @@ var qSelInnerHTML = function qSelInnerHTML(name) {
 };
 var log = function log(id) {
   var identifier = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  console.log(' start consoleLog' + "  " + identifier);
+  console.log(' start' + "  " + identifier);
   console.log(id);
-  console.log(' end consoleLog' + "  " + identifier);
+  console.log(' end' + "  " + identifier);
 };
 var write = function write(input) {
   return document.write(input);

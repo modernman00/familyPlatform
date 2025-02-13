@@ -624,7 +624,7 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, result, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, senderId, elementData, data, notificationHTML, url, _response, newValues, friendRequestSection;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, senderId, elementData, data, notificationHTML, url, _response, newValues, friendRequestSection;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -632,33 +632,36 @@ try {
             elementId = e.target.id;
             postId = e.target.name; // Handle Like Button Click
             if (!elementId.includes("likeButton")) {
-              _context.next = 11;
+              _context.next = 13;
               break;
             }
             // replace button with Counter to get the span id 
             likeCounterId = elementId.replace('Button', 'Counter'); // trim removes leading and trailing spaces
             likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
-            _context.next = 8;
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(encodedLikeCounterVal);
+            _context.next = 9;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
-          case 8:
-            result = _context.sent;
-            _context.next = 61;
-            break;
+          case 9:
+            _context.next = 11;
+            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewLikesPusher");
           case 11:
+            _context.next = 67;
+            break;
+          case 13:
             if (!elementId.includes("initComment")) {
-              _context.next = 16;
+              _context.next = 18;
               break;
             }
             commentFormId = elementId.replace('init', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.next = 61;
+            _context.next = 67;
             break;
-          case 16:
+          case 18:
             if (!elementId.includes("submitComment")) {
-              _context.next = 32;
+              _context.next = 36;
               break;
             }
             e.preventDefault();
@@ -672,21 +675,24 @@ try {
             inputComment = idForm.replace("form", "input");
             idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 28;
+              _context.next = 30;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 30;
+            _context.next = 34;
             break;
-          case 28:
-            _context.next = 30;
-            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/postCommentProfile', formEntries, options);
           case 30:
-            _context.next = 61;
-            break;
+            _context.next = 32;
+            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/postCommentProfile', formEntries, options);
           case 32:
+            _context.next = 34;
+            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewCommentPusher");
+          case 34:
+            _context.next = 67;
+            break;
+          case 36:
             if (!elementId.includes("submitPost")) {
-              _context.next = 47;
+              _context.next = 53;
               break;
             }
             e.preventDefault();
@@ -696,20 +702,23 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 40;
+            _context.next = 44;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post("/member/profilePage/post", formData, options);
-          case 40:
+          case 44:
             response = _context.sent;
-            _context.next = 43;
+            _context.next = 47;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
-          case 43:
+          case 47:
+            _context.next = 49;
+            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewPostPusher");
+          case 49:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 61;
+            _context.next = 67;
             break;
-          case 47:
+          case 53:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 60;
+              _context.next = 66;
               break;
             }
             // Extract the user ID from the target ID
@@ -721,9 +730,9 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 56;
+            _context.next = 62;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 56:
+          case 62:
             _response = _context.sent;
             if (_response.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
@@ -735,9 +744,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 61;
+            _context.next = 67;
             break;
-          case 60:
+          case 66:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -747,7 +756,7 @@ try {
                 });
               }
             }
-          case 61:
+          case 67:
           case "end":
             return _context.stop();
         }
@@ -1340,9 +1349,8 @@ try {
   var appendedPosts = new Set(); // To track unique comments
 
   // Initialize Pusher
-  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())('your-app-key', {
-    cluster: 'eu',
-    // Replace with your cluster
+  var pusher = new (pusher_js__WEBPACK_IMPORTED_MODULE_4___default())("0dc3f141e1632b5aa5db", {
+    cluster: "eu",
     encrypted: true
   });
 
@@ -1487,25 +1495,26 @@ try {
   // Subscribe to the posts channel
   var postsChannel = pusher.subscribe('posts-channel');
   postsChannel.bind('new-post', function (data) {
-    console.log('New post:', data);
-    var postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML += "<p>New Post: ".concat(data.content, "</p>");
+    data.forEach(function (item) {
+      return updatePost(item);
+    });
   });
 
   // Subscribe to the comments channel
   var commentsChannel = pusher.subscribe('comments-channel');
   commentsChannel.bind('new-comment', function (data) {
-    console.log('New comment:', data);
-    var commentsDiv = document.getElementById('comments');
-    commentsDiv.innerHTML += "<p>New Comment: ".concat(data.content, "</p>");
+    data.forEach(function (item) {
+      return updateComment(item);
+    });
   });
 
   // Subscribe to the likes channel
   var likesChannel = pusher.subscribe('likes-channel');
   likesChannel.bind('new-like', function (data) {
     console.log('New like:', data);
-    var likesDiv = document.getElementById('likes');
-    likesDiv.innerHTML += "<p>New Like on Post ID: ".concat(data.postId, "</p>");
+    data.forEach(function (item) {
+      return updateLike(item);
+    });
   });
 
   // Establish an EventSource for receiving like updates
@@ -1530,89 +1539,43 @@ try {
   // POLLING FUNCTION 
 
   // Function to perform long polling for a given endpoint
-  var _fetchPollingData = /*#__PURE__*/function () {
-    var _ref3 = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(endpoint, updateFunction) {
-      var response;
-      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
-        while (1) switch (_context4.prev = _context4.next) {
-          case 0:
-            _context4.prev = 0;
-            _context4.next = 3;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get(endpoint, {
-              timeout: 30000
-            });
-          case 3:
-            response = _context4.sent;
-            if (Array.isArray(response.data.message)) {
-              response.data.message.forEach(function (item) {
-                return updateFunction(item);
-              });
-            }
-            _context4.next = 13;
-            break;
-          case 7:
-            _context4.prev = 7;
-            _context4.t0 = _context4["catch"](0);
-            if (_context4.t0.code === 'ECONNABORTED') {
-              console.warn("Long polling connection timed out for ".concat(endpoint, ". Retrying..."));
-            } else {
-              console.error("Error fetching data from ".concat(endpoint, ":"), _context4.t0);
-            }
+  // const fetchPollingData = async (endpoint, updateFunction) => {
+  //     try {
+  //         const response = await axios.get(endpoint, { timeout: 30000 });
 
-            // Retry the request after a delay
-            _context4.next = 12;
-            return new Promise(function (resolve) {
-              return setTimeout(resolve, 2000);
-            });
-          case 12:
-            _fetchPollingData(endpoint, updateFunction); // Recursive call
-          case 13:
-          case "end":
-            return _context4.stop();
-        }
-      }, _callee4, null, [[0, 7]]);
-    }));
-    return function fetchPollingData(_x3, _x4) {
-      return _ref3.apply(this, arguments);
-    };
-  }();
+  //         if (Array.isArray(response.data.message)) {
 
-  // Main long polling function
-  (function () {
-    var _startLongPolling = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
-          case 0:
-            if (false) {}
-            _context5.prev = 1;
-            _context5.next = 4;
-            return Promise.all([_fetchPollingData('/getNewPostPolling', updatePost), _fetchPollingData('/getNewCommentPolling', updateComment), _fetchPollingData('/getNewLikesPolling', updateLike)]);
-          case 4:
-            _context5.next = 9;
-            break;
-          case 6:
-            _context5.prev = 6;
-            _context5.t0 = _context5["catch"](1);
-            console.error('Error fetching data:', _context5.t0);
-          case 9:
-            _context5.next = 11;
-            return new Promise(function (resolve) {
-              return setTimeout(resolve, 2000);
-            });
-          case 11:
-            _context5.next = 0;
-            break;
-          case 13:
-          case "end":
-            return _context5.stop();
-        }
-      }, _callee5, null, [[1, 6]]);
-    }));
-    function startLongPolling() {
-      return _startLongPolling.apply(this, arguments);
-    }
-    return startLongPolling;
-  })()();
+  //             response.data.message.forEach(item => updateFunction(item))
+
+  //         }
+  //     } catch (error) {
+  //         if (error.code === 'ECONNABORTED') {
+  //             console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
+  //         } else {
+  //             console.error(`Error fetching data from ${endpoint}:`, error);
+  //         }
+
+  //         // Retry the request after a delay
+  //         await new Promise(resolve => setTimeout(resolve, 2000));
+  //         fetchPollingData(endpoint, updateFunction); // Recursive call
+  //     }
+  // };
+
+  // // Main long polling function
+  // (async function startLongPolling() {
+  //     while (true) {
+  //         try {
+  //             await Promise.all([
+  //                 fetchPollingData('/getNewPostPolling', updatePost),
+  //                 fetchPollingData('/getNewCommentPolling', updateComment),
+  //                 fetchPollingData('/getNewLikesPolling', updateLike)
+  //             ]);
+  //         } catch (error) {
+  //             console.error('Error fetching data:', error);
+  //         }
+  //         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+  //     }
+  // })();
 
   // AUTOMATICALLY UPDATE TIMESTAMP
   // Function to check for elements and render if they exist every 5 seconds

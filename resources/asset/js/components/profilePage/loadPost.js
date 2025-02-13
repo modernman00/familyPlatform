@@ -13,8 +13,8 @@ try {
     const appendedPosts = new Set(); // To track unique comments
 
     // Initialize Pusher
-    const pusher = new Pusher('your-app-key', {
-        cluster: 'eu', // Replace with your cluster
+    const pusher = new Pusher(process.env.MIX_PUSHER_APP_KEY, {
+        cluster: process.env.MIX_PUSHER_APP_CLUSTER, 
         encrypted: true,
     });
 
@@ -65,9 +65,8 @@ try {
                 const oldestPost = appendedPosts.values().next().value;
                 appendedPosts.delete(oldestPost);
             }
-
-
-            appendNewPost(dataForUse)
+    
+             appendNewPost(dataForUse)
 
             try {
                 await axios.put(`/updatePostByStatusAsPublished/${dataForUse.post_no}`, { post_status: 'published' });
@@ -109,25 +108,20 @@ try {
     // Subscribe to the posts channel
 const postsChannel = pusher.subscribe('posts-channel');
 postsChannel.bind('new-post', (data) => {
-    console.log('New post:', data);
-    const postsDiv = document.getElementById('posts');
-    postsDiv.innerHTML += `<p>New Post: ${data.content}</p>`;
+    data.forEach(item => updatePost(item))
 });
 
 // Subscribe to the comments channel
 const commentsChannel = pusher.subscribe('comments-channel');
 commentsChannel.bind('new-comment', (data) => {
-    console.log('New comment:', data);
-    const commentsDiv = document.getElementById('comments');
-    commentsDiv.innerHTML += `<p>New Comment: ${data.content}</p>`;
+    data.forEach(item => updateComment(item))
 });
 
 // Subscribe to the likes channel
 const likesChannel = pusher.subscribe('likes-channel');
 likesChannel.bind('new-like', (data) => {
     console.log('New like:', data);
-    const likesDiv = document.getElementById('likes');
-    likesDiv.innerHTML += `<p>New Like on Post ID: ${data.postId}</p>`;
+    data.forEach(item => updateLike(item))
 });
 
 
@@ -157,43 +151,43 @@ likesChannel.bind('new-like', (data) => {
     // POLLING FUNCTION 
 
     // Function to perform long polling for a given endpoint
-    const fetchPollingData = async (endpoint, updateFunction) => {
-        try {
-            const response = await axios.get(endpoint, { timeout: 30000 });
+    // const fetchPollingData = async (endpoint, updateFunction) => {
+    //     try {
+    //         const response = await axios.get(endpoint, { timeout: 30000 });
 
-            if (Array.isArray(response.data.message)) {
+    //         if (Array.isArray(response.data.message)) {
 
-                response.data.message.forEach(item => updateFunction(item))
+    //             response.data.message.forEach(item => updateFunction(item))
 
-            }
-        } catch (error) {
-            if (error.code === 'ECONNABORTED') {
-                console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
-            } else {
-                console.error(`Error fetching data from ${endpoint}:`, error);
-            }
+    //         }
+    //     } catch (error) {
+    //         if (error.code === 'ECONNABORTED') {
+    //             console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
+    //         } else {
+    //             console.error(`Error fetching data from ${endpoint}:`, error);
+    //         }
 
-            // Retry the request after a delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            fetchPollingData(endpoint, updateFunction); // Recursive call
-        }
-    };
+    //         // Retry the request after a delay
+    //         await new Promise(resolve => setTimeout(resolve, 2000));
+    //         fetchPollingData(endpoint, updateFunction); // Recursive call
+    //     }
+    // };
 
-    // Main long polling function
-    (async function startLongPolling() {
-        while (true) {
-            try {
-                await Promise.all([
-                    fetchPollingData('/getNewPostPolling', updatePost),
-                    fetchPollingData('/getNewCommentPolling', updateComment),
-                    fetchPollingData('/getNewLikesPolling', updateLike)
-                ]);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
-        }
-    })();
+    // // Main long polling function
+    // (async function startLongPolling() {
+    //     while (true) {
+    //         try {
+    //             await Promise.all([
+    //                 fetchPollingData('/getNewPostPolling', updatePost),
+    //                 fetchPollingData('/getNewCommentPolling', updateComment),
+    //                 fetchPollingData('/getNewLikesPolling', updateLike)
+    //             ]);
+    //         } catch (error) {
+    //             console.error('Error fetching data:', error);
+    //         }
+    //         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+    //     }
+    // })();
 
     // AUTOMATICALLY UPDATE TIMESTAMP
     // Function to check for elements and render if they exist every 5 seconds
@@ -206,6 +200,7 @@ likesChannel.bind('new-like', (data) => {
     const checkOriginAndParsedData = (data) => {
         if (!data) throw new Error('No update received');
         if (data) {
+
             if (data.origin != appUrl) { msgException('Invalid Origin'); }
             return data
         }

@@ -23,23 +23,23 @@ $router->map(
 
 $router->map(
   method: 'GET', 
-  route: '/getNewPostPolling', 
-  target: 'App\controller\members\PostMessage@getNewPostPolling', 
-  name: 'polling'
+  route: '/getNewPostPusher', 
+  target: 'App\controller\members\PostMessage@getNewPostPusher', 
+  name: 'Pusher'
 );
 
 $router->map(
   method: 'GET', 
-  route: '/getNewCommentPolling', 
-  target: 'App\controller\members\PostMessage@getNewCommentPolling', 
-  name: 'polling-comment'
+  route: '/getNewCommentPusher', 
+  target: 'App\controller\members\PostMessage@getNewCommentPusher', 
+  name: 'Pusher-comment'
 );
 
 $router->map(
   method: 'GET', 
-  route: '/getNewLikesPolling', 
-  target: 'App\controller\members\PostLikeController@getNewLikesPolling', 
-  name: 'post-likes-polling'
+  route: '/getNewLikesPusher', 
+  target: 'App\controller\members\PostLikeController@getNewLikesPusher', 
+  name: 'post-likes-Pusher'
 );
 
 $router->map(

@@ -6,7 +6,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 
-use App\classes\{Db, AllFunctionalities, EventEmitter, Pusher};
+use App\classes\{Db, AllFunctionalities, Pusher};
 use App\model\Post;
 
 
@@ -75,8 +75,6 @@ class PostLikeController extends Db
         } catch (\Throwable $th) {
             showError($th);
         }
-
-   
     }
 
     public static function getNewLikesPusher()
@@ -85,24 +83,30 @@ class PostLikeController extends Db
             // Fetch updated like counts from the database
             $updatedLikes = Post::fetchUpdatedLikes();
             $response = [];
-            if ($updatedLikes) {
+
+            if (is_array($updatedLikes) && !empty($updatedLikes)) {
                 foreach ($updatedLikes as $postLikes) {
                     $postNo = $postLikes['post_no'];
+
                     // Data to broadcast
                     $data = [
-                        'origin' => getenv("APP_URL2"),
+                        'origin' => getenv("APP_URL2") ?: 'default_value', // Set a default value if not set
                         'likeCounter' => $postLikes['post_likes'],
                         'likeHtmlId' => "likeCounter$postNo",
                     ];
+
                     $response[] = $data;
                 }
-                Pusher::broadcast('likes-channel', 'like-event', $response);
+
+                try {
+                    Pusher::broadcast('likes-channel', 'like-event', $response);
+                } catch (\Exception $e) {
+                    showError($e); // Handle broadcasting error
+                }
             }
         } catch (\Throwable $th) {
-            showError($th);
+            showError($th); // Handle general errors
         }
-
-   
     }
 
     // public static function getLikes()

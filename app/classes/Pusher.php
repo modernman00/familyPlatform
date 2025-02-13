@@ -1,21 +1,23 @@
 <?php
 
 namespace App\classes;
+use Pusher\Pusher as PusherNotification;
 
 
 class Pusher  {
      
     public static function pusher()
     {
-        $pusher = new Pusher(
-            getenv('PUSHER_APP_KEY'),
-            getenv('PUSHER_APP_SECRET'),
-            getenv('PUSHER_APP_ID'),
+        $pusher = new PusherNotification(
+            getenv('MIX_PUSHER_APP_KEY'),
+            getenv('MIX_PUSHER_APP_SECRET'),
+            getenv('MIX_PUSHER_APP_ID'),
             [
-                'cluster' => getenv('PUSHER_APP_CLUSTER'),
+                'cluster' => getenv('MIX_PUSHER_APP_CLUSTER'),
                 'useTLS' => true,
             ]
         );
+        return $pusher;
     }
 
     public static function broadcast($theChannel, $theEvent, $theData)

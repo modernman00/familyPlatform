@@ -9,9 +9,9 @@ export const qSelValue = (name) => qSel(name).value
 export const qSelInnerHTML = (name) => qSel(name).innerHTML
 
 export const log = (id, identifier =null) => {
-    console.log(' start consoleLog'+ "  " + identifier)
+    console.log(' start'+ "  " + identifier)
     console.log(id)
-    console.log(' end consoleLog'+ "  " +identifier)
+    console.log(' end'+ "  " +identifier)
 }
 export const write = (input) => document.write(input)
 

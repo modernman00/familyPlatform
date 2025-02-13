@@ -28,7 +28,14 @@ try {
             let likeCounterVal = id(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
-            const result = await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
+            log(encodedLikeCounterVal)
+
+            await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
+
+              // update all members of similar famcode on their UIs using Pusher
+
+            await axios.get("/getNewLikesPusher");
+
 
 
             // Make the comment form to appear onclick. 
@@ -58,6 +65,11 @@ try {
             } else {
 
                 await axios.post('/postCommentProfile', formEntries, options)
+
+                    // update all members of similar famcode on their UIs using Pusher
+
+                await axios.get("/getNewCommentPusher");
+
                 
 
             }
@@ -74,7 +86,13 @@ try {
 
             // 3. 
             const response = await axios.post("/member/profilePage/post", formData, options)
+
+            // then notify members of simlar famcode about the post by email
             await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
+
+            // update all members of similar famcode on their UIs using Pusher
+
+            await axios.get("/getNewPostPusher");
 
 
             id('id01').style.display = 'none'

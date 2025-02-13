@@ -221,7 +221,7 @@ class PostMessage
     // }
 
     // build for Pusher library
-    private static function fetchNewMsg(callable $fetchFunction, array $params = null): array
+    private static function fetchNewMsg(callable $fetchFunction, array $params = null)
     {
         try {
             $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
@@ -232,11 +232,23 @@ class PostMessage
                     $response[] = $item;
                 }
                 return $response;
-            }
+            } 
+   
         } catch (\Throwable $th) {
             showError($th);
+           
         }
     }
+
+/**
+ * Fetches unpublished posts for the current user's family code and broadcasts them via Pusher.
+ * 
+ * This function retrieves new posts that have not yet been published, based on the user's 
+ * family code and member ID. The posts are then broadcasted to the 'posts-channel' with 
+ * the event name 'new-post' using the Pusher library.
+ * 
+ * @return void
+ */
 
     public static function getNewPostPusher()
     {
@@ -249,6 +261,16 @@ class PostMessage
 
         Pusher::broadcast('posts-channel', 'new-post' ,$newPost);
     }
+
+/**
+ * Fetches unpublished comments and broadcasts them via Pusher.
+ * 
+ * This function retrieves new comments that have not yet been published
+ * and broadcasts them to the 'comments-channel' with the event name 
+ * 'new-comment' using the Pusher library.
+ * 
+ * @return void
+ */
 
     public static function getNewCommentPusher()
     {
@@ -264,6 +286,14 @@ class PostMessage
         return Post::updateCommentByStatusAsPublished($commentNo);
     }
 
+    /**
+     * Sends an email to all members with the same family code as the post.
+     * The email is a notification that a new post has been published.
+     * 
+     * @param int $postNo The post number of the new post
+     * @return void
+     * @throws \Throwable
+     */
     public static function getNewPostAndEmail()
     {
         try {
