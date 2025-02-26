@@ -53,35 +53,13 @@ class PostLikeController extends Db
      * @param string $likeCounterId
      */
 
-    public static function getNewLikesPolling()
-    {
-        header('Content-Type: application/json');
-        try {
-            // Fetch updated like counts from the database
-            $updatedLikes = Post::fetchUpdatedLikes();
-            if ($updatedLikes) {
-                foreach ($updatedLikes as $postLikes) {
-                    $postNo = $postLikes['post_no'];
-                    // Data to broadcast
-                    $data = [
-                        'origin' => getenv("APP_URL2"),
-                        'likeCounter' => $postLikes['post_likes'],
-                        'likeHtmlId' => "likeCounter$postNo",
-                    ];
-
-                    msgSuccess(200, $data);
-                }
-            }
-        } catch (\Throwable $th) {
-            showError($th);
-        }
-    }
-
+  
     public static function getNewLikesPusher()
     {
         try {
             // Fetch updated like counts from the database
             $updatedLikes = Post::fetchUpdatedLikes();
+  
             $response = [];
 
             if (is_array($updatedLikes) && !empty($updatedLikes)) {
@@ -109,45 +87,6 @@ class PostLikeController extends Db
         }
     }
 
-    // public static function getLikes()
-    // {
-    //     // Broadcast to all clients
-    //     ignore_user_abort(true);
-    //     header('Content-Type: text/event-stream');
-    //     header('Cache-Control: no-cache');
-    //     header('Connection: keep-alive');
-    //     set_time_limit(0);
-
-    //     while (true) {
-    //         try {
-    //             // Fetch updated like counts from the database
-    //             $updatedLikes = Post::fetchUpdatedLikes();
-
-    //             if ($updatedLikes) {
-    //                 foreach ($updatedLikes as $postLikes) {
-    //                     $likeCount = $postLikes['post_likes'];
-    //                     $postNo = $postLikes['post_no'];
-    //                     $likeHTMLId = "likeCounter$postNo";
-
-    //                     // Data to broadcast
-    //                     $data = [
-    //                         'likeCounter' => $likeCount,
-    //                         'likeHtmlId' => $likeHTMLId,
-    //                     ];
-
-    //                     msgServerSent($data, $postNo, 'updateLike');
-    //                 }
-    //             } else {
-    //                 exit();
-    //             }
-    //             if (connection_aborted()) break;
-    //             sleep(5);
-    //         } catch (\Throwable $th) {
-    //             showSSEError($th);
-    //             break;
-    //         }
-    //     }
-    // }
 
 
 

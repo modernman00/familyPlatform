@@ -83,148 +83,12 @@ class PostMessage
         }
     }
 
-    // public static function getNewCommentSSE()
-    // {
-    //     // Broadcast to all clients
-    //     ignore_user_abort(true);
-    //     header('Content-Type: text/event-stream');
-    //     header('Cache-Control: no-cache');
-    //     header('Connection: keep-alive');
-    //     set_time_limit(0);
-
-    //     try {
-    //         $noNewCommentCount = 0; // Counter for loop cycles without new posts 
-    //         while (true) {
-
-    //             $getUnpublishedComment = Post::getUnpublishedComment();
-
-
-    //             if ($getUnpublishedComment) {
-
-    //                 foreach ($getUnpublishedComment as $comment) {
-    //                     $commentNo = $comment['post_no'];
-
-    //                     msgServerSent(
-    //                         data: $comment,
-    //                         id: $commentNo,
-    //                         event: 'updateComment'
-    //                     );
-
-    //                     // Post::updateCommentByStatusAsPublished($commentNo);
-
-    //                     // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-    //                 }
-    //             } else {
-
-    //                 $noNewCommentCount++;
-    //                 if ($noNewCommentCount >= 10) {
-    //                     break;
-    //                 }
-    //             }
-    //             if (connection_aborted()) break;
-
-    //             // Sleep briefly to avoid CPU overload
-    //             sleep(5); // 0.5 seconds
-    //         }
-    //     } catch (\Throwable $th) {
-    //         showSSEError($th);
-    //     }
-    // }
-
-    // public static function getNewPostSSE()
-    // {
-
-    //     // Broadcast to all clients
-    //     ignore_user_abort(true);
-    //     header('Content-Type: text/event-stream');
-    //     header('Cache-Control: no-cache');
-    //     header('Connection: keep-alive');
-    //     set_time_limit(0);
-
-    //     $maxDuration = 300; // 5 minutes
-    //     $startTime = time();
-    //     $noNewPostsCount = 0; // Counter for loop cycles without new posts  
-    //     $response = [];
-
-    //     try {
-
-    //         while (time() - $startTime < $maxDuration) {
-
-    //             $getUnpublishedPost = Post::getUnpublishedPost();
-
-    //             if ($getUnpublishedPost) {
-    //                 $noNewPostsCount = 0;
-
-    //                 foreach ($getUnpublishedPost as $post) {
-    //                     $response = $post;
-    //                     $postNo = $post['id'];
-
-    //                     msgServerSent(
-    //                         data: $response,
-    //                         id: $postNo,
-    //                         event: 'updatePost'
-    //                     );
-
-    //                     // Post::updatePostByStatusAsPublished($postNo);
-
-    //                     // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-    //                 }
-    //             } else {
-    //                 $noNewPostsCount++;
-    //                 if ($noNewPostsCount >= 10) {
-    //                     break;
-    //                 }
-    //             }
-    //             if (connection_aborted()) break;
-
-    //             // Sleep briefly to avoid CPU overload
-    //             sleep(10); // 0.5 seconds
-    //         }
-    //     } catch (\Throwable $th) {
-    //         showSSEError($th);
-    //     }
-    // }
-
-    // public static function getNewPostPolling()
-    // {
-    //     $id = cleanSession($_SESSION['memberId']);
-    //     $famCode = checkInput($_SESSION['famCode']);
-    //     self::fetchAndRespond(
-    //         fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],   
-    //         params: [$famCode, $id]
-    //     );
-    // }
-
-    // public static function getNewCommentPolling()
-    // {
-    //     self::fetchAndRespond( fetchFunction: [Post::class, 'getUnpublishedComment']);
-    // }
-
-    // private static function fetchAndRespond(callable $fetchFunction, array $params = null): void
-    // {
-    //     header('Content-Type: application/json');
-    //     try {
-    //         $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
-    //         $response = [];
-    //         if ($items) {
-    //             foreach ($items as $item) {
-    //                 $item['origin'] = getenv("APP_URL2");
-    //                 $response[] = $item;
-    //             }
-    //             msgSuccess(code: 200, msg: $response);
-    //         }
-    //     } catch (\Throwable $th) {
-    //         showError($th);
-    //     }
-    // }
 
     // build for Pusher library
     private static function fetchNewMsg(callable $fetchFunction, array $params = null)
     {
         try {
-            $items = (isset($params))? $fetchFunction(...$params) : $fetchFunction();
+            $items = (isset($params)) ? $fetchFunction(...$params) : $fetchFunction();
             $response = [];
             if ($items) {
                 foreach ($items as $item) {
@@ -232,51 +96,63 @@ class PostMessage
                     $response[] = $item;
                 }
                 return $response;
-            } 
-   
+            }
         } catch (\Throwable $th) {
             showError($th);
-           
         }
     }
 
-/**
- * Fetches unpublished posts for the current user's family code and broadcasts them via Pusher.
- * 
- * This function retrieves new posts that have not yet been published, based on the user's 
- * family code and member ID. The posts are then broadcasted to the 'posts-channel' with 
- * the event name 'new-post' using the Pusher library.
- * 
- * @return void
- */
+    /**
+     * Fetches unpublished posts for the current user's family code and broadcasts them via Pusher.
+     * 
+     * This function retrieves new posts that have not yet been published, based on the user's 
+     * family code and member ID. The posts are then broadcasted to the 'posts-channel' with 
+     * the event name 'new-post' using the Pusher library.
+     * 
+     * @return void
+     */
 
     public static function getNewPostPusher()
     {
         $id = cleanSession($_SESSION['memberId']);
         $famCode = checkInput($_SESSION['famCode']);
         $newPost = self::fetchNewMsg(
-            fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],   
+            fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],
             params: [$famCode, $id]
         );
 
-        Pusher::broadcast('posts-channel', 'new-post' ,$newPost);
+        Pusher::broadcast('posts-channel', 'new-post', $newPost);
     }
 
-/**
- * Fetches unpublished comments and broadcasts them via Pusher.
- * 
- * This function retrieves new comments that have not yet been published
- * and broadcasts them to the 'comments-channel' with the event name 
- * 'new-comment' using the Pusher library.
- * 
- * @return void
- */
+    /**
+     * Fetches unpublished comments and broadcasts them via Pusher.
+     * 
+     * This function retrieves new comments that have not yet been published
+     * and broadcasts them to the 'comments-channel' with the event name 
+     * 'new-comment' using the Pusher library.
+     * 
+     * @return void
+     */
 
     public static function getNewCommentPusher()
     {
         $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
+        \printArr($newComment);
 
-        Pusher::broadcast('comments-channel', 'new-comment' ,$newComment);
+        Pusher::broadcast('comments-channel', 'new-comment', $newComment);
+        // send push notification to all members with the same family code 
+        $data = Post::postByNo($newComment[0]['post_no']);
+
+        $results = AllMembersData::AllMembersEmailByFamCode(checkInput($data['postFamCode']));
+
+        $url = self::buildPostUrl($newComment[0]['post_no']);
+
+        self::notifyMembersByPushNotification(
+            results: $results,
+            postId: $newComment[0]['id'],
+            postOriginName: $newComment[0]['fullName'],
+            url: $url
+        );
     }
 
     public static function updateCommentByStatusAsPublished($commentNo)
@@ -309,10 +185,16 @@ class PostMessage
             $url = self::buildPostUrl($postNo);
 
             if ($data) {
-                // Send notifications to members
-                self::notifyMembers(
+                // Send notifications to members by email
+                self::notifyMembersByEmail(
                     results: $results,
-                    id: $data['id'],
+                    postId: $data['id'],
+                    postOriginName: $postOriginName,
+                    url: $url
+                );
+                self::notifyMembersByPushNotification(
+                    results: $results,
+                    postId: $data['id'],
                     postOriginName: $postOriginName,
                     url: $url
                 );
@@ -331,9 +213,9 @@ class PostMessage
     }
 
     // Helper function to notify members by email and push notifications
-    private static function notifyMembers(array $results, string $id, string $postOriginName, string $url): void
+    private static function notifyMembersByEmail(array $results, string $postId, string $postOriginName, string $url): void
     {
-        $getPostProfilePics = self::getProfilePicsForPostAndComment($id);
+        $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
             $memberData['postOriginName'] = $postOriginName;
@@ -346,11 +228,31 @@ class PostMessage
                 viewPath: "msg/customer/notifyNewPost",
                 subject: "$postOriginName posted a new update"
             );
+        }
+    }
 
-            // Send push notification to all members
+    /**
+     * Send push notifications to all members with the same family code as the post author.
+     * 
+     * @param array $results The array of member data from the database query.
+     * @param string $postId The post ID.
+     * @param string $postOriginName The name of the post author.
+     * @param string $url The URL of the post.
+     * 
+     * @return void
+     */
+    private static function notifyMembersByPushNotification(array $results, string $postId, string $postOriginName, string $url): void
+    {
+        $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
+
+        foreach ($results as $memberData) {
+            $memberData['postOriginName'] = $postOriginName;
+            $memberData['url'] = $url;
+            $memberData['img'] = $getPostProfilePics;
+            // Send push notification to all members WITH THE FAMILY CODE
             PushNotificationClass::sendPushNotification(
                 userId: $memberData['id'],
-                message: "$postOriginName posted a new update",
+                message: "$postOriginName posted a new comment",
                 url: $url
             );
         }

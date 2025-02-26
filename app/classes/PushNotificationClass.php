@@ -15,11 +15,11 @@ class PushNotificationClass extends VapidClass
 
     if ($subscription) {
       $auth = [
-           'VAPID' => array(
+           'VAPID' => [
                 'subject' => 'mailto:waledevtest@gmail.com',
                 'publicKey' => self::urlBase64ToUint8Array(base64String: getenv('VAPID_PUBLIC_KEY')),
                 'privateKey' => self::urlBase64ToUint8Array(base64String: getenv('VAPID_PRIVATE_KEY')),
-            ),
+           ],
       ];
 
       $webPush = new WebPush(auth: $auth);
@@ -34,11 +34,14 @@ class PushNotificationClass extends VapidClass
         ])
       );
 
-      foreach ($webPush->flush() as $report) {
-        if (!$report->isSuccess()) {
-          error_log("Push notification failed for subscription: {$report->getReason()}");
-        }
-      }
+      // Send notifications
+            foreach ($webPush->flush() as $report) {
+                if ($report->isSuccess()) {
+                    echo "Notification sent successfully.\n";
+                } else {
+                    echo "Failed: " . $report->getReason() . "\n";
+                }
+            }
     }
   }
 

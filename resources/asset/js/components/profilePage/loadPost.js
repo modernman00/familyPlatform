@@ -4,7 +4,8 @@ import { render } from "timeago.js"
 import { appendNewComment } from './comment'
 import Pusher from "pusher-js"
 import axios from "axios"
-
+import { eventHtml } from './eventHTML'
+import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 
 // set an empty array
 try {
@@ -14,7 +15,7 @@ try {
 
     // Initialize Pusher
     const pusher = new Pusher(process.env.MIX_PUSHER_APP_KEY, {
-        cluster: process.env.MIX_PUSHER_APP_CLUSTER, 
+        cluster: process.env.MIX_PUSHER_APP_CLUSTER,
         encrypted: true,
     });
 
@@ -65,8 +66,8 @@ try {
                 const oldestPost = appendedPosts.values().next().value;
                 appendedPosts.delete(oldestPost);
             }
-    
-             appendNewPost(dataForUse)
+
+            appendNewPost(dataForUse)
 
             try {
                 await axios.put(`/updatePostByStatusAsPublished/${dataForUse.post_no}`, { post_status: 'published' });
@@ -79,7 +80,7 @@ try {
     const updateComment = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
-        //   log(dataForUse)
+
         // Only append if the comment hasn't been added before
         if (!appendedComments.has(dataForUse.comment_no)) {
             appendedComments.add(dataForUse.comment_no);
@@ -106,88 +107,45 @@ try {
     };
 
     // Subscribe to the posts channel
-const postsChannel = pusher.subscribe('posts-channel');
-postsChannel.bind('new-post', (data) => {
-    data.forEach(item => updatePost(item))
-});
+    const postsChannel = pusher.subscribe('posts-channel');
+    postsChannel.bind('new-post', (data) => {
+        data.forEach(item => updatePost(item))
+    });
 
-// Subscribe to the comments channel
-const commentsChannel = pusher.subscribe('comments-channel');
-commentsChannel.bind('new-comment', (data) => {
-    data.forEach(item => updateComment(item))
-});
+    // Subscribe to the comments channel
+    const commentsChannel = pusher.subscribe('comments-channel');
+    commentsChannel.bind('new-comment', (data) => {
+        data.forEach(item => updateComment(item))
+    });
 
-// Subscribe to the likes channel
-const likesChannel = pusher.subscribe('likes-channel');
-likesChannel.bind('new-like', (data) => {
-    console.log('New like:', data);
-    data.forEach(item => updateLike(item))
-});
+    // Subscribe to the likes channel
+    const likesChannel = pusher.subscribe('likes-channel');
+    likesChannel.bind('like-event', (data) => {
 
+        data.forEach(item => updateLike(item))
+    });
 
-
-
-
-    // Establish an EventSource for receiving like updates
-    // const connectSSE = (url, event, callbackFn) => {
-    //     const sse = new EventSource(url);
-
-    //     sse.addEventListener(event, callbackFn);
-    //     // Reconnect on error or if the connection is closed
-    //     sse.onerror = (err) => {
-    //         console.warn("SSE connection lost, reconnecting...", err);
-    //         sse.close();
-    //         // startLongPolling();
-    //         // Correctly pass the arguments on reconnect
-    //         setTimeout(() => connectSSE(url, event, callbackFn), 5000); // Attempt to reconnect after 5 seconds
-    //     };
-    // };
+      // Subscribe to the event channel
 
 
-    // connectSSE("/post/getNewPost", "updatePost", updatePost);
-    // connectSSE("/comment/newComment", "updateComment", updateComment);
-    // connectSSE("/profileCard/getLikes", "updateLike", updateLike);
+      const checkEventAndAdd = (data) => {
+      
+          const appendEvent = eventHtml(data);
+          return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+      }
+      
+            const notificationChannel = pusher.subscribe('notification-channel');
+    
+            notificationChannel.bind('new-notification', (data) => {
+                if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
+                    checkEventAndAdd(data);
+                    addToNotificationTab(data);
+                    increaseNotificationCount();
+    
+                }
+            });
 
-    // POLLING FUNCTION 
 
-    // Function to perform long polling for a given endpoint
-    // const fetchPollingData = async (endpoint, updateFunction) => {
-    //     try {
-    //         const response = await axios.get(endpoint, { timeout: 30000 });
-
-    //         if (Array.isArray(response.data.message)) {
-
-    //             response.data.message.forEach(item => updateFunction(item))
-
-    //         }
-    //     } catch (error) {
-    //         if (error.code === 'ECONNABORTED') {
-    //             console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
-    //         } else {
-    //             console.error(`Error fetching data from ${endpoint}:`, error);
-    //         }
-
-    //         // Retry the request after a delay
-    //         await new Promise(resolve => setTimeout(resolve, 2000));
-    //         fetchPollingData(endpoint, updateFunction); // Recursive call
-    //     }
-    // };
-
-    // // Main long polling function
-    // (async function startLongPolling() {
-    //     while (true) {
-    //         try {
-    //             await Promise.all([
-    //                 fetchPollingData('/getNewPostPolling', updatePost),
-    //                 fetchPollingData('/getNewCommentPolling', updateComment),
-    //                 fetchPollingData('/getNewLikesPolling', updateLike)
-    //             ]);
-    //         } catch (error) {
-    //             console.error('Error fetching data:', error);
-    //         }
-    //         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
-    //     }
-    // })();
 
     // AUTOMATICALLY UPDATE TIMESTAMP
     // Function to check for elements and render if they exist every 5 seconds

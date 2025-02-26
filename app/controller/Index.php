@@ -190,21 +190,6 @@ class Index
     // }
 }
 
-// Helper function to send SSE messages
-private static function msgServerSent(array $data, string $id = null, string $event = null)
-{
-    if ($id) {
-        echo "id: $id\n";
-    }
 
-    if ($event) {
-        echo "event: $event\n";
-    }
-
-    echo "data: " . json_encode($data) . "\n\n";
-
-    ob_flush();
-    flush();
-}
 
 }

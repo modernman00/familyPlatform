@@ -26,9 +26,7 @@ const notificationHTML = (data) => {
         ${data.notification_name} -
         ${data.notification_content} -
         ${toSentenceCase(data.sender_name)}
-        <button class='w3-button w3-hover-grey w3-tiny w3-border' data-id="${data.sender_id}" id="deleteNotification${data.sender_id}${randomNumber}"> delete</button>
-
-    <hr>
+        <button class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id="${data.sender_id}" id="deleteNotification${data.sender_id}${randomNumber}"> delete</button>
   </a>
 
   `
@@ -53,8 +51,6 @@ export const addToNotificationTab = (data) => {
 const yourId = localStorage.getItem('requesterId');
 const famCode = localStorage.getItem('requesterFamCode');
 const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
-
-
 
 
 // get all the notification and display them 

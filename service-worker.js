@@ -114,9 +114,74 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// Utility function to show notification
+function showNotification({ title, body, url }) {
+  const options = {
+    body,
+    icon: '/public/img/favicon/android-chrome-192x192.png',
+    badge: '/public/img/favicon/android-chrome-192x192.png',
+    data: { url },
+    requireInteraction: true,       // Keeps notification visible until user interacts
+    actions: [
+      { action: "open", title: "View" }
+    ]
+  }
+  self.registration.showNotification(title, options);
+}
+
+
+
+// Push event - handle notifications
+self.addEventListener('push', function (event) {
+  let data = {};
+
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    console.error("Push event error:", e);
+  }
+
+
+  const notificationData = {
+    body: data.body || 'You have a new notification',
+    title: data.title || 'New Notification',
+
+    url: data.url || '/',
+
+
+  };
+
+    event.waitUntil(showNotification(notificationData));
+});
+
+
+// Notification click event - open the link when clicked
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(event.notification.data.url);
+      }
+    })
+  );
+});
+
+// Handle notification close event (optional)
+self.addEventListener('notificationclose', (event) => {
+  console.log('Notification closed', event.notification);
+});
+
 // Periodic sync event - sync content
 self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'content-sync') {
+    console.log('Periodic Sync triggered:', event.tag);
     event.waitUntil(syncContent());
   }
 });
@@ -167,64 +232,3 @@ async function syncContent() {
   }
 }
 
-// Utility function to show notification
-function showNotification({ title, body, url }) {
-  const options = {
-    body,
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
-    data: {
-      url,
-    },
-  };
-
-  self.registration.showNotification(title, options);
-}
-
-// Push event - handle notifications
-self.addEventListener('push', function (event) {
-  let data = event.data ? event.data.json() : {};
-
-  const options = {
-    body: data.body || 'You have a new notification',
-    icon: '/public/img/favicon/android-chrome-192x192.png',
-    badge: '/public/img/favicon/android-chrome-192x192.png',
-    data: {
-      url: data.url || '/',
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'New Notification', options)
-  );
-});
-
-// self.addEventListener('notificationclick', function (event) {
-//   event.notification.close();
-//   event.waitUntil(
-//     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
-//       if (clients.openWindow) {
-//         return clients.openWindow(event.notification.data.url);
-//       }
-//     })
-//   );
-// });
-
-
-
-// Notification click event - focus or open a window
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url === event.notification.data.url && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(event.notification.data.url);
-      }
-    })
-  );
-});

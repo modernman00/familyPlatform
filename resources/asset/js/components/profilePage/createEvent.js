@@ -4,6 +4,8 @@ import FormHelper from '../FormHelper';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { eventHtml } from './eventHTML'
 import axios from "axios";
+import Pusher from 'pusher-js';
+
 
 const formInput = document.querySelectorAll('.eventModalForm');
 const formInputArr = Array.from(formInput);
@@ -21,17 +23,6 @@ id('cancelModal').addEventListener('click', displayNone)
  */
 
 
-/**
- * Adds an event to the event list if it passes the family code filter.
- * 
- * @param {Object} data - The event data object to be checked and possibly added.
- * @returns {void}
- */
-const checkEventAndAdd = (data) => {
-
-    const appendEvent = eventHtml(data);
-    return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-}
 
 const options = {
     xsrfCookieName: 'XSRF-TOKEN',
@@ -68,58 +59,18 @@ const process = async (e) => {
             axios.post('/member/notification/event', eventFormEntries, options)
         ]);
 
-        // Extract and notificationNo from the responses
+        // Extract and get notificationNo from the responses
 
         const { message: notificationNo } = notificationResponse.data;
 
-        // Use Promise.all to fetch event data and notification data in parallel
-       
-        // const notificationDataResponse = await axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
+        // update all members of similar famcode on their UIs using Pusher
 
-        // USING SSE 
-
-        const eventSource = new EventSource(`/member/notification/event?notificationNo=${notificationNo}`);
-
-        eventSource.addEventListener('newNotification', (event) => {
-            const notificationData = JSON.parse(event.data);
-
-            log(notificationData);
-
-            // Update the UI with the new notification if it matches the family code
-            if (localStorage.getItem('requesterFamCode') === notificationData.receiver_id) {
-                checkEventAndAdd(notificationData);
+        axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
 
 
-                    addToNotificationTab(notificationData);
-                    increaseNotificationCount();
+        // close the modal
+        displayNone();
 
-            }
-          });
-
-          eventSource.onerror = (error) => {
-    console.error("SSE connection error:", error);
-    console.log("Error details:", error.target.readyState);  // Log the readyState of EventSource
-    eventSource.close();
-};
-
-
-        // SECOND OPTION
-      
-        // const notificationData = notificationDataResponse.data.message;
-
-        // const {eventData, member} =notificationData;
-
-        // if(localStorage.getItem('requesterFamCode') == eventData.receiver_id) {
-        //     checkEventAndAdd(eventData)
-
-        //     // Add the notification to the notification tab and increase count
-        //     if (eventData) {
-        //         addToNotificationTab(eventData);
-        //         increaseNotificationCount();
-        //     }
-        // } 
-        // // close the modal
-        // displayNone();
 
     } catch (error) {
         showError(error)

@@ -9,7 +9,8 @@ use App\classes\{
     Insert,
     CheckToken,
     Select,
-    PushNotificationClass
+    PushNotificationClass,
+    Pusher
 };
 use App\model\{EmailData, AllMembersData};
 
@@ -145,29 +146,16 @@ class Event extends AllMembersData
      */
     public static function GetEventNotificationBar()
     {
-        header("Content-Type: text/event-stream");
-        header("Cache-Control: no-cache");
-        header("Connection: keep-alive");
-        // Ensure the script runs indefinitely to support the long-running SSE connection
-set_time_limit(0);
         try {
 
             $notificationNo = checkInput(data: $_GET['notificationNo']);
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
             $result = Select::selectFn2(query: $query, bind: [$notificationNo]);
 
-            // $member = self::filterMemberByFamCode(famCode: $result[0]['receiver_id']);
-
-            // msgSuccess(code: 200, msg: [
-            //     'eventData' => $result[0], 
-            //     // 'member' => $member
-            // ]);
-
-            // real time update to the msgServerSent
-            msgServerSent(
-                data: $result[0],
-                id: $notificationNo,
-                event: 'newNotification'
+            Pusher::broadcast(
+                theChannel: 'notification-channel',
+                theEvent: 'new-notification',
+                theData: $result[0]
             );
         } catch (\Throwable $th) {
             showError(th: $th);

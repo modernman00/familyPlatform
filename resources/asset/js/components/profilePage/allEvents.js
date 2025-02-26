@@ -24,11 +24,11 @@ try {
 
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
+
             // trim removes leading and trailing spaces
             let likeCounterVal = id(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
-            const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
-            log(encodedLikeCounterVal)
+            const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
 
             await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
 

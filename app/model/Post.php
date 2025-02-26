@@ -162,7 +162,7 @@ class Post extends Select
     static function fetchUpdatedLikes()
     {
         // Define a recent time window in seconds, e.g., 10 seconds
-        $recentTimeWindow = 4;
+        $recentTimeWindow = 2;
 
         $stmt = parent::connect2()->prepare("SELECT post_no, postFamCode, post_likes 
                 FROM post
@@ -177,48 +177,4 @@ class Post extends Select
     }
 
 
-    // TEST THE CODE 
-
-    // static function getNewPost()
-    // {
-    //     $getUnpublishedPost = self::getUnpublishedPost();
-
-    //     if ($getUnpublishedPost) {
-
-    //         foreach ($getUnpublishedPost as $post) {
-    //             $postNo = $post['id'];
-
-    //             // printArr($post);
-
-    //             // msgServerSent($post, $post['id'], 'updatePost');
-
-    //             // self::updatePostByStatusAsPublished($postNo);
-
-    //             // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-    //         }
-    //     }
-    // }
-
-    // static function getNewComment()
-    // {
-    //     $getUnpublishedComment = self::getUnpublishedComment();
-
-    //     if ($getUnpublishedComment) {
-
-    //         foreach ($getUnpublishedComment as $comment) {
-    //             $commentNo = $comment['post_no'];
-
-    //             printArr($comment);
-
-
-    //             // msgServerSent($comment, $commentNo, 'updateComment');
-
-    //             // self::updateCommentByStatusAsPublished($commentNo);
-
-    //             // PushNotificationClass::sendPushNotificationToUser($results, "New Post", "A new post has been published by $postOriginName");            
-
-    //         }
-    //     }
-    // }
 }

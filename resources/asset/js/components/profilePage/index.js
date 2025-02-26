@@ -7,6 +7,7 @@ import "./modal"
 import "./img"
 
 import "./allEvents"
+import "./serviceWorker"
 
 import "./createEvent"
 import "./friendRequestCard"

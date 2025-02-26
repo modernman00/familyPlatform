@@ -540,7 +540,7 @@ var notificationHTML = function notificationHTML(data) {
   // generate random numbers to make the notification unique
 
   var randomNumber = Math.floor(100 + Math.random() * 900);
-  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button class='w3-button w3-hover-grey w3-tiny w3-border' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n\n    <hr>\n  </a>\n\n  ");
+  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -632,36 +632,35 @@ try {
             elementId = e.target.id;
             postId = e.target.name; // Handle Like Button Click
             if (!elementId.includes("likeButton")) {
-              _context.next = 13;
+              _context.next = 12;
               break;
             }
             // replace button with Counter to get the span id 
             likeCounterId = elementId.replace('Button', 'Counter'); // trim removes leading and trailing spaces
             likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(encodedLikeCounterVal);
-            _context.next = 9;
+            _context.next = 8;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
-          case 9:
-            _context.next = 11;
+          case 8:
+            _context.next = 10;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewLikesPusher");
-          case 11:
-            _context.next = 67;
+          case 10:
+            _context.next = 66;
             break;
-          case 13:
+          case 12:
             if (!elementId.includes("initComment")) {
-              _context.next = 18;
+              _context.next = 17;
               break;
             }
             commentFormId = elementId.replace('init', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.next = 67;
+            _context.next = 66;
             break;
-          case 18:
+          case 17:
             if (!elementId.includes("submitComment")) {
-              _context.next = 36;
+              _context.next = 35;
               break;
             }
             e.preventDefault();
@@ -675,24 +674,24 @@ try {
             inputComment = idForm.replace("form", "input");
             idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 30;
+              _context.next = 29;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 34;
+            _context.next = 33;
             break;
-          case 30:
-            _context.next = 32;
+          case 29:
+            _context.next = 31;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/postCommentProfile', formEntries, options);
-          case 32:
-            _context.next = 34;
+          case 31:
+            _context.next = 33;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewCommentPusher");
-          case 34:
-            _context.next = 67;
+          case 33:
+            _context.next = 66;
             break;
-          case 36:
+          case 35:
             if (!elementId.includes("submitPost")) {
-              _context.next = 53;
+              _context.next = 52;
               break;
             }
             e.preventDefault();
@@ -702,23 +701,23 @@ try {
             formData.append('postFamCode', requesterFamCodeValue);
 
             // 3. 
-            _context.next = 44;
+            _context.next = 43;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post("/member/profilePage/post", formData, options);
-          case 44:
+          case 43:
             response = _context.sent;
-            _context.next = 47;
+            _context.next = 46;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
-          case 47:
-            _context.next = 49;
+          case 46:
+            _context.next = 48;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewPostPusher");
-          case 49:
+          case 48:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 67;
+            _context.next = 66;
             break;
-          case 53:
+          case 52:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 66;
+              _context.next = 65;
               break;
             }
             // Extract the user ID from the target ID
@@ -730,9 +729,9 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 62;
+            _context.next = 61;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 62:
+          case 61:
             _response = _context.sent;
             if (_response.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
@@ -744,9 +743,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 67;
+            _context.next = 66;
             break;
-          case 66:
+          case 65:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -756,7 +755,7 @@ try {
                 });
               }
             }
-          case 67:
+          case 66:
           case "end":
             return _context.stop();
         }
@@ -838,7 +837,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
 
 
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
@@ -851,6 +852,7 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
 
 
 
@@ -870,16 +872,6 @@ var displayNone = function displayNone() {
  * @returns {boolean} - Returns true if event is linked to the family code
  */
 
-/**
- * Adds an event to the event list if it passes the family code filter.
- * 
- * @param {Object} data - The event data object to be checked and possibly added.
- * @returns {void}
- */
-var checkEventAndAdd = function checkEventAndAdd(data) {
-  var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_3__.eventHtml)(data);
-  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-};
 var options = {
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN'
@@ -895,7 +887,7 @@ var options = {
  */
 var process = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-    var eventForm, eventFormEntries, _yield$Promise$all, _yield$Promise$all2, eventResponse, notificationResponse, notificationNo, eventSource;
+    var eventForm, eventFormEntries, _yield$Promise$all, _yield$Promise$all2, eventResponse, notificationResponse, notificationNo;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
@@ -915,62 +907,29 @@ var process = /*#__PURE__*/function () {
           eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventModalForm');
           eventFormEntries = new FormData(eventForm); // POST data to create the event and notification in parallel
           _context.next = 12;
-          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/member/notification/event', eventFormEntries, options)]);
+          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_5__["default"].post('/member/notification/event', eventFormEntries, options)]);
         case 12:
           _yield$Promise$all = _context.sent;
           _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 2);
           eventResponse = _yield$Promise$all2[0];
           notificationResponse = _yield$Promise$all2[1];
-          // Extract and notificationNo from the responses
-          notificationNo = notificationResponse.data.message; // Use Promise.all to fetch event data and notification data in parallel
-          // const notificationDataResponse = await axios.get(`/member/notification/event?notificationNo=${notificationNo}`)
-          // USING SSE 
-          eventSource = new EventSource("/member/notification/event?notificationNo=".concat(notificationNo));
-          eventSource.addEventListener('newNotification', function (event) {
-            var notificationData = JSON.parse(event.data);
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(notificationData);
+          // Extract and get notificationNo from the responses
+          notificationNo = notificationResponse.data.message; // update all members of similar famcode on their UIs using Pusher
+          axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
 
-            // Update the UI with the new notification if it matches the family code
-            if (localStorage.getItem('requesterFamCode') === notificationData.receiver_id) {
-              checkEventAndAdd(notificationData);
-              (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.addToNotificationTab)(notificationData);
-              (0,_navbar__WEBPACK_IMPORTED_MODULE_2__.increaseNotificationCount)();
-            }
-          });
-          eventSource.onerror = function (error) {
-            console.error("SSE connection error:", error);
-            console.log("Error details:", error.target.readyState); // Log the readyState of EventSource
-            eventSource.close();
-          };
-
-          // SECOND OPTION
-
-          // const notificationData = notificationDataResponse.data.message;
-
-          // const {eventData, member} =notificationData;
-
-          // if(localStorage.getItem('requesterFamCode') == eventData.receiver_id) {
-          //     checkEventAndAdd(eventData)
-
-          //     // Add the notification to the notification tab and increase count
-          //     if (eventData) {
-          //         addToNotificationTab(eventData);
-          //         increaseNotificationCount();
-          //     }
-          // } 
-          // // close the modal
-          // displayNone();
-          _context.next = 25;
+          // close the modal
+          displayNone();
+          _context.next = 24;
           break;
-        case 22:
-          _context.prev = 22;
+        case 21:
+          _context.prev = 21;
           _context.t0 = _context["catch"](0);
           (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_context.t0);
-        case 25:
+        case 24:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[0, 22]]);
+    }, _callee, null, [[0, 21]]);
   }));
   return function process(_x) {
     return _ref.apply(this, arguments);
@@ -995,7 +954,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var eventHtml = function eventHtml(data) {
-  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.sender_name, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.notification_name, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.notification_date), " </p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.notification_type, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.notification_content, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n            \n           <hr>");
+  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.sender_name, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.notification_name, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.notification_date), " </p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.notification_type, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.notification_content, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n\n            \n           <hr>");
+
+  //                        <button 
+  //     type="button" 
+  //     id="coming${data.data.no}"
+  //     class="w3-button w3-tiny w3-theme-d2 w3-margin-bottom">
+  //       <em class="fa fa-comment"></em> 
+  //         Coming 
+  //     </button>
+  // 
 };
 
 /***/ }),
@@ -1301,12 +1269,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/profilePage/modal.js");
 /* harmony import */ var _img__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./img */ "./resources/asset/js/components/profilePage/img.js");
 /* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/profilePage/allEvents.js");
-/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
-/* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _serviceWorker__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./serviceWorker */ "./resources/asset/js/components/profilePage/serviceWorker.js");
+/* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
+/* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 
 
 localStorage.removeItem('redirect');
+
 
 
 
@@ -1330,11 +1300,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
+
 
 
 
@@ -1368,7 +1342,7 @@ try {
             case 0:
               _context.prev = 0;
               _context.next = 3;
-              return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPostCommentByFamCode");
+              return axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/post/getAllPostCommentByFamCode");
             case 3:
               pullData = _context.sent;
               // Assign fetched data to state properties
@@ -1423,7 +1397,7 @@ try {
             (0,_post__WEBPACK_IMPORTED_MODULE_1__.appendNewPost)(dataForUse);
             _context2.prev = 5;
             _context2.next = 8;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
               post_status: 'published'
             });
           case 8:
@@ -1450,8 +1424,7 @@ try {
         while (1) switch (_context3.prev = _context3.next) {
           case 0:
             // Parse the incoming data and check if it already exists in state
-            dataForUse = checkOriginAndParsedData(e); //   log(dataForUse)
-            // Only append if the comment hasn't been added before
+            dataForUse = checkOriginAndParsedData(e); // Only append if the comment hasn't been added before
             if (appendedComments.has(dataForUse.comment_no)) {
               _context3.next = 12;
               break;
@@ -1463,7 +1436,7 @@ try {
             (0,_comment__WEBPACK_IMPORTED_MODULE_3__.appendNewComment)(dataForUse);
             _context3.prev = 4;
             _context3.next = 7;
-            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
               comment_status: 'published'
             });
           case 7:
@@ -1510,72 +1483,26 @@ try {
 
   // Subscribe to the likes channel
   var likesChannel = pusher.subscribe('likes-channel');
-  likesChannel.bind('new-like', function (data) {
-    console.log('New like:', data);
+  likesChannel.bind('like-event', function (data) {
     data.forEach(function (item) {
       return updateLike(item);
     });
   });
 
-  // Establish an EventSource for receiving like updates
-  // const connectSSE = (url, event, callbackFn) => {
-  //     const sse = new EventSource(url);
+  // Subscribe to the event channel
 
-  //     sse.addEventListener(event, callbackFn);
-  //     // Reconnect on error or if the connection is closed
-  //     sse.onerror = (err) => {
-  //         console.warn("SSE connection lost, reconnecting...", err);
-  //         sse.close();
-  //         // startLongPolling();
-  //         // Correctly pass the arguments on reconnect
-  //         setTimeout(() => connectSSE(url, event, callbackFn), 5000); // Attempt to reconnect after 5 seconds
-  //     };
-  // };
-
-  // connectSSE("/post/getNewPost", "updatePost", updatePost);
-  // connectSSE("/comment/newComment", "updateComment", updateComment);
-  // connectSSE("/profileCard/getLikes", "updateLike", updateLike);
-
-  // POLLING FUNCTION 
-
-  // Function to perform long polling for a given endpoint
-  // const fetchPollingData = async (endpoint, updateFunction) => {
-  //     try {
-  //         const response = await axios.get(endpoint, { timeout: 30000 });
-
-  //         if (Array.isArray(response.data.message)) {
-
-  //             response.data.message.forEach(item => updateFunction(item))
-
-  //         }
-  //     } catch (error) {
-  //         if (error.code === 'ECONNABORTED') {
-  //             console.warn(`Long polling connection timed out for ${endpoint}. Retrying...`);
-  //         } else {
-  //             console.error(`Error fetching data from ${endpoint}:`, error);
-  //         }
-
-  //         // Retry the request after a delay
-  //         await new Promise(resolve => setTimeout(resolve, 2000));
-  //         fetchPollingData(endpoint, updateFunction); // Recursive call
-  //     }
-  // };
-
-  // // Main long polling function
-  // (async function startLongPolling() {
-  //     while (true) {
-  //         try {
-  //             await Promise.all([
-  //                 fetchPollingData('/getNewPostPolling', updatePost),
-  //                 fetchPollingData('/getNewCommentPolling', updateComment),
-  //                 fetchPollingData('/getNewLikesPolling', updateLike)
-  //             ]);
-  //         } catch (error) {
-  //             console.error('Error fetching data:', error);
-  //         }
-  //         await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
-  //     }
-  // })();
+  var checkEventAndAdd = function checkEventAndAdd(data) {
+    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_5__.eventHtml)(data);
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+  };
+  var notificationChannel = pusher.subscribe('notification-channel');
+  notificationChannel.bind('new-notification', function (data) {
+    if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
+      checkEventAndAdd(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_6__.addToNotificationTab)(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_6__.increaseNotificationCount)();
+    }
+  });
 
   // AUTOMATICALLY UPDATE TIMESTAMP
   // Function to check for elements and render if they exist every 5 seconds
@@ -1714,6 +1641,105 @@ var appendNewPost = function appendNewPost(el) {
     // }
   }
 };
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/serviceWorker.js":
+/*!********************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/serviceWorker.js ***!
+  \********************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+
+var VAPID_PUBLIC_KEY = "BAvqqppvGj5V0DqzieyYq5nGu9EW_db01_7jXO1_Nk-8UZzKJpCs1eGYx5d0yuBe7q3xu6oWaFS8etO9lazRMMo";
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+  navigator.serviceWorker.register('/service-worker.js', {
+    scope: '/'
+  }).then(function (swReg) {
+    console.log('Service Worker registered with scope:', swReg.scope);
+    // Check if the user is already subscribed
+    swReg.pushManager.getSubscription().then(function (subscription) {
+      if (subscription === null) {
+        // Request user permission for notifications
+        Notification.requestPermission().then(function (permission) {
+          if (permission === 'granted') {
+            subscribeUser(swReg);
+          } else {
+            // subscribeUser(swReg);
+            console.log('Push notifications permission denied.');
+            // Handle the case where the user denied permission
+          }
+        });
+      } else {
+        console.log('User is already subscribed:', subscription);
+        // If already subscribed, send the subscription to the server
+        postSubscriptionToServer(subscription);
+      }
+    });
+  })["catch"](function (error) {
+    console.error('Service Worker registration failed', error);
+  });
+} else {
+  console.error('Service Worker is not supported in this browser');
+}
+function subscribeUser(swReg) {
+  var applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY); // Access public VAPID key
+
+  swReg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: applicationServerKey
+  }).then(function (subscription) {
+    console.log('User is subscribed:', subscription);
+
+    // Send subscription object to the server to store it
+    postSubscriptionToServer(subscription);
+  })["catch"](function (error) {
+    console.error('Failed to subscribe the user: ', error);
+  });
+}
+function postSubscriptionToServer(subscription) {
+  // Prepare the subscription data to be sent to the server
+  var subscriptionData = {
+    id: localStorage.getItem('requesterId'),
+    // STILL CHECK IT
+    subscription: {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth
+      }
+    }
+  };
+  // Send subscription to the server using axios
+  axios__WEBPACK_IMPORTED_MODULE_0__["default"].post('/pushNotification/subscription', subscriptionData).then(function (response) {
+    console.log('Subscription data successfully sent to the server:', response.data);
+  })["catch"](function (error) {
+    console.error('Failed to send subscription data to the server:', error);
+  });
+}
+
+// utility for periodic sync  
+if ('periodicSync' in navigator) {
+  navigator.periodicSync.register('content-sync', {
+    minInterval: 24 * 60 * 60 * 1000 // Minimum interval in milliseconds (e.g., 1 day)
+  }).then(function () {
+    console.log('Periodic Sync registered');
+  })["catch"](function (error) {
+    console.error('Periodic Sync registration failed:', error);
+  });
+}
 
 /***/ })
 
