@@ -57,9 +57,9 @@ $router->map(
 );
 
 
-// $router->map(
-//   method: 'GET', 
-//   route: '/getNewCommentLikesPolling', 
-//   target: 'App\controller\members\PostMessage@getNewCommentLikesPolling', 
-//   name: 'polling-comment-likes'
-// );
+$router->map(
+  method: 'POST', 
+  route: '/pushNotification/subscription', 
+  target: 'App\controller\NotificationController@postSubscriberData', 
+  name: 'postSubscriberData'
+);

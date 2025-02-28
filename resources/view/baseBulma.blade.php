@@ -251,6 +251,8 @@
     <div class="content has-text-centered">
 
       <p>Website developed and maintained by Olawale Olaogun </p>
+<button id="subscribeButton">Subscribe to Notifications</button>
+   
 
       <a href="@yield('data-page-id')" title="To Top">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-bar-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -266,21 +268,6 @@
   <script type="text/javascript" src="/public/manifest.js" defer></script>
   <script type="text/javascript" src="/public/vendor.js" defer></script>
   <script type="text/javascript" src="/public/index.js" defer></script>
-
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then((registration) => {
-            console.log('Service Worker registered:', registration);
-          })
-          .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-          });
-      });
-    }
-
-  </script>
 
 
 </body>

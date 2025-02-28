@@ -2,12 +2,14 @@
 
 localStorage.removeItem('redirect')
 
+
 import "./loadPost"
 import "./modal"
 import "./img"
 
 import "./allEvents"
-import "./serviceWorker"
+import "./registerPushNotification"
+import "./periodicSync"
 
 import "./createEvent"
 import "./friendRequestCard"

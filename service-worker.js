@@ -14,32 +14,13 @@ const CacheFiles = [
   "/public/img/favicon/android-chrome-192x192.png",
   "/public/img/favicon/android-chrome-512x512.png",
   "/public/img/favicon/apple-touch-icon.png",
-  "public/img/photos/",
+  "/public/img/photos/",
   "/public/img/post/",
   "/public/img/profile/",
   '/public/img/favicon/favicon.ico',
   "/public/img/celebrate.jpeg",
   "/public/img/favicon/favicon-32x32.png"
 ];
-
-// get all profile images posted to the server and add them to the cache on install 
-
-//TODO - fix this
-// self.addEventListener("install", (event) => {
-//   event.waitUntil(
-//     (async () => {
-//       const images = await fetch("/public/img/profile/");
-//       const imagesArray = await images.json();
-//       console.log(imagesArray);
-//       imagesArray.forEach(async (image) => {
-//         const response = await fetch(`/public/img/profile/${image}`);
-//         const blob = await response.blob();
-//         const cache = await caches.open(CacheName);
-//         cache.put(`/public/img/profile/${image}`, new Response(blob));
-//       });
-//     })(),
-//   );
-// });
 
 // On install, cache the static resources
 self.addEventListener("install", (event) => {
@@ -53,9 +34,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-
-// delete old caches on activate
-
+// Delete old caches on activate
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
@@ -72,24 +51,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// On fetch, intercept server requests
-// and respond with cached responses instead of going to network
-
-// service-worker.js
-
-const putInCache = async (request, response) => {
-  const cache = await caches.open("v1");
-  await cache.put(request, response);
-};
-
-/**
- * Attempts to retrieve a resource using a cache-first strategy.
- *
- * @param {object} options - Options for the cache-first strategy.
- * @param {Request} options.request - The request to retrieve.
- * @param {string} options.fallbackUrl - The URL to fall back to if the request fails.
- * @return {Response} The retrieved response, or a fallback response if the request fails.
- */
 // Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
   event.respondWith(
@@ -103,8 +64,7 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       }).catch((error) => {
         console.error('Fetch failed; returning cached page instead:', error);
-        // Optional: Serve a fallback page if the network fails
-        return caches.match('/index');
+        return caches.match('/index'); // Optional: Serve a fallback page if the network fails
       });
 
       return cachedResponse || fetchPromise;
@@ -121,15 +81,13 @@ function showNotification({ title, body, url }) {
     icon: '/public/img/favicon/android-chrome-192x192.png',
     badge: '/public/img/favicon/android-chrome-192x192.png',
     data: { url },
-    requireInteraction: true,       // Keeps notification visible until user interacts
+    requireInteraction: true, // Keeps notification visible until user interacts
     actions: [
       { action: "open", title: "View" }
     ]
-  }
+  };
   self.registration.showNotification(title, options);
 }
-
-
 
 // Push event - handle notifications
 self.addEventListener('push', function (event) {
@@ -141,19 +99,14 @@ self.addEventListener('push', function (event) {
     console.error("Push event error:", e);
   }
 
-
   const notificationData = {
     body: data.body || 'You have a new notification',
     title: data.title || 'New Notification',
-
     url: data.url || '/',
-
-
   };
 
-    event.waitUntil(showNotification(notificationData));
+  event.waitUntil(showNotification(notificationData));
 });
-
 
 // Notification click event - open the link when clicked
 self.addEventListener('notificationclick', (event) => {
@@ -186,49 +139,70 @@ self.addEventListener('periodicsync', (event) => {
   }
 });
 
+// Sync content function
 async function syncContent() {
   try {
-    const response = await fetch('/api/get-updates');
+    console.log('Performing periodic content sync...');
+    const battery = await navigator.getBattery();
+    const isCharging = battery.charging;
+    const batteryLevel = battery.level;
+    console.log(`Battery charging: ${isCharging}, level: ${batteryLevel}`);
+
+    // Adjust sync frequency for low battery
+    if (!isCharging && batteryLevel < 0.2) {
+      console.warn('Battery is low, deferring sync.');
+      return;
+    }
+
+    // Fetch new data from the server
+    const yourId = localStorage.getItem('requesterId');
+    const famCode = localStorage.getItem('requesterFamCode');
+    const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
+
+    const response = await fetch(notificationURL);
+    if (!response.ok) throw new Error("Network response was not ok");
+
     const data = await response.json();
-    console.log('Periodic content sync completed:', data);
+    console.log('Fetched new content:', data);
 
+    // Notify user of successful sync
+    self.registration.showNotification('Sync Successful', {
+      body: 'Your content has been updated!',
+      icon: '/public/img/favicon/android-chrome-192x192.png'
+    });
 
-    // Check for new events, friend requests, and handle accordingly
-    if (data.newEvents.length > 0) {
-      for (let event of data.newEvents) {
-        showNotification({
-          title: 'New Event Created!',
-          body: `A new event "${event.title}" has been added.`,
-          url: `/events/${event.id}`,
-        });
-      }
+    if (data.length === 0) {
+      console.log('No new notifications to display.');
+      return;
     }
 
-    if (data.newFriendRequests.length > 0) {
-      for (let request of data.newFriendRequests) {
+    data.forEach((notification) => {
+      // Check the type of notification and display accordingly
+      if (notification.type === 'Friend Request') {
         showNotification({
-          title: 'New Friend Request',
-          body: `You have a new friend request from ${request.from}.`,
-          url: `/friend-requests`,
+          title: 'Friend Request!',
+          body: notification.notification_name,
+          url: `${process.env.MIX_APP_URL}/member/ProfilePage`,
+        });
+      } else {
+        showNotification({
+          title: notification.notification_name,
+          body: notification.notification_body,
+          url: `${process.env.MIX_APP_URL}/member/ProfilePage`
         });
       }
-    }
-
-    if (data.friendRequestsAccepted.length > 0) {
-      for (let friend of data.friendRequestsAccepted) {
-        showNotification({
-          title: 'Friend Request Accepted',
-          body: `${friend.name} accepted your friend request!`,
-          url: `/friends/${friend.id}`,
-        });
-      }
-    }
-
-
+    });
 
     // Update cache or IndexedDB with the new data
+    // Implement your caching logic here
+
   } catch (error) {
     console.error('Error during periodic content sync:', error);
+
+    // Send a push notification for failure
+    self.registration.showNotification('Sync Failed', {
+      body: 'We could not update your content. Please check your connection.',
+      icon: '/public/img/favicon/android-chrome-192x192.png'
+    });
   }
 }
-

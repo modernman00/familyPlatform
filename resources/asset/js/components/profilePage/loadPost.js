@@ -125,25 +125,25 @@ try {
         data.forEach(item => updateLike(item))
     });
 
-      // Subscribe to the event channel
+    // Subscribe to the event channel
 
 
-      const checkEventAndAdd = (data) => {
-      
-          const appendEvent = eventHtml(data);
-          return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
-      }
-      
-            const notificationChannel = pusher.subscribe('notification-channel');
-    
-            notificationChannel.bind('new-notification', (data) => {
-                if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
-                    checkEventAndAdd(data);
-                    addToNotificationTab(data);
-                    increaseNotificationCount();
-    
-                }
-            });
+    const checkEventAndAdd = (data) => {
+
+        const appendEvent = eventHtml(data);
+        return id('eventList').insertAdjacentHTML('afterbegin', appendEvent);
+    }
+
+    const notificationChannel = pusher.subscribe('notification-channel');
+
+    notificationChannel.bind('new-notification', (data) => {
+        if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
+            checkEventAndAdd(data);
+            addToNotificationTab(data);
+            increaseNotificationCount();
+
+        }
+    });
 
 
 

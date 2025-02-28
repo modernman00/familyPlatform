@@ -78,14 +78,18 @@ class NotificationController extends Select
 
             $inputData = json_decode(file_get_contents("php://input"), true);
             // Validate the input data
-            if (!isset($inputData['id'], $inputData['subscription']['endpoint'], $inputData['subscription']['keys']['p256dh'], $inputData['subscription']['keys']['auth'])) {
+            if (!isset(
+                $inputData['endpoint'],
+                $inputData['keys']['p256dh'],
+                $inputData['keys']['auth']
+            )) {
                 msgException(300, 'Invalid subscription data');
             }
 
-            $userId = $inputData['id'];
-            $endpoint = $inputData['subscription']['endpoint'];
-            $p256dhKey = $inputData['subscription']['keys']['p256dh'];
-            $authKey = $inputData['subscription']['keys']['auth'];
+            $userId = cleanSession($inputData['id']);
+            $endpoint = $inputData['endpoint'];
+            $p256dhKey = $inputData['keys']['p256dh'];
+            $authKey = $inputData['keys']['auth'];
             // Prepare the data to insert
             $data = [
                 'id' => $userId,
@@ -106,7 +110,7 @@ class NotificationController extends Select
 
             } else {
                 // If not, insert a new subscription
-                Insert::submitFormDynamicLastId('notification', $data, 'id');
+                Insert::submitFormDynamicLastId('pushNotification', $data, 'id');
             }
 
             msgSuccess(200, 'Subscription saved successfully');
@@ -115,50 +119,4 @@ class NotificationController extends Select
         }
     }
 
-
-    // TODO Auto-generated Not used yet
-    public static function getUnreadNotifications(int $userId): void
-    {
-        try {
-            $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'status', orderBy: 'ORDER BY created_at ASC');
-            $famCode = $_GET['famCode'] ?? null;
-
-            $query = "SELECT * FROM notification WHERE (receiver_id = ? OR receiver_id = ?) AND status = ?";
-            $result = Select::selectFn2($query, [$userId, $famCode, 'unread']);
-            msgSuccess(200, $result);
-        } catch (\Exception $e) {
-            showError($e);
-        }
-    }
-
-
-    // TODO Auto-generated Not used yet
-    public static function markAsRead($youId, $famCode, $senderId): bool
-    {
-        $youId = checkInput($youId);
-        $famCode = checkInput($famCode);
-        $senderId = checkInput($senderId);
-
-        if (!$youId || !$famCode || !$senderId) {
-            msgException(400, 'Invalid parameters');
-            return false;
-        }
-
-        try {
-            $query = "UPDATE notification SET notification_status = 'clicked' WHERE (receiver_id = ? OR receiver_id = ?) AND sender_id = ?";
-            $statement = parent::connect2()->prepare($query);
-            $result = $statement->execute([$youId, $famCode, $senderId]);
-
-            if ($result) {
-                msgSuccess(200, "success");
-                return true;
-            } else {
-                msgException(500, "Database update failed");
-                return false;
-            }
-        } catch (\Exception $e) {
-            showError($e);
-            return false;
-        }
-    }
 }

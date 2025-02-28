@@ -17,7 +17,7 @@ include_once __DIR__ . "/chat.php";
 include_once __DIR__ . "/Event.php";
 include_once __DIR__ . "/notification.php";
 include_once __DIR__ . "/friendRequest.php";
-include_once __DIR__ . "/webSocket.php";
+include_once __DIR__ . "/pushNotification.php";
 
 
 $router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
