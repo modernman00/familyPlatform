@@ -363,7 +363,7 @@ var config = {
     'Accept': 'application/json'
   }
 };
-var URL = "http://olaogun.test/";
+var URL = "https://olaogun.test/";
 // https: //laravel.com/docs/5.4/mix#environment-variables
 
 var getAllData = /*#__PURE__*/function () {

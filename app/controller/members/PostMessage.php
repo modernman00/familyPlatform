@@ -179,8 +179,10 @@ class PostMessage
             $data = Post::postByNo($postNo);
 
             $postOriginName = $data['fullName'];
+            $id = \checkInput($data['id']);
+            $famCode = checkInput($data['postFamCode']);
 
-            $results = AllMembersData::AllMembersEmailByFamCode(checkInput($data['postFamCode']));
+            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
 
             $url = self::buildPostUrl($postNo);
 

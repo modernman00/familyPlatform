@@ -231,7 +231,7 @@ var config = {
   }
 };
 var reqId = localStorage.getItem('requesterId');
-var URL = "http://olaogun.test/";
+var URL = "https://olaogun.test/";
 var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
 var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
 var renderMembers = function renderMembers(data, container, noMemberMessage, html) {
@@ -649,7 +649,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 
-var appUrl = "http://olaogun.test/";
+var appUrl = "https://olaogun.test/";
 var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
 var friendRequestCard = function friendRequestCard(data) {
   var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;

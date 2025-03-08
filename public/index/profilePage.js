@@ -1125,7 +1125,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 
-var appUrl = "http://olaogun.test/";
+var appUrl = "https://olaogun.test/";
 var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
 var friendRequestCard = function friendRequestCard(data) {
   var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;
