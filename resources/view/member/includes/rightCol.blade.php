@@ -73,7 +73,10 @@
 
 
        <label for="postMessage_uploadPics" class="custom-file-container__custom-file">
-         <input type="file" accept="image/*, image/heif, image/heic, video/*" class="custom-file-container__custom-file__custom-file-input" aria-label="Choose File" id="postMessage_uploadPics" name="photo[]" multiple />
+        <input type="file" 
+          accept="image/*, image/heif, image/heic, video/*" class="custom-file-container__custom-file__custom-file-input"aria-label="Choose File" id="postMessage_uploadPics" name="photo[]" 
+          multiple
+        />
          <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
          <span class="custom-file-container__custom-file__custom-file-control"></span>
        </label>

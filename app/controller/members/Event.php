@@ -176,7 +176,7 @@ class Event extends AllMembersData
     {
         try {
 
-            $notificationNo = $_GET['notificationNo'];
+            $notificationNo = checkInput($_GET['notificationNo']);
 
             $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
 
@@ -308,7 +308,7 @@ class Event extends AllMembersData
      */
     public static function getEventDataByNoController()
     {
-        $eventNo = $_GET['eventNo'];
+        $eventNo = checkInput($_GET['eventNo']);
         $allEventData = allMembersData::getEventDataByNo($eventNo);
 
         $eventFamCode = self::generateFamCode();

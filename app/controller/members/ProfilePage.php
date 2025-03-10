@@ -335,7 +335,7 @@ class ProfilePage extends ProcessImg
      */
     public function setHeader()
     {
-        $token = $_GET['token'];
+        $token = checkInput($_GET['token']);
          setCookie(name:'tokenJWT', value:$token, expires_or_options:time() + 3600, path: "/", domain:'', secure: true, httponly: true );
          msgSuccess(200, "message set");
     }

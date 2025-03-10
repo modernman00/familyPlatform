@@ -28,7 +28,7 @@ class AllMembersController extends AllMembersData
     public function processApiData(): void
     {
         try {
-            $id = $_GET['id'];
+            $id = checkInput($_GET['id']);
             $tokenVerify = new VerifyToken();
 
             $tokenConfirm = $tokenVerify->profilePage();

@@ -22,7 +22,6 @@ class ProcessImg extends AllFunctionalities
             // create a file path name for the database
             $fileName = checkInputImage($_FILES['profileImageFile']['name']);
 
-
             $this->profileImg = $fileName;
 
             if (!$_SESSION['id']) {
