@@ -192,7 +192,7 @@ class AllMembersData extends InnerJoin
     public static function getAllEventData(): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
             FROM events 
             INNER JOIN personal ON events.id = personal.id 
             WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
@@ -213,7 +213,7 @@ class AllMembersData extends InnerJoin
     public static function getEventDataByNo($eventNo): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,  events.eventDescription, personal.firstName, personal.lastName, personal.famCode
         FROM events 
         INNER JOIN personal ON events.id = personal.id 
         WHERE (events.no = :eventNo)
@@ -237,7 +237,7 @@ class AllMembersData extends InnerJoin
     public static function getEventDataByFamCode($famCode): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventGroup, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
         FROM events 
         INNER JOIN personal ON events.id = personal.id 
         WHERE (personal.famCode = :famCode)

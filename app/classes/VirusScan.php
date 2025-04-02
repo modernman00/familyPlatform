@@ -28,6 +28,7 @@ class VirusScan
 
       if (!$result->getCleanResult()) {
         msgException(401, 'Virus detected');
+        
       }
     } catch (Exception $e) {
       showError($e);

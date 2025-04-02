@@ -74,19 +74,19 @@ class ProfilePage extends ProcessImg
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
 
             $this->memberData = $setData->getCustomerData($this->id, $table);
-            
+
             $getFamCode = checkInput($this->memberData['famCode']);
             $_SESSION['famCode'] = $getFamCode;
 
-           
-          
-          
+
+
+
             // $rest = Post::getUnpublishedPost();
 
             //  foreach($rest as $rest){
             //     printArr($rest);
             //  }
-           
+
 
 
             $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
@@ -137,10 +137,6 @@ class ProfilePage extends ProcessImg
             }
 
 
-            // printArr(DataAll::commentProfilePicByPostNo((917)));
-            //  Post::getNewComment();
-            //  Post::getNewPost();
-
 
             view('member/profilePage', [
                 'data' => $this->memberData,
@@ -177,8 +173,6 @@ class ProfilePage extends ProcessImg
      */
     private function processPostData(): array
     {
-
-
         if (!$_POST) {
             throw new Exception("There was no post data", 1);
         }
@@ -198,7 +192,8 @@ class ProfilePage extends ProcessImg
                 $image = $_FILES['post_img']['name'];
                 // create the post array for the post image
                 for ($i = 0; $i < count($image); $i++) {
-                    $getSanitisePost["post_img$i"] = $image[$i];
+                     $name = str_replace(' ', '', $image[$i]);
+                    $getSanitisePost["post_img$i"] = $name;
                 }
             }
         }
@@ -236,7 +231,7 @@ class ProfilePage extends ProcessImg
             // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
 
 
-         
+
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -249,10 +244,10 @@ class ProfilePage extends ProcessImg
             $getComment = $this->processPostData();
 
             // get the profile pics of the commenter 
-            
+
             $getComment['profileImg'] = Post::getProfilePicsById($getComment['id']);
-       
-    
+
+
 
 
             Insert::submitFormDynamic('comment', $getComment);
@@ -270,7 +265,6 @@ class ProfilePage extends ProcessImg
         try {
             // process the image 
             $this->processProfileImage();
-           
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -283,16 +277,17 @@ class ProfilePage extends ProcessImg
     {
         if ($_FILES) {
             if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
-                fileUploadMultiple("img/photos/", 'photo');
+                fileUploadMultiple("public/img/photos/", 'photo');
 
                 // create a file path name for the database
                 $image = $_FILES['photo']['name'];
                 // create the post array for the post image
                 for ($i = 0; $i < count($image); $i++) {
-                 
+
                     $arrData = [
-                        'photo' => $image[$i],
-                        'id' => checkInput($_SESSION['id'])
+                        'img' => $image[$i],
+                        'id' => checkInput($_SESSION['id']),
+                        'where_from' => 'profile_upload_img'
                     ];
                     $insertFile = new Insert();
                     $insertFile->submitForm(table: 'images', field: $arrData);
@@ -309,7 +304,7 @@ class ProfilePage extends ProcessImg
     public function showPics(): void
     {
         $path = checkInput(data: $_GET['path']);
-     
+
         $imagePath = ProcessImg::showPostImg(picsSource: $path);
 
         $postId = checkInput(data: $_GET['pID']);
@@ -325,7 +320,7 @@ class ProfilePage extends ProcessImg
         ]);
     }
 
-        /**
+    /**
      * Sets an HTTP cookie for JWT token.
      * 
      * Retrieves the token from the GET request and sets a secure, HTTP-only cookie with a one-hour expiry.
@@ -336,7 +331,7 @@ class ProfilePage extends ProcessImg
     public function setHeader()
     {
         $token = checkInput($_GET['token']);
-         setCookie(name:'tokenJWT', value:$token, expires_or_options:time() + 3600, path: "/", domain:'', secure: true, httponly: true );
-         msgSuccess(200, "message set");
+        setCookie(name: 'tokenJWT', value: $token, expires_or_options: time() + 3600, path: "/", domain: '', secure: true, httponly: true);
+        msgSuccess(200, "message set");
     }
 }

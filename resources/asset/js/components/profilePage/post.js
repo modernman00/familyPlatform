@@ -19,11 +19,9 @@ export const allPost = (postData, commentData) => {
 
   if (!postData ||!Array.isArray(commentData)) {
     msgException('Invalid post data');
-   
   }
 
   let postNo = parseInt(postData.post_no)
-
 
   const filterComment = commentData.filter(comm => parseInt(comm.post_no) === postNo ) // filter the comment to an array
   const postHtml = html(postData, filterComment)

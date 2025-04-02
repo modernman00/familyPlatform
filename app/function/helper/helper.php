@@ -230,13 +230,11 @@ function showErrorExp($th): void
 function showSSEError($th): void
 {
     error_log("SSE Error: " . $th->getMessage());
-    echo "Error msg - " . $th->getMessage() . $th->getFile(). $th->getLine();
+    echo "Error msg - " . $th->getMessage() . $th->getFile() . $th->getLine();
     echo "<br>";
     echo "data: Error occurred\n\n";
     ob_flush();
     flush();
-
-
 }
 
 
@@ -319,20 +317,26 @@ function fileUploadMultiple($fileLocation, $formInputName): void
     // Looping all files
     for ($i = 0; $i < $countFiles; $i++) {
         $fileName = basename($_FILES[$formInputName]['name'][$i]);
+         // trim out the space in the file name
+        $fileName = str_replace(' ', '', $fileName);
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
         $pathToImage = "$fileLocation$fileName";
 
+       
+
+        // virus scan using ClamAV
         new ScanVirus(tempFileLocation: $fileTemp);
 
-        // sanitise the file
+        // Validate file
         $picError = "";
-        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-        $fileExtension = strtolower($fileExtension);
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedFormats = ['png', 'jpg', 'gif', 'jpeg'];
 
-        if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
-            $picError .= 'Format must be PNG, JPG, or GIF';
+        if (!in_array($fileExtension, $allowedFormats)) {
+            $picError .= 'Format must be PNG, JPG, GIF, or JPEG. ';
         }
+
 
         if ($fileSize > 102400000) {
             $picError .= 'File size must not exceed 10240kb';
@@ -344,22 +348,18 @@ function fileUploadMultiple($fileLocation, $formInputName): void
         // }
         if ($picError) {
             msgException(400, "Error Processing Request - post images - $picError");
+            continue; // skip this file upload
         }
 
-        $uploadFile = move_uploaded_file($fileTemp, $pathToImage);
-
-        // Check if upload was successful
-        if (!$uploadFile) {
+        // Move uploaded file
+        if (!move_uploaded_file($fileTemp, $pathToImage)) {
             $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
             continue; // Skip optimization if upload failed
         }
 
-        // Optimise the image
-
+        // Optimize the image
         $optimizerChain = ImgOptimizer::create();
         $optimizerChain->optimize($pathToImage);
-
-
         $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
     }
 }
@@ -372,29 +372,31 @@ function fileUpload($fileLocation, $formInputName): void
 {
     // UPLOAD PICTURE
     $fileName = basename($_FILES[$formInputName]['name']); #the fileName
+    $fileTemp = $_FILES[$formInputName]['tmp_name'];
+    $fileError = $_FILES[$formInputName]['error'];
+    $size = $_FILES[$formInputName]['size'];  # the file size
+
+        // trim out the space in the file name
+        $fileName = str_replace(' ', '', $fileName);
+
+    // Check for virus using ClamAV
+    new ScanVirus(tempFileLocation: $fileTemp);
 
     if (!$fileName) {
         throw new Exception("No File Name ", 1);
     }
-
-    $fileError = $_FILES[$formInputName]['error'];
 
     if ($fileError !== UPLOAD_ERR_OK) {
 
         throw new Exception('File upload error: ' . $fileError);
     }
 
-    $fileTemp = $_FILES[$formInputName]['tmp_name'];
-
     if (!$fileTemp) {
         throw new Exception("No Temp File", 1);
     }
 
-       // Check for virus using ClamAV
-    new ScanVirus(tempFileLocation: $fileTemp);
-
     # the file temp name
-    $size = $_FILES[$formInputName]['size'];  # the file size
+
     if (!$size) {
         throw new Exception("File has no size", 1);
     }
@@ -533,7 +535,3 @@ function getPostDataAxios()
 {
     return json_decode(file_get_contents("php://input"), true);
 }
-
-
-
-

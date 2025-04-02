@@ -32,7 +32,7 @@ try {
 
             await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
 
-              // update all members of similar famcode on their UIs using Pusher
+            // update all members of similar famcode on their UIs using Pusher
 
             await axios.get("/getNewLikesPusher");
 
@@ -43,8 +43,8 @@ try {
             const commentFormId = elementId.replace('init', 'form')
             id(commentFormId).style.display = "block"
 
-           // Handle Comment Submission
-        } else if (elementId.includes("submitComment")) {     
+            // Handle Comment Submission
+        } else if (elementId.includes("submitComment")) {
 
             e.preventDefault()
 
@@ -66,37 +66,43 @@ try {
 
                 await axios.post('/postCommentProfile', formEntries, options)
 
-                    // update all members of similar famcode on their UIs using Pusher
+                // update all members of similar famcode on their UIs using Pusher
 
                 await axios.get("/getNewCommentPusher");
 
-                
+
 
             }
             // SUBMIT THE POST
         } else if (elementId.includes("submitPost")) {
 
             e.preventDefault()
-            const formExtra = id('formPostMessageModal')        
+            const formExtra = id('formPostMessageModal')
             const formData = new FormData(formExtra)
             // get the requesterFamCode from the localStorage 
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
             // Append the new form entry to the FormData object
             formData.append('postFamCode', requesterFamCodeValue);
 
-            // 3. 
-            const response = await axios.post("/member/profilePage/post", formData, options)
+            try {
+                // 1. Send the POST request to submit the form data
+                const response = await axios.post("/member/profilePage/post", formData, options);
 
-            // then notify members of simlar famcode about the post by email
-            await axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
+                // 2. Notify members of similar famcode about the post by email
+                // 3. Update all members of similar famcode on their UIs using Pusher
+                await Promise.all([
+                    axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message),
+                    axios.get("/getNewPostPusher")
+                ]);
 
-            // update all members of similar famcode on their UIs using Pusher
-
-            await axios.get("/getNewPostPusher");
-
-
-            id('id01').style.display = 'none'
-            id("formPostMessageModal").reset();
+                // Hide the modal and reset the form
+                id('id01').style.display = 'none';
+                id("formPostMessageModal").reset();
+            } catch (error) {
+                console.error("An error occurred:", error);
+                // Optionally, display an error message to the user
+                alert("There was an error processing your request. Please try again.");
+            }
 
         }     // add/delete to/from the notificatn bar 
         else if (elementId && elementId.includes('deleteNotification')) {
@@ -108,7 +114,7 @@ try {
 
             // change the background of the clicked element 
 
- 
+
             const notificationHTML = id(senderId);
 
             // Make sure required variables are defined before using them
@@ -120,15 +126,15 @@ try {
             }
 
             const url = `/removeNotification/${yourId}/${famCode}/${data}`
- 
+
 
             const response = await axios.put(url)
 
             if (response.data.message === "success") {
 
                 // remove a html element with notificationBar after 2 mins 
-                    notificationHTML.remove()
-            
+                notificationHTML.remove()
+
                 // reduce the notification count as you have deleted the notification
 
                 const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
@@ -148,7 +154,7 @@ try {
 
 
     })
-} catch (e) { 
+} catch (e) {
     showError(e)
 }
 

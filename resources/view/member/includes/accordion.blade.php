@@ -3,7 +3,7 @@
         <div class="w3-white">
 
           <button class="w3-button w3-block w3-theme-l1 w3-left-align" id="createEvent">
-            <i class="fa fa-calendar-check-o fa-fw w3-margin-right"></i> Create Events
+            <i class="fa fa-calendar-check-o fa-fw w3-margin-right"></i> Create Event
           </button>
 
           <div id="Demo2" class="w3-hide w3-container">
@@ -22,7 +22,7 @@
                 @for ($i = 0; $i < 6; $i++)
                 @if($images["post_img$i"])
 
-                <a href="/profilepage/img?dir=img&pics={{ $images["post_img$i"] }}&pID={{ $data["post_no"] }}&path=post">
+                <a href="/profilepage/img?dir=img&pics={{ $images["post_img$i"] }}&pID={{ $images["post_no"] }}&path=post">
 
                 <div class="w3-half">
 

@@ -142,8 +142,10 @@ class PostMessage
         Pusher::broadcast('comments-channel', 'new-comment', $newComment);
         // send push notification to all members with the same family code 
         $data = Post::postByNo($newComment[0]['post_no']);
+        $famCode = checkInput($data['postFamCode']);    
+        $id = \checkInput($data['id']);
 
-        $results = AllMembersData::AllMembersEmailByFamCode(checkInput($data['postFamCode']));
+        $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
 
         $url = self::buildPostUrl($newComment[0]['post_no']);
 

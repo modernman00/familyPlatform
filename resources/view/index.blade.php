@@ -45,7 +45,7 @@
   <!-- Custom styles for this template -->
   <link href="/public/css/homePage.css" rel="stylesheet">
 
-  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> 
 
 
   <style>

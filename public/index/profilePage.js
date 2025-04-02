@@ -649,7 +649,7 @@ try {
             _context.next = 10;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewLikesPusher");
           case 10:
-            _context.next = 66;
+            _context.next = 71;
             break;
           case 12:
             if (!elementId.includes("initComment")) {
@@ -660,7 +660,7 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.next = 66;
+            _context.next = 71;
             break;
           case 17:
             if (!elementId.includes("submitComment")) {
@@ -691,11 +691,11 @@ try {
             _context.next = 33;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewCommentPusher");
           case 33:
-            _context.next = 66;
+            _context.next = 71;
             break;
           case 35:
             if (!elementId.includes("submitPost")) {
-              _context.next = 52;
+              _context.next = 57;
               break;
             }
             e.preventDefault();
@@ -703,25 +703,31 @@ try {
             formData = new FormData(formExtra); // get the requesterFamCode from the localStorage 
             requesterFamCodeValue = localStorage.getItem('requesterFamCode'); // Append the new form entry to the FormData object
             formData.append('postFamCode', requesterFamCodeValue);
-
-            // 3. 
-            _context.next = 43;
+            _context.prev = 41;
+            _context.next = 44;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post("/member/profilePage/post", formData, options);
-          case 43:
+          case 44:
             response = _context.sent;
-            _context.next = 46;
-            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message);
-          case 46:
-            _context.next = 48;
-            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewPostPusher");
-          case 48:
+            _context.next = 47;
+            return Promise.all([axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message), axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewPostPusher")]);
+          case 47:
+            // Hide the modal and reset the form
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'none';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("formPostMessageModal").reset();
-            _context.next = 66;
+            _context.next = 55;
             break;
-          case 52:
+          case 51:
+            _context.prev = 51;
+            _context.t0 = _context["catch"](41);
+            console.error("An error occurred:", _context.t0);
+            // Optionally, display an error message to the user
+            alert("There was an error processing your request. Please try again.");
+          case 55:
+            _context.next = 71;
+            break;
+          case 57:
             if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 65;
+              _context.next = 70;
               break;
             }
             // Extract the user ID from the target ID
@@ -733,9 +739,9 @@ try {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
             }
             url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 61;
+            _context.next = 66;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 61:
+          case 66:
             _response = _context.sent;
             if (_response.data.message === "success") {
               // remove a html element with notificationBar after 2 mins 
@@ -747,9 +753,9 @@ try {
             } else {
               (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
             }
-            _context.next = 66;
+            _context.next = 71;
             break;
-          case 65:
+          case 70:
             if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
@@ -759,11 +765,11 @@ try {
                 });
               }
             }
-          case 66:
+          case 71:
           case "end":
             return _context.stop();
         }
-      }, _callee);
+      }, _callee, null, [[41, 51]]);
     }));
     return function (_x) {
       return _ref.apply(this, arguments);
