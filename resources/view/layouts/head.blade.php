@@ -58,11 +58,11 @@
 
 .loader {
 
-    border: 16px solid #11e11b79;
+    border: 8px solid #11e11b79;
     border-radius: 50%;
-    border-top: 16px solid #2092ddf3;
-    width: 120px;
-    height: 120px;
+    border-top: 8px solid #2092ddf3;
+    width: 80px;
+    height: 80px;
     -webkit-animation: spin 2s linear infinite; /* Safari */
     animation: spin 2s linear infinite;
 }
@@ -142,6 +142,9 @@
     height: 18vh;
   }
 }
+
+
+
 
 
 

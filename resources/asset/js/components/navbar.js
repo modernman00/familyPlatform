@@ -19,7 +19,7 @@ const notificationHTML = (data) => {
 
     let randomNumber = Math.floor(100 + Math.random() * 900);
 
-    return `<a id = "notificationBar${data.sender_id}${randomNumber}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard">
+    return `<a id = "notificationBar${data.sender_id}${randomNumber}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16">
 
         ${postAgoNotification(data.created_at)}  - 
         <b> ${data.notification_type}</b> -

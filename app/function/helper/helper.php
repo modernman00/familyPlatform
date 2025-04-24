@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Philo\Blade\Blade;
 use App\classes\Select;
-use Spatie\ImageOptimizer\Image;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
 use App\classes\VirusScan as ScanVirus;
 
