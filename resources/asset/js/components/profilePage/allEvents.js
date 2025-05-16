@@ -1,7 +1,7 @@
 "use strict";
-import { id, log, msgException } from "../global"
+import { id, log, msgException, deleteNotification } from "../global"
 import axios from "axios"
-import { appendNewPost } from "./post";
+
 
 
 try {
@@ -10,14 +10,14 @@ try {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
-    const yourId = localStorage.getItem('requesterId');
-    const famCode = localStorage.getItem('requesterFamCode');
 
     // CLICK EVENT get the comment and like button from the document
     document.addEventListener('click', async (e) => {  //document.onclick = async (e) => {
 
         const elementId = e.target.id
         const postId = e.target.name
+
+
 
         // Handle Like Button Click
         if (elementId.includes("likeButton")) {
@@ -106,42 +106,7 @@ try {
 
         }     // add/delete to/from the notificatn bar 
         else if (elementId && elementId.includes('deleteNotification')) {
-            // Extract the user ID from the target ID
-            const senderId = elementId.replace("deleteNotification", "notificationBar");
-
-            const elementData = id(elementId)
-            const data = elementData.getAttribute("data-id");
-
-            // change the background of the clicked element 
-
-
-            const notificationHTML = id(senderId);
-
-            // Make sure required variables are defined before using them
-            if (
-                typeof yourId === 'undefined' ||
-                typeof famCode === 'undefined'
-            ) {
-                msgException("Required parameters (yourId or famCode) are not defined");
-            }
-
-            const url = `/removeNotification/${yourId}/${famCode}/${data}`
-
-
-            const response = await axios.put(url)
-
-            if (response.data.message === "success") {
-
-                // remove a html element with notificationBar after 2 mins 
-                notificationHTML.remove()
-
-                // reduce the notification count as you have deleted the notification
-
-                const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
-                id('notification_count').innerHTML = newValues;
-            } else {
-                msgException("Error removing notification");
-            }
+            deleteNotification(elementId)
         } // take you to the request card for approval or denial
         else if (e.target.classList.contains('linkRequestCard')) {
             // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD

@@ -543,7 +543,7 @@ var notificationHTML = function notificationHTML(data) {
   // generate random numbers to make the notification unique
 
   var randomNumber = Math.floor(100 + Math.random() * 900);
-  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
+  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button type = \"submit\" class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
@@ -622,13 +622,11 @@ try {
     xsrfCookieName: 'XSRF-TOKEN',
     xsrfHeaderName: 'X-XSRF-TOKEN'
   };
-  var yourId = localStorage.getItem('requesterId');
-  var famCode = localStorage.getItem('requesterFamCode');
 
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, senderId, elementData, data, notificationHTML, url, _response, newValues, friendRequestSection;
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, friendRequestSection;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
@@ -649,7 +647,7 @@ try {
             _context.next = 10;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewLikesPusher");
           case 10:
-            _context.next = 71;
+            _context.next = 58;
             break;
           case 12:
             if (!elementId.includes("initComment")) {
@@ -660,7 +658,7 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.next = 71;
+            _context.next = 58;
             break;
           case 17:
             if (!elementId.includes("submitComment")) {
@@ -691,7 +689,7 @@ try {
             _context.next = 33;
             return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getNewCommentPusher");
           case 33:
-            _context.next = 71;
+            _context.next = 58;
             break;
           case 35:
             if (!elementId.includes("submitPost")) {
@@ -723,40 +721,13 @@ try {
             // Optionally, display an error message to the user
             alert("There was an error processing your request. Please try again.");
           case 55:
-            _context.next = 71;
+            _context.next = 58;
             break;
           case 57:
-            if (!(elementId && elementId.includes('deleteNotification'))) {
-              _context.next = 70;
-              break;
-            }
-            // Extract the user ID from the target ID
-            senderId = elementId.replace("deleteNotification", "notificationBar");
-            elementData = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId);
-            data = elementData.getAttribute("data-id"); // change the background of the clicked element 
-            notificationHTML = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(senderId); // Make sure required variables are defined before using them
-            if (typeof yourId === 'undefined' || typeof famCode === 'undefined') {
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Required parameters (yourId or famCode) are not defined");
-            }
-            url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-            _context.next = 66;
-            return axios__WEBPACK_IMPORTED_MODULE_2__["default"].put(url);
-          case 66:
-            _response = _context.sent;
-            if (_response.data.message === "success") {
-              // remove a html element with notificationBar after 2 mins 
-              notificationHTML.remove();
-
-              // reduce the notification count as you have deleted the notification
-              newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('notification_count').innerHTML = newValues;
-            } else {
-              (0,_global__WEBPACK_IMPORTED_MODULE_0__.msgException)("Error removing notification");
-            }
-            _context.next = 71;
-            break;
-          case 70:
-            if (e.target.classList.contains('linkRequestCard')) {
+            if (elementId && elementId.includes('deleteNotification')) {
+              (0,_global__WEBPACK_IMPORTED_MODULE_0__.deleteNotification)(elementId);
+            } // take you to the request card for approval or denial
+            else if (e.target.classList.contains('linkRequestCard')) {
               // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
               friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
               if (friendRequestSection) {
@@ -765,7 +736,7 @@ try {
                 });
               }
             }
-          case 71:
+          case 58:
           case "end":
             return _context.stop();
         }

@@ -1,3 +1,5 @@
+import axios from "axios"
+
 export const id = (id) => document.getElementById(id)
 export const idValue = (id) => id(id).value
 export const idInnerHTML = (id) => id(id).innerHTML
@@ -93,3 +95,47 @@ export const showNotification = (elementId, addClass, message, timer = 5000) => 
         }
 
     };
+
+    const yourId = localStorage.getItem('requesterId');
+    const famCode = localStorage.getItem('requesterFamCode');
+
+    // delete notification 
+    export const deleteNotification = async (elementId) => {
+
+         // Extract the user ID from the target ID
+            const senderId = elementId.replace("deleteNotification", "notificationBar");
+          
+            const elementData = id(elementId)
+            const data = elementData.getAttribute("data-id");
+
+            // change the background of the clicked element 
+
+            const notificationHTML = id(senderId);
+
+            // Make sure required variables are defined before using them
+            if (
+                typeof yourId === 'undefined' ||
+                typeof famCode === 'undefined'
+            ) {
+                msgException("Required parameters (yourId or famCode) are not defined");
+            }
+
+            const url = `/removeNotification/${yourId}/${famCode}/${data}`
+
+
+            const response = await axios.put(url)
+
+
+            if (response.data.message === "Notification marked as read") {
+
+                // remove a html element with notificationBar after 2 mins 
+                notificationHTML.remove()
+
+                // reduce the notification count as you have deleted the notification
+
+                const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
+                id('notification_count').innerHTML = newValues;
+            } else {
+                msgException("Error removing notification" + " " + response.data.message);
+            }
+    }

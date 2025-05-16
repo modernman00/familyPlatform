@@ -1,5 +1,5 @@
 import axios from "axios";
-import { id, showError, qSel, msgException } from "../global"
+import { id, showError, qSel, msgException, deleteNotification } from "../global"
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { friendRequestCard } from "../profilePage/htmlFolder/friendRequestCard";
 
@@ -15,6 +15,7 @@ document.onclick = async (e) => {
     try {
         // Get the target element's ID
         const targetId = e.target.id;
+
 
         // Check if the ID includes 'addFamily'
         if (targetId.includes('addFamily')) {
@@ -52,46 +53,50 @@ document.onclick = async (e) => {
 
         } else if (targetId.includes('removeProfile')) {
 
-                     // Extract the user ID from the target ID
+            // Extract the user ID from the target ID
             const userId = targetId.replace("removeProfile", "");
 
-           const url = `/allMembers/removeProfile/${userId}/${reqId}`
+            const url = `/allMembers/removeProfile/${userId}/${reqId}`
 
-           alert(url)
+            alert(url)
 
             // include a console to confirm if they truly want to delete the profile
             if (confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
 
 
-        
 
-           const notificationHTML = qSel(`.member_profile_${userId}`);
-          
-          
 
-            const response = await axios.delete(url)
+                const notificationHTML = qSel(`.member_profile_${userId}`);
 
-            if(response.data.message === "success") {
-            
-                // remove a html element with call member_profile
-                notificationHTML.remove();
-            } else{
-                msgException(`Error deleting profile`)
-            }
+
+
+                const response = await axios.delete(url)
+
+                if (response.data.message === "success") {
+
+                    // remove a html element with call member_profile
+                    notificationHTML.remove();
+                } else {
+                    msgException(`Error deleting profile`)
+                }
             }
         }
 
-        else if (targetId.includes('seeProfile'))
-        {
-        
-               // Extract the user ID from the target ID
+        else if (targetId.includes('seeProfile')) {
+
+            // Extract the user ID from the target ID
             const userId = targetId.replace("seeProfile", "");
 
             // redirect to 'allMembers/setProfile/'+userId
             window.location.href = `/allMembers/setProfile/${userId}`;
 
-        
+
+        } else if (targetId.includes('deleteNotification')) {
+
+            // Call the deleteNotification function to remove the notification
+            deleteNotification(targetId);
         }
+        // Extract the user ID from the target ID
     } catch (error) {
         // Handle any errors that occur during execution
         showError(error);

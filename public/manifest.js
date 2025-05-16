@@ -114,7 +114,6 @@
 /******/ 		// This function allow to reference async chunks
 /******/ 		__webpack_require__.u = (chunkId) => {
 /******/ 			// return url for filenames not based on template
-/******/ 			if (chunkId === "/public/vendor") return "" + chunkId + ".js";
 /******/ 			if ({"register":1,"all_members":1,"login":1,"forgotPwd":1,"profilePage":1,"changePW":1,"familyCode":1,"accountSetting":1,"organogram":1}[chunkId]) return "public/index/" + chunkId + ".js";
 /******/ 			if (chunkId === "code") return "public/index/code.js";
 /******/ 			if (chunkId === "img") return "public/index/img.js";

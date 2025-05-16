@@ -59,6 +59,35 @@ class NotificationController extends Select
         }
     }
 
+    // make notification as read 
+    public static function notificationRead($youId, $senderId, $famCode)
+    {
+        try {
+            $youId = checkInput($youId) ?? null;
+            $senderId = checkInput($senderId) ?? null;
+            $famCode = checkInput($famCode) ?? null;
+
+            if ($youId === null || $senderId === null || $famCode === null) {
+                msgException(400, 'You ID, sender ID, and family code must be provided');
+            }
+
+            $query = "UPDATE notification 
+                SET notification_status = ? 
+                WHERE receiver_id = ? 
+                AND sender_id = ? 
+                OR sender_id = ?";
+            $result = Select::selectFn2($query, ['deleted', $youId, $senderId, $famCode]);
+
+            // Call msgSuccess after returning the result
+            msgSuccess(200, 'Notification marked as read');
+
+            return $result;
+        } catch (\Exception $e) {
+            // Handle errors or log them
+            showError($e);
+        }
+    }
+
 
     /**
      * Posts subscriber data to the server.

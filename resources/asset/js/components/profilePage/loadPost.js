@@ -116,7 +116,7 @@ try {
     const commentsChannel = pusher.subscribe('comments-channel');
     commentsChannel.bind('new-comment', (data) => {
         data.forEach(item => updateComment(item))
-    });
+    })
 
     // Subscribe to the likes channel
     const likesChannel = pusher.subscribe('likes-channel');

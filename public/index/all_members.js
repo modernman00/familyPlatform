@@ -106,6 +106,9 @@ document.onclick = /*#__PURE__*/function () {
             // Extract the user ID from the target ID
             _userId2 = targetId.replace("seeProfile", ""); // redirect to 'allMembers/setProfile/'+userId
             window.location.href = "/allMembers/setProfile/".concat(_userId2);
+          } else if (targetId.includes('deleteNotification')) {
+            // Call the deleteNotification function to remove the notification
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.deleteNotification)(targetId);
           }
         case 30:
           _context.next = 35;
@@ -581,7 +584,7 @@ var notificationHTML = function notificationHTML(data) {
   // generate random numbers to make the notification unique
 
   var randomNumber = Math.floor(100 + Math.random() * 900);
-  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
+  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button type = \"submit\" class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
