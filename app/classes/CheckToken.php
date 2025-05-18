@@ -2,6 +2,8 @@
 
 namespace App\classes;
 
+use App\exceptions\NotFoundException;
+
 class CheckToken
 {
 
@@ -14,17 +16,16 @@ class CheckToken
      *
      * @psalm-param 'token' $token
      */
-    public static function tokenCheck(string $token):void
+    public static function tokenCheck(string $token): void
     {
         // try {
-            $tokenCheck = $_SESSION[$token] ?? "bad";
-            $postToken = $_POST[$token] ?? "bad";
-            // invalidate $token stored in session
-            unset($_SESSION[$token]);
-            if ($tokenCheck != $postToken) {
+        $tokenCheck = $_SESSION[$token] ?? "bad";
+        $postToken = $_POST[$token] ?? "bad";
+        // invalidate $token stored in session
+        unset($_SESSION[$token]);
+        if ($tokenCheck != $postToken) {
 
-                msgException(401, "We are not familiar with the nature of your activities.");
-              
-      }
+            throw new NotFoundException("We are not familiar with the nature of your activities.");
+        }
     }
 }

@@ -4,6 +4,7 @@ import { matchRegex } from "./helper/general"
 
 export default class FormHelper {
     constructor(data) {
+         if (!Array.isArray(data)) throwError('data must be an array of form elements');
         this.data = data;
         this.error = [];
         this.result = 0;
@@ -22,6 +23,15 @@ export default class FormHelper {
     }
 
 
+    validateField(value, type = 'general') {
+        const regexes = {
+            email: /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-Z0-9]{2,4}$/,
+            // Add more regexes as needed
+        };
+        return type === 'email' ? regexes.email.test(value) : value.trim() !== '';
+    }
+
+
     massValidate() {
         // const reg = /[a-zA-Z0-9./@]/g;
         this.data.forEach(et => {
@@ -29,55 +39,34 @@ export default class FormHelper {
             for (let post of et) {
                 // capture the error to a variable
                 let errMsg = this.id(`${post.name}_error`)
+                let postName = post.name.replace('_', ' ')
+                let asterisk = "*";
 
-                    // rid it off the submit and token
-                if (post.name == 'submit' ||
-                    post.name == 'button' ||
-                    post.id == 'button' ||
-                    post.type == 'button' ||
-                    post.id == 'showPassword_id' ||
-                    post.id == 'g-recaptcha-response' ||
-                    post.name == 'cancel' ||
-                    post.name == "checkbox_id") {
-                    continue;
-                }
-
+                // rid it off the submit and token
+                if (['submit', 'button', 'showPassword_id', 'g-recaptcha-response', 'cancel', 'token', 'checkbox_id'].includes(post.name) ||
+                    ['button'].includes(post.id) || ['button'].includes(post.type)) return;
                 // check if there is no value
 
-                let postName = post.name.replace('_', ' ')
-                if (postName == "spouseName" ||
-                    postName == "spouseMobile" ||
-                    postName == "spouseEmail" ||
-                    postName == "fatherMobile" ||
-                    postName == "fatherEmail" ||
-                    postName == "motherMobile" ||
-                    postName == "maidenName" ||
-                    postName == "motherEmail"
-                ) {
-                    if (post.value === "") {
-                        post.value = "Not Provided"
-                    }
+                if (['spouseName', 'spouseMobile', 'spouseEmail', 'fatherMobile', 'fatherEmail', 'motherMobile', 'maidenName', 'motherEmail'].includes(post.name)) {
+                    // post.value is not prpvided if it is not provided 
+                    post.value = post.value === "" ? "Not Provided" : post.value
                 }
-   let asterisk = "*";
 
                 if (post.value === '' || post.value === 'select') {
-
-                    // CHECK IF ERRMSG EXISTS BEFORE SETTING THE INNERHTML
-                    if(errMsg) {
-                         errMsg.innerHTML = `${ post.placeholder ?? asterisk} cannot be left empty`
-                    errMsg.style.color = "red"
+                    if (!this.validateField(post.value)) {
+                        if (errMsg) {
+                            errMsg.innerHTML = `${post.placeholder ?? asterisk} cannot be left empty`;
+                            errMsg.style.color = 'red';
+                        }
+                        this.error.push(`${postName.toUpperCase()} cannot be left empty`);
+                        this.result = false;
                     }
-
-                   
-                    this.error.push(`${postName.toUpperCase()} cannot be left empty`)
-                } else {
-                    this.result = 1
                 }
-                const checkRegex = matchRegex(post.value)
-                if (checkRegex === false) {
-                    this.error.push(`There is a problem with your entry for ${postName.toUpperCase()}'s question`)
 
-                    errMsg.innerHTML = `* There is a problem with you entry for ${postName.toUpperCase()}'s question`
+                if (post.name === 'email' && !this.validateField(post.value, 'email')) {
+                    this.error.push('<li style="color: red;">Please enter a valid email</li>');
+                    if (errMsg) errMsg.innerHTML = '* Please enter a valid email';
+                    this.result = false;
                 }
             }
         })
@@ -195,19 +184,19 @@ export default class FormHelper {
      */
 
     matchInput(first, second) {
-            let error, firstInput, secondInput
-            error = this.id(`${second}_error`)
-            firstInput = this.id(first + '_id')
-            secondInput = this.id(second + '_id')
-            secondInput.addEventListener('keyup', () => {
-                error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
-            })
-        }
-        /**
-         *
-         * @param {the id of the input you want to inject to/ this is an array} idArray
-         * @param {*the comment or questions you want o inject} html
-         */
+        let error, firstInput, secondInput
+        error = this.id(`${second}_error`)
+        firstInput = this.id(first + '_id')
+        secondInput = this.id(second + '_id')
+        secondInput.addEventListener('keyup', () => {
+            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
+        })
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
 
     injectData(idArray, html) {
         let idData;
@@ -251,7 +240,7 @@ export default class FormHelper {
                 return;
             } else {
                 var xmlhttp = new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function() {
+                xmlhttp.onreadystatechange = function () {
                     if (this.readyState == 4 && this.status == 200) {
                         output.innerHTML = this.responseText;
                     }

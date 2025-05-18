@@ -108,6 +108,12 @@ function returnSuccessCode($msg): void
     echo json_encode($msg);
 }
 
+function throwError(int $code, mixed $msg): void
+{
+    throw new \Exception($msg, $code);
+}
+
+
 /**
  * 
  * @param mixed $errCode 401, 404 

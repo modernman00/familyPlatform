@@ -6,7 +6,8 @@ use Philo\Blade\Blade;
 use App\classes\Select;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
 use App\classes\VirusScan as ScanVirus;
-
+use Intervention\Image\ImageManager as Image;
+use App\exceptions\HttpExceptions;
 
 
 function view($path, array $data = [])
@@ -93,28 +94,35 @@ function number2word(int $number)
         echo $e->getMessage() . "\n";
     }
 }
+/**
+ * 
+ * @param string $postName  'user_input'
+ * @param array $policyScores [ 'policyA' => 5, 'policyB' => 3,'policyC' => 1,]
+ * @return int 
+ */
 
 
 
-// score application
-function Scoring(string $postName, string $policy1, string $policy2, int $score1, int $score2): void
+function Scoring(string $postName, array $policyScores): int
 {
-    if ($_POST[$postName] == $policy1) {
-        ${$postName} = $score1;
-    } else {
-        if ($_POST[$postName] == $policy2) {
-            ${$postName} = $score2;
-        } else {
-            ${$postName} = 2;
-        }
+    // Default score
+    $defaultScore = 2;
+
+    if (!isset($_POST[$postName])) {
+        return $defaultScore;
     }
 
-    ${$postName};
+    $userInput = $_POST[$postName]; // `$_POST
+
+    // Match the user input with the policy scores
+    return match (true) {
+        array_key_exists($userInput, $policyScores) => $policyScores[$userInput],
+        default => $defaultScore,
+    };
 }
 
-/**
- * @psalm-return array<empty, empty>|string
- */
+
+
 function setMinMaxLimit(array $minPolicy, array $maxPolicy, array $post): array|string
 {
     $error = [];
@@ -202,12 +210,33 @@ function cleanSession($x): string|null|int
 
 function showError($th): void
 {
-    error_log("Error: " . $th->getMessage());
-    $errorCode = (int) $th->getCode();
-    http_response_code($errorCode); // sets the response to 406
-    $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n";
-
-    echo json_encode(['error' => $error]);
+    if (getenv('APP_ENV') === 'local') {
+        error_log("Error: " . $th->getMessage());
+        $error = (int) $th->getCode() ?? 500;
+        if ($th instanceof HttpExceptions) {
+            http_response_code($th->getStatusCode());
+            echo json_encode([
+                'error' => $th->getMessage()
+            ]);
+        } else {
+            http_response_code($error);
+            echo json_encode([
+                'error' =>  $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n"
+            ]);
+        }
+    } else {
+        if ($th instanceof HttpExceptions) {
+            http_response_code($th->getStatusCode());
+            echo json_encode([
+                'error' => $th->getMessage()
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode([
+                'error' => 'An unexpected error occurred. ' . $th->getMessage()
+            ]);
+        }
+    }
 }
 
 /**
@@ -304,25 +333,48 @@ function sendText($message, $numbers): void
  * fileLocation: where you want to save the file
  * formInputName : the input name of the $_file
  */
-function fileUploadMultiple($fileLocation, $formInputName): void
+function fileUploadMultiple($fileLocation, $formInputName): array
 {
     // scanFileForVirus($_FILES[$formInputName]);
     // Count total files
+    $saveFiles = [];
     $countFiles = count($_FILES[$formInputName]['name']);
-
-    ini_set('post_max_size', '20M');
-    ini_set('upload_max_filesize', '20M');
 
     // Looping all files
     for ($i = 0; $i < $countFiles; $i++) {
         $fileName = basename($_FILES[$formInputName]['name'][$i]);
-         // trim out the space in the file name
+        // trim out the space in the file name
         $fileName = str_replace(' ', '', $fileName);
+        $fileName = str_replace(',', '', $fileName);
+        $fileInfo = pathinfo($fileName);
+        $baseName = $fileInfo['filename']; // e.g., "WhatsAppImage2021-01-24at12.00.04(1)"
+        $extension = strtolower($fileInfo['extension']); // e.g., "jpeg"
+        // Sanitize base name: replace dots and parentheses
+        $baseName = preg_replace('/\./', '_', $baseName); // Replace dots with underscores
+        $baseName = preg_replace('/[()]/', '', $baseName); // Replace parentheses with underscores
+
+        // Remove any extra underscores that might result from consecutive replacements
+        $baseName = preg_replace('/_+/', '_', $baseName); // Replace multiple underscores with a single one
+        $fileName = time() . '_' . $baseName . '.' . $extension; // e.g., "WhatsAppImage2021-01-24at12_00_04_1.jpeg"
         $fileTemp = $_FILES[$formInputName]['tmp_name'][$i];
         $fileSize = $_FILES[$formInputName]['size'][$i];
-        $pathToImage = "$fileLocation$fileName";
-
-       
+        $pathToImage = "$fileLocation$fileName"; // e.g., "1652634567_WhatsAppImage2021-01-24at12_00_04_1.jpeg"
+        $fileError = $_FILES[$formInputName]['error'][$i];
+        // Check for upload errors
+        if ($fileError !== UPLOAD_ERR_OK) {
+            $errorMessages = [
+                UPLOAD_ERR_INI_SIZE => 'File size exceeds the maximum allowed size (upload_max_filesize)',
+                UPLOAD_ERR_FORM_SIZE => 'File size exceeds the maximum allowed size (form limit)',
+                UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+                UPLOAD_ERR_NO_FILE => 'No file was uploaded',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+                UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload',
+            ];
+            $errorMsg = $errorMessages[$fileError] ?? 'Unknown upload error';
+            throwError(400, $errorMsg);
+            continue;
+        }
 
         // virus scan using ClamAV
         new ScanVirus(tempFileLocation: $fileTemp);
@@ -330,53 +382,93 @@ function fileUploadMultiple($fileLocation, $formInputName): void
         // Validate file
         $picError = "";
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $allowedFormats = ['png', 'jpg', 'gif', 'jpeg'];
+        $allowedFormats = ['png', 'jpg', 'gif', 'jpeg', 'heic'];
 
         if (!in_array($fileExtension, $allowedFormats)) {
-            $picError .= 'Format must be PNG, JPG, GIF, or JPEG. ';
+            $picError .= 'Format must be PNG, JPG, GIF, HEIC or JPEG. ';
+            throwError(400, "IMAGE FORMAT - $picError");
         }
 
 
-        if ($fileSize > 102400000) {
-            $picError .= 'File size must not exceed 10240kb';
-            msgException(400, "Error Processing Request - post images - $picError");
+        if ($fileSize > 10485760) { // 10 MB
+            $picError .= 'File size must not exceed 10MB';
+            throwError(400, "Error Processing Request - post images - $picError");
         }
         // if (file_exists($pathToImage)) {
         //     $picError .= "File $fileName already uploaded";
-        //     msgException(401, "Error Processing Request - post images - $picError");
+        //     throwError(401, "Error Processing Request - post images - $picError");
         // }
         if ($picError) {
-            msgException(400, "Error Processing Request - post images - $picError");
+            throwError(400, "Error Processing Request - post images - $picError");
             continue; // skip this file upload
         }
 
         // Move uploaded file
         if (!move_uploaded_file($fileTemp, $pathToImage)) {
             $_SESSION['imageUploadOutcome'] = 'Image was not successfully uploaded';
+            throwError(400, "Error Processing Request - post images - Image was not successfully uploaded");
             continue; // Skip optimization if upload failed
+        }
+
+        // Resize and crop image
+        try {
+            if (!file_exists($pathToImage) || !is_readable($pathToImage)) {
+                throw new Exception("Cannot read image at: $pathToImage");
+            }
+            if (!is_writable(dirname($pathToImage))) {
+                throw new Exception("Cannot write to directory: " . dirname($pathToImage));
+            }
+
+            $image = Image::imagick()->read($pathToImage) ?? Image::gd()->read($pathToImage);
+            $image->cover(300, 200);
+            $tempPath = $pathToImage . '.tmp';
+            $image->save($tempPath);
+            if (file_exists($tempPath)) {
+                rename($tempPath, $pathToImage);
+            } else {
+                throw new Exception("Failed to save resized image at $tempPath");
+            }
+        } catch (Exception $e) {
+            throw new Exception("Image processing failed: " . $e->getMessage());
         }
 
         // Optimize the image
         $optimizerChain = ImgOptimizer::create();
         $optimizerChain->optimize($pathToImage);
         $_SESSION['imageUploadOutcome'] = 'Image was successfully uploaded';
-    }
-}
 
+        $saveFiles[] = $fileName;
+    }
+
+    return $saveFiles;
+}
 /**
  * fileLocation: where you want to save the file
  * formInputName : the input name of the $_file
  */
 function fileUpload($fileLocation, $formInputName): void
 {
-    // UPLOAD PICTURE
-    $fileName = basename($_FILES[$formInputName]['name']); #the fileName
-    $fileTemp = $_FILES[$formInputName]['tmp_name'];
-    $fileError = $_FILES[$formInputName]['error'];
-    $size = $_FILES[$formInputName]['size'];  # the file size
+    if (!is_dir($fileLocation) || !is_writable($fileLocation)) {
+        throw new Exception("Invalid or unwritable file location", 400);
+    }
 
-        // trim out the space in the file name
-        $fileName = str_replace(' ', '', $fileName);
+    $file = $_FILES[$formInputName];
+    $fileName = basename($file['name']);
+    $fileTemp = $file['tmp_name'];
+    $fileError = $file['error'];
+    $fileSize = $file['size'];
+
+    // Validate MIME type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $fileTemp);
+    finfo_close($finfo);
+    $allowedMimes = ['image/png', 'image/jpeg', 'image/gif'];
+    if (!in_array($mime, $allowedMimes)) {
+        throw new Exception("Invalid file type", 400);
+    }
+
+    // trim out the space in the file name
+    $fileName = str_replace(' ', '', $fileName);
 
     // Check for virus using ClamAV
     new ScanVirus(tempFileLocation: $fileTemp);
@@ -396,7 +488,7 @@ function fileUpload($fileLocation, $formInputName): void
 
     # the file temp name
 
-    if (!$size) {
+    if (!$fileSize) {
         throw new Exception("File has no size", 1);
     }
 
@@ -413,8 +505,9 @@ function fileUpload($fileLocation, $formInputName): void
     if ($fileExtension != 'png' && $fileExtension != 'jpg' && $fileExtension != 'gif' && $fileExtension != 'jpeg') {
         throw new \Exception("Format must be PNG, JPG, JPEG or GIF", 1);
     }
-    if ($size > 10240000) {
-        throw new \Exception("File size is bigger than the required size", 1);
+    if ($fileSize > 10485760) { // 10 MB
+
+        throwError(400, "post imagee size error");
     }
     if (file_exists($fileName)) {
         throw new \Exception("File $fileName already uploaded", 1);

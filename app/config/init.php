@@ -6,8 +6,10 @@ namespace App\config;
 
 if (!session_start()) {
     session_start([
-    'cookie_httponly' => true,
-    'cookie_secure' => true
+    'cookie_httponly' => true, // Prevent JavaScript access to session cookie
+    'cookie_secure' => true, // Only send cookie over HTTPS
+    'use_strict_mode' => true, // Prevent session fixation
+    'cookie_samesite' => 'Strict', // Prevent CSRF
     ]);
 }
 

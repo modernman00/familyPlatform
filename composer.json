@@ -26,7 +26,7 @@
     },
 
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "cboden/ratchet": "^0.4.3",
         "dompdf/dompdf": "^0.8.3",
         "ext-gd": "*",
@@ -45,10 +45,7 @@
         "sunspikes/clamav-validator": "^3.0",
         "xenolope/quahog": "^3.0",
         "cloudmersive/cloudmersive_virusscan_api_client": "^3.1",
-        "react/event-loop": "^1.5",
-        "react/stream": "^1.4",
-        "react/http": "^1.10",
-        "ratchet/pawl": "^0.4.1"
+        "symfony/rate-limiter": "^6.4"
     },
 
     "require-dev": {
@@ -64,7 +61,8 @@
         "optimize-autoloader": true,
         "allow-plugins": {
             "kylekatarnls/update-helper": true
-        }
+        },
+        "php": "8.3.0"
 
     }
 }

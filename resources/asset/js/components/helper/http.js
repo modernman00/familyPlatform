@@ -14,30 +14,51 @@ axiosRetry(axios, { retries: 3 });
  * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
-export const postFormData = async(url, formId, redirect = null, css = null) => {
+export const postFormData = async (url, formId, redirect = null, css = null) => {
 
     let notificationForm = `${formId}_notification`
     const notificationId = id(notificationForm)
 
+
+    if (!notificationId) {
+        throw new Error('Notification element not found');
+    }
+    // Cleanup previous notification styles
+    notificationId.style.display = 'none';
+
+    ['is-danger', 'is-success', 'w3-red', 'w3-green', 'bg-danger', 'bg-success'].forEach(cls => notificationId.classList.remove(cls));
+
+
+
     // extract the form entries
     const form = id(formId)
+
+    if (!form) {
+        throw new Error('Form element not found');
+    }
 
     let formEntries = new FormData(form)
 
     formEntries.delete('submit')
     formEntries.delete('checkbox_id')
-        // formEntries.delete('token')
+
 
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
+        withCredentials: true, // Ensure cookies (e.g., XSRF token) are sent
     }
 
     // AXIOS POST FUNCTIONALITY
     try {
         const response = await axios.post(url, formEntries, options);
 
-        const successClass = getNotificationClassByCSS("bulma", 'green');
+        // Check for successful status (2xx)
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error(response.data?.message || 'Request failed');
+        }
+
+        const successClass = getNotificationClassByCSS(css || 'bulma', 'green');
 
         // check if response.data.message is an array
 
@@ -45,27 +66,14 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
         let famCodeSetFromHttp = null;
         let dbHttpResult = null;
 
-        if (typeof response.data.message === 'object') {
-            idSetFromHttp = response.data.message.id;
+        if (response.data && typeof response.data.message === 'object') {
+            idSetFromHttp = response.data.message.id || null;
+            famCodeSetFromHttp = response.data.message.famCode || null;
+            dbHttpResult = response.data.message.outcome || null;
 
-            famCodeSetFromHttp = response.data.message.famCode;
-
-            dbHttpResult = response.data.message.outcome;
-
-            // check if idSetFromHttp is null, then throw error
-
-            if (!idSetFromHttp) {
-                throw new Error('idSetFromHttp is null');
-            }
-
-            //throw error if dbHttpResult is null
-            if (!dbHttpResult) {
-                throw new Error('dbHttpResult is null');
-            }
-
-            if (!famCodeSetFromHttp) {
-                throw new Error('famCodeSetFromHttp is null');
-            }
+            if (!idSetFromHttp) throw new Error('idSetFromHttp is missing');
+            if (!dbHttpResult) throw new Error('dbHttpResult is missing');
+            if (!famCodeSetFromHttp) throw new Error('famCodeSetFromHttp is missing');
         } else {
             dbHttpResult = response.data.message;
         }
@@ -76,20 +84,20 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
 
         processFormDataAction(successClass, dbHttpResult, notificationId);
 
-        
 
-        if (redirect) {
-            setTimeout(() => {
-                window.location.assign(redirect);
-            }, 2000);
-        }
+
+
+        // if (redirect) {
+        //     const redirectDelay = 2000; // Configurable delay in ms
+        //     setTimeout(() => {
+        //         window.location.assign(redirect);
+        //     }, redirectDelay);
+        // }
 
     } catch (error) {
 
-        const errorClass = getNotificationClassByCSS(css, 'red');
-
-        const errorMessage = error?.response?.data?.message ?? error?.message?.message ?? error?.message;
-   // Process the form data for error
+        const errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
+        const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred';
         processFormDataAction(errorClass, errorMessage, notificationId);
 
     }
@@ -101,15 +109,18 @@ export const postFormData = async(url, formId, redirect = null, css = null) => {
  * @param {string} message - The notification message.
  */
 const processFormDataAction = (cssClass, message, formNotificationId) => {
-
     if (formNotificationId) {
         formNotificationId.style.display = 'block';
         formNotificationId.classList.add(cssClass);
-        id('error').scrollIntoView({ behavior: 'smooth' });
-        id('error').innerHTML = message;
-        id('setLoader').classList.remove('loader');
+        const errorElement = id('error');
+        if (errorElement) {
+            errorElement.scrollIntoView({ behavior: 'smooth' });
+            errorElement.innerHTML = message;
+        }
+        const loader = id('setLoader');
+        if (loader) loader.classList.remove('loader');
     } else {
-        throw new Error('NOTIFICATION NOT FOUND')
+        log('Notification element not found');
     }
 };
 
@@ -145,7 +156,7 @@ axiosTest()
     .catch(err => console.log(err))
  */
 
-export const getApiData = async(URL, token = null) => {
+export const getApiData = async (URL, token = null) => {
     try {
 
         const config = {
@@ -170,7 +181,7 @@ export const getApiData = async(URL, token = null) => {
 
 }
 
-export const getMultipleApiData = async(url1, url2, token = null) => {
+export const getMultipleApiData = async (url1, url2, token = null) => {
     try {
 
         const config = {
@@ -200,11 +211,11 @@ export const getMultipleApiData = async(url1, url2, token = null) => {
 
 // build a function to post multiple api form data
 
-export const postMultipleApiData = async(url1, url2, formData, token = null) => {
-    try {   
+export const postMultipleApiData = async (url1, url2, formData, token = null) => {
+    try {
 
         const config = {
-        headers: {
+            headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
@@ -213,7 +224,7 @@ export const postMultipleApiData = async(url1, url2, formData, token = null) => 
         }
         const fetch = await axios.all([
             axios.post(url1, formData, config),
-            axios.post(url2, formData, config)              
+            axios.post(url2, formData, config)
         ])
 
         return fetch
@@ -221,7 +232,7 @@ export const postMultipleApiData = async(url1, url2, formData, token = null) => 
     } catch (error) {
         return error;
     }
-}   
+}
 /**
  * 
  * @param { name} cname 

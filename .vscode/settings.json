@@ -2,7 +2,7 @@
     "cSpell.words": [
         "PHPSESSID"
     ],
-    "liveServer.settings.port": 5501,
+    "liveServer.settings.port": 5500,
 
     // This means that you change your real URL (current PHP url) 
     // to another URL (which Live Sever starts).
@@ -15,5 +15,24 @@
 
      "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
-    "php.version": "8.3"
+    "php.version": "8.3",
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "mysql",
+            "group": "family",
+            "database": "family",
+            "username": "root"
+        }
+    ],
+    "http.systemCertificates": false,
+    "intelephense.environment.phpVersion": "8.3.0"
+    
 }

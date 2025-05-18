@@ -178,6 +178,7 @@ class Select extends Db
             return $this->connect()->query($query)->fetchColumn();
         } catch (PDOException $e) {
             showError(th: $e);
+            return false;
         }
     }
 
@@ -189,19 +190,23 @@ class Select extends Db
      * @return mixed 
      */
 
-    public static function combineSelect(array $array, $callback, string $switch)
+        public static function combineSelect(array $array, $callback, string $switch)
     {
         try {
 
             $query = match($switch) {
-                "ONE_IDENTIFIER_COLUMN" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], column:$array['column'], identifier1: $array['identifier1']),
+                "ONE_IDENTIFIER_COLUMN" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], column:$array['column']),
+
+                 "ONE_IDENTIFIER_COLUMN_ID" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], column:$array['column'], identifier1: $array['identifier1']),
+
+                "TWO_IDENTIFIER_COLUMN" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], column:$array['column'], column2:$array['column2']),
 
                 "ONE_IDENTIFIER" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1']),
                 
                 "TWO_IDENTIFIERS" => self::formAndMatchQuery(selection: $array['selection'], table: $array['table'], identifier1: $array['identifier1'], identifier2: $array['identifier2']),
             };
 
-            return self::$callback($query, $array['bind']);
+            return self::$callback($query, $array['bind'] ?? null);
         } catch (\Throwable $th) {
             showError(th: $th);
         }

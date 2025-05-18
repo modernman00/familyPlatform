@@ -22,12 +22,13 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
     $dbPassword = $databaseData['password'];
     $id = $databaseData['id'];
     $table = "account";
-    $options = array('cost' => 12);
+    $options = ['cost' => 12];
 
     if (password_verify($textPassword, $dbPassword) === false) {
         msgException(401, 'There is a problem with your login credential! - Password');
-        }
-    
+        exit;
+    }
+
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
         // If so, create a new hash, and replace the old one
         $newHash = password_hash($textPassword, PASSWORD_DEFAULT, $options);
@@ -40,10 +41,8 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
             msgException(422, 'Password could not be updated');
             return false;
         }
-
-       
     }
-     return true;
+    return true;
 }
 
 
@@ -56,7 +55,6 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
 function useEmailToFindData($inputData)
 {
     $email = $inputData['email'];
-
     $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'account', identifier1: 'email');
     $emailData = Select::selectFn2(query: $query, bind: [$email]);
 
@@ -163,7 +161,7 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
  */
 function generateAuthToken(): string
 {
-    return mb_strtoupper(bin2hex(random_bytes(4)));
+    return mb_strtoupper(bin2hex(random_bytes(6)));
 }
 /**
  * Helps to generate token, and it updates the login table as well
@@ -175,15 +173,13 @@ function generateUpdateTableWithToken($customerId)
 {
     //5. generate code
     $token = generateAuthToken();
-
     //6.  update login account table with the code
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if (!$updateCodeToCustomer) {
-
         msgException(406, "Error : Could not update token");
     }
-    $_SESSION['2FA_token_ts'] = time();
-    $_SESSION['identifyCust'] = $customerId ?? "TEST";
+    $_SESSION['auth']['2FA_token_ts'] = time(); // Use 'auth' namespace
+    $_SESSION['auth']['identifyCust'] = $customerId ?? "TEST"; // Use 'auth' namespace
     return $token;
 }

@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\router;
 
+use App\Exceptions\NotFoundException;
+
 use AltoRouter;
 use PDOException;
 
-class RouteDispatch {
+class RouteDispatch
+{
     protected $match;
     protected $controller;
     protected $method;
 
-    public function dispatch(AltoRouter $router) {
+    public function dispatch(AltoRouter $router)
+    {
         try {
             $this->match = $router->match();
 
@@ -28,10 +32,11 @@ class RouteDispatch {
                         call_user_func_array([new $this->controller, $this->method], $this->match['params']);
                     } else {
                         echo "Method {$this->method} not defined in {$this->controller}";
+                        throw new NotFoundException("Method {$this->method}not found in {$this->controller}");
                     }
                 }
             } else {
-                
+
                 view('error/genError', ["error" => "Invalid URL"]);
             }
         } catch (PDOException $e) {
@@ -39,4 +44,3 @@ class RouteDispatch {
         }
     }
 }
-
