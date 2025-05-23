@@ -44,6 +44,7 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
 
 
     const options = {
+        baseURL: '/', // Adjust to your API base URL
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
         withCredentials: true, // Ensure cookies (e.g., XSRF token) are sent
@@ -87,17 +88,17 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
 
 
 
-        // if (redirect) {
-        //     const redirectDelay = 2000; // Configurable delay in ms
-        //     setTimeout(() => {
-        //         window.location.assign(redirect);
-        //     }, redirectDelay);
-        // }
+        if (redirect) {
+            const redirectDelay = 2000; // Configurable delay in ms
+            setTimeout(() => {
+                window.location.assign(redirect);
+            }, redirectDelay);
+        }
 
     } catch (error) {
 
         const errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
-        const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred';
+        const errorMessage = error.response?.data?.error || error.request || 'An unknown error occurred';
         processFormDataAction(errorClass, errorMessage, notificationId);
 
     }

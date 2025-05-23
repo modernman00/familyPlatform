@@ -10,7 +10,8 @@
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
 
-
+  {{--  set base url  --}}
+  @base
 
   <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
   <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
@@ -237,7 +238,7 @@
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll" data-target=".navbar" data-offset='60'>
 
-  @include('includes/bulmaNav')
+  @include('includes.bulmaNav')
 
   <section class="section content">
 

@@ -80,7 +80,7 @@ function checkInputImage($data): string|null
         $data = preg_replace('/[^a-zA-Z0-9\-\_\.\s]/', '', $data);
         return $data;
     } else {
-       msgException(406, 'image name not well formed');
+        msgException(406, 'image name not well formed');
     }
 }
 
@@ -135,7 +135,7 @@ function msgException(int $errCode, string | int  $msg): never
 
 function msgSuccess(int $code, mixed $msg, mixed $token = null): void
 {
-    http_response_code($code); 
+    http_response_code($code);
     echo json_encode([
         'message' => $msg,
         'token' => $token
@@ -160,7 +160,6 @@ function msgServerSent(string|array|int $data, string | int $id, string $event):
     echo "data: {$get}\n\n";
     ob_flush();
     flush();
-    
 }
 
 // BREAK A LOOP IF THE CLIENT ABORTED THE CONNECTION 

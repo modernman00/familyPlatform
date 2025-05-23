@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\controller;
+namespace App\Controller;
 
 use App\classes\Select;
 use DateInterval;
@@ -16,16 +16,20 @@ class Testphp extends Select
 {
     public $time = 90;
 
-
-    public static function testFunction():void
+    public static function showWord()
     {
-  
+        echo "it is working";
+    }
+
+
+    public static function testFunction(): void
+    {
+
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
         $result = parent::selectFn2(query: $query, bind: [18]);
         printArr($result);
-        foreach($result as $results)
-         echo json_encode($results);
-    
+        foreach ($result as $results)
+            echo json_encode($results);
     }
 
     public function index()
@@ -228,12 +232,10 @@ class Testphp extends Select
 
         $this->getGenerator3();
         $this->printIterable(["a", "b", "c"]);
-        echo $this->current(); 
+        echo $this->current();
         $_SESSION['TEST'] = "test";
         echo BR;
         $_SESSION['TEST'] ??= throw new \Exception("Error Processing Request", 1);
-
-
     }
 
 

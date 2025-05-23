@@ -2,7 +2,9 @@
 
 namespace App\classes;
 
-class Recaptcha 
+use App\Exceptions\CaptchaVerificationException;
+
+class Recaptcha
 
 {
 
@@ -16,13 +18,11 @@ class Recaptcha
 
     $recaptcha = json_decode($recaptcha);
 
-    if ( $recaptcha->success && $recaptcha->score >= 0.5 &&$recaptcha->action == $action) {
-            return true;
+    if ($recaptcha->success && $recaptcha->score >= 0.5 && $recaptcha->action == $action) {
+      return true;
     } else {
-           // reCAPTCHA verification failed
-        msgException(500, "reCAPTCHA verification failed. Please try again.");
+      // reCAPTCHA verification failed
+      throw new CaptchaVerificationException();
     }
-
   }
-
 }

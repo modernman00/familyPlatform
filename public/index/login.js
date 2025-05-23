@@ -637,6 +637,7 @@ var postFormData = /*#__PURE__*/function () {
       idSetFromHttp,
       famCodeSetFromHttp,
       dbHttpResult,
+      redirectDelay,
       _error$response,
       errorClass,
       errorMessage,
@@ -672,6 +673,8 @@ var postFormData = /*#__PURE__*/function () {
           formEntries["delete"]('submit');
           formEntries["delete"]('checkbox_id');
           options = {
+            baseURL: '/',
+            // Adjust to your API base URL
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
             withCredentials: true // Ensure cookies (e.g., XSRF token) are sent
@@ -725,26 +728,25 @@ var postFormData = /*#__PURE__*/function () {
           if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
           if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
           processFormDataAction(successClass, dbHttpResult, notificationId);
-
-          // if (redirect) {
-          //     const redirectDelay = 2000; // Configurable delay in ms
-          //     setTimeout(() => {
-          //         window.location.assign(redirect);
-          //     }, redirectDelay);
-          // }
-          _context.next = 48;
+          if (redirect) {
+            redirectDelay = 2000; // Configurable delay in ms
+            setTimeout(function () {
+              window.location.assign(redirect);
+            }, redirectDelay);
+          }
+          _context.next = 49;
           break;
-        case 43:
-          _context.prev = 43;
+        case 44:
+          _context.prev = 44;
           _context.t0 = _context["catch"](15);
           errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
-          errorMessage = ((_error$response = _context.t0.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || _context.t0.message || 'An unknown error occurred';
+          errorMessage = ((_error$response = _context.t0.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.error) || _context.t0.request || 'An unknown error occurred';
           processFormDataAction(errorClass, errorMessage, notificationId);
-        case 48:
+        case 49:
         case "end":
           return _context.stop();
       }
-    }, _callee, null, [[15, 43]]);
+    }, _callee, null, [[15, 44]]);
   }));
   return function postFormData(_x, _x2) {
     return _ref.apply(this, arguments);

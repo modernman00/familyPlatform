@@ -1,6 +1,6 @@
 <?php
 
-namespace App\exceptions;
+namespace App\Exceptions;
 
 
 class ForbiddenException extends HttpExceptions

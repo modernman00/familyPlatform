@@ -1,6 +1,6 @@
 <?php
 
-namespace App\controller\chat;
+namespace App\Controller\chat;
 
 use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;

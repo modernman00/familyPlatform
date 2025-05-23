@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\controller\register;
+namespace App\Controller\register;
 
 use App\classes\{
     SubmitForm,

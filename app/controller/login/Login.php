@@ -2,57 +2,31 @@
 
 declare(strict_types=1);
 
-namespace App\controller\login;
+namespace App\Controller\login;
 
 use App\classes\{
     CheckToken,
     Select,
     Recaptcha,
     Db,
-    PdoStorage
+    Limiter,
+    CorsHandler
 };
-
-
-
+use App\Exceptions\{UnauthorisedException,};
 use App\model\AllMembersData as AllMembersDataModel;
 use Exception;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+
+
 
 class Login extends Select
 {
-    private const int MAX_ATTEMPTS = 5;
-    private const int TIME_WINDOW = 15 * 60;
+
     private const string ACCOUNT = 'account';
     private const string ADMIN = '/lasu';
     private const string LOGIN = '/login';
     private const string LOGIN_TYPE = 'loginType';
-    // readonly string $ipAddress;
-    private readonly string $ipAddress; // Readonly property
-    private readonly RateLimiterFactory $rateLimiterFactory;
 
 
-
-    public function __construct()
-    {
-
-        $this->ipAddress = getUserIpAddr();
-
-        $db = Db::connect2();
-        $storage = new PdoStorage($db);
-        $this->rateLimiterFactory = new RateLimiterFactory([
-            'id' => 'login',
-            'policy' => 'fixed_window',
-            'limit' => self::MAX_ATTEMPTS,
-            'interval' => sprintf('%d seconds', self::TIME_WINDOW),
-        ], $storage);
-
-
-
-
-        if (!isset($_SESSION['auth'])) {
-            $_SESSION['auth'] = [];
-        }
-    }
 
     public function show()
     {
@@ -85,11 +59,7 @@ class Login extends Select
 
     public function login(): void
     {
-        header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
-        header("Content-Type: application/json; charset=UTF-8");
-        header("Access-Control-Allow-Methods: POST");
-        header("Access-Control-Max-Age: 3600");
-        header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+        CorsHandler::setHeaders(); // Call the static method to set headers
 
         Recaptcha::verifyCaptcha('login');
 
@@ -101,22 +71,9 @@ class Login extends Select
             $email = cleanSession($_POST['email']) ?? '';
 
             // Check rate limit
-            $emailLimiter = $this->rateLimiterFactory->create("email:$email");
-            $ipLimiter = $this->rateLimiterFactory->create("ip:{$this->ipAddress}");
+            Limiter::limit($email);
 
-            $emailLimit = $emailLimiter->consume(1);
-            $ipLimit = $ipLimiter->consume(1);
 
-            if (!$emailLimit->isAccepted() || !$ipLimit->isAccepted()) {
-                // For fixed_window, calculate retry time based on the window interval
-                $currentTime = time();
-                $windowStart = $currentTime - ($currentTime % self::TIME_WINDOW);
-                $nextWindow = $windowStart + self::TIME_WINDOW;
-                $retryAfter = max(1, $nextWindow - $currentTime); // Ensure at least 1 second
-
-                header('Retry-After: ' . $retryAfter);
-                msgException(msg: "Too many login attempts. Please try again in " . ceil($retryAfter / 60) . " minutes.", errCode: 429);
-            }
             //2. create min and max limit
             $minMaxData = [
                 'data' => ['email', 'password'],
@@ -144,8 +101,8 @@ class Login extends Select
 
             if ($data && $validatePwd) {
                 // Clear attempts on successful login
-                $emailLimiter->reset();
-                $ipLimiter->reset();
+                Limiter::$argLimiter->reset();
+                Limiter::$ipLimiter->reset();
                 // Login now based on login type
                 if ($detectIfAdminOrCustomer === self::ADMIN) {
                     $this->adminLogin($data);
@@ -163,7 +120,8 @@ class Login extends Select
             } else {
 
                 unset($_SESSION['auth']); // Clear only auth namespace
-                msgException(401, "Your credential could not be verified");
+
+                throw new UnauthorisedException('Your credential could not be verified');
             }
         } catch (\Throwable $th) {
 
@@ -186,7 +144,7 @@ class Login extends Select
         }
 
         generateSendTokenEmail($data);  // send token to email 
-        $_SESSION['auth']['login'] = true;
+        $_SESSION['auth']['login'] = true; // use at the code.php file
         unset($_SESSION['auth']['/loginType']); // not needed anymore
         session_regenerate_id();
     }

@@ -7,7 +7,9 @@ namespace App\router;
 use App\Exceptions\NotFoundException;
 
 use AltoRouter;
+use App\Exceptions\HttpExceptions;
 use PDOException;
+use Throwable;
 
 class RouteDispatch
 {
@@ -37,9 +39,9 @@ class RouteDispatch
                 }
             } else {
 
-                view('error/genError', ["error" => "Invalid URL"]);
+                view('error.genError', ["error" => "Invalid URL"]);
             }
-        } catch (PDOException $e) {
+        } catch (HttpExceptions $e) {
             showError($e);
         }
     }

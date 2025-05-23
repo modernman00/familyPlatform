@@ -1,6 +1,6 @@
 <?php
 
-namespace App\controller\register;
+namespace App\Controller\register;
 
 use App\Controller\Base;
 use App\classes\Select;

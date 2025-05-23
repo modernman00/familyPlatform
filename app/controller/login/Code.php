@@ -2,14 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\controller\login;
+namespace App\Controller\login;
 
 use App\classes\{
     CheckToken,
     Select,
-    JwtHandler
+    JwtHandler,
+    CorsHandler,
+    Limiter
 };
-
+use App\Exceptions\NotFoundException;
 
 class Code extends Select
 {
@@ -25,27 +27,28 @@ class Code extends Select
 
     public function show()
     {
-   
-    if ($_SESSION['login'] || $_SESSION['changePW']) {
-        return view('login/code');
-    }
+
+        if ($_SESSION['auth']['login'] || $_SESSION['changePW']) {
+            return view('login/code');
+        }
 
 
 
-    // Otherwise, show the general error view
-    return view('error/genError');
+        // Otherwise, show the general error view
+        return view('error/genError');
     }
 
 
     public function verify(): void
     {
+        CorsHandler::setHeaders(); // Call the static method to set headers
         try {
 
             $code = checkInput($_POST["code"]);
 
             // this SESSION IS set in generateUpdateTableWithToken function in checkSanitise file
 
-            $_SESSION['identifyCust'] ?? msgException(401, "Hmm, we can't seem to find you - try again");
+            $_SESSION['identifyCust'] ?? throw new NotFoundException("Hmm, we can't seem to find you - try again");
 
             $this->memberId = checkInput($_SESSION['identifyCust']);
 
@@ -53,6 +56,8 @@ class Code extends Select
                 $diff = time() - $_SESSION[self::TOKEN_SESSION];
                 msgException(401, "Invalid or expired Token $diff");
             }
+
+            Limiter::limit($code);
 
             // check if the code is stored in the database
 
@@ -76,8 +81,9 @@ class Code extends Select
                 // generate a jwt token
                 $jwt = new JwtHandler();
                 $token = $jwt->jwtEncodeData(
-                    serverName: getenv(name: 'APP_URL'), 
-                    data: ['id' => $this->memberId]);
+                    serverName: getenv(name: 'APP_URL'),
+                    data: ['id' => $this->memberId]
+                );
                 // 86400 = 1 day
 
                 // only set a cookie if not already set

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\controller\login;
+namespace App\Controller\login;
 
 use Exception;
 use App\classes\{CheckToken, Pass};

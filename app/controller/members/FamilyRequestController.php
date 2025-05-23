@@ -1,6 +1,6 @@
 <?php
 
-namespace App\controller\members;
+namespace App\Controller\members;
 
 use App\classes\{
   Select,

@@ -4,10 +4,10 @@ namespace App\Exceptions;
 
 
 
-class BadRequestException extends HttpExceptions
+class ValidationException extends HttpExceptions
 {
   public function __construct(string $message = "Bad Request")
   {
-    parent::__construct($message, 400);
+    parent::__construct($message, 422);
   }
 }

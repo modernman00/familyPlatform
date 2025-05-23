@@ -17,38 +17,44 @@
       @php
       // if $formAction is '/lasu', add code to the input
       if($formAction === '/lasu') {
-        $formArray = [
-          'email' => 'email',
-          'password' => 'password',
-          'type' => 'text',
-          'checkbox'=> 'Remember me',
-          'token' => 'token',
-            'submit'=> [
-            'button_captcha',
-            'js'=> 'LoginSubmission',
-            'key'=>getenv('RECAPTCHA_KEY'),
-            'action'=> 'login'
-          ], // 'submit' => 'button'
-        ];
+      $formArray = [
+      'email' => 'email',
+      'password' => 'password',
+      'type' => 'text',
+      'checkbox'=> 'Remember me',
+      'token' => 'token',
+      'submit'=> [
+      'button_captcha',
+      'js'=> 'LoginSubmission',
+      'key'=>getenv('RECAPTCHA_KEY'),
+      'action'=> 'login'
+      ], // 'submit' => 'button'
+      ];
       } else {
-        $formArray = [
-          'email' => 'email',
-          'password' => 'password',
-          'checkbox'=> 'Remember me',
-          'token' => 'token',
-          'submit'=> [
-            'button_captcha',
-            'js'=> 'LoginSubmission',
-            'key'=>getenv('RECAPTCHA_KEY'),
-            'action'=> 'login'
-          ], // 'submit' => 'button'
-        ];
+      $formArray = [
+      'email' => 'email',
+      'password' => 'password',
+      'checkbox'=> 'Remember me',
+      'token' => 'token',
+      'submit'=> [
+      'button_captcha',
+      'js'=> 'LoginSubmission',
+      'key'=>getenv('RECAPTCHA_KEY'),
+      'action'=> 'login'
+      ], // 'submit' => 'button'
+      ];
       }
+
+
 
       $form = new App\classes\BuildFormBulma($formArray);
       $form->genForm();
 
       @endphp
+
+
+
+
 
       <label class="checkbox">
         <input type="checkbox" id="showPassword_id">
@@ -63,10 +69,15 @@
 
   </form>
 
+
+
+
+
 </div>
 
 <script>
   sessionStorage.setItem('loginURL1', @json($formAction))
+
 </script>
 
 

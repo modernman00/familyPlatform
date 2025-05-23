@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\controller;
+namespace App\Controller;
 
 class ServeImgController {
     public function ProfileDir($imgName) {

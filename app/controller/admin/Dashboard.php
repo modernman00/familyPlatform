@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\controller\admin;
+namespace App\Controller\admin;
 
 class Dashboard
 {

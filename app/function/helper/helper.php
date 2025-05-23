@@ -2,27 +2,35 @@
 
 declare(strict_types=1);
 
-use Philo\Blade\Blade;
+use eftec\bladeone\BladeOne;
 use App\classes\Select;
 use Spatie\ImageOptimizer\OptimizerChainFactory as ImgOptimizer;
 use App\classes\VirusScan as ScanVirus;
 use Intervention\Image\ImageManager as Image;
 use App\exceptions\HttpExceptions;
-
+use App\Exceptions\NotFoundException;
 
 function view($path, array $data = [])
 {
-    // 1st param = accept the path to the file we actually want to load
-    //2nd param array = any data that we want to pass to the view
-    $view = __DIR__ . "/../../../resources/view";
-    $cache = __DIR__ . "/../../../bootstrap/cache";
-    $blade = new Blade(cachePath: $cache, viewPaths: [$view]);
-    // 2 parameters
-    //requires a path to the view -> folder where views are located
-    // 2nd is the path to a cache directory -> cache under bootstrap
-    echo $blade->view()->make($path, $data)->render();
-}
 
+    try {
+        $view = rtrim(__DIR__ . "/../../../resources/views", '/'); // Remove trailing slash
+        $cache = rtrim(__DIR__ . "/../../../bootstrap/cache", '/');
+        $viewFile = str_replace('/', '.', $path); // Convert to dot notation: msg.customer.token
+        // echo $viewFile;
+        static $blade = null;
+        if (!$blade) {
+            $blade = new BladeOne($view, $cache, BladeOne::MODE_DEBUG);
+            // $blade->setIsCompiled(false);
+            $blade->pipeEnable = true;
+            $blade->setBaseUrl(getenv('APP_URL'));
+        }
+
+        echo $blade->run($viewFile, $data);
+    } catch (Exception $e) {
+        showError($e);
+    }
+}
 function toSendEmail(string $viewPath, array $data, string $subject, string $emailRoute)
 {
     // generate the data to send the email
@@ -43,7 +51,7 @@ function make($fileName, $data): string|false
 {
     extract($data);
     ob_start();  // turn on output buffering so no output is sent but store inside the internal buffer
-    include __DIR__ . "/../../resources/views/emails/$fileName.php"; // include template
+    include __DIR__ . "/../../../resources/views/emails/$fileName.php"; // include template
     $content = ob_get_contents(); //get content out of the file
     ob_end_clean(); // erase output turn off output buffering although stored in $content variable
     return $content;
@@ -208,36 +216,40 @@ function cleanSession($x): string|null|int
 
 // SHOW THE ERROR EXCEPTION MESSAGE
 
-function showError($th): void
+function showError(Throwable $th): void
 {
-    if (getenv('APP_ENV') === 'local') {
-        error_log("Error: " . $th->getMessage());
-        $error = (int) $th->getCode() ?? 500;
-        if ($th instanceof HttpExceptions) {
-            http_response_code($th->getStatusCode());
-            echo json_encode([
-                'error' => $th->getMessage()
-            ]);
-        } else {
-            http_response_code($error);
-            echo json_encode([
-                'error' =>  $error = "Error on line {$th->getLine()} in {$th->getFile()}\n\n: The error message is {$th->getMessage()}\n\n"
-            ]);
-        }
+    $isLocal = getenv('APP_ENV') === 'local';
+    $statusCode = ($th instanceof \App\Exceptions\HttpExceptions)
+        ? $th->getStatusCode()
+        : ((int) $th->getCode() >= 100 && (int) $th->getCode() <= 599 ? (int) $th->getCode() : 500);
+
+    http_response_code($statusCode);
+
+    $logMessage = "[" . date('Y-m-d H:i:s') . "] "
+        . "Code: {$statusCode}, "
+        . "Message: {$th->getMessage()}, "
+        . "File: {$th->getFile()}, "
+        . "Line: {$th->getLine()}\n";
+
+
+
+    file_put_contents(__DIR__ . "/../../../bootstrap/log/" . date('Y-m-d') . '.log', $logMessage, FILE_APPEND);
+
+    if ($isLocal) {
+        echo json_encode([
+            'error' => $th instanceof \App\Exceptions\HttpExceptions
+                ? $th->getMessage()
+                : "Error on line {$th->getLine()} in {$th->getFile()}: {$th->getMessage()}"
+        ]);
     } else {
-        if ($th instanceof HttpExceptions) {
-            http_response_code($th->getStatusCode());
-            echo json_encode([
-                'error' => $th->getMessage()
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode([
-                'error' => 'An unexpected error occurred. ' . $th->getMessage()
-            ]);
-        }
+        echo json_encode([
+            'error' => $th instanceof \App\Exceptions\HttpExceptions
+                ? $th->getMessage()
+                : "An unexpected error occurred."
+        ]);
     }
 }
+
 
 /**
  * Summary of showErrorExp
@@ -426,9 +438,9 @@ function fileUploadMultiple($fileLocation, $formInputName): array
             if (file_exists($tempPath)) {
                 rename($tempPath, $pathToImage);
             } else {
-                throw new Exception("Failed to save resized image at $tempPath");
+                throw new NotFoundException("Failed to save resized image at $tempPath");
             }
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             throw new Exception("Image processing failed: " . $e->getMessage());
         }
 

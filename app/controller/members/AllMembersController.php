@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\controller\members;
+namespace App\Controller\members;
 
 
 use App\classes\{

@@ -35,6 +35,12 @@ class BuildFormBulma extends AlterTable
     public function __construct(public array $question)
     {
         $this->token = urlencode(base64_encode((random_bytes(32))));
+        setcookie('XSRF-TOKEN', $this->token, [
+            'expires' => time() + 3600,
+            'path' => '/',
+            'samesite' => 'Lax',
+            'httponly' => false, // Allow JavaScript to read it for Axios
+        ]);
     }
 
     /**
@@ -296,7 +302,6 @@ class BuildFormBulma extends AlterTable
                     </p>
                 </div>
                 HTML;
-            
             } elseif ($this->entValue[$i][0] === 'button_captcha') {
                 $js = $this->entValue[$i]['js'];
                 $siteKey = $this->entValue[$i]['key'];
@@ -597,7 +602,7 @@ class BuildFormBulma extends AlterTable
                     </div>
                 HTML;
             } elseif ($this->entValue[$i] === 'captcha') {
-                 echo sprintf('<div class="g-recaptcha" data-sitekey="%s"></div>', getenv('RECAPTCHA_KEY'));
+                echo sprintf('<div class="g-recaptcha" data-sitekey="%s"></div>', getenv('RECAPTCHA_KEY'));
             } else {
                 echo "Invalid form element type: {$this->entValue[$i]}";
             }

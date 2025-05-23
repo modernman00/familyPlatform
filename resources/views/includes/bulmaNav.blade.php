@@ -4,12 +4,18 @@
       <img src={{ getenv("IMG_CONTRACT") }} alt="logo" >
     </a>
 
-    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample" onkeydown="handleKeyDown(event)">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
     </a>
   </div>
+{{--  
+  <button type="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+  <span aria-hidden="true"></span>
+  <span aria-hidden="true"></span>
+  <span aria-hidden="true"></span>
+</button>  --}}
 
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
@@ -59,3 +65,15 @@
   </div>
 </nav>
 
+{{--  <script>
+function handleKeyDown(event) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault(); // Prevent default behavior (e.g., scrolling for Space)
+    // Toggle the menu (replace with your actual toggle logic)
+    const target = document.getElementById('navbarBasicExample');
+    const isExpanded = event.currentTarget.getAttribute('aria-expanded') === 'true';
+    event.currentTarget.setAttribute('aria-expanded', !isExpanded);
+    target.classList.toggle('is-active');
+  }
+}
+</script>  --}}

@@ -6,6 +6,10 @@ use App\classes\{
     Update,
     AllFunctionalities
 };
+use App\Exceptions\HttpExceptions;
+use App\Exceptions\ValidationException;
+use App\Exceptions\NotFoundException;
+use App\Exceptions\UnauthorisedException;
 
 /**
  * @param mixed $inputData  this is the form data 
@@ -25,8 +29,7 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
     $options = ['cost' => 12];
 
     if (password_verify($textPassword, $dbPassword) === false) {
-        msgException(401, 'There is a problem with your login credential! - Password');
-        exit;
+        throw new UnauthorisedException('There is a problem with your login credential! - Password');
     }
 
     if (password_needs_rehash($dbPassword, PASSWORD_DEFAULT, $options)) {
@@ -38,8 +41,8 @@ function checkPassword(#[SensitiveParameter] array $inputData, #[SensitiveParame
         $result = $passUpdate->updateMultiplePOST($data, $table, 'id');
 
         if (!$result) {
-            msgException(422, 'Password could not be updated');
-            return false;
+
+            throw new HttpExceptions('Password could not be updated');
         }
     }
     return true;
@@ -59,7 +62,8 @@ function useEmailToFindData($inputData)
     $emailData = Select::selectFn2(query: $query, bind: [$email]);
 
     if (empty($emailData)) {
-        msgException(401, 'We do not recognise your account');
+
+        throw new NotFoundException("We cannot locate the information");
     }
 
     return $emailData[0];
@@ -79,10 +83,10 @@ function checkIfEmailExist(string $email): mixed
 
     if (!$data) {
 
-        msgException(404, "We cannot find your email");
+        throw new NotFoundException("We cannot locate the information");
     }
-    foreach ($data as $data);
-    return $data;
+    // foreach ($data as $data);
+    return $data[0];
 }
 
 /**
@@ -105,10 +109,10 @@ function findTwoColUsingEmail(string $col, string $col2, array $data): mixed
 
     if (!$result) {
 
-        msgException(404, "We cannot locate the information");
+        throw new NotFoundException("We cannot locate the information");
     }
-    foreach ($result as $data);
-    return $data;
+    // foreach ($result as $data);
+    return $data[0];
 }
 
 /**
@@ -128,7 +132,7 @@ function findOneColUsingEmail(string $col, array $data): mixed
 
     if (!$data) {
 
-        msgException(404, "We cannot locate the information");
+        throw new NotFoundException("We cannot locate the information");
     }
     foreach ($data as $data);
     return $data;
@@ -149,7 +153,7 @@ function getSanitisedInputData(array $inputData, $minMaxData = NULL)
     if ($error) {
 
         $theError = "There is a problem with your input<br>" . implode('; <br>', $error);
-        msgException(400, $theError);
+        throw new ValidationException($theError);
     }
 
     return $sanitisedData;
@@ -177,7 +181,7 @@ function generateUpdateTableWithToken($customerId)
     $updateCodeToCustomer = new Update('account');
     $updateCodeToCustomer->updateTable('token', $token, 'id', $customerId);
     if (!$updateCodeToCustomer) {
-        msgException(406, "Error : Could not update token");
+        throw new HttpExceptions("Could not update token");
     }
     $_SESSION['auth']['2FA_token_ts'] = time(); // Use 'auth' namespace
     $_SESSION['auth']['identifyCust'] = $customerId ?? "TEST"; // Use 'auth' namespace

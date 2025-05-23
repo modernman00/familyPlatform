@@ -21,11 +21,12 @@ class CheckToken
         // try {
         $tokenCheck = $_SESSION[$token] ?? "bad";
         $postToken = $_POST[$token] ?? "bad";
+        $xsrfToken = $_SERVER['HTTP_X_XSRF_TOKEN'] ?? '';
         // invalidate $token stored in session
         unset($_SESSION[$token]);
-        if ($tokenCheck != $postToken) {
+        if ($tokenCheck != $postToken && $postToken != $xsrfToken) {
 
-            throw new NotFoundException("We are not familiar with the nature of your activities.");
+            throw new NotFoundException("We are not familiar with the nature of your activities.$postToken --  $xsrfToken");
         }
     }
 }
