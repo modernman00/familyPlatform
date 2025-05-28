@@ -23,7 +23,7 @@
   "homepage": "https://github.com/modernman00/js#readme",
   "devDependencies": {
     "cross-env": "^6.0.3",
-    "laravel-mix": "^6.0.18",
+    "laravel-mix": "^6.0.49",
     "node-sass": "^8.0.0",
     "parcel": "^2.1.1",
     "resolve-url-loader": "^5.0.0",
@@ -32,6 +32,7 @@
     "webpack": "^5.9.0"
   },
   "dependencies": {
+    "@modernman00/shared-js-lib": "github:modernman00/shared-js-lib#v1.0.0",
     "all-the-cities": "^3.1.0",
     "autocompleter": "^6.1.0",
     "axios": "^1.6.8",

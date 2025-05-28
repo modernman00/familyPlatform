@@ -1,4 +1,408 @@
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/public/vendor"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/vendor"],{
+
+/***/ "./node_modules/Autocompleter/autocomplete.js":
+/*!****************************************************!*\
+  !*** ./node_modules/Autocompleter/autocomplete.js ***!
+  \****************************************************/
+/***/ (function(module) {
+
+(function (global, factory) {
+   true ? module.exports = factory() :
+  0;
+}(this, (function () { 'use strict';
+
+  /*
+   * https://github.com/kraaden/autocomplete
+   * Copyright (c) 2016 Denys Krasnoshchok
+   * MIT License
+   */
+  function autocomplete(settings) {
+      // just an alias to minimize JS file size
+      var doc = document;
+      var container = settings.container || doc.createElement("div");
+      var containerStyle = container.style;
+      var userAgent = navigator.userAgent;
+      var mobileFirefox = ~userAgent.indexOf("Firefox") && ~userAgent.indexOf("Mobile");
+      var debounceWaitMs = settings.debounceWaitMs || 0;
+      var preventSubmit = settings.preventSubmit || false;
+      var disableAutoSelect = settings.disableAutoSelect || false;
+      // 'keyup' event will not be fired on Mobile Firefox, so we have to use 'input' event instead
+      var keyUpEventName = mobileFirefox ? "input" : "keyup";
+      var items = [];
+      var inputValue = "";
+      var minLen = 2;
+      var showOnFocus = settings.showOnFocus;
+      var selected;
+      var keypressCounter = 0;
+      var debounceTimer;
+      if (settings.minLength !== undefined) {
+          minLen = settings.minLength;
+      }
+      if (!settings.input) {
+          throw new Error("input undefined");
+      }
+      var input = settings.input;
+      container.className = "autocomplete " + (settings.className || "");
+      // IOS implementation for fixed positioning has many bugs, so we will use absolute positioning
+      containerStyle.position = "absolute";
+      /**
+       * Detach the container from DOM
+       */
+      function detach() {
+          var parent = container.parentNode;
+          if (parent) {
+              parent.removeChild(container);
+          }
+      }
+      /**
+       * Clear debouncing timer if assigned
+       */
+      function clearDebounceTimer() {
+          if (debounceTimer) {
+              window.clearTimeout(debounceTimer);
+          }
+      }
+      /**
+       * Attach the container to DOM
+       */
+      function attach() {
+          if (!container.parentNode) {
+              doc.body.appendChild(container);
+          }
+      }
+      /**
+       * Check if container for autocomplete is displayed
+       */
+      function containerDisplayed() {
+          return !!container.parentNode;
+      }
+      /**
+       * Clear autocomplete state and hide container
+       */
+      function clear() {
+          // prevent the update call if there are pending AJAX requests
+          keypressCounter++;
+          items = [];
+          inputValue = "";
+          selected = undefined;
+          detach();
+      }
+      /**
+       * Update autocomplete position
+       */
+      function updatePosition() {
+          if (!containerDisplayed()) {
+              return;
+          }
+          containerStyle.height = "auto";
+          containerStyle.width = input.offsetWidth + "px";
+          var maxHeight = 0;
+          var inputRect;
+          function calc() {
+              var docEl = doc.documentElement;
+              var clientTop = docEl.clientTop || doc.body.clientTop || 0;
+              var clientLeft = docEl.clientLeft || doc.body.clientLeft || 0;
+              var scrollTop = window.pageYOffset || docEl.scrollTop;
+              var scrollLeft = window.pageXOffset || docEl.scrollLeft;
+              inputRect = input.getBoundingClientRect();
+              var top = inputRect.top + input.offsetHeight + scrollTop - clientTop;
+              var left = inputRect.left + scrollLeft - clientLeft;
+              containerStyle.top = top + "px";
+              containerStyle.left = left + "px";
+              maxHeight = window.innerHeight - (inputRect.top + input.offsetHeight);
+              if (maxHeight < 0) {
+                  maxHeight = 0;
+              }
+              containerStyle.top = top + "px";
+              containerStyle.bottom = "";
+              containerStyle.left = left + "px";
+              containerStyle.maxHeight = maxHeight + "px";
+          }
+          // the calc method must be called twice, otherwise the calculation may be wrong on resize event (chrome browser)
+          calc();
+          calc();
+          if (settings.customize && inputRect) {
+              settings.customize(input, inputRect, container, maxHeight);
+          }
+      }
+      /**
+       * Redraw the autocomplete div element with suggestions
+       */
+      function update() {
+          // delete all children from autocomplete DOM container
+          while (container.firstChild) {
+              container.removeChild(container.firstChild);
+          }
+          // function for rendering autocomplete suggestions
+          var render = function (item, currentValue) {
+              var itemElement = doc.createElement("div");
+              itemElement.textContent = item.label || "";
+              return itemElement;
+          };
+          if (settings.render) {
+              render = settings.render;
+          }
+          // function to render autocomplete groups
+          var renderGroup = function (groupName, currentValue) {
+              var groupDiv = doc.createElement("div");
+              groupDiv.textContent = groupName;
+              return groupDiv;
+          };
+          if (settings.renderGroup) {
+              renderGroup = settings.renderGroup;
+          }
+          var fragment = doc.createDocumentFragment();
+          var prevGroup = "#9?$";
+          items.forEach(function (item) {
+              if (item.group && item.group !== prevGroup) {
+                  prevGroup = item.group;
+                  var groupDiv = renderGroup(item.group, inputValue);
+                  if (groupDiv) {
+                      groupDiv.className += " group";
+                      fragment.appendChild(groupDiv);
+                  }
+              }
+              var div = render(item, inputValue);
+              if (div) {
+                  div.addEventListener("click", function (ev) {
+                      settings.onSelect(item, input);
+                      clear();
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                  });
+                  if (item === selected) {
+                      div.className += " selected";
+                  }
+                  fragment.appendChild(div);
+              }
+          });
+          container.appendChild(fragment);
+          if (items.length < 1) {
+              if (settings.emptyMsg) {
+                  var empty = doc.createElement("div");
+                  empty.className = "empty";
+                  empty.textContent = settings.emptyMsg;
+                  container.appendChild(empty);
+              }
+              else {
+                  clear();
+                  return;
+              }
+          }
+          attach();
+          updatePosition();
+          updateScroll();
+      }
+      function updateIfDisplayed() {
+          if (containerDisplayed()) {
+              update();
+          }
+      }
+      function resizeEventHandler() {
+          updateIfDisplayed();
+      }
+      function scrollEventHandler(e) {
+          if (e.target !== container) {
+              updateIfDisplayed();
+          }
+          else {
+              e.preventDefault();
+          }
+      }
+      function keyupEventHandler(ev) {
+          var keyCode = ev.which || ev.keyCode || 0;
+          var ignore = settings.keysToIgnore || [38 /* Up */, 13 /* Enter */, 27 /* Esc */, 39 /* Right */, 37 /* Left */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */];
+          for (var _i = 0, ignore_1 = ignore; _i < ignore_1.length; _i++) {
+              var key = ignore_1[_i];
+              if (keyCode === key) {
+                  return;
+              }
+          }
+          if (keyCode >= 112 /* F1 */ && keyCode <= 123 /* F12 */ && !settings.keysToIgnore) {
+              return;
+          }
+          // the down key is used to open autocomplete
+          if (keyCode === 40 /* Down */ && containerDisplayed()) {
+              return;
+          }
+          startFetch(0 /* Keyboard */);
+      }
+      /**
+       * Automatically move scroll bar if selected item is not visible
+       */
+      function updateScroll() {
+          var elements = container.getElementsByClassName("selected");
+          if (elements.length > 0) {
+              var element = elements[0];
+              // make group visible
+              var previous = element.previousElementSibling;
+              if (previous && previous.className.indexOf("group") !== -1 && !previous.previousElementSibling) {
+                  element = previous;
+              }
+              if (element.offsetTop < container.scrollTop) {
+                  container.scrollTop = element.offsetTop;
+              }
+              else {
+                  var selectBottom = element.offsetTop + element.offsetHeight;
+                  var containerBottom = container.scrollTop + container.offsetHeight;
+                  if (selectBottom > containerBottom) {
+                      container.scrollTop += selectBottom - containerBottom;
+                  }
+              }
+          }
+      }
+      /**
+       * Select the previous item in suggestions
+       */
+      function selectPrev() {
+          if (items.length < 1) {
+              selected = undefined;
+          }
+          else {
+              if (selected === items[0]) {
+                  selected = items[items.length - 1];
+              }
+              else {
+                  for (var i = items.length - 1; i > 0; i--) {
+                      if (selected === items[i] || i === 1) {
+                          selected = items[i - 1];
+                          break;
+                      }
+                  }
+              }
+          }
+      }
+      /**
+       * Select the next item in suggestions
+       */
+      function selectNext() {
+          if (items.length < 1) {
+              selected = undefined;
+          }
+          if (!selected || selected === items[items.length - 1]) {
+              selected = items[0];
+              return;
+          }
+          for (var i = 0; i < (items.length - 1); i++) {
+              if (selected === items[i]) {
+                  selected = items[i + 1];
+                  break;
+              }
+          }
+      }
+      function keydownEventHandler(ev) {
+          var keyCode = ev.which || ev.keyCode || 0;
+          if (keyCode === 38 /* Up */ || keyCode === 40 /* Down */ || keyCode === 27 /* Esc */) {
+              var containerIsDisplayed = containerDisplayed();
+              if (keyCode === 27 /* Esc */) {
+                  clear();
+              }
+              else {
+                  if (!containerIsDisplayed || items.length < 1) {
+                      return;
+                  }
+                  keyCode === 38 /* Up */
+                      ? selectPrev()
+                      : selectNext();
+                  update();
+              }
+              ev.preventDefault();
+              if (containerIsDisplayed) {
+                  ev.stopPropagation();
+              }
+              return;
+          }
+          if (keyCode === 13 /* Enter */) {
+              if (selected) {
+                  settings.onSelect(selected, input);
+                  clear();
+              }
+              if (preventSubmit) {
+                  ev.preventDefault();
+              }
+          }
+      }
+      function focusEventHandler() {
+          if (showOnFocus) {
+              startFetch(1 /* Focus */);
+          }
+      }
+      function startFetch(trigger) {
+          // If multiple keys were pressed, before we get an update from server,
+          // this may cause redrawing autocomplete multiple times after the last key was pressed.
+          // To avoid this, the number of times keyboard was pressed will be saved and checked before redraw.
+          var savedKeypressCounter = ++keypressCounter;
+          var inputText = input.value;
+          var cursorPos = input.selectionStart || 0;
+          if (inputText.length >= minLen || trigger === 1 /* Focus */) {
+              clearDebounceTimer();
+              debounceTimer = window.setTimeout(function () {
+                  settings.fetch(inputText, function (elements) {
+                      if (keypressCounter === savedKeypressCounter && elements) {
+                          items = elements;
+                          inputValue = inputText;
+                          selected = (items.length < 1 || disableAutoSelect) ? undefined : items[0];
+                          update();
+                      }
+                  }, trigger, cursorPos);
+              }, trigger === 0 /* Keyboard */ ? debounceWaitMs : 0);
+          }
+          else {
+              clear();
+          }
+      }
+      function blurEventHandler() {
+          // we need to delay clear, because when we click on an item, blur will be called before click and remove items from DOM
+          setTimeout(function () {
+              if (doc.activeElement !== input) {
+                  clear();
+              }
+          }, 200);
+      }
+      /**
+       * Fixes #26: on long clicks focus will be lost and onSelect method will not be called
+       */
+      container.addEventListener("mousedown", function (evt) {
+          evt.stopPropagation();
+          evt.preventDefault();
+      });
+      /**
+       * Fixes #30: autocomplete closes when scrollbar is clicked in IE
+       * See: https://stackoverflow.com/a/9210267/13172349
+       */
+      container.addEventListener("focus", function () { return input.focus(); });
+      /**
+       * This function will remove DOM elements and clear event handlers
+       */
+      function destroy() {
+          input.removeEventListener("focus", focusEventHandler);
+          input.removeEventListener("keydown", keydownEventHandler);
+          input.removeEventListener(keyUpEventName, keyupEventHandler);
+          input.removeEventListener("blur", blurEventHandler);
+          window.removeEventListener("resize", resizeEventHandler);
+          doc.removeEventListener("scroll", scrollEventHandler, true);
+          clearDebounceTimer();
+          clear();
+      }
+      // setup event handlers
+      input.addEventListener("keydown", keydownEventHandler);
+      input.addEventListener(keyUpEventName, keyupEventHandler);
+      input.addEventListener("blur", blurEventHandler);
+      input.addEventListener("focus", focusEventHandler);
+      window.addEventListener("resize", resizeEventHandler);
+      doc.addEventListener("scroll", scrollEventHandler, true);
+      return {
+          destroy: destroy
+      };
+  }
+
+  return autocomplete;
+
+})));
+//# sourceMappingURL=autocomplete.js.map
+
+
+/***/ }),
 
 /***/ "./node_modules/autocompleter/autocomplete.js":
 /*!****************************************************!*\
@@ -8779,7 +9183,7 @@ const resolveBodyLength = async (headers, body) => {
   } catch (err) {
     unsubscribe && unsubscribe();
 
-    if (err && err.name === 'TypeError' && /fetch/i.test(err.message)) {
+    if (err && err.name === 'TypeError' && /Load failed|fetch/i.test(err.message)) {
       throw Object.assign(
         new _core_AxiosError_js__WEBPACK_IMPORTED_MODULE_2__["default"]('Network Error', _core_AxiosError_js__WEBPACK_IMPORTED_MODULE_2__["default"].ERR_NETWORK, config, request),
         {
@@ -9394,7 +9798,7 @@ const validators = _helpers_validator_js__WEBPACK_IMPORTED_MODULE_0__["default"]
  */
 class Axios {
   constructor(instanceConfig) {
-    this.defaults = instanceConfig;
+    this.defaults = instanceConfig || {};
     this.interceptors = {
       request: new _InterceptorManager_js__WEBPACK_IMPORTED_MODULE_1__["default"](),
       response: new _InterceptorManager_js__WEBPACK_IMPORTED_MODULE_1__["default"]()
@@ -9414,9 +9818,9 @@ class Axios {
       return await this._request(configOrUrl, config);
     } catch (err) {
       if (err instanceof Error) {
-        let dummy;
+        let dummy = {};
 
-        Error.captureStackTrace ? Error.captureStackTrace(dummy = {}) : (dummy = new Error());
+        Error.captureStackTrace ? Error.captureStackTrace(dummy) : (dummy = new Error());
 
         // slice off the Error: ... line
         const stack = dummy.stack ? dummy.stack.replace(/^.+\n/, '') : '';
@@ -9470,6 +9874,20 @@ class Axios {
         }, true);
       }
     }
+
+    // Set config.allowAbsoluteUrls
+    if (config.allowAbsoluteUrls !== undefined) {
+      // do nothing
+    } else if (this.defaults.allowAbsoluteUrls !== undefined) {
+      config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+    } else {
+      config.allowAbsoluteUrls = true;
+    }
+
+    _helpers_validator_js__WEBPACK_IMPORTED_MODULE_0__["default"].assertOptions(config, {
+      baseUrl: validators.spelling('baseURL'),
+      withXsrfToken: validators.spelling('withXSRFToken')
+    }, true);
 
     // Set config.method
     config.method = (config.method || this.defaults.method || 'get').toLowerCase();
@@ -9561,7 +9979,7 @@ class Axios {
 
   getUri(config) {
     config = (0,_mergeConfig_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this.defaults, config);
-    const fullPath = (0,_buildFullPath_js__WEBPACK_IMPORTED_MODULE_6__["default"])(config.baseURL, config.url);
+    const fullPath = (0,_buildFullPath_js__WEBPACK_IMPORTED_MODULE_6__["default"])(config.baseURL, config.url, config.allowAbsoluteUrls);
     return (0,_helpers_buildURL_js__WEBPACK_IMPORTED_MODULE_7__["default"])(fullPath, config.params, config.paramsSerializer);
   }
 }
@@ -9838,10 +10256,18 @@ class AxiosHeaders {
       setHeaders(header, valueOrRewrite)
     } else if(_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
       setHeaders((0,_helpers_parseHeaders_js__WEBPACK_IMPORTED_MODULE_1__["default"])(header), valueOrRewrite);
-    } else if (_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isHeaders(header)) {
-      for (const [key, value] of header.entries()) {
-        setHeader(value, key, rewrite);
+    } else if (_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isObject(header) && _utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isIterable(header)) {
+      let obj = {}, dest, key;
+      for (const entry of header) {
+        if (!_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isArray(entry)) {
+          throw TypeError('Object iterator must return a key-value pair');
+        }
+
+        obj[key = entry[0]] = (dest = obj[key]) ?
+          (_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]]) : entry[1];
       }
+
+      setHeaders(obj, valueOrRewrite)
     } else {
       header != null && setHeader(valueOrRewrite, header, rewrite);
     }
@@ -9981,6 +10407,10 @@ class AxiosHeaders {
 
   toString() {
     return Object.entries(this.toJSON()).map(([header, value]) => header + ': ' + value).join('\n');
+  }
+
+  getSetCookie() {
+    return this.get("set-cookie") || [];
   }
 
   get [Symbol.toStringTag]() {
@@ -10157,8 +10587,9 @@ __webpack_require__.r(__webpack_exports__);
  *
  * @returns {string} The combined full path
  */
-function buildFullPath(baseURL, requestedURL) {
-  if (baseURL && !(0,_helpers_isAbsoluteURL_js__WEBPACK_IMPORTED_MODULE_0__["default"])(requestedURL)) {
+function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+  let isRelativeUrl = !(0,_helpers_isAbsoluteURL_js__WEBPACK_IMPORTED_MODULE_0__["default"])(requestedURL);
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
     return (0,_helpers_combineURLs_js__WEBPACK_IMPORTED_MODULE_1__["default"])(baseURL, requestedURL);
   }
   return requestedURL;
@@ -10303,7 +10734,7 @@ function mergeConfig(config1, config2) {
   config2 = config2 || {};
   const config = {};
 
-  function getMergedValue(target, source, caseless) {
+  function getMergedValue(target, source, prop, caseless) {
     if (_utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isPlainObject(target) && _utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isPlainObject(source)) {
       return _utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].merge.call({caseless}, target, source);
     } else if (_utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isPlainObject(source)) {
@@ -10315,11 +10746,11 @@ function mergeConfig(config1, config2) {
   }
 
   // eslint-disable-next-line consistent-return
-  function mergeDeepProperties(a, b, caseless) {
+  function mergeDeepProperties(a, b, prop , caseless) {
     if (!_utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isUndefined(b)) {
-      return getMergedValue(a, b, caseless);
+      return getMergedValue(a, b, prop , caseless);
     } else if (!_utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isUndefined(a)) {
-      return getMergedValue(undefined, a, caseless);
+      return getMergedValue(undefined, a, prop , caseless);
     }
   }
 
@@ -10377,7 +10808,7 @@ function mergeConfig(config1, config2) {
     socketPath: defaultToConfig2,
     responseEncoding: defaultToConfig2,
     validateStatus: mergeDirectKeys,
-    headers: (a, b) => mergeDeepProperties(headersToObject(a), headersToObject(b), true)
+    headers: (a, b , prop) => mergeDeepProperties(headersToObject(a), headersToObject(b),prop, true)
   };
 
   _utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].forEach(Object.keys(Object.assign({}, config1, config2)), function computeConfigValue(prop) {
@@ -10697,7 +11128,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   VERSION: () => (/* binding */ VERSION)
 /* harmony export */ });
-const VERSION = "1.7.7";
+const VERSION = "1.9.0";
 
 /***/ }),
 
@@ -10924,7 +11355,7 @@ function encode(val) {
  *
  * @param {string} url The base of the url (e.g., http://www.google.com)
  * @param {object} [params] The params to be appended
- * @param {?object} options
+ * @param {?(object|Function)} options
  *
  * @returns {string} The formatted url
  */
@@ -10935,6 +11366,12 @@ function buildURL(url, params, options) {
   }
   
   const _encode = options && options.encode || encode;
+
+  if (_utils_js__WEBPACK_IMPORTED_MODULE_0__["default"].isFunction(options)) {
+    options = {
+      serialize: options
+    };
+  } 
 
   const serializeFn = options && options.serialize;
 
@@ -11300,75 +11737,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../utils.js */ "./node_modules/axios/lib/utils.js");
 /* harmony import */ var _platform_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../platform/index.js */ "./node_modules/axios/lib/platform/index.js");
 
 
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].hasStandardBrowserEnv ? ((origin, isMSIE) => (url) => {
+  url = new URL(url, _platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].origin);
 
-
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].hasStandardBrowserEnv ?
-
-// Standard browser envs have full support of the APIs needed to test
-// whether the request URL is of the same origin as current location.
-  (function standardBrowserEnv() {
-    const msie = _platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].navigator && /(msie|trident)/i.test(_platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].navigator.userAgent);
-    const urlParsingNode = document.createElement('a');
-    let originURL;
-
-    /**
-    * Parse a URL to discover its components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-    function resolveURL(url) {
-      let href = url;
-
-      if (msie) {
-        // IE needs attribute set twice to normalize properties
-        urlParsingNode.setAttribute('href', href);
-        href = urlParsingNode.href;
-      }
-
-      urlParsingNode.setAttribute('href', href);
-
-      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-      return {
-        href: urlParsingNode.href,
-        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-        host: urlParsingNode.host,
-        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-        hostname: urlParsingNode.hostname,
-        port: urlParsingNode.port,
-        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-          urlParsingNode.pathname :
-          '/' + urlParsingNode.pathname
-      };
-    }
-
-    originURL = resolveURL(window.location.href);
-
-    /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-    return function isURLSameOrigin(requestURL) {
-      const parsed = (_utils_js__WEBPACK_IMPORTED_MODULE_1__["default"].isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-      return (parsed.protocol === originURL.protocol &&
-          parsed.host === originURL.host);
-    };
-  })() :
-
-  // Non standard browser envs (web workers, react-native) lack needed support.
-  (function nonStandardBrowserEnv() {
-    return function isURLSameOrigin() {
-      return true;
-    };
-  })());
+  return (
+    origin.protocol === url.protocol &&
+    origin.host === url.host &&
+    (isMSIE || origin.port === url.port)
+  );
+})(
+  new URL(_platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].origin),
+  _platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].navigator && /(msie|trident)/i.test(_platform_index_js__WEBPACK_IMPORTED_MODULE_0__["default"].navigator.userAgent)
+) : () => true);
 
 
 /***/ }),
@@ -11581,7 +11964,7 @@ __webpack_require__.r(__webpack_exports__);
 
   newConfig.headers = headers = _core_AxiosHeaders_js__WEBPACK_IMPORTED_MODULE_1__["default"].from(headers);
 
-  newConfig.url = (0,_buildURL_js__WEBPACK_IMPORTED_MODULE_2__["default"])((0,_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_3__["default"])(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = (0,_buildURL_js__WEBPACK_IMPORTED_MODULE_2__["default"])((0,_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_3__["default"])(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
 
   // HTTP basic authentication
   if (auth) {
@@ -12243,6 +12626,14 @@ validators.transitional = function transitional(validator, version, message) {
   };
 };
 
+validators.spelling = function spelling(correctSpelling) {
+  return (value, opt) => {
+    // eslint-disable-next-line no-console
+    console.warn(`${opt} is likely a misspelling of ${correctSpelling}`);
+    return true;
+  }
+};
+
 /**
  * Assert object's properties type
  *
@@ -12480,6 +12871,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const {toString} = Object.prototype;
 const {getPrototypeOf} = Object;
+const {iterator, toStringTag} = Symbol;
 
 const kindOf = (cache => thing => {
     const str = toString.call(thing);
@@ -12606,7 +12998,7 @@ const isPlainObject = (val) => {
   }
 
   const prototype = getPrototypeOf(val);
-  return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
+  return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(toStringTag in val) && !(iterator in val);
 }
 
 /**
@@ -12957,13 +13349,13 @@ const isTypedArray = (TypedArray => {
  * @returns {void}
  */
 const forEachEntry = (obj, fn) => {
-  const generator = obj && obj[Symbol.iterator];
+  const generator = obj && obj[iterator];
 
-  const iterator = generator.call(obj);
+  const _iterator = generator.call(obj);
 
   let result;
 
-  while ((result = iterator.next()) && !result.done) {
+  while ((result = _iterator.next()) && !result.done) {
     const pair = result.value;
     fn.call(obj, pair[0], pair[1]);
   }
@@ -13076,26 +13468,6 @@ const toFiniteNumber = (value, defaultValue) => {
   return value != null && Number.isFinite(value = +value) ? value : defaultValue;
 }
 
-const ALPHA = 'abcdefghijklmnopqrstuvwxyz'
-
-const DIGIT = '0123456789';
-
-const ALPHABET = {
-  DIGIT,
-  ALPHA,
-  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-}
-
-const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-  let str = '';
-  const {length} = alphabet;
-  while (size--) {
-    str += alphabet[Math.random() * length|0]
-  }
-
-  return str;
-}
-
 /**
  * If the thing is a FormData object, return true, otherwise return false.
  *
@@ -13104,7 +13476,7 @@ const generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
  * @returns {boolean}
  */
 function isSpecCompliantForm(thing) {
-  return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === 'FormData' && thing[Symbol.iterator]);
+  return !!(thing && isFunction(thing.append) && thing[toStringTag] === 'FormData' && thing[iterator]);
 }
 
 const toJSONObject = (obj) => {
@@ -13173,6 +13545,10 @@ const asap = typeof queueMicrotask !== 'undefined' ?
 
 // *********************
 
+
+const isIterable = (thing) => thing != null && isFunction(thing[iterator]);
+
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   isArray,
   isArrayBuffer,
@@ -13223,14 +13599,13 @@ const asap = typeof queueMicrotask !== 'undefined' ?
   findKey,
   global: _global,
   isContextDefined,
-  ALPHABET,
-  generateString,
   isSpecCompliantForm,
   toJSONObject,
   isAsyncFn,
   isThenable,
   setImmediate: _setImmediate,
-  asap
+  asap,
+  isIterable
 });
 
 

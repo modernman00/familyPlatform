@@ -5369,16 +5369,16 @@
         },
         {
             "name": "waleolaogun/shared-lib",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "git@github.com:modernman00/shared-lib.git",
-                "reference": "4f0738034f61953fe08b97ba1f70c1682808bd5e"
+                "reference": "2d710df32becb7ceeb44fceb1252208a3d3b7719"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/4f0738034f61953fe08b97ba1f70c1682808bd5e",
-                "reference": "4f0738034f61953fe08b97ba1f70c1682808bd5e",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/2d710df32becb7ceeb44fceb1252208a3d3b7719",
+                "reference": "2d710df32becb7ceeb44fceb1252208a3d3b7719",
                 "shasum": ""
             },
             "require": {
@@ -5407,10 +5407,10 @@
             ],
             "description": "\"Shared library for common functions and classes across projects\",",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.4.0",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.5.0",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2025-05-28T02:08:08+00:00"
+            "time": "2025-05-28T02:49:08+00:00"
         },
         {
             "name": "xenolope/quahog",

@@ -888,6 +888,15 @@ var matchInput = function matchInput(first, second, err) {
     }
   });
 };
+
+/**
+ * Converts a string to sentence case.
+ *
+ * Sentence case is a string where the first letter of each word is capitalized, and the rest of the letters are in lowercase.
+ *
+ * @param {string} str The string to convert to sentence case.
+ * @returns {string} A new string in sentence case.
+ */
 var toSentenceCase = function toSentenceCase(str) {
   return str.toLowerCase() // Convert the string to lowercase
   .split(' ') // Split the string into words

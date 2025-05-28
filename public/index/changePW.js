@@ -534,6 +534,15 @@ var matchInput = function matchInput(first, second, err) {
     }
   });
 };
+
+/**
+ * Converts a string to sentence case.
+ *
+ * Sentence case is a string where the first letter of each word is capitalized, and the rest of the letters are in lowercase.
+ *
+ * @param {string} str The string to convert to sentence case.
+ * @returns {string} A new string in sentence case.
+ */
 var toSentenceCase = function toSentenceCase(str) {
   return str.toLowerCase() // Convert the string to lowercase
   .split(' ') // Split the string into words
@@ -676,7 +685,7 @@ var postFormData = /*#__PURE__*/function () {
             return notificationId.classList.remove(cls);
           });
 
-          // extract the form entries
+          // extract the form entriesËËË
           form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
           if (form) {
             _context.next = 11;

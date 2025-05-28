@@ -3,7 +3,7 @@
     "/manifest.js": "/manifest.js",
     "/index/register.js": "/index/register.js",
     "/index/all_members.js": "/index/all_members.js",
-    "/index/lasu.js": "/index/lasu.js",
+    "/index/login.js": "/index/login.js",
     "/index/forgotPwd.js": "/index/forgotPwd.js",
     "/index/code.js": "/index/code.js",
     "/index/profilePage.js": "/index/profilePage.js",
@@ -12,6 +12,7 @@
     "/index/familyCode.js": "/index/familyCode.js",
     "/index/accountSetting.js": "/index/accountSetting.js",
     "/index/organogram.js": "/index/organogram.js",
+    "/shared-lib.js": "/shared-lib.js",
     "/style.css": "/style.css",
     "/vendor.js": "/vendor.js"
 }

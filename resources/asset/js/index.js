@@ -1,9 +1,18 @@
 "use strict";
 import { qSel, showError } from "./components/global"
 
+import {log  } from "@shared"
+
 
 // to make the bulma navbar menu visible on mobile
 
+/**
+ * Tests if the current URL matches the given route.
+ *
+ * @param {string} url A URL route to test.
+ *
+ * @returns {boolean} True if the URL matches, otherwise false.
+ */
 const checkURL = (url) => {
     const regex = new RegExp(`^/${url}(\/[^/]+)*$`);
     return regex.test(window.location.pathname);
@@ -36,6 +45,7 @@ try {
 
 if (window.location.pathname === '/register') {
     qSel('.signUp').style.display = "none" // navbar mgt
+    log('index.js loaded')
 
     import (
         /* webpackChunkName: 'register' */
@@ -157,7 +167,8 @@ if (window.location.pathname === '/register') {
 
 
     // import (
-    //     /* webpackChunkName: 'getProfile' */
+    // import { setCookie } from '../../../node_modules/y/Cookie';
+    /* webpackChunkName: 'getProfile' */
     //     /* webpackPrefetch: true */
     //     './components/familyTree/index.js'
     // )

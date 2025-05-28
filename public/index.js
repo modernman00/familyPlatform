@@ -1,5 +1,5 @@
 "use strict";
-(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/public/index"],{
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["/index"],{
 
 /***/ "./resources/asset/js/components/global.js":
 /*!*************************************************!*\
@@ -190,12 +190,21 @@ var deleteNotification = /*#__PURE__*/function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./components/global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
 
 
 
 
 // to make the bulma navbar menu visible on mobile
 
+/**
+ * Tests if the current URL matches the given route.
+ *
+ * @param {string} url A URL route to test.
+ *
+ * @returns {boolean} True if the URL matches, otherwise false.
+ */
 var checkURL = function checkURL(url) {
   var regex = new RegExp("^/".concat(url, "(/[^/]+)*$"));
   return regex.test(window.location.pathname);
@@ -223,8 +232,8 @@ try {
 
 if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
-
-  Promise.all(/*! import() | register */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/ */ "./resources/asset/js/components/register/index.js")).then(function (module) {
+  (0,_shared__WEBPACK_IMPORTED_MODULE_1__.log)('index.js loaded');
+  Promise.all(/*! import() | register */[__webpack_require__.e("/vendor"), __webpack_require__.e("register")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/ */ "./resources/asset/js/components/register/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -232,7 +241,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/allMembers') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.allMemberNav').style.display = "none"; //allMemberNav
 
-  Promise.all(/*! import() | all_members */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/ */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
+  Promise.all(/*! import() | all_members */[__webpack_require__.e("/vendor"), __webpack_require__.e("all_members")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/allMembers/ */ "./resources/asset/js/components/allMembers/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -240,7 +249,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login' || window.location.pathname === '/lasu') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | login */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
+  Promise.all(/*! import() | login */[__webpack_require__.e("/vendor"), __webpack_require__.e("login")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/login/ */ "./resources/asset/js/components/login/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -248,7 +257,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/forgot') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | forgotPwd */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("forgotPwd")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
+  Promise.all(/*! import() | forgotPwd */[__webpack_require__.e("/vendor"), __webpack_require__.e("forgotPwd")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -256,7 +265,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/code') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | code */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
+  Promise.all(/*! import() | code */[__webpack_require__.e("/vendor"), __webpack_require__.e("code")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/generateCode/Code */ "./resources/asset/js/components/generateCode/Code.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -264,7 +273,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/member/ProfilePage') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.profilePageNav').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | profilePage */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("profilePage")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/ */ "./resources/asset/js/components/profilePage/index.js")).then(function (module) {
+  Promise.all(/*! import() | profilePage */[__webpack_require__.e("/vendor"), __webpack_require__.e("profilePage")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/ */ "./resources/asset/js/components/profilePage/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -273,14 +282,14 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
   // qSel('#loader').style.display ="none" // loader
-  Promise.all(/*! import() | changePW */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
+  Promise.all(/*! import() | changePW */[__webpack_require__.e("/vendor"), __webpack_require__.e("changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
   });
 } else if (window.location.pathname === '/profilepage/img') {
   // qSel('.login').style.display ="none" // navbar mgt
-  Promise.all(/*! import() | img */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("img")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/imgViewer */ "./resources/asset/js/components/profilePage/imgViewer.js")).then(function (module) {
+  Promise.all(/*! import() | img */[__webpack_require__.e("/vendor"), __webpack_require__.e("img")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/imgViewer */ "./resources/asset/js/components/profilePage/imgViewer.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -295,7 +304,7 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = "none"; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = "none"; // navbar mgt
 } else if (checkURL('accountSetting')) {
-  Promise.all(/*! import() | accountSetting */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
+  Promise.all(/*! import() | accountSetting */[__webpack_require__.e("/vendor"), __webpack_require__.e("accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -303,7 +312,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/organogram') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.familyTreeNav').style.display = "none"; // navbar mgt
 
-  Promise.all(/*! import() | organogram */[__webpack_require__.e("/public/vendor"), __webpack_require__.e("organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js")).then(function (module) {
+  Promise.all(/*! import() | organogram */[__webpack_require__.e("/vendor"), __webpack_require__.e("organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js")).then(function (module) {
     return module["default"];
   })["catch"](function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -313,7 +322,8 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.notification_count').style.display = "none"; // navbar mgt
 
   // import (
-  //     /* webpackChunkName: 'getProfile' */
+  // import { setCookie } from '../../../node_modules/y/Cookie';
+  /* webpackChunkName: 'getProfile' */
   //     /* webpackPrefetch: true */
   //     './components/familyTree/index.js'
   // )
@@ -339,13 +349,13 @@ __webpack_require__.r(__webpack_exports__);
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ /* webpack/runtime/startup prefetch */
 /******/ (() => {
-/******/ 	__webpack_require__.O(0, ["/public/index"], () => {
-/******/ 		["/public/vendor","register","all_members","login","forgotPwd","code","profilePage","changePW","img","familyCode","accountSetting","organogram"].map(__webpack_require__.E);
+/******/ 	__webpack_require__.O(0, ["/index"], () => {
+/******/ 		["/vendor","register","all_members","login","forgotPwd","code","profilePage","changePW","img","familyCode","accountSetting","organogram"].map(__webpack_require__.E);
 /******/ 	}, 5);
 /******/ })();
 /******/ 
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ __webpack_require__.O(0, ["public/style","/public/vendor"], () => (__webpack_exec__("./resources/asset/js/index.js"), __webpack_exec__("./resources/asset/scss/main.scss")));
+/******/ __webpack_require__.O(0, ["shared-lib","public/style","/vendor"], () => (__webpack_exec__("./resources/asset/js/index.js"), __webpack_exec__("./resources/asset/scss/main.scss")));
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
