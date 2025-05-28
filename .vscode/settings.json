@@ -3,19 +3,17 @@
         "PHPSESSID"
     ],
     "liveServer.settings.port": 5500,
-
     // This means that you change your real URL (current PHP url) 
     // to another URL (which Live Sever starts).
     "liveServer.settings.proxy": {
-        "enable": true,                             //   i. enabled
-        "baseUri": "/",                             //  ii. workspace
+        "enable": true, //   i. enabled
+        "baseUri": "/", //  ii. workspace
         "proxyUri": "http://localhost:80/" // iii. actual address
     },
     // vscode coloring
-
-     "editor.bracketPairColorization.enabled": true,
+    "editor.bracketPairColorization.enabled": true,
     "editor.guides.bracketPairs": "active",
-    "php.version": "8.3",
+    "php.version": "8.4.5",
     "sqltools.connections": [
         {
             "mysqlOptions": {
@@ -33,6 +31,5 @@
         }
     ],
     "http.systemCertificates": false,
-    "intelephense.environment.phpVersion": "8.3.0"
-    
+    "intelephense.environment.phpVersion": "8.4.5"
 }

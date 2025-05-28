@@ -6,13 +6,14 @@ namespace App\Controller\login;
 
 use App\classes\{
     CheckToken,
-    Select,
-    Recaptcha,
-    Db,
+    // Select,
+    // Recaptcha,
+    // Db,
     Limiter,
-    CorsHandler
+    // CorsHandler
 };
-use App\Exceptions\{UnauthorisedException,};
+use App\shared\Exceptions\ForbiddenException;
+use App\Shared\{Recaptcha, CorsHandler, Db, Select, Utility};
 use App\model\AllMembersData as AllMembersDataModel;
 use Exception;
 
@@ -37,7 +38,7 @@ class Login extends Select
             return view('login', compact('formAction'));
         } catch (\Throwable $e) {
 
-            showError($e);
+            Utility::showError($e);
         }
     }
 
@@ -53,7 +54,7 @@ class Login extends Select
             return view('login', compact('formAction'));
         } catch (\Throwable $e) {
 
-            showError($e);
+            Utility::showError($e);
         }
     }
 
@@ -68,7 +69,7 @@ class Login extends Select
             //1.  token verified
             CheckToken::tokenCheck(token: 'token');
 
-            $email = cleanSession($_POST['email']) ?? '';
+            $email = Utility::cleanSession($_POST['email']) ?? '';
 
             // Check rate limit
             Limiter::limit($email);
@@ -112,7 +113,7 @@ class Login extends Select
                     unset($data);
                 }
                 // I added the id because i need to set it as a session for the notification bar
-                msgSuccess(201, [
+                Utility::msgSuccess(201, [
                     'outcome' => "Account Validated",
                     'id' => $_SESSION['auth']['ID'],
                     'famCode' => $getFamCode['famCode'],
@@ -121,11 +122,11 @@ class Login extends Select
 
                 unset($_SESSION['auth']); // Clear only auth namespace
 
-                throw new UnauthorisedException('Your credential could not be verified');
+                throw new ForbiddenException('Your credential could not be verified');
             }
         } catch (\Throwable $th) {
 
-            showError($th);
+            Utility::showError($th);
         }
     }
 
@@ -140,7 +141,7 @@ class Login extends Select
         $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
-            msgException(406, 'We do not recognise your account');
+            throw new ForbiddenException('We do not recognise your account');
         }
 
         generateSendTokenEmail($data);  // send token to email 
@@ -200,7 +201,7 @@ class Login extends Select
             header("Location: $url");
             exit;
         } catch (\Throwable $e) {
-            \showError($e);
+            Utility::showError($e);
         }
     }
     // private function isRateLimited(string $email, string $ipAddress, int $maxAttempts, int $timeWindow): bool
