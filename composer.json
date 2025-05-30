@@ -51,13 +51,14 @@
     "ryangjchandler/blade-capture-directive": "^1.1",
     "eftec/bladeone": "^4.18",
     "intervention/image": "^3.11",
-    "waleolaogun/shared-lib": "^1.0"
+    "waleolaogun/shared-lib": "^1.5.3"
   },
   "require-dev": {
     "phpmd/phpmd": "^2.15.0",
     "vimeo/psalm": "^6.10.3",
     "psalm/attributes": "^0.1.0",
-    "phpstan/phpstan": "^2.1.16"
+    "phpstan/phpstan": "^2.1.16",
+    "friendsofphp/php-cs-fixer": "^3.75"
   },
   "bin-dir": [
     "local-php-security-checker"

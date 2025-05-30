@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
 
-  {{--  set base url  --}}
+  {{-- set base url  --}}
   @base
 
   <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
@@ -37,10 +37,10 @@
 
   <title>@yield('title')</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  
+
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
-  
+
 
   {{-- custom css --}}
   {{-- <link rel="stylesheet" href="/style.css">  --}}
@@ -52,7 +52,7 @@
 
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("APP_LOGO") }}>
 
-  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> 
+  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json">
 
 
   <style>
@@ -252,8 +252,8 @@
     <div class="content has-text-centered">
 
       <p>Website developed and maintained by Olawale Olaogun </p>
-<button id="subscribeButton">Subscribe to Notifications</button>
-   
+      <button id="subscribeButton">Subscribe to Notifications</button>
+
 
       <a href="@yield('data-page-id')" title="To Top">
         <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-bar-up" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -266,9 +266,10 @@
     </div>
   </div>
 
-  <script type="text/javascript" src="/public/manifest.js" defer></script>
-  <script type="text/javascript" src="/public/vendor.js" defer></script>
-  <script type="text/javascript" src="/public/index.js" defer></script>
+  <script type="text/javascript" src="/public/js/manifest.js" defer></script>
+  <script type="text/javascript" src="/public/js/vendor.js" defer></script>
+  <script type="text/javascript" src="/public/js/index.js" defer></script>
+  <script type="text/javascript" src="/public/js/shared-lib.js" defer></script>
 
 
 </body>
