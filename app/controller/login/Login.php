@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace App\Controller\login;
 
-use App\classes\{
-    CheckToken,
-    // Select,
-    // Recaptcha,
-    // Db,
+use Src\{
+    Select,
+    Recaptcha,
+    Db,
     Limiter,
-    // CorsHandler
+    CorsHandler,
+    Utility,
+    Token,
+    Sanitise\CheckSanitise as CleanUp
 };
-use App\shared\Exceptions\ForbiddenException;
-use App\Shared\{Recaptcha, CorsHandler, Db, Select, Utility};
+use Src\Exceptions\ForbiddenException;
 use App\model\AllMembersData as AllMembersDataModel;
 use Exception;
+use App\classes\CheckToken;
 
-
-
-class Login extends Select
+class Login
 {
-
     private const string ACCOUNT = 'account';
     private const string ADMIN = '/lasu';
     private const string LOGIN = '/login';
@@ -29,20 +28,20 @@ class Login extends Select
 
 
 
-    public function show()
+    public function show(): void
     {
         try {
 
             $formAction = self::LOGIN;
             $_SESSION['auth'][self::LOGIN_TYPE] = self::LOGIN;
-            return view('login', compact('formAction'));
+            view('login', compact('formAction'));
         } catch (\Throwable $e) {
 
             Utility::showError($e);
         }
     }
 
-    public function showAdmin()
+    public function showAdmin(): void
     {
         try {
             if (!isset($_SESSION['auth'])) {
@@ -51,7 +50,7 @@ class Login extends Select
 
             $formAction = self::ADMIN;
             $_SESSION['auth'][self::LOGIN_TYPE] = self::ADMIN;
-            return view('login', compact('formAction'));
+            view('login', compact('formAction'));
         } catch (\Throwable $e) {
 
             Utility::showError($e);
@@ -67,7 +66,7 @@ class Login extends Select
         try {
 
             //1.  token verified
-            CheckToken::tokenCheck(token: 'token');
+            // CheckToken::tokenCheck(token: 'token');
 
             $email = Utility::cleanSession($_POST['email']) ?? '';
 
@@ -82,25 +81,25 @@ class Login extends Select
                 'max' => [35, 65]
             ];
 
-            //3. sanitise the post data 
-            $sanitisedData = getSanitisedInputData($_POST, $minMaxData);
+            //3. sanitise the post data
+            $sanitisedData = CleanUp::getSanitisedInputData($_POST, $minMaxData);
 
             //4 check if email exist and get the database password
-            $data = useEmailToFindData(inputData: $sanitisedData);
+            $data = CleanUp::useEmailToFindData(inputData: $sanitisedData);
 
             $_SESSION['auth']['ID'] = $data['id']; // Use 'auth' namespace
 
-            //5. check password 
-            $validatePwd = checkPassword(inputData: $sanitisedData, databaseData: $data);
+            //5. check password
+            $validatePwd = CleanUp::checkPassword(inputData: $sanitisedData, databaseData: $data);
 
-            // GET THE FAMCODE 
+            // GET THE FAMCODE
 
             $getFamCode = AllMembersDataModel::getFamCode($data['id']);
 
             //4. control for login
             $detectIfAdminOrCustomer = $_SESSION['auth'][self::LOGIN_TYPE] ?? 0;
 
-            if ($data && $validatePwd) {
+            if (!empty($data) && $validatePwd) {
                 // Clear attempts on successful login
                 Limiter::$argLimiter->reset();
                 Limiter::$ipLimiter->reset();
@@ -137,24 +136,25 @@ class Login extends Select
             $_SESSION['auth']['rememberMe'] = true; // Use 'auth' namespace
         }
 
-        $query = parent::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
-        $checkAccountIsApproved = $this->selectFn(query: $query, bind: [$data['email'], 'approved']);
+        $query = Select::formAndMatchQuery(selection: 'SELECT_AND', table: self::ACCOUNT, identifier1: 'email', identifier2: "status");
+        $checkAccountIsApproved = Select::selectFn2(query: $query, bind: [$data['email'], 'approved']);
 
         if (!$checkAccountIsApproved) {
             throw new ForbiddenException('We do not recognise your account');
         }
 
-        generateSendTokenEmail($data);  // send token to email 
+        Token::generateSendTokenEmail($data);
+        // send token to email
         $_SESSION['auth']['login'] = true; // use at the code.php file
         unset($_SESSION['auth']['/loginType']); // not needed anymore
         session_regenerate_id();
     }
 
     /**
-     * 
-     * @param array $sanitisedData 
-     * @return void 
-     * @throws \Exception 
+     *
+     * @param array $sanitisedData
+     * @return void
+     * @throws \Exception
      */
 
     private function adminLogin(array $sanitisedData): void
@@ -163,14 +163,14 @@ class Login extends Select
 
         if ($getAdminCode === $sanitisedData['type']) {
 
-            $query = parent::formAndMatchQuery(
+            $query = Select::formAndMatchQuery(
                 selection: 'SELECT_COUNT_TWO',
                 table: self::ACCOUNT,
                 identifier1: 'type',
                 identifier2: "email"
             );
 
-            $outcome = $this->selectCountFn(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
+            $outcome = Select::selectCountFn2(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
             $outcome ??  msgException(406, "Your input is not recognised");
 
             $url0 = getenv("MIX_APP_URL2");
