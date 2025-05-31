@@ -50,7 +50,7 @@ class Login
 
             $formAction = self::ADMIN;
             $_SESSION['auth'][self::LOGIN_TYPE] = self::ADMIN;
-            view('login', compact('formAction'));
+            Utility::view('login', compact('formAction'));
         } catch (\Throwable $e) {
 
             Utility::showError($e);
@@ -66,7 +66,7 @@ class Login
         try {
 
             //1.  token verified
-            // CheckToken::tokenCheck(token: 'token');
+            CheckToken::tokenCheck(token: 'token');
 
             $email = Utility::cleanSession($_POST['email']) ?? '';
 
@@ -171,14 +171,14 @@ class Login
             );
 
             $outcome = Select::selectCountFn2(query: $query, bind: [$getAdminCode, $sanitisedData['email']]);
-            $outcome ??  msgException(406, "Your input is not recognised");
+            $outcome ??  Utility::msgException(406, "Your input is not recognised");
 
             $url0 = getenv("MIX_APP_URL2");
             $url = $url0 . "lasu";
             loggedDetection($url, $sanitisedData['email']);
             session_regenerate_id();
         } else {
-            msgException(406, "Invalid input - 2");
+            Utility::msgException(406, "Invalid input - 2");
         }
 
 

@@ -1,14 +1,20 @@
 <?php
+declare(strict_types=1);
 
-namespace App\classes\tables;
+namespace App\Classes\Tables;
 
 use PDOException;
-use App\classes\Insert;
+use App\Classes\Insert;
 
-class Work extends Insert
+final class Work extends Insert
 {
 
-    public function index()
+    /**
+     * Create the work table if it doesn't exist
+     *
+     * @return int|null Returns the number of affected rows or null on failure
+     */
+    public function index(): ?int
     {
         try {
             $sql = "CREATE TABLE IF NOT EXISTS  `family`.`work` (  
@@ -31,7 +37,9 @@ class Work extends Insert
             // use exec() because no results are returned
             return $conn->exec($sql);
         } catch (PDOException $e) {
-            echo $sql . "<br>" . $e->getMessage();
+            // Log the error instead of echoing it
+            error_log("Error creating work table: " . $e->getMessage());
+            return null;
         }
     }
 }

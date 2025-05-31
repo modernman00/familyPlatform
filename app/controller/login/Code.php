@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Controller\login;
 
-use App\classes\{
-    CheckToken,
+use Src\{
     Select,
     JwtHandler,
     CorsHandler,
-    Limiter
+    Limiter,
+    Utility
 };
-use App\Exceptions\NotFoundException;
+use Src\Exceptions\NotFoundException;
+use App\classes\CheckToken;
 
-class Code extends Select
+class Code
 {
     public string $table = 'account';
     public $email;
@@ -29,13 +30,13 @@ class Code extends Select
     {
 
         if ($_SESSION['auth']['login'] || $_SESSION['changePW']) {
-            return view('login/code');
+            Utility::view('login/code');
         }
 
 
 
         // Otherwise, show the general error view
-        return view('error/genError');
+        Utility::view('error/genError');
     }
 
 
@@ -44,17 +45,17 @@ class Code extends Select
         CorsHandler::setHeaders(); // Call the static method to set headers
         try {
 
-            $code = checkInput($_POST["code"]);
+            $code = Utility::checkInput($_POST["code"]);
 
             // this SESSION IS set in generateUpdateTableWithToken function in checkSanitise file
 
             $_SESSION['identifyCust'] ?? throw new NotFoundException("Hmm, we can't seem to find you - try again");
 
-            $this->memberId = checkInput($_SESSION['identifyCust']);
+            $this->memberId = Utility::checkInput($_SESSION['identifyCust']);
 
             if ((time() - ($_SESSION[self::TOKEN_SESSION])) > 1000) {
                 $diff = time() - $_SESSION[self::TOKEN_SESSION];
-                msgException(401, "Invalid or expired Token $diff");
+                Utility::msgException(401, "Invalid or expired Token $diff");
             }
 
             Limiter::limit($code);
@@ -65,7 +66,7 @@ class Code extends Select
 
             $result = Select::selectCountFn2($query, [$this->memberId, $code]);
 
-            $result ?? msgException(401, "There is a problem - check the Code");
+            $result ?? Utility::msgException(401, "There is a problem - check the Code");
 
             CheckToken::tokenCheck('token');
 
@@ -106,19 +107,19 @@ class Code extends Select
                 session_regenerate_id();
                 unset($_SESSION['login'], $_SESSION['id'], $_SESSION['rememberMe']);
 
-                msgSuccess(200, "Code authentication", $token);
+                Utility::msgSuccess(200, "Code authentication", $token);
 
                 unset($_SESSION['changePW']);
             } elseif ($_SESSION['changePW']) {
 
-                msgSuccess(200, "Code authentication");
+                Utility::msgSuccess(200, "Code authentication");
             } else {
 
-                msgException(401, "You are an alien");
+                Utility::msgException(401, "You are an alien");
             }
             // }
         } catch (\Throwable $th) {
-            showError($th);
+            Utility::showError($th);
         }
     }
 }

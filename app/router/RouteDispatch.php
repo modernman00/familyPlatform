@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\router;
 
-use App\Exceptions\NotFoundException;
+use Src\Exceptions\NotFoundException;
 
 use AltoRouter;
-use App\Exceptions\HttpExceptions;
-use PDOException;
-use Throwable;
+use Src\Exceptions\HttpException;
+
 
 class RouteDispatch
 {
@@ -41,7 +40,7 @@ class RouteDispatch
 
                 view('error.genError', ["error" => "Invalid URL"]);
             }
-        } catch (HttpExceptions $e) {
+        } catch (HttpException $e) {
             showError($e);
         }
     }

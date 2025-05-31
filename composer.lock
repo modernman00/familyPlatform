@@ -5369,16 +5369,16 @@
         },
         {
             "name": "waleolaogun/shared-lib",
-            "version": "v1.5.3",
+            "version": "v1.5.7",
             "source": {
                 "type": "git",
                 "url": "git@github.com:modernman00/shared-lib.git",
-                "reference": "1c2c97dccf6083433611e2c1d454a431a745b3f7"
+                "reference": "3580bc1c5ea7e058b9d1005a194aa7cd90c5cb78"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/1c2c97dccf6083433611e2c1d454a431a745b3f7",
-                "reference": "1c2c97dccf6083433611e2c1d454a431a745b3f7",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/3580bc1c5ea7e058b9d1005a194aa7cd90c5cb78",
+                "reference": "3580bc1c5ea7e058b9d1005a194aa7cd90c5cb78",
                 "shasum": ""
             },
             "require": {
@@ -5389,6 +5389,9 @@
                 "spatie/image-optimizer": "^1.6",
                 "sunspikes/clamav-validator": "^3.0",
                 "symfony/rate-limiter": "^7.2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.75"
             },
             "type": "library",
             "autoload": {
@@ -5407,10 +5410,10 @@
             ],
             "description": "\"Shared library for common functions and classes across projects\",",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.5.3",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.5.7",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2025-05-30T11:45:59+00:00"
+            "time": "2025-05-30T19:28:02+00:00"
         },
         {
             "name": "xenolope/quahog",
