@@ -2,14 +2,21 @@
 
 namespace App\Controller;
 
-use App\classes\{Update, Select};
+use App\controller\BaseController;
 use App\model\Post;
+use Src\LoginUtility;
+use Src\{Utility, Update, Select};
 
-class Index
+class Index extends BaseController
 {
     public function index(): void
     {
-        view('index');
+
+        try {
+            BaseController::viewWithCsp('index');
+        } catch (\Throwable $th) {
+            Utility::showError($th);
+        }
     }
 
 
@@ -19,17 +26,17 @@ class Index
      */
     function launch()
     {
-        view('launch');
+        BaseController::viewWithCsp('launch');
     }
 
     public function privacy(): void
     {
-        view('privacy');
+        BaseController::viewWithCsp('privacy');
     }
 
     public function terms(): void
     {
-        view('termOfUse');
+        BaseController::viewWithCsp('termOfUse');
     }
 
     public function accountSetting($id, $mobile, $email, $country, $famCode): void
@@ -48,7 +55,7 @@ class Index
 
 
         if ($_SESSION['id'] == $id) {
-            view('accountSetting', ['accountData' => $accountData]);
+            BaseController::viewWithCsp('accountSetting', ['accountData' => $accountData]);
         }
     }
 
@@ -68,7 +75,7 @@ class Index
             ]
         ];
 
-        $cleanData = getSanitisedInputData($_POST, $dataToCheck);
+        $cleanData = LoginUtility::getSanitisedInputData($_POST, $dataToCheck);
 
         $tableData = [
 
@@ -137,59 +144,55 @@ class Index
     }
 
     public static function checking()
-{
-    header('Content-Type: text/event-stream');
-    header('Cache-Control: no-cache');
-    header('Connection: keep-alive');
+    {
+        header('Content-Type: text/event-stream');
+        header('Cache-Control: no-cache');
+        header('Connection: keep-alive');
 
-       $maxDuration = 300; // 5 minutes
+        $maxDuration = 300; // 5 minutes
         $startTime = time();
 
-        while(true) {
-                $getUnpublishedPost = Post::getUnpublishedPost();
-                printArr($getUnpublishedPost);
-                echo ": heartbeat\n\n";
-
+        while (true) {
+            $getUnpublishedPost = Post::getUnpublishedPost();
+            printArr($getUnpublishedPost);
+            echo ": heartbeat\n\n";
         }
 
-     
 
-    // Infinite loop to keep the connection alive
-    // while (time() - $startTime < $maxDuration) {
-    //     // Check if the client has disconnected
-    //     if (connection_aborted()) {
-    //         break;
-    //     }
 
-    //     // // Fetch unpublished posts
-    //     // $getUnpublishedPost = Post::getUnpublishedPost();
+        // Infinite loop to keep the connection alive
+        // while (time() - $startTime < $maxDuration) {
+        //     // Check if the client has disconnected
+        //     if (connection_aborted()) {
+        //         break;
+        //     }
 
-    //     // foreach ($getUnpublishedPost as $post) {
-    //     //     $response = $post;
-    //     //     $postNo = $post['id'];
+        //     // // Fetch unpublished posts
+        //     // $getUnpublishedPost = Post::getUnpublishedPost();
 
-    //     //     // Send the event
-    //     //     self::msgServerSent(
-    //     //         data: $response,
-    //     //         id: $postNo,
-    //     //         event: 'updatePost'
-    //     //     );
+        //     // foreach ($getUnpublishedPost as $post) {
+        //     //     $response = $post;
+        //     //     $postNo = $post['id'];
 
-    //     // Post::updatePostByStatusAsPublished($postNo);
-    //     // }
+        //     //     // Send the event
+        //     //     self::msgServerSent(
+        //     //         data: $response,
+        //     //         id: $postNo,
+        //     //         event: 'updatePost'
+        //     //     );
 
-    //     // Sleep for a short time before the next iteration to prevent overloading
-     
+        //     // Post::updatePostByStatusAsPublished($postNo);
+        //     // }
 
-    //     // Send a heartbeat to keep the connection alive
-       
+        //     // Sleep for a short time before the next iteration to prevent overloading
+
+
+        //     // Send a heartbeat to keep the connection alive
+
         // ob_flush();
         // flush();
 
-    //        sleep(1);
-    // }
-}
-
-
-
+        //        sleep(1);
+        // }
+    }
 }

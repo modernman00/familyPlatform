@@ -18,6 +18,7 @@ use Src\Exceptions\ForbiddenException;
 use App\model\AllMembersData as AllMembersDataModel;
 use Exception;
 use App\classes\CheckToken;
+use App\Controller\BaseController;
 
 class Login
 {
@@ -34,7 +35,7 @@ class Login
 
             $formAction = self::LOGIN;
             $_SESSION['auth'][self::LOGIN_TYPE] = self::LOGIN;
-            view('login', compact('formAction'));
+            BaseController::viewWithCsp('login', compact('formAction'));
         } catch (\Throwable $e) {
 
             Utility::showError($e);
@@ -50,7 +51,7 @@ class Login
 
             $formAction = self::ADMIN;
             $_SESSION['auth'][self::LOGIN_TYPE] = self::ADMIN;
-            Utility::view('login', compact('formAction'));
+            BaseController::viewWithCsp('login', compact('formAction'));
         } catch (\Throwable $e) {
 
             Utility::showError($e);

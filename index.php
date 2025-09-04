@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+
 use App\router\RouteDispatch as dispatcher;
 
 require __DIR__ . "/app/config/init.php";

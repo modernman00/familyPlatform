@@ -12,15 +12,8 @@
       "App\\": "app/"
     },
     "files": [
-      "app/function/helper/helper.php",
-      "app/function/helper/email/sendEmail.php",
-      "app/function/helper/checkSanitise.php",
-      "app/function/helper/email.php",
-      "app/function/helper/security.php",
       "app/function/helper/Validate.php",
-      "app/function/helper/pdfConversion.php",
       "app/function/helper/optimiser.php",
-      "app/function/helper/date.php",
       "app/function/helper/submitDataHelper.php"
     ]
   },
@@ -32,26 +25,12 @@
   ],
   "require": {
     "php": "^8.3",
-    "cboden/ratchet": "^0.4.3",
-    "dompdf/dompdf": "^3.1.0",
     "ext-gd": "*",
     "vlucas/phpdotenv": "^5.6.2",
     "altorouter/altorouter": "^2.0",
-    "filp/whoops": "^2.7",
-    "phpmailer/phpmailer": "^6.5",
-    "firebase/php-jwt": "^6.11.1",
-    "tinify/tinify": "^1.5",
-    "rollbar/rollbar": "^4.1.3",
     "pusher/pusher-php-server": "^7.0",
-    "spatie/image-optimizer": "^1.6",
-    "sunspikes/clamav-validator": "^3.0",
-    "xenolope/quahog": "^3.0",
-    "cloudmersive/cloudmersive_virusscan_api_client": "^3.1",
-    "symfony/rate-limiter": "^7.2.0",
     "ryangjchandler/blade-capture-directive": "^1.1",
-    "eftec/bladeone": "^4.18",
-    "intervention/image": "^3.11",
-    "waleolaogun/shared-lib": "^1.5.3"
+    "modernman00/shared-lib": "^1.7"
   },
   "require-dev": {
     "phpmd/phpmd": "^2.15.0",

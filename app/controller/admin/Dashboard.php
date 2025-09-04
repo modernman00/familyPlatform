@@ -4,11 +4,20 @@ declare(strict_types=1);
 
 namespace App\Controller\admin;
 
-class Dashboard
+use App\Controller\BaseController;
+use Src\Utility;
+
+class Dashboard extends BaseController
 {
 
     public function index(): void
     {
-        view('admin/ReviewApps');
+        try {
+                parent::viewWithCsp('admin/ReviewApps');
+        } catch (\Throwable $th) {
+            Utility::showError($th);
+        }
+    
+  
     }
 }

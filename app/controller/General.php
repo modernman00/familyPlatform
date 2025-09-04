@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+use Src\ToSendEmail;
 
 use Exception;
 
@@ -27,7 +28,7 @@ class General
             'subject' => $data['subject'],
             'familyCode'=> $data['familyCode']
         ];
-        sendEmailGeneral($array, 'member');
+       ToSendEmail::sendEmailGeneral($array, 'member');
 
         echo json_encode(['message' => "Message sent to " . $data['data']['name']]);
 

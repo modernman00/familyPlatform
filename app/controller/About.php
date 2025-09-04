@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Controller;
+use Src\Utility;
 
 
 class About {
@@ -10,6 +11,11 @@ class About {
     public function index(): void
     {
        view('about');
+          try {
+            BaseController::viewWithCsp('about');
+        } catch (\Throwable $th) {
+            Utility::showError($th);
+        }
     }
 
 

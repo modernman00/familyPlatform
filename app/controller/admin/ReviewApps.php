@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace App\Controller\admin;
 
 use App\model\ReviewAppsData;
-use Exception;
-use App\classes\AllFunctionalities;
-use App\classes\Delete;
+use App\Controller\BaseController;
+use Src\Update;
+use Src\functionality\SendEmailFunctionality;
+use Src\DeleteFn;
 
 class ReviewApps extends ReviewAppsData
 {
     private $id;
-    private const REDIRECT = "Location: /admin/reviewApps";
+    private const REDIRECT = "/admin/reviewApps";
 
     // get the new application page 
     public function get()
     {
         $result = $this->index();
-        return view('admin/ReviewApps', ['result' => $result, 'no' => 1]);
+        BaseController::viewWithCsp('admin/ReviewApps', ['result' => $result, 'no' => 1]);
     }
 
     // once the $GET IS clicked, use this to get the customers data and set customers id as well
@@ -38,40 +39,23 @@ class ReviewApps extends ReviewAppsData
         return $data2;
     }
 
-
-    // // email functionality
-    /**
-     * @psalm-param 'admin'|'member' $emailRoute
-     */
-    private function toSendEmail(string $viewPath, array $data, string $subject, string $emailRoute)
-    {
-        // generate the data to send the email
-        $sendEmailArray = genEmailArray(
-            $viewPath,
-            $data,
-            $subject
-        );
-
-        // send the email
-        return sendEmailWrapper(var: $sendEmailArray, recipientType: $emailRoute);
-    }
     // // update the account status in the decision table 
     private function updateAccountStatus(string $acctStatus)
     {
-        $updateClass = new AllFunctionalities();
-        $checkUpdateStatus = $updateClass->update('account', 'status', $acctStatus, 'id', $this->id);
+        $accountUpdate = new Update('account');
+        $accountUpdate->updateTable(column: 'status', columnAnswer: $acctStatus, identifier: 'id', identifierAnswer: $this->id);
 
-       return $checkUpdateStatus ??= throw new Exception("Error Processing Request - account status");
+    //    return $checkUpdateStatus ??= throw new Exception("Error Processing Request - account status");
     }
 
     public function approve(): void
     {
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/approve", $data, "Membership Approval for {$data['firstName']}", 'member');
+            SendEmailFunctionality::email("msg/admin/approve",  "Membership Approval for {$data['firstName']}", $data, 'member');
 
             $this->updateAccountStatus('approved');
-            header(self::REDIRECT);
+            redirect(self::REDIRECT);
             exit;
         } catch (\Throwable $th) {
             showError($th);
@@ -82,17 +66,12 @@ class ReviewApps extends ReviewAppsData
     {
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/cancel", $data, "Loan application cancellation", 'member');
+            SendEmailFunctionality::email("msg/admin/cancel", "Loan application cancellation", $data,  'member');
             $this->updateAccountStatus('cancel');
 
-           
+            DeleteFn::deleteOneRow("contact", "id", $data['id']);
 
-            $deleteQuery = Delete::formAndMatchQuery(selection:"DELETE_ONE", table:"contact", identifier1:"id", limit:1);
-      
-
-            Delete::deleteFn($deleteQuery, [$data['id']]);
-
-            header(self::REDIRECT);
+            redirect(self::REDIRECT);
 
         } catch (\Throwable $th) {
             showError($th);
@@ -108,15 +87,12 @@ class ReviewApps extends ReviewAppsData
             $data = $this->getCustomerData();
       
             $data['email'] = 'application@loaneasyfinance.com';
-            $this->toSendEmail("msg/admin/delete", $data, "Delete App", 'admin');
+            SendEmailFunctionality::email("msg/admin/delete","Delete App", $data,  'admin');
             $this->updateAccountStatus('deleted');
 
-            // DELETE IT FROM THE CONTACT TABLE
-             $deleteQuery = Delete::formAndMatchQuery(selection:"DELETE_ONE", table:"contact", identifier1:"id", limit: "LIMIT 1");
+            DeleteFn::deleteOneRow("contact", "id", $data['id']);
 
-            Delete::deleteFn($deleteQuery, [$data['id']]);
-
-            header(self::REDIRECT);
+            redirect(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -126,9 +102,9 @@ class ReviewApps extends ReviewAppsData
     {
         try {
             $data = $this->getCustomerData();
-            $this->toSendEmail("msg/admin/decline", $data, 'Decision', 'member');
+            SendEmailFunctionality::email("msg/admin/decline",  'Decision', $data, 'member');
             $this->updateAccountStatus('declined');
-            header(self::REDIRECT);
+            redirect(self::REDIRECT);
         } catch (\Throwable $th) {
             showError($th);
         }

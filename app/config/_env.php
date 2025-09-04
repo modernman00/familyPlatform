@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Dotenv\Dotenv;
+use Src\LoggerFactory;
+
 // @sonar-disable-next-line php:S4833
 require_once __DIR__ . "/../../vendor/autoload.php";
 
@@ -10,5 +13,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 
 
 define('BASE_PATH', realpath(__DIR__ . '/../../'));
-$dotEnv = \Dotenv\Dotenv::createUnsafeImmutable(BASE_PATH);
+$dotEnv = Dotenv::createUnsafeImmutable(BASE_PATH);
 $dotEnv->load();
+
+$logger = LoggerFactory::createWithMailer();
