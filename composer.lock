@@ -1121,7 +1121,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v12.28.0",
+            "version": "v12.28.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -1726,16 +1726,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v1.7.1",
+            "version": "v1.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "c21b7ccec57888df252fd02b9d2831079e306ed3"
+                "reference": "601c0b857d0e8802a29cad0310b3b280e641fc6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/c21b7ccec57888df252fd02b9d2831079e306ed3",
-                "reference": "c21b7ccec57888df252fd02b9d2831079e306ed3",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/601c0b857d0e8802a29cad0310b3b280e641fc6f",
+                "reference": "601c0b857d0e8802a29cad0310b3b280e641fc6f",
                 "shasum": ""
             },
             "require": {
@@ -1781,10 +1781,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.7.1",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.7.2",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2025-09-03T22:54:02+00:00"
+            "time": "2025-09-04T23:28:45+00:00"
         },
         {
             "name": "monolog/monolog",
