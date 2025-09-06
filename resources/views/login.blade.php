@@ -6,10 +6,10 @@
 <div class="styleForm" style="margin-top: 2rem;">
 
   <img src={{ getenv('APP_LOGO')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
-  <form action="{{ $formAction }}" method="POST" class="login styleform_form" id="login" enctype="multipart/form-data">
+  <form action="{{ $formAction }}" method="POST" class="loginNow styleform_form" id="loginNow" enctype="multipart/form-data">
     <div id="setLoader" class="loader" style="display: none;">
     </div>
-    <div class="notification" id="login_notification" style="display: none;">
+    <div class="notification" id="loginNow_notification" style="display: none;">
 
       <p id="error"></p>
     </div>

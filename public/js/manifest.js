@@ -70,6 +70,16 @@
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/chunk prefetch function */
+/******/ 	(() => {
+/******/ 		__webpack_require__.F = {};
+/******/ 		__webpack_require__.E = (chunkId) => {
+/******/ 			Object.keys(__webpack_require__.F).map((key) => {
+/******/ 				__webpack_require__.F[key](chunkId);
+/******/ 			});
+/******/ 		}
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat get default export */
 /******/ 	(() => {
 /******/ 		// getDefaultExport function for compatibility with non-harmony modules
@@ -255,7 +265,20 @@
 /******/ 				}
 /******/ 		};
 /******/ 		
-/******/ 		// no prefetching
+/******/ 		__webpack_require__.F.j = (chunkId) => {
+/******/ 			if((!__webpack_require__.o(installedChunks, chunkId) || installedChunks[chunkId] === undefined) && !/^(\/js\/manifest|css\/main)$/.test(chunkId)) {
+/******/ 				installedChunks[chunkId] = null;
+/******/ 				var link = document.createElement('link');
+/******/ 		
+/******/ 				if (__webpack_require__.nc) {
+/******/ 					link.setAttribute("nonce", __webpack_require__.nc);
+/******/ 				}
+/******/ 				link.rel = "prefetch";
+/******/ 				link.as = "script";
+/******/ 				link.href = __webpack_require__.p + __webpack_require__.u(chunkId);
+/******/ 				document.head.appendChild(link);
+/******/ 			}
+/******/ 		};
 /******/ 		
 /******/ 		// no preloaded
 /******/ 		
