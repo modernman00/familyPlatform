@@ -8,18 +8,13 @@ use App\model\{
     SingleCustomerData,
     Post
 };
-
-use App\classes\{
-    Sanitise,
-    ProcessImg,
-    Insert,
-    VerifyToken,
+use Src\functionality\{
+    SignIn
 };
+use Src\{SubmitForm, FileUploader, LoginUtility};
+use App\controller\BaseController;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
+use App\classes\{ProcessImg};
 
 // use Pusher\Pusher;
 use App\model\AllMembersData as DataAll;
@@ -28,7 +23,7 @@ use App\model\AllMembersData as DataAll;
 
 use Exception;
 
-class ProfilePage extends ProcessImg
+class ProfilePage extends BaseController
 {
     /**
      * @var array|null
@@ -59,100 +54,47 @@ class ProfilePage extends ProcessImg
     private $getAllPics;
     private const REDIRECT = "Location: /member/ProfilePage";
 
-    public function __construct()
-    {
-        try {
-            unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
-
-            // GET MEMBER'S DATA
-            // GET MEMBER'S DATA
-            $this->id = checkInput($_SESSION['memberId'] ?? throw new Exception("Error Processing ID request", 1));
-
-            $setData = new SingleCustomerData;
-
-
-            $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
-
-            $this->memberData = $setData->getCustomerData($this->id, $table);
-
-            $getFamCode = checkInput($this->memberData['famCode']);
-            $_SESSION['famCode'] = $getFamCode;
-
-
-
-
-            // $rest = Post::getUnpublishedPost();
-
-            //  foreach($rest as $rest){
-            //     printArr($rest);
-            //  }
-
-
-
-            $this->friendRequestData = DataAll::getFriendRequestData($this->id, "Request sent");
-
-            //GET POST DATA 
-            $this->allPostData = Post::getAllPostProfilePics();
-
-            //GET ALL EVENTS DATA
-            $this->eventData = DataAll::getEventDataByFamCode($getFamCode);
-
-            //GET COMMENT DATA
-            $this->allCommentData = Post::getAllCommentProfilePics();
-
-            // POST AND ID
-            $this->post2Id = Post::postLink2Id($this->id);
-
-            $this->getAllPics = Post::getAllPostPics($this->id);
-        } catch (Exception $e) {
-            showError($e);
-        }
-    }
 
     public function index(): void
     {
-
+          unset($_SESSION['auth'], $_SESSION['imageUploadOutcome'], $_SESSION['token']);
         try {
-            if (!isset($_SESSION['loggedIn'])) {
 
-                header("location: /login");
+
+            $VerifyJWT = SignIn::verify();
+
+            if (!$VerifyJWT) {
+                redirect('/login');
             }
 
-            $_SESSION['id'] = $this->id;
-            $_SESSION['fName'] = $this->memberData['firstName'];
-            $_SESSION['lName'] = $this->memberData['lastName'];
-            $_SESSION['currentTime'] = time();
-
-            //  verify token
-
-            $tokenVerify = new VerifyToken();
-            $result = $tokenVerify->profilePage();
-
-            // if token is not verified
-
-            if (!$result) {
-                header("location: /login");
-                // $tokenErr = "Authentication failed";
-                // view('error/genError', ['error' => $tokenErr]);
-            }
+            $id = $VerifyJWT['id'] ?? throw new Exception("Error Processing ID request", 1);
+            $setData = new SingleCustomerData;
+            $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
+            $memberData = $setData->getCustomerData($id, $table);
+            $getFamCode = checkInput($memberData['famCode']);
+            $_SESSION['famCode'] = $getFamCode;
+            $friendRequestData = DataAll::getFriendRequestData($id, "Request sent");
+            $postLink2Id = Post::postLink2Id($id);
+            $pic2Id = Post::getAllPostPics($id);
+            $allData = Post::getAllPostProfilePics();
+            $commentProfilePics = Post::getAllCommentProfilePics();
+            $eventData = DataAll::getEventDataByFamCode($getFamCode);
 
 
-
-            view('member/profilePage', [
-                'data' => $this->memberData,
-                'allData' => $this->allPostData,
-                'comment' => $this->allCommentData,
-                'post2Id' => $this->post2Id,
-                'pics2Id' => $this->getAllPics,
-                'eventData' => $this->eventData,
-                'requestData' => $this->friendRequestData
+            parent::viewWithCsp('member/profilePage', [
+                'data' => $memberData,
+                'allData' => $allData,
+                'comment' => $commentProfilePics,
+                'post2Id' => $postLink2Id,
+                'pics2Id' => $pic2Id,
+                'eventData' => $eventData,
+                'requestData' => $friendRequestData
                 // 'comment2Post' => $this->comment2Post
             ]);
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            showError($th);
         }
     }
-
     /**
      * processPostData
      * 
@@ -178,21 +120,21 @@ class ProfilePage extends ProcessImg
         }
         // SANITISE THE POST 
         unset($_POST['post_img']);
-        $sanitise = new Sanitise(formData: $_POST);
-        $getSanitisePost = $sanitise->getCleanData();
+        $getSanitisePost = LoginUtility::getSanitisedInputData($_POST);
+
 
         // check if there are images in the post
         if ($_FILES) {
 
             if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
 
-                fileUploadMultiple(fileLocation: "public/img/post/", formInputName: 'post_img');
+                FileUploader::fileUploadMultiple(fileLocation: "public/img/post/", formInputName: 'post_img');
 
                 // create a file path name for the database
                 $image = $_FILES['post_img']['name'];
                 // create the post array for the post image
                 for ($i = 0; $i < count($image); $i++) {
-                     $name = str_replace(' ', '', $image[$i]);
+                    $name = str_replace(' ', '', $image[$i]);
                     $getSanitisePost["post_img$i"] = $name;
                 }
             }
@@ -222,11 +164,10 @@ class ProfilePage extends ProcessImg
     public function post(): void
     {
         try {
-            // header('Content-Type: text/event-stream');
-            // header('Cache-Control: no-cache');
+
             $getPost = $this->processPostData();
             $getPost['profileImg'] = Post::getProfilePicsById($getPost['id']);
-            Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
+            SubmitForm::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
             // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
 
@@ -242,17 +183,12 @@ class ProfilePage extends ProcessImg
     {
         try {
             $getComment = $this->processPostData();
-
             // get the profile pics of the commenter 
 
             $getComment['profileImg'] = Post::getProfilePicsById($getComment['id']);
 
-
-
-
-            Insert::submitFormDynamic('comment', $getComment);
+            SubmitForm::submitFormDynamic('comment', $getComment);
         } catch (\Throwable $th) {
-            returnErrorCode(401, $th);
             showError($th);
         }
     }
@@ -264,7 +200,8 @@ class ProfilePage extends ProcessImg
     {
         try {
             // process the image 
-            $this->processProfileImage();
+            $processImage = new ProcessImg();
+            $processImage->processProfileImage();
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -277,7 +214,7 @@ class ProfilePage extends ProcessImg
     {
         if ($_FILES) {
             if ($_FILES['photo']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
-                fileUploadMultiple("public/img/photos/", 'photo');
+                FileUploader::fileUploadMultiple("public/img/photos/", 'photo');
 
                 // create a file path name for the database
                 $image = $_FILES['photo']['name'];
@@ -289,8 +226,7 @@ class ProfilePage extends ProcessImg
                         'id' => checkInput($_SESSION['id']),
                         'where_from' => 'profile_upload_img'
                     ];
-                    $insertFile = new Insert();
-                    $insertFile->submitForm(table: 'images', field: $arrData);
+                    SubmitForm::submitForm(table: 'images', fields: $arrData);
                 }
             }
 

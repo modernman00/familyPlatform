@@ -3,6 +3,7 @@
 namespace App\classes;
 
 use App\classes\AllFunctionalities;
+use Src\{SubmitForm, FileUploader};
 
 
 class ProcessImg extends AllFunctionalities
@@ -17,8 +18,7 @@ class ProcessImg extends AllFunctionalities
                 
             }
         
-
-            fileUpload("public/img/profile/", 'profileImageFile');
+            FileUploader::fileUploadSingle("public/img/profile/", 'profileImageFile');
             // create a file path name for the database
             $fileName = checkInputImage($_FILES['profileImageFile']['name']);
 
@@ -34,11 +34,8 @@ class ProcessImg extends AllFunctionalities
                 'id' => checkInput($_SESSION['id'])
             ];
 
-        
-            $insertFile = new Insert();
-
             // insert the photo to the images table
-            $insertFile->submitForm('images', $data);
+            SubmitForm::submitForm('images', $data);
 
             // Update the profile_table
             $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));

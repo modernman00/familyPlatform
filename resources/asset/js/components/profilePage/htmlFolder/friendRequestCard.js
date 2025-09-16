@@ -1,4 +1,4 @@
-import {qSel} from '../../global'
+import { qSel } from '@shared'
 const appUrl = process.env.MIX_APP_URL2;
 const approverId = encodeURIComponent(localStorage.getItem('requesterId'))
 
@@ -10,28 +10,27 @@ export const friendRequestCard = (data) => {
   const lastName = encodeURIComponent(data.lastName ?? data.requesterLastName);
   const requestId = encodeURIComponent(data.id ?? data.requesterId);
   const requestCode = encodeURIComponent(data.famCode ?? data.requesterFamCode);
-  
+  const mutualFriends = '2 mutual friends';
+
 
   const html = `<p id=${requestId}_linkRequestCard></p>
 
+    <div class="d-flex align-items-center mb-3 friend-request-card">
+      <img src="${imageUrl}" alt="Avatar" class="avatar me-3><br>
 
-  <img src="${imageUrl}" alt="Avatar" style="width:50%"><br>
+        <div class="flex-grow-1">
+          <h6 class="mb-0">${firstName} ${lastName}</h6>
+          <small class="text-muted">${mutualFriends}</small>
+        </div>
+    </div>
 
-   <span>${firstName} ${lastName}</span>
+    <div class="friend-request-actions mb-3">
+
+              <a href="${appUrl}member/request/${requestId}/${approverId}/50/${requestCode}/pp" class="btn btn-sm btn-primary" title="confirm">Confirm</a>
 
 
-    <div class="w3-row w3-opacity">
-      <div class="w3-half">
-        <a href="${appUrl}member/request/${requestId}/${approverId}/50/${requestCode}/pp" style="text-decoration: none;">
-          <button class="w3-button w3-block w3-green w3-section" title="Accept"><i class="fa fa-check"></i></button>
-        </a>
-      </div>
-      
-      <div class="w3-half">
-        <a href="${appUrl}member/request/${requestId}/${approverId}/10" style="text-decoration: none;">
-          <button class="w3-button w3-block w3-red w3-section" title="Decline"><i class="fa fa-remove"></i></button>
-        </a>
-      </div>
+              <a href="${appUrl}member/request/${requestId}/${approverId}/10" class="btn btn-sm btn-outline-secondary" title="Decline">Decline</a>
+
     </div>
   `;
 

@@ -1,6 +1,6 @@
 
 import axios from 'axios'
-import { log, showError } from "../global"
+import { log, showError } from "@shared"
 const approverId = encodeURIComponent(localStorage.getItem('requesterId')) // means that the user currently working on the UI
 import { friendRequestCard } from './htmlFolder/friendRequestCard';
 
@@ -48,6 +48,39 @@ const countFriendRequest = (friend) => {
 // Fetch and render friend requests on page load
 
    fetchFriendRequests();
+
+
+         
+        // Friend Request Actions
+        const confirmRequestButtons = document.querySelectorAll('.confirm-request');
+        const deleteRequestButtons = document.querySelectorAll('.delete-request');
+        
+        confirmRequestButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.card-body');
+                const alert = document.createElement('div');
+                alert.className = 'alert alert-success';
+                alert.textContent = 'Friend request confirmed!';
+                card.innerHTML = '';
+                card.appendChild(alert);
+                
+                // Update notification badge
+                updateNotificationBadge(-1);
+            });
+        });
+        
+        deleteRequestButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.card');
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                    // Update notification badge
+                    updateNotificationBadge(-1);
+                }, 300);
+            });
+        });
+
 
 
 

@@ -9,11 +9,10 @@ use Src\functionality\{
 
     PasswordResetFunctionality,
 };
-use Src\Utility;
+
 
 class PassChange extends BaseController
 {
-    public string $table = 'account';
 
     public function show(): void
     {

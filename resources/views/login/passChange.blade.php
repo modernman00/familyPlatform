@@ -1,42 +1,39 @@
-@extends ('baseBulma')
-@section('title', 'Change Password')
+@extends('baseBulmaForm')
+@section('title', 'forgot_password')
 @section('content')
 
-<div class="styleForm" style="margin-top: 4rem;">
 
-  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
-    
+    <div class="styleform_header">
+        <h3>Please, enter the changePW to verify your identity</h3>
+    </div>
+
+
     <hr class="my-2">
-    
-    <form action="/login/changePW" id="changePassword" method="post" class="styleform_form">
-
-            <h3 >Please, enter your new password</h3>
-        <p id="changePasswordErr"></p>
+    <form action="" id="changePW" class="styleform_form changePW">
         <div class="form-group">
             <br>
             <div class='row'>
-                {{-- <input type="hidden" id="email_id" placeholder="alex@gmail.com" class="input email is-medium" autocomplete="username" name="email" value=""> --}}
 
-                <?php
+                @php
 
                     $formArray = [
-                        'changePassword_notification' => 'showError',
+                        'changePW_notification' => 'showError',
                         'password' => 'password',
                         'confirm_password' => 'password',
                         'token' => 'token',
-                        'button' => 'submit'                        
+                           'submit' => 'button',    
+                           'showPassword' => 'showPassword'                    
                     ];
 
-                    $form = new App\classes\BuildFormBulma($formArray);
+                     $form = new Src\BuildFormBulma($formArray);
                     $form->genForm();
 
-                ?>
+                 @endphp
+
                 <br>
 
-            </div>
 
     </form>
 
-    </div>
 
 @endsection

@@ -1,45 +1,38 @@
-@extends ('baseBulma')
-@section('title', 'Code')
+@extends('baseBulmaForm')
+@section('title', 'Token')
 @section('content')
 
-<div class="styleForm" style="margin-top: 4rem;">
 
-  <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo">
-
-<div class="styleform_header">
-      <h3>
-        Please, enter the CODE to verify your identity
-    </h3>
-
-</div>
-
+    <div class="styleform_header">
+        <h3>Please, enter the code to verify your identity</h3>
+    </div>
 
 
     <hr class="my-2">
-    <form action="" method="post" class="styleform_form" id="codeForm" class="codeForm">
+    <form action="" id="code" method="post" class="styleform_form code">
         <div class="form-group">
             <br>
             <div class='row'>
-                
-                <?php
+
+                @php
 
                     $formArray = [
-                        "codeForm_notification"=> "showError",
+                        "code_notification"=> "showError",
                         'code' => 'text',
                         'token' => 'token',
-                        'button' => 'submit'
+                          'submit' => 'button',
                     ];
 
                     $form = new App\classes\BuildFormBulma($formArray);
                     $form->genForm();
 
-                ?>
+                 @endphp
+
                 <br>
 
-            </div>
 
     </form>
-</div>
+
 
 
 

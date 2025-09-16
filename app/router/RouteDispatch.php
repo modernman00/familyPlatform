@@ -38,7 +38,7 @@ class RouteDispatch
                 }
             } else {
 
-                view('error.genError', ["error" => "Invalid URL"]);
+                 view('error.404');
             }
         } catch (HttpException $e) {
             showError($e);

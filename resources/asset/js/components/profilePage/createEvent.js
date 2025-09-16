@@ -11,10 +11,18 @@ const formInput = document.querySelectorAll('.eventModalForm');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
+const cancelModal = () => {
 
-const displayNone = () => id('id_event_modal').style.display = 'none'
+    const displayNone = () => id('id_event_modal').style.display = 'none'
 
-id('cancelModal').addEventListener('click', displayNone)
+    id('cancelModal').addEventListener('click', displayNone)
+
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cancelModal);
+}
+
 
 /**
  * Filters events by family code (famCode) to ensure only relevant events are shown
@@ -78,7 +86,13 @@ const process = async (e) => {
 
 }
 
-id('submitEventModal').addEventListener('click', process)
+
+
+   if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        id('submitEventModal').addEventListener('click', process)
+    });
+  }
 
 
 

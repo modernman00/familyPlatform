@@ -8,7 +8,7 @@ export const showPostImg = (data) => {
   const picsImgHtml = (imgElement, i, postNo) => `
     <a href="/profilepage/img?dir=img&pics=${imgElement}&pID=${postNo}&path=post">
       <div class="w3-half">
-        <img src="/public/img/post/${imgElement}" style="width:100%" alt="images${i}" class="w3-margin-bottom w3-hover-sepia" id="postImage${i}">
+        <img src="/public/img/post/${imgElement}" style="width:100%" alt="images${i}" class="img-fluid mb-3" id="postImage${i}" >
       </div>
     </a>
   `;
@@ -16,9 +16,8 @@ export const showPostImg = (data) => {
   const imgElements = postImagesWithValues.map((pics, i) => picsImgHtml(pics, i, data.post_no)).join('');
 
   return `
-    <div class="w3-row-padding" style="margin:0 -16px">
+
       ${imgElements}
-      <br>
-    </div>
+
   `;
 };

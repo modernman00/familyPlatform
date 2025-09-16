@@ -39,7 +39,7 @@ class Post extends Select
         return $result[0];
     }
 
-    static function postLink2Id(string $id): array|int|string
+    static function postLink2Id(string|int $id): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
@@ -92,7 +92,7 @@ class Post extends Select
      * @param [type] $custNo this is the id
      *  get the
      */
-    public static function getAllPostPics(string $custNo): array|int|string
+    public static function getAllPostPics(string|int $custNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);

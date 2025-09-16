@@ -1,7 +1,99 @@
 'use strict';
-import { qSel, showError } from './components/global';
+import { showError , log} from '@modernman00/shared-js-lib';
 
-import { log } from '@shared'; // to make the bulma navbar menu visible on mobile
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const routeMap = {
+    '/register': {
+      module: () => import(/* webpackChunkName: 'register' */ './components/register/'),
+      hide: ['.signUp'], // Hide signup navbar
+    },
+    '/allMembers': {
+      module: () => import(/* webpackChunkName: 'all_members' */ './components/allMembers/'),
+      hide: ['.allMemberNav'], // Hide allMembers navbar
+    },
+    '/login': {
+      
+      module: () => import(/* webpackChunkName: 'login' */ './components/acctMgt/login.js'),
+      hide: ['.login'], // Hide login navbar
+    },
+    '/lasu': {
+      module: () => import(/* webpackChunkName: 'lasu' */ './components/acctMgt/admin.js'),
+      hide: ['.login'], // Same login module as /login
+    },
+    '/forgot': {
+      module: () => import(/* webpackChunkName: 'forgotPwd' */ './components/acctMgt/forgot.js'),
+      hide: ['.signup_login'], // Hide login/signup navbar
+    },
+    '/code': {
+      module: () => import(/* webpackChunkName: 'code' */ './components/acctMgt/code.js'),
+      hide: ['.signup_login'], // Hide login/signup navbar
+    },
+    '/profilePage': {
+      module: () => import(/* webpackChunkName: 'profilePage' */ './components/profilePage/'),
+      hide: ['.profilePageNav'], // Hide profile page navbar
+    },
+    '/changePW': {
+      module: () => import(/* webpackChunkName: 'changePW' */ './components/acctMgt/changePW.js'),
+      hide: ['.login', '.signUp'], // Hide login and signup navbars
+    },
+    '/profilepage/img': {
+      module: () => import(/* webpackChunkName: 'img' */ './components/profilePage/imgViewer'),
+    },
+    '/createFamilyCode': {
+      module: () => import(/* webpackChunkName: 'familyCode' */ './components/register/familyCode'),
+    },
+    '/register/nextStep': {
+      hide: ['.login', '.signUp'], // No module, just hide navbars
+    },
+    '/organogram': {
+      module: () => import(/* webpackChunkName: 'organogram' */ './components/familyTree/index.js'),
+      hide: ['.familyTreeNav'], // Hide family tree navbar
+    },
+    '/allMembers/getProfile': {
+      // Module import commented out — placeholder for future logic
+      hide: ['.familyTreeNav', '.notification_count'], // Hide navbars
+    },
+  };
+
+  // Support for dynamic route matching
+  if (checkURL('accountSetting')) {
+    routeMap['/accountSetting'] = {
+      module: () => import(/* webpackChunkName: 'accountSetting' */ './components/accountSetting'),
+    };
+  }
+
+  try {
+    const path = window.location.pathname;
+    const route = routeMap[path];
+
+    if (!route) {
+      throw new Error(`Unhandled route: ${path}`);
+    }
+
+    // Hide specified nav elements
+    if (route.hide) {
+      route.hide.forEach((selector) => {
+        const el = document.querySelector(selector);
+        if (el) el.style.display = 'none';
+      });
+    }
+
+    // Load module if defined
+    if (route.module) {
+      route.module()
+        .then((mod) => mod.default)
+        .catch((err) => {
+          showError(err);
+          throw new Error(`Failed to load module for ${path}: ${err.message}`);
+        });
+    }
+  } catch (error) {
+    showError(error);
+    throw error;
+  }
+});
 
 /**
  * Tests if the current URL matches the given route.
@@ -33,132 +125,4 @@ try {
   });
 } catch (error) {
   showError(error);
-}
-
-// Get all "navbar-burger" elements
-
-if (window.location.pathname === '/register') {
-  qSel('.signUp').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'register' */
-    /* webpackPrefetch: true */
-    './components/register/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/allMembers') {
-  qSel('.allMemberNav').style.display = 'none'; //allMemberNav
-
-  import(
-    /* webpackChunkName: 'all_members' */
-    /* webpackPrefetch: true */
-    './components/allMembers/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (
-  window.location.pathname === '/login' ||
-  window.location.pathname === '/lasu'
-) {
-  qSel('.login').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'login' */
-    /* webpackPrefetch: true */
-    './components/login/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/login/forgot') {
-  qSel('.signup_login').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'forgotPwd' */
-    /* webpackPrefetch: true */
-    './components/forgotPwd/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/login/code') {
-  qSel('.signup_login').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'code' */
-    /* webpackPrefetch: true */
-    './components/generateCode/Code'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/member/ProfilePage') {
-  qSel('.profilePageNav').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'profilePage' */
-    /* webpackPrefetch: true */
-    './components/profilePage/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/login/changePW') {
-  qSel('.login').style.display = 'none'; // navbar mgt
-  qSel('.signUp').style.display = 'none'; // navbar mgt
-  // qSel('#loader').style.display ="none" // loader
-  import(
-    /* webpackChunkName: 'changePW' */
-    /* webpackPrefetch: true */
-    './components/changePW/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/profilepage/img') {
-  // qSel('.login').style.display ="none" // navbar mgt
-  import(
-    /* webpackChunkName: 'img' */
-    /* webpackPrefetch: true */
-    './components/profilePage/imgViewer'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/createFamilyCode') {
-  import(
-    /* webpackChunkName: 'familyCode' */
-    /* webpackPrefetch: true */
-    './components/register/familyCode'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/register/nextStep') {
-  qSel('.login').style.display = 'none'; // navbar mgt
-  qSel('.signUp').style.display = 'none'; // navbar mgt
-} else if (checkURL('accountSetting')) {
-  import(
-    /* webpackChunkName: 'accountSetting' */
-    /* webpackPrefetch: true */
-    './components/accountSetting'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/organogram') {
-  qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
-
-  import(
-    /* webpackChunkName: 'organogram' */
-    /* webpackPrefetch: true */
-    './components/familyTree/index.js'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
-} else if (window.location.pathname === '/allMembers/getProfile') {
-  qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
-  qSel('.notification_count').style.display = 'none'; // navbar mgt
-
-  // import (
-  // import { setCookie } from '../../../node_modules/y/Cookie';
-  /* webpackChunkName: 'getProfile' */
-  //     /* webpackPrefetch: true */
-  //     './components/familyTree/index.js'
-  // )
-  // .then((module) => module.default)
-  //     .catch((err) => showError(err))
 }

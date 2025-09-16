@@ -38,9 +38,11 @@ function myFunction(id) {
 
 
 </script>
-   <script type="text/javascript" src="/public/manifest.js" defer></script>
-  <script type="text/javascript" src="/public/vendor.js" defer></script>
-  <script type="text/javascript" src="/public/index.js" defer></script>
+     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js"></script>
+
+    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/manifest.js"></script>
+
+    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/vendor.js"></script>
       
 <script>
 

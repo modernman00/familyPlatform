@@ -7,7 +7,7 @@
 @section('content')
 <p>
 @if ($data)
-    Please use this token {{ $data['token'] }} to login to your account within the next ten minutes. <br><br>
+    Please use this token {{ $data['code'] }} to login to your account within the next ten minutes. <br><br>
 @else 
     There is a problem with the authentication.
 @endif

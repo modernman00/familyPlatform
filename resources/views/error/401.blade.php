@@ -1,0 +1,5 @@
+@extends('errors.base')
+@section('title', 'Unauthorized')
+@section('code', '401')
+@section('message', 'You are not authorized to access this page.')
+@section('details', 'Please log in with the correct credentials or contact support.') 

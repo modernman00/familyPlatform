@@ -28,7 +28,7 @@
       <span class="nav-link-text">All Members</span>
     </a>
 
-        <a href="/member/ProfilePage" class="w3-hide-small w3-mobile w3-bar-item w3-button nav-link profilePageNav" title="My page">
+        <a href="/profilePage" class="w3-hide-small w3-mobile w3-bar-item w3-button nav-link profilePageNav" title="My page">
       <i class="fa fa-user"></i>
       <span class="nav-link-text">My Page</span>
     </a>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Sign Out -->
-    <a href="/signout" class="w3-bar-item w3-button sign-out-btn w3-right" title="Sign out">
+    <a href="signout/login" class="w3-bar-item w3-button sign-out-btn w3-right" title="Sign out">
       <i class="fa fa-sign-out-alt"></i>
       <span class="w3-hide-small">Sign Out</span>
     </a>

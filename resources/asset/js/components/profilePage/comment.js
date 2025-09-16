@@ -3,25 +3,32 @@ import { id, log } from "../global";
 
 export const commentHTML = (data) => {
 
-  const {profileImg, date_created, img, comment, comment_no} = data
+  const {profileImg, fullName, date_created, img, comment, comment_no} = data
 
   const imgURL = profileImg || img 
 
   
   const image = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
 
-  return `<div class='w3-ul w3-border w3-round' id='comment${comment_no}' name='commentDiv'>
-            <div class='w3-container commentDiv'>
-              <img src='${image}' alt='Avatar' class='w3-left w3-circle w3-margin-right commentImg' style='width:50px; height:50px'>
-              <p class='w3-right w3-opacity commentTiming' datetime='${date_created}' title='${date_created}'> ${format(date_created)} </p> 
-              <p class='commentFont'> ${comment}</p>
-            </div>
+  return `<div class='d-flex mb-3 commentDiv' id='comment${comment_no}' name='commentDiv'>
+         
+      <img src='${image}' alt='Avatar' class="rounded-circle me-2 commentImg" width="32" height="32">
+
+              <div class="flex-grow-1">
+                <div class="comment">
+                  <strong> ${fullName}</strong>
+                  ${comment}  
+                  <small class='w3-right w3-opacity commentTiming' datetime='${date_created}' title='${date_created}'> ${format(date_created)} 
+                  </small> 
+                  </div>
+              </div>
+         
           </div>`
 }
 
 export const showComment = (comment) => {
   if (!comment) {
-    return `<div class="w3-ul w3-border" id="comment" name="commentDiv"></div>`;
+    return `<div id="comment" name="commentDiv"></div>`;
   } // only run if there is comment
 
 
@@ -56,6 +63,24 @@ export const appendNewComment = (commentData) => {
   commentContainer.insertAdjacentHTML('beforeend', commentHtml)
 
 
+}
+
+export const writeComment = (postNo) => {
+  return ` 
+    <form action="/postCommentProfile" 
+      id="formComment${postNo}" 
+    >
+          <div class="mt-3">
+              <div class="input-group">
+                <input type="text" class="form-control" 
+                id="inputComment${postNo}" placeholder="Write a comment...">
+
+                <button class="btn btn-outline-primary" type="button" id="inputComment${postNo}" name="inputComment">Post</button>
+
+              </div>
+          </div>
+    </form>
+    `
 }
 
 

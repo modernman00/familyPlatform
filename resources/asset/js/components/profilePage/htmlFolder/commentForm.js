@@ -1,35 +1,40 @@
-export const commentForm = (data) => {
-  const { post_no } = data
-  return ` <p id="formComment${post_no}_notification"></p>
+export const commentForm = ({ post_no }) => {
+  return `
+    <p id="formComment${post_no}_notification"></p>
 
-  <form 
-    action="/postCommentProfile" 
-    method="post" id="formComment${post_no}" 
-    style="display:none" 
-    enctype="multipart/form-data">
+    <form 
+      action="/postCommentProfile" 
+      method="post" 
+      id="formComment${post_no}" 
+      style="display:none" 
+      enctype="multipart/form-data"
+      class="mb-4"
+    >
 
-    <input 
-      name='post_no' 
-      type="hidden" 
-      name="${post_no}" 
-      value=${post_no} />
+      <input 
+        type="hidden" 
+        name="post_no" 
+        value="${post_no}" 
+      />
 
-    <input 
-      class="w3-input w3-border w3-round-large inputComment" 
-      type="text" 
-      placeholder="Write a comment"
-      id="inputComment${post_no}" 
-      value = "" name='comment'>
+      <input 
+        type="text" 
+        class="form-control form-control-sm rounded-pill inputComment" 
+        placeholder="Write a comment" 
+        id="inputComment${post_no}" 
+        name="comment" 
+        value=""
+      />
 
-    <br>
-
-    <button 
-      type='submit' 
-      id="submitComment${post_no}" 
-      class="w3-button w3-green submitComment">
-        Submit
-    </button>
-    
-    <br><br>
-  </form>`
-}
+      <div class="mt-3">
+        <button 
+          type="submit" 
+          id="submitComment${post_no}" 
+          class="btn btn-success btn-sm submitComment"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  `;
+};

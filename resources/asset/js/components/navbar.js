@@ -6,6 +6,20 @@ import { toSentenceCase } from "./helper/general"
 import axios from "axios"
 // import { html } from './profilePage/html';
 
+ 
+        // Update notification badge
+        function updateNotificationBadge(change) {
+            const badge = document.querySelector('.notification-badge');
+            let count = parseInt(badge.textContent);
+            count += change;
+            if (count <= 0) {
+                badge.style.display = 'none';
+            } else {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+            }
+        }
+
 
 const postAgoNotification = (date) => {
     return `

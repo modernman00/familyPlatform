@@ -28,7 +28,7 @@ class SingleCustomerData extends InnerJoin
 	 * ONLY USE THIS FUNCTION TO GET A SINGLE STATE
 	 * @return array
 	 */
-	public function getCustomerData(string $custId, array $table): array | bool
+	public function getCustomerData(string|int $custId, array $table): array | bool
 	{
 		try {
 			$para = "id";

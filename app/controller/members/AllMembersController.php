@@ -3,12 +3,10 @@
 declare(strict_types=1);
 
 namespace App\Controller\members;
-
-
-use App\classes\{
+use Src\{
     Select,
-    VerifyToken,
-    Delete
+    Delete,
+    functionality\SignIn
 };
 use App\model\AllMembersData;
 use Exception;
@@ -25,22 +23,17 @@ class AllMembersController extends AllMembersData
         }
     }
 
-    public function processApiData(): void
+      public function processApiData(): void
     {
         try {
-            $id = checkInput($_GET['id']);
-            $tokenVerify = new VerifyToken();
-
-            $tokenConfirm = $tokenVerify->profilePage();
-
-            if (!$tokenConfirm) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
-            }
+            $VerifyJWT = SignIn::verify('users');
+            if ($VerifyJWT) {
+                $id = $VerifyJWT['id'];
 
             $result = $this->getAllMembers($id);
 
             echo json_encode($result);
+            }
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -68,20 +61,16 @@ class AllMembersController extends AllMembersData
     //     die();
     // }
     // /allMembers/setProfile?id
-    public function getProfile($id): void
+        public function getProfile($id): void
     {
         try {
             //  verify token
-            $tokenVerify = new verifyToken();
-            $result = $tokenVerify->profilePage();
-
+            $VerifyJWT = SignIn::verify();
             // if token is verified
 
-            if (!$result) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
+            if (!$$VerifyJWT) {
+               \redirect($_ENV['401URL']);
             }
-
             $id = checkInput($id);
             $result = $this->getAllMembersById($id);
             if (!$result) {
