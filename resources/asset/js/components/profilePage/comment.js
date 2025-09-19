@@ -1,5 +1,5 @@
 import { format } from "timeago.js"
-import { id, log } from "../global";
+import { toSentenceCase, id} from "@shared"
 
 export const commentHTML = (data) => {
 
@@ -16,7 +16,7 @@ export const commentHTML = (data) => {
 
               <div class="flex-grow-1">
                 <div class="comment">
-                  <strong> ${fullName}</strong>
+                  <strong> ${toSentenceCase(fullName)} </strong> 
                   ${comment}  
                   <small class='w3-right w3-opacity commentTiming' datetime='${date_created}' title='${date_created}'> ${format(date_created)} 
                   </small> 

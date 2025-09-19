@@ -31,5 +31,7 @@
         }
     ],
     "http.systemCertificates": false,
-    "intelephense.environment.phpVersion": "8.4.5"
+    "intelephense.environment.phpVersion": "8.4.5",
+    "fiveServer.php.executable": "/opt/homebrew/bin/php",
+    "fiveServer.injectBody": true
 }

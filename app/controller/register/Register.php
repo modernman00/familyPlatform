@@ -123,11 +123,11 @@ class Register extends Db
 
                 //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
 
-                $kidsCount = (int) $cleanData['kids'];
-                $siblingsCount = (int) $cleanData['siblings'];
+                $kidsCount = (int) $cleanData['children'];
+                $siblingsCount = (int) $cleanData['sibling'];
 
                 if ($kidsCount > 0) {
-                    processKidSibling('kid', $kidsCount, $cleanData);
+                    processKidSibling('children', $kidsCount, $cleanData);
                 }
 
                 if ($siblingsCount > 0) {

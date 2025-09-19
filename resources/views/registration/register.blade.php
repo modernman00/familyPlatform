@@ -69,7 +69,7 @@
   'placeholder' => ['marital status', "gender",'maiden name'],
   'inputType' => ['select','select', 'text'],
   'options' => [
-  ['select', 'Yes', 'No'],
+  ['select', 'Married', 'Single', 'Divorced', 'Seperated', 'Widowed'],
   ['select', 'Male', 'Female'],
   ],
   'icon' => [
@@ -83,7 +83,7 @@
   'spouse' => [
   'mixed',
   'label' => ["Spouse's name", "Spouse's Email","Spouse's mobile"],
-  'attribute' => ['spouseName', 'spouseEmail', 'spouseMobile'],
+  'attribute' => ['spouse_name', 'spouse_email', 'spouse_mobile'],
   'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089'],
   'inputType' => ['text','email', 'text'],
   'icon' => [
@@ -101,7 +101,7 @@
   'mother' => [
   'mixed',
   'label' => ["mother's name", "mother's email", "mother's mobile"],
-  'attribute' => ['motherName', 'motherEmail','motherMobile'],
+  'attribute' => ['mother_name', 'mother_email','mother_mobile'],
   'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089'],
   'inputType' => ['text', 'email', 'text'],
   'icon' => [
@@ -116,7 +116,7 @@
   'father' => [
   'mixed',
   'label' => ["Father's name", "Father's email", "Father's mobile"],
-  'attribute' => ['fatherName','fatherEmail', 'fatherMobile' ],
+  'attribute' => ['father_name','father_email', 'father_mobile' ],
   'placeholder' => ['Yommy Olaogun',"yomi@email.com", '447809789098'],
   'inputType' => ['text', 'text', 'text'],
   'icon' => [
@@ -133,7 +133,7 @@
   'childrenAndSiblings' => [
   'select-many',
   'label' => ['Numbers of children', 'Number of Siblings'],
-  'attribute' => ['kids', 'siblings'],
+  'attribute' => ['children', 'sibling'],
   // 'inputType' => ['select', 'select'],
   'options' => [
   ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],

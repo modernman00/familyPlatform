@@ -10,7 +10,7 @@
                     <form>
                         <div class="text-center mb-4">
                             <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile" class="rounded-circle mb-3" width="100" height="100">
-                            <button type="button" class="btn btn-outline-primary btn-sm d-block mx-auto">Change profile picture</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm d-block mx-auto">Change Avatar</button>
                         </div>
                         
                         <div class="row mb-3">
@@ -31,23 +31,18 @@
                         
                         <div class="mb-3">
                             <label for="location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="location" value="{{$data['country']}}">
+                            <input type="text" class="form-control" id="location" value="{{$data['location']}}">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="text" class="form-control" id="email" value={{$data['email']}}>
-                        </div>
-
-                          <div class="mb-3">
-                            <label for="mobile" class="form-label">mobile</label>
-                            <input type="text" class="form-control" id="mobile" value={{$data['mobile']}}>
+                            <label for="work" class="form-label">Work</label>
+                            <input type="text" class="form-control" id="work" value="Senior Developer at TechCorp">
                         </div>
                         
-                        {{-- <div class="mb-3">
+                        <div class="mb-3">
                             <label for="education" class="form-label">Education</label>
                             <input type="text" class="form-control" id="education" value="Stanford University">
-                        </div> --}}
+                        </div>
                         
                         <div class="mb-3">
                             <label for="relationship" class="form-label">Relationship Status</label>

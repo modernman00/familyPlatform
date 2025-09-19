@@ -1,65 +1,53 @@
-@extends ('layouts.w3s_member')
-@section('title', 'All members')
-@section('data-page-id', 'allMemberPage')
+@extends('layouts.profileBase')
+@section('title', 'All Members')
+@section('data-page-id', 'allMembers')
+@push('styles')
+    <link rel="stylesheet" href="public/css/showMembers.css">
+@endpush
 @section('content')
 
-<style>
-.member-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
 
-/* Add to your styles */
-@media (prefers-color-scheme: dark) {
-  .w3-card, .w3-white {
-    background-color: #1d2226 !important;
-    color: #e4e6eb !important;
-  }
-  .w3-text-black { color: #e4e6eb !important; }
-  .w3-text-gray { color: #a0a4a8 !important; }
-  .w3-light-grey { background-color: #2d3b44 !important; }
-  .w3-hover-shadow:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important; }
-}
+    <!-- Header Section -->
+    <div class="members-header text-center">
+        <div class="container">
+            <h1 class="display-5 fw-bold">Meet Our Members</h1>
+            <p class="lead">Connect with amazing people from around the world</p>
+            <div class="mt-4">
+                <span class="badge bg-light text-dark me-2">256+ Members</span>
+                <span class="badge bg-light text-dark me-2">15+ Countries</span>
+                <span class="badge bg-light text-dark">50+ Professions</span>
+            </div>
+        </div>
+    </div>
 
-/* Custom CSS for perfect LinkedIn styling */
-</style>
+    <!-- Main Content -->
+    <div class="members-container">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group mb-2">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input class="form-control" type="search" placeholder="Search members by name"
+                            aria-label="Search" id="searchFamily" name="searchFamily">
 
+                    </div>
+                </div>
 
-<br>
-
-<div class="w3-container w3-content" style="max-width:1400px;margin-top:40px">
-
-        <div class="w3-card w3-white w3-round-large w3-padding" style="margin-bottom:20px">
-                <form class="w3-container">
-                        <div class="w3-row">
-                                <div class="w3-col s10 m11">
-                                        <input type="text" placeholder="Search the family network..."
-                                                name="searchFamily" class="w3-input w3-border w3-round-large"
-                                                id="searchFamily" style="padding:12px;font-size:16px">
-                                </div>
-                                <div class="w3-col s2 m1">
-                                        <button type="submit" class="w3-button w3-blue w3-round-large"
-                                                style="width:100%;height:100%">
-                                                <i class="fa fa-search"></i>
-                                        </button>
-                                </div>
-                        </div>
-                        <p id="searchHidden"></p>
-                </form>
+            </div>
         </div>
 
         <!-- Loading indicator -->
-        <div id="setLoader" class="w3-center w3-padding-32 loader">
-             
+        <div id="setLoader" class="loader">
+
         </div>
 
+        <p id="searchHidden"></p>
 
         <!-- Members Grid -->
-        <div class="w3-row-padding" id="allMembers">
-                <!-- Member cards will be inserted here dynamically -->
-        </div>
+        <div class="members-grid membersGrid" id="allMembers"> </div>
 
-</div>
+    </div>
 
 
 @endsection

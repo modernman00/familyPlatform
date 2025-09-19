@@ -17,31 +17,39 @@ class RouteDispatch
     protected $method;
 
     public function dispatch(AltoRouter $router)
-    {
-        try {
-            $this->match = $router->match();
+{
+    try {
+        $this->match = $router->match();
 
-            if ($this->match) {
-                if (is_callable($this->match['target'])) {
-                    call_user_func_array($this->match['target'], $this->match['params']);
-                } else {
-                    $controllerAndFunction = explode('@', $this->match['target']);
-                    $this->controller = $controllerAndFunction[0];
-                    $this->method = $controllerAndFunction[1];
-
-                    if (method_exists($this->controller, $this->method)) {
-                        call_user_func_array([new $this->controller, $this->method], $this->match['params']);
-                    } else {
-                        echo "Method {$this->method} not defined in {$this->controller}";
-                        throw new NotFoundException("Method {$this->method}not found in {$this->controller}");
-                    }
-                }
-            } else {
-
-                 view('error.404');
-            }
-        } catch (HttpException $e) {
-            showError($e);
+        if (!$this->match) {
+            view('errors.404');
+            return;
         }
+
+        /* ----------  callable route ---------- */
+        if (is_callable($this->match['target'])) {
+            call_user_func_array($this->match['target'], $this->match['params']);
+            return;
+        }
+
+        /* ----------  string controller@method ---------- */
+        [$controller, $method] = explode('@', $this->match['target']);
+
+        if (!method_exists($controller, $method)) {
+            throw new NotFoundException("Method {$method} not found in {$controller}");
+        }
+
+        call_user_func_array([new $controller, $method], $this->match['params']);
+
+    } catch (HttpException $e) {          // your custom layer
+        showError($e);
+    } catch (NotFoundException $e) {      // 404 you throw above
+        http_response_code(404);
+        view('errors.404', ['message' => $e->getMessage()]);
+    } catch (\Throwable $e) {             // *** catch everything else ***
+        error_log((string) $e);
+        http_response_code(500);
+        view('errors.500', ['exception' => $e]);   // or showError($e) if it accepts Throwable
     }
+}
 }

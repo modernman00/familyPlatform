@@ -74,11 +74,12 @@ document.onclick = async (e) => {
         }
       }
     } else if (targetId.includes('seeProfile')) {
+    
       // Extract the user ID from the target ID
       const userId = targetId.replace('seeProfile', '');
 
       // redirect to 'allMembers/setProfile/'+userId
-      window.location.href = `/allMembers/setProfile/${userId}`;
+      window.location.href = `/allMembers/seeProfile/${userId}`;
     } else if (targetId.includes('deleteNotification')) {
       // Call the deleteNotification function to remove the notification
       deleteNotification(targetId);

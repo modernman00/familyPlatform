@@ -37,6 +37,7 @@ class SingleCustomerData extends InnerJoin
 			$result = $this->joinParamOr(firstTable: $firstTable, para: $para, table: $table, id: $custId);
 
 			$result ?? \msgException(401, 'result not found');
+
 			$result = $result[0];
 			unset($result['password']);
 
@@ -68,6 +69,8 @@ class SingleCustomerData extends InnerJoin
 			if (!$result) {
 				throw new \Exception("Error Processing Request - query", 1);
 			}
+			$result = $result[0];
+			unset($result['password']);
 			return $result;
 		} catch (\PDOException $e) {
 			showError($e);

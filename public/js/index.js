@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     '/organogram': {
       module: function module() {
-        return Promise.all(/*! import() | organogram */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("organogram")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js"));
+        return __webpack_require__.e(/*! import() | organogram */ "organogram").then(__webpack_require__.bind(__webpack_require__, /*! ./components/familyTree/index.js */ "./resources/asset/js/components/familyTree/index.js"));
       },
       hide: ['.familyTreeNav'] // Hide family tree navbar
     },
@@ -149,6 +149,24 @@ try {
       el.classList.toggle('is-active');
       $target.classList.toggle('is-active');
     });
+  });
+  var darkModeToggle = document.getElementById('darkModeToggle');
+  var body = document.body;
+
+  // Check for saved dark mode preference
+  if (localStorage.getItem('darkMode') === 'enabled') {
+    body.classList.add('dark-mode');
+    darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+  }
+  darkModeToggle.addEventListener('click', function () {
+    body.classList.toggle('dark-mode');
+    if (body.classList.contains('dark-mode')) {
+      localStorage.setItem('darkMode', 'enabled');
+      darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    } else {
+      localStorage.setItem('darkMode', null);
+      darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+    }
   });
 } catch (error) {
   (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showError)(error);

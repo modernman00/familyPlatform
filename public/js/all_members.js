@@ -448,7 +448,7 @@ document.onclick = /*#__PURE__*/function () {
           if (targetId.includes('seeProfile')) {
             // Extract the user ID from the target ID
             _userId2 = targetId.replace('seeProfile', ''); // redirect to 'allMembers/setProfile/'+userId
-            window.location.href = "/allMembers/setProfile/".concat(_userId2);
+            window.location.href = "/allMembers/seeProfile/".concat(_userId2);
           } else if (targetId.includes('deleteNotification')) {
             // Call the deleteNotification function to remove the notification
             (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.deleteNotification)(targetId);
@@ -700,11 +700,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   renderHtml: () => (/* binding */ renderHtml)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
-
+var toSentenceCase = function toSentenceCase(str) {
+  if (str || typeof str == 'string')
+    // {
+    //     throw new Error('Invalid sentence for toSentenceCase function')
+    // }
+    return str.toLowerCase() // Convert the string to lowercase
+    .split(' ') // Split the string into words
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    }) // Capitalize the first letter of each word
+    .join(' '); // Join the words back into a string
+};
 var renderHtml = function renderHtml(el) {
   var famCode = localStorage.getItem('requesterFamCode');
   var reqId = localStorage.getItem('requesterId');
@@ -718,15 +728,16 @@ var renderHtml = function renderHtml(el) {
     var related = famCode == el.famCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Connect';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
-    var fatherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.fatherName);
-    var motherName = (0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.motherName);
+    var fatherName = toSentenceCase(el.father_name);
+    var motherName = toSentenceCase(el.mother_name);
+    var spouseName = toSentenceCase(el.spouseName);
     // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
-    var html = "\n    <div class=\"w3-col l3 m6 w3-margin-bottom member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\" style=\"width: 270px;\">\n        <div class=\"w3-card w3-white w3-round-large member-card\" style=\"height: 450px;\">\n    \n            <div class=\"w3-display-container profile-image-container\" style=\"height: 250px; overflow: hidden;\">\n                <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\" \n                     class=\"w3-image profile-image w3-hover-opacity\" \n                     style=\"width: 100%; height: 100%; object-fit: cover;\" \n                     alt=\"").concat(el.firstName, "\">\n                <div class=\"w3-display-bottomleft w3-container w3-padding w3-text-white\" style=\"text-shadow: 1px 1px 3px #000;\">\n                    <h3><b>").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.firstName), " ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(el.lastName), "</b></h3>\n                </div>\n            </div>\n    \n            <div class=\"w3-container w3-padding\" style=\"flex-grow: 1; overflow: hidden;\">\n                <p class=\"w3-text-gray\"><i class=\"fa fa-map-marker\"></i> ").concat(el.country, "</p>\n                \n                ").concat(areTheyLinked ? "\n                    <div class=\"w3-small w3-text-gray\" style=\"max-height: 150px; overflow: hidden;\">\n                        <p><b>Father:</b> ".concat(fatherName || 'Not specified', "</p>\n                        <p><b>Mother:</b> ").concat(motherName || 'Not specified', "</p>\n                        <p><b>Spouse:</b> ").concat(el.spouseName || 'Not specified', "</p>\n                        <p><b>Mobile:</b> ").concat(el.mobile || 'Not specified', "</p>\n                        <p><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n                    </div>\n                ") : '', "\n                \n                <div class=\"w3-row w3-margin-top\">\n                    ").concat(areTheyLinked ? "\n                        <div class=\"w3-col s6 w3-padding-small\">\n                            <button class=\"w3-button w3-blue w3-round-large w3-block\" id=\"seeProfile".concat(el.id, "\">\n                                <i class=\"fa fa-user\"></i> Profile\n                            </button>\n                        </div>\n                        ").concat(related ? '' : "\n                        <div class=\"w3-col s6 w3-padding-small\">\n                            <button class=\"w3-button w3-light-gray w3-round-large w3-block\" id=\"removeProfile".concat(el.id, "\">\n                                <i class=\"fa fa-times\"></i> Remove\n                            </button>\n                        </div>\n                        "), "\n                    ") : "\n                        <div class=\"w3-col s12 w3-padding-small\">\n                            <button type=\"button\" data-user-id=\"addFamily".concat(el.id, "\" \n                                class=\"w3-button w3-blue w3-round-large\" \n                                id=\"addFamily").concat(el.id, "\" ").concat(disableButton, " onmouseover=\"pulseButton(this)\" \n                                onmouseout=\"resetButton(this)\">\n                                <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n                            </button>\n                        </div>\n                    "), "\n                </div>\n            </div>\n        </div>\n        </div>");
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
+    var html = "\n    <div class=\"member-card member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n\n       <div class=\"member-card-header\">\n            <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\"  alt=\"Member-").concat(el.firstName, "\" class=\"member-avatar\">\n        </div>\n\n        <div class=\"member-card-body\">\n            <h3 class=\"member-name\">").concat(toSentenceCase(el.firstName), " ").concat(toSentenceCase(el.lastName), "</h3>\n            <p class=\"member-location\">").concat(el.country, "</p>\n\n  ").concat(areTheyLinked ? "\n    <div class=\"member-details\">\n      <p class=\"member-detail\"><b>Father:</b> ".concat(fatherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mother:</b> ").concat(motherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Spouse:</b> ").concat(spouseName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mobile:</b> ").concat(el.mobile || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n    </div>\n\n            <div class=\"member-stats\">\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">342</div>\n                            <div class=\"stat-label\">Posts</div>\n                        </div>\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">1.2K</div>\n                            <div class=\"stat-label\">Followers</div>\n                        </div>\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">256</div>\n                            <div class=\"stat-label\">Following</div>\n                        </div>\n                    </div>\n\n    <div class=\"member-interests\">\n      <button class=\"btn btn-profile\" id=\"seeProfile").concat(el.id, "\">\n        <i class=\"fa fa-user\"></i> See Profile\n      </button>\n      <span class=\"btn btn-remove\" id=\"removeProfile").concat(el.id, "\">\n        <i class=\"fa fa-times\"></i> Remove\n      </span>\n    </div>\n  ") : "\n    <div class=\"member-actions\">\n      <button class=\"btn btn-primary btn-sm w-100\" \n              data-user-id=\"addFamily".concat(el.id, "\" \n              ").concat(disableButton, "\n              onmouseover=\"pulseButton(this)\" \n              onmouseout=\"resetButton(this)\">\n        <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n      </button>\n    </div>\n  "), "\n</div>\n\n\n\n    </div>\n");
+    (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+    (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
   }
 };
 

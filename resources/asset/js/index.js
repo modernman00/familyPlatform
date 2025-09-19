@@ -106,6 +106,8 @@ const checkURL = (url) =>
   !!window.location.pathname.match(new RegExp(`^/${url}(?:/[^/]+)*$`));
 
 try {
+
+
   const $navbarBurgers = Array.prototype.slice.call(
     document.querySelectorAll('.navbar-burger'),
     0,
@@ -123,6 +125,27 @@ try {
       $target.classList.toggle('is-active');
     });
   });
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+                const body = document.body;
+
+                // Check for saved dark mode preference
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    body.classList.add('dark-mode');
+                    darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                }
+
+                darkModeToggle.addEventListener('click', () => {
+                    body.classList.toggle('dark-mode');
+
+                    if (body.classList.contains('dark-mode')) {
+                        localStorage.setItem('darkMode', 'enabled');
+                        darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+                    } else {
+                        localStorage.setItem('darkMode', null);
+                        darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+                    }
+                });
 } catch (error) {
   showError(error);
 }

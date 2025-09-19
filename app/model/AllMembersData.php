@@ -33,7 +33,7 @@ class AllMembersData extends InnerJoin
     public function getAllMembers($id): array
     {
         try {
-            $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.fatherName, ofm.motherName, ofm.spouseName, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
+            $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.father_name, ofm.mother_name, ofm.spouse_name, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
                 FROM personal AS p
                   INNER JOIN otherFamily AS ofm ON p.id = ofm.id
                   INNER JOIN profilePics AS pp ON p.id = pp.id

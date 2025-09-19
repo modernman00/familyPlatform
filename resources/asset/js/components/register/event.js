@@ -24,7 +24,7 @@ export const showSpouse = () => {
 
   const maritalStatus = id('maritalStatus_id').value;
   
-  if (maritalStatus === "Yes") {
+  if (maritalStatus === "Married") {
     showElement('spouse');
   } else {
     hideElement('spouse');

@@ -1146,7 +1146,7 @@ var showMaidenName = function showMaidenName() {
 };
 var showSpouse = function showSpouse() {
   var maritalStatus = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus_id').value;
-  if (maritalStatus === "Yes") {
+  if (maritalStatus === "Married") {
     showElement('spouse');
   } else {
     hideElement('spouse');

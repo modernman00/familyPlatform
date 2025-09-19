@@ -573,7 +573,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   writeComment: () => (/* binding */ writeComment)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
 var commentHTML = function commentHTML(data) {
@@ -585,7 +585,7 @@ var commentHTML = function commentHTML(data) {
     comment_no = data.comment_no;
   var imgURL = profileImg || img;
   var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class='d-flex mb-3 commentDiv' id='comment".concat(comment_no, "' name='commentDiv'>\n         \n      <img src='").concat(image, "' alt='Avatar' class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n              <div class=\"flex-grow-1\">\n                <div class=\"comment\">\n                  <strong> ").concat(fullName, "</strong>\n                  ").concat(comment, "  \n                  <small class='w3-right w3-opacity commentTiming' datetime='").concat(date_created, "' title='").concat(date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), " \n                  </small> \n                  </div>\n              </div>\n         \n          </div>");
+  return "<div class='d-flex mb-3 commentDiv' id='comment".concat(comment_no, "' name='commentDiv'>\n         \n      <img src='").concat(image, "' alt='Avatar' class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n              <div class=\"flex-grow-1\">\n                <div class=\"comment\">\n                  <strong> ").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), " </strong> \n                  ").concat(comment, "  \n                  <small class='w3-right w3-opacity commentTiming' datetime='").concat(date_created, "' title='").concat(date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), " \n                  </small> \n                  </div>\n              </div>\n         \n          </div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {
@@ -606,7 +606,7 @@ var appendNewComment = function appendNewComment(commentData) {
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
 
-  var commentContainer = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  var commentContainer = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
   if (!commentContainer) {
     throw new Error("The comment div id does not exist ");
   }
@@ -692,6 +692,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   nameImgTiming: () => (/* binding */ nameImgTiming)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
 
 var timeAgo = function timeAgo(x) {
   return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
@@ -721,7 +723,7 @@ var nameImgTiming = function nameImgTiming(data) {
     date_created = data.date_created,
     post_time = data.post_time;
   var img = profileImg ? "/public/img/profile/".concat(profileImg) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex align-items-center mb-3\">\n\n            <img src=\"".concat(img, "\" alt=\"Profile\" class=\"rounded-circle me-3 postImg\" width=\"40\" height=\"40\">\n                        \n            <div>\n                <h6 class=\"mb-0\">").concat(fullName, "</h6>\n\n                <small class=\"text-muted timeago postTimeCal\" title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "' datetime='").concat(date_created, "'>posted ").concat(timeAgo(post_time), "</small>\n            </div>\n            </div>");
+  return "<div class=\"d-flex align-items-center mb-3\">\n\n            <img src=\"".concat(img, "\" alt=\"Profile\" class=\"rounded-circle me-3 postImg\" width=\"40\" height=\"40\">\n                        \n            <div>\n                <h6 class=\"mb-0\">").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), " </h6>\n\n                <small class=\"text-muted\">posted </small><small class=\"text-muted timeago postTimeCal\" title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "' datetime='").concat(date_created, "'> ").concat(timeAgo(post_time), "</small>\n            </div>\n            </div>");
 };
 
 /***/ }),

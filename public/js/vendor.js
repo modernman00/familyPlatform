@@ -1224,8 +1224,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   getApiData: () => (/* binding */ getApiData),
 /* harmony export */   getMultipleApiData: () => (/* binding */ getMultipleApiData),
-/* harmony export */   postFormData: () => (/* binding */ postFormData),
-/* harmony export */   postMultipleApiData: () => (/* binding */ postMultipleApiData)
+/* harmony export */   postFormData: () => (/* binding */ postFormData)
 /* harmony export */ });
 /* harmony import */ var _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./UtilityHtml.js */ "./node_modules/@modernman00/shared-js-lib/UtilityHtml.js");
 /* harmony import */ var _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./axiosWrapper.js */ "./node_modules/@modernman00/shared-js-lib/axiosWrapper.js");
@@ -1266,7 +1265,7 @@ const postFormData = async (url, formId, redirect = null, css = null) => {
     // } 
 
     // extract the form entries
-     // extract the form entriesËËË
+    // extract the form entriesËËË
     const form = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)(formId)
 
     if (!form) {
@@ -1290,13 +1289,13 @@ const postFormData = async (url, formId, redirect = null, css = null) => {
 
         // check if response.data.message is an array
         const { message } = response.data || {};
-        if( !message) {
+        if (!message) {
             throw new Error('Response data does not contain a message');
         }
         processFormDataAction(successClass, message, notificationId);
 
         if (redirect) {
-           (0,_general_js__WEBPACK_IMPORTED_MODULE_2__.redirectAfterDelay)(redirect, 2000);
+            (0,_general_js__WEBPACK_IMPORTED_MODULE_2__.redirectAfterDelay)(redirect, 2000);
         }
 
     } catch (error) {
@@ -1348,100 +1347,96 @@ const getNotificationClassByCSS = (css, status) => {
 
 
 /**
- * 
- * @param { the url you want to get} URL 
- * @returns 
- // now we can use that data from the outside!
-axiosTest()
-    .then(data => {
-        response.json({ message: 'Request received!', data })
-    })
-    .catch(err => console.log(err))
+ * Fetches data from a given URL using Axios, with optional Bearer token authentication.
+ * Resolves to the response data from the server.
+ * Rejects with an error object if something goes wrong.
+ *
+ * @param {string} URL - The URL to fetch data from.
+ * @param {string|null} token - Optional Bearer token for authentication.
+ * @returns {Promise<object>} - Resolves to the response data from the server or an error object if something goes wrong.
+ * // Example usage of getApiData function
+
+// With auth token
+// const data = await getApiData('https://api.example.com/users', myAuthToken);
+// if (data.status && data.status !== 200) {
+//   console.error("API error:", data);
+// } else {
+//   console.log("User data:", data);
+// }
+
+// Without auth token
+// const publicData = await getApiData('https://api.example.com/public');
+// console.log(publicData);
+
  */
 
 const getApiData = async (URL, token = null) => {
     try {
-
         const config = {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                ...(token && { Authorization: `Bearer ${token}` }), // only add if token exists
             },
         };
 
-        const fetch = await _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].get(URL, config);
-        return fetch.data;
-
-
+        const response = await _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].get(URL, config);
+        return response.data;
     } catch (error) {
-
-        return error;
-
+        // return something cleaner
+        if (error.response) {
+            // server responded with error
+            return { status: error.response.status, data: error.response.data };
+        } else {
+            // network or other issue
+            return { status: "network_error", message: error.message };
+        }
     }
-
-
 };
 
+
+
+
+/**
+ * Fetches data from two API endpoints in parallel.
+ *
+ * @param {string} url1 - The first API endpoint.
+ * @param {string} url2 - The second API endpoint.
+ * @param {string|null} token - Optional Bearer token for authentication.
+ *
+ * @returns {Promise<object[]>} - Resolves to an array of response data [res1.data, res2.data]
+ *                                or an error object if something goes wrong.
+ *
+ * Usage:
+ * const [users, posts] = await getMultipleApiData('/api/users', '/api/posts', myToken);
+ */
 const getMultipleApiData = async (url1, url2, token = null) => {
     try {
-
         const config = {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                ...(token && { Authorization: `Bearer ${token}` }), // add only if token exists
             },
         };
 
-        const fetch = await _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].all([
+        // run requests in parallel
+        const [res1, res2] = await _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].all([
             _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].get(url1, config),
-            _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].get(url2, config)
-        ]);
-        return fetch;
-
-    } catch (error) {
-
-        return error;
-
-    }
-
-
-};
-
-
-// build a function to post multiple api form data
-
-const postMultipleApiData = async (url1, url2, formData, token = null) => {
-    try {
-
-        const config = {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-        };
-        const fetch = await _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].all([
-            _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].post(url1, formData, config),
-            _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].post(url2, formData, config)
+            _axiosWrapper_js__WEBPACK_IMPORTED_MODULE_1__["default"].get(url2, config),
         ]);
 
-        return fetch;
-
+        return [res1.data, res2.data]; // return just the data
     } catch (error) {
-        return error;
+        if (error.response) {
+            return { status: error.response.status, data: error.response.data };
+        } else {
+            return { status: "network_error", message: error.message };
+        }
     }
 };
-/**
- * 
- * @param { name} cname 
- * @param {* value} cvalue 
- * @param {* no of days 365} exdays 
- */
 
 
 /***/ }),
@@ -1632,6 +1627,10 @@ const realTimeCheckLen = (input, maxi) => {
  * @returns {string} A new string in sentence case.
  */
 const toSentenceCase = (str) => {
+     if (!str || typeof str !== 'string' || str.length === 0 || str === 'undefined') 
+    {
+        throw new Error('Invalid sentence for toSentenceCase function')
+    }
     return str
         .toLowerCase() // Convert the string to lowercase
         .split(' ')    // Split the string into words
@@ -2157,7 +2156,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   msgException: () => (/* reexport safe */ _ShowResponse_js__WEBPACK_IMPORTED_MODULE_6__.msgException),
 /* harmony export */   parseErrorResponse: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_14__.parseErrorResponse),
 /* harmony export */   postFormData: () => (/* reexport safe */ _Http_js__WEBPACK_IMPORTED_MODULE_0__.postFormData),
-/* harmony export */   postMultipleApiData: () => (/* reexport safe */ _Http_js__WEBPACK_IMPORTED_MODULE_0__.postMultipleApiData),
 /* harmony export */   qSel: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSel),
 /* harmony export */   qSelAll: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSelAll),
 /* harmony export */   qSelInnerHTML: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSelInnerHTML),

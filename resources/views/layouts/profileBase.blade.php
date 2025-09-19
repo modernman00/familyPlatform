@@ -14,7 +14,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href={{ $_ENV['APP_LOGO'] }}>
 
     <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json">
-    <link rel="stylesheet" href="public/css/profilepage2.css">
+    @stack('styles')
+
+   
 
 
 </head>
@@ -22,11 +24,17 @@
 
   @include('layouts.navbar')
 
-    <div class="container-main">
+    {{-- <div class="container-main"> --}}
 
         @yield('content')
 
 
+    {{-- </div> --}}
+
+
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle" id="darkModeToggle">
+        <i class="bi bi-moon-fill"></i>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
@@ -51,5 +59,9 @@
     });
   }
 </script>
+
+
+    
+
 </body>
 </html>

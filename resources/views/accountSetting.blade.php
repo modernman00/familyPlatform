@@ -56,7 +56,7 @@
         'childrenAndSiblings' => [
         'mixed',
         'label' => ['Add Kids?', 'Add Siblings?', 'add spouse?'],
-        'attribute' => ['kids', 'siblings', 'maritalStatus'],
+        'attribute' => ['children', 'sibling', 'maritalStatus'],
         'inputType' => ['select', 'select', 'select'],
         'options' => [
         ['select', 0, 1, 2, 3],
@@ -75,7 +75,7 @@
         'spouse' => [
         'mixed',
         'label' => ["Spouse's name", "Spouse's Email","Spouse's mobile", 'maiden name'],
-        'attribute' => ['spouseName', 'spouseEmail', 'spouseMobile', 'spouseMaidenName'],
+        'attribute' => ['spouse_name', 'spouse_email', 'spouse_mobile', 'spouse_maidenName'],
         'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089', 'maiden name'],
         'inputType' => ['text','email', 'text', 'text'],
         'icon' => [

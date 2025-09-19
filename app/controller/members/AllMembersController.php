@@ -68,7 +68,7 @@ class AllMembersController extends AllMembersData
             $VerifyJWT = SignIn::verify();
             // if token is verified
 
-            if (!$$VerifyJWT) {
+            if (!$VerifyJWT) {
                \redirect($_ENV['401URL']);
             }
             $id = checkInput($id);
@@ -84,7 +84,7 @@ class AllMembersController extends AllMembersData
             $data = null;
             foreach ($result as $data);
 
-            view('member/getProfile', compact('data', 'pictures'));
+            view('member.getProfile', compact('data', 'pictures'));
         } catch (Exception $e) {
             showError($e);
         }

@@ -1,4 +1,5 @@
 import { format } from "timeago.js"
+import { toSentenceCase} from "@shared"
 const timeAgo = (x) => format(x)
 
 // const fullName = (fullName) => {
@@ -31,9 +32,9 @@ export const nameImgTiming = (data) => {
             <img src="${img}" alt="Profile" class="rounded-circle me-3 postImg" width="40" height="40">
                         
             <div>
-                <h6 class="mb-0">${fullName}</h6>
+                <h6 class="mb-0">${toSentenceCase(fullName)} </h6>
 
-                <small class="text-muted timeago postTimeCal" title='${format(date_created)}' datetime='${date_created}'>posted ${timeAgo(post_time)}</small>
+                <small class="text-muted">posted </small><small class="text-muted timeago postTimeCal" title='${format(date_created)}' datetime='${date_created}'> ${timeAgo(post_time)}</small>
             </div>
             </div>`
 }
