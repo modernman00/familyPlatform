@@ -449,9 +449,6 @@ document.onclick = /*#__PURE__*/function () {
             // Extract the user ID from the target ID
             _userId2 = targetId.replace('seeProfile', ''); // redirect to 'allMembers/setProfile/'+userId
             window.location.href = "/allMembers/seeProfile/".concat(_userId2);
-          } else if (targetId.includes('deleteNotification')) {
-            // Call the deleteNotification function to remove the notification
-            (0,_global_js__WEBPACK_IMPORTED_MODULE_2__.deleteNotification)(targetId);
           }
         case 7:
           _context.n = 9;
@@ -770,7 +767,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   checkElements: () => (/* binding */ checkElements),
 /* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
 /* harmony export */   date2String: () => (/* binding */ date2String),
-/* harmony export */   deleteNotification: () => (/* binding */ deleteNotification),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
@@ -788,11 +784,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   warningSign: () => (/* binding */ warningSign),
 /* harmony export */   write: () => (/* binding */ write)
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
 
 var id = function id(_id) {
   return document.getElementById(_id);
@@ -894,48 +885,6 @@ var checkManyElements = function checkManyElements(idOrClass, classString) {
     theFunction(doesElementExist);
   }
 };
-var yourId = localStorage.getItem('requesterId');
-var famCode = localStorage.getItem('requesterFamCode');
-
-// delete notification 
-var deleteNotification = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(elementId) {
-    var senderId, elementData, data, notificationHTML, url, response, newValues;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
-        case 0:
-          // Extract the user ID from the target ID
-          senderId = elementId.replace("deleteNotification", "notificationBar");
-          elementData = id(elementId);
-          data = elementData.getAttribute("data-id"); // change the background of the clicked element 
-          notificationHTML = id(senderId); // Make sure required variables are defined before using them
-          if (typeof yourId === 'undefined' || typeof famCode === 'undefined') {
-            msgException("Required parameters (yourId or famCode) are not defined");
-          }
-          url = "/removeNotification/".concat(yourId, "/").concat(famCode, "/").concat(data);
-          _context.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"].put(url);
-        case 1:
-          response = _context.v;
-          if (response.data.message === "Notification marked as read") {
-            // remove a html element with notificationBar after 2 mins 
-            notificationHTML.remove();
-
-            // reduce the notification count as you have deleted the notification
-            newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
-            id('notification_count').innerHTML = newValues;
-          } else {
-            msgException("Error removing notification" + " " + response.data.message);
-          }
-        case 2:
-          return _context.a(2);
-      }
-    }, _callee);
-  }));
-  return function deleteNotification(_x) {
-    return _ref.apply(this, arguments);
-  };
-}();
 
 /***/ }),
 
@@ -1162,7 +1111,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   increaseNotificationCount: () => (/* binding */ increaseNotificationCount)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
@@ -1170,6 +1119,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 // const timeAgo = (x) => format(x)
+
 
 // import { html } from './profilePage/html';
 
@@ -1190,20 +1140,63 @@ var postAgoNotification = function postAgoNotification(date) {
 };
 // this is the notification htnl 
 var notificationHTML = function notificationHTML(data) {
+  // Map notification types to icon classes
+  // Map type → { icon, colour }
+  var iconMap = {
+    friend_request: {
+      icon: "bi bi-person-plus",
+      color: "text-primary"
+    },
+    // Blue
+    like: {
+      icon: "bi bi-hand-thumbs-up",
+      color: "text-success"
+    },
+    // Green
+    comment: {
+      icon: "bi bi-chat-dots",
+      color: "text-info"
+    },
+    // Cyan
+    anniversary: {
+      icon: "fa-solid fa-cake-candles",
+      color: "text-warning"
+    },
+    // Gold
+    new_post: {
+      icon: "bi bi-file-post",
+      color: "text-purple"
+    },
+    // Custom purple
+    "default": {
+      icon: "bi bi-bell",
+      color: "text-secondary"
+    } // Grey
+  };
+  var _ref = iconMap[data.notification_type] || iconMap["default"],
+    icon = _ref.icon,
+    color = _ref.color;
+  var readOrUnread = data.notification_status === 'clicked' ? 'read' : 'unread';
+  var sender_id = data.sender_id,
+    notification_name = data.notification_name,
+    notification_content = data.notification_content,
+    created_at = data.created_at,
+    no = data.no;
+
   // generate random numbers to make the notification unique
 
   var randomNumber = Math.floor(100 + Math.random() * 900);
-  return "<a id = \"notificationBar".concat(data.sender_id).concat(randomNumber, "\" data-id=\"").concat(data.sender_id, "\" class=\"w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16\">\n\n        ").concat(postAgoNotification(data.created_at), "  - \n        <b> ").concat(data.notification_type, "</b> -\n        ").concat(data.notification_name, " -\n        ").concat(data.notification_content, " -\n        ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase)(data.sender_name), "\n        <button type = \"submit\" class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id=\"").concat(data.sender_id, "\" id=\"deleteNotification").concat(data.sender_id).concat(randomNumber, "\"> delete</button>\n  </a>\n\n  ");
+  return "<div id = \"notificationBar".concat(sender_id).concat(randomNumber, "\"   class=\"list-group-item list-group-item-action d-flex align-items-start notification_real_time ").concat(readOrUnread, " notification-item linkRequestCard\">\n\n    \n            <div class=\"notification-icon ").concat(color, "\">\n                <i class=\"").concat(icon, "\"></i></div>\n            <div class=\"notification-text\">\n                <strong>").concat(notification_name, "</strong>\n                <small>").concat(notification_content, "</small>\n                <div class=\"notification-time\"> ").concat(postAgoNotification(created_at), " </div>\n            </div>\n            <button class=\"notification-delete btn btn-sm btn-outline-secondary btn-light\" \n                 \" \n                    data-no=\"").concat(no, "\"\n                    id=\"deleteNotification").concat(sender_id).concat(randomNumber, "\"\n                    aria-label=\"Delete notification\">\n                <i class=\"bi bi-x-circle\"></i>\n            </button>\n \n\n  </div>\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
 
 var increaseNotificationCount = function increaseNotificationCount() {
   var currentNotificationCount = parseInt(sessionStorage.getItem('notificationCount')) + 1;
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = currentNotificationCount;
+  (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = currentNotificationCount;
 };
 var addToNotificationTab = function addToNotificationTab(data) {
-  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSel)('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+  return (0,_shared__WEBPACK_IMPORTED_MODULE_1__.qSel)('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
 };
 var yourId = localStorage.getItem('requesterId');
 var famCode = localStorage.getItem('requesterFamCode');
@@ -1221,7 +1214,7 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
   if (data) {
     if (data.length > 0) {
       // Display the count of notifications
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
+      (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = data.length;
 
       // Store the notification count in session storage
       sessionStorage.setItem('notificationCount', data.length);
@@ -1230,18 +1223,114 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
       data.forEach(function (element) {
         addToNotificationTab(element);
       });
-
       // Update the timing of notifications
       var updateNotificationTiming = document.querySelectorAll(".notification_timeago");
       (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.render)(updateNotificationTiming);
     } else {
-      (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
+      (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
     }
   }
 })["catch"](function (error) {
   // Handle any errors that occur during the process
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+  (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
 });
+
+// delete a notification 
+
+// delete notification 
+
+// document.addEventListener('click', async (e) => {
+//     const id = e.target.id;
+//        log(id)
+//     // if (!id.includes('deleteNotification')) return;
+
+//     // const deleteBtn = id(id);
+//     // const sender_id = deleteBtn.getAttribute('data-id');
+
+//     // const url = `/removeNotification/${yourId}/${famCode}/${sender_id}`
+//     // const response = axios.put(url)
+
+//     // if (response.data.message === "Notification marked as read") {
+
+//     //     // remove a html element with notificationBar after 2 mins 
+//     //     qSel(`#${deleteBtn.id}`).closest('.notification_real_time')?.remove();
+
+//     //     // reduce the notification count as you have deleted the notification
+
+//     //     const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
+//     //     id('notification_count').innerHTML = newValues;
+//     // } else {
+//     //     msgException("Error removing notification" + " " + response.data.message);
+//     // }
+// })
+
+var notificationBtn = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notificationBtn');
+var notificationDropdown = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notificationDropdown');
+var markAllReadBtn = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('markAllRead');
+var notificationCount = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
+
+// Toggle dropdown visibility
+notificationBtn.addEventListener('click', function (e) {
+  e.stopPropagation();
+  notificationDropdown.classList.toggle('show');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (e) {
+  if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+    notificationDropdown.classList.remove('show');
+  }
+});
+
+// Prevent dropdown from closing when clicking inside it
+notificationDropdown.addEventListener('click', function (e) {
+  e.stopPropagation();
+});
+
+// Mark all as read functionality
+markAllReadBtn.addEventListener('click', function () {
+  var unreadItems = document.querySelectorAll('.notification-item.unread');
+  unreadItems.forEach(function (item) {
+    item.classList.remove('unread');
+  });
+
+  // Update notification count
+  notificationCount.textContent = '0';
+  notificationCount.style.display = 'none';
+});
+
+/* run once, after the dropdown HTML is in the page */
+var initDeleteOnce = function initDeleteOnce() {
+  var tab = document.getElementById('notification_tab'); // static parent
+  if (!tab) return;
+  tab.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[id*="deleteNotification"]');
+    if (!btn) return; // not a delete button → ignore
+
+    e.stopPropagation(); // keep dropdown open
+    var bannerId = btn.id.replace('deleteNotification', 'notificationBar');
+    var no = btn.getAttribute('data-no');
+    var url = "/removeNotification/".concat(no);
+    axios__WEBPACK_IMPORTED_MODULE_3__["default"].put(url).then(function (response) {
+      if (response.data.message === 'Notification marked as read') {
+        var _document$getElementB;
+        // remove a html element with notificationBar after 2 mins
+        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 || _document$getElementB.remove();
+
+        // reduce the notification count as you have deleted the notification
+        var newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
+        sessionStorage.setItem('notificationCount', newValues);
+        (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = newValues;
+      } else {
+        (0,_shared__WEBPACK_IMPORTED_MODULE_1__.msgException)('Error removing notification' + ' ' + response.data.message);
+      }
+      // your counter routine
+    });
+  });
+};
+
+/* safe entry point */
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initDeleteOnce) : initDeleteOnce();
 
 ///member/notifications
 

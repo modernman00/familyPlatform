@@ -18,7 +18,7 @@
                         <a class="nav-link active" href="/profilePage">My Page</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/organogram/{{ $data['id'] }}">Family Tree </a>
+                        <a class="nav-link active" href="/organogram?id={{ $data['id'] }}">Family Tree</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Events</a>
@@ -67,11 +67,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                         @if (isset($data['mobile']) && !empty($data['email']) && !empty($data['country']) && !empty($data['famCode']))
-
-                            <li><a class="dropdown-item" href="/accountSetting/{{ urlencode(trim($data['id'])) }}/{{ urlencode(trim($data['mobile'])) }}/{{ trim($data['email']) }}/{{ str_replace(' ', '', trim($data['country'])) }}/{{ urlencode(trim($data['famCode'])) }}" >Settings</a></li>
-                         @endif
-                         
+                            <li><a class="dropdown-item" href="/setting?id={{ $data['id'] }}">Settings</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>

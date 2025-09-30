@@ -11,7 +11,7 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
     {{-- FAVICON  --}}
-    <link rel="icon" type="image/x-icon" href={{ $_ENV['APP_URL'] }}>
+    <link rel="icon" type="image/x-icon" href={{ $_ENV['IMG_CONTRACT'] }}>
 
 
     <!-- If you intended to include a <noscript> block, add the opening tag -->

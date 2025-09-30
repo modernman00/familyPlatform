@@ -37,7 +37,7 @@ import "./periodicSync"
 import "./createEvent"
 import "./friendRequestCard"
 import "../navbar"
-import "./newPage"
+// import "./newPage"
 
 
 

@@ -12,33 +12,38 @@
                     <h5 class="card-title"> {{ $data['firstName'] }}
                         {{ $data['lastName'] }} </h5>
 
-                    <p class="card-text">{{ $data['id'] }} | {{ $data['famCode'] }} |{{ $data['country'] }}</p>
+                    <p class="card-text">{{ $data['country'] }}</p>
                     <hr>
 
                     <div class="d-flex justify-content-around">
 
+                        @isset($data['spouseName'])
+
+                            <div>
+                                <h6 class="mb-0">{{ $data['spouseName'] }}</h6>
+                                <small>Spouse</small>
+                            </div>
+                            
+                        @endisset
+
+
                         <div>
-                            <h6 class="mb-0">{{ $data['spouseName'] }}</h6>
-                            <small>Spouse</small>
+                            <h6 class="mb-0">{{ $data['famCode'] }}</h6>
+                            <small><b>Family code</b></small>
                         </div>
 
                         {{-- <div>
-                            <h6 class="mb-0">{{ $data['famCode'] }}</h6>
-                            <small>Family code</small>
-                        </div> --}}
-
-                        <div>
                             <h6 class="mb-0">1.2K</h6>
                             <small>Posts</small>
-                        </div>
+                        </div> --}}
                     </div>
                     <hr>
 
-                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit
                             Profile
                     </button>
 
-                    <button class="btn btn-outline-primary w-100" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal"
                         data-bs-target="#createEventModal">
                         <i class="bi bi-plus-circle"></i> Create Event
                     </button>

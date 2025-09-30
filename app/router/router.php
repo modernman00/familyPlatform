@@ -18,9 +18,8 @@ include_once __DIR__ . "/Event.php";
 include_once __DIR__ . "/notification.php";
 include_once __DIR__ . "/friendRequest.php";
 include_once __DIR__ . "/pushNotification.php";
+include_once __DIR__ . "/organogram.php";
 
-
-$router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'MEMBERS_ORGANOGRAM');
 
 $router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');
 

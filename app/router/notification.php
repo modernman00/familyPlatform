@@ -29,7 +29,7 @@ $router->map(
 
 $router->map(
   method: 'PUT', 
-  route: '/removeNotification/[a:youId]/[a:famCode]/[a:senderId]', 
+  route: '/removeNotification/[i:no]', 
   target: 'App\controller\NotificationController@notificationRead',
   name: 'delete notification by id'
 );

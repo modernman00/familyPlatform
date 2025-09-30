@@ -1,24 +1,25 @@
 import { format, render } from "timeago.js"
-import { id, showError, qSel, log, msgException } from './global'
+import { id, showError, qSel, msgException, log } from '@shared'
 import { toSentenceCase } from "./helper/general"
 
 // const timeAgo = (x) => format(x)
 import axios from "axios"
+import { qSelAll } from "@modernman00/shared-js-lib";
 // import { html } from './profilePage/html';
 
- 
-        // Update notification badge
-        function updateNotificationBadge(change) {
-            const badge = document.querySelector('.notification-badge');
-            let count = parseInt(badge.textContent);
-            count += change;
-            if (count <= 0) {
-                badge.style.display = 'none';
-            } else {
-                badge.textContent = count;
-                badge.style.display = 'flex';
-            }
-        }
+
+// Update notification badge
+function updateNotificationBadge(change) {
+    const badge = document.querySelector('.notification-badge');
+    let count = parseInt(badge.textContent);
+    count += change;
+    if (count <= 0) {
+        badge.style.display = 'none';
+    } else {
+        badge.textContent = count;
+        badge.style.display = 'flex';
+    }
+}
 
 
 const postAgoNotification = (date) => {
@@ -29,22 +30,51 @@ const postAgoNotification = (date) => {
 // this is the notification htnl 
 const notificationHTML = (data) => {
 
+    // Map notification types to icon classes
+    // Map type → { icon, colour }
+    const iconMap = {
+        friend_request: { icon: "bi bi-person-plus", color: "text-primary" },   // Blue
+        like: { icon: "bi bi-hand-thumbs-up", color: "text-success" }, // Green
+        comment: { icon: "bi bi-chat-dots", color: "text-info" },         // Cyan
+        anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" }, // Gold
+        new_post: { icon: "bi bi-file-post", color: "text-purple" },       // Custom purple
+        default: { icon: "bi bi-bell", color: "text-secondary" }          // Grey
+    };
+
+    const { icon, color } = iconMap[data.notification_type] || iconMap.default
+    const readOrUnread = (data.notification_status === 'clicked') ? 'read' : 'unread'
+    const { sender_id, notification_name, notification_content, created_at, no } = data
+
+
     // generate random numbers to make the notification unique
 
     let randomNumber = Math.floor(100 + Math.random() * 900);
 
-    return `<a id = "notificationBar${data.sender_id}${randomNumber}" data-id="${data.sender_id}" class="w3-bar-item w3-button notification_real_time linkRequestCard w3-padding-16">
+    return `<div id = "notificationBar${sender_id}${randomNumber}"   class="list-group-item list-group-item-action d-flex align-items-start notification_real_time ${readOrUnread} notification-item linkRequestCard">
 
-        ${postAgoNotification(data.created_at)}  - 
-        <b> ${data.notification_type}</b> -
-        ${data.notification_name} -
-        ${data.notification_content} -
-        ${toSentenceCase(data.sender_name)}
-        <button type = "submit" class='w3-button-small w3-round w3-hover-grey w3-border-blue' data-id="${data.sender_id}" id="deleteNotification${data.sender_id}${randomNumber}"> delete</button>
-  </a>
+    
+            <div class="notification-icon ${color}">
+                <i class="${icon}"></i></div>
+            <div class="notification-text">
+                <strong>${notification_name}</strong>
+                <small>${notification_content}</small>
+                <div class="notification-time"> ${postAgoNotification(created_at)} </div>
+            </div>
+            <button class="notification-delete btn btn-sm btn-outline-secondary btn-light" 
+                 " 
+                    data-no="${no}"
+                    id="deleteNotification${sender_id}${randomNumber}"
+                    aria-label="Delete notification">
+                <i class="bi bi-x-circle"></i>
+            </button>
+ 
+
+  </div>
 
   `
 }
+
+
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
 
@@ -93,7 +123,6 @@ axios.get(notificationURL)
                 data.forEach(element => {
                     addToNotificationTab(element);
                 });
-
                 // Update the timing of notifications
                 const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
                 render(updateNotificationTiming);
@@ -110,6 +139,114 @@ axios.get(notificationURL)
         showError(error);
     });
 
+
+// delete a notification 
+
+// delete notification 
+
+
+
+
+// document.addEventListener('click', async (e) => {
+//     const id = e.target.id;
+//        log(id)
+//     // if (!id.includes('deleteNotification')) return;
+
+//     // const deleteBtn = id(id);
+//     // const sender_id = deleteBtn.getAttribute('data-id');
+
+//     // const url = `/removeNotification/${yourId}/${famCode}/${sender_id}`
+//     // const response = axios.put(url)
+
+//     // if (response.data.message === "Notification marked as read") {
+
+//     //     // remove a html element with notificationBar after 2 mins 
+//     //     qSel(`#${deleteBtn.id}`).closest('.notification_real_time')?.remove();
+
+//     //     // reduce the notification count as you have deleted the notification
+
+//     //     const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
+//     //     id('notification_count').innerHTML = newValues;
+//     // } else {
+//     //     msgException("Error removing notification" + " " + response.data.message);
+//     // }
+// })
+
+
+const notificationBtn = id('notificationBtn');
+const notificationDropdown = id('notificationDropdown');
+const markAllReadBtn = id('markAllRead');
+const notificationCount = id('notification_count');
+
+// Toggle dropdown visibility
+notificationBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    notificationDropdown.classList.toggle('show');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function (e) {
+    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+        notificationDropdown.classList.remove('show');
+    }
+});
+
+// Prevent dropdown from closing when clicking inside it
+notificationDropdown.addEventListener('click', function (e) {
+    e.stopPropagation();
+});
+
+// Mark all as read functionality
+markAllReadBtn.addEventListener('click', function () {
+    const unreadItems = document.querySelectorAll('.notification-item.unread');
+    unreadItems.forEach(item => {
+        item.classList.remove('unread');
+    });
+
+    // Update notification count
+    notificationCount.textContent = '0';
+    notificationCount.style.display = 'none';
+});
+
+/* run once, after the dropdown HTML is in the page */
+const initDeleteOnce = () => {
+    const tab = document.getElementById('notification_tab'); // static parent
+    if (!tab) return;
+
+    tab.addEventListener('click', e => {
+        const btn = e.target.closest('button[id*="deleteNotification"]');
+        if (!btn) return;                   // not a delete button → ignore
+
+        e.stopPropagation();                // keep dropdown open
+        const bannerId = btn.id.replace('deleteNotification', 'notificationBar');
+        const no = btn.getAttribute('data-no');
+    
+
+        const url = `/removeNotification/${no}`;
+
+
+        axios.put(url)
+            .then(response => {
+                if (response.data.message === 'Notification marked as read') {
+                    // remove a html element with notificationBar after 2 mins
+                    document.getElementById(bannerId)?.remove();
+
+                    // reduce the notification count as you have deleted the notification
+                    const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
+                    sessionStorage.setItem('notificationCount', newValues);
+                    id('notification_count').innerHTML = newValues;
+                } else {
+                    msgException('Error removing notification' + ' ' + response.data.message);
+                }
+                // your counter routine
+            });
+    })
+}
+
+/* safe entry point */
+document.readyState === 'loading'
+    ? document.addEventListener('DOMContentLoaded', initDeleteOnce)
+    : initDeleteOnce();
 
 
 

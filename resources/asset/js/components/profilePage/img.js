@@ -1,13 +1,13 @@
 "use strict";
 import { id, log } from "../global"
 import { showImageFileUploadFn } from "../helper/images"
-// import  axios from "axios"
+import  axios from "axios"
 
 // id('profilePics').addEventListener('click', ()=> id('formProfilePics').style.display ="block"
 
 // );
 
-// // FOR PROFILE IMAGE CHANGE
+// FOR PROFILE IMAGE CHANGE
 // showImageFileUploadFn('uploadButtonProfilePics', 'profileImageFile', 'profileImgFileNames')
 
 // // FOR POST MODAL IMAGE UPLOAD  

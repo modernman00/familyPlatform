@@ -1,5 +1,6 @@
 @extends ('layouts.profileBase')
 @section('title', 'Profile')
+@section('data-page-id', 'getProfilePage')
 {{-- custom css --}}
 @push('styles')
     <link rel="stylesheet" href="/public/css/seeProfile.css">
@@ -16,7 +17,9 @@
                 <img src="/public/img/profile/{{ $data['img'] }}" alt="{{ $data['firstName'] }} {{ $data['lastName'] }}" class="profile-avatar">
                 <div class="profile-details">
                     <h1>{{ $data['firstName'] }} {{ $data['lastName'] }}</h1>
-                    <div class="family-tree-name"> <a href="/organogram?id={{ $data['id'] }}">SEE {{ $data['firstName'] }}'S FAMILY TREE </a></div>
+                    <div class="family-tree-name"> 
+                      
+                    </div>
                     <div class="profile-location">
                         <i class="bi bi-geo-alt-fill me-2"></i> Lives in {{ $data['country'] }}
                     </div>
@@ -38,10 +41,25 @@
                             <div class="detail-value">{{$data['gender']}}</div>
                         </div>
                     </div>
-                    <div class="detail-item">
+                          <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Date of Birth</div>
+                            <div class="detail-value">June 15, 1975</div>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Family Tree</div>
+                            <div class="detail-value">  <a href="/organogram/{{ $data['id'] }}">SEE {{ $data['firstName'] }}'S FAMILY TREE 
+                        </a></div>
+                        </div>
+                    </div>
+                      <div class="detail-item">
+                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
+                        <div class="detail-content">
+                            <div class="detail-label">Family Tree</div>
                             <div class="detail-value">June 15, 1975</div>
                         </div>
                     </div>

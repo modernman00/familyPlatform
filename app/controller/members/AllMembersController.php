@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Controller\members;
+
 use Src\{
     Select,
     Delete,
@@ -17,22 +18,28 @@ class AllMembersController extends AllMembersData
     {
         try {
 
-            view('member/showMembers');
+            // create id for the family tree link
+            $data = [
+                'id' => checkInput($_SESSION['id']),
+                'fullName' => checkInput($_SESSION['fName']) . ' ' . checkInput($_SESSION['lName']),
+            ];
+
+            view('member/showMembers', \compact('data'));
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-      public function processApiData(): void
+    public function processApiData(): void
     {
         try {
             $VerifyJWT = SignIn::verify('users');
             if ($VerifyJWT) {
                 $id = $VerifyJWT['id'];
 
-            $result = $this->getAllMembers($id);
+                $result = $this->getAllMembers($id);
 
-            echo json_encode($result);
+                echo json_encode($result);
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -61,7 +68,7 @@ class AllMembersController extends AllMembersData
     //     die();
     // }
     // /allMembers/setProfile?id
-        public function getProfile($id): void
+    public function getProfile($id): void
     {
         try {
             //  verify token
@@ -69,7 +76,7 @@ class AllMembersController extends AllMembersData
             // if token is verified
 
             if (!$VerifyJWT) {
-               \redirect($_ENV['401URL']);
+                \redirect($_ENV['401URL']);
             }
             $id = checkInput($id);
             $result = $this->getAllMembersById($id);
@@ -107,7 +114,7 @@ class AllMembersController extends AllMembersData
             }
 
             // Sanitize inputs 
-            $apr = checkInput($apr); 
+            $apr = checkInput($apr);
             $req = checkInput($req);
 
             $query = Delete::formAndMatchQuery(

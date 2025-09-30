@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\classes\{Select, Insert};
+use App\classes\{Select, Insert, Update};
 
-use Src\Update;
+use Src\UpdateFn;
 
 
 class NotificationController extends Select
@@ -51,7 +51,6 @@ class NotificationController extends Select
                 ORDER BY created_at ASC";
             $result = Select::selectFn2($query, [$notificationId, $famCode, "new"]);
 
-
             // Call msgSuccess after returning the result
             msgSuccess(200, $result);
 
@@ -63,25 +62,28 @@ class NotificationController extends Select
     }
 
     // make notification as read 
-    public static function notificationRead($no, $senderId, $famCode)
+    public static function notificationRead($youId, $senderId, $famCode)
     {
         try {
-            $no = checkInput($no) ?? null;
+            $youId = checkInput($youId) ?? null;
+            $senderId = checkInput($senderId) ?? null;
+            $famCode = checkInput($famCode) ?? null;
 
-            if ($no === null || $senderId === null || $famCode === null) {
+            if ($youId === null || $senderId === null || $famCode === null) {
                 msgException(400, 'You ID, sender ID, and family code must be provided');
             }
 
-
-            $updateTable = new Update('notification');
-
-            $updateTable->updateTable('notification_status', 'deleted', 'no', $no);
-
+            $query = "UPDATE notification 
+                SET notification_status = ? 
+                WHERE receiver_id = ? 
+                AND sender_id = ? 
+                OR sender_id = ?";
+            $result = Select::selectFn2($query, ['deleted', $youId, $senderId, $famCode]);
 
             // Call msgSuccess after returning the result
             msgSuccess(200, 'Notification marked as read');
 
-            // return $result;
+            return $result;
         } catch (\Exception $e) {
             // Handle errors or log them
             showError($e);
@@ -147,4 +149,5 @@ class NotificationController extends Select
             msgException(300, $e);
         }
     }
+
 }

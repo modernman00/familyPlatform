@@ -104,10 +104,8 @@ try {
                 alert("There was an error processing your request. Please try again.");
             }
 
-        }     // add/delete to/from the notificatn bar 
-        else if (elementId && elementId.includes('deleteNotification')) {
-            deleteNotification(elementId)
-        } // take you to the request card for approval or denial
+        }     
+        // take you to the request card for approval or denial
         else if (e.target.classList.contains('linkRequestCard')) {
             // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
 

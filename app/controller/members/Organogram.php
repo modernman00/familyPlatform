@@ -19,7 +19,7 @@ class Organogram extends SingleCustomerData
      * @return void
      * @throws Exception
      */
-    public function index(): void
+    public function index($id): void
     {
         try {
             // Verify token
@@ -30,7 +30,7 @@ class Organogram extends SingleCustomerData
             }
 
             // Sanitize input
-            $id = checkInput($_GET['id'] ?? '');
+            $id = checkInput($id ?? '');
             if (empty($id)) {
                 throw new NotFoundException('Main person ID required');
             }
@@ -59,7 +59,11 @@ class Organogram extends SingleCustomerData
             $children = $this->fetchRelationsData($id, 'children', 'children');
 
             // Fetch sibling children
-            $siblingChildren = $this->getSiblingChildren($siblings);
+            $siblingChildren = null;
+
+            if ($siblings !== null) {   // strict null check
+               $siblingChildren = $this->getSiblingChildren($siblings); // or whatever you need to do
+            }
 
             // Build response
             $data = [
@@ -72,7 +76,7 @@ class Organogram extends SingleCustomerData
                 'sibling_children' => $siblingChildren
             ];
 
-    //    \printArr($data);
+            //    \printArr($data);
 
             view('member/organogram', compact('data'));
 
@@ -109,7 +113,7 @@ class Organogram extends SingleCustomerData
                     }
                 } else {
                     $relationship = $fullData['relationship'] = $this->resolveRelationship($who, $row["{$who}_gender"]);
-                     $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
+                    $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
                     array_push($data, [
                         'name' => $row["{$who}_name"],
                         'email' => $row["{$who}_email"],
@@ -185,7 +189,7 @@ class Organogram extends SingleCustomerData
 
                     // check for children detail via contact 
                     $fetchTheId = SelectFn::selectAllRowsById('contact', 'email', $email);
-       
+
 
                     if (!empty($fetchTheId)) {
 
@@ -198,7 +202,6 @@ class Organogram extends SingleCustomerData
                                 $fullData['relationship'] = $this->resolveRelationship('sibling_children', $fullData['gender']);
                                 $fullData['father_id'] = $id;
                             }
-                  
                         }
 
 
@@ -206,7 +209,7 @@ class Organogram extends SingleCustomerData
 
                         array_push($siblingChildren, $formatedData);
                     } else {
-                         $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
+                        $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
                         array_push($siblingChildren, [
                             'father_id' => $id,
                             'name' => $data['children_name'],
