@@ -46,6 +46,7 @@ const options = {
  * eventForm.addEventListener('submit', process);
  */
 const process = async (e) => {
+
     try {
         e.preventDefault();
         id('error').innerHTML = ""
@@ -77,7 +78,7 @@ const process = async (e) => {
 
 
         // close the modal
-        displayNone();
+        // displayNone();
 
 
     } catch (error) {
@@ -86,13 +87,13 @@ const process = async (e) => {
 
 }
 
+id('submitEventModal').addEventListener('click', process)
 
-
-   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        id('submitEventModal').addEventListener('click', process)
-    });
-  }
+//    if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', () => {
+//         id('submitEventModal').addEventListener('click', process)
+//     });
+//   }
 
 
 

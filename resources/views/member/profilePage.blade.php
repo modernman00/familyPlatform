@@ -27,9 +27,30 @@
         @includeIf('member.modals.editProfile')
         @includeIf('member.modals.share')
         @includeIf('member.modals.createEvent')
+        @includeIf('member.modals.shareModal2')
 
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('img'); // Hidden file input
+            const previewImg = document.getElementById('profilePreview'); // Current avatar image
+
+            if (!fileInput || !previewImg) return; // Defensive check
+
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0]; // Get the first selected file
+                if (!file) return;
+
+                const reader = new FileReader(); // Create a FileReader to read the image
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result; // Update the image src with base64 data
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            });
+        });
+    </script>
 
 
 

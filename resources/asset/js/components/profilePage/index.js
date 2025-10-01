@@ -37,6 +37,7 @@ import "./periodicSync"
 import "./createEvent"
 import "./friendRequestCard"
 import "../navbar"
+import "./editProfile"
 // import "./newPage"
 
 

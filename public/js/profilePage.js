@@ -1262,7 +1262,7 @@ var process = /*#__PURE__*/function () {
           axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
 
           // close the modal
-          displayNone();
+          // displayNone();
           _context.n = 4;
           break;
         case 3:
@@ -1278,11 +1278,35 @@ var process = /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }();
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function () {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitEventModal').addEventListener('click', process);
-  });
-}
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitEventModal').addEventListener('click', process);
+
+//    if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', () => {
+//         id('submitEventModal').addEventListener('click', process)
+//     });
+//   }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/editProfile.js":
+/*!******************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/editProfile.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+//import axios 
+
+
+// Submission handler
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.update)({
+  formId: 'editProfileFormModal',
+  route: '/member/profilePage/editProfile',
+  buttonId: 'editProfileBtnModal',
+  redirect: 'profilePage'
+});
 
 /***/ }),
 
@@ -1722,6 +1746,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _createEvent__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./createEvent */ "./resources/asset/js/components/profilePage/createEvent.js");
 /* harmony import */ var _friendRequestCard__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./friendRequestCard */ "./resources/asset/js/components/profilePage/friendRequestCard.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _editProfile__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./editProfile */ "./resources/asset/js/components/profilePage/editProfile.js");
 
 
 localStorage.removeItem('redirect');
@@ -1745,6 +1770,7 @@ darkModeToggle.addEventListener('click', function () {
     darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
   }
 });
+
 
 
 

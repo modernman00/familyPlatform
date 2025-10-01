@@ -13,6 +13,7 @@ use Src\functionality\{
 };
 use Src\{SubmitForm, FileUploader, LoginUtility};
 use App\controller\BaseController;
+use Src\functionality\UpdateExistingData;
 
 use App\classes\{ProcessImg};
 
@@ -248,5 +249,32 @@ class ProfilePage extends BaseController
         $token = checkInput($_GET['token']);
         setCookie(name: 'tokenJWT', value: $token, expires_or_options: time() + 3600, path: "/", domain: '', secure: true, httponly: true);
         msgSuccess(200, "message set");
+    }
+
+    // edit the profile 
+
+    public function editProfile(): void
+    {
+        try {
+            if (!$_POST) {
+                throw new Exception("There was no post data", 1);
+                exit;
+            }
+ 
+
+          
+         UpdateExistingData::updateMultipleTables(
+            fileTable: 'profilePics',
+            imgPath: 'public/img/profile/',
+            fileName: 'img',
+            removeKeys:['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
+            allowedTables: ['personal', 'contact', 'profilePics'],
+            identifier: 'id',
+            identifierValue: $_SESSION['id']
+            );
+
+        } catch (\Throwable $th) {
+            showError($th);
+        }
     }
 }

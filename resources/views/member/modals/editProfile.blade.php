@@ -1,69 +1,137 @@
+    @php
+
+        $token = urlencode(base64_encode(random_bytes(32)));
+        $_SESSION['token'] = $token;
+        setcookie('XSRF-TOKEN', $token, [
+            'expires' => time() + 900,
+            'path' => '/',
+            'samesite' => 'Lax',
+            'secure' => ($_ENV['APP_ENV'] ?? 'production') === 'production',
+            'httponly' => false,
+        ]);
+
+    @endphp
+
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+
         <div class="modal-dialog modal-lg">
+
             <div class="modal-content">
+
                 <div class="modal-header">
                     <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
-                    <form>
+
+                    <form id="editProfileFormModal" class="editProfileFormModal" enctype="multipart/form-data">
+
+                        <p id="setLoader"></p>
+
+                        <p id="editProfileFormModal_notification"></p>
+
                         <div class="text-center mb-4">
-                            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="Profile" class="rounded-circle mb-3" width="100" height="100">
-                            <button type="button" class="btn btn-outline-primary btn-sm d-block mx-auto">Change profile picture</button>
+                            @isset($data['img'])
+                                <img src="{{ asset('img/profile/' . $data['img']) }}" alt="Profile"
+                                    class="rounded-circle mb-1" width="122" height="122" id="profilePreview">
+                                <br>
+
+                                <label for="img" class="btn btn-sm btn-outline-secondary mb-0 mx-auto"
+                                    title="Change Profile Picture">
+                                    <i class="bi bi-camera-fill text-success"></i>
+                                </label>
+                                <input type="file" class="form-control" id="img" name="img"
+                                    style="display: none;" accept="image/*">
+                            @endisset
                         </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="firstName" value="{{$data['firstName']}}">
+                        @php
+                            $fields = [
+                                'personal' => [
+                                    [
+                                        'label' => 'First Name',
+                                        'name' => "personal['firstName']",
+                                        'id' => 'firstName',
+                                        'type' => 'text',
+                                        'value' => $data['firstName'],
+                                        'class' => 'form-control',
+                                    ],
+                                    [
+                                        'label' => 'Last Name',
+                                        'name' => "personal['lastName']",
+                                        'id' => 'lastName',
+                                        'type' => 'text',
+                                        'value' => $data['lastName'],
+                                        'class' => 'form-control',
+                                    ],
+                                    [
+                                        'label' => 'Relationship Status',
+                                        'name' => "personal['marital_status']",
+                                        'id' => 'marital_status',
+                                        'type' => 'select',
+                                        'value' => $data['marital_status'],
+                                        'options' => ['Single', 'Dating', 'Married', 'Divorced', 'Widowed'],
+                                        'class' => 'form-select',
+                                    ],
+                                ],
+                                'contact' => [
+                                    [
+                                        'label' => 'Location',
+                                        'name' => "contact['country']",
+                                        'id' => 'country',
+                                        'type' => 'text',
+                                        'value' => $data['country'],
+                                        'class' => 'form-control',
+                                    ],
+                                    [
+                                        'label' => 'Email',
+                                        'name' => "contact['email']",
+                                        'id' => 'email',
+                                        'type' => 'text',
+                                        'value' => $data['email'],
+                                        'class' => 'form-control',
+                                    ],
+                                    [
+                                        'label' => 'Mobile',
+                                        'name' => "contact['mobile']",
+                                        'id' => 'mobile',
+                                        'type' => 'text',
+                                        'value' => $data['mobile'],
+                                        'class' => 'form-control',
+                                    ],
+                                ],
+                            ];
+
+                        @endphp
+
+                        {{--  --}}
+
+                        @foreach ($fields as $key => $group)
+                            <div class="row mb-3">
+                                @foreach ($group as $field)
+                                    @include('form-helper-nested', $field)
+                                @endforeach
                             </div>
-                            <div class="col-md-6">
-                                <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="lastName" value="{{$data['lastName']}}">
-                            </div>
-                        </div>
-                        
-                        {{-- <div class="mb-3">
-                            <label for="bio" class="form-label">Bio</label>
-                            <textarea class="form-control" id="bio" rows="3">Software Developer | Photographer | Travel Enthusiast</textarea>
-                        </div> --}}
-                        
-                        <div class="mb-3">
-                            <label for="location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="location" value="{{$data['country']}}">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="text" class="form-control" id="email" value={{$data['email']}}>
+                        @endforeach
+
+
+
+<div class="g-recaptcha" data-sitekey="{{ $_ENV['RECAPTCHA_KEY'] }}" data-theme="dark"></div>
+                    <br> 
+
+                        {{-- hidden input --}}
+                        <input type="hidden" name="token" value="{{ $token }}">
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" id="editProfileBtnModal" name="submit" class="btn btn-primary">Save
+                                Changes</button>
                         </div>
 
-                          <div class="mb-3">
-                            <label for="mobile" class="form-label">mobile</label>
-                            <input type="text" class="form-control" id="mobile" value={{$data['mobile']}}>
-                        </div>
-                        
-                        {{-- <div class="mb-3">
-                            <label for="education" class="form-label">Education</label>
-                            <input type="text" class="form-control" id="education" value="Stanford University">
-                        </div> --}}
-                        
-                        <div class="mb-3">
-                            <label for="relationship" class="form-label">Relationship Status</label>
-                            <select class="form-select" id="relationship">
-                                <option selected>Single</option>
-                                <option>In a relationship</option>
-                                <option>Married</option>
-                                <option>Divorced</option>
-                            </select>
-                        </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Save Changes</button>
-                </div>
+
             </div>
         </div>
     </div>

@@ -18,6 +18,8 @@
 
   <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
 
+      <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+
   
 
   <link rel="stylesheet" type="text/css" href="/public/css/profilepage.css">

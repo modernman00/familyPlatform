@@ -14,6 +14,9 @@ use App\classes\{
 };
 use App\model\{EmailData, AllMembersData};
 
+use Src\functionality\SubmitPostData;
+use Src\LoginUtility;
+
 class Event extends AllMembersData
 {
     /**
@@ -29,20 +32,39 @@ class Event extends AllMembersData
     public static function submitEvent()
     {
         try {
-            // SANITISE THE ENTRY
-            $cleanData = getSanitisedInputData($_POST);
-            $cleanData['id'] = checkInput(data: $_SESSION['id']);
+            // // SANITISE THE ENTRY
+            // $cleanData = LoginUtility::getSanitisedInputData($_POST);
+            // $cleanData['id'] = checkInput(data: $_SESSION['id']);
 
-            $cleanData['eventCode'] = self::generateFamCode();
+            // $cleanData['eventCode'] = self::generateFamCode();
 
-            CheckToken::tokenCheck(token: 'token');
+            // CheckToken::tokenCheck(token: 'token');
 
-            $lastInsertedId = Insert::submitFormDynamicLastId(
+            // $lastInsertedId = Insert::submitFormDynamicLastId(
+            //     table: 'events',
+            //     field: $cleanData,
+            //     lastIdCol: 'no'
+            // );
+            // msgSuccess(code: 200, msg: $lastInsertedId);
+
+            SubmitPostData::submitToOneTablenImage(
                 table: 'events',
-                field: $cleanData,
-                lastIdCol: 'no'
+                minMaxData: [
+                    'data' => ['eventName',  'eventDescription'],
+                    'min'  => [5,  10],
+                    'max'  => [100, 500]
+                ],
+                removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
+                newInput: [
+                    'eventCode' => self::generateFamCode(),
+                    'id' => checkInput($_SESSION['id'])
+                ]
+
             );
-            msgSuccess(code: 200, msg: $lastInsertedId);
+
+
+
+
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -93,7 +115,7 @@ class Event extends AllMembersData
     {
 
         try {
-            $cleanData = getSanitisedInputData(inputData: $_POST);
+            $cleanData = LoginUtility::getSanitisedInputData( $_POST);
             $cleanData['id'] = checkInput(data: $_SESSION['id']);
             $id = $cleanData['id'];
 

@@ -12,7 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-id("setLoader").style.display = "none";
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("setLoader").style.display = "none";
 (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAdminLoginHandler)({
   formId: 'lasu',
   route: 'lasu',

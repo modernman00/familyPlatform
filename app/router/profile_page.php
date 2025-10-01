@@ -38,3 +38,6 @@ $router->map('PUT', '/profileCard/postLikes', 'App\controller\members\PostLikeCo
 
 
 // $router->map('GET', '/member/profileCard/getComments', 'App\model\Post@likeFunction', 'likeCounter');
+
+// edit profile post
+$router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\ProfilePage@editProfile', 'EDIT_PROFILE');

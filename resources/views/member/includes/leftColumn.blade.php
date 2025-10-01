@@ -39,14 +39,15 @@
                     </div>
                     <hr>
 
-                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit
-                            Profile
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile
                     </button>
 
                     <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal"
                         data-bs-target="#createEventModal">
                         <i class="bi bi-plus-circle"></i> Create Event
                     </button>
+
+                    {{-- <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Open</button> --}}
                 </div>
 
             </div>

@@ -426,6 +426,107 @@ const loginSubmission = async (formId, loginURL, redirect, css = null, lengthLim
 
 /***/ }),
 
+/***/ "./node_modules/@modernman00/shared-js-lib/AcctMgt/update.js":
+/*!*******************************************************************!*\
+  !*** ./node_modules/@modernman00/shared-js-lib/AcctMgt/update.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   update: () => (/* binding */ update)
+/* harmony export */ });
+/* harmony import */ var _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../UtilityHtml.js */ "./node_modules/@modernman00/shared-js-lib/UtilityHtml.js");
+/* harmony import */ var _Utility_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../Utility.js */ "./node_modules/@modernman00/shared-js-lib/Utility.js");
+/* harmony import */ var _ShowResponse_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../ShowResponse.js */ "./node_modules/@modernman00/shared-js-lib/ShowResponse.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _general_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../general.js */ "./node_modules/@modernman00/shared-js-lib/general.js");
+
+
+
+
+
+/**
+ * Creates a reusable form submission handler for update forms.
+ *
+ * @function update
+ * @param {Object} options - Configuration for the handler.
+ * @param {string} options.formId - ID of the form element.
+   * @param {string} options.buttonId - ID of the submit button.
+ * @param {string} options.route - API endpoint for submission.
+ * @param {string} options.redirect - URL to redirect to after success.
+ *
+ * @example
+ * update({
+ *   formId: 'updateForm',
+ *   buttonId: 'updateButton',
+ *   route: appTestRoutes.appTestUpdate,
+ *   redirect: appTestRoutes.appTestUpdateRedirect
+ * });
+ */
+function update({
+  formId,
+  buttonId,
+  route,
+  redirect,
+}) {
+  const handler = async (e) => {
+    e.preventDefault();
+
+    const form = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
+    if (!form) {
+      (0,_ShowResponse_js__WEBPACK_IMPORTED_MODULE_2__.msgException)(`Form with ID "${formId}" not found.`);
+      return;
+    }
+
+    const formData = new FormData();
+    const inputs = form.querySelectorAll('[name]');
+
+    inputs.forEach(input => {
+      const name = input.name;
+      const original = input.getAttribute('data-original');
+      const current = input.type === 'file' ? input.files[0] : input.value;
+
+      // Only include changed fields
+      if (input.type === 'file') {
+        if (current) formData.append(name, current);
+      } else if (current !== original) {
+        formData.append(name, current);
+      }
+    });
+
+    try {
+
+      const response = await axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(route, formData);
+
+      const message = response.data.message;
+
+      const notificationId = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)(`${formId}_notification`) || formId;
+
+      notificationId.scrollIntoView({ behavior: 'smooth' });
+
+      notificationId.innerHTML = message;
+
+
+      if (redirect) {
+        (0,_general_js__WEBPACK_IMPORTED_MODULE_4__.redirectAfterDelay)(redirect, 2000);
+      }
+
+    } catch (error) {
+      console.log(error);
+      const ErrorMsg = (0,_general_js__WEBPACK_IMPORTED_MODULE_4__.parseErrorResponse)(error);
+      notificationId.innerHTML = `<li style="color:white; background-color:red">${ErrorMsg}</li>`;
+    }
+  };
+
+  (0,_Utility_js__WEBPACK_IMPORTED_MODULE_1__.bindEvent)({ id: buttonId, handler });
+}
+
+
+
+/***/ }),
+
 /***/ "./node_modules/@modernman00/shared-js-lib/Cookie.js":
 /*!***********************************************************!*\
   !*** ./node_modules/@modernman00/shared-js-lib/Cookie.js ***!
@@ -1625,17 +1726,16 @@ const realTimeCheckLen = (input, maxi) => {
  *
  * @param {string} str The string to convert to sentence case.
  * @returns {string} A new string in sentence case.
+ * @throws {Error} If the input is not a string or is empty.    
  */
 const toSentenceCase = (str) => {
-     if (!str || typeof str !== 'string' || str.length === 0 || str === 'undefined') 
-    {
-        throw new Error('Invalid sentence for toSentenceCase function')
-    }
-    return str
-        .toLowerCase() // Convert the string to lowercase
-        .split(' ')    // Split the string into words
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-        .join(' ');    // Join the words back into a string
+    if (str || typeof str == 'string') {
+        return str
+            .toLowerCase() // Convert the string to lowercase
+            .split(' ')    // Split the string into words
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+            .join(' ');    // Join the words back into a string
+    } 
 }
 
 /**
@@ -2152,29 +2252,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   log: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.log),
 /* harmony export */   loginSubmission: () => (/* reexport safe */ _AcctMgt_processAll_js__WEBPACK_IMPORTED_MODULE_13__.loginSubmission),
 /* harmony export */   manipulateAttribute: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute),
-/* harmony export */   matchInput: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_14__.matchInput),
+/* harmony export */   matchInput: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_15__.matchInput),
 /* harmony export */   msgException: () => (/* reexport safe */ _ShowResponse_js__WEBPACK_IMPORTED_MODULE_6__.msgException),
-/* harmony export */   parseErrorResponse: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_14__.parseErrorResponse),
+/* harmony export */   parseErrorResponse: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_15__.parseErrorResponse),
 /* harmony export */   postFormData: () => (/* reexport safe */ _Http_js__WEBPACK_IMPORTED_MODULE_0__.postFormData),
 /* harmony export */   qSel: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSel),
 /* harmony export */   qSelAll: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSelAll),
 /* harmony export */   qSelInnerHTML: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSelInnerHTML),
 /* harmony export */   qSelValue: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.qSelValue),
 /* harmony export */   realTimeCheckLen: () => (/* reexport safe */ _Utility_js__WEBPACK_IMPORTED_MODULE_2__.realTimeCheckLen),
-/* harmony export */   redirectAfterDelay: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_14__.redirectAfterDelay),
+/* harmony export */   redirectAfterDelay: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_15__.redirectAfterDelay),
 /* harmony export */   removeDiv: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.removeDiv),
 /* harmony export */   sanitizeInput: () => (/* reexport safe */ _Utility_js__WEBPACK_IMPORTED_MODULE_2__.sanitizeInput),
 /* harmony export */   setCookie: () => (/* reexport safe */ _Cookie_js__WEBPACK_IMPORTED_MODULE_4__.setCookie),
 /* harmony export */   setupPasswordChange: () => (/* reexport safe */ _AcctMgt_changePassword_js__WEBPACK_IMPORTED_MODULE_9__.setupPasswordChange),
 /* harmony export */   showElement: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.showElement),
 /* harmony export */   showError: () => (/* reexport safe */ _ShowResponse_js__WEBPACK_IMPORTED_MODULE_6__.showError),
-/* harmony export */   showFileName: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_14__.showFileName),
+/* harmony export */   showFileName: () => (/* reexport safe */ _general_js__WEBPACK_IMPORTED_MODULE_15__.showFileName),
 /* harmony export */   showLoader: () => (/* reexport safe */ _Loader_js__WEBPACK_IMPORTED_MODULE_3__.showLoader),
 /* harmony export */   showNotification: () => (/* reexport safe */ _ShowResponse_js__WEBPACK_IMPORTED_MODULE_6__.showNotification),
 /* harmony export */   showPassword: () => (/* reexport safe */ _Utility_js__WEBPACK_IMPORTED_MODULE_2__.showPassword),
 /* harmony export */   showResponse: () => (/* reexport safe */ _ShowResponse_js__WEBPACK_IMPORTED_MODULE_6__.showResponse),
 /* harmony export */   timeAgo: () => (/* reexport safe */ _DateTime_js__WEBPACK_IMPORTED_MODULE_7__.timeAgo),
 /* harmony export */   toSentenceCase: () => (/* reexport safe */ _Utility_js__WEBPACK_IMPORTED_MODULE_2__.toSentenceCase),
+/* harmony export */   update: () => (/* reexport safe */ _AcctMgt_update_js__WEBPACK_IMPORTED_MODULE_14__.update),
 /* harmony export */   updateTimeRealTime: () => (/* reexport safe */ _DateTime_js__WEBPACK_IMPORTED_MODULE_7__.updateTimeRealTime),
 /* harmony export */   warningSign: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.warningSign),
 /* harmony export */   write: () => (/* reexport safe */ _UtilityHtml_js__WEBPACK_IMPORTED_MODULE_1__.write)
@@ -2193,7 +2294,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _AcctMgt_forgot_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./AcctMgt/forgot.js */ "./node_modules/@modernman00/shared-js-lib/AcctMgt/forgot.js");
 /* harmony import */ var _AcctMgt_login_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./AcctMgt/login.js */ "./node_modules/@modernman00/shared-js-lib/AcctMgt/login.js");
 /* harmony import */ var _AcctMgt_processAll_js__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./AcctMgt/processAll.js */ "./node_modules/@modernman00/shared-js-lib/AcctMgt/processAll.js");
-/* harmony import */ var _general_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./general.js */ "./node_modules/@modernman00/shared-js-lib/general.js");
+/* harmony import */ var _AcctMgt_update_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./AcctMgt/update.js */ "./node_modules/@modernman00/shared-js-lib/AcctMgt/update.js");
+/* harmony import */ var _general_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./general.js */ "./node_modules/@modernman00/shared-js-lib/general.js");
+
 
 
 

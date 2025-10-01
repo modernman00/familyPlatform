@@ -1,5 +1,5 @@
 "use strict";
-import { createAdminLoginHandler } from '@modernman00/shared-js-lib';
+import { createAdminLoginHandler, id } from '@modernman00/shared-js-lib';
 
 id("setLoader").style.display = "none";
 
