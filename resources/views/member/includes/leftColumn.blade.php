@@ -81,8 +81,13 @@
                 requesterFamCode: @json($data['famCode'])
 
             };
+
+            const yourName = profile.requesterFirstName + ' ' + profile.requesterLastName;
+
             localStorage.setItem('requesterFamCode', @json($data['famCode']));
             localStorage.setItem('requesterId', @json($data['id']));
+
+              localStorage.setItem('yourName', yourName);
 
             // Convert the object to a JSON string and store it in localStorage
             localStorage.setItem('profile', JSON.stringify(profile));

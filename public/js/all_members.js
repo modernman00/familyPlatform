@@ -591,6 +591,7 @@ axios__WEBPACK_IMPORTED_MODULE_0__["default"].get("".concat(URL, "allMembers/pro
     throw Error('There is no data');
   }
   var data = response.data;
+  console.log(data);
   var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__["default"])(data);
   renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
 
@@ -642,12 +643,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 
+
+
 var reqId = localStorage.getItem('requesterId');
+var famCode = localStorage.getItem('requesterFamCode');
 var allMembersContainer = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('allMembers');
 var noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
 var handleInput = function handleInput(data, WithFamCode, renderMembers) {
@@ -660,8 +666,68 @@ var handleInput = function handleInput(data, WithFamCode, renderMembers) {
     var filteredData = data.filter(function (el) {
       return el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal);
     });
+    // if no match found, show a message with a checkbox to send a request to the new member to join the platform
+    // the checkbox will show a form to enter the new member's name and email or mobile number
+    // the form will have a submit button to send the request
+
     if (filteredData.length === 0) {
-      allMembersContainer.innerHTML = "No matching name found.";
+      allMembersContainer.innerHTML = "No matching name found-  Do you want us to send them a text/email to register to the platform</i>?</h4>".concat((0,_shared__WEBPACK_IMPORTED_MODULE_2__.checkBox)('newMemberRequest'), " <br> \n            \n            <input type=\"hidden\" id=\"newMemberName\" value=\"").concat(inputVal, "\">\n\n             <input type=\"type\" id=\"newMemberRequestName\" class=\"form-control\" name=\"newMemberRequestName\" data-yourName = \"\" placeholder=\"Enter their name\" >\n\n            <input type=\"type\" id=\"newMemberRequestEmail\" class=\"form-control\" name=\"newMemberRequestEmail\" data-yourName = \"\" placeholder=\"Enter their email address or mobile number\" >\n\n            <p id=\"loader\" class=\"loader\" style=\"display:none;\"><p>\n            <small id=\"newMemberRequest_help\" class=\"form-text text-muted\"></small>\n\n            <button class=\"button is-primary\" id=\"newMemberRequestBtn\">Send Request</button>");
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestEmail').style.display = 'none';
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestName').style.display = 'none';
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestBtn').style.display = 'none';
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestYes').addEventListener('click', function () {
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestName').style.display = 'block';
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestEmail').style.display = 'block';
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestBtn').style.display = 'block';
+      });
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestBtn').addEventListener('click', function () {
+        var email = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestEmail').value;
+        var name = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequestName').value;
+        var yourName = localStorage.getItem('yourName');
+        var familyCode = localStorage.getItem('requesterFamCode');
+        // check if email is an email or mobile number
+        var mobileRegex = /^\+?[1-9]\d{1,14}$/; // Simple regex for international phone numbers
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex for email addresses
+        var helpMsg = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('newMemberRequest_help');
+        if (!emailRegex.test(email) && !mobileRegex.test(email)) {
+          helpMsg.innerHTML = 'Please enter a valid email address or mobile number.';
+          return;
+        }
+        if (!emailRegex.test(email) && mobileRegex.test(email)) {
+          // if it is a mobile number, ensure it starts with country code
+          if (!email.startsWith('+')) {
+            helpMsg.innerHTML = 'Please include the country code. E.g +2348036517179';
+            return;
+          } else {
+            // send a text to the mobile number
+          }
+        } else if (emailRegex.test(email)) {
+          if (name.length < 2) {
+            helpMsg.innerHTML = 'Please enter a valid name with at least 2 characters.';
+            return;
+          }
+
+          // send an email to the email address
+          var postObj = {
+            mobile: "",
+            viewPath: "msg/contactNewMember",
+            data: {
+              email: email,
+              mobile: "",
+              name: name,
+              familyCode: familyCode,
+              yourName: yourName
+            },
+            subject: "".concat(yourName, " Wants You: Experience the Magic of your Family Network Today!")
+          };
+          axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/register/contactNewMember", postObj).then(function (response) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("allMembers", 'is-success', response.data.message);
+            helpMsg.innerHTML = "";
+          })["catch"](function (error) {
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("allMembers", 'is-danger', error.message);
+          });
+        }
+      });
     } else {
       var uniqueItems = {};
       var _iterator = _createForOfIteratorHelper(filteredData),
@@ -724,6 +790,7 @@ var renderHtml = function renderHtml(el) {
     var areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
     var related = famCode == el.famCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Connect';
+    var relationshipType = el.relationship ? el.relationship : 'Immediate Family';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
     var fatherName = toSentenceCase(el.father_name);
     var motherName = toSentenceCase(el.mother_name);
@@ -731,7 +798,7 @@ var renderHtml = function renderHtml(el) {
     // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
-    var html = "\n    <div class=\"member-card member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n\n       <div class=\"member-card-header\">\n            <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\"  alt=\"Member-").concat(el.firstName, "\" class=\"member-avatar\">\n        </div>\n\n        <div class=\"member-card-body\">\n            <h3 class=\"member-name\">").concat(toSentenceCase(el.firstName), " ").concat(toSentenceCase(el.lastName), "</h3>\n            <p class=\"member-location\">").concat(el.country, "</p>\n\n  ").concat(areTheyLinked ? "\n    <div class=\"member-details\">\n      <p class=\"member-detail\"><b>Father:</b> ".concat(fatherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mother:</b> ").concat(motherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Spouse:</b> ").concat(spouseName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mobile:</b> ").concat(el.mobile || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n    </div>\n\n            <div class=\"member-stats\">\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">342</div>\n                            <div class=\"stat-label\">Posts</div>\n                        </div>\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">1.2K</div>\n                            <div class=\"stat-label\">Followers</div>\n                        </div>\n                        <div class=\"stat\">\n                            <div class=\"stat-number\">256</div>\n                            <div class=\"stat-label\">Following</div>\n                        </div>\n                    </div>\n\n    <div class=\"member-interests\">\n      <button class=\"btn btn-profile\" id=\"seeProfile").concat(el.id, "\">\n        <i class=\"fa fa-user\"></i> See Profile\n      </button>\n      <span class=\"btn btn-remove\" id=\"removeProfile").concat(el.id, "\">\n        <i class=\"fa fa-times\"></i> Remove\n      </span>\n    </div>\n  ") : "\n    <div class=\"member-actions\">\n      <button class=\"btn btn-primary btn-sm w-100\" \n              data-user-id=\"addFamily".concat(el.id, "\" \n              ").concat(disableButton, "\n              onmouseover=\"pulseButton(this)\" \n              onmouseout=\"resetButton(this)\">\n        <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n      </button>\n    </div>\n  "), "\n</div>\n\n\n\n    </div>\n");
+    var html = "\n    <div class=\"member-card member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n\n       <div class=\"member-card-header\">\n            <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\"  alt=\"Member-").concat(el.firstName, "\" class=\"member-avatar\">\n        </div>\n\n        <div class=\"member-card-body\">\n            <h3 class=\"member-name\">").concat(toSentenceCase(el.firstName), " ").concat(toSentenceCase(el.lastName), "</h3>\n            <p class=\"member-location\">").concat(el.country, "</p>\n\n  ").concat(areTheyLinked ? "\n    <div class=\"member-details\">\n      <p class=\"member-detail\"><b>Father:</b> ".concat(fatherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mother:</b> ").concat(motherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Spouse:</b> ").concat(spouseName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mobile:</b> ").concat(el.mobile || 'Not specified', "</p>\n       <p class=\"member-detail\"><b>Family Code:</b> ").concat(el.famCode || 'Not specified', "</p>\n         <p class=\"member-detail\"><b>Relationship Type:</b> ").concat(relationshipType, "</p>\n      <p class=\"member-detail\"><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n    </div>\n\n    <div class=\"member-interests\">\n      <button class=\"btn btn-profile\" id=\"seeProfile").concat(el.id, "\">\n        <i class=\"fa fa-user\"></i> See Profile\n      </button>\n      <span class=\"btn btn-remove\" id=\"removeProfile").concat(el.id, "\">\n        <i class=\"fa fa-times\"></i> Remove\n      </span>\n    </div>\n  ") : "\n    <div class=\"member-actions\">\n      <button class=\"btn btn-primary btn-sm w-100\" \n              data-user-id=\"addFamily".concat(el.id, "\" \n              ").concat(disableButton, "\n              onmouseover=\"pulseButton(this)\" \n              onmouseout=\"resetButton(this)\">\n        <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n      </button>\n    </div>\n  "), "\n</div>\n\n\n\n    </div>\n");
     (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } catch (error) {
     (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
@@ -767,6 +834,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   checkElements: () => (/* binding */ checkElements),
 /* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
 /* harmony export */   date2String: () => (/* binding */ date2String),
+/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
+/* harmony export */   formReset: () => (/* binding */ formReset),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
@@ -784,6 +853,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   warningSign: () => (/* binding */ warningSign),
 /* harmony export */   write: () => (/* binding */ write)
 /* harmony export */ });
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 var id = function id(_id) {
   return document.getElementById(_id);
@@ -831,6 +903,74 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
     id(idName).setAttribute(attributeType, nameValue);
   }
 };
+
+/**
+ * Resets a form by clearing all input fields, validation messages, 
+ * image previews and custom inputs.
+ * @param {string} formId - The ID of the form to reset.
+ */
+var formReset = function formReset(formId) {
+  var form = id(formId);
+  if (!form) return;
+
+  // Reset form fields
+  form.reset();
+
+  // Clear validation messages
+  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+    el.classList.remove('is-invalid');
+    if (el.classList.contains('invalid-feedback')) {
+      el.textContent = '';
+    }
+  });
+
+  // Clear image previews
+  form.qSelAll('.preview-img').forEach(function (img) {
+    img.src = '';
+    img.style.display = 'none';
+  });
+
+  // Clear custom inputs (e.g., emoji pickers, rich text)
+  form.qSelAll('[data-custom-input]').forEach(function (el) {
+    el.value = '';
+  });
+};
+var fileUploadSizeValidation = function fileUploadSizeValidation(fileInputId) {
+  var maxSizeMB = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+  var fileInput = id(fileInputId);
+  if (!fileInput || !fileInput.files) return true; // No files to validate
+
+  var maxSizeBytes = maxSizeMB * 1024 * 1024;
+  var _iterator = _createForOfIteratorHelper(fileInput.files),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var file = _step.value;
+      if (file.size > maxSizeBytes) {
+        alert("File ".concat(file.name, " exceeds the maximum size of ").concat(maxSizeMB, "MB."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.size === 0) {
+        alert("File ".concat(file.name, " is empty and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.type.includes("exe") || file.type.includes("sh") || file.type.includes("bat") || file.type.includes("js")) {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/") && !file.type === "application/pdf" && !file.type === "application/msword" && !file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return true; // All files are within size limit
+};
 var date2String = function date2String(date) {
   return new Date().toDateString(date);
 };
@@ -859,7 +999,7 @@ var showNotification = function showNotification(elementId, addClass, message) {
   id("".concat(elementId)).style.display = "block"; // unblock the notification
   id("".concat(elementId)).classList.add(addClass); // add the success class
   id("".concat(elementId)).innerHTML = message; // error element
-  id('loader').classList.remove('loader'); // remove loader
+  // id('loader').classList.remove('loader') // remove loader
 
   setTimeout(function () {
     id("".concat(elementId)).style.backgroundColor = "";
@@ -1144,39 +1284,69 @@ var notificationHTML = function notificationHTML(data) {
   // Map type → { icon, colour }
   var iconMap = {
     friend_request: {
-      icon: "bi bi-person-plus",
+      icon: "fa-solid fa-user-plus",
       color: "text-primary"
     },
     // Blue
     like: {
-      icon: "bi bi-hand-thumbs-up",
+      icon: "fa-solid fa-thumbs-up",
       color: "text-success"
     },
     // Green
     comment: {
-      icon: "bi bi-chat-dots",
+      icon: "fa-solid fa-comment-dots",
       color: "text-info"
     },
     // Cyan
-    anniversary: {
+    Anniversary: {
       icon: "fa-solid fa-cake-candles",
       color: "text-warning"
     },
     // Gold
+    Birthday: {
+      icon: "fa-solid fa-cake-candles",
+      color: "text-warning"
+    },
+    // Gold
+    Wedding: {
+      icon: "fa-solid fa-heart",
+      color: "text-warning"
+    },
+    // Gold
     new_post: {
-      icon: "bi bi-file-post",
+      icon: "fa-solid fa-file-lines",
       color: "text-purple"
     },
     // Custom purple
+    House_Warming: {
+      icon: "fa-solid fa-house",
+      color: "text-orange"
+    },
+    // Orange
+    Reunion: {
+      icon: "fa-solid fa-people-group",
+      color: "text-pink"
+    },
+    // Pink
+    Party: {
+      icon: "fa-solid fa-champagne-glasses",
+      color: "text-danger"
+    },
+    // Red
+    Meeting: {
+      icon: "fa-solid fa-handshake",
+      color: "text-teal"
+    },
+    // Teal
     "default": {
-      icon: "bi bi-bell",
+      icon: "fa-solid fa-bell",
       color: "text-secondary"
     } // Grey
   };
   var _ref = iconMap[data.notification_type] || iconMap["default"],
     icon = _ref.icon,
     color = _ref.color;
-  var readOrUnread = data.notification_status === 'clicked' ? 'read' : 'unread';
+  var readOrUnread = data.notification_status === 'new' ? 'unread' : 'read';
   var sender_id = data.sender_id,
     notification_name = data.notification_name,
     notification_content = data.notification_content,
@@ -1186,7 +1356,7 @@ var notificationHTML = function notificationHTML(data) {
   // generate random numbers to make the notification unique
 
   var randomNumber = Math.floor(100 + Math.random() * 900);
-  return "<div id = \"notificationBar".concat(sender_id).concat(randomNumber, "\"   class=\"list-group-item list-group-item-action d-flex align-items-start notification_real_time ").concat(readOrUnread, " notification-item linkRequestCard\">\n\n    \n            <div class=\"notification-icon ").concat(color, "\">\n                <i class=\"").concat(icon, "\"></i></div>\n            <div class=\"notification-text\">\n                <strong>").concat(notification_name, "</strong>\n                <small>").concat(notification_content, "</small>\n                <div class=\"notification-time\"> ").concat(postAgoNotification(created_at), " </div>\n            </div>\n            <button class=\"notification-delete btn btn-sm btn-outline-secondary btn-light\" \n                 \" \n                    data-no=\"").concat(no, "\"\n                    id=\"deleteNotification").concat(sender_id).concat(randomNumber, "\"\n                    aria-label=\"Delete notification\">\n                <i class=\"bi bi-x-circle\"></i>\n            </button>\n \n\n  </div>\n\n  ");
+  return "<a id = \"notificationBar".concat(sender_id).concat(randomNumber, "\" href=\"#linkNotification").concat(no, "\"  class=\"list-group-item list-group-item-action d-flex align-items-start notification_real_time ").concat(readOrUnread, " notification-item linkRequestCard\">\n\n    \n            <div class=\"notification-icon ").concat(color, "\">\n                <i class=\"").concat(icon, "\"></i></div>\n            <div class=\"notification-text\">\n                <strong>").concat(notification_name, "</strong><br>\n                <small>").concat(notification_content, "</small>\n                <div class=\"notification-time\"> ").concat(postAgoNotification(created_at), " </div>\n            </div>\n            <button class=\"notification-delete btn btn-sm btn-outline-secondary btn-light\" \n                 \" \n                    data-no=\"").concat(no, "\"\n                    data-is=\"").concat(sender_id, "\"\n                    type=\"submit\"\n                    id=\"deleteNotification").concat(sender_id).concat(randomNumber, "\"\n                    aria-label=\"Delete notification\">\n               <i class=\"fa-solid fa-trash\"></i>\n            </button>\n \n\n  </a>\n\n\n  ");
 };
 
 // CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD

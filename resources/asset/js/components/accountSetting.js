@@ -15,6 +15,8 @@ const options = {
   xsrfHeaderName: 'X-XSRF-TOKEN',
 }
 
+alert("Account Setting Page")
+
 
 const process = (e) => {
   try {

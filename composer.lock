@@ -1726,16 +1726,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v1.7.12",
+            "version": "v1.7.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "4ea2784555f8e0ba3b1dd1bff7bc3d7705c3d836"
+                "reference": "93f4054be439bb1656f89b9d8505bcae2789a633"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/4ea2784555f8e0ba3b1dd1bff7bc3d7705c3d836",
-                "reference": "4ea2784555f8e0ba3b1dd1bff7bc3d7705c3d836",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/93f4054be439bb1656f89b9d8505bcae2789a633",
+                "reference": "93f4054be439bb1656f89b9d8505bcae2789a633",
                 "shasum": ""
             },
             "require": {
@@ -1767,7 +1767,10 @@
                     "Tests\\": "tests/"
                 },
                 "files": [
-                    "src/helpers.php"
+                    "helpers/helpers.php",
+                    "helpers/dates.php",
+                    "helpers/csrf.php",
+                    "helpers/session.php"
                 ]
             },
             "license": [
@@ -1781,10 +1784,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.7.12",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.7.14",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2025-09-30T23:30:34+00:00"
+            "time": "2025-10-02T08:31:14+00:00"
         },
         {
             "name": "monolog/monolog",

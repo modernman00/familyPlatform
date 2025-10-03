@@ -10,6 +10,8 @@
             'httponly' => false,
         ]);
 
+        $_SESSION['EDIT_PROFILE_ID'] = $data['id'];
+
     @endphp
 
     <!-- Edit Profile Modal -->

@@ -17,24 +17,28 @@ export const commentForm = ({ post_no }) => {
         value="${post_no}" 
       />
 
+             <div class="mt-3">
+              <div class="input-group">
+
       <input 
         type="text" 
-        class="form-control form-control-sm rounded-pill inputComment" 
-        placeholder="Write a comment" 
+        class="form-control form-control-sm inputComment" 
+        placeholder="Write a comment..." 
         id="inputComment${post_no}" 
         name="comment" 
         value=""
       />
 
-      <div class="mt-3">
         <button 
           type="submit" 
           id="submitComment${post_no}" 
-          class="btn btn-success btn-sm submitComment"
+          class="btn btn-outline-primary btn-sm submitComment"
         >
           Submit
         </button>
-      </div>
+      
+              </div>
+          </div>
     </form>
   `;
 };

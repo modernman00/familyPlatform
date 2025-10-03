@@ -28,7 +28,7 @@
   <p>
   
 
-    Hello {{ $data['firstName'] }},
+    Hello {{ $data['name'] }},
 
     <br><br>
   

@@ -21,7 +21,7 @@ class AllMembersController extends AllMembersData
             // create id for the family tree link
             $data = [
                 'id' => checkInput($_SESSION['id']),
-                'fullName' => checkInput($_SESSION['fName']) . ' ' . checkInput($_SESSION['lName']),
+                'fullName' => checkInput($_SESSION['fullName']),
             ];
 
             view('member/showMembers', \compact('data'));

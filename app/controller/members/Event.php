@@ -16,6 +16,7 @@ use App\model\{EmailData, AllMembersData};
 
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
+use Src\SubmitForm;
 
 class Event extends AllMembersData
 {
@@ -57,12 +58,10 @@ class Event extends AllMembersData
                 removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
                 newInput: [
                     'eventCode' => self::generateFamCode(),
-                    'id' => checkInput($_SESSION['id'])
+                    'id' => checkInput($_SESSION['CREATE_EVENT_ID'])
                 ]
 
             );
-
-
 
 
         } catch (\Throwable $th) {
@@ -72,13 +71,13 @@ class Event extends AllMembersData
 
     private static function generateFamCode(): string
     {
-        $getFamCode = parent::getMemberName(id: $_SESSION['id']);
+        $getFamCode = parent::getMemberName(id: $_SESSION['CREATE_EVENT_ID']);
         return $getFamCode['famCode'];
     }
 
     private static function getSenderName(): string
     {
-        $getSenderName = parent::getMemberName(id: $_SESSION['id']);
+        $getSenderName = parent::getMemberName(id: $_SESSION['CREATE_EVENT_ID']);
         return $getSenderName['fName'] . " " . $getSenderName['lName'];
     }
 
@@ -116,7 +115,7 @@ class Event extends AllMembersData
 
         try {
             $cleanData = LoginUtility::getSanitisedInputData( $_POST);
-            $cleanData['id'] = checkInput(data: $_SESSION['id']);
+            $cleanData['id'] = checkInput(data: $_SESSION['CREATE_EVENT_ID']);
             $id = $cleanData['id'];
 
             // GET THE SENDER'S NAME 
@@ -141,7 +140,7 @@ class Event extends AllMembersData
                 'notification_status' => 'new'
             ];
 
-            $lastInsertedId = Insert::submitFormDynamicLastId(
+            $lastInsertedId = SubmitForm::submitFormDynamicLastId(
                 table: 'notification',
                 field: $cleanDataNotification,
                 lastIdCol: 'no'

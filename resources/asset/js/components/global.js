@@ -36,6 +36,68 @@ export const manipulateAttribute = (idName, removeOrSet, attributeType, nameValu
   
 }
 
+/**
+ * Resets a form by clearing all input fields, validation messages, 
+ * image previews and custom inputs.
+ * @param {string} formId - The ID of the form to reset.
+ */
+export const formReset =(formId)=> {
+    const form = id(formId);
+    if (!form) return;
+
+    // Reset form fields
+    form.reset();
+
+    // Clear validation messages
+    form.qSelAll('.is-invalid, .invalid-feedback').forEach(el => {
+        el.classList.remove('is-invalid');
+        if (el.classList.contains('invalid-feedback')) {
+            el.textContent = '';
+        }
+    });
+
+
+    // Clear image previews
+    form.qSelAll('.preview-img').forEach(img => {
+        img.src = '';
+        img.style.display = 'none';
+    });
+
+    // Clear custom inputs (e.g., emoji pickers, rich text)
+    form.qSelAll('[data-custom-input]').forEach(el => {
+        el.value = '';
+    });
+}
+
+
+export const fileUploadSizeValidation = (fileInputId, maxSizeMB = 3) => {
+    const fileInput = id(fileInputId);
+    if (!fileInput || !fileInput.files) return true; // No files to validate
+
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    for (const file of fileInput.files) {
+        if (file.size > maxSizeBytes) {
+            alert(`File ${file.name} exceeds the maximum size of ${maxSizeMB}MB.`);
+            fileInput.value = ''; // Clear the input
+            return false; // Validation failed
+        } else if (file.size === 0) {
+            alert(`File ${file.name} is empty and cannot be uploaded.`);
+            fileInput.value = ''; // Clear the input
+            return false; // Validation failed
+        } else if(file.type.includes("exe") || file.type.includes("sh") || file.type.includes("bat") || file.type.includes("js")) {
+            alert(`File ${file.name} is of an unsupported type and cannot be uploaded.`);
+            fileInput.value = ''; // Clear the input
+            return false; // Validation failed
+        } else if(!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/") && !file.type === "application/pdf" && !file.type === "application/msword" && !file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+            alert(`File ${file.name} is of an unsupported type and cannot be uploaded.`);
+            fileInput.value = ''; // Clear the input
+            return false; // Validation failed
+        }
+    }
+    return true; // All files are within size limit
+};
+
+
 export const date2String = (date) => new Date().toDateString(date)
 
 export const showError = (e) => {
@@ -66,7 +128,7 @@ export const showNotification = (elementId, addClass, message, timer = 5000) => 
     id(`${elementId}`).style.display = "block" // unblock the notification
     id(`${elementId}`).classList.add(addClass) // add the success class
     id(`${elementId}`).innerHTML = message // error element
-    id('loader').classList.remove('loader') // remove loader
+    // id('loader').classList.remove('loader') // remove loader
 
     setTimeout(() => {
         id(`${elementId}`).style.backgroundColor = ""

@@ -495,6 +495,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   checkElements: () => (/* binding */ checkElements),
 /* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
 /* harmony export */   date2String: () => (/* binding */ date2String),
+/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
+/* harmony export */   formReset: () => (/* binding */ formReset),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
@@ -512,6 +514,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   warningSign: () => (/* binding */ warningSign),
 /* harmony export */   write: () => (/* binding */ write)
 /* harmony export */ });
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 var id = function id(_id) {
   return document.getElementById(_id);
@@ -559,6 +564,74 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
     id(idName).setAttribute(attributeType, nameValue);
   }
 };
+
+/**
+ * Resets a form by clearing all input fields, validation messages, 
+ * image previews and custom inputs.
+ * @param {string} formId - The ID of the form to reset.
+ */
+var formReset = function formReset(formId) {
+  var form = id(formId);
+  if (!form) return;
+
+  // Reset form fields
+  form.reset();
+
+  // Clear validation messages
+  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+    el.classList.remove('is-invalid');
+    if (el.classList.contains('invalid-feedback')) {
+      el.textContent = '';
+    }
+  });
+
+  // Clear image previews
+  form.qSelAll('.preview-img').forEach(function (img) {
+    img.src = '';
+    img.style.display = 'none';
+  });
+
+  // Clear custom inputs (e.g., emoji pickers, rich text)
+  form.qSelAll('[data-custom-input]').forEach(function (el) {
+    el.value = '';
+  });
+};
+var fileUploadSizeValidation = function fileUploadSizeValidation(fileInputId) {
+  var maxSizeMB = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+  var fileInput = id(fileInputId);
+  if (!fileInput || !fileInput.files) return true; // No files to validate
+
+  var maxSizeBytes = maxSizeMB * 1024 * 1024;
+  var _iterator = _createForOfIteratorHelper(fileInput.files),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var file = _step.value;
+      if (file.size > maxSizeBytes) {
+        alert("File ".concat(file.name, " exceeds the maximum size of ").concat(maxSizeMB, "MB."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.size === 0) {
+        alert("File ".concat(file.name, " is empty and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.type.includes("exe") || file.type.includes("sh") || file.type.includes("bat") || file.type.includes("js")) {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/") && !file.type === "application/pdf" && !file.type === "application/msword" && !file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return true; // All files are within size limit
+};
 var date2String = function date2String(date) {
   return new Date().toDateString(date);
 };
@@ -587,7 +660,7 @@ var showNotification = function showNotification(elementId, addClass, message) {
   id("".concat(elementId)).style.display = "block"; // unblock the notification
   id("".concat(elementId)).classList.add(addClass); // add the success class
   id("".concat(elementId)).innerHTML = message; // error element
-  id('loader').classList.remove('loader'); // remove loader
+  // id('loader').classList.remove('loader') // remove loader
 
   setTimeout(function () {
     id("".concat(elementId)).style.backgroundColor = "";

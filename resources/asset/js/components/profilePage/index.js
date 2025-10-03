@@ -27,17 +27,15 @@ localStorage.removeItem('redirect')
 import "./loadPost"
 import "./modal"
 import "./img"
-import "./emojiPicker"
 import "./rsvpBtn"
-
 import "./allEvents"
 import "./registerPushNotification"
 import "./periodicSync"
-
 import "./createEvent"
 import "./friendRequestCard"
 import "../navbar"
 import "./editProfile"
+import "./emojiPicker"
 // import "./newPage"
 
 

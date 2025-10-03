@@ -115,7 +115,7 @@ class AllMembersData extends InnerJoin
      * @param string $famCode The family code used to filter members.
      * @return array An array containing the email, family code, first name, last name, and ID of each member.
      */
-    public static function AllMembersEmailByFamCode($famCode, $id): array
+    public static function AllMembersEmailByFamCode($famCode): array
     {
         try {
             $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id 
@@ -123,7 +123,7 @@ class AllMembersData extends InnerJoin
                       INNER JOIN personal p ON a.id = p.id                    
                       WHERE (p.famCode = :famCode)";
             $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode, 'id' => $id]);
+            $result->execute(['famCode' => $famCode]);
             return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);

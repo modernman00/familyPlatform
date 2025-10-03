@@ -2,43 +2,44 @@ import { format } from "timeago.js"
 import { id, showError } from "@shared"
 
 const toSentenceCase = (str) => {
-     if (str || typeof str == 'string') 
+  if (str || typeof str == 'string')
     // {
     //     throw new Error('Invalid sentence for toSentenceCase function')
     // }
     return str
-        .toLowerCase() // Convert the string to lowercase
-        .split(' ')    // Split the string into words
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-        .join(' ');    // Join the words back into a string
+      .toLowerCase() // Convert the string to lowercase
+      .split(' ')    // Split the string into words
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
+      .join(' ');    // Join the words back into a string
 }
 
 export const renderHtml = (el) => {
-    const famCode = localStorage.getItem('requesterFamCode')
-    const reqId = localStorage.getItem('requesterId')
+  const famCode = localStorage.getItem('requesterFamCode')
+  const reqId = localStorage.getItem('requesterId')
 
-    try {
-        if (!el) {
-            // Handle the case where 'el' is falsy, such as when data is not available.
-            throw new Error('there is no data')
-        }
+  try {
+    if (!el) {
+      // Handle the case where 'el' is falsy, such as when data is not available.
+      throw new Error('there is no data')
+    }
 
-        const theImg = `/public/img/profile/${el.img}`;
-        const areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
-        const related = famCode == el.famCode
-        const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
-            el.status :
-            'Connect';
+    const theImg = `/public/img/profile/${el.img}`;
+    const areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
+    const related = famCode == el.famCode
+    const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
+      el.status :
+      'Connect';
+      const relationshipType = (el.relationship)? el.relationship: 'Immediate Family';
 
-        const disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
+    const disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
 
-        const fatherName = toSentenceCase(el.father_name);
-        const motherName = toSentenceCase(el.mother_name);
-        const spouseName = toSentenceCase(el.spouseName);
-        // const spouse = toSentenceCase(el.spouseName);
+    const fatherName = toSentenceCase(el.father_name);
+    const motherName = toSentenceCase(el.mother_name);
+    const spouseName = toSentenceCase(el.spouseName);
+    // const spouse = toSentenceCase(el.spouseName);
 
-        // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
-        const html = `
+    // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
+    const html = `
     <div class="member-card member_profile_${el.id}" id="${el.id}">
 
        <div class="member-card-header">
@@ -55,23 +56,10 @@ export const renderHtml = (el) => {
       <p class="member-detail"><b>Mother:</b> ${motherName || 'Not specified'}</p>
       <p class="member-detail"><b>Spouse:</b> ${spouseName || 'Not specified'}</p>
       <p class="member-detail"><b>Mobile:</b> ${el.mobile || 'Not specified'}</p>
+       <p class="member-detail"><b>Family Code:</b> ${el.famCode || 'Not specified'}</p>
+         <p class="member-detail"><b>Relationship Type:</b> ${relationshipType}</p>
       <p class="member-detail"><b>Member since:</b> ${format(el.created_at)}</p>
     </div>
-
-            <div class="member-stats">
-                        <div class="stat">
-                            <div class="stat-number">342</div>
-                            <div class="stat-label">Posts</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">1.2K</div>
-                            <div class="stat-label">Followers</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-number">256</div>
-                            <div class="stat-label">Following</div>
-                        </div>
-                    </div>
 
     <div class="member-interests">
       <button class="btn btn-profile" id="seeProfile${el.id}">
@@ -100,13 +88,13 @@ export const renderHtml = (el) => {
 `;
 
 
-        id('allMembers').insertAdjacentHTML('beforeend', html);
+    id('allMembers').insertAdjacentHTML('beforeend', html);
 
-    } catch (error) {
+  } catch (error) {
 
-        showError(error);
+    showError(error);
 
-    }
+  }
 
 
 };

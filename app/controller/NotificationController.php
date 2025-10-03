@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\classes\{Select, Insert};
-
+use Src\Exceptions\NotFoundException;
 use Src\Update;
 
 
@@ -63,13 +63,13 @@ class NotificationController extends Select
     }
 
     // make notification as read 
-    public static function notificationRead($no, $senderId, $famCode)
+    public static function notificationRead($no)
     {
         try {
             $no = checkInput($no) ?? null;
 
-            if ($no === null || $senderId === null || $famCode === null) {
-                msgException(400, 'You ID, sender ID, and family code must be provided');
+            if ($no === null) {
+                throw new NotFoundException('Notification No not found');
             }
 
 

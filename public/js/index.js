@@ -84,17 +84,13 @@ document.addEventListener('DOMContentLoaded', function () {
     '/allMembers/getProfile': {
       // Module import commented out — placeholder for future logic
       hide: ['.familyTreeNav', '.notification_count'] // Hide navbars
-    }
-  };
-
-  // Support for dynamic route matching
-  if (checkURL('accountSetting')) {
-    routeMap['/accountSetting'] = {
+    },
+    '/accountSetting': {
       module: function module() {
         return Promise.all(/*! import() | accountSetting */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("accountSetting")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/accountSetting */ "./resources/asset/js/components/accountSetting.js"));
       }
-    };
-  }
+    }
+  };
   try {
     var path = window.location.pathname;
     var route = routeMap[path];

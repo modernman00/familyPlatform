@@ -10,20 +10,34 @@ export const commentHTML = (data) => {
   
   const image = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
 
-  return `<div class='d-flex mb-3 commentDiv' id='comment${comment_no}' name='commentDiv'>
-         
-      <img src='${image}' alt='Avatar' class="rounded-circle me-2 commentImg" width="32" height="32">
+  return `<div class="d-flex mb-3 commentDiv align-items-start" id="comment${comment_no}" name="commentDiv">
+  <img src="${image}" alt="Avatar" class="rounded-circle me-2 commentImg" width="32" height="32">
 
-              <div class="flex-grow-1">
-                <div class="comment">
-                  <strong> ${toSentenceCase(fullName)} </strong> 
-                  ${comment}  
-                  <small class='w3-right w3-opacity commentTiming' datetime='${date_created}' title='${date_created}'> ${format(date_created)} 
-                  </small> 
-                  </div>
-              </div>
-         
-          </div>`
+  <div class="flex-grow-1">
+    <div class="d-flex justify-content-between align-items-center">
+      <strong>${toSentenceCase(fullName)}</strong>
+      <small class="text-muted commentTiming" datetime="${date_created}" title="${date_created}">
+        ${format(date_created)}
+      </small>
+    </div>
+
+    <div class="comment-text mb-2">
+      ${comment}
+    </div>
+
+    <div class="comment-actions d-flex gap-3">
+      <button class="btn btn-sm btn-icon text-danger" onclick="removeComment(${comment_no})" title="Remove">
+        <i class="bi bi-trash"></i>
+      </button>
+      <button class="btn btn-sm btn-icon text-warning" onclick="reportComment(${comment_no})" title="Report">
+        <i class="bi bi-flag"></i>
+      </button>
+      <button class="btn btn-sm btn-icon text-primary" onclick="likeComment(${comment_no})" title="Like">
+        <i class="bi bi-hand-thumbs-up"></i>
+      </button>
+    </div>
+  </div>
+</div>`
 }
 
 export const showComment = (comment) => {
@@ -65,22 +79,5 @@ export const appendNewComment = (commentData) => {
 
 }
 
-export const writeComment = (postNo) => {
-  return ` 
-    <form action="/postCommentProfile" 
-      id="formComment${postNo}" 
-    >
-          <div class="mt-3">
-              <div class="input-group">
-                <input type="text" class="form-control" 
-                id="inputComment${postNo}" placeholder="Write a comment...">
-
-                <button class="btn btn-outline-primary" type="button" id="inputComment${postNo}" name="inputComment">Post</button>
-
-              </div>
-          </div>
-    </form>
-    `
-}
 
 

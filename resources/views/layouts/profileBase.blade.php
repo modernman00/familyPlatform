@@ -6,6 +6,10 @@
     <title>{{ $_ENV['APP_NAME'] }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+ 
+    <script src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
+
       <title>@yield('title')</title>
 
         <link rel="stylesheet" href="/public/noscript.css" />

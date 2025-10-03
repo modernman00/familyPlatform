@@ -2,7 +2,7 @@
         <div class="sidebar-column">
             <!-- Events -->
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center" id="eventHeader">
                     <h6 class="mb-0">Upcoming Events</h6>
                     <a href="#" class="btn btn-sm btn-outline-primary">See All</a>
                 </div>
@@ -25,18 +25,26 @@
                     }
                     @endphp
 
-                    <div class="event-card card mb-3">
+                    <div class="event-card card mb-3" id="linkNotification{{ $event['no'] }}">
                         <div class="card-body">
                             <div class="d-flex">
-                                <div class="event-date me-3">
-                                    <div class="fw-bold">20</div>
-                                    <div>OCT</div>
-                                </div>
+                           
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-0">{{ $event['firstName'] }} {{ $event['lastName'] }} - {{ $event['eventName'] }} - </h6>
-                                     <p class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</p>
-                                    <p class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</p>
-                                    <small class="text-muted">{{ dateFormat($event['eventDate']) }} | <b><i style="color: rgba(11, 11, 201, 0.631)"> {{ $dateDifference }}</small>
+
+                                    <small class="eventInfo"><strong>RSVP:</strong> {{ $event['firstName'] }} {{ $event['lastName'] }}  </small><br>
+
+                                      <small class="eventInfo"><strong>Event: </strong>{{ $event['eventName'] }}</small><br>
+
+                                     <small class="eventInfo"><strong>Type: </strong>{{ $event['eventType'] }}</small><br>
+
+                                    <small class="eventInfo"><strong>Description: </strong> {{ $event['eventDescription'] }}</small><br>
+
+                                    <small class="eventInfo"> <strong>Date:</strong> {{ dateFormat($event['eventDate']) }} </small>
+                                 
+                                    <small style="color: rgba(11, 11, 201, 0.631)"> {{ $dateDifference }}</small>
+
+                                     <input type='hidden' name='event_no' id='event{{ $event['no'] }}' value='{{ $event['no'] }}'>
+
                                     <div class="mt-2 rsvp-buttons d-flex">
                                         <button class="btn btn-sm btn-outline-primary">Going</button>
                                         <button class="btn btn-sm btn-outline-secondary">Maybe</button>

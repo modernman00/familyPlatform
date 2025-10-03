@@ -1,5 +1,5 @@
 "use strict";
-import { id, log, msgException, deleteNotification } from "../global"
+import { id, showError, formReset, fileUploadSizeValidation } from "../global"
 import axios from "axios"
 
 
@@ -70,6 +70,7 @@ try {
 
                 await axios.get("/getNewCommentPusher");
 
+                formReset(idForm);
 
 
             }
@@ -77,8 +78,22 @@ try {
         } else if (elementId.includes("submitPost")) {
 
             e.preventDefault()
+
+            // check if the post message is empty
+            const postMessage = id('postMessage').value.trim();
+
+            if (postMessage === "") {
+                alert("Post message cannot be empty");
+                return;
+            }
+
+            // validate the file input if any
+            fileUploadSizeValidation('post_img', 3);
+
+
             const formExtra = id('formPostMessageModal')
             const formData = new FormData(formExtra)
+            
             // get the requesterFamCode from the localStorage 
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
             // Append the new form entry to the FormData object
@@ -91,17 +106,18 @@ try {
                 // 2. Notify members of similar famcode about the post by email
                 // 3. Update all members of similar famcode on their UIs using Pusher
                 await Promise.all([
-                    axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message),
+                    axios.get("/post/getNewPostAndEmail?newPostNo=" + response.data.token),
                     axios.get("/getNewPostPusher")
                 ]);
 
-                // Hide the modal and reset the form
-                id('id01').style.display = 'none';
-                id("formPostMessageModal").reset();
+                formReset("formPostMessageModal");
+                
             } catch (error) {
-                console.error("An error occurred:", error);
+                console.error("An error occurred:", error.response.data.message);
                 // Optionally, display an error message to the user
-                alert("There was an error processing your request. Please try again.");
+                id('formPostMessageModal_notification').innerHTML = 'There was an error submitting your post. Please try again later.';
+                id('formPostMessageModal_notification').classList.add('is-danger');
+                id('formPostMessageModal_notification').style.display = 'block';
             }
 
         }     

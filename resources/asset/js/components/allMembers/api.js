@@ -40,14 +40,14 @@ axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
 
         const data = response.data;
 
+        console.log(data);
+
         const dataWithFamCode = filterMembersByFamCode(data);
 
         renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, renderHtml);
 
         // Remove the "loader" class after rendering is complete
         id('setLoader').classList.remove('loader');
-
-
 
         id('searchFamily').addEventListener('input', () => handleInput(
             data,

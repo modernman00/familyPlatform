@@ -50,6 +50,29 @@
                 reader.readAsDataURL(file); // Read the file as a data URL
             });
         });
+
+            window.appUrl = "{{ env('MIX_APP_URL') }}";
+
+        //        // Image Modal functionality
+        // function openModal(src) {
+        //     document.getElementById('imageModal').style.display = 'flex';
+        //     document.getElementById('modalImage').src = src;
+        //     document.body.style.overflow = 'hidden';
+        // }
+
+        // function closeModal() {
+        //     document.getElementById('imageModal').style.display = 'none';
+        //     document.body.style.overflow = 'auto';
+        // }
+
+        // // Close modal when clicking outside the image
+        // window.onclick = function(event) {
+        //     const modal = document.getElementById('imageModal');
+        //     if (event.target === modal) {
+        //         closeModal();
+        //     }
+        // }
+            
     </script>
 
 

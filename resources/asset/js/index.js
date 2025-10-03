@@ -55,14 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // Module import commented out — placeholder for future logic
       hide: ['.familyTreeNav', '.notification_count'], // Hide navbars
     },
+    '/accountSetting': {
+      
+      module: () => import(/* webpackChunkName: 'accountSetting' */ './components/accountSetting'),
+
+    },
   };
 
-  // Support for dynamic route matching
-  if (checkURL('accountSetting')) {
-    routeMap['/accountSetting'] = {
-      module: () => import(/* webpackChunkName: 'accountSetting' */ './components/accountSetting'),
-    };
-  }
+
 
   try {
     const path = window.location.pathname;

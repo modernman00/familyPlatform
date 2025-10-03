@@ -21,7 +21,7 @@
                         <a class="nav-link active" href="/organogram/{{ $data['id'] }}">Family Tree </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Events</a>
+                        <a class="nav-link" href="#eventHeader">Events</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/allMembers">All members</a>

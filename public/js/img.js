@@ -12,6 +12,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   checkElements: () => (/* binding */ checkElements),
 /* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
 /* harmony export */   date2String: () => (/* binding */ date2String),
+/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
+/* harmony export */   formReset: () => (/* binding */ formReset),
 /* harmony export */   hideElement: () => (/* binding */ hideElement),
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
@@ -29,6 +31,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   warningSign: () => (/* binding */ warningSign),
 /* harmony export */   write: () => (/* binding */ write)
 /* harmony export */ });
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
 var id = function id(_id) {
   return document.getElementById(_id);
@@ -76,6 +81,74 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
     id(idName).setAttribute(attributeType, nameValue);
   }
 };
+
+/**
+ * Resets a form by clearing all input fields, validation messages, 
+ * image previews and custom inputs.
+ * @param {string} formId - The ID of the form to reset.
+ */
+var formReset = function formReset(formId) {
+  var form = id(formId);
+  if (!form) return;
+
+  // Reset form fields
+  form.reset();
+
+  // Clear validation messages
+  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+    el.classList.remove('is-invalid');
+    if (el.classList.contains('invalid-feedback')) {
+      el.textContent = '';
+    }
+  });
+
+  // Clear image previews
+  form.qSelAll('.preview-img').forEach(function (img) {
+    img.src = '';
+    img.style.display = 'none';
+  });
+
+  // Clear custom inputs (e.g., emoji pickers, rich text)
+  form.qSelAll('[data-custom-input]').forEach(function (el) {
+    el.value = '';
+  });
+};
+var fileUploadSizeValidation = function fileUploadSizeValidation(fileInputId) {
+  var maxSizeMB = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 3;
+  var fileInput = id(fileInputId);
+  if (!fileInput || !fileInput.files) return true; // No files to validate
+
+  var maxSizeBytes = maxSizeMB * 1024 * 1024;
+  var _iterator = _createForOfIteratorHelper(fileInput.files),
+    _step;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var file = _step.value;
+      if (file.size > maxSizeBytes) {
+        alert("File ".concat(file.name, " exceeds the maximum size of ").concat(maxSizeMB, "MB."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.size === 0) {
+        alert("File ".concat(file.name, " is empty and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (file.type.includes("exe") || file.type.includes("sh") || file.type.includes("bat") || file.type.includes("js")) {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      } else if (!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/") && !file.type === "application/pdf" && !file.type === "application/msword" && !file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        alert("File ".concat(file.name, " is of an unsupported type and cannot be uploaded."));
+        fileInput.value = ''; // Clear the input
+        return false; // Validation failed
+      }
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
+  }
+  return true; // All files are within size limit
+};
 var date2String = function date2String(date) {
   return new Date().toDateString(date);
 };
@@ -104,7 +177,7 @@ var showNotification = function showNotification(elementId, addClass, message) {
   id("".concat(elementId)).style.display = "block"; // unblock the notification
   id("".concat(elementId)).classList.add(addClass); // add the success class
   id("".concat(elementId)).innerHTML = message; // error element
-  id('loader').classList.remove('loader'); // remove loader
+  // id('loader').classList.remove('loader') // remove loader
 
   setTimeout(function () {
     id("".concat(elementId)).style.backgroundColor = "";
@@ -521,8 +594,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   appendNewComment: () => (/* binding */ appendNewComment),
 /* harmony export */   commentHTML: () => (/* binding */ commentHTML),
-/* harmony export */   showComment: () => (/* binding */ showComment),
-/* harmony export */   writeComment: () => (/* binding */ writeComment)
+/* harmony export */   showComment: () => (/* binding */ showComment)
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -537,7 +609,7 @@ var commentHTML = function commentHTML(data) {
     comment_no = data.comment_no;
   var imgURL = profileImg || img;
   var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class='d-flex mb-3 commentDiv' id='comment".concat(comment_no, "' name='commentDiv'>\n         \n      <img src='").concat(image, "' alt='Avatar' class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n              <div class=\"flex-grow-1\">\n                <div class=\"comment\">\n                  <strong> ").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), " </strong> \n                  ").concat(comment, "  \n                  <small class='w3-right w3-opacity commentTiming' datetime='").concat(date_created, "' title='").concat(date_created, "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), " \n                  </small> \n                  </div>\n              </div>\n         \n          </div>");
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" id=\"comment".concat(comment_no, "\" name=\"commentDiv\">\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n    <div class=\"comment-actions d-flex gap-3\">\n      <button class=\"btn btn-sm btn-icon text-danger\" onclick=\"removeComment(").concat(comment_no, ")\" title=\"Remove\">\n        <i class=\"bi bi-trash\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-warning\" onclick=\"reportComment(").concat(comment_no, ")\" title=\"Report\">\n        <i class=\"bi bi-flag\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-primary\" onclick=\"likeComment(").concat(comment_no, ")\" title=\"Like\">\n        <i class=\"bi bi-hand-thumbs-up\"></i>\n      </button>\n    </div>\n  </div>\n</div>");
 };
 var showComment = function showComment(comment) {
   if (!comment) {
@@ -564,9 +636,6 @@ var appendNewComment = function appendNewComment(commentData) {
   }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
-};
-var writeComment = function writeComment(postNo) {
-  return " \n    <form action=\"/postCommentProfile\" \n      id=\"formComment".concat(postNo, "\" \n    >\n          <div class=\"mt-3\">\n              <div class=\"input-group\">\n                <input type=\"text\" class=\"form-control\" \n                id=\"inputComment").concat(postNo, "\" placeholder=\"Write a comment...\">\n\n                <button class=\"btn btn-outline-primary\" type=\"button\" id=\"inputComment").concat(postNo, "\" name=\"inputComment\">Post</button>\n\n              </div>\n          </div>\n    </form>\n    ");
 };
 
 /***/ }),
@@ -595,7 +664,7 @@ var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var post_no = el.post_no,
     postMessage = el.postMessage;
-  return "\n    <div class=\"post card\">\n     <div class=\"card-body post{{$data['post_no']}}\" id=\"postIt\">\n    ".concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n    ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.writeComment)(el), "\n      \n    </div>\n");
+  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(el), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n\n      \n    </div>\n");
 };
 
 /***/ }),
@@ -612,7 +681,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var commentForm = function commentForm(_ref) {
   var post_no = _ref.post_no;
-  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      style=\"display:none\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n      <input \n        type=\"text\" \n        class=\"form-control form-control-sm rounded-pill inputComment\" \n        placeholder=\"Write a comment\" \n        id=\"inputComment").concat(post_no, "\" \n        name=\"comment\" \n        value=\"\"\n      />\n\n      <div class=\"mt-3\">\n        <button \n          type=\"submit\" \n          id=\"submitComment").concat(post_no, "\" \n          class=\"btn btn-success btn-sm submitComment\"\n        >\n          Submit\n        </button>\n      </div>\n    </form>\n  ");
+  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      style=\"display:none\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n             <div class=\"mt-3\">\n              <div class=\"input-group\">\n\n      <input \n        type=\"text\" \n        class=\"form-control form-control-sm inputComment\" \n        placeholder=\"Write a comment...\" \n        id=\"inputComment").concat(post_no, "\" \n        name=\"comment\" \n        value=\"\"\n      />\n\n        <button \n          type=\"submit\" \n          id=\"submitComment").concat(post_no, "\" \n          class=\"btn btn-outline-primary btn-sm submitComment\"\n        >\n          Submit\n        </button>\n      \n              </div>\n          </div>\n    </form>\n  ");
 };
 
 /***/ }),
@@ -688,6 +757,7 @@ var nameImgTiming = function nameImgTiming(data) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   imgCount: () => (/* binding */ imgCount),
 /* harmony export */   showPostImg: () => (/* binding */ showPostImg)
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
@@ -698,12 +768,26 @@ var showPostImg = function showPostImg(data) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/public/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"img-fluid mb-3\" id=\"postImage").concat(i, "\" >\n      </div>\n    </a>\n  ");
+    return "\n  \n\n     \n        <img \n          src=\"/public/img/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          class=\"grid-image zoomable-image\" \n          id=\"postImage").concat(i, "\"\n          >\n    \n \n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
   }).join('');
-  return "\n\n      ".concat(imgElements, "\n\n  ");
+
+  // ✅ Optional: return both HTML and count for contributor-safe rendering
+  return imgElements;
+};
+var imgCount = function imgCount(data) {
+  // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
+  var postImagesWithValues = Object.keys(data).filter(function (key) {
+    return key.startsWith('post_img') && data[key] !== null;
+  }).map(function (el) {
+    return data[el];
+  });
+  var imageCount = postImagesWithValues.length;
+
+  // ✅ Optional: return both HTML and count for contributor-safe rendering
+  return imageCount;
 };
 
 /***/ }),

@@ -32,17 +32,24 @@ const notificationHTML = (data) => {
 
     // Map notification types to icon classes
     // Map type → { icon, colour }
-    const iconMap = {
-        friend_request: { icon: "bi bi-person-plus", color: "text-primary" },   // Blue
-        like: { icon: "bi bi-hand-thumbs-up", color: "text-success" }, // Green
-        comment: { icon: "bi bi-chat-dots", color: "text-info" },         // Cyan
-        anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" }, // Gold
-        new_post: { icon: "bi bi-file-post", color: "text-purple" },       // Custom purple
-        default: { icon: "bi bi-bell", color: "text-secondary" }          // Grey
-    };
+const iconMap = {
+    friend_request: { icon: "fa-solid fa-user-plus", color: "text-primary" },       // Blue
+    like: { icon: "fa-solid fa-thumbs-up", color: "text-success" },                // Green
+    comment: { icon: "fa-solid fa-comment-dots", color: "text-info" },             // Cyan
+    Anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" },      // Gold
+    Birthday: { icon: "fa-solid fa-cake-candles", color: "text-warning" },         // Gold
+    Wedding: { icon: "fa-solid fa-heart", color: "text-warning" },                 // Gold
+    new_post: { icon: "fa-solid fa-file-lines", color: "text-purple" },            // Custom purple
+    House_Warming: { icon: "fa-solid fa-house", color: "text-orange" },            // Orange
+    Reunion: { icon: "fa-solid fa-people-group", color: "text-pink" },             // Pink
+    Party: { icon: "fa-solid fa-champagne-glasses", color: "text-danger" },        // Red
+    Meeting: { icon: "fa-solid fa-handshake", color: "text-teal" },                // Teal
+    default: { icon: "fa-solid fa-bell", color: "text-secondary" }                 // Grey
+};
 
     const { icon, color } = iconMap[data.notification_type] || iconMap.default
-    const readOrUnread = (data.notification_status === 'clicked') ? 'read' : 'unread'
+
+    const readOrUnread = (data.notification_status === 'new') ? 'unread' : 'read'
     const { sender_id, notification_name, notification_content, created_at, no } = data
 
 
@@ -50,26 +57,29 @@ const notificationHTML = (data) => {
 
     let randomNumber = Math.floor(100 + Math.random() * 900);
 
-    return `<div id = "notificationBar${sender_id}${randomNumber}"   class="list-group-item list-group-item-action d-flex align-items-start notification_real_time ${readOrUnread} notification-item linkRequestCard">
+    return `<a id = "notificationBar${sender_id}${randomNumber}" href="#linkNotification${no}"  class="list-group-item list-group-item-action d-flex align-items-start notification_real_time ${readOrUnread} notification-item linkRequestCard">
 
     
             <div class="notification-icon ${color}">
                 <i class="${icon}"></i></div>
             <div class="notification-text">
-                <strong>${notification_name}</strong>
+                <strong>${notification_name}</strong><br>
                 <small>${notification_content}</small>
                 <div class="notification-time"> ${postAgoNotification(created_at)} </div>
             </div>
             <button class="notification-delete btn btn-sm btn-outline-secondary btn-light" 
                  " 
                     data-no="${no}"
+                    data-is="${sender_id}"
+                    type="submit"
                     id="deleteNotification${sender_id}${randomNumber}"
                     aria-label="Delete notification">
-                <i class="bi bi-x-circle"></i>
+               <i class="fa-solid fa-trash"></i>
             </button>
  
 
-  </div>
+  </a>
+
 
   `
 }

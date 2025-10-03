@@ -76,10 +76,8 @@ const process = async (e) => {
 
         axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
 
-
-        // close the modal
-        // displayNone();
-
+      // redirect to the profile page to view the event
+        window.location.href = '/profilePage';
 
     } catch (error) {
         showError(error)
@@ -88,12 +86,6 @@ const process = async (e) => {
 }
 
 id('submitEventModal').addEventListener('click', process)
-
-//    if (document.readyState === 'loading') {
-//     document.addEventListener('DOMContentLoaded', () => {
-//         id('submitEventModal').addEventListener('click', process)
-//     });
-//   }
 
 
 

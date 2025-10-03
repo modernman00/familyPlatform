@@ -13,7 +13,7 @@ use Src\functionality\{
 };
 use Src\{SubmitForm, FileUploader, LoginUtility};
 use App\controller\BaseController;
-use Src\functionality\UpdateExistingData;
+use Src\functionality\{UpdateExistingData, SubmitPostData};
 
 use App\classes\{ProcessImg};
 
@@ -36,22 +36,41 @@ class ProfilePage extends BaseController
 
     public function index(): void
     {
-          unset($_SESSION['auth'], $_SESSION['imageUploadOutcome'], $_SESSION['token']);
+        unset(
+            $_SESSION['auth'],
+            $_SESSION['imageUploadOutcome'],
+            $_SESSION['token'],
+            $_SESSION['EDIT_PROFILE_ID'],
+            $_SESSION['CREATE_EVENT_ID'],
+            $_SESSION['changePW'],
+            $_SESSION['register'],
+
+        );
+
+        unsetSess(['auth', 'imageUploadOutcome', 'token', 'EDIT_PROFILE_ID', 'CREATE_EVENT_ID', 'changePW', 'register', 'LAST_INSERT_ID_COMMENT', 'LAST_INSERT_ID_CODE_MGT', 'LAST_INSERT_ID_POST', 'LAST_INSERT_ID_AUDIT_LOGS', 'LAST_INSERT_ID_NOTIFICATION', 'POST_COUNT', 'fName', 'lName', 'currentTime', 'LAST_INSERT_ID_EVENTS', 'LAST_INSERT_ID_events', 'email', 'id', 'famCode']);
+
         try {
-
-
             $VerifyJWT = SignIn::verify();
 
             if (!$VerifyJWT) {
                 redirect('/login');
             }
 
+            if (!isset($_SESSION['id'])) {
+                $_SESSION['id'] = $VerifyJWT['id'];
+            }
+
+
+
             $id = $VerifyJWT['id'] ?? throw new Exception("Error Processing ID request", 1);
             $setData = new SingleCustomerData;
             $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
             $memberData = $setData->getCustomerData($id, $table);
-            $getFamCode = checkInput($memberData['famCode']);
-            $_SESSION['famCode'] = $getFamCode;
+            $getFamCode = $memberData['famCode'];
+            sessSetMany([
+                'famCode' => $getFamCode,
+                'fullName' => $memberData['firstName'] . ' ' . $memberData['lastName']
+            ]);
             $friendRequestData = DataAll::getFriendRequestData($id, "Request sent");
             $postLink2Id = Post::postLink2Id($id);
             $pic2Id = Post::getAllPostPics($id);
@@ -70,7 +89,6 @@ class ProfilePage extends BaseController
                 'requestData' => $friendRequestData
                 // 'comment2Post' => $this->comment2Post
             ]);
-
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -95,36 +113,15 @@ class ProfilePage extends BaseController
      */
     private function processPostData(): array
     {
-        if (!$_POST) {
-            throw new Exception("There was no post data", 1);
-        }
-        // SANITISE THE POST 
-        unset($_POST['post_img']);
-        $getSanitisePost = LoginUtility::getSanitisedInputData($_POST);
+        $id = cleanSession($_SESSION['id']);
+        $newInput = [
+            'id' => $id,
+            'fullName' => sessGet('fullName'),
+            'post_time' => milliSeconds(),
+            'profileImg' => Post::getProfilePicsById($id)
+        ];
 
-
-        // check if there are images in the post
-        if ($_FILES) {
-
-            if ($_FILES['post_img']['error'][0] !== 4 || $_FILES['post_img']['size'][0] !== 0) {
-
-                FileUploader::fileUploadMultiple(fileLocation: "public/img/post/", formInputName: 'post_img');
-
-                // create a file path name for the database
-                $image = $_FILES['post_img']['name'];
-                // create the post array for the post image
-                for ($i = 0; $i < count($image); $i++) {
-                    $name = str_replace(' ', '', $image[$i]);
-                    $getSanitisePost["post_img$i"] = $name;
-                }
-            }
-        }
-
-        // get the other post variables id, fullname, time of post
-        $getSanitisePost['id'] = checkInput(data: $_SESSION['id']);
-        $getSanitisePost['fullName'] = $_SESSION['fName'] . " " . $_SESSION['lName'];
-        $getSanitisePost['post_time'] = milliSeconds();
-        return $getSanitisePost;
+        return $newInput;
     }
 
 
@@ -144,15 +141,19 @@ class ProfilePage extends BaseController
     public function post(): void
     {
         try {
+            $newData = $this->processPostData();
 
-            $getPost = $this->processPostData();
-            $getPost['profileImg'] = Post::getProfilePicsById($getPost['id']);
-            SubmitForm::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
+            SubmitPostData::submitToOneTablenImage(
+                table: 'post',
+                imgPath: 'public/img/post/',
+                fileName: 'post_img',
+                fileTable: 'post',
+                newInput: $newData,
+                isCaptcha: false
+            );
 
+            // this send the last post id to the JS frontend
             // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
-
-
-
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -162,12 +163,13 @@ class ProfilePage extends BaseController
     public function postComment(): void
     {
         try {
-            $getComment = $this->processPostData();
-            // get the profile pics of the commenter 
 
-            $getComment['profileImg'] = Post::getProfilePicsById($getComment['id']);
-
-            SubmitForm::submitFormDynamic('comment', $getComment);
+            $newData = $this->processPostData();
+            SubmitPostData::submitToOneTablenImage(
+                table: 'comment',
+                newInput: $newData,
+                isCaptcha: false
+            );
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -260,19 +262,16 @@ class ProfilePage extends BaseController
                 throw new Exception("There was no post data", 1);
                 exit;
             }
- 
 
-          
-         UpdateExistingData::updateMultipleTables(
-            fileTable: 'profilePics',
-            imgPath: 'public/img/profile/',
-            fileName: 'img',
-            removeKeys:['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
-            allowedTables: ['personal', 'contact', 'profilePics'],
-            identifier: 'id',
-            identifierValue: $_SESSION['id']
+            UpdateExistingData::updateMultipleTables(
+                fileTable: 'profilePics',
+                imgPath: 'public/img/profile/',
+                fileName: 'img',
+                removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
+                allowedTables: ['personal', 'contact', 'profilePics'],
+                identifier: 'id',
+                identifierValue: $_SESSION['EDIT_PROFILE_ID']
             );
-
         } catch (\Throwable $th) {
             showError($th);
         }

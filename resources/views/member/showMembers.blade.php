@@ -10,7 +10,7 @@
     <!-- Header Section -->
     <div class="members-header text-center">
         <div class="container">
-            <h1 class="display-5 fw-bold">Meet Our Members</h1>
+            <h1 class="display-5 fw-bold">Meet Your Family Members & Close Associates</h1>
             <p class="lead">Connect with amazing people from around the world</p>
             <div class="mt-4">
                 <span class="badge bg-light text-dark me-2">256+ Members</span>

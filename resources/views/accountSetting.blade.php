@@ -1,4 +1,4 @@
-@extends ('layouts.w3s_member')
+@extends ('layouts.profileBase')
 @section('title', 'ACCOUNT SETTING')
 @section('data-page-id', 'AccountSettingPage')
 @section('content')
@@ -18,7 +18,7 @@
 
       <p class="subtitle"> Your Account ID : {{ $accountData['id'] }} <br>
         Your Family Code : {{ $accountData['famCode'] }} <br>
-        FirstName : <span id="fName">{{ $_SESSION['fName'] }}</span>  <br>     Lastname :  <span id="lName">{{ $_SESSION['lName'] }}</span>  </p>
+        Name : <span id="fName">{{ $_SESSION['fullName'] }}</span>  <br>   </p>
       
      
 

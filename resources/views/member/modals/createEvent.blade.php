@@ -9,6 +9,7 @@
             'secure' => ($_ENV['APP_ENV'] ?? 'production') === 'production',
             'httponly' => false,
         ]);
+        $_SESSION['CREATE_EVENT_ID'] = $data['id'];
    @endphp
 
 
@@ -63,6 +64,7 @@
                                <option value="Birthday">Birthday</option>
                                <option value="Anniversary">Anniversary</option>
                                <option value="Reunion">Reunion</option>
+                                 <option value="House_warming">House Warming</option>
                                <option value="Wedding">Wedding</option>
                                <option value="Party">Party</option>
                                <option value="Meeting">Meeting</option>

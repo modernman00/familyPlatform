@@ -11,8 +11,7 @@ use App\model\{
     AllMembersData,
 };
 
-
-
+use Src\functionality\SendEmailFunctionality as SendMail;
 
 class PostMessage
 {
@@ -137,12 +136,11 @@ class PostMessage
     public static function getNewCommentPusher()
     {
         $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
-        \printArr($newComment);
 
         Pusher::broadcast('comments-channel', 'new-comment', $newComment);
         // send push notification to all members with the same family code 
         $data = Post::postByNo($newComment[0]['post_no']);
-        $famCode = checkInput($data['postFamCode']);    
+        $famCode = checkInput($data['postFamCode']);
         $id = \checkInput($data['id']);
 
         $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
@@ -176,19 +174,16 @@ class PostMessage
     {
         try {
 
-            $postNo = cleanSession($_GET['newCommentNo']);
-
+            $postNo = cleanSession($_GET['newPostNo']);
             $data = Post::postByNo($postNo);
-
-            $postOriginName = $data['fullName'];
-            $id = \checkInput($data['id']);
-            $famCode = checkInput($data['postFamCode']);
-
-            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
-
-            $url = self::buildPostUrl($postNo);
-
             if ($data) {
+                $postOriginName = $data['fullName'];
+                // $id = checkInput($data['id']);
+                $famCode = checkInput($data['postFamCode']);
+
+                $results = AllMembersData::AllMembersEmailByFamCode($famCode);
+                $url = self::buildPostUrl($postNo);
+
                 // Send notifications to members by email
                 self::notifyMembersByEmail(
                     results: $results,
@@ -205,7 +200,7 @@ class PostMessage
             }
             msgSuccess(200, "Success");
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            showError($th);
         }
     }
 
@@ -213,7 +208,7 @@ class PostMessage
     private static function buildPostUrl($postNo): string
     {
         $getUrl = getenv('MIX_APP_URL');
-        return "$getUrl/member/ProfilePage?#post$postNo";
+        return "$getUrl/profilePage?#post$postNo";
     }
 
     // Helper function to notify members by email and push notifications
@@ -226,11 +221,20 @@ class PostMessage
             $memberData['url'] = $url;
             $memberData['img'] = $getPostProfilePics;
 
+            $data = [
+                'email' => $memberData['email'],
+                'postOriginName' => $postOriginName,
+                'url' => $url,
+                'img' => $getPostProfilePics,
+                'name' => $memberData['firstName']
+            ];
+
             // Send email to all members
-            sendEmailAll(
-                data: $memberData,
-                viewPath: "msg/customer/notifyNewPost",
-                subject: "$postOriginName posted a new update"
+            SendMail::email(
+                "msg/customer/notifyNewPost",
+                "$postOriginName posted a new update",
+                $data,
+                'member'
             );
         }
     }
