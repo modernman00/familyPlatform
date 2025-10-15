@@ -41,3 +41,10 @@ $router->map('PUT', '/profileCard/postLikes', 'App\controller\members\PostLikeCo
 
 // edit profile post
 $router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\ProfilePage@editProfile', 'EDIT_PROFILE');
+
+// delete comment 
+$router->map('DELETE', '/deleteComment/[i:commentNo]', 'App\Controller\members\PostMessage@deleteComment', 'COMMENT_DELETE');
+
+//my-pictures
+$router->map('GET', '/my-pictures/[a:id]', 'App\controller\members\ProfilePage@myPics', 'MY_PICS');
+

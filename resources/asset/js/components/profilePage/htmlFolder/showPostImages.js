@@ -12,11 +12,12 @@ export const showPostImg = (data) => {
         <img 
           src="/public/img/post/${imgElement}" 
           alt="images${i}" 
-          class="grid-image zoomable-image" 
+          data-postImgId="${postNo}${imgElement}"
+          data-imgIndex="${i}"
+          data-postNo="${postNo}"
+          class="grid-image zoomable-image${postNo}" 
           id="postImage${i}"
           >
-    
- 
   `;
 
   const imgElements = postImagesWithValues.map((pics, i) => picsImgHtml(pics, i, data.post_no)).join('');

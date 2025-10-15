@@ -12,6 +12,8 @@ use App\model\{
 };
 
 use Src\functionality\SendEmailFunctionality as SendMail;
+use Src\DeleteFn;
+use Src\Utility;
 
 class PostMessage
 {
@@ -56,7 +58,7 @@ class PostMessage
                 ]
             );
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            \showError($th);
         }
     }
 
@@ -67,7 +69,7 @@ class PostMessage
             Post::updatePostByStatusAsPublished($postNo);
             msgSuccess(200, "post updated successfully");
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            \showError($th);
         }
     }
 
@@ -78,13 +80,13 @@ class PostMessage
 
             msgSuccess(200, "comment updated successfully");
         } catch (\Throwable $th) {
-            showErrorExp($th);
+            \showError($th);
         }
     }
 
 
     // build for Pusher library
-    private static function fetchNewMsg(callable $fetchFunction, array $params = null)
+    private static function fetchNewMsg(callable $fetchFunction, ?array $params = null)
     {
         try {
             $items = (isset($params)) ? $fetchFunction(...$params) : $fetchFunction();
@@ -128,11 +130,11 @@ class PostMessage
      * 
      * This function retrieves new comments that have not yet been published
      * and broadcasts them to the 'comments-channel' with the event name 
-     * 'new-comment' using the Pusher library.
+     * 'new-comment' using the Pusher library. Additionally, it sends a push notification
+     * to all members with the same family code as the comment author.
      * 
      * @return void
      */
-
     public static function getNewCommentPusher()
     {
         $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
@@ -155,6 +157,46 @@ class PostMessage
         );
     }
 
+
+    // delete comment
+    public static function deleteComment($commentNo)
+    {
+        try {
+            $userId = $_SESSION['id'];
+            $commentNo = Utility::checkInput($commentNo);
+
+            // select the id of the comment author
+            $commentAuthorId = Post::commentByNo($commentNo)['id'];
+            $commentPostNo = Post::commentByNo($commentNo)['post_no'];
+
+            // select the id of the post author
+            $postAuthorId = Post::postByNo($commentPostNo)['id'];
+
+            // // trigger pusher to update the comment count
+            // delete if user is admin or the author of the comment or the author of the post
+            if ($userId === $commentAuthorId || $userId === $postAuthorId) {
+
+                DeleteFn::deleteOneRow("comment", "comment_no", $commentNo);
+
+                // trigger pusher to update all the UI elements for the deleted comment 
+                Pusher::broadcast('comments-channel', 'delete-comment', ['commentNo'=>$commentNo, 'postNo'=>$commentPostNo]);
+                
+                msgSuccess(200, "comment deleted successfully");
+            }
+        } catch (\Throwable $th) {
+            \showError($th);
+        }
+    }
+
+    /**
+     * Updates a comment's status as published.
+     * 
+     * @param int $commentNo The comment number of the comment to update.
+     * 
+     * @return mixed The result of the database query.
+     * 
+     * @throws \Throwable If an error occurs during the database query.
+     */
     public static function updateCommentByStatusAsPublished($commentNo)
     {
         $commentNo = cleanSession($commentNo);

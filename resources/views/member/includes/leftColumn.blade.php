@@ -47,6 +47,14 @@
                         <i class="bi bi-plus-circle"></i> Create Event
                     </button>
 
+                        <button type="button" 
+        class="btn btn-danger w-100"
+        onclick="window.location.href='/my-pictures/{{ $data['id'] }}'">
+  Go to pictures
+</button>
+
+
+
                     {{-- <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#editProfileModal">Open</button> --}}
                 </div>
 

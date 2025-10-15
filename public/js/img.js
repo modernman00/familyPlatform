@@ -18,6 +18,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
 /* harmony export */   idValue: () => (/* binding */ idValue),
+/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
 /* harmony export */   msgException: () => (/* binding */ msgException),
@@ -89,13 +90,16 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
  */
 var formReset = function formReset(formId) {
   var form = id(formId);
-  if (!form) return;
+  if (!form) {
+    console.warn("Form with ID \"".concat(formId, "\" not found."));
+    return;
+  }
 
   // Reset form fields
   form.reset();
 
   // Clear validation messages
-  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+  form.querySelectorAll('.is-invalid, .invalid-feedback').forEach(function (el) {
     el.classList.remove('is-invalid');
     if (el.classList.contains('invalid-feedback')) {
       el.textContent = '';
@@ -103,13 +107,13 @@ var formReset = function formReset(formId) {
   });
 
   // Clear image previews
-  form.qSelAll('.preview-img').forEach(function (img) {
+  form.querySelectorAll('.preview-img').forEach(function (img) {
     img.src = '';
     img.style.display = 'none';
   });
 
   // Clear custom inputs (e.g., emoji pickers, rich text)
-  form.qSelAll('[data-custom-input]').forEach(function (el) {
+  form.querySelectorAll('[data-custom-input]').forEach(function (el) {
     el.value = '';
   });
 };
@@ -201,6 +205,98 @@ var checkManyElements = function checkManyElements(idOrClass, classString) {
   // Check if elements exist before calling render function
   if (doesElementExist.length > 0) {
     theFunction(doesElementExist);
+  }
+};
+
+/**
+* ----------------------------------------------------------------
+* Reusable Image Modal Function
+* ----------------------------------------------------------------
+* This function finds all images with the specified selector
+* and attaches a click event to show them in a modal.
+*
+* @param {string} selector - The CSS selector for the images you want to be zoomable (e.g., '.zoomable-image').
+* @param {string} modalId - The ID of the modal element (e.g., 'imageModal').
+* @param {string} modalImageId - The ID of the image element inside the modal (e.g., 'modalImage').
+* @param {string} modalCloseId - The ID of the close button inside the modal (e.g., 'imageModalClose').
+* @param {string} imgSrc - The source URL of the image to display in the modal.
+* @param {string} imgAlt - The alt text for the image to display in the modal.
+* ---------------------------------------------------------------- 
+*/
+var initializeImageModal = function initializeImageModal(selector, clickedImageIndex, modalId, modalImageId, modalCloseId) {
+  // Get references to the modal elements
+  // Global variables to manage modal state
+  var currentImages = [];
+  var currentImageIndex = 0;
+  var modal = document.getElementById(modalId);
+  var modalImage = document.getElementById(modalImageId);
+  var closeModal = document.getElementById(modalCloseId);
+  var prevButton = document.getElementById('prevButton');
+  var nextButton = document.getElementById('nextButton');
+
+  // Find all images that match the selector
+  var images = document.querySelectorAll(selector);
+  log(images[images.length - 1].src, " IMAGES");
+
+  // Guard clause: if no modal or images, do nothing.
+  if (!modal || !modalImage || !closeModal || images.length === 0) {
+    console.warn('Image modal setup failed: Required elements not found.');
+    return;
+  }
+
+  // Function to hide the modal
+  var hideModal = function hideModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scrolling
+  };
+
+  // Function to show the modal with a specific image
+  var showModal = function showModal(index) {
+    if (!currentImages || currentImages.length === 0) return;
+    if (index < 0) {
+      currentImageIndex = currentImages.length - 1; // Loop to the last image
+    } else if (index >= currentImages.length) {
+      currentImageIndex = 0; // Loop to the first image
+    } else {
+      currentImageIndex = index;
+    }
+    modalImage.src = currentImages[currentImageIndex].src;
+    modalImage.alt = currentImages[currentImageIndex].alt;
+    modal.classList.add("show");
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  // Event listeners for modal controls
+  closeModal.addEventListener("click", hideModal);
+  prevButton.addEventListener("click", function () {
+    return showModal(currentImageIndex - 1);
+  });
+  nextButton.addEventListener("click", function () {
+    return showModal(currentImageIndex + 1);
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      hideModal();
+    }
+  });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", function (e) {
+    if (modal.classList.contains("show")) {
+      if (e.key === "Escape") {
+        hideModal();
+      } else if (e.key === "ArrowLeft") {
+        showModal(currentImageIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        showModal(currentImageIndex + 1);
+      }
+    }
+  });
+  currentImages = Array.from(document.querySelectorAll(selector));
+  if (currentImages.length > 0) {
+    showModal(clickedImageIndex);
+  } else {
+    console.warn("No images found for selector: ".concat(selector));
   }
 };
 
@@ -600,25 +696,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
-var commentHTML = function commentHTML(data) {
+var reqId = localStorage.getItem('requesterId');
+var commentHTML = function commentHTML(data, postId) {
   var profileImg = data.profileImg,
     fullName = data.fullName,
     date_created = data.date_created,
     img = data.img,
     comment = data.comment,
-    comment_no = data.comment_no;
+    comment_no = data.comment_no,
+    id = data.id;
   var imgURL = profileImg || img;
   var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" id=\"comment".concat(comment_no, "\" name=\"commentDiv\">\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n    <div class=\"comment-actions d-flex gap-3\">\n      <button class=\"btn btn-sm btn-icon text-danger\" onclick=\"removeComment(").concat(comment_no, ")\" title=\"Remove\">\n        <i class=\"bi bi-trash\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-warning\" onclick=\"reportComment(").concat(comment_no, ")\" title=\"Report\">\n        <i class=\"bi bi-flag\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-primary\" onclick=\"likeComment(").concat(comment_no, ")\" title=\"Like\">\n        <i class=\"bi bi-hand-thumbs-up\"></i>\n      </button>\n    </div>\n  </div>\n</div>");
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n     <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\"></div>\n\n      <div class=\"comment-actions d-flex gap-3\">\n    \n                \n                <div class=\"reaction-bar\" id=\"reaction-bar-").concat(comment_no, "\">\n                    <div class=\"reaction-option\" data-reaction=\"like\" data-label=\"Like\">\n                        <div class=\"reaction-emoji\">\uD83D\uDC4D</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"love\" data-label=\"Love\">\n                        <div class=\"reaction-emoji\">\u2764\uFE0F</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"haha\" data-label=\"Haha\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE04</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"wow\" data-label=\"Wow\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE2E</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"sad\" data-label=\"Sad\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE22</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"angry\" data-label=\"Angry\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE20</div>\n                    </div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\"></i>\n                    <span>Like</span>\n                    <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">0</div>\n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                </button>") : '', "\n                \n         \n      </div>\n\n\n\n\n  </div>\n</div><hr>");
 };
-var showComment = function showComment(comment) {
+
+// i need the postid to use to show the delete button 
+var showComment = function showComment(comment, postId) {
   if (!comment) {
     return "<div id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
   // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
-    return commentHTML(commentElement);
+    return commentHTML(commentElement, postId);
   });
   return commentHTMLArray.join(''); // Join the array elements into a single string
 };
@@ -663,8 +763,10 @@ __webpack_require__.r(__webpack_exports__);
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var post_no = el.post_no,
-    postMessage = el.postMessage;
-  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(el), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n\n      \n    </div>\n");
+    postMessage = el.postMessage,
+    id = el.id;
+  var commentLength = comment.length;
+  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(el), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el, commentLength), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment, id), "\n\n      \n    </div>\n");
 };
 
 /***/ }),
@@ -696,8 +798,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
 /* harmony export */ });
-var likeCommentButton = function likeCommentButton(data) {
-  return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-3\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n      </button>\n        <button><i class=\"bi bi-share me-1\"></i> Share</button>\n    </div>\n    ");
+var likeCommentButton = function likeCommentButton(data, commentLength) {
+  return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-1\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n          (<span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">\n            ").concat(commentLength, "\n          </span>)\n          \n      </button>\n   \n    </div>\n    ");
 };
 
 /***/ }),
@@ -768,7 +870,7 @@ var showPostImg = function showPostImg(data) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n  \n\n     \n        <img \n          src=\"/public/img/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          class=\"grid-image zoomable-image\" \n          id=\"postImage").concat(i, "\"\n          >\n    \n \n  ");
+    return "\n  \n\n     \n        <img \n          src=\"/public/img/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          data-postImgId=\"").concat(postNo).concat(imgElement, "\"\n          data-imgIndex=\"").concat(i, "\"\n          data-postNo=\"").concat(postNo, "\"\n          class=\"grid-image zoomable-image").concat(postNo, "\" \n          id=\"postImage").concat(i, "\"\n          >\n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);

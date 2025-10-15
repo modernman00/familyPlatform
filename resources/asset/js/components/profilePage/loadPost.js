@@ -89,12 +89,46 @@ try {
 
             appendNewComment(dataForUse)
 
+            const commentCounterEl = id(`commentCounter${dataForUse.post_no}`);
+            if (commentCounterEl) {
+
+                const commentCount = parseInt(commentCounterEl.textContent)
+                // get the current value and convert it to a number 
+                    commentCounterEl.textContent = commentCount + 1;
+        
+
+            }
+
+
             try {
                 await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' });
 
             } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
 
         }
+    };
+
+    const deleteComment = (data) => {
+        const no = data.commentNo;
+        const postNo = data.postNo;
+
+        const commentEl = id(`commentDiv${no}`);
+        if (commentEl) commentEl.remove();
+
+        const commentCounterEl = id(`commentCounter${postNo}`);
+        if (commentCounterEl) {
+
+            const commentCount = parseInt(commentCounterEl.textContent)
+            // get the current value and convert it to a number 
+
+            if (commentCount > 0) {
+                commentCounterEl.textContent = commentCount - 1;
+            }
+
+        }
+
+
+
     };
 
     const updateLike = (e) => {
@@ -116,6 +150,9 @@ try {
     const commentsChannel = pusher.subscribe('comments-channel');
     commentsChannel.bind('new-comment', (data) => {
         data.forEach(item => updateComment(item))
+    })
+    commentsChannel.bind('delete-comment', (data) => {
+        deleteComment(data)
     })
 
     // Subscribe to the likes channel

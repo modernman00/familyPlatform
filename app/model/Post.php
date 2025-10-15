@@ -147,6 +147,13 @@ class Post extends Select
         return $result;
     }
 
+    /**
+     * Updates the status of a comment to published
+     *
+     * @param int|string $commentNo the comment number to be updated
+     *
+     * @return bool true if the update was successful, false otherwise
+     */
     static function updateCommentByStatusAsPublished($commentNo): bool
     {
         $newUpdate = new Update('comment');

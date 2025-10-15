@@ -360,6 +360,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
 /* harmony export */   idValue: () => (/* binding */ idValue),
+/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
 /* harmony export */   msgException: () => (/* binding */ msgException),
@@ -431,13 +432,16 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
  */
 var formReset = function formReset(formId) {
   var form = id(formId);
-  if (!form) return;
+  if (!form) {
+    console.warn("Form with ID \"".concat(formId, "\" not found."));
+    return;
+  }
 
   // Reset form fields
   form.reset();
 
   // Clear validation messages
-  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+  form.querySelectorAll('.is-invalid, .invalid-feedback').forEach(function (el) {
     el.classList.remove('is-invalid');
     if (el.classList.contains('invalid-feedback')) {
       el.textContent = '';
@@ -445,13 +449,13 @@ var formReset = function formReset(formId) {
   });
 
   // Clear image previews
-  form.qSelAll('.preview-img').forEach(function (img) {
+  form.querySelectorAll('.preview-img').forEach(function (img) {
     img.src = '';
     img.style.display = 'none';
   });
 
   // Clear custom inputs (e.g., emoji pickers, rich text)
-  form.qSelAll('[data-custom-input]').forEach(function (el) {
+  form.querySelectorAll('[data-custom-input]').forEach(function (el) {
     el.value = '';
   });
 };
@@ -543,6 +547,98 @@ var checkManyElements = function checkManyElements(idOrClass, classString) {
   // Check if elements exist before calling render function
   if (doesElementExist.length > 0) {
     theFunction(doesElementExist);
+  }
+};
+
+/**
+* ----------------------------------------------------------------
+* Reusable Image Modal Function
+* ----------------------------------------------------------------
+* This function finds all images with the specified selector
+* and attaches a click event to show them in a modal.
+*
+* @param {string} selector - The CSS selector for the images you want to be zoomable (e.g., '.zoomable-image').
+* @param {string} modalId - The ID of the modal element (e.g., 'imageModal').
+* @param {string} modalImageId - The ID of the image element inside the modal (e.g., 'modalImage').
+* @param {string} modalCloseId - The ID of the close button inside the modal (e.g., 'imageModalClose').
+* @param {string} imgSrc - The source URL of the image to display in the modal.
+* @param {string} imgAlt - The alt text for the image to display in the modal.
+* ---------------------------------------------------------------- 
+*/
+var initializeImageModal = function initializeImageModal(selector, clickedImageIndex, modalId, modalImageId, modalCloseId) {
+  // Get references to the modal elements
+  // Global variables to manage modal state
+  var currentImages = [];
+  var currentImageIndex = 0;
+  var modal = document.getElementById(modalId);
+  var modalImage = document.getElementById(modalImageId);
+  var closeModal = document.getElementById(modalCloseId);
+  var prevButton = document.getElementById('prevButton');
+  var nextButton = document.getElementById('nextButton');
+
+  // Find all images that match the selector
+  var images = document.querySelectorAll(selector);
+  log(images[images.length - 1].src, " IMAGES");
+
+  // Guard clause: if no modal or images, do nothing.
+  if (!modal || !modalImage || !closeModal || images.length === 0) {
+    console.warn('Image modal setup failed: Required elements not found.');
+    return;
+  }
+
+  // Function to hide the modal
+  var hideModal = function hideModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scrolling
+  };
+
+  // Function to show the modal with a specific image
+  var showModal = function showModal(index) {
+    if (!currentImages || currentImages.length === 0) return;
+    if (index < 0) {
+      currentImageIndex = currentImages.length - 1; // Loop to the last image
+    } else if (index >= currentImages.length) {
+      currentImageIndex = 0; // Loop to the first image
+    } else {
+      currentImageIndex = index;
+    }
+    modalImage.src = currentImages[currentImageIndex].src;
+    modalImage.alt = currentImages[currentImageIndex].alt;
+    modal.classList.add("show");
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  // Event listeners for modal controls
+  closeModal.addEventListener("click", hideModal);
+  prevButton.addEventListener("click", function () {
+    return showModal(currentImageIndex - 1);
+  });
+  nextButton.addEventListener("click", function () {
+    return showModal(currentImageIndex + 1);
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      hideModal();
+    }
+  });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", function (e) {
+    if (modal.classList.contains("show")) {
+      if (e.key === "Escape") {
+        hideModal();
+      } else if (e.key === "ArrowLeft") {
+        showModal(currentImageIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        showModal(currentImageIndex + 1);
+      }
+    }
+  });
+  currentImages = Array.from(document.querySelectorAll(selector));
+  if (currentImages.length > 0) {
+    showModal(clickedImageIndex);
+  } else {
+    console.warn("No images found for selector: ".concat(selector));
   }
 };
 
@@ -1084,13 +1180,14 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(e) {
-      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, _t;
+      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
             //document.onclick = async (e) => {
             elementId = e.target.id;
-            postId = e.target.name; // Handle Like Button Click
+            postId = e.target.name;
+            postImgId = e.target.dataset.postimgid; // Handle Like Button Click
             if (!elementId.includes("likeButton")) {
               _context.n = 3;
               break;
@@ -1105,7 +1202,7 @@ try {
             _context.n = 2;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/getNewLikesPusher");
           case 2:
-            _context.n = 17;
+            _context.n = 21;
             break;
           case 3:
             if (!elementId.includes("initComment")) {
@@ -1116,7 +1213,7 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).style.display = "block";
 
             // Handle Comment Submission
-            _context.n = 17;
+            _context.n = 21;
             break;
           case 4:
             if (!elementId.includes("submitComment")) {
@@ -1149,7 +1246,7 @@ try {
           case 7:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.formReset)(idForm);
           case 8:
-            _context.n = 17;
+            _context.n = 21;
             break;
           case 9:
             if (!elementId.includes("submitPost")) {
@@ -1182,6 +1279,8 @@ try {
             return Promise.all([axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/post/getNewPostAndEmail?newPostNo=" + response.data.token), axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/getNewPostPusher")]);
           case 13:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.formReset)("formPostMessageModal");
+            // redirect to the profile page
+            window.location.href = '/profilePage';
             _context.n = 15;
             break;
           case 14:
@@ -1193,19 +1292,67 @@ try {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal_notification').classList.add('is-danger');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal_notification').style.display = 'block';
           case 15:
-            _context.n = 17;
+            _context.n = 21;
             break;
           case 16:
-            if (e.target.classList.contains('linkRequestCard')) {
-              // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
-              friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
-              if (friendRequestSection) {
-                friendRequestSection.scrollIntoView({
-                  behavior: "smooth"
-                });
+            if (!e.target.classList.contains('linkRequestCard')) {
+              _context.n = 17;
+              break;
+            }
+            // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+            friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
+            if (friendRequestSection) {
+              friendRequestSection.scrollIntoView({
+                behavior: "smooth"
+              });
+            }
+            _context.n = 21;
+            break;
+          case 17:
+            if (!e.target.classList.contains('grid-image')) {
+              _context.n = 18;
+              break;
+            }
+            if (e.target.classList.contains('grid-image')) {
+              postNo = e.target.dataset.postno;
+              imgClass = ".zoomable-image".concat(postNo);
+              imagesInGroup = Array.from(document.querySelectorAll(imgClass));
+              initialIndex = imagesInGroup.findIndex(function (img) {
+                return img.src === e.target.src;
+              });
+              if (initialIndex !== -1) {
+                (0,_global__WEBPACK_IMPORTED_MODULE_0__.initializeImageModal)(imgClass, initialIndex, 'imageModal', 'modalImage', 'imageModalClose');
               }
             }
-          case 17:
+            _context.n = 21;
+            break;
+          case 18:
+            if (!elementId.includes('removeCommentIcon')) {
+              _context.n = 21;
+              break;
+            }
+            // get the comment no
+            commentNo = elementId.replace('removeCommentIcon', ''); // Ask user to confirm before deleting (safety check)
+            if (!confirm('Are you sure you want to remove this comment?')) {
+              _context.n = 21;
+              break;
+            }
+            // Find the comment element and remove it from page
+            commentElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("commentDiv".concat(commentNo));
+            if (!commentElement) {
+              _context.n = 20;
+              break;
+            }
+            _context.n = 19;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"]["delete"]("/deleteComment/".concat(commentNo));
+          case 19:
+            _response = _context.v;
+            alert(_response.data.message);
+            _context.n = 21;
+            break;
+          case 20:
+            alert('Comment not found');
+          case 21:
             return _context.a(2);
         }
       }, _callee, null, [[11, 14]]);
@@ -1237,25 +1384,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
-var commentHTML = function commentHTML(data) {
+var reqId = localStorage.getItem('requesterId');
+var commentHTML = function commentHTML(data, postId) {
   var profileImg = data.profileImg,
     fullName = data.fullName,
     date_created = data.date_created,
     img = data.img,
     comment = data.comment,
-    comment_no = data.comment_no;
+    comment_no = data.comment_no,
+    id = data.id;
   var imgURL = profileImg || img;
   var image = imgURL ? "/public/img/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" id=\"comment".concat(comment_no, "\" name=\"commentDiv\">\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n    <div class=\"comment-actions d-flex gap-3\">\n      <button class=\"btn btn-sm btn-icon text-danger\" onclick=\"removeComment(").concat(comment_no, ")\" title=\"Remove\">\n        <i class=\"bi bi-trash\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-warning\" onclick=\"reportComment(").concat(comment_no, ")\" title=\"Report\">\n        <i class=\"bi bi-flag\"></i>\n      </button>\n      <button class=\"btn btn-sm btn-icon text-primary\" onclick=\"likeComment(").concat(comment_no, ")\" title=\"Like\">\n        <i class=\"bi bi-hand-thumbs-up\"></i>\n      </button>\n    </div>\n  </div>\n</div>");
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n     <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\"></div>\n\n      <div class=\"comment-actions d-flex gap-3\">\n    \n                \n                <div class=\"reaction-bar\" id=\"reaction-bar-").concat(comment_no, "\">\n                    <div class=\"reaction-option\" data-reaction=\"like\" data-label=\"Like\">\n                        <div class=\"reaction-emoji\">\uD83D\uDC4D</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"love\" data-label=\"Love\">\n                        <div class=\"reaction-emoji\">\u2764\uFE0F</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"haha\" data-label=\"Haha\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE04</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"wow\" data-label=\"Wow\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE2E</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"sad\" data-label=\"Sad\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE22</div>\n                    </div>\n                    <div class=\"reaction-option\" data-reaction=\"angry\" data-label=\"Angry\">\n                        <div class=\"reaction-emoji\">\uD83D\uDE20</div>\n                    </div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\"></i>\n                    <span>Like</span>\n                    <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">0</div>\n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                </button>") : '', "\n                \n         \n      </div>\n\n\n\n\n  </div>\n</div><hr>");
 };
-var showComment = function showComment(comment) {
+
+// i need the postid to use to show the delete button 
+var showComment = function showComment(comment, postId) {
   if (!comment) {
     return "<div id=\"comment\" name=\"commentDiv\"></div>";
   } // only run if there is comment
 
   // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
-    return commentHTML(commentElement);
+    return commentHTML(commentElement, postId);
   });
   return commentHTMLArray.join(''); // Join the array elements into a single string
 };
@@ -1274,6 +1425,383 @@ var appendNewComment = function appendNewComment(commentData) {
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/commentEmoji.js":
+/*!*******************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/commentEmoji.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
+/* harmony import */ var lodash__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(lodash__WEBPACK_IMPORTED_MODULE_1__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+
+
+
+// =============================================
+// REACTION DATA STORAGE
+// =============================================
+
+/**
+ * This object stores ALL the reaction data for EVERY comment
+ * Think of it like a big scoreboard that tracks:
+ * - How many of each reaction type each comment has
+ * - What reaction the current user has given (if any)
+ */
+var reactionsData = {
+  // Comment ID 700: 2 likes, 1 love, no other reactions, current user hasn't reacted
+  700: {
+    like: 2,
+    love: 1,
+    haha: 0,
+    wow: 0,
+    sad: 0,
+    angry: 0,
+    userReaction: null
+  },
+  // Comment ID 701: 5 likes, 2 loves, 3 hahas, etc.
+  701: {
+    like: 5,
+    love: 2,
+    haha: 3,
+    wow: 1,
+    sad: 0,
+    angry: 0,
+    userReaction: null
+  },
+  // Add more comments as needed...
+  702: {
+    like: 3,
+    love: 4,
+    haha: 1,
+    wow: 2,
+    sad: 0,
+    angry: 0,
+    userReaction: null
+  }
+};
+
+/**
+ * We need 'let' instead of 'const' for hoverTimeout because:
+ * - We need to CHANGE its value multiple times (clear and reset it)
+ * - 'const' would make it permanent (can't change)
+ * - 'let' allows reassignment
+ */
+var hoverTimeout;
+
+// =============================================
+// REACTION MANAGEMENT FUNCTIONS
+// =============================================
+
+/**
+ * REMOVE a user's reaction from a comment
+ * @param {number} commentId - Which comment to remove reaction from
+ */
+var removeReaction = function removeReaction(commentId) {
+  // Get the reaction data for this specific comment
+  var data = reactionsData[commentId];
+
+  // Safety check: If no data or user hasn't reacted, do nothing
+  if (!(data !== null && data !== void 0 && data.userReaction)) return;
+
+  // Decrease the count for the reaction type user had
+  // Example: If user had 'love', then data.love becomes data.love - 1
+  data[data.userReaction]--;
+
+  // Mark that user no longer has any reaction
+  data.userReaction = null;
+
+  // Show a message to the user
+  showNotification('Reaction removed!');
+
+  // Update the display to show the changes
+  updateReactionDisplay(commentId);
+};
+
+/**
+ * ADD or UPDATE a user's reaction to a comment
+ * @param {number} commentId - Which comment to react to
+ * @param {string} reaction - Type of reaction ('like', 'love', etc.)
+ * @param {string} emoji - The emoji character to display
+ */
+var updateReaction = function updateReaction(commentId, reaction, emoji) {
+  // Get the reaction data for this specific comment
+  var data = reactionsData[commentId];
+
+  // Safety check: If no data found, show warning and stop
+  if (!data) {
+    console.warn("No reaction data for comment ".concat(commentId));
+    return;
+  }
+
+  // If user already had a different reaction, remove it first
+  // Example: User had 'like' but now clicks 'love' - remove the 'like'
+  if (data.userReaction && data.userReaction !== reaction) {
+    data[data.userReaction]--; // Decrease old reaction count
+  }
+
+  // If user is adding a new reaction or changing to a different one
+  if (!data.userReaction || data.userReaction !== reaction) {
+    data[reaction]++; // Increase new reaction count
+    data.userReaction = reaction; // Remember user's choice
+    showNotification("Reacted with ".concat(reaction, "!"));
+  }
+
+  // Update the display to show the new reaction
+  updateReactionDisplay(commentId);
+};
+
+/**
+ * SHOW a temporary message to the user (like a toast notification)
+ * @param {string} message - Text to show in the notification
+ * @param {boolean} isError - Whether this is an error message (changes color)
+ */
+var showNotification = function showNotification(message) {
+  var isError = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  // Find the notification element in the HTML
+  var notification = document.getElementById('notification');
+  if (!notification) return;
+
+  // Set the message text
+  notification.textContent = message;
+
+  // Change color: red for errors, blue for success
+  notification.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--primary-color)';
+
+  // Make the notification visible
+  notification.classList.add('show');
+
+  // Hide the notification after 3 seconds automatically
+  setTimeout(function () {
+    notification.classList.remove('show');
+  }, 3000);
+};
+
+/**
+ * UPDATE the visual display of reactions for a comment
+ * This function makes the HTML match our data
+ * @param {number} commentId - Which comment to update
+ */
+var updateReactionDisplay = function updateReactionDisplay(commentId) {
+  // Get data and all the HTML elements we need to update
+  var data = reactionsData[commentId];
+  var likeButton = document.getElementById("like-button-".concat(commentId));
+  var likeCount = document.getElementById("like-count-".concat(commentId));
+  var reactionPreview = document.getElementById("reaction-preview-".concat(commentId));
+
+  // Safety check: Make sure all elements exist before trying to update them
+  if (!data || !likeButton || !likeCount || !reactionPreview) return;
+
+  // ===== CALCULATE TOTAL REACTIONS =====
+  /**
+   * We use 'reduce' to add up all reaction counts
+   * It's like going through each reaction type and keeping a running total
+   */
+  var reactionTypes = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+  var totalReactions = reactionTypes.reduce(function (total, type) {
+    return total + data[type]; // Add this reaction type's count to the total
+  }, 0); // Start counting from 0
+
+  // ===== UPDATE THE LIKE BUTTON =====
+  /**
+   * Map reaction types to their emoji characters
+   * This is like a dictionary: 'like' → '👍', 'love' → '❤️', etc.
+   */
+  var emojiMap = {
+    'like': '👍',
+    'love': '❤️',
+    'haha': '😄',
+    'wow': '😮',
+    'sad': '😢',
+    'angry': '😠'
+  };
+
+  // Check if current user has reacted to this comment
+  if (data.userReaction) {
+    // USER HAS REACTED - Show their reaction
+
+    // Change the button icon to show which reaction user chose
+    likeButton.querySelector('.reaction-icon').textContent = emojiMap[data.userReaction];
+
+    // Change the button text (Like → Love, Like → Haha, etc.)
+    likeButton.querySelector('span').textContent = data.userReaction.charAt(0).toUpperCase() + data.userReaction.slice(1);
+
+    // Add blue color to show it's active
+    likeButton.classList.add('active');
+  } else {
+    // USER HAS NOT REACTED - Show default state
+
+    // Reset to default thumbs-up icon
+    likeButton.querySelector('.reaction-icon').className = 'bi bi-hand-thumbs-up reaction-icon';
+
+    // Reset text to "Like"
+    likeButton.querySelector('span').textContent = 'Like';
+
+    // Remove blue color
+    likeButton.classList.remove('active');
+  }
+
+  // Update the like counter number
+  likeCount.textContent = data.like;
+
+  // ===== UPDATE REACTION PREVIEW =====
+  // Clear any existing preview content
+  reactionPreview.innerHTML = '';
+
+  // Only show preview if there are any reactions
+  if (totalReactions > 0) {
+    // Find which reactions have counts (filter) and take top 3 (slice)
+    var topReactions = reactionTypes.filter(function (type) {
+      return data[type] > 0;
+    }) // Only keep reactions with count > 0
+    .slice(0, 3); // Take only first 3
+
+    // Create and add emoji previews for top reactions
+    topReactions.forEach(function (type) {
+      // Create a div element for this emoji
+      var emojiPreview = document.createElement('div');
+      emojiPreview.className = 'reaction-preview-emoji';
+      emojiPreview.textContent = emojiMap[type]; // Set the emoji character
+      reactionPreview.appendChild(emojiPreview); // Add to preview area
+    });
+
+    // Add the reaction count text (e.g., "5 reactions")
+    var countElement = document.createElement('div');
+    countElement.className = 'reaction-preview-count';
+
+    // Use proper grammar: "1 reaction" vs "5 reactions"
+    countElement.textContent = totalReactions === 1 ? '1 reaction' : "".concat(totalReactions, " reactions");
+    reactionPreview.appendChild(countElement);
+  }
+};
+
+// =============================================
+// EVENT HANDLING SYSTEM - WITH ERROR FIXES
+// =============================================
+
+/**
+ * MAIN FUNCTION: Set up all event listeners for reactions
+ * This is the "brain" that makes everything interactive
+ */
+var initializeReactionsSimple = function initializeReactionsSimple() {
+  console.log('🔄 Starting simple reaction system...');
+
+  // Handle clicks on reaction emojis
+  document.addEventListener('click', function (event) {
+    var _event$target$classLi;
+    if ((_event$target$classLi = event.target.classList) !== null && _event$target$classLi !== void 0 && _event$target$classLi.contains('reaction-option')) {
+      var commentDiv = event.target.closest('.commentDiv');
+      if (!commentDiv) return;
+      var commentNo = commentDiv.getAttribute('data-comment-no');
+      var reaction = event.target.getAttribute('data-reaction');
+
+      // Animate and update
+      event.target.classList.add('bounce');
+      setTimeout(function () {
+        return event.target.classList.remove('bounce');
+      }, 500);
+      updateReaction(commentNo, reaction, event.target.textContent.trim());
+
+      // Hide reaction bar
+      var reactionBar = document.getElementById("reaction-bar-".concat(commentNo));
+      if (reactionBar) reactionBar.classList.remove('show');
+    }
+  });
+
+  // Handle clicks on like buttons
+  document.addEventListener('click', function (event) {
+    var likeButton = event.target.closest('[id^="like-button-"]');
+    if (likeButton) {
+      var _reactionsData$commen;
+      var commentNo = likeButton.id.replace('like-button-', '');
+      var currentReaction = (_reactionsData$commen = reactionsData[commentNo]) === null || _reactionsData$commen === void 0 ? void 0 : _reactionsData$commen.userReaction;
+      currentReaction ? removeReaction(commentNo) : updateReaction(commentNo, 'like', '👍');
+    }
+  });
+
+  // Show reaction bar on hover
+  document.addEventListener('mouseenter', function (event) {
+    var likeButton = event.target.closest('[id^="like-button-"]');
+    if (likeButton) {
+      var commentNo = likeButton.id.replace('like-button-', '');
+      var reactionBar = document.getElementById("reaction-bar-".concat(commentNo));
+      if (reactionBar) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = setTimeout(function () {
+          return reactionBar.classList.add('show');
+        }, 300);
+      }
+    }
+  }, true);
+
+  // Hide reaction bar on mouse leave
+  document.addEventListener('mouseleave', function (event) {
+    var likeButton = event.target.closest('[id^="like-button-"]');
+    var reactionBarElement = event.target.closest('.reaction-bar');
+    if (likeButton || reactionBarElement) {
+      clearTimeout(hoverTimeout);
+      setTimeout(function () {
+        document.querySelectorAll('.reaction-bar.show').forEach(function (bar) {
+          if (!bar.matches(':hover')) bar.classList.remove('show');
+        });
+      }, 200);
+    }
+  }, true);
+};
+
+// Start the simple version
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeReactionsSimple);
+} else {
+  initializeReactionsSimple();
+}
+
+// =============================================
+// INITIALIZATION - START THE SYSTEM
+// =============================================
+
+// Start the simple version
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeReactionsSimple);
+} else {
+  initializeReactionsSimple();
+}
+
+// =============================================
+// EXTRA COMMENT FUNCTIONS (Remove/Report)
+// =============================================
+
+/**
+ * REMOVE a comment when trash button is clicked
+ * @param {number} commentId - Which comment to remove
+ */
+
+// =============================================
+// DEBUGGING HELPERS
+// =============================================
+
+/**
+ * DEBUG FUNCTION: Check what's causing the closest error
+ * This will help us understand why event.target.closest fails
+ */
+var debugEventTarget = function debugEventTarget(event) {
+  var _event$target, _event$target2;
+  console.log('=== DEBUG EVENT TARGET ===');
+  console.log('Event type:', event.type);
+  console.log('Event target id:', event.target.id);
+  console.log('Event target type:', _typeof(event.target));
+  console.log('Event target constructor:', (_event$target = event.target) === null || _event$target === void 0 || (_event$target = _event$target.constructor) === null || _event$target === void 0 ? void 0 : _event$target.name);
+  console.log('Has closest method:', _typeof((_event$target2 = event.target) === null || _event$target2 === void 0 ? void 0 : _event$target2.closest));
+  console.log('==========================');
+};
+
+// Optional: Uncomment to see debug info for all clicks
+// document.addEventListener('click', debugEventTarget);
 
 /***/ }),
 
@@ -1738,8 +2266,10 @@ __webpack_require__.r(__webpack_exports__);
 var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var post_no = el.post_no,
-    postMessage = el.postMessage;
-  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(el), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n\n      \n    </div>\n");
+    postMessage = el.postMessage,
+    id = el.id;
+  var commentLength = comment.length;
+  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(el), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el, commentLength), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment, id), "\n\n      \n    </div>\n");
 };
 
 /***/ }),
@@ -1802,8 +2332,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
 /* harmony export */ });
-var likeCommentButton = function likeCommentButton(data) {
-  return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-3\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n      </button>\n        <button><i class=\"bi bi-share me-1\"></i> Share</button>\n    </div>\n    ");
+var likeCommentButton = function likeCommentButton(data, commentLength) {
+  return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-1\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n          (<span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">\n            ").concat(commentLength, "\n          </span>)\n          \n      </button>\n   \n    </div>\n    ");
 };
 
 /***/ }),
@@ -1876,7 +2406,7 @@ var showPostImg = function showPostImg(data) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n  \n\n     \n        <img \n          src=\"/public/img/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          class=\"grid-image zoomable-image\" \n          id=\"postImage").concat(i, "\"\n          >\n    \n \n  ");
+    return "\n  \n\n     \n        <img \n          src=\"/public/img/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          data-postImgId=\"").concat(postNo).concat(imgElement, "\"\n          data-imgIndex=\"").concat(i, "\"\n          data-postNo=\"").concat(postNo, "\"\n          class=\"grid-image zoomable-image").concat(postNo, "\" \n          id=\"postImage").concat(i, "\"\n          >\n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
@@ -1987,6 +2517,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _editProfile__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./editProfile */ "./resources/asset/js/components/profilePage/editProfile.js");
 /* harmony import */ var _emojiPicker__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./emojiPicker */ "./resources/asset/js/components/profilePage/emojiPicker.js");
+/* harmony import */ var _commentEmoji__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./commentEmoji */ "./resources/asset/js/components/profilePage/commentEmoji.js");
 
 
 localStorage.removeItem('redirect');
@@ -2010,6 +2541,8 @@ darkModeToggle.addEventListener('click', function () {
     darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
   }
 });
+
+
 
 
 
@@ -2157,7 +2690,7 @@ try {
   }();
   var updateComment = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(e) {
-      var dataForUse, _t3;
+      var dataForUse, commentCounterEl, commentCount, _t3;
       return _regenerator().w(function (_context3) {
         while (1) switch (_context3.p = _context3.n) {
           case 0:
@@ -2172,6 +2705,11 @@ try {
             // check if dataForUse length is greater than 0 and if yes foreach to lop 
 
             (0,_comment__WEBPACK_IMPORTED_MODULE_3__.appendNewComment)(dataForUse);
+            commentCounterEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("commentCounter".concat(dataForUse.post_no));
+            if (commentCounterEl) {
+              commentCount = parseInt(commentCounterEl.textContent); // get the current value and convert it to a number 
+              commentCounterEl.textContent = commentCount + 1;
+            }
             _context3.p = 1;
             _context3.n = 2;
             return axios__WEBPACK_IMPORTED_MODULE_5__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
@@ -2193,6 +2731,21 @@ try {
       return _ref2.apply(this, arguments);
     };
   }();
+  var deleteComment = function deleteComment(data) {
+    var no = data.commentNo;
+    var postNo = data.postNo;
+    var commentEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("commentDiv".concat(no));
+    if (commentEl) commentEl.remove();
+    var commentCounterEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("commentCounter".concat(postNo));
+    if (commentCounterEl) {
+      var commentCount = parseInt(commentCounterEl.textContent);
+      // get the current value and convert it to a number 
+
+      if (commentCount > 0) {
+        commentCounterEl.textContent = commentCount - 1;
+      }
+    }
+  };
   var updateLike = function updateLike(e) {
     // Parse the incoming data and check if it already exists in state
     var dataForUse = checkOriginAndParsedData(e);
@@ -2216,6 +2769,9 @@ try {
     data.forEach(function (item) {
       return updateComment(item);
     });
+  });
+  commentsChannel.bind('delete-comment', function (data) {
+    deleteComment(data);
   });
 
   // Subscribe to the likes channel

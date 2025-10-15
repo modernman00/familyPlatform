@@ -1,5 +1,5 @@
 "use strict";
-import { id, showError, formReset, fileUploadSizeValidation } from "../global"
+import { id, log, showError, formReset, fileUploadSizeValidation, initializeImageModal } from "../global"
 import axios from "axios"
 
 
@@ -16,11 +16,13 @@ try {
 
         const elementId = e.target.id
         const postId = e.target.name
-
+        const postImgId = e.target.dataset.postimgid;
 
 
         // Handle Like Button Click
         if (elementId.includes("likeButton")) {
+
+
 
             // replace button with Counter to get the span id 
             const likeCounterId = elementId.replace('Button', 'Counter')
@@ -93,7 +95,7 @@ try {
 
             const formExtra = id('formPostMessageModal')
             const formData = new FormData(formExtra)
-            
+
             // get the requesterFamCode from the localStorage 
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
             // Append the new form entry to the FormData object
@@ -111,7 +113,9 @@ try {
                 ]);
 
                 formReset("formPostMessageModal");
-                
+                // redirect to the profile page
+                window.location.href = '/profilePage';
+
             } catch (error) {
                 console.error("An error occurred:", error.response.data.message);
                 // Optionally, display an error message to the user
@@ -120,7 +124,7 @@ try {
                 id('formPostMessageModal_notification').style.display = 'block';
             }
 
-        }     
+        }
         // take you to the request card for approval or denial
         else if (e.target.classList.contains('linkRequestCard')) {
             // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
@@ -129,7 +133,57 @@ try {
             if (friendRequestSection) {
                 friendRequestSection.scrollIntoView({ behavior: "smooth" });
             }
+        } // click event for the post images to show in a modal
+        else if (e.target.classList.contains('grid-image')) {
+            if (e.target.classList.contains('grid-image')) {
+                const postNo = e.target.dataset.postno;
+                const imgClass = `.zoomable-image${postNo}`;
+                const imagesInGroup = Array.from(document.querySelectorAll(imgClass));
+                const initialIndex = imagesInGroup.findIndex(img => img.src === e.target.src);
+
+                if (initialIndex !== -1) {
+                    initializeImageModal(imgClass, initialIndex, 'imageModal', 'modalImage', 'imageModalClose');
+                }
+            }
+                     
+        } else if (elementId.includes('removeCommentIcon')) {
+            // get the comment no
+             const commentNo = elementId.replace('removeCommentIcon', '');
+               // Ask user to confirm before deleting (safety check)
+               if (confirm('Are you sure you want to remove this comment?')) {
+                 // Find the comment element and remove it from page
+                 const commentElement = id(`commentDiv${commentNo}`);
+                 if (commentElement) {
+                
+                   // remove from the database 
+                 const response = await axios.delete(`/deleteComment/${commentNo}`);
+                 alert(response.data.message)
+               
+                 }else{
+                     alert('Comment not found')
+                 }
+               }
+            
         }
+
+        // Find the closest element with a id starting with "like-button-"
+        // else if(e.target.closest('[id^="like-button-"]')) {
+        //     const likeButtonDiv = e.target.closest('[id^="like-button-"]');
+        //     const likeButtonDivId = likeButtonDiv.getAttribute('id');
+        //     const commentNo = likeButtonDiv.getAttribute('data-comment-no');
+        //     const likeCount = id(`like-count-${commentNo}`).textContent.trim();
+
+        //     // show the reaction bar 
+        //     id(`reaction-bar-${commentNo}`).classList.add('show');
+
+        //     // update the like count
+        //     id(`like-count-${commentNo}`).textContent = parseInt(likeCount) + 1;
+
+
+
+
+
+        // }
 
 
     })

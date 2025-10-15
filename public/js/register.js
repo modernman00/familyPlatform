@@ -501,6 +501,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   id: () => (/* binding */ id),
 /* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
 /* harmony export */   idValue: () => (/* binding */ idValue),
+/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
 /* harmony export */   log: () => (/* binding */ log),
 /* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
 /* harmony export */   msgException: () => (/* binding */ msgException),
@@ -572,13 +573,16 @@ var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attr
  */
 var formReset = function formReset(formId) {
   var form = id(formId);
-  if (!form) return;
+  if (!form) {
+    console.warn("Form with ID \"".concat(formId, "\" not found."));
+    return;
+  }
 
   // Reset form fields
   form.reset();
 
   // Clear validation messages
-  form.qSelAll('.is-invalid, .invalid-feedback').forEach(function (el) {
+  form.querySelectorAll('.is-invalid, .invalid-feedback').forEach(function (el) {
     el.classList.remove('is-invalid');
     if (el.classList.contains('invalid-feedback')) {
       el.textContent = '';
@@ -586,13 +590,13 @@ var formReset = function formReset(formId) {
   });
 
   // Clear image previews
-  form.qSelAll('.preview-img').forEach(function (img) {
+  form.querySelectorAll('.preview-img').forEach(function (img) {
     img.src = '';
     img.style.display = 'none';
   });
 
   // Clear custom inputs (e.g., emoji pickers, rich text)
-  form.qSelAll('[data-custom-input]').forEach(function (el) {
+  form.querySelectorAll('[data-custom-input]').forEach(function (el) {
     el.value = '';
   });
 };
@@ -684,6 +688,98 @@ var checkManyElements = function checkManyElements(idOrClass, classString) {
   // Check if elements exist before calling render function
   if (doesElementExist.length > 0) {
     theFunction(doesElementExist);
+  }
+};
+
+/**
+* ----------------------------------------------------------------
+* Reusable Image Modal Function
+* ----------------------------------------------------------------
+* This function finds all images with the specified selector
+* and attaches a click event to show them in a modal.
+*
+* @param {string} selector - The CSS selector for the images you want to be zoomable (e.g., '.zoomable-image').
+* @param {string} modalId - The ID of the modal element (e.g., 'imageModal').
+* @param {string} modalImageId - The ID of the image element inside the modal (e.g., 'modalImage').
+* @param {string} modalCloseId - The ID of the close button inside the modal (e.g., 'imageModalClose').
+* @param {string} imgSrc - The source URL of the image to display in the modal.
+* @param {string} imgAlt - The alt text for the image to display in the modal.
+* ---------------------------------------------------------------- 
+*/
+var initializeImageModal = function initializeImageModal(selector, clickedImageIndex, modalId, modalImageId, modalCloseId) {
+  // Get references to the modal elements
+  // Global variables to manage modal state
+  var currentImages = [];
+  var currentImageIndex = 0;
+  var modal = document.getElementById(modalId);
+  var modalImage = document.getElementById(modalImageId);
+  var closeModal = document.getElementById(modalCloseId);
+  var prevButton = document.getElementById('prevButton');
+  var nextButton = document.getElementById('nextButton');
+
+  // Find all images that match the selector
+  var images = document.querySelectorAll(selector);
+  log(images[images.length - 1].src, " IMAGES");
+
+  // Guard clause: if no modal or images, do nothing.
+  if (!modal || !modalImage || !closeModal || images.length === 0) {
+    console.warn('Image modal setup failed: Required elements not found.');
+    return;
+  }
+
+  // Function to hide the modal
+  var hideModal = function hideModal() {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scrolling
+  };
+
+  // Function to show the modal with a specific image
+  var showModal = function showModal(index) {
+    if (!currentImages || currentImages.length === 0) return;
+    if (index < 0) {
+      currentImageIndex = currentImages.length - 1; // Loop to the last image
+    } else if (index >= currentImages.length) {
+      currentImageIndex = 0; // Loop to the first image
+    } else {
+      currentImageIndex = index;
+    }
+    modalImage.src = currentImages[currentImageIndex].src;
+    modalImage.alt = currentImages[currentImageIndex].alt;
+    modal.classList.add("show");
+    document.body.style.overflow = "hidden"; // Prevent background scrolling
+  };
+
+  // Event listeners for modal controls
+  closeModal.addEventListener("click", hideModal);
+  prevButton.addEventListener("click", function () {
+    return showModal(currentImageIndex - 1);
+  });
+  nextButton.addEventListener("click", function () {
+    return showModal(currentImageIndex + 1);
+  });
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      hideModal();
+    }
+  });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", function (e) {
+    if (modal.classList.contains("show")) {
+      if (e.key === "Escape") {
+        hideModal();
+      } else if (e.key === "ArrowLeft") {
+        showModal(currentImageIndex - 1);
+      } else if (e.key === "ArrowRight") {
+        showModal(currentImageIndex + 1);
+      }
+    }
+  });
+  currentImages = Array.from(document.querySelectorAll(selector));
+  if (currentImages.length > 0) {
+    showModal(clickedImageIndex);
+  } else {
+    console.warn("No images found for selector: ".concat(selector));
   }
 };
 

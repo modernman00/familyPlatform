@@ -36,6 +36,9 @@ import "./friendRequestCard"
 import "../navbar"
 import "./editProfile"
 import "./emojiPicker"
+import "./commentEmoji"
+
+
 // import "./newPage"
 
 

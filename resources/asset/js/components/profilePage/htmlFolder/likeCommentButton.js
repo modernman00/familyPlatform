@@ -1,6 +1,6 @@
-export const likeCommentButton = (data) => {
+export const likeCommentButton = (data, commentLength) => {
   return `
-   <div class="reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-3">
+   <div class="reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-1">
     <button 
       type="button" 
       id="likeButton${data.post_no}" 
@@ -19,8 +19,12 @@ export const likeCommentButton = (data) => {
       id="initComment${data.post_no}">
         <i class="bi bi-chat me-1"></i> 
           Comment 
+          (<span class="commentCounter" id="commentCounter${data.post_no}">
+            ${commentLength}
+          </span>)
+          
       </button>
-        <button><i class="bi bi-share me-1"></i> Share</button>
+   
     </div>
     `
 }

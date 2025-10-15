@@ -11,7 +11,7 @@ use App\model\{
 use Src\functionality\{
     SignIn
 };
-use Src\{SubmitForm, FileUploader, LoginUtility};
+use Src\{SubmitForm, FileUploader, SelectFn, LoginUtility};
 use App\controller\BaseController;
 use Src\functionality\{UpdateExistingData, SubmitPostData};
 
@@ -275,5 +275,22 @@ class ProfilePage extends BaseController
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    public function myPics($id): void
+    {
+
+        $id = checkInput(data: $id);
+
+        SelectFn::selectDynamicColumnsById(
+            table: 'images', 
+            implodeColArray: ['post_img0', 'post_img1', 'post_img2', 'post_img3', 'post_img4', 'post_img5'],
+            identifier: 'id', 
+            value: $id
+            );
+       
+
+
+        view('my-pictures');
     }
 }

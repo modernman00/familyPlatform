@@ -6,7 +6,8 @@ import { showComment} from "./comment"
 
 
 export const html = (el, comment = null) => {
-  const { post_no, postMessage } = el
+  const { post_no, postMessage, id } = el
+  const commentLength = comment.length;
   return `
     <div class="post card" id="post${post_no}">
      <div class="card-body post${post_no}" id="postIt">
@@ -20,10 +21,10 @@ export const html = (el, comment = null) => {
     </div>
     </div>
 
-    ${likeCommentButton(el)}
+    ${likeCommentButton(el, commentLength)}
     ${commentForm(el)}
     <div id = 'showComment${post_no}' class="comment-section">
-    ${showComment(comment)}
+    ${showComment(comment, id)}
 
       
     </div>
