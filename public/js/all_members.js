@@ -786,7 +786,7 @@ var renderHtml = function renderHtml(el) {
       // Handle the case where 'el' is falsy, such as when data is not available.
       throw new Error('there is no data');
     }
-    var theImg = "/public/img/profile/".concat(el.img);
+    var theImg = "/resources/images/profile/".concat(el.img);
     var areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
     var related = famCode == el.famCode;
     var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Connect';
@@ -1618,7 +1618,7 @@ var appUrl = "https://olaogun.test/";
 var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
 var friendRequestCard = function friendRequestCard(data) {
   var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;
-  var imageUrl = "/public/img/profile/".concat(encodeURIComponent((_data$img = data.img) !== null && _data$img !== void 0 ? _data$img : data.requesterProfileImg));
+  var imageUrl = "/resources/images/profile/".concat(encodeURIComponent((_data$img = data.img) !== null && _data$img !== void 0 ? _data$img : data.requesterProfileImg));
   var firstName = encodeURIComponent((_data$firstName = data.firstName) !== null && _data$firstName !== void 0 ? _data$firstName : data.requesterFirstName);
   var lastName = encodeURIComponent((_data$lastName = data.lastName) !== null && _data$lastName !== void 0 ? _data$lastName : data.requesterLastName);
   var requestId = encodeURIComponent((_data$id = data.id) !== null && _data$id !== void 0 ? _data$id : data.requesterId);

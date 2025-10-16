@@ -261,18 +261,18 @@ const initializeReactionsSimple = () => {
   });
   
   // Show reaction bar on hover
-  document.addEventListener('mouseenter', (event) => {
-    const likeButton = event.target.closest('[id^="like-button-"]');
-    if (likeButton) {
-      const commentNo = likeButton.id.replace('like-button-', '');
-      const reactionBar = document.getElementById(`reaction-bar-${commentNo}`);
+  // document.addEventListener('mouseenter', (event) => {
+  //   const likeButton = event.target.closest('[id^="like-button-"]');
+  //   if (likeButton) {
+  //     const commentNo = likeButton.id.replace('like-button-', '');
+  //     const reactionBar = document.getElementById(`reaction-bar-${commentNo}`);
       
-      if (reactionBar) {
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(() => reactionBar.classList.add('show'), 300);
-      }
-    }
-  }, true);
+  //     if (reactionBar) {
+  //       clearTimeout(hoverTimeout);
+  //       hoverTimeout = setTimeout(() => reactionBar.classList.add('show'), 300);
+  //     }
+  //   }
+  // }, true);
   
   // Hide reaction bar on mouse leave
   document.addEventListener('mouseleave', (event) => {

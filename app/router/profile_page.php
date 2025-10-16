@@ -46,5 +46,5 @@ $router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\
 $router->map('DELETE', '/deleteComment/[i:commentNo]', 'App\Controller\members\PostMessage@deleteComment', 'COMMENT_DELETE');
 
 //my-pictures
-$router->map('GET', '/my-pictures/[a:id]', 'App\controller\members\ProfilePage@myPics', 'MY_PICS');
+$router->map('GET', '/images', 'App\controller\members\ProfilePage@myPics', 'MY_PICS');
 

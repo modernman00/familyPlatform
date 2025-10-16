@@ -146,7 +146,8 @@ try {
                 }
             }
                      
-        } else if (elementId.includes('removeCommentIcon')) {
+        } 
+        else if (elementId.includes('removeCommentIcon')) {
             // get the comment no
              const commentNo = elementId.replace('removeCommentIcon', '');
                // Ask user to confirm before deleting (safety check)
@@ -164,7 +165,12 @@ try {
                  }
                }
             
-        }
+        } 
+            // redirect to the images pages
+        // else if(elementId.includes('directToImages')){
+        //     const user_id = localStorage.getItem('requesterId');
+        //       window.location.href = `images/${user_id}`;
+        // }
 
         // Find the closest element with a id starting with "like-button-"
         // else if(e.target.closest('[id^="like-button-"]')) {

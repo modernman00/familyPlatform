@@ -67,6 +67,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return Promise.all(/*! import() | img */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("img")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/profilePage/imgViewer */ "./resources/asset/js/components/profilePage/imgViewer.js"));
       }
     },
+    '/images': {
+      module: function module() {
+        return __webpack_require__.e(/*! import() | images */ "images").then(__webpack_require__.bind(__webpack_require__, /*! ./components/images */ "./resources/asset/js/components/images.js"));
+      }
+    },
     '/createFamilyCode': {
       module: function module() {
         return __webpack_require__.e(/*! import() | familyCode */ "familyCode").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js"));

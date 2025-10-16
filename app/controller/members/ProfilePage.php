@@ -11,7 +11,7 @@ use App\model\{
 use Src\functionality\{
     SignIn
 };
-use Src\{SubmitForm, FileUploader, SelectFn, LoginUtility};
+use Src\{SubmitForm, FileUploader, SelectFn, Utility, LoginUtility};
 use App\controller\BaseController;
 use Src\functionality\{UpdateExistingData, SubmitPostData};
 
@@ -145,7 +145,7 @@ class ProfilePage extends BaseController
 
             SubmitPostData::submitToOneTablenImage(
                 table: 'post',
-                imgPath: 'public/img/post/',
+                imgPath: 'resources/images/post/',
                 fileName: 'post_img',
                 fileTable: 'post',
                 newInput: $newData,
@@ -265,7 +265,7 @@ class ProfilePage extends BaseController
 
             UpdateExistingData::updateMultipleTables(
                 fileTable: 'profilePics',
-                imgPath: 'public/img/profile/',
+                imgPath: 'resources/images/profile/',
                 fileName: 'img',
                 removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
                 allowedTables: ['personal', 'contact', 'profilePics'],
@@ -277,20 +277,20 @@ class ProfilePage extends BaseController
         }
     }
 
-    public function myPics($id): void
+    public function myPics(): void
     {
 
-        $id = checkInput(data: $id);
+        $id = checkInput($_SESSION['id']);
 
-        SelectFn::selectDynamicColumnsById(
-            table: 'images', 
-            implodeColArray: ['post_img0', 'post_img1', 'post_img2', 'post_img3', 'post_img4', 'post_img5'],
-            identifier: 'id', 
-            value: $id
+            $images = SelectFn::selectDynamicColumnsById(
+                table: 'images', 
+                identifier: 'id', 
+                value: $id, 
+                implodeColArray: ['id', 'img', 'caption', 'likes', 'where_from', 'created_at']
             );
-       
+    
+       parent::viewWithCsp('member/images', ['images' => $images]);
 
-
-        view('my-pictures');
+        // view('member.images', compact('images') );
     }
 }

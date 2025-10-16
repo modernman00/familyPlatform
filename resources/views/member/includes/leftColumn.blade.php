@@ -4,7 +4,7 @@
                 <div class="card-header position-relative">
                     <div class="cover-photo"
                         style="height: 100px; background-color: #0a526f; border-radius: 8px 8px 0 0;"></div>
-                    <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg">
+                    <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg">
                 </div>
 
                 <div class="card-body">
@@ -47,11 +47,12 @@
                         <i class="bi bi-plus-circle"></i> Create Event
                     </button>
 
-                        <button type="button" 
-        class="btn btn-danger w-100"
-        onclick="window.location.href='/my-pictures/{{ $data['id'] }}'">
+                       <button type="button" id="directToImages"
+    class="btn btn-danger w-100"
+    onclick="window.location.href='{{ route('images') }}'">
   Go to pictures
 </button>
+
 
 
 

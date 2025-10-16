@@ -29,7 +29,7 @@
                     <div class="d-flex align-items-center mb-3">
                         {{-- User Info --}}
                         @isset($data['img'])
-                            <img src="{{ asset('img/profile/' . $data['img']) }}" alt="Avatar"
+                            <img src="{{ route('resources/images/profile/' . $data['img']) }}" alt="Avatar"
                                 class="rounded-circle me-3 profileImg" width="40" height="40">
                         @else
                             <img src="{{ asset('img/avatar/avatarF.png') }}" alt="Avatar" width="40" height="40"

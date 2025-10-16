@@ -41,6 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     '/profilepage/img': {
       module: () => import(/* webpackChunkName: 'img' */ './components/profilePage/imgViewer'),
     },
+    '/images': {
+      module: () => import(/* webpackChunkName: 'images' */ './components/images'),
+    },
     '/createFamilyCode': {
       module: () => import(/* webpackChunkName: 'familyCode' */ './components/register/familyCode'),
     },

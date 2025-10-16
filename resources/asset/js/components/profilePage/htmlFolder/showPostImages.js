@@ -10,7 +10,7 @@ export const showPostImg = (data) => {
 
      
         <img 
-          src="/public/img/post/${imgElement}" 
+          src="/resources/images/post/${imgElement}" 
           alt="images${i}" 
           data-postImgId="${postNo}${imgElement}"
           data-imgIndex="${i}"

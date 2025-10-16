@@ -4,7 +4,7 @@
             <div class="card post-composer mb-4" data-bs-toggle="modal" data-bs-target="#postModal">
                 <div class="card-body d-flex align-items-center">
                     @isset($data['img'])
-                        <img src="/public/img/profile/{{ $data['img'] }}" alt="profile"
+                        <img src="/resources/images/profile/{{ $data['img'] }}" alt="profile"
                             class="rounded-circle me-3 " width="40" height="40">
                     @else
                         <img src="/public/avatar/avatarF.png" alt="profile" width="40" height="40"

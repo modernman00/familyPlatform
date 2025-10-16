@@ -46,11 +46,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     </script>
-     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js"></script>
+     <script nonce="{{ $nonce }}" src="{{ route('public/js/index.js') }}"></script>
+<script nonce="{{ $nonce }}" src="{{ route('public/js/manifest.js') }}"></script>
+<script nonce="{{ $nonce }}" src="{{ route('public/js/vendor.js') }}"></script>
 
-    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/manifest.js"></script>
-
-    <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/vendor.js"></script>
       
 <script>
   if ('serviceWorker' in navigator) {

@@ -7,7 +7,7 @@ export const commentHTML = (data, postId) => {
 
   const {profileImg, fullName, date_created, img, comment, comment_no, id} = data
   const imgURL = profileImg || img 
-  const image = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/avatar/avatarF.png`
+  const image = (imgURL) ? `/resources/images/profile/${imgURL}` : `/public/avatar/avatarF.png`
 
   return `<div class="d-flex mb-3 commentDiv align-items-start" data-commentDiv-no="${comment_no}" id="commentDiv${comment_no}" name="commentDiv">
 

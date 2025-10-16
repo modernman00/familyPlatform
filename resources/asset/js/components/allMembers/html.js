@@ -23,7 +23,7 @@ export const renderHtml = (el) => {
       throw new Error('there is no data')
     }
 
-    const theImg = `/public/img/profile/${el.img}`;
+    const theImg = `/resources/images/profile/${el.img}`;
     const areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
     const related = famCode == el.famCode
     const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?

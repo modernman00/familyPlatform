@@ -1,0 +1,148 @@
+/* Responsive Grid */
+
+html {
+  font-size: 16px;
+}
+
+body {
+  overflow-x: hidden;
+  font-family: "Arial", "Roboto Slab", "Helvetica Neue", Helvetica, sans-serif;
+  line-height: 1.7;
+  color: #818181;
+  padding: 30px;
+}
+
+.avatar {
+  vertical-align: middle;
+  width: 20vh;
+  height: 20vh;
+  border-radius: 50%;
+}
+
+p {
+  line-height: 1.75;
+}
+
+a {
+  color: #fed136;
+}
+
+a:hover {
+  color: #fec503;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+
+}
+
+.grid-item {
+  /* Ensure grid items are consistent */
+  width: 300px; /* Adjust as needed */
+  margin: 10px;
+}
+
+.grid-item img {
+  width: 100%; /* Make image fill the container */
+  height: 200px; /* Set a fixed height */
+  object-fit: cover; /* Crop the image to fit, preserving aspect ratio */
+  object-position: center; /* Center the image within the container */
+  border-radius: 6px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .grid-item:hover img {
+    transform: scale(1.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1.5;
+  }
+}
+
+.img-meta {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.like-btn {
+  border: none;
+  background: none;
+  color: #e63946;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.like-btn:hover {
+  transform: scale(1.2);
+}
+
+.upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.upload-row input[type="file"],
+.upload-row input[type="text"],
+.upload-row button {
+  flex: 1;
+  min-width: 150px;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.upload-row button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.upload-row button:hover {
+  background-color: #45a049;
+}
+
+.note {
+  font-size: 12px;
+  color: #666;
+}
+
+.timestamp {
+  font-size: 11px;
+  color: #777;
+  margin-top: 2px;
+}
+
+button {
+  background: #d23c77;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  background: #b53467;
+}
+

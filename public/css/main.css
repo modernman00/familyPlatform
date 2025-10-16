@@ -608,3 +608,19 @@ textarea {
     animation-duration: 1.5s;
   }
 }
+
+
+button {
+  background: #d23c77;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  background: #b53467;
+}

@@ -25,7 +25,7 @@ const timeAgo = (x) => format(x)
 export const nameImgTiming = (data) => {
     const { profileImg, fullName, date_created, post_time} = data;
 
-    const img = (profileImg) ? `/public/img/profile/${profileImg}` : "/public/avatar/avatarF.png"
+    const img = (profileImg) ? `/resources/images/profile/${profileImg}` : "/public/avatar/avatarF.png"
 
     return `<div class="d-flex align-items-center mb-3">
 
