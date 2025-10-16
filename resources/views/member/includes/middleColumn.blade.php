@@ -42,3 +42,69 @@
             </nav>
         </div>
 
+
+<script>
+   
+  const reactionBars = document.querySelectorAll('.reaction-bar');
+  
+  // Show/hide reaction bar on hover
+  document.querySelectorAll('[id^="like-button-"]').forEach(button => {
+    const commentNo = button.getAttribute('data-comment-no');
+    const bar = document.getElementById(`reaction-bar-${commentNo}`);
+    
+    button.addEventListener('mouseenter', () => {
+      bar.classList.add('show');
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      setTimeout(() => bar.classList.remove('show'), 600);
+    });
+
+    bar.addEventListener('mouseenter', () => {
+      bar.classList.add('show');
+    });
+    bar.addEventListener('mouseleave', () => {
+      bar.classList.remove('show');
+    });
+  });
+
+  // Handle reaction click
+  document.querySelectorAll('.reaction-option').forEach(option => {
+    option.addEventListener('click', async (e) => {
+      const reaction = option.getAttribute('data-reaction');
+      const commentDiv = option.closest('[data-commentDiv-no]');
+      const commentNo = commentDiv.getAttribute('data-commentDiv-no');
+      const button = document.getElementById(`like-button-${commentNo}`);
+      const countEl = document.getElementById(`like-count-${commentNo}`);
+      const preview = document.getElementById(`reaction-preview-${commentNo}`);
+
+      // Optimistic UI update
+      preview.innerHTML = `<span class="reaction-emoji">${option.querySelector('.reaction-emoji').textContent}</span>`;
+      button.querySelector('span').textContent = option.getAttribute('data-label');
+      
+      let count = parseInt(countEl.textContent || '0', 10);
+      countEl.textContent = count + 1;
+
+      try {
+        const res = await fetch('/api/reactions/add', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            comment_no: commentNo,
+            reaction,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message);
+      } catch (error) {
+        console.error('Failed to record reaction:', error);
+        // revert optimistic UI change
+        countEl.textContent = count;
+        preview.innerHTML = '';
+      }
+    });
+  });
+
+
+</script>

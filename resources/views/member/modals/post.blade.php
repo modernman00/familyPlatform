@@ -64,28 +64,41 @@
                             class="d-block mb-2 text-muted small"></span>
 
                         {{-- Emoji Picker & Upload --}}
-                        <div class="mb-3 position-relative">
-                            <button type="button" class="btn btn-sm btn-outline-secondary me-2" id="emojiToggle"
-                                aria-expanded="false" aria-controls="emojiPickerList">
-                                <i class="bi bi-emoji-smile"></i> Emoji
-                            </button>
-                            <div id="emojiPickerList" class="d-flex flex-wrap gap-2 mt-2 d-none" role="listbox" aria-hidden="true" >
-                                <!-- Emojis will be dynamically inserted here -->
+                        <div class="mt-3 d-flex justify-content-between align-items-center position-relative">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="emojiToggle"
+                                    title="add emoji" aria-expanded="false" aria-controls="emojiPickerList">
+                                    😊
+                                </button>
+                                <div id="emojiPickerList" class="d-flex flex-wrap gap-2 mt-2 d-none" role="listbox"
+                                    aria-hidden="true">
+                                    <!-- Emojis will be dynamically inserted here -->
+
+                                </div>
+
+                                {{-- image upload button --}}
+
+                                <label for="imageUpload" class="btn btn-sm btn-outline-secondary mb-0"
+                                    title="Attach image">
+                                    📷
+                                </label>
+                                <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple
+                                    hidden>
+
+                                <button type="button" class="btn btn-sm btn-outline-secondary" title="Add GIF"
+                                    aria-label="Add GIF">GIF</button>
+
+
+
+                                <button type="button" class="btn btn-sm btn-outline-secondary" title="Stickers"
+                                    aria-label="Stickers">🏷️</button>
 
                             </div>
 
 
-                            {{-- image upload button --}}
 
-                            <label for="imageUpload" class="btn btn-sm btn-outline-secondary mb-0">
-                                <i class="bi bi-image"></i> Photo
-                            </label>
-                            <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple hidden>
-
-                        </div>
-
-                        {{-- Visibility Notice --}}
-                        {{-- <div class="border-top pt-3">
+                            {{-- Visibility Notice --}}
+                            {{-- <div class="border-top pt-3">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <span class="text-muted">Only members with your family code can see you
@@ -106,14 +119,14 @@
                         </div> --}}
 
 
-                        <input type="hidden" name="token" value="{{ $token }}">
+                            <input type="hidden" name="token" value="{{ $token }}">
 
-                        {{-- Modal Footer --}}
-                        <div class="modal-footer">
+
                             <button type="button" id="submitPost" name="submit"
-                                class="btn btn-primary submitPost w-100">
+                                class="btn btn-primary btn-sm submitPost">
                                 Post</button>
                         </div>
+
                     </form>
 
                 </div>

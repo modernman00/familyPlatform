@@ -1,6 +1,7 @@
 "use strict";
 import { id, log, showError, formReset, fileUploadSizeValidation, initializeImageModal } from "../global"
 import axios from "axios"
+import { showEmojiPicker } from '../emojiPicker.js';
 
 
 
@@ -17,7 +18,6 @@ try {
         const elementId = e.target.id
         const postId = e.target.name
         const postImgId = e.target.dataset.postimgid;
-
 
         // Handle Like Button Click
         if (elementId.includes("likeButton")) {
@@ -43,10 +43,32 @@ try {
             // Make the comment form to appear onclick. 
         } else if (elementId.includes("initComment")) {
             const commentFormId = elementId.replace('init', 'form')
-            id(commentFormId).style.display = "block"
+            id(commentFormId).classList.toggle('d-none');
 
-            // Handle Comment Submission
-        } else if (elementId.includes("submitComment")) {
+
+        }
+        // comment form emoji picker
+        else if (elementId.includes("emojiToggle")) {
+
+            const emojiToggler = id(elementId)
+
+            const emojiListElement = elementId.replace('emojiToggle', 'emojiCommentPickerList')
+
+            const emojiList = id(emojiListElement); // Container for emoji buttons
+            // 🟡 Toggle emoji picker visibility when the toggle button is clicked
+            // emojiToggler.addEventListener('click', () => {
+            emojiList.classList.toggle('d-none'); // Show/hide the emoji list
+            emojiToggler.setAttribute('aria-expanded', emojiList.classList.contains('d-none') ? 'false' : 'true');
+            // });
+
+            // comment form emoji picker
+            showEmojiPicker(emojiListElement, 'data-commentEmoji-target');
+
+
+        }
+
+        // Handle Comment Submission
+        else if (elementId.includes("submitComment")) {
 
             e.preventDefault()
 
@@ -145,28 +167,28 @@ try {
                     initializeImageModal(imgClass, initialIndex, 'imageModal', 'modalImage', 'imageModalClose');
                 }
             }
-                     
-        } 
+
+        }
         else if (elementId.includes('removeCommentIcon')) {
             // get the comment no
-             const commentNo = elementId.replace('removeCommentIcon', '');
-               // Ask user to confirm before deleting (safety check)
-               if (confirm('Are you sure you want to remove this comment?')) {
-                 // Find the comment element and remove it from page
-                 const commentElement = id(`commentDiv${commentNo}`);
-                 if (commentElement) {
-                
-                   // remove from the database 
-                 const response = await axios.delete(`/deleteComment/${commentNo}`);
-                 alert(response.data.message)
-               
-                 }else{
-                     alert('Comment not found')
-                 }
-               }
-            
-        } 
-            // redirect to the images pages
+            const commentNo = elementId.replace('removeCommentIcon', '');
+            // Ask user to confirm before deleting (safety check)
+            if (confirm('Are you sure you want to remove this comment?')) {
+                // Find the comment element and remove it from page
+                const commentElement = id(`commentDiv${commentNo}`);
+                if (commentElement) {
+
+                    // remove from the database 
+                    const response = await axios.delete(`/deleteComment/${commentNo}`);
+                    alert(response.data.message)
+
+                } else {
+                    alert('Comment not found')
+                }
+            }
+
+        }
+        // redirect to the images pages
         // else if(elementId.includes('directToImages')){
         //     const user_id = localStorage.getItem('requesterId');
         //       window.location.href = `images/${user_id}`;
@@ -193,6 +215,65 @@ try {
 
 
     })
+
+
+    // MOUSE ENTER 
+
+    document.addEventListener('click', async (e) => {
+
+        const reactionDiv = e.target.closest('.reaction-button');
+        const reactionOption = e.target.closest('.reaction-option');
+
+        if (reactionDiv) {
+            const elementId = reactionDiv.id
+            const elementName = reactionDiv.name
+            const commentNo = reactionDiv.dataset.commentNo;
+
+
+            const reactionBar = id(`reaction-bar-${commentNo}`);
+            if (reactionBar) {
+                
+                reactionBar.classList.toggle('show');
+            } else {
+                  reactionBar.classList.remove('show');
+            }
+
+        } else if (reactionOption) {
+            const no = reactionOption.dataset.optionNo;
+            const button = id(`like-button-${no}`);
+            const countEl = id(`like-count-${no}`);
+            const preview = id(`reaction-preview-${no}`);
+            const emojiContent = reactionOption.textContent;
+            const label = reactionOption.dataset.label;
+            // Optimistic UI update
+            preview.innerHTML = `<span class="reaction-emoji">${emojiContent}</span>`;
+            button.querySelector('span').textContent = label;
+
+            let count = parseInt(countEl.textContent || '0', 10);
+            countEl.textContent = count + 1;
+
+            const response = await axios.post(`/commentReaction`, {
+                comment_no: no,
+                reaction: emojiContent,
+                label: label
+            })
+
+            // alert(response.data.message)
+        } else{
+            const reactionBar = e.target.closest('.reaction-bar');
+            if (reactionBar) {
+                reactionBar.classList.remove('show');
+            }
+        }
+
+
+
+    })
+
+
+
+
+    // MOUSE LEAVE
 } catch (e) {
     showError(e)
 }

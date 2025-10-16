@@ -1,4 +1,6 @@
 import axios from "axios"
+// Import emoji metadata from emojibase (English locale, full dataset)
+
 
 export const id = (id) => document.getElementById(id)
 export const idValue = (id) => id(id).value
@@ -256,4 +258,6 @@ export const initializeImageModal = (selector, clickedImageIndex, modalId, modal
 
 
 }
+
+
 

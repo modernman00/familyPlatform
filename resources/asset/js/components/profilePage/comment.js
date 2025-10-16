@@ -27,32 +27,35 @@ export const commentHTML = (data, postId) => {
 
      <div class="reaction-preview" id="reaction-preview-${comment_no}"></div>
 
-      <div class="comment-actions d-flex gap-3">
-    
-                
-                <div class="reaction-bar" id="reaction-bar-${comment_no}">
-                    <div class="reaction-option" data-reaction="like" data-label="Like">
-                        <div class="reaction-emoji">👍</div>
+      <div class="comment-actions d-flex gap-3">         
+                <div class="reaction-bar"  id="reaction-bar-${comment_no}">
+
+                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-like-${comment_no}" data-reaction="like" data-label="Like">
+
+                      👍
+
                     </div>
-                    <div class="reaction-option" data-reaction="love" data-label="Love">
-                        <div class="reaction-emoji">❤️</div>
+
+                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-love-${comment_no}" data-reaction="love" data-label="Love">
+                      ❤️
                     </div>
-                    <div class="reaction-option" data-reaction="haha" data-label="Haha">
-                        <div class="reaction-emoji">😄</div>
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-haha-${comment_no}" data-reaction="haha" data-label="Haha">
+                      😄
                     </div>
-                    <div class="reaction-option" data-reaction="wow" data-label="Wow">
-                        <div class="reaction-emoji">😮</div>
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-wow-${comment_no}" data-reaction="wow" data-label="Wow">
+                     😮
                     </div>
-                    <div class="reaction-option" data-reaction="sad" data-label="Sad">
-                        <div class="reaction-emoji">😢</div>
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-sad-${comment_no}" data-reaction="sad" data-label="Sad">
+                      😢
                     </div>
-                    <div class="reaction-option" data-reaction="angry" data-label="Angry">
-                        <div class="reaction-emoji">😠</div>
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-angry-${comment_no}"
+                     data-reaction="angry" data-label="Angry">
+                      😠
                     </div>
                 </div>
 
                 <div class="reaction-button like-button-${comment_no}" id="like-button-${comment_no}" data-comment-no="${comment_no}">
-                    <i class="bi bi-hand-thumbs-up reaction-icon"></i>
+                    <i class="bi bi-hand-thumbs-up reaction-icon" id="like-icon-${comment_no}"></i>
                     <span>Like</span>
                     <div class="reaction-count" id="like-count-${comment_no}">0</div>
                 </div>
@@ -61,14 +64,8 @@ export const commentHTML = (data, postId) => {
                   reqId == id || reqId == postId ? `<button class="btn btn-sm btn-icon text-danger" id="removeComment(${comment_no})" title="Remove">
                     <i class="bi bi-trash" id="removeCommentIcon${comment_no}"></i>
                 </button>` : ''
-                }
-                
-         
+                }        
       </div>
-
-
-
-
   </div>
 </div><hr>`
 

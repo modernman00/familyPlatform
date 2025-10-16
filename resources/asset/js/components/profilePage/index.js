@@ -35,8 +35,8 @@ import "./createEvent"
 import "./friendRequestCard"
 import "../navbar"
 import "./editProfile"
-import "./emojiPicker"
-import "./commentEmoji"
+import "./postEmojiImgProcess"
+import "./commentEmojiTest"
 
 
 // import "./newPage"

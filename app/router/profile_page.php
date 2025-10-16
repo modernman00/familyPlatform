@@ -48,3 +48,6 @@ $router->map('DELETE', '/deleteComment/[i:commentNo]', 'App\Controller\members\P
 //my-pictures
 $router->map('GET', '/images', 'App\controller\members\ProfilePage@myPics', 'MY_PICS');
 
+// COMMENT REACTION 
+$router->map('POST', '/commentReaction', 'App\Controller\members\CommentReactionController@addReaction', 'COMMENT_REACTION');
+
