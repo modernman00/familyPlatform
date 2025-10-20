@@ -259,7 +259,7 @@ try {
             })
 
             // alert(response.data.message)
-        } else{
+        } else {
             const reactionBar = e.target.closest('.reaction-bar');
             if (reactionBar) {
                 reactionBar.classList.remove('show');

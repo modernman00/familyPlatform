@@ -154,6 +154,9 @@ try {
     commentsChannel.bind('delete-comment', (data) => {
         deleteComment(data)
     })
+    commentsChannel.bind('reacted-updated', (data) => {
+        deleteComment(data)
+    })
 
     // Subscribe to the likes channel
     const likesChannel = pusher.subscribe('likes-channel');

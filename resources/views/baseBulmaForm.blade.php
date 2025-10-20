@@ -235,40 +235,7 @@
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll" data-offset='60'>
 
-    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <img src={{ $_ENV['APP_LOGO'] }} width="30" height="30" alt="">
-                <span class="ml-2 has-text-weight-semibold">Decision Matrix</span>
-            </a>
-
-            <!-- Mobile burger toggle -->
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-
-        <div id="navbarMenu" class="navbar-menu">
-            <div class="navbar-end">
-                <a class="navbar-item" href="/">Home</a>
-                <a class="navbar-item" href="about">About</a>
-                <a class="navbar-item" href="contact">Contact</a>
-                <a class="navbar-item" href="/#questions">Questions</a>
-                <a class="navbar-item" href="blogs">Blogs</a>
-                <a class="navbar-item noDisplay" id="signout" href="signout/managed">Sign out</a>
-
-                <!-- Theme toggle -->
-                <div class="navbar-item">
-                    <div class="field">
-                        <input type="checkbox" id="themeSwitch" class="switch is-rounded is-small">
-                        <label for="themeSwitch">🌙</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+     @include('includes.bulmaNav')
 
 
 

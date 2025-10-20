@@ -30,26 +30,26 @@ export const commentHTML = (data, postId) => {
       <div class="comment-actions d-flex gap-3">         
                 <div class="reaction-bar"  id="reaction-bar-${comment_no}">
 
-                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-like-${comment_no}" data-reaction="like" data-label="Like">
+                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-like-${comment_no}" data-reaction="like" data-label="likes">
 
                       👍
 
                     </div>
 
-                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-love-${comment_no}" data-reaction="love" data-label="Love">
+                    <div class="reaction-option" data-option-no="${comment_no}" id="reaction-option-love-${comment_no}" data-reaction="love" data-label="love">
                       ❤️
                     </div>
-                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-haha-${comment_no}" data-reaction="haha" data-label="Haha">
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-haha-${comment_no}" data-reaction="haha" data-label="haha">
                       😄
                     </div>
-                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-wow-${comment_no}" data-reaction="wow" data-label="Wow">
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-wow-${comment_no}" data-reaction="wow" data-label="wow">
                      😮
                     </div>
-                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-sad-${comment_no}" data-reaction="sad" data-label="Sad">
+                    <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-sad-${comment_no}" data-reaction="sad" data-label="sad">
                       😢
                     </div>
                     <div class="reaction-option" data-option-no="${comment_no}"id="reaction-option-angry-${comment_no}"
-                     data-reaction="angry" data-label="Angry">
+                     data-reaction="angry" data-label="angry">
                       😠
                     </div>
                 </div>
