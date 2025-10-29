@@ -31,31 +31,54 @@ class PostMessage
     {
 
         try {
-            // it works
-            $message = AllMembersData::postProfilePicByFamCode(
+            // 1. Get all posts
+            $posts = AllMembersData::postProfilePicByFamCode(
                 id: cleanSession($_SESSION['memberId']),
                 famCode: checkInput($_SESSION['famCode'])
             );
 
-            if (!$message) msgException(401, "no post msg");
+            if (!$posts) msgException(401, "no post msg");
 
-            $count = count($message);
+            $count = count($posts);
 
-            $newCommentArray = [];
+            // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
+            foreach ($posts as &$post) {
 
-            foreach ($message as $msg) {
+                // 3. Get all comments for THIS post
+                $comments = AllMembersData::commentProfilePicByPostNo($post['post_no']);
 
-                $commentData = AllMembersData::commentProfilePicByPostNo($msg['post_no']); // it works
-                $newCommentArray[] = $commentData; // add the result to $newCommentArray instead of overwriting
+                if (!$comments) {
+                    $comments = [];
+                    continue; // No comments for this post, move to the next post
+                }
+
+                // 4. Loop through each comment: MUST use the reference operator (&) to modify the original array.
+                foreach ($comments as &$comment) {
+
+                    //  // 5. Get reactions for THIS comment
+                    // 5. Get reactions for THIS comment
+                    $commentNo = $comment['comment_no'];
+                    $reactions = CommentReactionController::fetchReactions($commentNo, false);
+
+                    // 6. Attach the reactions directly to their comment
+                    // We use $comment (the reference) to attach reactions to this specific comment array.
+                    $comment['reactions'] = $reactions ? $reactions : [];
+                    // }                  
+                }
+                unset($comment); // Good practice to unset the inner reference
+
+                // 7. Attach the comments (which now have reactions) to the CURRENT post array
+                // We use $post (the reference) to modify the specific element in $posts.
+                $post['comments'] = $comments;
             }
+
+            // 8. Unset references to prevent bugs
+            unset($post);
 
             $_SESSION['POST_COUNT'] = $count;
             msgSuccess(
                 code: 200,
-                msg: [
-                    'post' => $message,
-                    'comment' => $newCommentArray
-                ]
+                msg: $posts
             );
         } catch (\Throwable $th) {
             \showError($th);
@@ -179,8 +202,8 @@ class PostMessage
                 DeleteFn::deleteOneRow("comment", "comment_no", $commentNo);
 
                 // trigger pusher to update all the UI elements for the deleted comment 
-                Pusher::broadcast('comments-channel', 'delete-comment', ['commentNo'=>$commentNo, 'postNo'=>$commentPostNo]);
-                
+                Pusher::broadcast('comments-channel', 'delete-comment', ['commentNo' => $commentNo, 'postNo' => $commentPostNo]);
+
                 msgSuccess(200, "comment deleted successfully");
             }
         } catch (\Throwable $th) {

@@ -51,3 +51,6 @@ $router->map('GET', '/images', 'App\controller\members\ProfilePage@myPics', 'MY_
 // COMMENT REACTION 
 $router->map('POST', '/commentReaction', 'App\Controller\members\CommentReactionController@addReaction', 'COMMENT_REACTION');
 
+// GET COMMENT REACTORS COUNT AND WHO HAVE REACTED TO A COMMENT
+$router->map('GET', '/commentReactionSummary/[i:commentNo]', 'App\Controller\members\CommentReactionController@fetchReactions', 'COMMENT_REACTION_WHO_HAVE_REACTED');
+

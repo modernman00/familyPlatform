@@ -101,5 +101,5 @@ if (process.env.MIX_SOURCEMAPS !== 'false') {
 }
 
 mix.babelConfig({
-  plugins: ["@babel/plugin-syntax-dynamic-import"],
+  plugins: ["@babel/plugin-syntax-dynamic-import", "@babel/plugin-proposal-optional-chaining"],
 });

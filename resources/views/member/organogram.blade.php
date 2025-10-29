@@ -1,12 +1,9 @@
 @extends ('layouts.profileBase')
 @section('title', 'Family Tree')
-{{-- custom css --}}
+@section('data-page-id', 'organogram')
 @push('styles')
     <link rel="stylesheet" href="/public/css/organogram.css">
 @endpush
-
-
-@section('data-page-id', 'Organogram')
 @section('content')
 
     <div class="organogram-container">
@@ -173,7 +170,6 @@
             </div>
         </div>
 
+    </div>
 
-
-
-    @endsection
+@endsection

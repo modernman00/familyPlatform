@@ -237,8 +237,6 @@
 
      @include('includes.bulmaNav')
 
-
-
     <section class="section content">
 
         <div class="container">
@@ -250,15 +248,9 @@
 
                 {{-- <hr class="my-2"> --}}
 
-
                 @yield('content')
 
-
-
-
-
             </div>
-
 
         </div>
 
@@ -266,8 +258,6 @@
 
     <div class="footer">
         <div class="content has-text-centered">
-
-
             <a href="@yield('data-page-id')" title="To Top">
                 <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-arrow-bar-up" fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg">
@@ -291,8 +281,6 @@
             });
         });
     </script>
-
-
 
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js"></script>
 

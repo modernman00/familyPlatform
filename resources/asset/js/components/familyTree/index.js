@@ -73,3 +73,4 @@ window.addEventListener('click', (e) => {
     personModal.style.display = 'none';
   }
 });
+

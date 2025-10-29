@@ -1,4 +1,4 @@
-import { log, showError, checkManyElements, id, msgException } from '../global'
+import { log, showError, checkManyElements, id, msgException, qSel } from '../global'
 import { appendNewPost, allPost } from './post'
 import { render } from "timeago.js"
 import { appendNewComment } from './comment'
@@ -21,32 +21,37 @@ try {
 
     // Global state object with data-fetching and initialization logic
     const state = {
-        post: [],
-        comment: [],
+        posts: [], // Renamed 'post' to 'posts' for clarity
 
         // Method to fetch initial data and populate state
         async initialize() {
             try {
+              const pullData = await axios.get(`/post/getAllPostCommentByFamCode`);
+            
+            // --- THE FIX IS HERE ---
+            // Manually parse the data string before using it
+            let responseData = pullData.data;
 
-                const pullData = await axios.get(`/post/getAllPostCommentByFamCode`);
+            // Check if the data is a string and needs parsing (based on your screenshot)
+            if (typeof responseData === 'string') {
+                responseData = JSON.parse(responseData);
+            }
+                   
+            // 1. Assign the new 'posts' array from the parsed response
+            this.posts = responseData.message;
 
-                // Assign fetched data to state properties
-                this.post = pullData.data.message.post;
-                this.comment = pullData.data.message.comment;
-
-                this.comment = this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
-
-                if (this.post.length > 0) {
-
-                    // Render posts and comments on the page after data is loaded
-                    this.post.forEach(data => allPost(data, this.comment));
-                } else {
-                    log("No post")
-                }
-
+            if (this.posts.length > 0) {
+                // 2. Loop and render.
+                this.posts.forEach(post => allPost(post));
+            } else {
+                log("No post");
+            }
 
             } catch (error) {
                 console.error("Error fetching posts and comments:", error);
+                showError(error);
+
+
             }
         }
     };
@@ -94,8 +99,8 @@ try {
 
                 const commentCount = parseInt(commentCounterEl.textContent)
                 // get the current value and convert it to a number 
-                    commentCounterEl.textContent = commentCount + 1;
-        
+                commentCounterEl.textContent = commentCount + 1;
+
 
             }
 
@@ -127,9 +132,8 @@ try {
 
         }
 
-
-
     };
+
 
     const updateLike = (e) => {
         // Parse the incoming data and check if it already exists in state
@@ -139,6 +143,26 @@ try {
             likeElement.innerHTML = parseInt(dataForUse.likeCounter)
         }
     };
+
+    const reactionUpdated = ({ commentNo, reaction, countReaction, whoReacted }) => {
+        const likeCount = qSel(`#like-count-${commentNo}`);
+        const preview = qSel(`#reaction-preview-${commentNo}`);
+
+        if (likeCount) {
+            likeCount.textContent = countReaction[reaction] || 0;
+        }
+
+        if (preview) {
+            preview.innerHTML = `
+            <span title="${whoReacted} reacted with ${reaction}">${reaction}</span>
+        `;
+        }
+
+        const tooltip = id(`reaction-summary-${commentNo}`);
+        if (tooltip) {
+            tooltip.innerHTML = `<div><strong>${whoReacted}</strong> and others reacted</div>`;
+        }
+    }
 
     // Subscribe to the posts channel
     const postsChannel = pusher.subscribe('posts-channel');
@@ -155,7 +179,8 @@ try {
         deleteComment(data)
     })
     commentsChannel.bind('reacted-updated', (data) => {
-        deleteComment(data)
+        if (!Array.isArray(data)) data = [data];
+        data.forEach(item => reactionUpdated(item));
     })
 
     // Subscribe to the likes channel

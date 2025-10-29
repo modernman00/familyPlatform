@@ -5,30 +5,31 @@ import { id, log, msgException, showError } from '../global'
 const famCode = localStorage.getItem('requesterFamCode');
 /**
  * Renders a post and its associated comments in the DOM.
- * 
- * This function takes a post object and an array of comment data,
- * filters the comments to include only those associated with the 
- * given post, generates HTML for the post using the `html` function, 
- * and appends it to the 'postIt' container in the DOM.
+ * * This function now expects a single, complete post object (postData) 
+ * which already contains its comments in the 'comments' key, as provided 
+ * by the refactored PHP backend.
  *
- * @param {Object} el - The post object containing post data, including post number.
- * @param {Array} commentData - An array of comment objects associated with posts.
- * @returns {boolean} - Returns false if the post object is invalid.
+ * @param {Object} postData - The post object containing post data, and a nested 'comments' array.
  */
-export const allPost = (postData, commentData) => {
+export const allPost = (postData) => { // <-- Removed commentData parameter
 
-  if (!postData ||!Array.isArray(commentData)) {
-    msgException('Invalid post data');
+  // Check for valid post data
+  if (!postData || typeof postData.post_no === 'undefined') {
+    msgException('Invalid post data structure received.');
+    return;
   }
 
-  let postNo = parseInt(postData.post_no)
+  // 1. The comments array is now directly available inside the postData object.
+  // We use the logical OR (|| []) to ensure it's always an array, even if the key is missing.
+  const postComments = postData.comments || [];
 
-  const filterComment = commentData.filter(comm => parseInt(comm.post_no) === postNo ) // filter the comment to an array
-  const postHtml = html(postData, filterComment)
-  // if(postFamCode === famCode) {
-    id('postIt').insertAdjacentHTML('beforeend', postHtml)
-   
+  // 2. Pass the post data and its now-ready-to-use comment array to the HTML function
+  const postHtml = html(postData, postComments);
+  
+  // 3. Insert the post HTML into the container
+  id('postIt').insertAdjacentHTML('beforeend', postHtml);
 }
+
 
 /**
  * Appends a new post to the DOM if it does not already exist.

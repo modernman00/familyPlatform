@@ -696,6 +696,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./showEmojiOnComment.js */ "./resources/asset/js/components/profilePage/showEmojiOnComment.js");
+
+
 
 
 var reqId = localStorage.getItem('requesterId');
@@ -709,15 +713,27 @@ var commentHTML = function commentHTML(data, postId) {
     id = data.id;
   var imgURL = profileImg || img;
   var image = imgURL ? "/resources/images/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n     <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\"></div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\">\n\n                      \uD83D\uDC4D\n\n                    </div>\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\n                      \u2764\uFE0F\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\n                      \uD83D\uDE04\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\n                     \uD83D\uDE2E\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\n                      \uD83D\uDE22\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\n                      \uD83D\uDE20\n                    </div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                    <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">0</div>\n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
+  var counts = {};
+  var total;
+
+  // check if reactions and counts exist
+  if (data.reactions) {
+    var _data$reactions$count, _data$reactions, _data$reactions2;
+    counts = (_data$reactions$count = data === null || data === void 0 || (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
+    total = data === null || data === void 0 || (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 || (_data$reactions2 = _data$reactions2.counts) === null || _data$reactions2 === void 0 ? void 0 : _data$reactions2.totalReactions;
+  } else {
+    counts = {};
+    total = 0;
+  }
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName)).concat(comment_no, "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
 };
 
 // i need the postid to use to show the delete button 
 var showComment = function showComment(comment, postId) {
   if (!comment) {
     return "<div id=\"comment\" name=\"commentDiv\"></div>";
-  } // only run if there is comment
-
+  }
+  // only run if there is comment
   // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
     return commentHTML(commentElement, postId);
@@ -731,11 +747,7 @@ var appendNewComment = function appendNewComment(commentData) {
   }
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
-
   var commentContainer = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
-  if (!commentContainer) {
-    throw new Error("The comment div id does not exist ");
-  }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
@@ -785,7 +797,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var commentForm = function commentForm(_ref) {
   var post_no = _ref.post_no;
-  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4 d-none formComment").concat(post_no, "\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\">\n      </div>\n\n      <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n        \n\n             \n\n                <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n     <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n     <div class=\"d-flex gap-2\">\n                    <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\"\n                                title=\"add emoji\" \n                                id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\n                                \uD83D\uDE0A\n                            </button>\n\n\n              <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\"\n                                aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n  </div>\n                <button \n                    type=\"submit\" \n                    id=\"submitComment").concat(post_no, "\" \n                    class=\"btn btn-outline-primary btn-sm submitComment\"\n                >\n              Submit\n            </button>\n      \n            \n          </div>\n    </form>\n  ");
+  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4 d-none formComment").concat(post_no, "\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\">\n      </div>\n\n      <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n                  \n\n                <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n     <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n     <div class=\"d-flex gap-2\">\n                    <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\"\n                                title=\"add emoji\" \n                                id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\n                                \uD83D\uDE0A\n                            </button>\n\n\n              <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\"\n                                aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n  </div>\n                <button \n                    type=\"submit\" \n                    id=\"submitComment").concat(post_no, "\" \n                    class=\"btn btn-outline-primary btn-sm submitComment\"\n                >\n              Submit\n            </button>\n      \n            \n          </div>\n    </form>\n  ");
 };
 
 /***/ }),
@@ -907,6 +919,82 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
 
 
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/showEmojiOnComment.js":
+/*!*************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/showEmojiOnComment.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderTopReactions: () => (/* binding */ renderTopReactions)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+/**
+ * 🧠 Extracts the top 3 reaction types by count.
+ * Filters out metadata keys like 'comment_no' and 'total', then sorts descending.
+ *
+ * @param {Object} counts - Reaction summary object including totals and metadata
+ * @returns {Array} - Array of top 3 reactions like [ ['love', 5], ['wow', 3], ['likes', 2] ]
+ */
+var getTopReactions = function getTopReactions() {
+  var counts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return Object.entries(counts).filter(function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+      label = _ref2[0],
+      count = _ref2[1];
+    return !['comment_no', 'total', 'totalReactions'].includes(label) && count > 0;
+  }) // 🧼 Remove metadata and zero-count reactions
+  .sort(function (_ref3, _ref4) {
+    var _ref5 = _slicedToArray(_ref3, 2),
+      a = _ref5[1];
+    var _ref6 = _slicedToArray(_ref4, 2),
+      b = _ref6[1];
+    return b - a;
+  }) // 🔢 Sort descending by count
+  .slice(0, 3);
+}; // 🎯 Return top 3 reactions only
+
+/**
+ * 🧠 Renders the top 3 reactions into the preview section of a comment.
+ * Uses emoji map for visual clarity and teaches contributors how to safely update the DOM.
+ *
+ * @param {Object} counts - Reaction counts object from the server
+ * @param {string|number} commentNo - Unique identifier for the comment block
+ */
+var renderTopReactions = function renderTopReactions(counts) {
+  // 🧩 Map semantic labels to emoji characters
+  var emojiMap = {
+    likes: '👍',
+    love: '❤️',
+    haha: '😄',
+    wow: '😮',
+    sad: '😢',
+    angry: '😠'
+  };
+  var top = getTopReactions(counts); // 🧠 Get top 3 reactions
+
+  var html = top.map(function (_ref7) {
+    var _emojiMap$label;
+    var _ref8 = _slicedToArray(_ref7, 2),
+      label = _ref8[0],
+      count = _ref8[1];
+    var emoji = (_emojiMap$label = emojiMap[label]) !== null && _emojiMap$label !== void 0 ? _emojiMap$label : ''; // 🧼 Fallback if label missing
+    return "".concat(emoji, " ").concat(count); // 🖼️ Render emoji + count
+  }).join(' '); // 🧵 Combine into single HTML string
+  return html;
+};
 
 /***/ })
 

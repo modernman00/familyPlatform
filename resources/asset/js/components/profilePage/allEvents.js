@@ -2,6 +2,8 @@
 import { id, log, showError, formReset, fileUploadSizeValidation, initializeImageModal } from "../global"
 import axios from "axios"
 import { showEmojiPicker } from '../emojiPicker.js';
+import { cacheReaction, getCachedReaction } from './indexDB/reactions.js';
+import { renderTopReactions } from './showEmojiOnComment.js'
 
 
 
@@ -139,7 +141,7 @@ try {
                 window.location.href = '/profilePage';
 
             } catch (error) {
-                console.error("An error occurred:", error.response.data.message);
+                console.error("An error occurred:", error.response);
                 // Optionally, display an error message to the user
                 id('formPostMessageModal_notification').innerHTML = 'There was an error submitting your post. Please try again later.';
                 id('formPostMessageModal_notification').classList.add('is-danger');
@@ -207,68 +209,121 @@ try {
         //     // update the like count
         //     id(`like-count-${commentNo}`).textContent = parseInt(likeCount) + 1;
 
-
-
-
-
         // }
+        else if (e.target.closest('[id^="reaction-option-"]')) {
+            const reactionOptionDiv = e.target.closest('[id^="reaction-option-"]');
+            const reactionOptionDivId = reactionOptionDiv.getAttribute('id');
+            const commentNo = reactionOptionDiv.getAttribute('data-option-no');
+            const emojiContent = reactionOptionDiv.textContent;
+            const theLabel = reactionOptionDiv.dataset.label;
 
-
-    })
-
-
-    // MOUSE ENTER 
-
-    document.addEventListener('click', async (e) => {
-
-        const reactionDiv = e.target.closest('.reaction-button');
-        const reactionOption = e.target.closest('.reaction-option');
-
-        if (reactionDiv) {
-            const elementId = reactionDiv.id
-            const elementName = reactionDiv.name
-            const commentNo = reactionDiv.dataset.commentNo;
-
-
-            const reactionBar = id(`reaction-bar-${commentNo}`);
-            if (reactionBar) {
-                
-                reactionBar.classList.toggle('show');
-            } else {
-                  reactionBar.classList.remove('show');
-            }
-
-        } else if (reactionOption) {
-            const no = reactionOption.dataset.optionNo;
-            const button = id(`like-button-${no}`);
-            const countEl = id(`like-count-${no}`);
-            const preview = id(`reaction-preview-${no}`);
-            const emojiContent = reactionOption.textContent;
-            const label = reactionOption.dataset.label;
-            // Optimistic UI update
-            preview.innerHTML = `<span class="reaction-emoji">${emojiContent}</span>`;
-            button.querySelector('span').textContent = label;
-
-            let count = parseInt(countEl.textContent || '0', 10);
-            countEl.textContent = count + 1;
-
+            // post to the comment_reactions table
             const response = await axios.post(`/commentReaction`, {
-                comment_no: no,
+                comment_no: commentNo,
                 reaction: emojiContent,
-                label: label
+                label: theLabel,
             })
 
-            // alert(response.data.message)
-        } else {
-            const reactionBar = e.target.closest('.reaction-bar');
+            const button = id(`like-button-${commentNo}`);
+            const countEl = id(`like-count-${commentNo}`);
+            const preview = id(`reaction-preview-${commentNo}`);
+
+            // destructure the response to get the reaction summary
+            const { label, reaction, countReaction } = response.data.message;
+            if (label) button.querySelector('span').textContent = label;
+
+            const emoji = renderTopReactions(countReaction, commentNo);
+            if (reaction) preview.innerHTML = emoji;
+            if (countEl) countEl.textContent = countReaction.totalReactions;
+
+            // hide the reaction bar after selection
+            const reactionBar = id(`reaction-bar-${commentNo}`);
             if (reactionBar) {
                 reactionBar.classList.remove('show');
             }
         }
 
+    });
+
+    // MOUSE ENTER OVER THE LIKE BUTTON TO SHOW REACTION OPTIONS
+    document.addEventListener('mouseover', async (e) => {
+
+        const reactionDiv = e.target.closest('.reaction-button');
+
+        //1 mouseover on the like button to show the reaction-option div
+        if (reactionDiv) {
+
+            const elementId = reactionDiv.id
+            const elementName = reactionDiv.name
+            const commentNo = reactionDiv.dataset.commentNo;
+
+            //2 show the reaction bar - reaction-option class
+            const reactionBar = id(`reaction-bar-${commentNo}`);
+            if (reactionBar) {
+                reactionBar.classList.toggle('show');
+            } else {
+                reactionBar.classList.remove('show');
+            }
+        }
+
+        // MOUSE ENTER OVER THE REACTION PREVIEW OR COUNT TO SHOW TOOLTIP
+
+        if (e.target.classList.contains('reaction-preview') || e.target.classList.contains('reaction-count')) {
+            const commentNo = e.target.id.replace('reaction-preview-', '').replace('like-count-', '');
+            // fetch and show the reaction summary tooltip  
+
+            const getResponse = await axios.get(`/commentReactionSummary/${commentNo}`);
+            const { counts, who } = getResponse.data.message;
+
+            const whoList = who.map(u => `<div class="who-reacted">${u.reaction} ${u.firstName} ${u.lastName}</div>`).join('');
+
+            // Create a summary of reactions that actually occurred
+            const emojiSummary = Object.entries(counts)
+                .filter(([reactionType, count]) => Number(count) > 0) // Keep only reactions with a count greater than 0
+                .map(([reactionType, count]) => {
+                    return `<span>${reactionType} ${count}</span>`; // Convert each to a span element
+                })
+                .join(' '); // Combine all spans into one string with spaces in between
 
 
-    })
+            // tooltip display
+            const tooltip = id(`reaction-summary-${commentNo}`);
+            if (!tooltip) return;
+            if (tooltip) tooltip.style.display = 'block';
+            tooltip.innerHTML = `<div class="loading-tooltip">Loading...</div>`;
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = `
+                    <div class="tooltip-body">${whoList}</div>
+            `;
+
+            // Hide the tooltip after 5 seconds
+            setTimeout(() => {
+                tooltip.style.display = 'none';
+            }, 4000);
+
+            tooltip.classList.remove('show');
+
+        }
+
+    });
+
+    document.addEventListener('mouseover', e => {
+        const target = e.target.closest('.reaction-button');
+        if (!target) return;
+        const commentNo = target.dataset.commentNo;
+        const tooltip = id(`reaction-summary-${commentNo}`);
+        if (tooltip) tooltip.style.display = 'block';
+    });
+
+
+
+    document.addEventListener('mouseout', e => {
+        const target = e.target.closest('.reaction-button');
+        if (!target) return;
+        const commentNo = target.dataset.commentNo;
+        const tooltip = id(`reaction-summary-${commentNo}`);
+        if (tooltip) tooltip.style.display = 'none';
+    });
 
 
 

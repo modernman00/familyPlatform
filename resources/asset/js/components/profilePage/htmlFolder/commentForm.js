@@ -21,9 +21,7 @@ export const commentForm = ({ post_no }) => {
 
       <div id="gifPickerList" class="d-flex flex-wrap gap-2 mt-2 d-none" role="listbox" aria-hidden="true"></div>
 
-        
-
-             
+                  
 
                 <textarea class="form-control inputComment mb-3" data-commentEmoji-target id="inputComment${post_no}" name="comment" rows=2> </textarea/>
                 

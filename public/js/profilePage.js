@@ -1350,12 +1350,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _emojiPicker_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../emojiPicker.js */ "./resources/asset/js/components/emojiPicker.js");
+/* harmony import */ var _indexDB_reactions_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./indexDB/reactions.js */ "./resources/asset/js/components/profilePage/indexDB/reactions.js");
+/* harmony import */ var _showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./showEmojiOnComment.js */ "./resources/asset/js/components/profilePage/showEmojiOnComment.js");
 
 
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
+
 
 
 
@@ -1368,7 +1378,7 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(e) {
-      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, emojiToggler, emojiListElement, emojiList, idForm, form, formEntries, inputComment, idInputComment, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, _t;
+      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, emojiToggler, emojiListElement, emojiList, idForm, form, formEntries, inputComment, idInputComment, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, reactionOptionDiv, reactionOptionDivId, _commentNo, emojiContent, theLabel, _response2, button, countEl, preview, _response2$data$messa, label, reaction, countReaction, emoji, reactionBar, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -1390,7 +1400,7 @@ try {
             _context.n = 2;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/getNewLikesPusher");
           case 2:
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 3:
             if (!elementId.includes("initComment")) {
@@ -1399,7 +1409,7 @@ try {
             }
             commentFormId = elementId.replace('init', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(commentFormId).classList.toggle('d-none');
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 4:
             if (!elementId.includes("emojiToggle")) {
@@ -1417,7 +1427,7 @@ try {
 
             // comment form emoji picker
             (0,_emojiPicker_js__WEBPACK_IMPORTED_MODULE_2__.showEmojiPicker)(emojiListElement, 'data-commentEmoji-target');
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 5:
             if (!elementId.includes("submitComment")) {
@@ -1450,7 +1460,7 @@ try {
           case 8:
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.formReset)(idForm);
           case 9:
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 10:
             if (!elementId.includes("submitPost")) {
@@ -1490,13 +1500,13 @@ try {
           case 15:
             _context.p = 15;
             _t = _context.v;
-            console.error("An error occurred:", _t.response.data.message);
+            console.error("An error occurred:", _t.response);
             // Optionally, display an error message to the user
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal_notification').innerHTML = 'There was an error submitting your post. Please try again later.';
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal_notification').classList.add('is-danger');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formPostMessageModal_notification').style.display = 'block';
           case 16:
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 17:
             if (!e.target.classList.contains('linkRequestCard')) {
@@ -1510,7 +1520,7 @@ try {
                 behavior: "smooth"
               });
             }
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 18:
             if (!e.target.classList.contains('grid-image')) {
@@ -1528,11 +1538,11 @@ try {
                 (0,_global__WEBPACK_IMPORTED_MODULE_0__.initializeImageModal)(imgClass, initialIndex, 'imageModal', 'modalImage', 'imageModalClose');
               }
             }
-            _context.n = 22;
+            _context.n = 25;
             break;
           case 19:
             if (!elementId.includes('removeCommentIcon')) {
-              _context.n = 22;
+              _context.n = 23;
               break;
             }
             // get the comment no
@@ -1557,6 +1567,41 @@ try {
           case 21:
             alert('Comment not found');
           case 22:
+            _context.n = 25;
+            break;
+          case 23:
+            if (!e.target.closest('[id^="reaction-option-"]')) {
+              _context.n = 25;
+              break;
+            }
+            reactionOptionDiv = e.target.closest('[id^="reaction-option-"]');
+            reactionOptionDivId = reactionOptionDiv.getAttribute('id');
+            _commentNo = reactionOptionDiv.getAttribute('data-option-no');
+            emojiContent = reactionOptionDiv.textContent;
+            theLabel = reactionOptionDiv.dataset.label; // post to the comment_reactions table
+            _context.n = 24;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post("/commentReaction", {
+              comment_no: _commentNo,
+              reaction: emojiContent,
+              label: theLabel
+            });
+          case 24:
+            _response2 = _context.v;
+            button = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("like-button-".concat(_commentNo));
+            countEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("like-count-".concat(_commentNo));
+            preview = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-preview-".concat(_commentNo)); // destructure the response to get the reaction summary
+            _response2$data$messa = _response2.data.message, label = _response2$data$messa.label, reaction = _response2$data$messa.reaction, countReaction = _response2$data$messa.countReaction;
+            if (label) button.querySelector('span').textContent = label;
+            emoji = (0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_4__.renderTopReactions)(countReaction, _commentNo);
+            if (reaction) preview.innerHTML = emoji;
+            if (countEl) countEl.textContent = countReaction.totalReactions;
+
+            // hide the reaction bar after selection
+            reactionBar = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-bar-".concat(_commentNo));
+            if (reactionBar) {
+              reactionBar.classList.remove('show');
+            }
+          case 25:
             return _context.a(2);
         }
       }, _callee, null, [[12, 15]]);
@@ -1566,62 +1611,71 @@ try {
     };
   }());
 
-  // MOUSE ENTER 
-
-  document.addEventListener('click', /*#__PURE__*/function () {
+  // MOUSE ENTER OVER THE LIKE BUTTON TO SHOW REACTION OPTIONS
+  document.addEventListener('mouseover', /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(e) {
-      var reactionDiv, reactionOption, elementId, elementName, commentNo, reactionBar, no, button, countEl, preview, emojiContent, label, count, response, _reactionBar;
+      var reactionDiv, elementId, elementName, commentNo, reactionBar, _commentNo2, getResponse, _getResponse$data$mes, counts, who, whoList, emojiSummary, tooltip;
       return _regenerator().w(function (_context2) {
         while (1) switch (_context2.n) {
           case 0:
-            reactionDiv = e.target.closest('.reaction-button');
-            reactionOption = e.target.closest('.reaction-option');
-            if (!reactionDiv) {
-              _context2.n = 1;
-              break;
+            reactionDiv = e.target.closest('.reaction-button'); //1 mouseover on the like button to show the reaction-option div
+            if (reactionDiv) {
+              elementId = reactionDiv.id;
+              elementName = reactionDiv.name;
+              commentNo = reactionDiv.dataset.commentNo; //2 show the reaction bar - reaction-option class
+              reactionBar = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-bar-".concat(commentNo));
+              if (reactionBar) {
+                reactionBar.classList.toggle('show');
+              } else {
+                reactionBar.classList.remove('show');
+              }
             }
-            elementId = reactionDiv.id;
-            elementName = reactionDiv.name;
-            commentNo = reactionDiv.dataset.commentNo;
-            reactionBar = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-bar-".concat(commentNo));
-            if (reactionBar) {
-              reactionBar.classList.toggle('show');
-            } else {
-              reactionBar.classList.remove('show');
-            }
-            _context2.n = 4;
-            break;
-          case 1:
-            if (!reactionOption) {
+
+            // MOUSE ENTER OVER THE REACTION PREVIEW OR COUNT TO SHOW TOOLTIP
+            if (!(e.target.classList.contains('reaction-preview') || e.target.classList.contains('reaction-count'))) {
               _context2.n = 3;
               break;
             }
-            no = reactionOption.dataset.optionNo;
-            button = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("like-button-".concat(no));
-            countEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("like-count-".concat(no));
-            preview = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-preview-".concat(no));
-            emojiContent = reactionOption.textContent;
-            label = reactionOption.dataset.label; // Optimistic UI update
-            preview.innerHTML = "<span class=\"reaction-emoji\">".concat(emojiContent, "</span>");
-            button.querySelector('span').textContent = label;
-            count = parseInt(countEl.textContent || '0', 10);
-            countEl.textContent = count + 1;
-            _context2.n = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post("/commentReaction", {
-              comment_no: no,
-              reaction: emojiContent,
-              label: label
-            });
-          case 2:
-            response = _context2.v;
-            _context2.n = 4;
-            break;
-          case 3:
-            _reactionBar = e.target.closest('.reaction-bar');
-            if (_reactionBar) {
-              _reactionBar.classList.remove('show');
+            _commentNo2 = e.target.id.replace('reaction-preview-', '').replace('like-count-', ''); // fetch and show the reaction summary tooltip  
+            _context2.n = 1;
+            return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/commentReactionSummary/".concat(_commentNo2));
+          case 1:
+            getResponse = _context2.v;
+            _getResponse$data$mes = getResponse.data.message, counts = _getResponse$data$mes.counts, who = _getResponse$data$mes.who;
+            whoList = who.map(function (u) {
+              return "<div class=\"who-reacted\">".concat(u.reaction, " ").concat(u.firstName, " ").concat(u.lastName, "</div>");
+            }).join(''); // Create a summary of reactions that actually occurred
+            emojiSummary = Object.entries(counts).filter(function (_ref3) {
+              var _ref4 = _slicedToArray(_ref3, 2),
+                reactionType = _ref4[0],
+                count = _ref4[1];
+              return Number(count) > 0;
+            }) // Keep only reactions with a count greater than 0
+            .map(function (_ref5) {
+              var _ref6 = _slicedToArray(_ref5, 2),
+                reactionType = _ref6[0],
+                count = _ref6[1];
+              return "<span>".concat(reactionType, " ").concat(count, "</span>"); // Convert each to a span element
+            }).join(' '); // Combine all spans into one string with spaces in between
+            // tooltip display
+            tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-summary-".concat(_commentNo2));
+            if (tooltip) {
+              _context2.n = 2;
+              break;
             }
-          case 4:
+            return _context2.a(2);
+          case 2:
+            if (tooltip) tooltip.style.display = 'block';
+            tooltip.innerHTML = "<div class=\"loading-tooltip\">Loading...</div>";
+            tooltip.style.display = 'block';
+            tooltip.innerHTML = "\n                    <div class=\"tooltip-body\">".concat(whoList, "</div>\n            ");
+
+            // Hide the tooltip after 5 seconds
+            setTimeout(function () {
+              tooltip.style.display = 'none';
+            }, 4000);
+            tooltip.classList.remove('show');
+          case 3:
             return _context2.a(2);
         }
       }, _callee2);
@@ -1630,6 +1684,20 @@ try {
       return _ref2.apply(this, arguments);
     };
   }());
+  document.addEventListener('mouseover', function (e) {
+    var target = e.target.closest('.reaction-button');
+    if (!target) return;
+    var commentNo = target.dataset.commentNo;
+    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-summary-".concat(commentNo));
+    if (tooltip) tooltip.style.display = 'block';
+  });
+  document.addEventListener('mouseout', function (e) {
+    var target = e.target.closest('.reaction-button');
+    if (!target) return;
+    var commentNo = target.dataset.commentNo;
+    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-summary-".concat(commentNo));
+    if (tooltip) tooltip.style.display = 'none';
+  });
 
   // MOUSE LEAVE
 } catch (e) {
@@ -1653,6 +1721,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./showEmojiOnComment.js */ "./resources/asset/js/components/profilePage/showEmojiOnComment.js");
+
+
 
 
 var reqId = localStorage.getItem('requesterId');
@@ -1666,15 +1738,27 @@ var commentHTML = function commentHTML(data, postId) {
     id = data.id;
   var imgURL = profileImg || img;
   var image = imgURL ? "/resources/images/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n     <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\"></div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\">\n\n                      \uD83D\uDC4D\n\n                    </div>\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\n                      \u2764\uFE0F\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\n                      \uD83D\uDE04\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\n                     \uD83D\uDE2E\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\n                      \uD83D\uDE22\n                    </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\"id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\n                      \uD83D\uDE20\n                    </div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                    <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">0</div>\n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
+  var counts = {};
+  var total;
+
+  // check if reactions and counts exist
+  if (data.reactions) {
+    var _data$reactions$count, _data$reactions, _data$reactions2;
+    counts = (_data$reactions$count = data === null || data === void 0 || (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
+    total = data === null || data === void 0 || (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 || (_data$reactions2 = _data$reactions2.counts) === null || _data$reactions2 === void 0 ? void 0 : _data$reactions2.totalReactions;
+  } else {
+    counts = {};
+    total = 0;
+  }
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName)).concat(comment_no, "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
 };
 
 // i need the postid to use to show the delete button 
 var showComment = function showComment(comment, postId) {
   if (!comment) {
     return "<div id=\"comment\" name=\"commentDiv\"></div>";
-  } // only run if there is comment
-
+  }
+  // only run if there is comment
   // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
   var commentHTMLArray = comment.map(function (commentElement) {
     return commentHTML(commentElement, postId);
@@ -1688,24 +1772,10 @@ var appendNewComment = function appendNewComment(commentData) {
   }
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
-
   var commentContainer = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
-  if (!commentContainer) {
-    throw new Error("The comment div id does not exist ");
-  }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/profilePage/commentEmojiTest.js":
-/*!***********************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/commentEmojiTest.js ***!
-  \***********************************************************************/
-/***/ (() => {
-
-
 
 /***/ }),
 
@@ -2040,7 +2110,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var commentForm = function commentForm(_ref) {
   var post_no = _ref.post_no;
-  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4 d-none formComment").concat(post_no, "\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\">\n      </div>\n\n      <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n        \n\n             \n\n                <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n     <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n     <div class=\"d-flex gap-2\">\n                    <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\"\n                                title=\"add emoji\" \n                                id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\n                                \uD83D\uDE0A\n                            </button>\n\n\n              <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\"\n                                aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n  </div>\n                <button \n                    type=\"submit\" \n                    id=\"submitComment").concat(post_no, "\" \n                    class=\"btn btn-outline-primary btn-sm submitComment\"\n                >\n              Submit\n            </button>\n      \n            \n          </div>\n    </form>\n  ");
+  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form \n      action=\"/postCommentProfile\" \n      method=\"post\" \n      id=\"formComment").concat(post_no, "\" \n      enctype=\"multipart/form-data\"\n      class=\"mb-4 d-none formComment").concat(post_no, "\"\n    >\n\n      <input \n        type=\"hidden\" \n        name=\"post_no\" \n        value=\"").concat(post_no, "\" \n      />\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\">\n      </div>\n\n      <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n                  \n\n                <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n     <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n     <div class=\"d-flex gap-2\">\n                    <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\"\n                                title=\"add emoji\" \n                                id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\n                                \uD83D\uDE0A\n                            </button>\n\n\n              <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\"\n                                aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n  </div>\n                <button \n                    type=\"submit\" \n                    id=\"submitComment").concat(post_no, "\" \n                    class=\"btn btn-outline-primary btn-sm submitComment\"\n                >\n              Submit\n            </button>\n      \n            \n          </div>\n    </form>\n  ");
 };
 
 /***/ }),
@@ -2270,8 +2340,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _editProfile__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./editProfile */ "./resources/asset/js/components/profilePage/editProfile.js");
 /* harmony import */ var _postEmojiImgProcess__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./postEmojiImgProcess */ "./resources/asset/js/components/profilePage/postEmojiImgProcess.js");
-/* harmony import */ var _commentEmojiTest__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./commentEmojiTest */ "./resources/asset/js/components/profilePage/commentEmojiTest.js");
-/* harmony import */ var _commentEmojiTest__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(_commentEmojiTest__WEBPACK_IMPORTED_MODULE_12__);
+/* harmony import */ var _longPress__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./longPress */ "./resources/asset/js/components/profilePage/longPress.js");
+/* harmony import */ var _longPress__WEBPACK_IMPORTED_MODULE_12___default = /*#__PURE__*/__webpack_require__.n(_longPress__WEBPACK_IMPORTED_MODULE_12__);
 
 
 localStorage.removeItem('redirect');
@@ -2307,9 +2377,81 @@ darkModeToggle.addEventListener('click', function () {
 
 
 
-
+// import "./commentEmojiTest"
+ // long press for reaction options
 
 // import "./newPage"
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/indexDB/reactions.js":
+/*!************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/indexDB/reactions.js ***!
+  \************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cacheReaction: () => (/* binding */ cacheReaction)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/**
+ * Creates a local database in the browser
+ * Stores reactions using a unique comment number
+ * Lets you save and retrieve reactions without needing a server 
+ */
+
+/**
+ * This opens (or creates) a database called reactions.
+ * The 1 is the version number — useful when upgrading the database structure later.
+ */
+var dbPromise = indexedDB.open('reactions', 1);
+
+/**
+ * This runs only when the database is new or its version changes.
+ * It creates a store (like a table) called 'reactions'.
+ * Each item in this store will use commentNo as its unique ID (called a keyPath).
+ */
+dbPromise.onupgradeneeded = function (e) {
+  var db = e.target.result;
+  db.createObjectStore('reactions', {
+    keyPath: 'commentNo'
+  });
+};
+
+/**
+ * This function retrieves a reaction from the database using its commentNo
+ * It opens a read-only transaction and fetches the matching record.} commentNo 
+ */
+function cacheReaction(_x, _x2) {
+  return _cacheReaction.apply(this, arguments);
+}
+function _cacheReaction() {
+  _cacheReaction = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(commentNo, data) {
+    var db, tx;
+    return _regenerator().w(function (_context) {
+      while (1) switch (_context.n) {
+        case 0:
+          _context.n = 1;
+          return dbPromise;
+        case 1:
+          db = _context.v.result;
+          tx = db.transaction('reactions', 'readwrite');
+          tx.objectStore('reactions').put({
+            commentNo: commentNo,
+            data: data
+          });
+        case 2:
+          return _context.a(2);
+      }
+    }, _callee);
+  }));
+  return _cacheReaction.apply(this, arguments);
+}
 
 /***/ }),
 
@@ -2357,13 +2499,13 @@ try {
 
   // Global state object with data-fetching and initialization logic
   var state = {
-    post: [],
-    comment: [],
+    posts: [],
+    // Renamed 'post' to 'posts' for clarity
     // Method to fetch initial data and populate state
     initialize: function initialize() {
       var _this = this;
       return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-        var pullData, _t;
+        var pullData, responseData, _t;
         return _regenerator().w(function (_context) {
           while (1) switch (_context.p = _context.n) {
             case 0:
@@ -2372,15 +2514,19 @@ try {
               return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get("/post/getAllPostCommentByFamCode");
             case 1:
               pullData = _context.v;
-              // Assign fetched data to state properties
-              _this.post = pullData.data.message.post;
-              _this.comment = pullData.data.message.comment;
-              _this.comment = _this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
+              // --- THE FIX IS HERE ---
+              // Manually parse the data string before using it
+              responseData = pullData.data; // Check if the data is a string and needs parsing (based on your screenshot)
+              if (typeof responseData === 'string') {
+                responseData = JSON.parse(responseData);
+              }
 
-              if (_this.post.length > 0) {
-                // Render posts and comments on the page after data is loaded
-                _this.post.forEach(function (data) {
-                  return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(data, _this.comment);
+              // 1. Assign the new 'posts' array from the parsed response
+              _this.posts = responseData.message;
+              if (_this.posts.length > 0) {
+                // 2. Loop and render.
+                _this.posts.forEach(function (post) {
+                  return (0,_post__WEBPACK_IMPORTED_MODULE_1__.allPost)(post);
                 });
               } else {
                 (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)("No post");
@@ -2391,6 +2537,7 @@ try {
               _context.p = 2;
               _t = _context.v;
               console.error("Error fetching posts and comments:", _t);
+              (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(_t);
             case 3:
               return _context.a(2);
           }
@@ -2508,6 +2655,24 @@ try {
       likeElement.innerHTML = parseInt(dataForUse.likeCounter);
     }
   };
+  var reactionUpdated = function reactionUpdated(_ref3) {
+    var commentNo = _ref3.commentNo,
+      reaction = _ref3.reaction,
+      countReaction = _ref3.countReaction,
+      whoReacted = _ref3.whoReacted;
+    var likeCount = (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)("#like-count-".concat(commentNo));
+    var preview = (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)("#reaction-preview-".concat(commentNo));
+    if (likeCount) {
+      likeCount.textContent = countReaction[reaction] || 0;
+    }
+    if (preview) {
+      preview.innerHTML = "\n            <span title=\"".concat(whoReacted, " reacted with ").concat(reaction, "\">").concat(reaction, "</span>\n        ");
+    }
+    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("reaction-summary-".concat(commentNo));
+    if (tooltip) {
+      tooltip.innerHTML = "<div><strong>".concat(whoReacted, "</strong> and others reacted</div>");
+    }
+  };
 
   // Subscribe to the posts channel
   var postsChannel = pusher.subscribe('posts-channel');
@@ -2528,7 +2693,10 @@ try {
     deleteComment(data);
   });
   commentsChannel.bind('reacted-updated', function (data) {
-    deleteComment(data);
+    if (!Array.isArray(data)) data = [data];
+    data.forEach(function (item) {
+      return reactionUpdated(item);
+    });
   });
 
   // Subscribe to the likes channel
@@ -2576,6 +2744,68 @@ try {
 } catch (error) {
   (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
 }
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/longPress.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/longPress.js ***!
+  \****************************************************************/
+/***/ (() => {
+
+/**
+* Initializes long-press behavior for all visible reaction buttons.
+* This loop ensures onboarding clarity for contributors working with dynamic comment blocks.
+*/
+document.querySelectorAll('.reaction-button').forEach(function (btn) {
+  var commentNo = btn.dataset.commentNo;
+  setupLongPressReaction(commentNo);
+});
+
+/**
+ * Sets up long-press behavior on a reaction button to reveal emoji options.
+ * This improves mobile UX and teaches contributors how to scaffold gesture-based interactions.
+ *
+ * @param {string} commentNo - Unique identifier for the comment block
+ */
+var setupLongPressReaction = function setupLongPressReaction(commentNo) {
+  var button = document.getElementById("like-button-".concat(commentNo));
+  var reactionBar = document.getElementById("reaction-bar-".concat(commentNo));
+  if (!button || !reactionBar) return; // 🧩 Defensive check for missing DOM elements
+
+  var pressTimer; // ⏱️ Used to track long-press duration
+
+  // 📱 Mobile long-press: triggers on touchstart after delay
+  button.addEventListener('touchstart', function (e) {
+    e.preventDefault(); // 🧼 Prevent accidental scroll or tap
+    pressTimer = setTimeout(function () {
+      reactionBar.classList.add('show'); // 🎉 Reveal emoji bar
+    }, 400); // ⏱️ Customize delay to match UX expectations
+  });
+
+  // 🧼 Cancel long-press if user lifts finger or scrolls
+  button.addEventListener('touchend', function () {
+    return clearTimeout(pressTimer);
+  });
+  button.addEventListener('touchmove', function () {
+    return clearTimeout(pressTimer);
+  });
+
+  // 🖱️ Optional desktop fallback: long-press via mouse
+  button.addEventListener('mousedown', function () {
+    pressTimer = setTimeout(function () {
+      reactionBar.classList.add('show');
+    }, 500); // Slightly longer for desktop UX
+  });
+
+  // 🧼 Cancel desktop long-press if mouse leaves or releases
+  button.addEventListener('mouseup', function () {
+    return clearTimeout(pressTimer);
+  });
+  button.addEventListener('mouseleave', function () {
+    return clearTimeout(pressTimer);
+  });
+};
 
 /***/ }),
 
@@ -2696,26 +2926,29 @@ __webpack_require__.r(__webpack_exports__);
 var famCode = localStorage.getItem('requesterFamCode');
 /**
  * Renders a post and its associated comments in the DOM.
- * 
- * This function takes a post object and an array of comment data,
- * filters the comments to include only those associated with the 
- * given post, generates HTML for the post using the `html` function, 
- * and appends it to the 'postIt' container in the DOM.
+ * * This function now expects a single, complete post object (postData) 
+ * which already contains its comments in the 'comments' key, as provided 
+ * by the refactored PHP backend.
  *
- * @param {Object} el - The post object containing post data, including post number.
- * @param {Array} commentData - An array of comment objects associated with posts.
- * @returns {boolean} - Returns false if the post object is invalid.
+ * @param {Object} postData - The post object containing post data, and a nested 'comments' array.
  */
-var allPost = function allPost(postData, commentData) {
-  if (!postData || !Array.isArray(commentData)) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.msgException)('Invalid post data');
+var allPost = function allPost(postData) {
+  // <-- Removed commentData parameter
+
+  // Check for valid post data
+  if (!postData || typeof postData.post_no === 'undefined') {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.msgException)('Invalid post data structure received.');
+    return;
   }
-  var postNo = parseInt(postData.post_no);
-  var filterComment = commentData.filter(function (comm) {
-    return parseInt(comm.post_no) === postNo;
-  }); // filter the comment to an array
-  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postData, filterComment);
-  // if(postFamCode === famCode) {
+
+  // 1. The comments array is now directly available inside the postData object.
+  // We use the logical OR (|| []) to ensure it's always an array, even if the key is missing.
+  var postComments = postData.comments || [];
+
+  // 2. Pass the post data and its now-ready-to-use comment array to the HTML function
+  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postData, postComments);
+
+  // 3. Insert the post HTML into the container
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
 };
 
@@ -2909,6 +3142,83 @@ rsvpButtons.forEach(function (button) {
     }
   });
 });
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/showEmojiOnComment.js":
+/*!*************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/showEmojiOnComment.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderTopReactions: () => (/* binding */ renderTopReactions)
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+/**
+ * 🧠 Extracts the top 3 reaction types by count.
+ * Filters out metadata keys like 'comment_no' and 'total', then sorts descending.
+ *
+ * @param {Object} counts - Reaction summary object including totals and metadata
+ * @returns {Array} - Array of top 3 reactions like [ ['love', 5], ['wow', 3], ['likes', 2] ]
+ */
+var getTopReactions = function getTopReactions() {
+  var counts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return Object.entries(counts).filter(function (_ref) {
+    var _ref2 = _slicedToArray(_ref, 2),
+      label = _ref2[0],
+      count = _ref2[1];
+    return !['comment_no', 'total', 'totalReactions'].includes(label) && count > 0;
+  }) // 🧼 Remove metadata and zero-count reactions
+  .sort(function (_ref3, _ref4) {
+    var _ref5 = _slicedToArray(_ref3, 2),
+      a = _ref5[1];
+    var _ref6 = _slicedToArray(_ref4, 2),
+      b = _ref6[1];
+    return b - a;
+  }) // 🔢 Sort descending by count
+  .slice(0, 3);
+}; // 🎯 Return top 3 reactions only
+
+/**
+ * 🧠 Renders the top 3 reactions into the preview section of a comment.
+ * Uses emoji map for visual clarity and teaches contributors how to safely update the DOM.
+ *
+ * @param {Object} counts - Reaction counts object from the server
+ * @param {string|number} commentNo - Unique identifier for the comment block
+ */
+var renderTopReactions = function renderTopReactions(counts) {
+  // 🧩 Map semantic labels to emoji characters
+  var emojiMap = {
+    likes: '👍',
+    love: '❤️',
+    haha: '😄',
+    wow: '😮',
+    sad: '😢',
+    angry: '😠'
+  };
+  var top = getTopReactions(counts); // 🧠 Get top 3 reactions
+
+  var html = top.map(function (_ref7) {
+    var _emojiMap$label;
+    var _ref8 = _slicedToArray(_ref7, 2),
+      label = _ref8[0],
+      count = _ref8[1];
+    var emoji = (_emojiMap$label = emojiMap[label]) !== null && _emojiMap$label !== void 0 ? _emojiMap$label : ''; // 🧼 Fallback if label missing
+    return "".concat(emoji, " ").concat(count); // 🖼️ Render emoji + count
+  }).join(' '); // 🧵 Combine into single HTML string
+  return html;
+};
 
 /***/ })
 

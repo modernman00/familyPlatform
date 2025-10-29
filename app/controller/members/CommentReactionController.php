@@ -2,21 +2,30 @@
 
 namespace App\Controller\members;
 
-use App\classes\{PushNotificationClass, Pusher};
+use PDO;
 
-use Src\Exceptions\ForbiddenException;
 use Src\Exceptions\NotFoundException;
+use Src\Exceptions\ForbiddenException;
+use App\classes\{Db, PushNotificationClass, Pusher};
 use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin};
 
 class CommentReactionController
 {
 
+  /**
+   * Expected JSON input:
+   * {
+   *   "comment_no": int,
+   *   "reaction": string, // emoji or shortcode
+   *   "label": string     // semantic label like 'love', 'sad'
+   * }
+   */
   public function addReaction()
   {
     try {
-      $userId = $_SESSION['id'];
-
+      $userId = $_SESSION['id'] ?? null;
       $input = json_decode(file_get_contents('php://input'), true);
+
       $commentNo = $input['comment_no'] ?? null;
       $reaction = $input['reaction'] ?? null;
       $label = $input['label'] ?? null;
@@ -29,8 +38,9 @@ class CommentReactionController
       if (!$commentNo || !$reaction) {
         throw new NotFoundException('Comment no or reaction not found');
       }
+      preventAbuseTogglin();
 
-
+      // 🧩 Check if user already reacted with the same emoji
       $existing = SelectFn::selectWhereBothIdentifiersMatch(
         table: 'comment_reactions',
         identifier1: 'comment_no',
@@ -39,11 +49,18 @@ class CommentReactionController
         identifier2Answer: $userId
       );
 
-      $update = false;
-      $insert = false;
+      if ($existing && $existing[0]['label'] === $label) {
+        // 👀 Avoid redundant updates (same emoji again)
+        msgSuccess(200, 'Reaction unchanged');
+        return;
+      }
 
-      if ($existing) {
-        $update = UpdateFn::makeUpdateFn(
+      // 🧠 will only update if the emoji is differnt
+      if ($existing && $existing[0]['label'] !== $label) {
+
+
+
+        UpdateFn::makeUpdateFn(
           table: 'comment_reactions',
           identifier: ['comment_no', 'id'],
           data: [
@@ -55,7 +72,7 @@ class CommentReactionController
           logic: 'AND'
         );
       } else {
-        $insert = SubmitForm::submitForm(
+        SubmitForm::submitForm(
           table: 'comment_reactions',
           fields: [
             'comment_no' => $commentNo,
@@ -66,30 +83,40 @@ class CommentReactionController
         );
       }
 
-      $countReaction = $this->countReactions($commentNo);
+      // 🧮 Count total reactions and who reacted
+      $countReaction = self::countReactions($commentNo);
+      $whoReacted = self::getReactions($commentNo);
 
-      $whoReacted = $this->getReactions($commentNo);
+      // 🟢 Pusher broadcast payload
+      $payload = [
+        'commentNo' => $commentNo,
+        'reaction' => $reaction,
+        'label' => $label,
+        'countReaction' => $countReaction,
+        'whoReacted' => $whoReacted
+      ];
 
+      // 🚀 Send push notification
       PushNotificationClass::sendPushNotification(
         userId: $userId,
         message: "$whoReacted reacted to a comment"
       );
-      $payload = [
-        'countReaction' => $countReaction,
-        'whoReacted' => $whoReacted,
-        'commentNo' => $commentNo
-      ];
       Pusher::broadcast('comments-channel', 'reaction-updated', $payload);
 
-      // if ($update || $insert) {
-  msgSuccess(200, 'Reaction added successfully', $payload);
-      // }
+      msgSuccess(200, $payload);
     } catch (\Throwable $e) {
       \showError($e);
     }
   }
 
-  private function countReactions($commentNo)
+  /**
+   * Count the total number of reactions for a given comment
+   *
+   * @param int $commentNo The comment number to count reactions for
+   * @return array An associative array with the count of each reaction type and the comment number
+   * @throws \Throwable If an error occurs while executing the query
+   */
+  private static function countReactions($commentNo)
   {
     try {
 
@@ -100,6 +127,22 @@ class CommentReactionController
         value: $commentNo
       );
 
+      //   $countReaction returns (
+      // [0] => Array
+      //     (
+      //         [label] => likes
+      //         [total] => 1
+      //     )
+
+      // [1] => Array
+      //     (
+      //         [label] => sad
+      //         [total] => 1
+      //     )
+
+      //   );
+      $totalReactions = 0;
+
       $countReactionArray = [
         'likes' => 0,
         'love' => 0,
@@ -107,15 +150,17 @@ class CommentReactionController
         'wow' => 0,
         'sad' => 0,
         'angry' => 0,
-        'comment_no' => $commentNo
+        'comment_no' => $commentNo,
+        'totalReactions' => 0
       ];
 
       foreach ($countReaction as $count) {
         // change $count['label'] to smaller case
         $label = strtolower($count['label']);
         $countReactionArray[$label] = (int)$count['total'];
+        $totalReactions += (int)$count['total'];
+        $countReactionArray['totalReactions'] = $totalReactions;
       }
-
 
       // check if comment_no exist in reaction_count table and if yes, update and if no, insert
       $existing = SelectFn::selectAllRowsById(
@@ -143,7 +188,7 @@ class CommentReactionController
   }
 
   // get who have reacted to a comment
-  private function getReactions($commentNo)
+  private static function getReactions($commentNo)
   {
     try {
       // Now fetch who reacted (limit for tooltip)
@@ -153,11 +198,37 @@ class CommentReactionController
         paraWhere: 'comment_no',
         bind: $commentNo,
         table: ['personal'],
-        selectFields: 'personal.firstName, personal.lastName',
+        selectFields: 'personal.firstName, personal.lastName, comment_reactions.reaction, comment_reactions.label',
         limit: 5
       );
 
-      return  $response[0]['firstName'] . ' ' . $response[0]['lastName'];
+      // foreach ($response as $row) {
+      //   $who = $row['firstName'] . ' ' . $row['lastName'];
+      //   $row['fullName'] = $who;
+      // }
+      return $response;
+    } catch (\Throwable $e) {
+      \showError($e);
+    }
+  }
+
+  /**
+   * Fetch the counts of reactions for a comment and who have reacted
+   * 
+   * @param int $commentNo The comment number
+   * @param bool $returnType Whether to return a JSON response or an array
+   * @return array|void The counts of reactions and who have reacted
+   * @throws \Throwable
+   */
+  public static function fetchReactions($commentNo, $returnType = true)
+  {
+    try {
+      $counts = self::countReactions($commentNo);
+      $who = self::getReactions($commentNo);
+      if (!$returnType) {
+        return ['counts' => $counts, 'who' => $who];
+      }
+      msgSuccess(200, ['counts' => $counts, 'who' => $who]);
     } catch (\Throwable $e) {
       \showError($e);
     }

@@ -36,7 +36,9 @@ import "./friendRequestCard"
 import "../navbar"
 import "./editProfile"
 import "./postEmojiImgProcess"
-import "./commentEmojiTest"
+// import "./commentEmojiTest"
+import "./longPress" // long press for reaction options
+
 
 
 // import "./newPage"
