@@ -12,7 +12,7 @@
         ]);
 
     @endphp
-    <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
 
@@ -65,16 +65,11 @@
 
                         {{-- Emoji Picker & Upload --}}
                         <div class="mt-3 d-flex justify-content-between align-items-center position-relative">
-                            <div class="d-flex gap-2">
+                            <div class="gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="emojiToggle"
                                     title="add emoji" aria-expanded="false" aria-controls="emojiPickerList">
                                     😊
                                 </button>
-                                <div id="emojiPickerList" class="d-flex flex-wrap gap-2 mt-2 d-none" role="listbox"
-                                    aria-hidden="true">
-                                    <!-- Emojis will be dynamically inserted here -->
-
-                                </div>
 
                                 {{-- image upload button --}}
 
@@ -82,16 +77,25 @@
                                     title="Attach image">
                                     📷
                                 </label>
+
                                 <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple
                                     hidden>
+
+                                    {{-- GIF --}}
 
                                 <button type="button" class="btn btn-sm btn-outline-secondary" title="Add GIF"
                                     aria-label="Add GIF">GIF</button>
 
-
+                                    {{-- Stickers --}}
 
                                 <button type="button" class="btn btn-sm btn-outline-secondary" title="Stickers"
                                     aria-label="Stickers">🏷️</button>
+                                
+                                  <div id="emojiPickerList" class="d-flex flex-wrap mt-2 d-none" role="listbox"
+                                    >
+                                    <!-- Emojis will be dynamically inserted here -->
+
+                                </div>
 
                             </div>
 

@@ -59,7 +59,7 @@ try {
     // initiate the global object
     state.initialize();
 
-    const updatePost = async (e) => {
+    const addNewPost = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
         // Only append if the comment hasn't been added before
@@ -82,7 +82,7 @@ try {
         }
     };
 
-    const updateComment = async (e) => {
+    const addNewComment = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);
 
@@ -100,14 +100,10 @@ try {
                 const commentCount = parseInt(commentCounterEl.textContent)
                 // get the current value and convert it to a number 
                 commentCounterEl.textContent = commentCount + 1;
-
-
             }
-
 
             try {
                 await axios.put(`/updateCommentByStatusAsPublished/${dataForUse.comment_no}`, { comment_status: 'published' });
-
             } catch (error) { console.error(`Failed to update comment status: ${error.message}`); }
 
         }
@@ -167,13 +163,13 @@ try {
     // Subscribe to the posts channel
     const postsChannel = pusher.subscribe('posts-channel');
     postsChannel.bind('new-post', (data) => {
-        data.forEach(item => updatePost(item))
+        data.forEach(item => addNewPost(item))
     });
 
     // Subscribe to the comments channel
     const commentsChannel = pusher.subscribe('comments-channel');
     commentsChannel.bind('new-comment', (data) => {
-        data.forEach(item => updateComment(item))
+        data.forEach(item => addNewComment(item))
     })
     commentsChannel.bind('delete-comment', (data) => {
         deleteComment(data)

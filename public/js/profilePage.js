@@ -1318,7 +1318,7 @@ var initDeleteOnce = function initDeleteOnce() {
       if (response.data.message === 'Notification marked as read') {
         var _document$getElementB;
         // remove a html element with notificationBar after 2 mins
-        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 || _document$getElementB.remove();
+        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.remove();
 
         // reduce the notification count as you have deleted the notification
         var newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
@@ -1378,7 +1378,7 @@ try {
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(e) {
-      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, emojiToggler, emojiListElement, emojiList, idForm, form, formEntries, inputComment, idInputComment, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, reactionOptionDiv, reactionOptionDivId, _commentNo, emojiContent, theLabel, _response2, button, countEl, preview, _response2$data$messa, label, reaction, countReaction, emoji, reactionBar, _t;
+      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, emojiToggler, emojiListElement, emojiList, idForm, form, formEntries, inputComment, idInputComment, _id, _commentFormId, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, reactionOptionDiv, reactionOptionDivId, _commentNo, emojiContent, theLabel, _response2, button, countEl, preview, _response2$data$messa, label, reaction, countReaction, emoji, reactionBar, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -1416,6 +1416,7 @@ try {
               _context.n = 5;
               break;
             }
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(elementId);
             emojiToggler = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(elementId);
             emojiListElement = elementId.replace('emojiToggle', 'emojiCommentPickerList');
             emojiList = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(emojiListElement); // Container for emoji buttons
@@ -1435,10 +1436,10 @@ try {
               break;
             }
             e.preventDefault();
-
             //idForm == formComment511
             idForm = elementId.replace("submit", "form"); // make the comment form disappear
-            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).style.display = "none";
+            // id(idForm).style.display = "none"
+            (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm).classList.add('d-none');
             // extract the form entries
             form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(idForm);
             formEntries = new FormData(form); // if the comment form input is empty. Get the input id and check 
@@ -1458,7 +1459,10 @@ try {
             _context.n = 8;
             return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get("/getNewCommentPusher");
           case 8:
+            _commentFormId = elementId.replace('submit', 'form');
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.formReset)(idForm);
+            // Hide the form explicitly
+            (_id = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(_commentFormId)) === null || _id === void 0 ? void 0 : _id.classList.add('d-none');
           case 9:
             _context.n = 25;
             break;
@@ -1729,6 +1733,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var reqId = localStorage.getItem('requesterId');
 var commentHTML = function commentHTML(data, postId) {
+  var _data$reactions$count, _data$reactions, _data$reactions2, _data$reactions2$coun;
   var profileImg = data.profileImg,
     fullName = data.fullName,
     date_created = data.date_created,
@@ -1742,14 +1747,9 @@ var commentHTML = function commentHTML(data, postId) {
   var total;
 
   // check if reactions and counts exist
-  if (data.reactions) {
-    var _data$reactions$count, _data$reactions, _data$reactions2;
-    counts = (_data$reactions$count = data === null || data === void 0 || (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
-    total = data === null || data === void 0 || (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 || (_data$reactions2 = _data$reactions2.counts) === null || _data$reactions2 === void 0 ? void 0 : _data$reactions2.totalReactions;
-  } else {
-    counts = {};
-    total = 0;
-  }
+
+  counts = (_data$reactions$count = data === null || data === void 0 ? void 0 : (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
+  total = data === null || data === void 0 ? void 0 : (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 ? void 0 : (_data$reactions2$coun = _data$reactions2.counts) === null || _data$reactions2$coun === void 0 ? void 0 : _data$reactions2$coun.totalReactions;
   return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName)).concat(comment_no, "</strong>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      ").concat(comment, "\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
 };
 
@@ -1773,6 +1773,9 @@ var appendNewComment = function appendNewComment(commentData) {
   var idDiv = "showComment".concat(commentData.post_no);
   // check if the div has been created by the DOM 
   var commentContainer = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  if (!commentContainer) {
+    throw new Error('commetContainer div not found in the DOM');
+  }
   var commentHtml = commentHTML(commentData);
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 };
@@ -2548,7 +2551,7 @@ try {
 
   // initiate the global object
   state.initialize();
-  var updatePost = /*#__PURE__*/function () {
+  var addNewPost = /*#__PURE__*/function () {
     var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(e) {
       var dataForUse, oldestPost, _t2;
       return _regenerator().w(function (_context2) {
@@ -2585,11 +2588,11 @@ try {
         }
       }, _callee2, null, [[1, 3]]);
     }));
-    return function updatePost(_x) {
+    return function addNewPost(_x) {
       return _ref.apply(this, arguments);
     };
   }();
-  var updateComment = /*#__PURE__*/function () {
+  var addNewComment = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(e) {
       var dataForUse, commentCounterEl, commentCount, _t3;
       return _regenerator().w(function (_context3) {
@@ -2628,7 +2631,7 @@ try {
         }
       }, _callee3, null, [[1, 3]]);
     }));
-    return function updateComment(_x2) {
+    return function addNewComment(_x2) {
       return _ref2.apply(this, arguments);
     };
   }();
@@ -2678,7 +2681,7 @@ try {
   var postsChannel = pusher.subscribe('posts-channel');
   postsChannel.bind('new-post', function (data) {
     data.forEach(function (item) {
-      return updatePost(item);
+      return addNewPost(item);
     });
   });
 
@@ -2686,7 +2689,7 @@ try {
   var commentsChannel = pusher.subscribe('comments-channel');
   commentsChannel.bind('new-comment', function (data) {
     data.forEach(function (item) {
-      return updateComment(item);
+      return addNewComment(item);
     });
   });
   commentsChannel.bind('delete-comment', function (data) {

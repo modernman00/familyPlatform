@@ -134,24 +134,6 @@
         }
         </style>
     <![endif]-->
-    <script>
-var _rollbarConfig = {
-    accessToken: '07c1732fabc74d2d9141515020902081',
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-    payload: {
-        environment: 'testenv',
-        // context: 'rollbar/test'
-        client: {
-          javascript: {
-            code_version: '1.0',
-            // source_map_enabled: true,
-            // guess_uncaught_frames: true
-          }
-        }
-    }
-};
-/</script>
 </head>
 
 
@@ -186,7 +168,7 @@ var _rollbarConfig = {
                                 <tr>
                                     <td align="center" height="70" style="height:70px;">
                                         <a href="" style="display: block; border-style: none !important; border: 0 !important;">
-                                        <img src ={{ getenv("MIX_APP_URL2") }}{{ getenv("IMG_CONTRACT") }} width="50" height="50" alt="LOGO" />
+                                        <img src ={{$_ENV["APP_LOGO"] }} width="50" height="50" alt="LOGO" />
                                         </a>
                                     </td>
                                 </tr>

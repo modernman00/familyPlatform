@@ -204,14 +204,14 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
 (0,_shared__WEBPACK_IMPORTED_MODULE_0__.log)('tree loaded');
 (0,_events__WEBPACK_IMPORTED_MODULE_1__.initTree)();
 (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('familyTree').addEventListener('click', function (e) {
-  var _node$querySelector;
+  var _node$querySelector, _node$querySelector$t;
   var node = e.target.closest('.tree-node');
   if (!node) return;
-  var name = (_node$querySelector = node.querySelector('.node-name')) === null || _node$querySelector === void 0 || (_node$querySelector = _node$querySelector.textContent) === null || _node$querySelector === void 0 ? void 0 : _node$querySelector.trim();
+  var name = (_node$querySelector = node.querySelector('.node-name')) === null || _node$querySelector === void 0 ? void 0 : (_node$querySelector$t = _node$querySelector.textContent) === null || _node$querySelector$t === void 0 ? void 0 : _node$querySelector$t.trim();
   var nodeFn = function nodeFn(nodeClass) {
     var _first$dataset;
     var first = node.querySelector(nodeClass);
-    return (first === null || first === void 0 || (_first$dataset = first.dataset) === null || _first$dataset === void 0 ? void 0 : _first$dataset.id) || null;
+    return (first === null || first === void 0 ? void 0 : (_first$dataset = first.dataset) === null || _first$dataset === void 0 ? void 0 : _first$dataset.id) || null;
   };
   var email = nodeFn('.node-email');
   var id = nodeFn('.node-id');

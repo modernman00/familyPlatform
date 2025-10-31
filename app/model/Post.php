@@ -104,12 +104,27 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
+    /**
+     * Fetches all comments from the database.
+     * 
+     * This function retrieves all comments from the database and returns them as an array.
+     * 
+     * @return array<int|string> The array of comments
+     */
     static function getAllComments(): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
         return parent::selectFn2(query: $query);
     }
 
+    /**
+     * Fetches all unpublished posts from the database.
+     * 
+     * This function retrieves all posts with a status of 'new' and returns them as an array.
+     * The posts are ordered in descending order by their post number.
+     * 
+     * @return array|int|string The array of unpublished posts
+     */
     static function getUnpublishedPost(): array|int|string
     {
         $query = parent::formAndMatchQuery(
@@ -124,6 +139,14 @@ class Post extends Select
 
     
 
+    /**
+     * Fetches all unpublished comments from the database.
+     * 
+     * This function retrieves all comments with a status of 'new' and returns them as an array.
+     * The comments are ordered in descending order by their comment number.
+     * 
+     * @return array|int|string The array of unpublished comments
+     */
     static function getUnpublishedComment(): array|int|string
     {
         $query = parent::formAndMatchQuery(
@@ -136,6 +159,13 @@ class Post extends Select
  
     }
 
+    /**
+     * Updates the status of a post to published
+     * 
+     * @param int|string $postNo The post number of the post to update
+     * 
+     * @return bool True if the update was successful, false otherwise
+     */
     static function updatePostByStatusAsPublished($postNo): bool
     {
         $newUpdate = new Update('post');

@@ -1583,7 +1583,7 @@ var initDeleteOnce = function initDeleteOnce() {
       if (response.data.message === 'Notification marked as read') {
         var _document$getElementB;
         // remove a html element with notificationBar after 2 mins
-        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 || _document$getElementB.remove();
+        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.remove();
 
         // reduce the notification count as you have deleted the notification
         var newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);

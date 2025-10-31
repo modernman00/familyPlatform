@@ -13,16 +13,10 @@ export const commentHTML = (data, postId) => {
   let counts = {}
   let total;
 
-
   // check if reactions and counts exist
-  if (data.reactions) {
+
     counts = data?.reactions?.counts ?? {};
     total = data?.reactions?.counts?.totalReactions;
-  } else {
-    counts = {};
-    total = 0;
-  }
-
 
   return `<div class="d-flex mb-3 commentDiv align-items-start" data-commentDiv-no="${comment_no}" id="commentDiv${comment_no}" name="commentDiv">
 
@@ -103,11 +97,12 @@ export const appendNewComment = (commentData) => {
   if (!commentData) {
     throw new Error('No comment update received');
   }
-
   const idDiv = `showComment${commentData.post_no}`
   // check if the div has been created by the DOM 
   const commentContainer = id(idDiv);
-
+   if (!commentContainer) {
+    throw new Error('commetContainer div not found in the DOM');
+  }
   const commentHtml = commentHTML(commentData)
   commentContainer.insertAdjacentHTML('beforeend', commentHtml);
 }

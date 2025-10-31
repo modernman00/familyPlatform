@@ -1,7 +1,11 @@
         <!-- Middle Column - Feed -->
         <div class="feed-column">
             <!-- Post Composer -->
-            <div class="card post-composer mb-4" data-bs-toggle="modal" data-bs-target="#postModal">
+            <div class="card post-composer mb-4" 
+            data-bs-toggle="modal" 
+             id="openPostModalTrigger" 
+            data-bs-target="#postModal" 
+            tabindex="0">
                 <div class="card-body d-flex align-items-center">
                     @isset($data['img'])
                         <img src="/resources/images/profile/{{ $data['img'] }}" alt="profile"
@@ -12,7 +16,7 @@
                     @endisset
 
                     <div class="flex-grow-1">
-                        <span class="text-muted">What's on your mind, {{ $data['firstName'] }} ?</span>
+                        <span class="text-muted">What's on your mind, {{ $data['firstName'] }}?</span>
                     </div>
                 </div>
             </div>

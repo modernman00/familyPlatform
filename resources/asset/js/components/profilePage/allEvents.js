@@ -46,11 +46,10 @@ try {
         } else if (elementId.includes("initComment")) {
             const commentFormId = elementId.replace('init', 'form')
             id(commentFormId).classList.toggle('d-none');
-
-
         }
         // comment form emoji picker
         else if (elementId.includes("emojiToggle")) {
+            log(elementId)
 
             const emojiToggler = id(elementId)
 
@@ -71,13 +70,12 @@ try {
 
         // Handle Comment Submission
         else if (elementId.includes("submitComment")) {
-
             e.preventDefault()
-
             //idForm == formComment511
             const idForm = elementId.replace("submit", "form")
             // make the comment form disappear
-            id(idForm).style.display = "none"
+            // id(idForm).style.display = "none"
+            id(idForm).classList.add('d-none');
             // extract the form entries
             const form = id(idForm)
             let formEntries = new FormData(form)
@@ -89,15 +87,15 @@ try {
             if (idInputComment.value == null || idInputComment.value == "") {
                 alert("Please enter a comment before submitting")
             } else {
-
                 await axios.post('/postCommentProfile', formEntries, options)
-
                 // update all members of similar famcode on their UIs using Pusher
-
                 await axios.get("/getNewCommentPusher");
 
+                 const commentFormId = elementId.replace('submit', 'form')
+ 
                 formReset(idForm);
-
+                // Hide the form explicitly
+id(commentFormId)?.classList.add('d-none');
 
             }
             // SUBMIT THE POST
