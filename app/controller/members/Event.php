@@ -48,7 +48,7 @@ class Event extends AllMembersData
             // );
             // msgSuccess(code: 200, msg: $lastInsertedId);
 
-            SubmitPostData::submitToOneTablenImage(
+            $retunLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'events',
                 minMaxData: [
                     'data' => ['eventName',  'eventDescription'],
@@ -62,6 +62,7 @@ class Event extends AllMembersData
                 ]
 
             );
+            msgSuccess(200, "Event submitted", $retunLastId);
 
 
         } catch (\Throwable $th) {

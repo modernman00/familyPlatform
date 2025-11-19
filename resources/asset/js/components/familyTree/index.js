@@ -3,48 +3,40 @@ import { initTree } from './events'
 import { showPersonDetails } from './showModal'
 import axios from 'axios';
 
-
 const modalBody = id('modalBody');
 const closeModal = id('closeModal');
 const personModal = id('personModal');
 
+initTree();
 
-  log('tree loaded')
-  initTree();
+id('familyTree').addEventListener('click', (e) => {
+  const node = e.target.closest('.tree-node');
+  if (!node) return;
+  const name = node.querySelector('.node-name')?.textContent?.trim();
 
-   id('familyTree').addEventListener('click', (e) => {
-    const node = e.target.closest('.tree-node');
-    if (!node) return;
-    const name = node.querySelector('.node-name')?.textContent?.trim();
+  const nodeFn = (nodeClass) => {
+    const first = node.querySelector(nodeClass);
+    return first?.dataset?.id || null;
+  }
 
-    const nodeFn = (nodeClass) => {
-      const first = node.querySelector(nodeClass);
-      return first?.dataset?.id || null;
-      
-    }
+  const email = nodeFn('.node-email');
+  const id = nodeFn('.node-id');
+  const img = nodeFn('.node-img');
+  const maritalStatus = nodeFn('.node-maritalStatus');
+  const spouseName = nodeFn('.node-spouseName');
+  const occupation = nodeFn('.node-occupation');
 
-    const email = nodeFn('.node-email');
-    const id  = nodeFn('.node-id');
-    const img = nodeFn('.node-img');
-    const fullName = nodeFn('.node-fullName');
-    const maritalStatus = nodeFn('.node-maritalStatus');
-    const spouseName = nodeFn('.node-spouseName');
-    const occupation = nodeFn('.node-occupation');
-  
-   const detailData = {
-     fullName: fullName,
-     email: email,
-     img: img,
-     maritalStatus: maritalStatus,
-     spouseName: spouseName,
-     occupation: occupation,
-     
-   }
+  const detailData = {
+    fullName: name,
+    email: email,
+    img: img,
+    maritalStatus: maritalStatus,
+    spouseName: spouseName,
+    occupation: occupation,
+  }
 
-    showPersonDetails(detailData);
-
-
-  })
+  showPersonDetails(detailData);
+})
 
 
 // When a person node is clicked, show their details

@@ -121,7 +121,7 @@ class Organogram extends SingleCustomerData
                         'linked' => $row["{$who}_linked"],
                         'relationship' => $relationship,
                         'gender' => $row["{$who}_gender"],
-                        'img' => $data['img'] ? "public/img/profile/{$data['img']}" : "public/img/profile/$sex"
+                        'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
                     ]);
                 }
             }
@@ -156,7 +156,7 @@ class Organogram extends SingleCustomerData
             'relationship' => $data['relationship'] ?? null,
             'country' => $data['country'] ?? null,
             'occupation' => $data['occupation'] ?? null,
-            'img' => $data['img'] ? "public/img/profile/{$data['img']}" : "public/img/profile/$sex"
+            'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
         ];
     }
 

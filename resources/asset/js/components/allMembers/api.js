@@ -1,8 +1,8 @@
 import axios from "axios";
 import { id, showError } from "../global";
 import { renderHtml } from "./html";
-import filterMembersByFamCode from "./filterMembersByFamCode";
 import { handleInput } from "./handleInput";
+import { getMultipleApiData } from "@modernman00/shared-js-lib"
 
 const config = {
     headers: {
@@ -11,7 +11,6 @@ const config = {
         'Accept': 'application/json'
     },
 };
-
 const reqId = localStorage.getItem('requesterId');
 const URL = process.env.MIX_APP_URL2;
 const allMembersContainer = id('allMembers');
@@ -28,35 +27,18 @@ export const renderMembers = (data, container, noMemberMessage, html) => {
     }
 };
 
+const url1 = `${URL}allMembers/processApiData`; // data based on famCode and reqMgt accepted and approved
+const url2 = `${URL}allMembers/allData`; // all the users data
 
-axios.get(`${URL}allMembers/processApiData?id=${reqId}`, config)
-    .then(function (response) {
+const [famCodeData, allUsers] = await getMultipleApiData(url1, url2);
 
-        id('allMembers').innerHTML = "";
-
-        if (!response.data) {
-            throw Error('There is no data');
-        }
-
-        const data = response.data;
-
-        console.log(data);
-
-        const dataWithFamCode = filterMembersByFamCode(data);
-
-        renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, renderHtml);
-
-        // Remove the "loader" class after rendering is complete
-        id('setLoader').classList.remove('loader');
-
-        id('searchFamily').addEventListener('input', () => handleInput(
-            data,
-            dataWithFamCode,
-            renderMembers
-        )
-
-        );
-
-
-    })
-    .catch(err => showError(err.message));
+// const dataWithFamCode = filterMembersByFamCode(data);
+renderMembers(famCodeData.message, allMembersContainer, noMemberHTML, renderHtml);
+// Remove the "loader" class after rendering is complete
+id('setLoader').classList.remove('loader');
+id('searchFamily').addEventListener('input', () => handleInput(
+    allUsers.message,
+    famCodeData.message,
+    renderMembers
+)
+);

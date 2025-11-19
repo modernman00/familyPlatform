@@ -1,5 +1,5 @@
 import { format } from "timeago.js"
-import { id, showError } from "@shared"
+import { id, showError, log } from "@shared"
 
 const toSentenceCase = (str) => {
   if (str || typeof str == 'string')
@@ -22,11 +22,10 @@ export const renderHtml = (el) => {
       // Handle the case where 'el' is falsy, such as when data is not available.
       throw new Error('there is no data')
     }
+    log(el)
 
     const theImg = `/resources/images/profile/${el.img}`;
-    const areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
-    const related = famCode == el.famCode
-    const statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ?
+    const statusButtonHTML = el.status !== null ?
       el.status :
       'Connect';
       const relationshipType = (el.relationship)? el.relationship: 'Immediate Family';
@@ -35,38 +34,37 @@ export const renderHtml = (el) => {
 
     const fatherName = toSentenceCase(el.father_name);
     const motherName = toSentenceCase(el.mother_name);
-    const spouseName = toSentenceCase(el.spouseName);
+    const spouseName = toSentenceCase(el.spouse_name);
     // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
     const html = `
     <div class="member-card member_profile_${el.id}" id="${el.id}">
 
-       <div class="member-card-header">
-            <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}" class="member-avatar">
+       <div class="card-cover">
+            <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}" class= "card-img-top">
         </div>
 
         <div class="member-card-body">
             <h3 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h3>
             <p class="member-location">${el.country}</p>
 
-  ${areTheyLinked ? `
-    <div class="member-details">
-      <p class="member-detail"><b>Father:</b> ${fatherName || 'Not specified'}</p>
-      <p class="member-detail"><b>Mother:</b> ${motherName || 'Not specified'}</p>
-      <p class="member-detail"><b>Spouse:</b> ${spouseName || 'Not specified'}</p>
-      <p class="member-detail"><b>Mobile:</b> ${el.mobile || 'Not specified'}</p>
-       <p class="member-detail"><b>Family Code:</b> ${el.famCode || 'Not specified'}</p>
-         <p class="member-detail"><b>Relationship Type:</b> ${relationshipType}</p>
-      <p class="member-detail"><b>Member since:</b> ${format(el.created_at)}</p>
+  ${el.relationType ? `
+    <div class="member-details text-secondary mb-3 pb-3 border-bottom border-secondary">
+
+         <p class="member-detail small mb-1">  <i class="fa fa-link me-2 text-danger"></i><b>Relationship Type:</b> ${el.relationType}</p>
+          <p class="member-detail small mb-1"> <i class="fa fa-calendar-alt me-2 text-info"></i><b>Member since:</b> ${format(el.created_at)}</p>
     </div>
 
     <div class="member-interests">
-      <button class="btn btn-profile" id="seeProfile${el.id}">
-        <i class="fa fa-user"></i> See Profile
+      <button class="btn btn-sm btn-profile" id="seeProfile${el.id}" tooltip="View ${toSentenceCase(el.firstName)}'s Profile">
+        <i class="fa fa-user"></i>Profile
       </button>
-      <span class="btn btn-remove" id="removeProfile${el.id}">
-        <i class="fa fa-times"></i> Remove
+         <button class="btn btn-sm btn-profile" id="familyTree${el.id}" tooltip="View ${toSentenceCase(el.firstName)}'s Family Tree">
+        <i class="fa fa-tree"></i> Family Tree
+      </button>
+      <span class="btn btn-sm btn-remove" id="removeProfile${el.id}" tooltip="Remove ${toSentenceCase(el.firstName)} from your family">
+        <i class="fa fa-times"></i> 
       </span>
     </div>
   ` : `
@@ -74,8 +72,7 @@ export const renderHtml = (el) => {
       <button class="btn btn-primary btn-sm w-100" 
               data-user-id="addFamily${el.id}" 
               ${disableButton}
-              onmouseover="pulseButton(this)" 
-              onmouseout="resetButton(this)">
+              tooltip="Send a connection request to ${toSentenceCase(el.firstName)}">
         <i class="fa fa-user-plus"></i> ${statusButtonHTML}
       </button>
     </div>

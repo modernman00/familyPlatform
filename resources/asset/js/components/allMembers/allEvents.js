@@ -80,6 +80,14 @@ document.onclick = async (e) => {
 
       // redirect to 'allMembers/setProfile/'+userId
       window.location.href = `/allMembers/seeProfile/${userId}`;
+      
+    } else if (targetId.includes('familyTree')) {
+    
+      // Extract the user ID from the target ID
+      const userId = targetId.replace('familyTree', '');
+
+      // redirect to 'allMembers/setProfile/'+userId
+      window.location.href = `/organogram/${userId}`;
     } 
     // else if (targetId.includes('deleteNotification')) {
     //   // Call the deleteNotification function to remove the notification

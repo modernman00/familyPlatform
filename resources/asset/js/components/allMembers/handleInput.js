@@ -23,7 +23,7 @@ export const handleInput = (data, WithFamCode, renderMembers) => {
 
     } else {
         let filteredData = data.filter(el =>
-            el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal)
+            el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal) || el.email.toLowerCase().includes(inputVal) || el.mobile.toLowerCase().includes(inputVal) || el.famCode.toLowerCase().includes(inputVal) || el.country.toLowerCase().includes(inputVal)
         );
         // if no match found, show a message with a checkbox to send a request to the new member to join the platform
         // the checkbox will show a form to enter the new member's name and email or mobile number

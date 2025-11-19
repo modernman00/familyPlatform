@@ -44,13 +44,13 @@ try {
 
             // Make the comment form to appear onclick. 
         } else if (elementId.includes("initComment")) {
+          
             const commentFormId = elementId.replace('init', 'form')
             id(commentFormId).classList.toggle('d-none');
         }
         // comment form emoji picker
         else if (elementId.includes("emojiToggle")) {
-            log(elementId)
-
+        
             const emojiToggler = id(elementId)
 
             const emojiListElement = elementId.replace('emojiToggle', 'emojiCommentPickerList')
@@ -71,8 +71,11 @@ try {
         // Handle Comment Submission
         else if (elementId.includes("submitComment")) {
             e.preventDefault()
+ 
             //idForm == formComment511
             const idForm = elementId.replace("submit", "form")
+            const postId = elementId.replace("submitComment", "")
+     
             // make the comment form disappear
             // id(idForm).style.display = "none"
             id(idForm).classList.add('d-none');
@@ -91,11 +94,16 @@ try {
                 // update all members of similar famcode on their UIs using Pusher
                 await axios.get("/getNewCommentPusher");
 
+                // hide the emoji picker after submission
+
+                id(`emojiCommentPickerList${postId}`)?.classList.toggle('d-none');
+
+
                  const commentFormId = elementId.replace('submit', 'form')
  
                 formReset(idForm);
                 // Hide the form explicitly
-id(commentFormId)?.classList.add('d-none');
+                id(commentFormId)?.classList.add('d-none');
 
             }
             // SUBMIT THE POST

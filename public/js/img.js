@@ -5,34 +5,34 @@
 /*!*************************************************!*\
   !*** ./resources/asset/js/components/global.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkElements: () => (/* binding */ checkElements),
-/* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
-/* harmony export */   date2String: () => (/* binding */ date2String),
-/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
-/* harmony export */   formReset: () => (/* binding */ formReset),
-/* harmony export */   hideElement: () => (/* binding */ hideElement),
-/* harmony export */   id: () => (/* binding */ id),
-/* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
-/* harmony export */   idValue: () => (/* binding */ idValue),
-/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
-/* harmony export */   log: () => (/* binding */ log),
-/* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
-/* harmony export */   msgException: () => (/* binding */ msgException),
-/* harmony export */   qSel: () => (/* binding */ qSel),
-/* harmony export */   qSelAll: () => (/* binding */ qSelAll),
-/* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
-/* harmony export */   qSelValue: () => (/* binding */ qSelValue),
-/* harmony export */   showElement: () => (/* binding */ showElement),
-/* harmony export */   showError: () => (/* binding */ showError),
-/* harmony export */   showNotification: () => (/* binding */ showNotification),
-/* harmony export */   warningSign: () => (/* binding */ warningSign),
-/* harmony export */   write: () => (/* binding */ write)
+/* harmony export */   checkElements: function() { return /* binding */ checkElements; },
+/* harmony export */   checkManyElements: function() { return /* binding */ checkManyElements; },
+/* harmony export */   date2String: function() { return /* binding */ date2String; },
+/* harmony export */   fileUploadSizeValidation: function() { return /* binding */ fileUploadSizeValidation; },
+/* harmony export */   formReset: function() { return /* binding */ formReset; },
+/* harmony export */   hideElement: function() { return /* binding */ hideElement; },
+/* harmony export */   id: function() { return /* binding */ id; },
+/* harmony export */   idInnerHTML: function() { return /* binding */ idInnerHTML; },
+/* harmony export */   idValue: function() { return /* binding */ idValue; },
+/* harmony export */   initializeImageModal: function() { return /* binding */ initializeImageModal; },
+/* harmony export */   log: function() { return /* binding */ log; },
+/* harmony export */   manipulateAttribute: function() { return /* binding */ manipulateAttribute; },
+/* harmony export */   msgException: function() { return /* binding */ msgException; },
+/* harmony export */   qSel: function() { return /* binding */ qSel; },
+/* harmony export */   qSelAll: function() { return /* binding */ qSelAll; },
+/* harmony export */   qSelInnerHTML: function() { return /* binding */ qSelInnerHTML; },
+/* harmony export */   qSelValue: function() { return /* binding */ qSelValue; },
+/* harmony export */   showElement: function() { return /* binding */ showElement; },
+/* harmony export */   showError: function() { return /* binding */ showError; },
+/* harmony export */   showNotification: function() { return /* binding */ showNotification; },
+/* harmony export */   warningSign: function() { return /* binding */ warningSign; },
+/* harmony export */   write: function() { return /* binding */ write; }
 /* harmony export */ });
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
@@ -308,32 +308,32 @@ var initializeImageModal = function initializeImageModal(selector, clickedImageI
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/helper/http.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkCookie: () => (/* binding */ checkCookie),
-/* harmony export */   getApiData: () => (/* binding */ getApiData),
-/* harmony export */   getCookie: () => (/* binding */ getCookie),
-/* harmony export */   getMultipleApiData: () => (/* binding */ getMultipleApiData),
-/* harmony export */   postFormData: () => (/* binding */ postFormData),
-/* harmony export */   postMultipleApiData: () => (/* binding */ postMultipleApiData),
-/* harmony export */   setCookie: () => (/* binding */ setCookie)
+/* harmony export */   checkCookie: function() { return /* binding */ checkCookie; },
+/* harmony export */   getApiData: function() { return /* binding */ getApiData; },
+/* harmony export */   getCookie: function() { return /* binding */ getCookie; },
+/* harmony export */   getMultipleApiData: function() { return /* binding */ getMultipleApiData; },
+/* harmony export */   postFormData: function() { return /* binding */ postFormData; },
+/* harmony export */   postMultipleApiData: function() { return /* binding */ postMultipleApiData; },
+/* harmony export */   setCookie: function() { return /* binding */ setCookie; }
 /* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+
+
 
 
 
 // import Cookies from 'js-cookie'
 
-(0,axios_retry__WEBPACK_IMPORTED_MODULE_2__["default"])(axios__WEBPACK_IMPORTED_MODULE_1__["default"], {
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_4__["default"])(axios__WEBPACK_IMPORTED_MODULE_3__["default"], {
   retries: 3
 });
 
@@ -347,7 +347,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
  NOTICE:::Make sure you set the notification id as the formId_notification
  */
 var postFormData = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url, formId) {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(url, formId) {
     var redirect,
       css,
       notificationForm,
@@ -368,15 +368,15 @@ var postFormData = /*#__PURE__*/function () {
       errorMessage,
       _args = arguments,
       _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.p = _context.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
           redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
           css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
           notificationForm = "".concat(formId, "_notification");
-          notificationId = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(notificationForm);
+          notificationId = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(notificationForm);
           if (notificationId) {
-            _context.n = 1;
+            _context.next = 1;
             break;
           }
           throw new Error('Notification element not found');
@@ -388,16 +388,16 @@ var postFormData = /*#__PURE__*/function () {
           });
 
           // extract the form entriesËËË
-          form = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(formId);
+          form = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(formId);
           if (form) {
-            _context.n = 2;
+            _context.next = 2;
             break;
           }
           throw new Error('Form element not found');
         case 2:
           formEntries = new FormData(form);
-          formEntries["delete"]('submit');
-          formEntries["delete"]('checkbox_id');
+          formEntries.delete('submit');
+          formEntries.delete('checkbox_id');
           options = {
             baseURL: '/',
             // Adjust to your API base URL
@@ -405,13 +405,13 @@ var postFormData = /*#__PURE__*/function () {
             xsrfHeaderName: 'X-XSRF-TOKEN',
             withCredentials: true // Ensure cookies (e.g., XSRF token) are sent
           }; // AXIOS POST FUNCTIONALITY
-          _context.p = 3;
-          _context.n = 4;
-          return axios__WEBPACK_IMPORTED_MODULE_1__["default"].post(url, formEntries, options);
+          _context.prev = 3;
+          _context.next = 4;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url, formEntries, options);
         case 4:
-          response = _context.v;
+          response = _context.sent;
           if (!(response.status < 200 || response.status >= 300)) {
-            _context.n = 5;
+            _context.next = 5;
             break;
           }
           throw new Error(((_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.message) || 'Request failed');
@@ -420,32 +420,32 @@ var postFormData = /*#__PURE__*/function () {
           idSetFromHttp = null;
           famCodeSetFromHttp = null;
           dbHttpResult = null;
-          if (!(response.data && _typeof(response.data.message) === 'object')) {
-            _context.n = 9;
+          if (!(response.data && typeof response.data.message === 'object')) {
+            _context.next = 9;
             break;
           }
           idSetFromHttp = response.data.message.id || null;
           famCodeSetFromHttp = response.data.message.famCode || null;
           dbHttpResult = response.data.message.outcome || null;
           if (idSetFromHttp) {
-            _context.n = 6;
+            _context.next = 6;
             break;
           }
           throw new Error('idSetFromHttp is missing');
         case 6:
           if (dbHttpResult) {
-            _context.n = 7;
+            _context.next = 7;
             break;
           }
           throw new Error('dbHttpResult is missing');
         case 7:
           if (famCodeSetFromHttp) {
-            _context.n = 8;
+            _context.next = 8;
             break;
           }
           throw new Error('famCodeSetFromHttp is missing');
         case 8:
-          _context.n = 10;
+          _context.next = 10;
           break;
         case 9:
           dbHttpResult = response.data.message;
@@ -460,16 +460,17 @@ var postFormData = /*#__PURE__*/function () {
               window.location.assign(redirect);
             }, redirectDelay);
           }
-          _context.n = 12;
+          _context.next = 12;
           break;
         case 11:
-          _context.p = 11;
-          _t = _context.v;
+          _context.prev = 11;
+          _t = _context["catch"](3);
           errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
           errorMessage = ((_error$response = _t.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : _error$response$data.error) || _t.request || 'An unknown error occurred';
           processFormDataAction(errorClass, errorMessage, notificationId);
         case 12:
-          return _context.a(2);
+        case "end":
+          return _context.stop();
       }
     }, _callee, null, [[3, 11]]);
   }));
@@ -487,17 +488,17 @@ var processFormDataAction = function processFormDataAction(cssClass, message, fo
   if (formNotificationId) {
     formNotificationId.style.display = 'block';
     formNotificationId.classList.add(cssClass);
-    var errorElement = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('error');
+    var errorElement = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('error');
     if (errorElement) {
       errorElement.scrollIntoView({
         behavior: 'smooth'
       });
       errorElement.innerHTML = message;
     }
-    var loader = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader');
+    var loader = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('setLoader');
     if (loader) loader.classList.remove('loader');
   } else {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)('Notification element not found');
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.log)('Notification element not found');
   }
 };
 
@@ -533,17 +534,17 @@ axiosTest()
  */
 
 var getApiData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(URL) {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(URL) {
     var token,
       config,
       fetch,
       _args2 = arguments,
       _t2;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.p = _context2.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
           token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
-          _context2.p = 1;
+          _context2.prev = 1;
           config = {
             headers: {
               'X-Requested-With': 'XMLHttpRequest',
@@ -552,15 +553,18 @@ var getApiData = /*#__PURE__*/function () {
               'Authorization': 'Bearer ' + token
             }
           };
-          _context2.n = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_1__["default"].get(URL, config);
+          _context2.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(URL, config);
         case 2:
-          fetch = _context2.v;
-          return _context2.a(2, fetch.data);
+          fetch = _context2.sent;
+          return _context2.abrupt("return", fetch.data);
         case 3:
-          _context2.p = 3;
-          _t2 = _context2.v;
-          return _context2.a(2, _t2);
+          _context2.prev = 3;
+          _t2 = _context2["catch"](1);
+          return _context2.abrupt("return", _t2);
+        case 4:
+        case "end":
+          return _context2.stop();
       }
     }, _callee2, null, [[1, 3]]);
   }));
@@ -569,17 +573,17 @@ var getApiData = /*#__PURE__*/function () {
   };
 }();
 var getMultipleApiData = /*#__PURE__*/function () {
-  var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(url1, url2) {
+  var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(url1, url2) {
     var token,
       config,
       fetch,
       _args3 = arguments,
       _t3;
-    return _regenerator().w(function (_context3) {
-      while (1) switch (_context3.p = _context3.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
         case 0:
           token = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
-          _context3.p = 1;
+          _context3.prev = 1;
           config = {
             headers: {
               'X-Requested-With': 'XMLHttpRequest',
@@ -588,15 +592,18 @@ var getMultipleApiData = /*#__PURE__*/function () {
               'Authorization': 'Bearer ' + token
             }
           };
-          _context3.n = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_1__["default"].all([axios__WEBPACK_IMPORTED_MODULE_1__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_1__["default"].get(url2, config)]);
+          _context3.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url2, config)]);
         case 2:
-          fetch = _context3.v;
-          return _context3.a(2, fetch);
+          fetch = _context3.sent;
+          return _context3.abrupt("return", fetch);
         case 3:
-          _context3.p = 3;
-          _t3 = _context3.v;
-          return _context3.a(2, _t3);
+          _context3.prev = 3;
+          _t3 = _context3["catch"](1);
+          return _context3.abrupt("return", _t3);
+        case 4:
+        case "end":
+          return _context3.stop();
       }
     }, _callee3, null, [[1, 3]]);
   }));
@@ -608,17 +615,17 @@ var getMultipleApiData = /*#__PURE__*/function () {
 // build a function to post multiple api form data
 
 var postMultipleApiData = /*#__PURE__*/function () {
-  var _ref4 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(url1, url2, formData) {
+  var _ref4 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee4(url1, url2, formData) {
     var token,
       config,
       fetch,
       _args4 = arguments,
       _t4;
-    return _regenerator().w(function (_context4) {
-      while (1) switch (_context4.p = _context4.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
         case 0:
           token = _args4.length > 3 && _args4[3] !== undefined ? _args4[3] : null;
-          _context4.p = 1;
+          _context4.prev = 1;
           config = {
             headers: {
               'X-Requested-With': 'XMLHttpRequest',
@@ -627,15 +634,18 @@ var postMultipleApiData = /*#__PURE__*/function () {
               'Authorization': 'Bearer ' + token
             }
           };
-          _context4.n = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_1__["default"].all([axios__WEBPACK_IMPORTED_MODULE_1__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_1__["default"].post(url2, formData, config)]);
+          _context4.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url2, formData, config)]);
         case 2:
-          fetch = _context4.v;
-          return _context4.a(2, fetch);
+          fetch = _context4.sent;
+          return _context4.abrupt("return", fetch);
         case 3:
-          _context4.p = 3;
-          _t4 = _context4.v;
-          return _context4.a(2, _t4);
+          _context4.prev = 3;
+          _t4 = _context4["catch"](1);
+          return _context4.abrupt("return", _t4);
+        case 4:
+        case "end":
+          return _context4.stop();
       }
     }, _callee4, null, [[1, 3]]);
   }));
@@ -687,13 +697,13 @@ var checkCookie = function checkCookie() {
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/comment.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   appendNewComment: () => (/* binding */ appendNewComment),
-/* harmony export */   commentHTML: () => (/* binding */ commentHTML),
-/* harmony export */   showComment: () => (/* binding */ showComment)
+/* harmony export */   appendNewComment: function() { return /* binding */ appendNewComment; },
+/* harmony export */   commentHTML: function() { return /* binding */ commentHTML; },
+/* harmony export */   showComment: function() { return /* binding */ showComment; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -758,11 +768,11 @@ var appendNewComment = function appendNewComment(commentData) {
 /*!***********************************************************!*\
   !*** ./resources/asset/js/components/profilePage/html.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   html: () => (/* binding */ html)
+/* harmony export */   html: function() { return /* binding */ html; }
 /* harmony export */ });
 /* harmony import */ var _htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./htmlFolder/nameImageTiming */ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js");
 /* harmony import */ var _htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./htmlFolder/commentForm */ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js");
@@ -789,11 +799,11 @@ var html = function html(el) {
 /*!*****************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/htmlFolder/commentForm.js ***!
   \*****************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   commentForm: () => (/* binding */ commentForm)
+/* harmony export */   commentForm: function() { return /* binding */ commentForm; }
 /* harmony export */ });
 var commentForm = function commentForm(_ref) {
   var post_no = _ref.post_no;
@@ -806,11 +816,11 @@ var commentForm = function commentForm(_ref) {
 /*!***********************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js ***!
   \***********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   likeCommentButton: () => (/* binding */ likeCommentButton)
+/* harmony export */   likeCommentButton: function() { return /* binding */ likeCommentButton; }
 /* harmony export */ });
 var likeCommentButton = function likeCommentButton(data, commentLength) {
   return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-1\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n          (<span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">\n            ").concat(commentLength, "\n          </span>)\n          \n      </button>\n   \n    </div>\n    ");
@@ -822,11 +832,11 @@ var likeCommentButton = function likeCommentButton(data, commentLength) {
 /*!*********************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js ***!
   \*********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   nameImgTiming: () => (/* binding */ nameImgTiming)
+/* harmony export */   nameImgTiming: function() { return /* binding */ nameImgTiming; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -869,12 +879,12 @@ var nameImgTiming = function nameImgTiming(data) {
 /*!********************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js ***!
   \********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   imgCount: () => (/* binding */ imgCount),
-/* harmony export */   showPostImg: () => (/* binding */ showPostImg)
+/* harmony export */   imgCount: function() { return /* binding */ imgCount; },
+/* harmony export */   showPostImg: function() { return /* binding */ showPostImg; }
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
   // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
@@ -912,7 +922,7 @@ var imgCount = function imgCount(data) {
 /*!****************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/imgViewer.js ***!
   \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
@@ -926,19 +936,15 @@ __webpack_require__.r(__webpack_exports__);
 /*!*************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/showEmojiOnComment.js ***!
   \*************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderTopReactions: () => (/* binding */ renderTopReactions)
+/* harmony export */   renderTopReactions: function() { return /* binding */ renderTopReactions; }
 /* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
 
 
 /**
@@ -951,15 +957,15 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var getTopReactions = function getTopReactions() {
   var counts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return Object.entries(counts).filter(function (_ref) {
-    var _ref2 = _slicedToArray(_ref, 2),
+    var _ref2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref, 2),
       label = _ref2[0],
       count = _ref2[1];
     return !['comment_no', 'total', 'totalReactions'].includes(label) && count > 0;
   }) // 🧼 Remove metadata and zero-count reactions
   .sort(function (_ref3, _ref4) {
-    var _ref5 = _slicedToArray(_ref3, 2),
+    var _ref5 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref3, 2),
       a = _ref5[1];
-    var _ref6 = _slicedToArray(_ref4, 2),
+    var _ref6 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref4, 2),
       b = _ref6[1];
     return b - a;
   }) // 🔢 Sort descending by count
@@ -987,7 +993,7 @@ var renderTopReactions = function renderTopReactions(counts) {
 
   var html = top.map(function (_ref7) {
     var _emojiMap$label;
-    var _ref8 = _slicedToArray(_ref7, 2),
+    var _ref8 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref7, 2),
       label = _ref8[0],
       count = _ref8[1];
     var emoji = (_emojiMap$label = emojiMap[label]) !== null && _emojiMap$label !== void 0 ? _emojiMap$label : ''; // 🧼 Fallback if label missing

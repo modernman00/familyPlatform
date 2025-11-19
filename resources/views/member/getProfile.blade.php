@@ -14,7 +14,7 @@
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-info">
-                <img src="/public/img/profile/{{ $data['img'] }}" alt="{{ $data['firstName'] }} {{ $data['lastName'] }}" class="profile-avatar">
+                <img src="/resources/images/profile/{{ $data['img'] }}" alt="{{ $data['firstName'] }} {{ $data['lastName'] }}" class="profile-avatar">
                 <div class="profile-details">
                     <h1>{{ $data['firstName'] }} {{ $data['lastName'] }}</h1>
                     <div class="family-tree-name"> 
@@ -23,7 +23,7 @@
                     <div class="profile-location">
                         <i class="bi bi-geo-alt-fill me-2"></i> Lives in {{ $data['country'] }}
                     </div>
-                    {{-- <span class="badge badge-custom">Family Patriarch</span> --}}
+                    <span class="badge badge-custom">{{ $data['famCode'] }}</span>
                 </div>
             </div>
         </div>
@@ -45,36 +45,15 @@
                         <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Date of Birth</div>
-                            <div class="detail-value">June 15, 1975</div>
+                            <div class="detail-value">{{ $data['day'] }} / {{ $data['month'] }}</div>
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Family Tree</div>
-                            <div class="detail-value">  <a href="/organogram/{{ $data['id'] }}">SEE {{ $data['firstName'] }}'S FAMILY TREE 
-                        </a></div>
-                        </div>
-                    </div>
-                      <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Family Tree</div>
-                            <div class="detail-value">June 15, 1975</div>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-geo-alt"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Birthplace</div>
-                            <div class="detail-value">Lagos, Nigeria</div>
-                        </div>
-                    </div>
+
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Relationship Status</div>
-                            <div class="detail-value">Married</div>
+                            <div class="detail-value">{{$data['marital_status']}}</div>
                         </div>
                     </div>
                 </div>
@@ -100,14 +79,7 @@
                         <div class="detail-icon"><i class="bi bi-person-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Spouse/Partner</div>
-                            <div class="detail-value">Not Provided</div>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-people"></i></div>
-                        <div class="detail-content">
-                            <div class="detail-label">Children</div>
-                            <div class="detail-value">3 (2 sons, 1 daughter)</div>
+                            <div class="detail-value">{{ $data['spouse_name'] }}</div>
                         </div>
                     </div>
                 </div>
@@ -117,13 +89,13 @@
                     <h3><i class="bi bi-telephone-fill me-2"></i>Contact Information</h3>
                     <div class="contact-info">
                         <div class="contact-item">
-                            <i class="bi bi-phone"></i> +44 7805 262504
+                            <i class="bi bi-phone"></i> +{{ $data['mobile'] }}
                         </div>
                         <div class="contact-item">
-                            <i class="bi bi-envelope"></i> lafane.olaogun@example.com
+                            <i class="bi bi-envelope"></i> {{ $data['email'] }}
                         </div>
                         <div class="contact-item">
-                            <i class="bi bi-house"></i> London, United Kingdom
+                            <i class="bi bi-house"></i> {{ $data['country'] }}
                         </div>
                     </div>
                 </div>
@@ -159,7 +131,7 @@
                 </div>
 
                 <!-- Life Events Card -->
-                <div class="info-card">
+                {{-- <div class="info-card">
                     <h3><i class="bi bi-clock-history me-2"></i>Life Events</h3>
                     <div class="timeline">
                         <div class="timeline-event">
@@ -179,7 +151,7 @@
                             <div class="event-desc">Started OLAOGUN Family Business</div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Additional Information Card -->
                 <div class="info-card">
@@ -210,11 +182,11 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons">
+        {{-- <div class="action-buttons">
             <button class="btn-primary-custom"><i class="bi bi-pencil-fill me-2"></i>Edit Profile</button>
-            <button class="btn-outline-custom"><i class="bi bi-printer me-2"></i>Print Family Tree</button>
+            <button class="btn-outline-custom"><i class="bi bi-printer me-2"></i>Family Tree</button>
             <button class="btn-outline-custom"><i class="bi bi-share me-2"></i>Share Profile</button>
-        </div>
+        </div> --}}
     </div>
 
   @endsection

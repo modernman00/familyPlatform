@@ -14,6 +14,7 @@ use App\model\{
 use Src\functionality\SendEmailFunctionality as SendMail;
 use Src\DeleteFn;
 use Src\Utility;
+use Src\functionality\SignIn;
 
 class PostMessage
 {
@@ -31,15 +32,22 @@ class PostMessage
     {
 
         try {
+            $VerifyJWT = SignIn::verify('users');
+            $id = \cleanSession($VerifyJWT['id']);
+            $famCode = \cleanSession($VerifyJWT['famCode']);
             // 1. Get all posts
-            $posts = AllMembersData::postProfilePicByFamCode(
-                id: cleanSession($_SESSION['memberId']),
-                famCode: checkInput($_SESSION['famCode'])
+            $posts = AllMembersData::getVisiblePosts(
+                $id,
+                $famCode
             );
+
+         
+
 
             if (!$posts) msgException(401, "no post msg");
 
             $count = count($posts);
+ 
 
             // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
             foreach ($posts as &$post) {
@@ -51,10 +59,10 @@ class PostMessage
                     $comments = [];
                     continue; // No comments for this post, move to the next post
                 }
+               
 
                 // 4. Loop through each comment: MUST use the reference operator (&) to modify the original array.
                 foreach ($comments as &$comment) {
-
                     //  // 5. Get reactions for THIS comment
                     // 5. Get reactions for THIS comment
                     $commentNo = $comment['comment_no'];
@@ -74,7 +82,7 @@ class PostMessage
 
             // 8. Unset references to prevent bugs
             unset($post);
-
+            
             $_SESSION['POST_COUNT'] = $count;
             msgSuccess(
                 code: 200,

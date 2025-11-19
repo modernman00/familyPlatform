@@ -226,6 +226,11 @@ footer .glyphicon {
   font-size: 1rem;
 }
 
+input::-webkit-input-placeholder {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
 input::-moz-placeholder {
   font-size: 0.7rem;
   text-transform: uppercase;

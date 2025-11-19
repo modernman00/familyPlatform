@@ -66,7 +66,7 @@
                         {{-- Emoji Picker & Upload --}}
                         <div class="mt-3 d-flex justify-content-between align-items-center position-relative">
                             <div class="gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" id="emojiToggle"
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="emojiPost"
                                     title="add emoji" aria-expanded="false" aria-controls="emojiPickerList">
                                     😊
                                 </button>
@@ -91,7 +91,7 @@
                                 <button type="button" class="btn btn-sm btn-outline-secondary" title="Stickers"
                                     aria-label="Stickers">🏷️</button>
                                 
-                                  <div id="emojiPickerList" class="d-flex flex-wrap mt-2 d-none" role="listbox"
+                                  <div id="emojiListPost" class="d-flex flex-wrap mt-2 d-none" role="listbox"
                                     >
                                     <!-- Emojis will be dynamically inserted here -->
 

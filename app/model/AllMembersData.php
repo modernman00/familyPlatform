@@ -30,30 +30,176 @@ class AllMembersData extends InnerJoin
     //     return $memberData;
     // }
 
-    public function getAllMembers($id): array
+
+    /**
+     * Retrieve all members of the given family code, including those who have been approved by the given requesterId
+     * 
+     * @param string $famCode The family code to retrieve members for
+     * @param int $requesterId The requesterId to retrieve approved members for
+     * @return array An array of all members of the given family code, including those who have been approved by the given requesterId
+     * @throws PDOException If there is a problem with the database query
+     */
+    public function getAllMembers($famCode, $requesterId): array
     {
         try {
-            $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.father_name, ofm.mother_name, ofm.spouse_name, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
-                FROM personal AS p
-                  INNER JOIN otherFamily AS ofm ON p.id = ofm.id
-                  INNER JOIN profilePics AS pp ON p.id = pp.id
-                  INNER JOIN contact AS c ON p.id = c.id
-                   LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = :id
-                  ) AS rm ON p.id = rm.approver_id";
+            $query = "
+            SELECT 
+                p.id, p.firstName, p.lastName, p.famCode, p.created_at,
+                ofm.father_name, ofm.mother_name, ofm.spouse_name,
+                pp.img, c.email, c.country, c.mobile,
+                CASE 
+                    WHEN p.famCode = :famCode1 THEN 'family'
+                    WHEN p.id IN (
+                        SELECT approver_id 
+                        FROM requestMgt 
+                        WHERE requester_id = :requesterId1 
+                        AND status = 'Approved'
+                    ) THEN 'approved_you'
+                    WHEN p.id IN (
+                        SELECT requester_id 
+                        FROM requestMgt 
+                        WHERE approver_id = :requesterId2 
+                        AND status = 'Approved'
+                    ) THEN 'you_approved'
+                    ELSE 'other'
+                END AS relationType
+            FROM personal AS p
+            INNER JOIN otherFamily AS ofm ON p.id = ofm.id
+            INNER JOIN profilePics AS pp ON p.id = pp.id
+            INNER JOIN contact AS c ON p.id = c.id
+            WHERE 
+                (
+                    p.famCode = :famCode2
+                    OR p.id IN (
+                        SELECT approver_id 
+                        FROM requestMgt 
+                        WHERE requester_id = :requesterId3 
+                        AND status = 'Approved'
+                    )
+                    OR p.id IN (
+                        SELECT requester_id 
+                        FROM requestMgt 
+                        WHERE approver_id = :requesterId4 
+                        AND status = 'Approved'
+                    )
+                )
+                AND p.id != :Id
+            ORDER BY 
+                CASE 
+                    WHEN p.famCode = :famCode3 THEN 1
+                    WHEN p.id IN (
+                        SELECT approver_id 
+                        FROM requestMgt 
+                        WHERE requester_id = :requesterId5 
+                        AND status = 'Approved'
+                    ) THEN 2
+                    ELSE 3
+                END,
+                p.firstName
+        ";
 
-            $result = self::connect2()->prepare($query);
-            $result->bindValue(':id', $id, PDO::PARAM_STR);
-            $result->execute();
+            $stmt = self::connect2()->prepare($query);
 
-            return $result->fetchAll();
+            // bind all parameters
+            $stmt->bindValue(':famCode1', $famCode);
+            $stmt->bindValue(':famCode2', $famCode);
+            $stmt->bindValue(':famCode3', $famCode);
+
+            $stmt->bindValue(':requesterId1', $requesterId);
+            $stmt->bindValue(':requesterId2', $requesterId);
+            $stmt->bindValue(':requesterId3', $requesterId);
+            $stmt->bindValue(':requesterId4', $requesterId);
+            $stmt->bindValue(':requesterId5', $requesterId);
+
+            $stmt->bindValue(':Id', $requesterId);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             showError($e);
             return [];
         }
     }
+
+    /**
+     * Retrieve all users in the database, including their personal information, other family members, profile picture, and contact information.
+     * 
+     * @return array An array of all users in the database
+     * @throws \Throwable If there is a problem with the database query
+     */
+    public function getAllUsersData($userId, $famCode): array
+    {
+        try {
+            $query = "
+            SELECT 
+                p.id, p.firstName, p.lastName, p.famCode, p.created_at,
+                ofm.father_name, ofm.mother_name, ofm.spouse_name,
+                pp.img, c.email, c.country, c.mobile,
+                rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+            FROM personal AS p
+            INNER JOIN otherFamily AS ofm ON p.id = ofm.id
+            INNER JOIN profilePics AS pp ON p.id = pp.id
+            INNER JOIN contact AS c ON p.id = c.id
+            LEFT JOIN (
+                SELECT requester_id, approver_id, status, requesterCode
+                FROM requestMgt
+                WHERE requester_id = :requester_id
+            ) AS rm ON p.id = rm.approver_id
+            WHERE p.id != :current_user && p.famCode != :famCode
+        ";
+
+            $stmt = self::connect2()->prepare($query);
+            $stmt->bindValue(':requester_id', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':current_user', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':famCode', $famCode, PDO::PARAM_STR);
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Throwable $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+    public static function getVisiblePosts(string $userId, string $famCode): array
+    {
+        try {
+            $query = " SELECT 
+                    post.*
+                FROM post
+                WHERE post.postFamCode = :fam_code
+                OR (
+                    post.id IN (
+                        SELECT approver_id 
+                        FROM requestMgt
+                        WHERE requester_id = :user_id1 
+                        AND status = 'Approved'
+                        UNION
+                        SELECT requester_id 
+                        FROM requestMgt
+                        WHERE approver_id = :user_id2 
+                        AND status = 'Approved'
+                    )
+                )
+                ORDER BY post.date_created DESC
+            ";
+
+
+            $stmt = self::connect2()->prepare($query);
+            $stmt->bindValue(':user_id1', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':user_id2', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':fam_code', $famCode, PDO::PARAM_STR);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\Throwable $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+
+
+
 
 
 

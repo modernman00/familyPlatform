@@ -4,35 +4,33 @@
 /*!*****************************************************!*\
   !*** ./resources/asset/js/components/FormHelper.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ FormHelper)
+/* harmony export */   "default": function() { return /* binding */ FormHelper; }
 /* harmony export */ });
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+
+
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var FormHelper = /*#__PURE__*/function () {
   function FormHelper(data) {
-    _classCallCheck(this, FormHelper);
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, FormHelper);
     if (!Array.isArray(data)) throwError('data must be an array of form elements');
     this.data = data;
     this.error = [];
     this.result = 0;
   }
-  return _createClass(FormHelper, [{
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(FormHelper, [{
     key: "id",
     value: function id(x) {
       return document.getElementById(x);
@@ -346,21 +344,22 @@ var FormHelper = /*#__PURE__*/function () {
 /*!****************************************************!*\
   !*** ./resources/asset/js/components/api/index.js ***!
   \****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   fetchEmailData: () => (/* binding */ fetchEmailData),
-/* harmony export */   getAllData: () => (/* binding */ getAllData),
-/* harmony export */   postData: () => (/* binding */ postData)
+/* harmony export */   fetchEmailData: function() { return /* binding */ fetchEmailData; },
+/* harmony export */   getAllData: function() { return /* binding */ getAllData; },
+/* harmony export */   postData: function() { return /* binding */ postData; }
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
 
 
 var config = {
@@ -374,25 +373,26 @@ var URL = "https://olaogun.test/";
 // https: //laravel.com/docs/5.4/mix#environment-variables
 
 var getAllData = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee() {
     var response, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.p = _context.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context.p = 0;
-          _context.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"].get("".concat(URL, "allMembers/processApiData2"), config);
+          _context.prev = 0;
+          _context.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("".concat(URL, "allMembers/processApiData2"), config);
         case 1:
-          response = _context.v;
-          return _context.a(2, response.data);
+          response = _context.sent;
+          return _context.abrupt("return", response.data);
         case 2:
-          _context.p = 2;
-          _t = _context.v;
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(_t);
+          _context.prev = 2;
+          _t = _context["catch"](0);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
           // You can perform additional error handling actions if needed
           throw _t;
         case 3:
-          return _context.a(2);
+        case "end":
+          return _context.stop();
       }
     }, _callee, null, [[0, 2]]);
   }));
@@ -401,27 +401,28 @@ var getAllData = /*#__PURE__*/function () {
   };
 }();
 var postData = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(url, object) {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(url, object) {
     var response, _t2;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.p = _context2.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          _context2.p = 0;
-          _context2.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"].post(url, object);
+          _context2.prev = 0;
+          _context2.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url, object);
         case 1:
-          response = _context2.v;
+          response = _context2.sent;
           console.log(response);
-          _context2.n = 3;
+          _context2.next = 3;
           break;
         case 2:
-          _context2.p = 2;
-          _t2 = _context2.v;
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(_t2);
+          _context2.prev = 2;
+          _t2 = _context2["catch"](0);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t2);
           // You can perform additional error handling actions if needed
           throw _t2;
         case 3:
-          return _context2.a(2);
+        case "end":
+          return _context2.stop();
       }
     }, _callee2, null, [[0, 2]]);
   }));
@@ -431,12 +432,12 @@ var postData = /*#__PURE__*/function () {
 }();
 var fetchEmailData = function fetchEmailData() {
   // Make a GET request and return the promise
-  return axios__WEBPACK_IMPORTED_MODULE_0__["default"].get("".concat(URL, "getEmails")).then(function (response) {
+  return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("".concat(URL, "getEmails")).then(function (response) {
     // Extract the data from the response
     var data = response.data;
     // Return the data or do further processing
     return data;
-  })["catch"](function (error) {
+  }).catch(function (error) {
     // Handle any errors that occur during the request
     console.error('Error fetching data:', error);
     throw error; // Rethrow the error to be handled by the caller
@@ -449,13 +450,13 @@ var fetchEmailData = function fetchEmailData() {
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/dataToCheck.js ***!
   \******************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Login: () => (/* binding */ Login),
-/* harmony export */   dataToCheckRegister: () => (/* binding */ dataToCheckRegister)
+/* harmony export */   Login: function() { return /* binding */ Login; },
+/* harmony export */   dataToCheckRegister: function() { return /* binding */ dataToCheckRegister; }
 /* harmony export */ });
 
 
@@ -487,35 +488,35 @@ var Login = {
 /*!*************************************************!*\
   !*** ./resources/asset/js/components/global.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkElements: () => (/* binding */ checkElements),
-/* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
-/* harmony export */   date2String: () => (/* binding */ date2String),
-/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
-/* harmony export */   formReset: () => (/* binding */ formReset),
-/* harmony export */   hideElement: () => (/* binding */ hideElement),
-/* harmony export */   id: () => (/* binding */ id),
-/* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
-/* harmony export */   idValue: () => (/* binding */ idValue),
-/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
-/* harmony export */   log: () => (/* binding */ log),
-/* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
-/* harmony export */   msgException: () => (/* binding */ msgException),
-/* harmony export */   qSel: () => (/* binding */ qSel),
-/* harmony export */   qSelAll: () => (/* binding */ qSelAll),
-/* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
-/* harmony export */   qSelValue: () => (/* binding */ qSelValue),
-/* harmony export */   showElement: () => (/* binding */ showElement),
-/* harmony export */   showError: () => (/* binding */ showError),
-/* harmony export */   showNotification: () => (/* binding */ showNotification),
-/* harmony export */   warningSign: () => (/* binding */ warningSign),
-/* harmony export */   write: () => (/* binding */ write)
+/* harmony export */   checkElements: function() { return /* binding */ checkElements; },
+/* harmony export */   checkManyElements: function() { return /* binding */ checkManyElements; },
+/* harmony export */   date2String: function() { return /* binding */ date2String; },
+/* harmony export */   fileUploadSizeValidation: function() { return /* binding */ fileUploadSizeValidation; },
+/* harmony export */   formReset: function() { return /* binding */ formReset; },
+/* harmony export */   hideElement: function() { return /* binding */ hideElement; },
+/* harmony export */   id: function() { return /* binding */ id; },
+/* harmony export */   idInnerHTML: function() { return /* binding */ idInnerHTML; },
+/* harmony export */   idValue: function() { return /* binding */ idValue; },
+/* harmony export */   initializeImageModal: function() { return /* binding */ initializeImageModal; },
+/* harmony export */   log: function() { return /* binding */ log; },
+/* harmony export */   manipulateAttribute: function() { return /* binding */ manipulateAttribute; },
+/* harmony export */   msgException: function() { return /* binding */ msgException; },
+/* harmony export */   qSel: function() { return /* binding */ qSel; },
+/* harmony export */   qSelAll: function() { return /* binding */ qSelAll; },
+/* harmony export */   qSelInnerHTML: function() { return /* binding */ qSelInnerHTML; },
+/* harmony export */   qSelValue: function() { return /* binding */ qSelValue; },
+/* harmony export */   showElement: function() { return /* binding */ showElement; },
+/* harmony export */   showError: function() { return /* binding */ showError; },
+/* harmony export */   showNotification: function() { return /* binding */ showNotification; },
+/* harmony export */   warningSign: function() { return /* binding */ warningSign; },
+/* harmony export */   write: function() { return /* binding */ write; }
 /* harmony export */ });
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
@@ -791,12 +792,12 @@ var initializeImageModal = function initializeImageModal(selector, clickedImageI
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/helper/autocomplete.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autocomplete: () => (/* binding */ autocomplete)
+/* harmony export */   autocomplete: function() { return /* binding */ autocomplete; }
 /* harmony export */ });
 var autocomplete = function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
@@ -909,40 +910,36 @@ var autocomplete = function autocomplete(inp, arr) {
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
-/* harmony export */   checkBox: () => (/* binding */ checkBox),
-/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
-/* harmony export */   convertFormData: () => (/* binding */ convertFormData),
-/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
-/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
-/* harmony export */   isChecked: () => (/* binding */ isChecked),
-/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
-/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
-/* harmony export */   matchInput: () => (/* binding */ matchInput),
-/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
-/* harmony export */   realTimeCheckLen: () => (/* binding */ realTimeCheckLen),
-/* harmony export */   removeDiv: () => (/* binding */ removeDiv),
-/* harmony export */   showResponse: () => (/* binding */ showResponse),
-/* harmony export */   toSentenceCase: () => (/* binding */ toSentenceCase)
+/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
+/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
+/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
+/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
+/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
+/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
+/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
+/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
+/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
+/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
+/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
+/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
 /* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
-/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 
 
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 
 
 
@@ -966,7 +963,7 @@ var createAndAppendElement = function createAndAppendElement(elementType, setId,
   var newDiv = document.createElement(elementType);
   newDiv.setAttribute('id', setId);
   newDiv.setAttribute('class', "field ".concat(setClass));
-  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(parent);
   return parentDiv.appendChild(newDiv);
 };
 
@@ -977,7 +974,7 @@ var createAndAppendElement = function createAndAppendElement(elementType, setId,
  * @param { filterby is the data.filterby }
  */
 var autoCompleter = function autoCompleter(inputId, data) {
-  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+  autocompleter__WEBPACK_IMPORTED_MODULE_2___default()({
     input: inputId,
     fetch: function fetch(text, update) {
       text = text.toLowerCase();
@@ -993,7 +990,7 @@ var autoCompleter = function autoCompleter(inputId, data) {
   });
 };
 var distinctValue = function distinctValue(array) {
-  return _toConsumableArray(new Set(array));
+  return (0,_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__["default"])(new Set(array));
 };
 var checkBox = function checkBox(subject) {
   return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
@@ -1005,15 +1002,15 @@ var isChecked = function isChecked(name, fn) {
   var yesId = "".concat(name, "Yes");
   var noId = "".concat(name, "No");
   var checked = function checked() {
-    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).checked) {
       alert('check');
       fn();
-    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).checked) {
       alert('check No');
     }
   };
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).addEventListener('click', checked);
 };
 var matchRegex = function matchRegex(data) {
   if (data) {
@@ -1033,9 +1030,9 @@ var matchRegex = function matchRegex(data) {
  */
 var matchInput = function matchInput(first, second, err) {
   var error, firstInput, secondInput;
-  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
-  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
-  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(second);
   secondInput.addEventListener('keyup', function () {
     if (secondInput.value !== firstInput.value) {
       error.innerHTML = 'Your passwords do not match';
@@ -1064,12 +1061,12 @@ var toSentenceCase = function toSentenceCase(str) {
   .join(' '); // Join the words back into a string
 };
 var convertFormData = function convertFormData(formId) {
-  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSelAll)(formId);
+  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSelAll)(formId);
   var formInputArr = Array.from(formInput);
-  return new _FormHelper__WEBPACK_IMPORTED_MODULE_2__["default"](formInputArr);
+  return new _FormHelper__WEBPACK_IMPORTED_MODULE_3__["default"](formInputArr);
 };
 var showResponse = function showResponse(theId, message, status) {
-  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(theId);
+  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(theId);
   var col = status ? 'green' : 'red';
   responseEl.innerHTML = message;
   responseEl.style.color = 'green';
@@ -1089,16 +1086,16 @@ var showResponse = function showResponse(theId, message, status) {
 var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
   try {
     var _loop = function _loop(i) {
-      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_id"));
+      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_id"));
       if (theData === null || theData === undefined || theData === "") {
         throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
       }
       var max = maxi[i];
-      var error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_error"));
+      var error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_error"));
       theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
       theData.addEventListener('keyup', function () {
         error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
-        var help = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_help"));
+        var help = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_help"));
         help.style.color = 'red';
         help.style.fontSize = '10px';
         error.style.color = 'red';
@@ -1121,12 +1118,12 @@ var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
 /*!**********************************************************!*\
   !*** ./resources/asset/js/components/kidsAndSiblings.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   processKidsSiblings: () => (/* binding */ processKidsSiblings)
+/* harmony export */   processKidsSiblings: function() { return /* binding */ processKidsSiblings; }
 /* harmony export */ });
 /* harmony import */ var _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data/kidsSibling */ "./resources/asset/js/data/kidsSibling.js");
 /* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/global */ "./resources/asset/js/components/global.js");
@@ -1216,7 +1213,7 @@ var processKidsSiblings = function processKidsSiblings(checkEmailExists, firstNa
             setTimeout(function () {
               helpHTML.style.display = "none";
             }, 5000);
-          })["catch"](function (error) {
+          }).catch(function (error) {
             (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
           });
         };
@@ -1242,13 +1239,13 @@ var processKidsSiblings = function processKidsSiblings(checkEmailExists, firstNa
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/event.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   hideElement: () => (/* binding */ hideElement),
-/* harmony export */   showSpouse: () => (/* binding */ showSpouse)
+/* harmony export */   hideElement: function() { return /* binding */ hideElement; },
+/* harmony export */   showSpouse: function() { return /* binding */ showSpouse; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -1306,60 +1303,61 @@ injectStudent();
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/register/familyCode.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
-var button = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("btnFamCode");
+
+
+var button = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("btnFamCode");
 btnFamCode.addEventListener("click", function () {
   try {
-    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('surname_id').value !== "") {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('surname_id').value !== "") {
       var uniqueNumber = Date.now();
       var uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
-      var getSurname = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('surname_id').value;
+      var getSurname = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('surname_id').value;
       var firstFourLetters = getSurname.substring(0, 4);
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
+      (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
       btnFamCode.disabled = true;
     }
   } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("surname_error").innerHTML = error.messages;
+    (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("surname_error").innerHTML = error.messages;
   }
 });
 
 // Get references to the HTML output and the copy icon
 
-var copyIcon = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('copyIcon');
-var htmlOutputDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createFamCode');
-var htmlOutput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createCode');
+var copyIcon = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('copyIcon');
+var htmlOutputDiv = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('createFamCode');
+var htmlOutput = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('createCode');
 copyIcon.addEventListener('click', /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(e) {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
     var range, selection, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.p = _context.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
           copyIcon.innerHTML = "";
-          _context.p = 1;
+          _context.prev = 1;
           e.preventDefault();
 
           // check if the family code has been generated 
           if (!htmlOutput.value) {
-            _context.n = 5;
+            _context.next = 5;
             break;
           }
           if (!(navigator.clipboard && navigator.clipboard.writeText)) {
-            _context.n = 3;
+            _context.next = 3;
             break;
           }
-          _context.n = 2;
+          _context.next = 2;
           return navigator.clipboard.writeText(htmlOutput.value);
         case 2:
-          _context.n = 4;
+          _context.next = 4;
           break;
         case 3:
           // Fallback to the deprecated method
@@ -1372,22 +1370,23 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
           selection.removeAllRanges();
         case 4:
           copyIcon.innerHTML = "copied";
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = htmlOutput.value;
-          _context.n = 6;
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('famCode_id').value = htmlOutput.value;
+          _context.next = 6;
           break;
         case 5:
           copyIcon.innerHTML = "copy";
-          (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('famCode_id').value = "";
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('famCode_id').value = "";
           alert('Please generate the family code first');
         case 6:
-          _context.n = 8;
+          _context.next = 8;
           break;
         case 7:
-          _context.p = 7;
-          _t = _context.v;
+          _context.prev = 7;
+          _t = _context["catch"](1);
           console.error('Unable to copy the HTML output: ', _t);
         case 8:
-          return _context.a(2);
+        case "end":
+          return _context.stop();
       }
     }, _callee, null, [[1, 7]]);
   }));
@@ -1402,12 +1401,12 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
 /*!*********************************************************************!*\
   !*** ./resources/asset/js/components/register/html/kids_Sibling.js ***!
   \*********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtmlFamily: () => (/* binding */ renderHtmlFamily)
+/* harmony export */   renderHtmlFamily: function() { return /* binding */ renderHtmlFamily; }
 /* harmony export */ });
 var renderHtmlFamily = function renderHtmlFamily(family, no) {
   if (no) {
@@ -1426,12 +1425,12 @@ var renderHtmlFamily = function renderHtmlFamily(family, no) {
 /*!*********************************************************************!*\
   !*** ./resources/asset/js/components/register/html/notification.js ***!
   \*********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   processFormDataAction: () => (/* binding */ processFormDataAction)
+/* harmony export */   processFormDataAction: function() { return /* binding */ processFormDataAction; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 
@@ -1453,7 +1452,7 @@ var processFormDataAction = function processFormDataAction(addClass, serverRespo
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/index.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -1486,7 +1485,7 @@ confirmPs.setAttribute('autocomplete', 'new-password');
 /*!*********************************************************************!*\
   !*** ./resources/asset/js/components/register/injectCountryCode.js ***!
   \*********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -1709,7 +1708,7 @@ injectCountryCode();
 /*!*******************************************************************!*\
   !*** ./resources/asset/js/components/register/mobileNameCheck.js ***!
   \*******************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -1762,7 +1761,7 @@ if (getData instanceof Promise) {
     });
 
     // Code that relies on the data obtained from getAllData() can be placed here
-  })["catch"](function (error) {
+  }).catch(function (error) {
     (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
     // Handle the error appropriately
   });
@@ -1805,7 +1804,7 @@ var setInput = function setInput(name, value) {
     axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/register/contactNewMember", postObj).then(function (response) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_help"), 'is-success', response.data.message);
       genId.innerHTML = "";
-    })["catch"](function (error) {
+    }).catch(function (error) {
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_error"), 'is-danger', error.message);
       (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
     });
@@ -1888,7 +1887,7 @@ var checkPersonalEmail = function checkPersonalEmail(e) {
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/register/modal.js ***!
   \*********************************************************/
-/***/ (() => {
+/***/ (function() {
 
 document.addEventListener('DOMContentLoaded', function () {
   // Functions to open and close a modal
@@ -1935,12 +1934,12 @@ document.addEventListener('DOMContentLoaded', function () {
 /*!**********************************************************************!*\
   !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
   \**********************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   show: () => (/* binding */ show)
+/* harmony export */   show: function() { return /* binding */ show; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
@@ -2008,21 +2007,22 @@ onChangeKidAndSiblings();
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/register/processForm.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
-/* harmony import */ var _html_notification__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./html/notification */ "./resources/asset/js/components/register/html/notification.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
+/* harmony import */ var _html_notification__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./html/notification */ "./resources/asset/js/components/register/html/notification.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+
+
 
 
 
@@ -2030,40 +2030,40 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
 
 var formInput = document.querySelectorAll('.register');
 var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
+var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_2__["default"](formInputArr);
 (function () {
   try {
     formData.clearError();
     // set the maxlength, check the length of the value, raise error
-    formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max);
+    formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_4__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_4__.dataToCheckRegister.maxLength.max);
     // check if password matches real time
-    formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
+    formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_4__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_4__.dataToCheckRegister.password.pwd2);
 
     // formData.duplicate('firstName_id', 'alias_id')
   } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+    (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(error);
   }
 })();
-var notificationDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div');
-var notificationMsg = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('register_notify_div_msg');
+var notificationDiv = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('register_notify_div');
+var notificationMsg = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('register_notify_div_msg');
 var processFormData = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url, formElement, token) {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(url, formElement, token) {
     var form, formEntries, options;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
-          form = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(formElement);
+          form = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(formElement);
           formEntries = new FormData(form);
-          formEntries["delete"]('submit');
-          formEntries["delete"]('checkbox_id');
+          formEntries.delete('submit');
+          formEntries.delete('checkbox_id');
           options = {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN'
           };
-          _context.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url, formEntries, options).then(function (response) {
+          _context.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_6__["default"].post(url, formEntries, options).then(function (response) {
             // get the api message and output it to the form
-            (0,_html_notification__WEBPACK_IMPORTED_MODULE_3__.processFormDataAction)('is-success', response.data);
+            (0,_html_notification__WEBPACK_IMPORTED_MODULE_5__.processFormDataAction)('is-success', response.data);
             setTimeout(function () {
               //window.location.replace(redirect)
               window.location.replace('register/nextStep');
@@ -2071,11 +2071,12 @@ var processFormData = /*#__PURE__*/function () {
 
             // it clears all the contents
             //  formData.clearHtml();
-          })["catch"](function (error) {
-            (0,_html_notification__WEBPACK_IMPORTED_MODULE_3__.processFormDataAction)('is-danger', error.response.data);
+          }).catch(function (error) {
+            (0,_html_notification__WEBPACK_IMPORTED_MODULE_5__.processFormDataAction)('is-danger', error.response.data);
           });
         case 1:
-          return _context.a(2);
+        case "end":
+          return _context.stop();
       }
     }, _callee);
   }));
@@ -2084,41 +2085,41 @@ var processFormData = /*#__PURE__*/function () {
   };
 }();
 window.processForm = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(token) {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(token) {
     var emailError, errorData, _t;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.p = _context2.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          _context2.p = 0;
+          _context2.prev = 0;
           // e.preventDefault();
           notificationDiv.classList.remove('is-danger'); // remove the danger class from the notification
           notificationMsg.innerHTML = ""; // empty the error element
-          if (!(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('checkbox').checked) {
-            _context2.n = 4;
+          if (!(0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('checkbox').checked) {
+            _context2.next = 4;
             break;
           }
           // window.location.hash = '#setLoader';
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").focus(); // focus on the loader element
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("setLoader").focus(); // focus on the loader element
 
           formData.clearError();
           formData.emailVal();
           formData.massValidate();
 
           // CHECK IF EMAIL HAS NOT BEEN REGISTERED ERROR IS NULL
-          emailError = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("email_error").innerHTML;
+          emailError = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("email_error").innerHTML;
           if (!(formData.error.length <= 0 && emailError == "")) {
-            _context2.n = 2;
+            _context2.next = 2;
             break;
           }
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").classList.add('loader');
-          _context2.n = 1;
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("setLoader").classList.add('loader');
+          _context2.next = 1;
           return processFormData("/register", 'register');
         case 1:
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("setLoader").classList.remove('loader');
-          return _context2.a(2);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("setLoader").classList.remove('loader');
+          return _context2.abrupt("return");
         case 2:
           alert("The form cannot be submitted. Please check the errors");
-          notificationMsg.innerHTML = "".concat(_global__WEBPACK_IMPORTED_MODULE_1__.warningSign, " Check the errors");
+          notificationMsg.innerHTML = "".concat(_global__WEBPACK_IMPORTED_MODULE_3__.warningSign, " Check the errors");
           notificationDiv.style.display = "block";
           notificationDiv.style.backgroundColor = "Red";
           notificationDiv.style.color = "White";
@@ -2129,21 +2130,22 @@ window.processForm = /*#__PURE__*/function () {
           });
           //By using the js scrollIntoView method on the error element, the browser will automatically scroll to make the error message the focus point after the form is submitted.
         case 3:
-          _context2.n = 5;
+          _context2.next = 5;
           break;
         case 4:
           alert('To continue, you need to agree to the our privacy policy');
           errorData = "To continue, you need to agree to the our privacy policy";
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.showNotification)('checkbox_error', 'is-danger', errorData);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showNotification)('checkbox_error', 'is-danger', errorData);
         case 5:
-          _context2.n = 7;
+          _context2.next = 7;
           break;
         case 6:
-          _context2.p = 6;
-          _t = _context2.v;
-          (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(_t);
+          _context2.prev = 6;
+          _t = _context2["catch"](0);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
         case 7:
-          return _context2.a(2);
+        case "end":
+          return _context2.stop();
       }
     }, _callee2, null, [[0, 6]]);
   }));
@@ -2161,7 +2163,7 @@ window.processForm = /*#__PURE__*/function () {
 /*!**************************************************************!*\
   !*** ./resources/asset/js/components/register/smallinput.js ***!
   \**************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
@@ -2215,12 +2217,12 @@ close.addEventListener('click', function () {
 /*!************************************************!*\
   !*** ./resources/asset/js/data/kidsSibling.js ***!
   \************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkEmailObj: () => (/* binding */ checkEmailObj)
+/* harmony export */   checkEmailObj: function() { return /* binding */ checkEmailObj; }
 /* harmony export */ });
 var checkEmailObj = {
   kidEmailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],

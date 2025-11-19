@@ -5,34 +5,32 @@
 /*!*****************************************************!*\
   !*** ./resources/asset/js/components/FormHelper.js ***!
   \*****************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ FormHelper)
+/* harmony export */   "default": function() { return /* binding */ FormHelper; }
 /* harmony export */ });
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
 
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+
+
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 
 var FormHelper = /*#__PURE__*/function () {
   function FormHelper(data) {
-    _classCallCheck(this, FormHelper);
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, FormHelper);
     if (!Array.isArray(data)) throwError('data must be an array of form elements');
     this.data = data;
     this.error = [];
     this.result = 0;
   }
-  return _createClass(FormHelper, [{
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(FormHelper, [{
     key: "id",
     value: function id(x) {
       return document.getElementById(x);
@@ -346,18 +344,19 @@ var FormHelper = /*#__PURE__*/function () {
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/allMembers/allEvents.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global.js */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../global.js */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+
+
 
 
 
@@ -373,24 +372,24 @@ var reqId = localStorage.getItem('requesterId');
  * @param {MouseEvent} e - The event object.
  */
 document.onclick = /*#__PURE__*/function () {
-  var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(e) {
-    var targetId, userId, approverDetails, requesterDetails, familyRequestData, response, famCode, _userId, url, notificationHTML, _response, _userId2, _t;
-    return _regenerator().w(function (_context) {
-      while (1) switch (_context.p = _context.n) {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
+    var targetId, userId, approverDetails, requesterDetails, familyRequestData, response, famCode, _userId, url, notificationHTML, _response, _userId2, _userId3, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
         case 0:
-          _context.p = 0;
+          _context.prev = 0;
           // Get the target element's ID
           targetId = e.target.id; // Check if the ID includes 'addFamily'
           if (!targetId.includes('addFamily')) {
-            _context.n = 3;
+            _context.next = 3;
             break;
           }
           // Extract the user ID from the target ID
           userId = targetId.replace('addFamily', ''); // Fetch approver details for the user
-          _context.n = 1;
+          _context.next = 1;
           return fetchApproverData(userId);
         case 1:
-          approverDetails = _context.v;
+          approverDetails = _context.sent;
           // Prepare family request data
           requesterDetails = getLocalStorageProfile();
           familyRequestData = {
@@ -399,25 +398,25 @@ document.onclick = /*#__PURE__*/function () {
             emailPath: 'msg/request',
             subject: "".concat(requesterDetails.requesterFirstName, " ").concat(requesterDetails.requesterLastName, " sent you a family request")
           }; // Send the family request data to the server for processing which returns the notification details for the approvers tab
-          _context.n = 2;
+          _context.next = 2;
           return sendFamilyRequest(familyRequestData);
         case 2:
-          response = _context.v;
+          response = _context.sent;
           // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
           famCode = localStorage.getItem('requesterFamCode');
           if (famCode === approverDetails.approverCode) {
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_3__.addToNotificationTab)(response.data.message);
-            (0,_profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__.friendRequestCard)(requesterDetails);
-            (0,_navbar__WEBPACK_IMPORTED_MODULE_3__.increaseNotificationCount)();
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_5__.addToNotificationTab)(response.data.message);
+            (0,_profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_6__.friendRequestCard)(requesterDetails);
+            (0,_navbar__WEBPACK_IMPORTED_MODULE_5__.increaseNotificationCount)();
           }
 
           // Update the button's HTML and disable it
           updateButton(targetId, 'Request Sent');
-          _context.n = 7;
+          _context.next = 7;
           break;
         case 3:
           if (!targetId.includes('removeProfile')) {
-            _context.n = 6;
+            _context.next = 6;
             break;
           }
           // Extract the user ID from the target ID
@@ -427,39 +426,44 @@ document.onclick = /*#__PURE__*/function () {
 
           // include a console to confirm if they truly want to delete the profile
           if (!confirm('You will no longer see the profile and associated posts. Are you sure you want to delete the profile?')) {
-            _context.n = 5;
+            _context.next = 5;
             break;
           }
-          notificationHTML = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.qSel)(".member_profile_".concat(_userId));
-          _context.n = 4;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"]["delete"](url);
+          notificationHTML = (0,_shared__WEBPACK_IMPORTED_MODULE_3__.qSel)(".member_profile_".concat(_userId));
+          _context.next = 4;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].delete(url);
         case 4:
-          _response = _context.v;
+          _response = _context.sent;
           if (_response.data.message === 'success') {
             // remove a html element with call member_profile
             notificationHTML.remove();
           } else {
-            (0,_shared__WEBPACK_IMPORTED_MODULE_1__.msgException)("Error deleting profile");
+            (0,_shared__WEBPACK_IMPORTED_MODULE_3__.msgException)("Error deleting profile");
           }
         case 5:
-          _context.n = 7;
+          _context.next = 7;
           break;
         case 6:
           if (targetId.includes('seeProfile')) {
             // Extract the user ID from the target ID
             _userId2 = targetId.replace('seeProfile', ''); // redirect to 'allMembers/setProfile/'+userId
             window.location.href = "/allMembers/seeProfile/".concat(_userId2);
+          } else if (targetId.includes('familyTree')) {
+            // Extract the user ID from the target ID
+            _userId3 = targetId.replace('familyTree', ''); // redirect to 'allMembers/setProfile/'+userId
+            window.location.href = "/organogram/".concat(_userId3);
           }
         case 7:
-          _context.n = 9;
+          _context.next = 9;
           break;
         case 8:
-          _context.p = 8;
-          _t = _context.v;
+          _context.prev = 8;
+          _t = _context["catch"](0);
           // Handle any errors that occur during execution
-          (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(_t);
+          (0,_shared__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
         case 9:
-          return _context.a(2);
+        case "end":
+          return _context.stop();
       }
     }, _callee, null, [[0, 8]]);
   }));
@@ -473,16 +477,16 @@ function fetchApproverData(_x2) {
   return _fetchApproverData.apply(this, arguments);
 } // Function to retrieve requester details from local storage
 function _fetchApproverData() {
-  _fetchApproverData = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(userId) {
+  _fetchApproverData = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(userId) {
     var result, approverDetails, _t2;
-    return _regenerator().w(function (_context2) {
-      while (1) switch (_context2.p = _context2.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          _context2.p = 0;
-          _context2.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
+          _context2.prev = 0;
+          _context2.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
         case 1:
-          result = _context2.v;
+          result = _context2.sent;
           approverDetails = {
             approverFirstName: result.data.message.firstName,
             approverLastName: result.data.message.lastName,
@@ -490,14 +494,15 @@ function _fetchApproverData() {
             approverId: result.data.message.id,
             approverCode: result.data.message.famCode
           };
-          return _context2.a(2, approverDetails);
+          return _context2.abrupt("return", approverDetails);
         case 2:
-          _context2.p = 2;
-          _t2 = _context2.v;
+          _context2.prev = 2;
+          _t2 = _context2["catch"](0);
           console.error(_t2);
           throw _t2;
         case 3:
-          return _context2.a(2);
+        case "end":
+          return _context2.stop();
       }
     }, _callee2, null, [[0, 2]]);
   }));
@@ -513,29 +518,30 @@ function sendFamilyRequest(_x3) {
   return _sendFamilyRequest.apply(this, arguments);
 } // Function to update the button's HTML and disable it
 function _sendFamilyRequest() {
-  _sendFamilyRequest = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(data) {
+  _sendFamilyRequest = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(data) {
     var _t3;
-    return _regenerator().w(function (_context3) {
-      while (1) switch (_context3.p = _context3.n) {
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
         case 0:
-          _context3.p = 0;
-          _context3.n = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_0__["default"].post('/members/familyRequestMgt', data);
+          _context3.prev = 0;
+          _context3.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/members/familyRequestMgt', data);
         case 1:
-          return _context3.a(2, _context3.v);
+          return _context3.abrupt("return", _context3.sent);
         case 2:
-          _context3.p = 2;
-          _t3 = _context3.v;
-          (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(_t3);
+          _context3.prev = 2;
+          _t3 = _context3["catch"](0);
+          (0,_shared__WEBPACK_IMPORTED_MODULE_3__.showError)(_t3);
         case 3:
-          return _context3.a(2);
+        case "end":
+          return _context3.stop();
       }
     }, _callee3, null, [[0, 2]]);
   }));
   return _sendFamilyRequest.apply(this, arguments);
 }
 function updateButton(targetId, newHTML) {
-  var theTargetId = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)(targetId);
+  var theTargetId = (0,_shared__WEBPACK_IMPORTED_MODULE_3__.id)(targetId);
   theTargetId.innerHTML = newHTML;
   theTargetId.disabled = true;
 }
@@ -548,17 +554,19 @@ function updateButton(targetId, newHTML) {
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/allMembers/api.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+__webpack_require__.a(module, async function (__webpack_handle_async_dependencies__, __webpack_async_result__) { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderMembers: () => (/* binding */ renderMembers)
+/* harmony export */   renderMembers: function() { return /* binding */ renderMembers; }
 /* harmony export */ });
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
-/* harmony import */ var _filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./filterMembersByFamCode */ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js");
-/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
+/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
 
 
 
@@ -585,49 +593,23 @@ var renderMembers = function renderMembers(data, container, noMemberMessage, htm
     data.forEach(html);
   }
 };
-axios__WEBPACK_IMPORTED_MODULE_0__["default"].get("".concat(URL, "allMembers/processApiData?id=").concat(reqId), config).then(function (response) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').innerHTML = "";
-  if (!response.data) {
-    throw Error('There is no data');
-  }
-  var data = response.data;
-  console.log(data);
-  var dataWithFamCode = (0,_filterMembersByFamCode__WEBPACK_IMPORTED_MODULE_3__["default"])(data);
-  renderMembers(dataWithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
+var url1 = "".concat(URL, "allMembers/processApiData"); // data based on famCode and reqMgt accepted and approved
+var url2 = "".concat(URL, "allMembers/allData"); // all the users data
 
-  // Remove the "loader" class after rendering is complete
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').classList.remove('loader');
-  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('input', function () {
-    return (0,_handleInput__WEBPACK_IMPORTED_MODULE_4__.handleInput)(data, dataWithFamCode, renderMembers);
-  });
-})["catch"](function (err) {
-  return (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(err.message);
+var _await$getMultipleApi = await (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.getMultipleApiData)(url1, url2),
+  _await$getMultipleApi2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_await$getMultipleApi, 2),
+  famCodeData = _await$getMultipleApi2[0],
+  allUsers = _await$getMultipleApi2[1];
+
+// const dataWithFamCode = filterMembersByFamCode(data);
+renderMembers(famCodeData.message, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
+// Remove the "loader" class after rendering is complete
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('setLoader').classList.remove('loader');
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('searchFamily').addEventListener('input', function () {
+  return (0,_handleInput__WEBPACK_IMPORTED_MODULE_3__.handleInput)(allUsers.message, famCodeData.message, renderMembers);
 });
-
-/***/ }),
-
-/***/ "./resources/asset/js/components/allMembers/filterMembersByFamCode.js":
-/*!****************************************************************************!*\
-  !*** ./resources/asset/js/components/allMembers/filterMembersByFamCode.js ***!
-  \****************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-var reqId = localStorage.getItem('requesterId');
-var famCode = localStorage.getItem('requesterFamCode');
-var filterMembersByFamCode = function filterMembersByFamCode(data) {
-  // Check if data is an array before calling filter
-  if (!Array.isArray(data)) {
-    console.error('Error: data is not an array:');
-  }
-  return data.filter(function (el) {
-    return el.famCode === famCode || el.requesterCode === famCode || el.postFamCode === famCode || el.eventCode === famCode;
-  });
-};
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (filterMembersByFamCode);
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
@@ -635,17 +617,17 @@ var filterMembersByFamCode = function filterMembersByFamCode(data) {
 /*!*****************************************************************!*\
   !*** ./resources/asset/js/components/allMembers/handleInput.js ***!
   \*****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   handleInput: () => (/* binding */ handleInput)
+/* harmony export */   handleInput: function() { return /* binding */ handleInput; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
@@ -664,7 +646,7 @@ var handleInput = function handleInput(data, WithFamCode, renderMembers) {
     renderMembers(WithFamCode, allMembersContainer, noMemberHTML, _html__WEBPACK_IMPORTED_MODULE_1__.renderHtml);
   } else {
     var filteredData = data.filter(function (el) {
-      return el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal);
+      return el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal) || el.email.toLowerCase().includes(inputVal) || el.mobile.toLowerCase().includes(inputVal) || el.famCode.toLowerCase().includes(inputVal) || el.country.toLowerCase().includes(inputVal);
     });
     // if no match found, show a message with a checkbox to send a request to the new member to join the platform
     // the checkbox will show a form to enter the new member's name and email or mobile number
@@ -723,7 +705,7 @@ var handleInput = function handleInput(data, WithFamCode, renderMembers) {
           axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/register/contactNewMember", postObj).then(function (response) {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("allMembers", 'is-success', response.data.message);
             helpMsg.innerHTML = "";
-          })["catch"](function (error) {
+          }).catch(function (error) {
             (0,_global__WEBPACK_IMPORTED_MODULE_0__.showNotification)("allMembers", 'is-danger', error.message);
           });
         }
@@ -756,11 +738,11 @@ var handleInput = function handleInput(data, WithFamCode, renderMembers) {
 /*!**********************************************************!*\
   !*** ./resources/asset/js/components/allMembers/html.js ***!
   \**********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtml: () => (/* binding */ renderHtml)
+/* harmony export */   renderHtml: function() { return /* binding */ renderHtml; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -786,19 +768,18 @@ var renderHtml = function renderHtml(el) {
       // Handle the case where 'el' is falsy, such as when data is not available.
       throw new Error('there is no data');
     }
+    (0,_shared__WEBPACK_IMPORTED_MODULE_1__.log)(el);
     var theImg = "/resources/images/profile/".concat(el.img);
-    var areTheyLinked = famCode == el.famCode || famCode == el.requesterCode;
-    var related = famCode == el.famCode;
-    var statusButtonHTML = el.status && el.requester_id === reqId && el.status !== 'Approved' ? el.status : 'Connect';
+    var statusButtonHTML = el.status !== null ? el.status : 'Connect';
     var relationshipType = el.relationship ? el.relationship : 'Immediate Family';
     var disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
     var fatherName = toSentenceCase(el.father_name);
     var motherName = toSentenceCase(el.mother_name);
-    var spouseName = toSentenceCase(el.spouseName);
+    var spouseName = toSentenceCase(el.spouse_name);
     // const spouse = toSentenceCase(el.spouseName);
 
     // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
-    var html = "\n    <div class=\"member-card member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n\n       <div class=\"member-card-header\">\n            <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\"  alt=\"Member-").concat(el.firstName, "\" class=\"member-avatar\">\n        </div>\n\n        <div class=\"member-card-body\">\n            <h3 class=\"member-name\">").concat(toSentenceCase(el.firstName), " ").concat(toSentenceCase(el.lastName), "</h3>\n            <p class=\"member-location\">").concat(el.country, "</p>\n\n  ").concat(areTheyLinked ? "\n    <div class=\"member-details\">\n      <p class=\"member-detail\"><b>Father:</b> ".concat(fatherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mother:</b> ").concat(motherName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Spouse:</b> ").concat(spouseName || 'Not specified', "</p>\n      <p class=\"member-detail\"><b>Mobile:</b> ").concat(el.mobile || 'Not specified', "</p>\n       <p class=\"member-detail\"><b>Family Code:</b> ").concat(el.famCode || 'Not specified', "</p>\n         <p class=\"member-detail\"><b>Relationship Type:</b> ").concat(relationshipType, "</p>\n      <p class=\"member-detail\"><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n    </div>\n\n    <div class=\"member-interests\">\n      <button class=\"btn btn-profile\" id=\"seeProfile").concat(el.id, "\">\n        <i class=\"fa fa-user\"></i> See Profile\n      </button>\n      <span class=\"btn btn-remove\" id=\"removeProfile").concat(el.id, "\">\n        <i class=\"fa fa-times\"></i> Remove\n      </span>\n    </div>\n  ") : "\n    <div class=\"member-actions\">\n      <button class=\"btn btn-primary btn-sm w-100\" \n              data-user-id=\"addFamily".concat(el.id, "\" \n              ").concat(disableButton, "\n              onmouseover=\"pulseButton(this)\" \n              onmouseout=\"resetButton(this)\">\n        <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n      </button>\n    </div>\n  "), "\n</div>\n\n\n\n    </div>\n");
+    var html = "\n    <div class=\"member-card member_profile_".concat(el.id, "\" id=\"").concat(el.id, "\">\n\n       <div class=\"card-cover\">\n            <img src=\"").concat(el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image', "\"  alt=\"Member-").concat(el.firstName, "\" class= \"card-img-top\">\n        </div>\n\n        <div class=\"member-card-body\">\n            <h3 class=\"member-name\">").concat(toSentenceCase(el.firstName), " ").concat(toSentenceCase(el.lastName), "</h3>\n            <p class=\"member-location\">").concat(el.country, "</p>\n\n  ").concat(el.relationType ? "\n    <div class=\"member-details text-secondary mb-3 pb-3 border-bottom border-secondary\">\n\n         <p class=\"member-detail small mb-1\">  <i class=\"fa fa-link me-2 text-danger\"></i><b>Relationship Type:</b> ".concat(el.relationType, "</p>\n          <p class=\"member-detail small mb-1\"> <i class=\"fa fa-calendar-alt me-2 text-info\"></i><b>Member since:</b> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</p>\n    </div>\n\n    <div class=\"member-interests\">\n      <button class=\"btn btn-sm btn-profile\" id=\"seeProfile").concat(el.id, "\" tooltip=\"View ").concat(toSentenceCase(el.firstName), "'s Profile\">\n        <i class=\"fa fa-user\"></i>Profile\n      </button>\n         <button class=\"btn btn-sm btn-profile\" id=\"familyTree").concat(el.id, "\" tooltip=\"View ").concat(toSentenceCase(el.firstName), "'s Family Tree\">\n        <i class=\"fa fa-tree\"></i> Family Tree\n      </button>\n      <span class=\"btn btn-sm btn-remove\" id=\"removeProfile").concat(el.id, "\" tooltip=\"Remove ").concat(toSentenceCase(el.firstName), " from your family\">\n        <i class=\"fa fa-times\"></i> \n      </span>\n    </div>\n  ") : "\n    <div class=\"member-actions\">\n      <button class=\"btn btn-primary btn-sm w-100\" \n              data-user-id=\"addFamily".concat(el.id, "\" \n              ").concat(disableButton, "\n              tooltip=\"Send a connection request to ").concat(toSentenceCase(el.firstName), "\">\n        <i class=\"fa fa-user-plus\"></i> ").concat(statusButtonHTML, "\n      </button>\n    </div>\n  "), "\n</div>\n\n\n\n    </div>\n");
     (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers').insertAdjacentHTML('beforeend', html);
   } catch (error) {
     (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
@@ -811,15 +792,21 @@ var renderHtml = function renderHtml(el) {
 /*!***********************************************************!*\
   !*** ./resources/asset/js/components/allMembers/index.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
+__webpack_require__.a(module, async function (__webpack_handle_async_dependencies__, __webpack_async_result__) { try {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./api */ "./resources/asset/js/components/allMembers/api.js");
 /* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/allMembers/allEvents.js");
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_api__WEBPACK_IMPORTED_MODULE_1__]);
+var __webpack_async_dependencies_result__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+_api__WEBPACK_IMPORTED_MODULE_1__ = __webpack_async_dependencies_result__[0];
 
 
 
+__webpack_async_result__();
+} catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
@@ -827,34 +814,34 @@ __webpack_require__.r(__webpack_exports__);
 /*!*************************************************!*\
   !*** ./resources/asset/js/components/global.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkElements: () => (/* binding */ checkElements),
-/* harmony export */   checkManyElements: () => (/* binding */ checkManyElements),
-/* harmony export */   date2String: () => (/* binding */ date2String),
-/* harmony export */   fileUploadSizeValidation: () => (/* binding */ fileUploadSizeValidation),
-/* harmony export */   formReset: () => (/* binding */ formReset),
-/* harmony export */   hideElement: () => (/* binding */ hideElement),
-/* harmony export */   id: () => (/* binding */ id),
-/* harmony export */   idInnerHTML: () => (/* binding */ idInnerHTML),
-/* harmony export */   idValue: () => (/* binding */ idValue),
-/* harmony export */   initializeImageModal: () => (/* binding */ initializeImageModal),
-/* harmony export */   log: () => (/* binding */ log),
-/* harmony export */   manipulateAttribute: () => (/* binding */ manipulateAttribute),
-/* harmony export */   msgException: () => (/* binding */ msgException),
-/* harmony export */   qSel: () => (/* binding */ qSel),
-/* harmony export */   qSelAll: () => (/* binding */ qSelAll),
-/* harmony export */   qSelInnerHTML: () => (/* binding */ qSelInnerHTML),
-/* harmony export */   qSelValue: () => (/* binding */ qSelValue),
-/* harmony export */   showElement: () => (/* binding */ showElement),
-/* harmony export */   showError: () => (/* binding */ showError),
-/* harmony export */   showNotification: () => (/* binding */ showNotification),
-/* harmony export */   warningSign: () => (/* binding */ warningSign),
-/* harmony export */   write: () => (/* binding */ write)
+/* harmony export */   checkElements: function() { return /* binding */ checkElements; },
+/* harmony export */   checkManyElements: function() { return /* binding */ checkManyElements; },
+/* harmony export */   date2String: function() { return /* binding */ date2String; },
+/* harmony export */   fileUploadSizeValidation: function() { return /* binding */ fileUploadSizeValidation; },
+/* harmony export */   formReset: function() { return /* binding */ formReset; },
+/* harmony export */   hideElement: function() { return /* binding */ hideElement; },
+/* harmony export */   id: function() { return /* binding */ id; },
+/* harmony export */   idInnerHTML: function() { return /* binding */ idInnerHTML; },
+/* harmony export */   idValue: function() { return /* binding */ idValue; },
+/* harmony export */   initializeImageModal: function() { return /* binding */ initializeImageModal; },
+/* harmony export */   log: function() { return /* binding */ log; },
+/* harmony export */   manipulateAttribute: function() { return /* binding */ manipulateAttribute; },
+/* harmony export */   msgException: function() { return /* binding */ msgException; },
+/* harmony export */   qSel: function() { return /* binding */ qSel; },
+/* harmony export */   qSelAll: function() { return /* binding */ qSelAll; },
+/* harmony export */   qSelInnerHTML: function() { return /* binding */ qSelInnerHTML; },
+/* harmony export */   qSelValue: function() { return /* binding */ qSelValue; },
+/* harmony export */   showElement: function() { return /* binding */ showElement; },
+/* harmony export */   showError: function() { return /* binding */ showError; },
+/* harmony export */   showNotification: function() { return /* binding */ showNotification; },
+/* harmony export */   warningSign: function() { return /* binding */ warningSign; },
+/* harmony export */   write: function() { return /* binding */ write; }
 /* harmony export */ });
-function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 
@@ -1130,39 +1117,35 @@ var initializeImageModal = function initializeImageModal(selector, clickedImageI
 /*!*********************************************************!*\
   !*** ./resources/asset/js/components/helper/general.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autoCompleter: () => (/* binding */ autoCompleter),
-/* harmony export */   checkBox: () => (/* binding */ checkBox),
-/* harmony export */   checkBox2: () => (/* binding */ checkBox2),
-/* harmony export */   convertFormData: () => (/* binding */ convertFormData),
-/* harmony export */   createAndAppendElement: () => (/* binding */ createAndAppendElement),
-/* harmony export */   distinctValue: () => (/* binding */ distinctValue),
-/* harmony export */   isChecked: () => (/* binding */ isChecked),
-/* harmony export */   loaderIcon: () => (/* binding */ loaderIcon),
-/* harmony export */   loaderIconBootstrap: () => (/* binding */ loaderIconBootstrap),
-/* harmony export */   loaderIconBulma: () => (/* binding */ loaderIconBulma),
-/* harmony export */   matchInput: () => (/* binding */ matchInput),
-/* harmony export */   matchRegex: () => (/* binding */ matchRegex),
-/* harmony export */   realTimeCheckLen: () => (/* binding */ realTimeCheckLen),
-/* harmony export */   removeDiv: () => (/* binding */ removeDiv),
-/* harmony export */   showResponse: () => (/* binding */ showResponse),
-/* harmony export */   toSentenceCase: () => (/* binding */ toSentenceCase)
+/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
+/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
+/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
+/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
+/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
+/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
+/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
+/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
+/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
+/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
+/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
+/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
 /* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
-/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 
 
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
 
 
 
@@ -1186,7 +1169,7 @@ var createAndAppendElement = function createAndAppendElement(elementType, setId,
   var newDiv = document.createElement(elementType);
   newDiv.setAttribute('id', setId);
   newDiv.setAttribute('class', "field ".concat(setClass));
-  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(parent);
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(parent);
   return parentDiv.appendChild(newDiv);
 };
 
@@ -1197,7 +1180,7 @@ var createAndAppendElement = function createAndAppendElement(elementType, setId,
  * @param { filterby is the data.filterby }
  */
 var autoCompleter = function autoCompleter(inputId, data) {
-  autocompleter__WEBPACK_IMPORTED_MODULE_1___default()({
+  autocompleter__WEBPACK_IMPORTED_MODULE_2___default()({
     input: inputId,
     fetch: function fetch(text, update) {
       text = text.toLowerCase();
@@ -1213,7 +1196,7 @@ var autoCompleter = function autoCompleter(inputId, data) {
   });
 };
 var distinctValue = function distinctValue(array) {
-  return _toConsumableArray(new Set(array));
+  return (0,_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__["default"])(new Set(array));
 };
 var checkBox = function checkBox(subject) {
   return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
@@ -1225,15 +1208,15 @@ var isChecked = function isChecked(name, fn) {
   var yesId = "".concat(name, "Yes");
   var noId = "".concat(name, "No");
   var checked = function checked() {
-    if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).checked) {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).checked) {
       alert('check');
       fn();
-    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).checked) {
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).checked) {
       alert('check No');
     }
   };
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(yesId).addEventListener('click', checked);
-  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(noId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).addEventListener('click', checked);
 };
 var matchRegex = function matchRegex(data) {
   if (data) {
@@ -1253,9 +1236,9 @@ var matchRegex = function matchRegex(data) {
  */
 var matchInput = function matchInput(first, second, err) {
   var error, firstInput, secondInput;
-  error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(err);
-  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(first);
-  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(second);
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(second);
   secondInput.addEventListener('keyup', function () {
     if (secondInput.value !== firstInput.value) {
       error.innerHTML = 'Your passwords do not match';
@@ -1284,12 +1267,12 @@ var toSentenceCase = function toSentenceCase(str) {
   .join(' '); // Join the words back into a string
 };
 var convertFormData = function convertFormData(formId) {
-  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSelAll)(formId);
+  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSelAll)(formId);
   var formInputArr = Array.from(formInput);
-  return new _FormHelper__WEBPACK_IMPORTED_MODULE_2__["default"](formInputArr);
+  return new _FormHelper__WEBPACK_IMPORTED_MODULE_3__["default"](formInputArr);
 };
 var showResponse = function showResponse(theId, message, status) {
-  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(theId);
+  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(theId);
   var col = status ? 'green' : 'red';
   responseEl.innerHTML = message;
   responseEl.style.color = 'green';
@@ -1309,16 +1292,16 @@ var showResponse = function showResponse(theId, message, status) {
 var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
   try {
     var _loop = function _loop(i) {
-      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_id"));
+      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_id"));
       if (theData === null || theData === undefined || theData === "") {
         throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
       }
       var max = maxi[i];
-      var error = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_error"));
+      var error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_error"));
       theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
       theData.addEventListener('keyup', function () {
         error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
-        var help = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(input[i], "_help"));
+        var help = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_help"));
         help.style.color = 'red';
         help.style.fontSize = '10px';
         error.style.color = 'red';
@@ -1341,12 +1324,12 @@ var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
 /*!*************************************************!*\
   !*** ./resources/asset/js/components/navbar.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   addToNotificationTab: () => (/* binding */ addToNotificationTab),
-/* harmony export */   increaseNotificationCount: () => (/* binding */ increaseNotificationCount)
+/* harmony export */   addToNotificationTab: function() { return /* binding */ addToNotificationTab; },
+/* harmony export */   increaseNotificationCount: function() { return /* binding */ increaseNotificationCount; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -1436,12 +1419,12 @@ var notificationHTML = function notificationHTML(data) {
       color: "text-teal"
     },
     // Teal
-    "default": {
+    default: {
       icon: "fa-solid fa-bell",
       color: "text-secondary"
     } // Grey
   };
-  var _ref = iconMap[data.notification_type] || iconMap["default"],
+  var _ref = iconMap[data.notification_type] || iconMap.default,
     icon = _ref.icon,
     color = _ref.color;
   var readOrUnread = data.notification_status === 'new' ? 'unread' : 'read';
@@ -1498,7 +1481,7 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
       (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = 0;
     }
   }
-})["catch"](function (error) {
+}).catch(function (error) {
   // Handle any errors that occur during the process
   (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
 });
@@ -1608,11 +1591,11 @@ document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded'
 /*!***********************************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js ***!
   \***********************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   friendRequestCard: () => (/* binding */ friendRequestCard)
+/* harmony export */   friendRequestCard: function() { return /* binding */ friendRequestCard; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 

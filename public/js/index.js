@@ -5,7 +5,7 @@
 /*!*************************************!*\
   !*** ./resources/asset/js/index.js ***!
   \*************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -69,12 +69,12 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     '/images': {
       module: function module() {
-        return __webpack_require__.e(/*! import() | images */ "images").then(__webpack_require__.bind(__webpack_require__, /*! ./components/images */ "./resources/asset/js/components/images.js"));
+        return Promise.all(/*! import() | images */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("images")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/images */ "./resources/asset/js/components/images.js"));
       }
     },
     '/createFamilyCode': {
       module: function module() {
-        return __webpack_require__.e(/*! import() | familyCode */ "familyCode").then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js"));
+        return Promise.all(/*! import() | familyCode */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("familyCode")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/register/familyCode */ "./resources/asset/js/components/register/familyCode.js"));
       }
     },
     '/register/nextStep': {
@@ -98,7 +98,19 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   try {
     var path = window.location.pathname;
-    var route = routeMap[path];
+    // Enhanced route matching that handles parameters
+    var routeKey = Object.keys(routeMap).find(function (routePath) {
+      // Exact match
+      if (path === routePath) return true;
+
+      // Match routes with parameters like /organogram/870016OLAWALE
+      if (path.startsWith(routePath + '/')) return true;
+      return false;
+    });
+    if (!routeKey) {
+      throw new Error("Unhandled route: ".concat(path));
+    }
+    var route = routeMap[routeKey];
     if (!route) {
       throw new Error("Unhandled route: ".concat(path));
     }
@@ -114,8 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load module if defined
     if (route.module) {
       route.module().then(function (mod) {
-        return mod["default"];
-      })["catch"](function (err) {
+        return mod.default;
+      }).catch(function (err) {
         (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
         throw new Error("Failed to load module for ".concat(path, ": ").concat(err.message));
       });
@@ -179,7 +191,7 @@ try {
 /*!****************************************!*\
   !*** ./resources/asset/scss/main.scss ***!
   \****************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
@@ -188,9 +200,9 @@ __webpack_require__.r(__webpack_exports__);
 /***/ })
 
 },
-/******/ __webpack_require__ => { // webpackRuntimeModules
-/******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ __webpack_require__.O(0, ["css/main","/js/vendor"], () => (__webpack_exec__("./resources/asset/js/index.js"), __webpack_exec__("./resources/asset/scss/main.scss")));
+/******/ function(__webpack_require__) { // webpackRuntimeModules
+/******/ var __webpack_exec__ = function(moduleId) { return __webpack_require__(__webpack_require__.s = moduleId); }
+/******/ __webpack_require__.O(0, ["css/main","/js/vendor"], function() { return __webpack_exec__("./resources/asset/js/index.js"), __webpack_exec__("./resources/asset/scss/main.scss"); });
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);

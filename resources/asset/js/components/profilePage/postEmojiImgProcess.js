@@ -2,13 +2,13 @@
 import { showEmojiPicker } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
 
-// Get references to DOM elements used in the emoji picker and image preview
+// Get references to DOM elements used in the emoji picker and image preview - SHOW EMOJIs FOR POST
 
-const emojiToggle = document.getElementById('emojiToggle'); // Button to show/hide emoji picker
-const emojiList = document.getElementById('emojiPickerList'); // Container for emoji buttons
+const emojiToggle = document.getElementById('emojiPost'); // Button to show/hide emoji picker
+const emojiList = document.getElementById('emojiListPost'); // Container for emoji buttons
 
 
-showEmojiPicker('emojiPickerList', 'data-emoji-target');
+showEmojiPicker('emojiListPost', 'data-emoji-target');
 
 // 🟡 Toggle emoji picker visibility when the toggle button is clicked
 emojiToggle.addEventListener('click', () => {

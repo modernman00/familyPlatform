@@ -143,7 +143,7 @@ class ProfilePage extends BaseController
         try {
             $newData = $this->processPostData();
 
-            SubmitPostData::submitToOneTablenImage(
+            $returnLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'post',
                 imgPath: 'resources/images/post/',
                 fileName: 'post_img',
@@ -151,7 +151,7 @@ class ProfilePage extends BaseController
                 newInput: $newData,
                 isCaptcha: false
             );
-
+            msgSuccess(200, "Post submitted", $returnLastId);
             // this send the last post id to the JS frontend
             // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
         } catch (\Throwable $th) {
@@ -165,11 +165,12 @@ class ProfilePage extends BaseController
         try {
 
             $newData = $this->processPostData();
-            SubmitPostData::submitToOneTablenImage(
+            $returnLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'comment',
                 newInput: $newData,
                 isCaptcha: false
             );
+            msgSuccess(200, "Comment submitted", $returnLastId);
         } catch (\Throwable $th) {
             showError($th);
         }

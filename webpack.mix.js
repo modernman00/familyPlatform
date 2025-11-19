@@ -3,13 +3,16 @@ const mix = require('laravel-mix');
 const CopyWebpackPlugin = require('copy-webpack-plugin'); // Copies files (like images) to your public folder.
 const ImageminPlugin = require('imagemin-webpack-plugin').default; // Optimizes images.
 
+// Add polyfills at the very top
 mix
-  .setPublicPath('public') // Everything goes into the /public folder
-  //   .setResourceRoot('./') // This tells where to load resources from (like images in CSS)
-  .sass('resources/asset/scss/main.scss', 'css') // Turn SCSS into public/css/main.css
-  .js('resources/asset/js/index.js', 'js') // Turn index.js into public/js/index.js
-  .options({ legacyNodePolyfills: true })
-  .extract(); // Pull out vendor code (like from node_modules) into a separate file for caching
+  .setPublicPath('public')
+  .js('resources/asset/js/index.js', 'js')
+  .sass('resources/asset/scss/main.scss', 'css')
+  .options({
+    legacyNodePolyfills: true,
+    processCssUrls: false // Add this to prevent URL processing issues
+  })
+  .extract();
 
 
 // Custom devtool based on environment
@@ -18,9 +21,10 @@ const devtool = mix.inProduction()
   : 'cheap-module-source-map'; // Development (CSP-friendly)
 
 mix
-  .setPublicPath("public")
   .webpackConfig({
-    output: { publicPath: "/public/" },
+    output: { 
+      publicPath: "/public/" 
+    },
     devtool, // <-- Add this line to configure sourcemap type
     optimization: {
       splitChunks: {
@@ -49,13 +53,16 @@ mix
         "@": path.resolve(__dirname, "resources/asset/js"),
         "@scss": path.resolve(__dirname, "resources/asset/scss"),
         "@css": path.resolve(__dirname, "resources/asset/css"),
-        "@img": path.resolve(__dirname, "resources/asset/img"),
+        "@img": path.resolve(__dirname, "resources/images/img"),
+        "@imgProfile": path.resolve(__dirname, "resources/images/profile"),
         "@components": path.resolve(__dirname, "resources/asset/js/components"),
-        "@shared": path.resolve(
-          __dirname,
-          "node_modules/@modernman00/shared-js-lib"
+        "@shared": path.resolve(__dirname, "node_modules/@modernman00/shared-js-lib"
         ),
       },
+      fallback: {
+      "path": false,
+      "fs": false
+    }
     },
     plugins: [
       new CopyWebpackPlugin({
@@ -91,6 +98,25 @@ mix
     ]
   })
 
+
+// CRITICAL: Add proper Babel config for Safari compatibility
+mix.babelConfig({
+  presets: [
+    ['@babel/preset-env', {
+      useBuiltIns: 'entry',
+      corejs: 3,
+      targets: {
+        browsers: ['> 1%', 'last 2 versions', 'not dead', 'safari >= 9']
+      }
+    }]
+  ],
+  plugins: [
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-proposal-optional-chaining",
+    "@babel/plugin-transform-runtime" // ADD THIS
+  ]
+});
+
 // Enable versioning in production
 if (mix.inProduction()) {
   mix.version();
@@ -99,7 +125,3 @@ if (mix.inProduction()) {
 if (process.env.MIX_SOURCEMAPS !== 'false') {
   mix.webpackConfig({ devtool });
 }
-
-mix.babelConfig({
-  plugins: ["@babel/plugin-syntax-dynamic-import", "@babel/plugin-proposal-optional-chaining"],
-});

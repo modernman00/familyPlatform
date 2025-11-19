@@ -10,12 +10,11 @@
     <!-- Header Section -->
     <div class="members-header text-center">
         <div class="container">
-            <h1 class="display-5 fw-bold">Meet Your Family Members & Close Associates</h1>
+            <h1 class="display-6 fw-bold">Meet Your Family Members & Close Associates</h1>
             <p class="lead">Connect with amazing people from around the world</p>
-            <div class="mt-4">
-                <span class="badge bg-light text-dark me-2">256+ Members</span>
-                <span class="badge bg-light text-dark me-2">15+ Countries</span>
-                <span class="badge bg-light text-dark">50+ Professions</span>
+            <div class="mt-2">
+                <span class="badge bg-light text-dark me-1">{{ count($data) }} Members</span>
+
             </div>
         </div>
     </div>
@@ -28,7 +27,7 @@
                 <div class="col-md-6">
                     <div class="input-group mb-2">
                         <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input class="form-control" type="search" placeholder="Search members by name"
+                        <input class="form-control" type="search" placeholder="Search for other family members by name"
                             aria-label="Search" id="searchFamily" name="searchFamily">
 
                     </div>
@@ -45,7 +44,7 @@
         <p id="searchHidden"></p>
 
         <!-- Members Grid -->
-        <div class="members-grid membersGrid" id="allMembers"> </div>
+        <div class="members-grid membersGrid " id="allMembers"> </div>
 
     </div>
 

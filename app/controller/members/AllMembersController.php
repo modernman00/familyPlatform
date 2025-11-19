@@ -23,6 +23,7 @@ class AllMembersController extends AllMembersData
                 'id' => checkInput($_SESSION['id']),
                 'fullName' => checkInput($_SESSION['fullName']),
             ];
+         
 
             view('member/showMembers', \compact('data'));
         } catch (\Throwable $th) {
@@ -35,11 +36,10 @@ class AllMembersController extends AllMembersData
         try {
             $VerifyJWT = SignIn::verify('users');
             if ($VerifyJWT) {
-                $id = $VerifyJWT['id'];
-
-                $result = $this->getAllMembers($id);
-
-                echo json_encode($result);
+                $id = \cleanSession($VerifyJWT['id']);
+                $famCode = \cleanSession($VerifyJWT['famCode']);
+                $result = $this->getAllMembers($famCode, $id);
+                msgSuccess(200, $result);
             }
         } catch (\Throwable $th) {
             showError($th);
@@ -50,11 +50,27 @@ class AllMembersController extends AllMembersData
     {
         try {
             $result = $this->getAllMembersNoPics();
-            echo json_encode($result);
+            msgSuccess(200, $result);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
+
+    public function getAllUsersDataFn(): void
+    {
+        try {
+             $VerifyJWT = SignIn::verify('users');
+            if ($VerifyJWT) {
+                $id = \cleanSession($VerifyJWT['id']);
+                $famCode = \cleanSession($VerifyJWT['famCode']);
+            }
+            $result = $this->getAllUsersData($id, $famCode);
+            msgSuccess(200, $result);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
 
 
     /**
@@ -102,8 +118,8 @@ class AllMembersController extends AllMembersData
     {
         try {
             //  verify token
-            $tokenVerify = new verifyToken();
-            $result = $tokenVerify->profilePage();
+              $VerifyJWT = SignIn::verify('users');
+            $result = $VerifyJWT;
 
             // if token is verified
 

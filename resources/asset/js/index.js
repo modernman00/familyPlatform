@@ -69,7 +69,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     const path = window.location.pathname;
-    const route = routeMap[path];
+      // Enhanced route matching that handles parameters
+  let routeKey = Object.keys(routeMap).find(routePath => {
+    // Exact match
+    if (path === routePath) return true;
+    
+    // Match routes with parameters like /organogram/870016OLAWALE
+    if (path.startsWith(routePath + '/')) return true;
+    
+    return false;
+  });
+
+  if (!routeKey) {
+    throw new Error(`Unhandled route: ${path}`);
+  }
+
+  const route = routeMap[routeKey];
 
     if (!route) {
       throw new Error(`Unhandled route: ${path}`);

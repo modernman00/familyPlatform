@@ -5,11 +5,11 @@
 /*!************************************************************!*\
   !*** ./resources/asset/js/components/familyTree/events.js ***!
   \************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   initTree: () => (/* binding */ initTree)
+/* harmony export */   initTree: function() { return /* binding */ initTree; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _showModal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./showModal */ "./resources/asset/js/components/familyTree/showModal.js");
@@ -137,11 +137,11 @@ var initTree = function initTree() {
 /*!****************************************************************!*\
   !*** ./resources/asset/js/components/familyTree/familyData.js ***!
   \****************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   familyData: () => (/* binding */ familyData)
+/* harmony export */   familyData: function() { return /* binding */ familyData; }
 /* harmony export */ });
 // Sample data for family members
 var familyData = {
@@ -188,7 +188,7 @@ var familyData = {
 /*!***********************************************************!*\
   !*** ./resources/asset/js/components/familyTree/index.js ***!
   \***********************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -201,7 +201,6 @@ __webpack_require__.r(__webpack_exports__);
 var modalBody = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('modalBody');
 var closeModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('closeModal');
 var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
-(0,_shared__WEBPACK_IMPORTED_MODULE_0__.log)('tree loaded');
 (0,_events__WEBPACK_IMPORTED_MODULE_1__.initTree)();
 (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('familyTree').addEventListener('click', function (e) {
   var _node$querySelector, _node$querySelector$t;
@@ -216,12 +215,11 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
   var email = nodeFn('.node-email');
   var id = nodeFn('.node-id');
   var img = nodeFn('.node-img');
-  var fullName = nodeFn('.node-fullName');
   var maritalStatus = nodeFn('.node-maritalStatus');
   var spouseName = nodeFn('.node-spouseName');
   var occupation = nodeFn('.node-occupation');
   var detailData = {
-    fullName: fullName,
+    fullName: name,
     email: email,
     img: img,
     maritalStatus: maritalStatus,
@@ -264,11 +262,11 @@ window.addEventListener('click', function (e) {
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/familyTree/showModal.js ***!
   \***************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showPersonDetails: () => (/* binding */ showPersonDetails)
+/* harmony export */   showPersonDetails: function() { return /* binding */ showPersonDetails; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _familyData__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./familyData */ "./resources/asset/js/components/familyTree/familyData.js");
