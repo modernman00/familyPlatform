@@ -26,13 +26,10 @@ body {
   font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
+  padding: 20px;
 }
 
-.navbar {
-  background-color: var(--card-bg);
-  box-shadow: var(--shadow);
-  border-bottom: 1px solid var(--border-color);
-}
+
 
 .container-main {
   display: flex;
@@ -316,6 +313,7 @@ body {
     margin: 2px 0;
   }
 }
+
 .btn-icon {
   background: none;
   border: none;
@@ -323,6 +321,7 @@ body {
   font-size: 1.2rem;
   cursor: pointer;
 }
+
 .btn-icon:focus {
   outline: 2px solid #0d6efd;
   outline-offset: 2px;
@@ -422,6 +421,7 @@ body {
 .grid-image:hover {
   opacity: 0.9;
 }
+
 /* Styles for the Post Image Modal */
 .image-modal {
   position: fixed;
@@ -476,6 +476,7 @@ body {
   line-height: 1;
   transition: transform 0.2s ease;
 }
+
 .image-modal-close:hover {
   transform: scale(1.1);
 }
@@ -646,6 +647,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -653,6 +655,7 @@ body {
 }
 
 @keyframes bounce {
+
   0%,
   20%,
   53%,
@@ -660,13 +663,16 @@ body {
   100% {
     transform: translate3d(0, 0, 0);
   }
+
   40%,
   43% {
     transform: translate3d(0, -6px, 0);
   }
+
   70% {
     transform: translate3d(0, -3px, 0);
   }
+
   90% {
     transform: translate3d(0, -1px, 0);
   }
@@ -689,10 +695,3 @@ body {
   content: "👤";
   font-size: 0.9rem;
 }
-
-
-
-
-
-
-

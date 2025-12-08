@@ -197,7 +197,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 var modalBody = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('modalBody');
 var closeModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('closeModal');
 var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
@@ -213,36 +212,24 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
     return (first === null || first === void 0 ? void 0 : (_first$dataset = first.dataset) === null || _first$dataset === void 0 ? void 0 : _first$dataset.id) || null;
   };
   var email = nodeFn('.node-email');
-  var id = nodeFn('.node-id');
+  var relation = nodeFn('.node-relation');
   var img = nodeFn('.node-img');
   var maritalStatus = nodeFn('.node-maritalStatus');
   var spouseName = nodeFn('.node-spouseName');
   var occupation = nodeFn('.node-occupation');
+  var country = nodeFn('.node-country');
   var detailData = {
     fullName: name,
     email: email,
     img: img,
     maritalStatus: maritalStatus,
     spouseName: spouseName,
-    occupation: occupation
+    occupation: occupation,
+    relation: relation,
+    country: country
   };
   (0,_showModal__WEBPACK_IMPORTED_MODULE_2__.showPersonDetails)(detailData);
 });
-
-// When a person node is clicked, show their details
-// document.querySelectorAll('.tree-node').forEach(node => {
-//   node.addEventListener('click', (e) => {
-//     e.stopPropagation(); // Prevent bubbling to parent
-
-//      // Get the name from the .node-name span
-//   const name = node.querySelector('.node-name')?.textContent?.trim();
-
-//         // Get the data-id from the .node-id span
-//   const idSpan = node.querySelector('.node-id');
-//   const dataId = idSpan?.dataset?.id || null;
-//     showPersonDetails(name);
-//   });
-// });
 
 // Close modal when "X" button is clicked
 closeModal.addEventListener('click', function () {
@@ -253,6 +240,29 @@ closeModal.addEventListener('click', function () {
 window.addEventListener('click', function (e) {
   if (e.target === personModal) {
     personModal.style.display = 'none';
+  }
+});
+
+// ===== INSTRUCTIONS TOGGLE =====
+var instructionsToggle = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('instructionsToggle');
+var instructions = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('instructions');
+
+// Check localStorage for saved state
+var instructionsState = localStorage.getItem('instructionsCollapsed');
+if (instructionsState === 'false') {
+  instructions.classList.remove('collapsed');
+}
+
+// Toggle instructions visibility
+instructionsToggle === null || instructionsToggle === void 0 ? void 0 : instructionsToggle.addEventListener('click', function () {
+  instructions.classList.toggle('collapsed');
+  var isCollapsed = instructions.classList.contains('collapsed');
+  localStorage.setItem('instructionsCollapsed', isCollapsed);
+
+  // Update button icon
+  var icon = instructionsToggle.querySelector('i');
+  if (icon) {
+    icon.className = isCollapsed ? 'bi bi-question-circle-fill' : 'bi bi-x-circle-fill';
   }
 });
 
@@ -289,10 +299,11 @@ var showPersonDetails = function showPersonDetails(personData) {
     fullName = personData.fullName,
     spouseName = personData.spouseName,
     occupation = personData.occupation,
-    country = personData.country;
+    country = personData.country,
+    email = personData.email;
 
   // Inject HTML into modal body with person's details
-  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Spouse</div>\n        <div class=\"detail-value\">").concat(spouseName || 'N/A', "</div>\n      </div>\n \n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation, "</div>\n      </div>\n      ").concat(country ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">country</div>\n          <div class=\"detail-value\">".concat(country, "</div>\n        </div>\n      ") : '', "\n    </div>\n  ");
+  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Spouse</div>\n        <div class=\"detail-value\">").concat(spouseName || 'N/A', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Email</div>\n        <div class=\"detail-value\">").concat(email, "</div>\n      </div>\n\n \n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation, "</div>\n      </div>\n      ").concat(country ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">country</div>\n          <div class=\"detail-value\">".concat(country, "</div>\n        </div>\n      ") : '', "\n    </div>\n  ");
 
   // Show the modal
   personModal.style.display = 'flex';

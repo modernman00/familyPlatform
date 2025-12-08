@@ -11,23 +11,18 @@ use Src\{
 };
 use App\model\AllMembersData;
 use Exception;
+use App\Controller\BaseController as Base;
 
 class AllMembersController extends AllMembersData
 {
     public function index(): void
     {
         try {
-
-            // create id for the family tree link
-            $data = [
-                'id' => checkInput($_SESSION['id']),
-                'fullName' => checkInput($_SESSION['fullName']),
-            ];
-         
+           $data = Base::membersData();
 
             view('member/showMembers', \compact('data'));
         } catch (\Throwable $th) {
-            showError($th);
+            showError($th); 
         }
     }
 

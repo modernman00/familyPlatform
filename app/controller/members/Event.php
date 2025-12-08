@@ -33,20 +33,6 @@ class Event extends AllMembersData
     public static function submitEvent()
     {
         try {
-            // // SANITISE THE ENTRY
-            // $cleanData = LoginUtility::getSanitisedInputData($_POST);
-            // $cleanData['id'] = checkInput(data: $_SESSION['id']);
-
-            // $cleanData['eventCode'] = self::generateFamCode();
-
-            // CheckToken::tokenCheck(token: 'token');
-
-            // $lastInsertedId = Insert::submitFormDynamicLastId(
-            //     table: 'events',
-            //     field: $cleanData,
-            //     lastIdCol: 'no'
-            // );
-            // msgSuccess(code: 200, msg: $lastInsertedId);
 
             $retunLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'events',
@@ -58,7 +44,7 @@ class Event extends AllMembersData
                 removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
                 newInput: [
                     'eventCode' => self::generateFamCode(),
-                    'id' => checkInput($_SESSION['CREATE_EVENT_ID'])
+                    'id' => checkInput($_SESSION['id'])
                 ]
 
             );
@@ -72,24 +58,22 @@ class Event extends AllMembersData
 
     private static function generateFamCode(): string
     {
-        $getFamCode = parent::getMemberName(id: $_SESSION['CREATE_EVENT_ID']);
-        return $getFamCode['famCode'];
+        return checkInput($_SESSION['famCode']);
     }
 
     private static function getSenderName(): string
     {
-        $getSenderName = parent::getMemberName(id: $_SESSION['CREATE_EVENT_ID']);
-        return $getSenderName['fName'] . " " . $getSenderName['lName'];
+        return checkInput($_SESSION['fullName']);
     }
 
     // Filter members based on the event famCode
-    private static function filterMemberByFamCode(string $famCode): array
+    private static function filterMemberByFamCode(): array
     {
         // Get all members' details including email, famCode, and id
         $members = self::getAllMembersCodeAndEmail();
 
-        $membersToNotify = array_filter($members, function ($member) use ($famCode) {
-            return $member['famCode'] == $famCode;
+        $membersToNotify = array_filter($members, function ($member) {
+            return $member['famCode'] == self::generateFamCode();
         });
 
         return $membersToNotify;
@@ -116,7 +100,7 @@ class Event extends AllMembersData
 
         try {
             $cleanData = LoginUtility::getSanitisedInputData( $_POST);
-            $cleanData['id'] = checkInput(data: $_SESSION['CREATE_EVENT_ID']);
+            $cleanData['id'] = checkInput(data: $_SESSION['id']);
             $id = $cleanData['id'];
 
             // GET THE SENDER'S NAME 
@@ -242,7 +226,7 @@ class Event extends AllMembersData
                     // Get the famCode of the event
                     $eventFamCode = $eventData['famCode'];
 
-                    $membersToNotify = self::filterMemberByFamCode(famCode: $eventFamCode);
+                    $membersToNotify = self::filterMemberByFamCode();
 
                     // Extract email addresses from the filtered members
                     $emailsToNotify = array_column($membersToNotify, 'email');

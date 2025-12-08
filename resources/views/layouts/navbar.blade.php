@@ -1,6 +1,6 @@
     <!-- Navigation Bar -->
 
-    <link rel="stylesheet" href="public/css/navbar.css">
+    <link rel="stylesheet" href="/public/css/navbar.css">
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-primary" href="#">
@@ -14,16 +14,16 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Home</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item profilePageNav">
                         <a class="nav-link active" href="/profilePage">My Page</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/organogram/{{ $data['id'] }}">Family Tree </a>
+                    <li class="nav-item familyTreeNav">
+                        <a class="nav-link active" href="/organogram/{{$_SESSION['id'] }}">Family Tree </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#eventHeader">Events</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item allMembersNav">
                         <a class="nav-link" href="/allMembers">All members</a>
                     </li>
                 </ul>
@@ -59,24 +59,23 @@
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="userMenu"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle me-1"></i> {{ $data['fullName'] }}
+                            <i class="bi bi-person-circle me-1"></i> {{ $_SESSION['fullName'] }}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                            <li><a class="dropdown-item" href="/profile" data-bs-toggle="modal"
-                                    data-bs-target="#editProfileModal">Profile</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
+                            <li class="profileNav">
+                                <a class="dropdown-item" href="/profile" data-bs-toggle="modal"
+                                    data-bs-target="#editProfileModal">Profile</a>
                             </li>
-                         @if (isset($data['mobile']) && !empty($data['email']) && !empty($data['country']) && !empty($data['famCode']))
+                    
+                        <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="/accountSetting/{{ urlencode(trim($data['id'])) }}/{{ urlencode(trim($data['mobile'])) }}/{{ trim($data['email']) }}/{{ str_replace(' ', '', trim($data['country'])) }}/{{ urlencode(trim($data['famCode'])) }}" >Settings</a></li>
-                         @endif
-                         
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                            <li><a class="dropdown-item" href="/accountSetting/{{ urlencode(trim($data['id'])) ?? $_SESSION['id'] }}" >Settings</a></li>
+                               
+                            <li><hr class="dropdown-divider"></li>
 
                             <li><a class="dropdown-item" href="/signout">Logout</a></li>
+                          
+                   
                         </ul>
                     </div>
                 </div>

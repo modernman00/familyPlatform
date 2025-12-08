@@ -10,13 +10,8 @@ export const commentHTML = (data, postId) => {
   const { profileImg, fullName, date_created, img, comment, comment_no, id } = data
   const imgURL = profileImg || img
   const image = (imgURL) ? `/resources/images/profile/${imgURL}` : `/public/avatar/avatarF.png`
-  let counts = {}
-  let total;
-
-  // check if reactions and counts exist
-
-    counts = data?.reactions?.counts ?? {};
-    total = data?.reactions?.counts?.totalReactions;
+  let counts = data?.reactions?.counts ?? {};
+  let total = data?.reactions?.counts?.totalReactions ?? 0;
 
   return `<div class="d-flex mb-3 commentDiv align-items-start" data-commentDiv-no="${comment_no}" id="commentDiv${comment_no}" name="commentDiv">
 
@@ -24,14 +19,14 @@ export const commentHTML = (data, postId) => {
 
   <div class="flex-grow-1">
     <div class="d-flex justify-content-between align-items-center">
-      <strong>${toSentenceCase(fullName)}${comment_no}</strong>
+      <small><strong>${toSentenceCase(fullName)}</strong></small>
       <small class="text-muted commentTiming" datetime="${date_created}" title="${date_created}">
         ${format(date_created)}
       </small>
     </div>
 
     <div class="comment-text mb-2">
-      ${comment}
+      <small>${comment}</small>
     </div>
 
       <div class="d-flex reaction-preview-section align-items-center mb-2 gap-2"> 

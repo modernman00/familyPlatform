@@ -36,6 +36,11 @@ class ProfilePage extends BaseController
 
     public function index(): void
     {
+        // PWA-compatible: Allow SW caching but force revalidation
+        header("Cache-Control: private, must-revalidate, max-age=0");
+        header("Vary: Cookie");
+        header("Expires: 0");
+
         unset(
             $_SESSION['auth'],
             $_SESSION['imageUploadOutcome'],
@@ -50,34 +55,15 @@ class ProfilePage extends BaseController
         unsetSess(['auth', 'imageUploadOutcome', 'token', 'EDIT_PROFILE_ID', 'CREATE_EVENT_ID', 'changePW', 'register', 'LAST_INSERT_ID_COMMENT', 'LAST_INSERT_ID_CODE_MGT', 'LAST_INSERT_ID_POST', 'LAST_INSERT_ID_AUDIT_LOGS', 'LAST_INSERT_ID_NOTIFICATION', 'POST_COUNT', 'fName', 'lName', 'currentTime', 'LAST_INSERT_ID_EVENTS', 'LAST_INSERT_ID_events', 'email', 'id', 'famCode']);
 
         try {
-            $VerifyJWT = SignIn::verify();
-
-            if (!$VerifyJWT) {
-                redirect('/login');
-            }
-
-            if (!isset($_SESSION['id'])) {
-                $_SESSION['id'] = $VerifyJWT['id'];
-            }
-
-
-
-            $id = $VerifyJWT['id'] ?? throw new Exception("Error Processing ID request", 1);
-            $setData = new SingleCustomerData;
-            $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
-            $memberData = $setData->getCustomerData($id, $table);
+            $id = parent::returnId();
+            $memberData = parent::membersData();
             $getFamCode = $memberData['famCode'];
-            sessSetMany([
-                'famCode' => $getFamCode,
-                'fullName' => $memberData['firstName'] . ' ' . $memberData['lastName']
-            ]);
             $friendRequestData = DataAll::getFriendRequestData($id, "Request sent");
             $postLink2Id = Post::postLink2Id($id);
             $pic2Id = Post::getAllPostPics($id);
             $allData = Post::getAllPostProfilePics();
             $commentProfilePics = Post::getAllCommentProfilePics();
             $eventData = DataAll::getEventDataByFamCode($getFamCode);
-
 
             parent::viewWithCsp('member/profilePage', [
                 'data' => $memberData,
@@ -147,7 +133,7 @@ class ProfilePage extends BaseController
                 table: 'post',
                 imgPath: 'resources/images/post/',
                 fileName: 'post_img',
-                fileTable: 'post',
+                sourceFileTable: 'post',
                 newInput: $newData,
                 isCaptcha: false
             );
@@ -165,6 +151,7 @@ class ProfilePage extends BaseController
         try {
 
             $newData = $this->processPostData();
+
             $returnLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'comment',
                 newInput: $newData,
@@ -261,7 +248,7 @@ class ProfilePage extends BaseController
         try {
             if (!$_POST) {
                 throw new Exception("There was no post data", 1);
-                exit;
+
             }
 
             UpdateExistingData::updateMultipleTables(
@@ -278,19 +265,68 @@ class ProfilePage extends BaseController
         }
     }
 
+    public function setProfilePicFromImage(): void
+    {
+        try {
+            // Get JSON input
+            $input = json_decode(file_get_contents('php://input'), true);
+
+            if (!isset($input['imageName'])) {
+                throw new Exception("Image name not provided", 1);
+            }
+
+            $imageName = checkInput($input['imageName']);
+            $id = checkInput($_SESSION['id']);
+
+            // Source and destination paths
+            $sourcePath = "resources/images/" . $imageName;
+            $destPath = "resources/images/profile/" . $imageName;
+
+            // Check if source file exists
+            if (!file_exists($sourcePath)) {
+                throw new Exception("Image file not found", 1);
+            }
+
+            // Copy the image to profile folder
+            if (!copy($sourcePath, $destPath)) {
+                throw new Exception("Failed to copy image", 1);
+            }
+
+            // Update the profilePics table
+            $updateProfilePic = new \App\classes\Update('profilePics');
+            $result = $updateProfilePic->updateTable(
+                column: 'img',
+                columnAnswer: $imageName,
+                identifier: 'id',
+                identifierAnswer: $id
+            );
+
+            if ($result) {
+                msgSuccess(200, "Profile picture updated successfully");
+            } else {
+                throw new Exception("Failed to update profile picture in database", 1);
+            }
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
     public function myPics(): void
     {
 
+       SignIn::verify();
+       
         $id = checkInput($_SESSION['id']);
 
-            $images = SelectFn::selectDynamicColumnsById(
-                table: 'images', 
-                identifier: 'id', 
-                value: $id, 
-                implodeColArray: ['id', 'img', 'caption', 'likes', 'where_from', 'created_at']
-            );
-    
-       parent::viewWithCsp('member/images', ['images' => $images]);
+        $images = SelectFn::selectDynamicColumnsById(
+            table: 'images',
+            identifier: 'id',
+            value: $id,
+            implodeColArray: ['id', 'img', 'caption', 'likes', 'where_from', 'created_at']
+        );
+
+
+        parent::viewWithCsp('member/images', ['data' => $images]);
 
         // view('member.images', compact('images') );
     }

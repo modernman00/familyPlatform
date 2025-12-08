@@ -1,4 +1,4 @@
-const Version = "1.3";
+const Version = "2.0"; // Updated for PWA-compatible security features
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
   "/",
@@ -51,27 +51,120 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch event - stale-while-revalidate strategy
+// Fetch event - smart caching strategy based on page type
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          caches.open(CacheName).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-          });
-        }
-        return networkResponse;
-      }).catch((error) => {
-        console.error('Fetch failed; returning cached page instead:', error);
-        return caches.match('/index'); // Optional: Serve a fallback page if the network fails
-      });
+  const { request } = event;
+  const url = new URL(request.url);
 
-      return cachedResponse || fetchPromise;
+  // Skip non-GET requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // Determine caching strategy based on URL
+  if (isAuthenticatedPage(url)) {
+    // Network-first for authenticated pages (security priority)
+    event.respondWith(networkFirstStrategy(request));
+  } else {
+    // Stale-while-revalidate for other content (performance priority)
+    event.respondWith(staleWhileRevalidateStrategy(request));
+  }
+});
+
+// Network-first strategy for authenticated pages
+async function networkFirstStrategy(request) {
+  try {
+    // Always try network first for authenticated pages
+    const networkResponse = await fetch(request);
+
+    // Only cache successful responses
+    if (networkResponse && networkResponse.status === 200) {
+      const cache = await caches.open(CacheName);
+      cache.put(request, networkResponse.clone());
+    }
+
+    return networkResponse;
+  } catch (error) {
+    // Network failed, try cache as fallback
+    console.log('[SW] Network failed for authenticated page, trying cache:', error);
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    // If no cache, return offline page
+    return new Response(
+      '<h1>Offline</h1><p>You are currently offline. Please check your connection.</p>',
+      {
+        headers: { 'Content-Type': 'text/html' }
+      }
+    );
+  }
+}
+
+// Stale-while-revalidate strategy for non-authenticated content
+function staleWhileRevalidateStrategy(request) {
+  return caches.match(request).then((cachedResponse) => {
+    const fetchPromise = fetch(request).then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200) {
+        caches.open(CacheName).then((cache) => {
+          cache.put(request, networkResponse.clone());
+        });
+      }
+      return networkResponse;
     }).catch((error) => {
-      console.error('Error matching cache or fetching:', error);
-    })
-  );
+      console.error('Fetch failed; returning cached page instead:', error);
+      return caches.match('/index'); // Optional: Serve a fallback page if the network fails
+    });
+
+    return cachedResponse || fetchPromise;
+  }).catch((error) => {
+    console.error('Error matching cache or fetching:', error);
+  });
+}
+
+// Helper: Check if URL is an authenticated page
+function isAuthenticatedPage(url) {
+  const authenticatedPaths = [
+    '/member/ProfilePage',
+    '/profilePage',
+    '/allMembers',
+    '/organogram',
+    '/accountSetting',
+    '/member/',
+    '/admin/'
+  ];
+
+  return authenticatedPaths.some(path => url.pathname.startsWith(path));
+}
+
+// Listen for messages from the client (e.g., to clear auth cache on logout)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'CLEAR_AUTH_CACHE') {
+    // Clear cached authenticated pages on logout
+    event.waitUntil(
+      caches.open(CacheName).then((cache) => {
+        return cache.keys().then((requests) => {
+          return Promise.all(
+            requests
+              .filter((request) => {
+                const url = new URL(request.url);
+                return isAuthenticatedPage(url);
+              })
+              .map((request) => {
+                console.log('[SW] Clearing auth cache for:', request.url);
+                return cache.delete(request);
+              })
+          );
+        });
+      })
+    );
+  }
 });
 
 // Utility function to show notification

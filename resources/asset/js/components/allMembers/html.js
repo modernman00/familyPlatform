@@ -28,7 +28,7 @@ export const renderHtml = (el) => {
     const statusButtonHTML = el.status !== null ?
       el.status :
       'Connect';
-      const relationshipType = (el.relationship)? el.relationship: 'Immediate Family';
+    const relationshipType = (el.relationship) ? el.relationship : 'Immediate Family';
 
     const disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
 
@@ -42,45 +42,42 @@ export const renderHtml = (el) => {
     <div class="member-card member_profile_${el.id}" id="${el.id}">
 
        <div class="card-cover">
-            <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}" class= "card-img-top">
+            <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}"loading="lazy">
         </div>
 
         <div class="member-card-body">
             <h3 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h3>
-            <p class="member-location">${el.country}</p>
+            <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.country}</p>
 
   ${el.relationType ? `
-    <div class="member-details text-secondary mb-3 pb-3 border-bottom border-secondary">
+    <div class="member-details">
 
-         <p class="member-detail small mb-1">  <i class="fa fa-link me-2 text-danger"></i><b>Relationship Type:</b> ${el.relationType}</p>
-          <p class="member-detail small mb-1"> <i class="fa fa-calendar-alt me-2 text-info"></i><b>Member since:</b> ${format(el.created_at)}</p>
+         <p class="member-detail">  <i class="fa fa-link"></i><span>${el.relationType}</span></p>
+          <p class="member-detail"> <i class="fa fa-calendar-alt"></i><span>Member since ${format(el.created_at)}</span></p>
     </div>
 
     <div class="member-interests">
-      <button class="btn btn-sm btn-profile" id="seeProfile${el.id}" tooltip="View ${toSentenceCase(el.firstName)}'s Profile">
-        <i class="fa fa-user"></i>Profile
+      <button class="btn-profile primary-action" id="seeProfile${el.id}" tooltip="View Profile">
+        <i class="fa fa-user"></i> View Profile
       </button>
-         <button class="btn btn-sm btn-profile" id="familyTree${el.id}" tooltip="View ${toSentenceCase(el.firstName)}'s Family Tree">
-        <i class="fa fa-tree"></i> Family Tree
+         <button class="btn-profile" id="familyTree${el.id}" tooltip="View Tree">
+        <i class="fa fa-sitemap"></i> Family Tree
       </button>
-      <span class="btn btn-sm btn-remove" id="removeProfile${el.id}" tooltip="Remove ${toSentenceCase(el.firstName)} from your family">
-        <i class="fa fa-times"></i> 
-      </span>
+      <button class="btn-remove" id="removeProfile${el.id}" tooltip="Remove Connection">
+        <i class="fa fa-user-times"></i> Remove
+      </button>
     </div>
   ` : `
-    <div class="member-actions">
-      <button class="btn btn-primary btn-sm w-100" 
+    <div class="member-interests">
+      <button class="btn-profile primary-action" 
               data-user-id="addFamily${el.id}" 
               ${disableButton}
-              tooltip="Send a connection request to ${toSentenceCase(el.firstName)}">
+              tooltip="Send Request">
         <i class="fa fa-user-plus"></i> ${statusButtonHTML}
       </button>
     </div>
   `}
 </div>
-
-
-
     </div>
 `;
 

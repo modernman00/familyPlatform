@@ -35,19 +35,45 @@ class PostMessage
             $VerifyJWT = SignIn::verify('users');
             $id = \cleanSession($VerifyJWT['id']);
             $famCode = \cleanSession($VerifyJWT['famCode']);
-            // 1. Get all posts
+
+            // Get pagination parameters
+            $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
+            $offset = ($page - 1) * $limit;
+
+            // 1. Get visible posts with pagination
             $posts = AllMembersData::getVisiblePosts(
                 $id,
-                $famCode
+                $famCode,
+                $limit,
+                $offset
             );
 
-         
+            // Get total count for pagination metadata
+            $total = AllMembersData::countVisiblePosts($id, $famCode);
+            $lastPage = ceil($total / $limit);
 
 
-            if (!$posts) msgException(401, "no post msg");
+
+
+            if (!$posts) {
+                msgSuccess(
+                    code: 200,
+                    msg: [
+                        'message' => [],
+                        'pagination' => [
+                            'total' => $total,
+                            'per_page' => $limit,
+                            'current_page' => $page,
+                            'last_page' => $lastPage
+                        ]
+                    ]
+                );
+                return;
+            }
 
             $count = count($posts);
- 
+
 
             // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
             foreach ($posts as &$post) {
@@ -59,7 +85,7 @@ class PostMessage
                     $comments = [];
                     continue; // No comments for this post, move to the next post
                 }
-               
+
 
                 // 4. Loop through each comment: MUST use the reference operator (&) to modify the original array.
                 foreach ($comments as &$comment) {
@@ -82,11 +108,19 @@ class PostMessage
 
             // 8. Unset references to prevent bugs
             unset($post);
-            
+
             $_SESSION['POST_COUNT'] = $count;
             msgSuccess(
                 code: 200,
-                msg: $posts
+                msg: [
+                    'message' => $posts,
+                    'pagination' => [
+                        'total' => $total,
+                        'per_page' => $limit,
+                        'current_page' => $page,
+                        'last_page' => $lastPage
+                    ]
+                ]
             );
         } catch (\Throwable $th) {
             \showError($th);
@@ -152,6 +186,8 @@ class PostMessage
             fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],
             params: [$famCode, $id]
         );
+
+        p($newPost);
 
         Pusher::broadcast('posts-channel', 'new-post', $newPost);
     }

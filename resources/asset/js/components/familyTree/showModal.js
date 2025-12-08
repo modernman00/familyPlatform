@@ -13,7 +13,7 @@ export const  showPersonDetails = (personData) => {
   }
 
         // deconstruct the data object and assign it to variables
-  const { img, relation, fullName, spouseName,  occupation,  country } = personData;
+  const { img, relation, fullName, spouseName,  occupation,  country, email } = personData;
 
   // Inject HTML into modal body with person's details
   modalBody.innerHTML = `
@@ -29,6 +29,12 @@ export const  showPersonDetails = (personData) => {
         <div class="detail-label">Spouse</div>
         <div class="detail-value">${spouseName || 'N/A'}</div>
       </div>
+
+      <div class="detail-item">
+        <div class="detail-label">Email</div>
+        <div class="detail-value">${email}</div>
+      </div>
+
  
       <div class="detail-item">
         <div class="detail-label">Occupation</div>

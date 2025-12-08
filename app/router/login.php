@@ -17,12 +17,12 @@ $router->map('POST', '/forgot', 'App\controller\login\Forgot@verify', 'ForgotPos
 
 
 //admin SIGN OUT 
-$router->map('GET', '/admin/signout', 'App\controller\login\Login@adminSignOut', 'ADMIN SIGN OUT' );
+$router->map('GET', '/admin/signout', 'App\controller\login\Login@adminSignOut', 'ADMIN SIGN OUT');
 
 // $router->map('GET', '/signout', 'App\controller\login\Login@adminSignOut', 'signout');
 
 // LOG OUT PAGE
-$router->map('GET', '/signout/[a:redirect]', 'App\controller\LogoutController@signout', 'signout');
+$router->map('GET', '/signout/[a:redirect]?', 'App\controller\LogoutController@signout', 'signout');
 
 // CODE 
 

@@ -1,148 +1,201 @@
-/* Responsive Grid */
-
-html {
-  font-size: 16px;
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-body {
-  overflow-x: hidden;
-  font-family: "Arial", "Roboto Slab", "Helvetica Neue", Helvetica, sans-serif;
-  line-height: 1.7;
-  color: #818181;
-  padding: 30px;
-}
-
-.avatar {
-  vertical-align: middle;
-  width: 20vh;
-  height: 20vh;
-  border-radius: 50%;
-}
-
-p {
-  line-height: 1.75;
-}
-
-a {
-  color: #fed136;
-}
-
-a:hover {
-  color: #fec503;
-}
-
+/* Grid Layout (Fixed Size) */
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
-
 }
 
+/* Grid Item */
 .grid-item {
-  /* Ensure grid items are consistent */
-  width: 300px; /* Adjust as needed */
-  margin: 10px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1;
 }
 
 .grid-item img {
-  width: 100%; /* Make image fill the container */
-  height: 200px; /* Set a fixed height */
-  object-fit: cover; /* Crop the image to fit, preserving aspect ratio */
-  object-position: center; /* Center the image within the container */
-  border-radius: 6px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .grid-item:hover img {
-    transform: scale(1.5);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  }
-}
-
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1.5;
-  }
-}
-
-.img-meta {
-  text-align: center;
-  font-size: 14px;
-  margin-top: 5px;
-}
-
-.like-btn {
-  border: none;
-  background: none;
-  color: #e63946;
-  cursor: pointer;
-  font-size: 16px;
-  transition: transform 0.2s ease;
-}
-
-.like-btn:hover {
-  transform: scale(1.2);
-}
-
-.upload-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.upload-row input[type="file"],
-.upload-row input[type="text"],
-.upload-row button {
-  flex: 1;
-  min-width: 150px;
-  padding: 8px;
-  font-size: 14px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.upload-row button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.upload-row button:hover {
-  background-color: #45a049;
-}
-
-.note {
-  font-size: 12px;
-  color: #666;
-}
-
-.timestamp {
-  font-size: 11px;
-  color: #777;
-  margin-top: 2px;
-}
-
-button {
-  background: #d23c77;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
   width: 100%;
+  height: 250px;
+  /* Fixed height */
+  object-fit: cover;
+  /* Crop to fit */
+  display: block;
+  cursor: zoom-in;
+  transition: filter 0.3s;
 }
 
-button:hover {
-  background: #b53467;
+.grid-item:hover img {
+  filter: brightness(0.95);
 }
 
+/* Image Metadata (Overlay on hover or below) */
+.img-meta {
+  padding: 12px;
+  background: #fff;
+}
+
+.description {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.meta-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #888;
+}
+
+.likeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e74c3c;
+  font-weight: 600;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s;
+}
+
+.likeBtn:hover {
+  transform: scale(1.1);
+}
+
+.setProfilePicBtn {
+  background: none;
+  border: 1px solid #3b5998;
+  cursor: pointer;
+  color: #3b5998;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.setProfilePicBtn:hover {
+  background: #3b5998;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pagination a {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.pagination a.active,
+.pagination a:hover {
+  background: var(--primary-color, #3b5998);
+  color: #fff;
+  border-color: var(--primary-color, #3b5998);
+}
+
+/* Lightbox Modal */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  padding-top: 50px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(5px);
+}
+
+.lightbox-content {
+  margin: auto;
+  display: block;
+  max-width: 90%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  animation-name: zoom;
+  animation-duration: 0.3s;
+}
+
+.lightbox-caption {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 700px;
+  text-align: center;
+  color: #ccc;
+  padding: 10px 0;
+  height: 150px;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+@keyframes zoom {
+  from {
+    transform: scale(0.8);
+    opacity: 0
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1
+  }
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+  cursor: pointer;
+  z-index: 2001;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  transform: rotate(90deg);
+}

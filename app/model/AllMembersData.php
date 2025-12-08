@@ -161,7 +161,7 @@ class AllMembersData extends InnerJoin
         }
     }
 
-    public static function getVisiblePosts(string $userId, string $famCode): array
+    public static function getVisiblePosts(string $userId, string $famCode, int $limit = 50, int $offset = 0): array
     {
         try {
             $query = " SELECT 
@@ -182,6 +182,7 @@ class AllMembersData extends InnerJoin
                     )
                 )
                 ORDER BY post.date_created DESC
+                LIMIT :limit OFFSET :offset
             ";
 
 
@@ -189,11 +190,47 @@ class AllMembersData extends InnerJoin
             $stmt->bindValue(':user_id1', $userId, PDO::PARAM_STR);
             $stmt->bindValue(':user_id2', $userId, PDO::PARAM_STR);
             $stmt->bindValue(':fam_code', $famCode, PDO::PARAM_STR);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetchAll();
         } catch (\Throwable $e) {
             showError($e);
             return [];
+        }
+    }
+
+    public static function countVisiblePosts(string $userId, string $famCode): int
+    {
+        try {
+            $query = " SELECT 
+                    COUNT(*)
+                FROM post
+                WHERE post.postFamCode = :fam_code
+                OR (
+                    post.id IN (
+                        SELECT approver_id 
+                        FROM requestMgt
+                        WHERE requester_id = :user_id1 
+                        AND status = 'Approved'
+                        UNION
+                        SELECT requester_id 
+                        FROM requestMgt
+                        WHERE approver_id = :user_id2 
+                        AND status = 'Approved'
+                    )
+                )
+            ";
+
+            $stmt = self::connect2()->prepare($query);
+            $stmt->bindValue(':user_id1', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':user_id2', $userId, PDO::PARAM_STR);
+            $stmt->bindValue(':fam_code', $famCode, PDO::PARAM_STR);
+            $stmt->execute();
+            return (int) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            showError($e);
+            return 0;
         }
     }
 
@@ -325,7 +362,7 @@ class AllMembersData extends InnerJoin
     public function getAllMembersById($id)
     {
 
-        $table = ['personal', 'otherFamily', 'profilePics', 'post',  'contact'];
+        $table = ['personal', 'otherFamily', 'profilePics', 'post', 'contact'];
 
         $firstTable = array_shift($table);
 

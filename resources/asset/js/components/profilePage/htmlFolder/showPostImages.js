@@ -6,9 +6,6 @@ export const showPostImg = (data) => {
   .map(el => data[el])
 
   const picsImgHtml = (imgElement, i, postNo) => `
-  
-
-     
         <img 
           src="/resources/images/post/${imgElement}" 
           alt="images${i}" 

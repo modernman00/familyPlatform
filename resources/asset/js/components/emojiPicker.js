@@ -35,7 +35,9 @@ const renderEmojiList = (emojis, emojiContainerId, emojiTargetDataClass) => {
  
   emojiList.innerHTML = ''; // Clear existing emojis
 
-  const emojiTarget = document.querySelector(`[${emojiTargetDataClass}]`); // Where emojis will be inserted
+  // Scope to the closest form
+  const form = emojiList.closest('form');
+  const emojiTarget = form.querySelector(`[${emojiTargetDataClass}]`);
 
   // Load and render cached recent emojis first
   const cached = JSON.parse(localStorage.getItem(EMOJI_CACHE_KEY)) || [];

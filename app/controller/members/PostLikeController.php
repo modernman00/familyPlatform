@@ -41,7 +41,7 @@ class PostLikeController extends Db
             msgSuccess(200, 'success');
         } catch (\Throwable $th) {
 
-            returnErrorCode(505, $th);
+            showError($th);
         }
     }
 

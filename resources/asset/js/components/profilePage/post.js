@@ -42,8 +42,8 @@ export const allPost = (postData) => { // <-- Removed commentData parameter
  * @param {Object} el - The post object containing post data, including post number.
  * @returns {boolean} - Returns false if the post object is invalid.
  */
-export const appendNewPost = (el) => {
- const {post_no} = el 
+export const appendNewPost = (postArray) => {
+ const {post_no} = postArray 
 // Generate the IDs for the comment form and its components const 
 const commentFormId = `formComment${post_no}`; 
 const inputCommentId = `inputComment${post_no}`; 
@@ -56,7 +56,7 @@ const submitCommentId = `submitComment${post_no}`;
 
 // If the comment form components do not exist, create and append the new post
   if (!commentForm1 || !inputComment || !submitComment) {
-    const appendHTML = html(el);
+    const appendHTML = html(postArray);
 
   // Ensure the post belongs to the correct family code
     // if (el.postFamCode === famCode) {

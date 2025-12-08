@@ -32,20 +32,20 @@ const notificationHTML = (data) => {
 
     // Map notification types to icon classes
     // Map type → { icon, colour }
-const iconMap = {
-    friend_request: { icon: "fa-solid fa-user-plus", color: "text-primary" },       // Blue
-    like: { icon: "fa-solid fa-thumbs-up", color: "text-success" },                // Green
-    comment: { icon: "fa-solid fa-comment-dots", color: "text-info" },             // Cyan
-    Anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" },      // Gold
-    Birthday: { icon: "fa-solid fa-cake-candles", color: "text-warning" },         // Gold
-    Wedding: { icon: "fa-solid fa-heart", color: "text-warning" },                 // Gold
-    new_post: { icon: "fa-solid fa-file-lines", color: "text-purple" },            // Custom purple
-    House_Warming: { icon: "fa-solid fa-house", color: "text-orange" },            // Orange
-    Reunion: { icon: "fa-solid fa-people-group", color: "text-pink" },             // Pink
-    Party: { icon: "fa-solid fa-champagne-glasses", color: "text-danger" },        // Red
-    Meeting: { icon: "fa-solid fa-handshake", color: "text-teal" },                // Teal
-    default: { icon: "fa-solid fa-bell", color: "text-secondary" }                 // Grey
-};
+    const iconMap = {
+        friend_request: { icon: "fa-solid fa-user-plus", color: "text-primary" },       // Blue
+        like: { icon: "fa-solid fa-thumbs-up", color: "text-success" },                // Green
+        comment: { icon: "fa-solid fa-comment-dots", color: "text-info" },             // Cyan
+        Anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" },      // Gold
+        Birthday: { icon: "fa-solid fa-cake-candles", color: "text-warning" },         // Gold
+        Wedding: { icon: "fa-solid fa-heart", color: "text-warning" },                 // Gold
+        new_post: { icon: "fa-solid fa-file-lines", color: "text-purple" },            // Custom purple
+        House_Warming: { icon: "fa-solid fa-house", color: "text-orange" },            // Orange
+        Reunion: { icon: "fa-solid fa-people-group", color: "text-pink" },             // Pink
+        Party: { icon: "fa-solid fa-champagne-glasses", color: "text-danger" },        // Red
+        Meeting: { icon: "fa-solid fa-handshake", color: "text-teal" },                // Teal
+        default: { icon: "fa-solid fa-bell", color: "text-secondary" }                 // Grey
+    };
 
     const { icon, color } = iconMap[data.notification_type] || iconMap.default
 
@@ -120,11 +120,15 @@ axios.get(notificationURL)
         const data = res.data.message;
 
         if (data) {
+            console.log(data);
+
 
             if (data.length > 0) {
 
                 // Display the count of notifications
-                id('notification_count').innerHTML = data.length;
+                const countBadge = id('notification_count');
+                countBadge.innerHTML = data.length;
+                countBadge.style.display = 'flex';
 
                 // Store the notification count in session storage
                 sessionStorage.setItem('notificationCount', data.length);
@@ -137,7 +141,9 @@ axios.get(notificationURL)
                 const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
                 render(updateNotificationTiming);
             } else {
-                id('notification_count').innerHTML = 0;
+                const countBadge = id('notification_count');
+                countBadge.innerHTML = '0';
+                countBadge.style.display = 'none';
             }
 
         }
@@ -188,35 +194,40 @@ const notificationDropdown = id('notificationDropdown');
 const markAllReadBtn = id('markAllRead');
 const notificationCount = id('notification_count');
 
-// Toggle dropdown visibility
-notificationBtn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    notificationDropdown.classList.toggle('show');
-});
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function (e) {
-    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-        notificationDropdown.classList.remove('show');
-    }
-});
-
-// Prevent dropdown from closing when clicking inside it
-notificationDropdown.addEventListener('click', function (e) {
-    e.stopPropagation();
-});
-
-// Mark all as read functionality
-markAllReadBtn.addEventListener('click', function () {
-    const unreadItems = document.querySelectorAll('.notification-item.unread');
-    unreadItems.forEach(item => {
-        item.classList.remove('unread');
+// Only add event listeners if notification elements exist on the page
+if (notificationBtn && notificationDropdown) {
+    // Toggle dropdown visibility
+    notificationBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        notificationDropdown.classList.toggle('show');
     });
 
-    // Update notification count
-    notificationCount.textContent = '0';
-    notificationCount.style.display = 'none';
-});
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.classList.remove('show');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    notificationDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+}
+
+// Mark all as read functionality (only if button exists)
+if (markAllReadBtn && notificationCount) {
+    markAllReadBtn.addEventListener('click', function () {
+        const unreadItems = document.querySelectorAll('.notification-item.unread');
+        unreadItems.forEach(item => {
+            item.classList.remove('unread');
+        });
+
+        // Update notification count
+        notificationCount.textContent = '0';
+        notificationCount.style.display = 'none';
+    });
+}
 
 /* run once, after the dropdown HTML is in the page */
 const initDeleteOnce = () => {
@@ -230,7 +241,7 @@ const initDeleteOnce = () => {
         e.stopPropagation();                // keep dropdown open
         const bannerId = btn.id.replace('deleteNotification', 'notificationBar');
         const no = btn.getAttribute('data-no');
-    
+
 
         const url = `/removeNotification/${no}`;
 
@@ -242,9 +253,19 @@ const initDeleteOnce = () => {
                     document.getElementById(bannerId)?.remove();
 
                     // reduce the notification count as you have deleted the notification
-                    const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1);
+                    const currentCount = parseInt(sessionStorage.getItem('notificationCount')) - 1;
+                    const newValues = currentCount > 0 ? currentCount : 0;
+
                     sessionStorage.setItem('notificationCount', newValues);
-                    id('notification_count').innerHTML = newValues;
+
+                    const countBadge = id('notification_count');
+                    countBadge.innerHTML = newValues;
+
+                    if (newValues <= 0) {
+                        countBadge.style.display = 'none';
+                    } else {
+                        countBadge.style.display = 'flex';
+                    }
                 } else {
                     msgException('Error removing notification' + ' ' + response.data.message);
                 }

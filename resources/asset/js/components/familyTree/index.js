@@ -1,7 +1,7 @@
-import { id, log, getApiData } from '@shared'
+import { id } from '@shared'
 import { initTree } from './events'
 import { showPersonDetails } from './showModal'
-import axios from 'axios';
+
 
 const modalBody = id('modalBody');
 const closeModal = id('closeModal');
@@ -20,11 +20,12 @@ id('familyTree').addEventListener('click', (e) => {
   }
 
   const email = nodeFn('.node-email');
-  const id = nodeFn('.node-id');
+  const relation = nodeFn('.node-relation');
   const img = nodeFn('.node-img');
   const maritalStatus = nodeFn('.node-maritalStatus');
   const spouseName = nodeFn('.node-spouseName');
   const occupation = nodeFn('.node-occupation');
+  const country = nodeFn('.node-country');
 
   const detailData = {
     fullName: name,
@@ -33,26 +34,13 @@ id('familyTree').addEventListener('click', (e) => {
     maritalStatus: maritalStatus,
     spouseName: spouseName,
     occupation: occupation,
+    relation: relation,
+    country: country,
   }
 
   showPersonDetails(detailData);
 })
 
-
-// When a person node is clicked, show their details
-// document.querySelectorAll('.tree-node').forEach(node => {
-//   node.addEventListener('click', (e) => {
-//     e.stopPropagation(); // Prevent bubbling to parent
-
-//      // Get the name from the .node-name span
-//   const name = node.querySelector('.node-name')?.textContent?.trim();
-
-//         // Get the data-id from the .node-id span
-//   const idSpan = node.querySelector('.node-id');
-//   const dataId = idSpan?.dataset?.id || null;
-//     showPersonDetails(name);
-//   });
-// });
 
 // Close modal when "X" button is clicked
 closeModal.addEventListener('click', () => {
@@ -66,3 +54,25 @@ window.addEventListener('click', (e) => {
   }
 });
 
+// ===== INSTRUCTIONS TOGGLE =====
+const instructionsToggle = id('instructionsToggle');
+const instructions = id('instructions');
+
+// Check localStorage for saved state
+const instructionsState = localStorage.getItem('instructionsCollapsed');
+if (instructionsState === 'false') {
+  instructions.classList.remove('collapsed');
+}
+
+// Toggle instructions visibility
+instructionsToggle?.addEventListener('click', () => {
+  instructions.classList.toggle('collapsed');
+  const isCollapsed = instructions.classList.contains('collapsed');
+  localStorage.setItem('instructionsCollapsed', isCollapsed);
+
+  // Update button icon
+  const icon = instructionsToggle.querySelector('i');
+  if (icon) {
+    icon.className = isCollapsed ? 'bi bi-question-circle-fill' : 'bi bi-x-circle-fill';
+  }
+});

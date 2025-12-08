@@ -135,6 +135,14 @@ try {
                 // 1. Send the POST request to submit the form data
                 const response = await axios.post("/member/profilePage/post", formData, options);
 
+                console.log(response.data);
+
+                // Assuming the response contains the new post number in response.data.token
+                // You can adjust this based on your actual response structure
+
+                // Cache the new post data if needed
+                // await cachePost(response.data.newPost);
+
                 // 2. Notify members of similar famcode about the post by email
                 // 3. Update all members of similar famcode on their UIs using Pusher
                 await Promise.all([
@@ -144,7 +152,7 @@ try {
 
                 formReset("formPostMessageModal");
                 // redirect to the profile page
-                window.location.href = '/profilePage';
+             window.location.href = '/profilePage';
 
             } catch (error) {
                 console.error("An error occurred:", error.response);

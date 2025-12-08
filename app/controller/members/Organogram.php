@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\members;
 
+use App\controller\BaseController;
 use App\model\SingleCustomerData;
 
 use Src\{SelectFn};
@@ -22,34 +23,15 @@ class Organogram extends SingleCustomerData
     public function index($id): void
     {
         try {
-            // Verify token
-            $VerifyJWT = SignIn::verify();
-
-            if (!$VerifyJWT) {
-                redirect('/login');
-            }
-
+ 
             // Sanitize input
             $id = checkInput($id ?? '');
             if (empty($id)) {
                 throw new NotFoundException('Main person ID required');
             }
 
-            // Validate family code from session
-            $famCode = $_SESSION['famCode'] ?? null; // From Login.php
-            if (!$famCode) {
-                throw new NotFoundException('Unauthorized: Family code required');
-            }
+           $data = BaseController::membersData();
 
-            // Fetch main person's data
-            $tables = ['personal', 'profilePics', 'contact', 'work'];
-            $mainPerson = $this->getCustomerData($id, $tables);
-            if (empty($mainPerson)) {
-                throw new NotFoundException('Main person not found');
-            }
-
-            // Format main person data
-            $mainPersonData = $this->formatPerson($mainPerson);
 
             // Fetch other family members
             $spouse = $this->fetchRelationsData($id, 'otherFamily', 'spouse');
@@ -66,19 +48,18 @@ class Organogram extends SingleCustomerData
             }
 
             // Build response
-            $data = [
-                'main' => $mainPersonData,
+            $orgData = [
                 'spouse' => $spouse[0],
                 'father' => $father[0],
                 'mother' => $mother[0],
                 'siblings' => $siblings,
                 'children' => $children,
                 'sibling_children' => $siblingChildren
+           
             ];
 
-            //    \printArr($data);
 
-            view('member/organogram', compact('data'));
+         view('member/organogram', compact('orgData', 'data'));
 
             // msgSuccess(200, $response);
         } catch (\Throwable $th) {

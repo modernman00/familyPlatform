@@ -6,93 +6,97 @@
 @endpush
 @section('content')
 
-    <div class="organogram-container">
+<div class="organogram-container">
         <div class="organogram-header">
             <h2 class="organogram-title">
-                {{ isset($data['main']['firstName']) ? $data['main']['firstName'] : '' }}
-                {{ isset($data['main']['lastName']) ? $data['main']['lastName'] : '' }}'s family Tree
+                <i class="bi bi-diagram-3-fill"></i>
+                {{ isset($data['firstName']) ? $data['firstName'] : '' }}
+                {{ isset($data['lastName']) ? $data['lastName'] : '' }}'s Family Tree
             </h2>
 
-            {{-- <p class="organogram-subtitle">
-                This family tree represents every member of the family who share the same father and mother.
-                In future updates, we will expand the tree to include other family members who are linked solely
-                through either the mother's or father's side, further encompassing the broader family network.
-            </p> --}}
-
             <p class="organogram-subtitle">
-                Click a person to learn more, scroll to zoom, and drag to pan.
+                Explore your family connections • Click to view details • Drag to navigate
             </p>
 
         </div>
 
-        <div class="instructions">
-            <h4>How to Navigate:</h4>
+        <!-- Collapsible Instructions -->
+        <button class="instructions-toggle" id="instructionsToggle" title="Toggle Help">
+            <i class="bi bi-question-circle-fill"></i>
+        </button>
+
+        <div class="instructions collapsed" id="instructions">
+            <h4><i class="bi bi-info-circle"></i> How to Navigate:</h4>
             <ul>
-                <li>Click on any person to view details</li>
-                <li>Scroll to zoom in/out</li>
-                <li>Drag to pan around the tree</li>
-                <li>Use zoom buttons for precise control</li>
+                <li><i class="bi bi-cursor-fill"></i> Click any person to view details</li>
+                <li><i class="bi bi-zoom-in"></i> Scroll to zoom in/out</li>
+                <li><i class="bi bi-arrows-move"></i> Drag to pan around</li>
+                <li><i class="bi bi-plus-circle"></i> Use zoom buttons for control</li>
             </ul>
         </div>
-
-
         <div class="tree-container">
             <div class="tree-wrapper" id="treeWrapper">
                 <div class="tree" id="familyTree">
                     <ul>
                         <li>
                             <!-- Parents -->
-                            @include('member.includes.treeNode', [
-                                'type' => 'Father',
-                                'data' => $data['father'],
-                            ])
+                            <div class="couple-wrapper has-children">
+                                @include('member.includes.treeNode', [
+                                    'type' => 'Father',
+                                    'dataDB' => $orgData['father'],
+                                ])
 
-                            @include('member.includes.treeNode', [
-                                'type' => 'Mother',
-                                'data' => $data['mother'],
-                            ])
+                                @include('member.includes.treeNode', [
+                                    'type' => 'Mother',
+                                    'dataDB' => $orgData['mother'],
+                                ])
+                            </div>
 
 
                             {{--  THE MAIN PERSON IN FOCUS AND IF THERE IS A SPOUSE  --}}
                             <ul>
                                 <li>
 
-                                    @include('member.includes.treeNode', [
-                                        'type' => 'Me',
-                                        'data' => $data['main'],
-                                    ])
-
-
-
-                                    @isset($data['spouse']['name'])
+                                    @php
+                                        $hasChildren = isset($orgData['children']) && count($orgData['children']) > 0;
+                                    @endphp
+                                    <div class="couple-wrapper {{ $hasChildren ? 'has-children' : '' }}">
                                         @include('member.includes.treeNode', [
-                                            'type' => 'spouse',
-                                            'data' => $data['spouse'],
+                                            'type' => 'Me',
+                                            'dataDB' => $data,
                                         ])
-                                    @endisset
+
+                                        @isset($orgData['spouse']['name'])
+                                            @include('member.includes.treeNode', [
+                                                'type' => 'spouse',
+                                                'dataDB' => $orgData['spouse'],
+                                            ])
+                                        @endisset
+                                    </div>
 
                                     {{--  check if they have children --}}
+                                    {{--  check if they have children --}}
+                                    @if (isset($orgData['children']) && is_array($orgData['children']) && count($orgData['children']) > 0)
                                     <ul>
                                         <li>
-                                            @if (isset($data['children']) !== null)
-                                                @foreach ($data['children'] as $child)
-                                                
-                                                        @include('member.includes.treeNode', [
-                                                            'type' => 'child',
-                                                            'data' => $child,
-                                                        ])
-                                                
-                                                @endforeach
-                                            @endif
+                                            @foreach ($orgData['children'] as $child)
+                                            
+                                                    @include('member.includes.treeNode', [
+                                                        'type' => 'child',
+                                                        'dataDB' => $child,
+                                                    ])
+                                            
+                                            @endforeach
                                         </li>
                                     </ul>
+                                    @endif
 
                                 </li>
 
                                     {{--  check if the main person has siblings --}}
                                 
-                                    @isset($data['siblings'])
-                                        @foreach ($data['siblings'] as $sibling)
+                                    @isset($orgData['siblings'])
+                                        @foreach ($orgData['siblings'] as $sibling)
                                         <li>
                                             @isset($sibling['name'])
                                     
@@ -110,8 +114,8 @@
                                                     @endphp
                                                 
 
-                                                    @if ($siblingId && isset($data['sibling_children']))
-                                                    @foreach ($data['sibling_children'] as $child)
+                                                    @if ($siblingId && isset($orgData['sibling_children']))
+                                                    @foreach ($orgData['sibling_children'] as $child)
                                                     @if (isset($child['father_id']) && $child['father_id'] === $siblingId)
                                                     <ul>
                                                         <li>

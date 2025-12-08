@@ -5,16 +5,24 @@ import { imagePreview } from '../fileUploadPreview';
 // Get references to DOM elements used in the emoji picker and image preview - SHOW EMOJIs FOR POST
 
 const emojiToggle = document.getElementById('emojiPost'); // Button to show/hide emoji picker
-const emojiList = document.getElementById('emojiListPost'); // Container for emoji buttons
-
+const emojiContainer = document.getElementById('emojiPickerContainer'); // Container for emoji picker
+const closeEmojiBtn = document.getElementById('closeEmojiPicker'); // Close button
 
 showEmojiPicker('emojiListPost', 'data-emoji-target');
 
 // 🟡 Toggle emoji picker visibility when the toggle button is clicked
 emojiToggle.addEventListener('click', () => {
-    emojiList.classList.toggle('d-none'); // Show/hide the emoji list
-    emojiToggle.setAttribute('aria-expanded', emojiList.classList.contains('d-none') ? 'false' : 'true');
+    emojiContainer.classList.toggle('d-none'); // Show/hide the emoji container
+    emojiToggle.setAttribute('aria-expanded', emojiContainer.classList.contains('d-none') ? 'false' : 'true');
 });
+
+// Close button handler
+if (closeEmojiBtn) {
+    closeEmojiBtn.addEventListener('click', () => {
+        emojiContainer.classList.add('d-none');
+        emojiToggle.setAttribute('aria-expanded', 'false');
+    });
+}
 
 
 imagePreview('imageUpload', 'imagePreviewList', 'postModalImgFileNames', 'imagePreviewContainer', 'closeImagePreview');

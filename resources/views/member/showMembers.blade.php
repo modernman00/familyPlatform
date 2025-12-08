@@ -2,19 +2,19 @@
 @section('title', 'All Members')
 @section('data-page-id', 'allMembers')
 @push('styles')
-    <link rel="stylesheet" href="public/css/showMembers.css">
+    <link rel="stylesheet" href="/public/css/showMembers.css">
 @endpush
 @section('content')
 
 
     <!-- Header Section -->
-    <div class="members-header text-center">
-        <div class="container">
-            <h1 class="display-6 fw-bold">Meet Your Family Members & Close Associates</h1>
-            <p class="lead">Connect with amazing people from around the world</p>
-            <div class="mt-2">
-                <span class="badge bg-light text-dark me-1">{{ count($data) }} Members</span>
-
+    <!-- Header Section -->
+    <div class="members-header">
+        <div class="members-container">
+            <h1 class="fw-bold mb-2">Family Members</h1>
+            <p class="lead mb-2 small">Connect with your family</p>
+            <div class="d-inline-block">
+                <span class="badge bg-light text-dark rounded-pill px-3 py-2" id="memberCount">0 Members</span>
             </div>
         </div>
     </div>

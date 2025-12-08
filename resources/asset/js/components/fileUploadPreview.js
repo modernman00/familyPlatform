@@ -15,47 +15,84 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
   const previewList = id(previewListId); // Where preview thumbnails are shown
   const fileNamesDisplay = id(fileNamesDisplayId); // Text display of selected 
 
-  imageInput.addEventListener('change', () => {
-    const files = Array.from(imageInput.files); // Convert FileList to array
+  // Helper to update the UI and input files
+  const updatePreviews = (files) => {
     previewList.innerHTML = ''; // Clear previous previews
-    fileNamesDisplay.textContent = ''; // Clear file name display
 
     if (files.length === 0) {
-      previewContainer.classList.add('d-none'); // Hide preview section
+      previewContainer.classList.add('d-none');
+      fileNamesDisplay.textContent = '';
+      imageInput.value = ''; // Clear input if no files
       return;
     }
 
-    // For each selected image, create a thumbnail preview
-    files.forEach(file => {
-      if (file.size > 3 * 1024 * 1024) { // 3MB limit
-        alert('File too large. Max 10MB allowed.');
-      }
+    // Create a new DataTransfer to update the file input
+    const dataTransfer = new DataTransfer();
 
+    files.forEach((file, index) => {
+      dataTransfer.items.add(file);
+
+      // Create wrapper for image and remove button
+      const wrapper = document.createElement('div');
+      wrapper.className = 'position-relative d-inline-block';
+
+      const img = document.createElement('img');
       const reader = new FileReader();
       reader.onload = e => {
-        const img = document.createElement('img');
-        img.src = e.target.result; // Base64 image data
-        img.alt = 'Preview';
-        img.className = 'img-thumbnail';
-        img.style.maxWidth = '100px';
-        img.style.maxHeight = '100px';
-        previewList.appendChild(img);
+        img.src = e.target.result;
       };
-      reader.readAsDataURL(file); // Convert file to Base64
+      reader.readAsDataURL(file);
+
+      img.alt = 'Preview';
+      img.className = 'img-thumbnail';
+      img.style.maxWidth = '100px';
+      img.style.maxHeight = '100px';
+
+      // Create remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 p-0 rounded-circle d-flex align-items-center justify-content-center';
+      removeBtn.style.width = '20px';
+      removeBtn.style.height = '20px';
+      removeBtn.style.transform = 'translate(30%, -30%)';
+      removeBtn.innerHTML = '<i class="bi bi-x"></i>';
+      removeBtn.onclick = (e) => {
+        e.preventDefault(); // Prevent form submission if inside form
+        const newFiles = files.filter((_, i) => i !== index);
+        updatePreviews(newFiles);
+      };
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(removeBtn);
+      previewList.appendChild(wrapper);
     });
+
+    // Update the file input with the new list of files
+    imageInput.files = dataTransfer.files;
 
     // Show file names and reveal preview container
     fileNamesDisplay.textContent = files.map(f => f.name).join(', ');
     previewContainer.classList.remove('d-none');
+  };
+
+  imageInput.addEventListener('change', () => {
+    const files = Array.from(imageInput.files);
+
+    // Check for file size limit
+    const validFiles = files.filter(file => {
+      if (file.size > 3 * 1024 * 1024) { // 3MB limit
+        alert(`File ${file.name} is too large. Max 3MB allowed.`);
+        return false;
+      }
+      return true;
+    });
+
+    updatePreviews(validFiles);
   });
 
   if (closePreviewBtnId) {
     const closePreviewBtn = id(closePreviewBtnId); // Button to clear image previews
     closePreviewBtn.addEventListener('click', () => {
-      imageInput.value = ''; // Reset file input
-      previewList.innerHTML = ''; // Clear thumbnails
-      fileNamesDisplay.textContent = ''; // Clear file names
-      previewContainer.classList.add('d-none'); // Hide preview section
+      updatePreviews([]); // Clear all
     });
   }
 }

@@ -1,9 +1,11 @@
 'use strict';
-import { showError , log} from '@modernman00/shared-js-lib';
+import { showError, log } from '@modernman00/shared-js-lib';
 
+import "./components/navbar"
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
   const routeMap = {
     '/register': {
       module: () => import(/* webpackChunkName: 'register' */ './components/register/'),
@@ -11,10 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     '/allMembers': {
       module: () => import(/* webpackChunkName: 'all_members' */ './components/allMembers/'),
-      hide: ['.allMemberNav'], // Hide allMembers navbar
+      hide: ['.allMembersNav'], // Hide allMembers navbar
     },
     '/login': {
-      
+
       module: () => import(/* webpackChunkName: 'login' */ './components/acctMgt/login.js'),
       hide: ['.login'], // Hide login navbar
     },
@@ -52,14 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     '/organogram': {
       module: () => import(/* webpackChunkName: 'organogram' */ './components/familyTree/index.js'),
-      hide: ['.familyTreeNav'], // Hide family tree navbar
+      hide: ['.familyTreeNav', '.profileNav'], // Hide family tree navbar
     },
     '/allMembers/getProfile': {
       // Module import commented out — placeholder for future logic
-      hide: ['.familyTreeNav', '.notification_count'], // Hide navbars
+      hide: ['.familyTreeNav'], // Hide navbars
     },
     '/accountSetting': {
-      
+
       module: () => import(/* webpackChunkName: 'accountSetting' */ './components/accountSetting'),
 
     },
@@ -69,22 +71,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     const path = window.location.pathname;
-      // Enhanced route matching that handles parameters
-  let routeKey = Object.keys(routeMap).find(routePath => {
-    // Exact match
-    if (path === routePath) return true;
-    
-    // Match routes with parameters like /organogram/870016OLAWALE
-    if (path.startsWith(routePath + '/')) return true;
-    
-    return false;
-  });
+    // Enhanced route matching that handles parameters
+    let routeKey = Object.keys(routeMap).find(routePath => {
+      // Exact match
+      if (path === routePath) return true;
 
-  if (!routeKey) {
-    throw new Error(`Unhandled route: ${path}`);
-  }
+      // Match routes with parameters like /organogram/870016OLAWALE
+      if (path.startsWith(routePath + '/')) return true;
 
-  const route = routeMap[routeKey];
+      return false;
+    });
+
+    if (!routeKey) {
+      throw new Error(`Unhandled route: ${path}`);
+    }
+
+    const route = routeMap[routeKey];
 
     if (!route) {
       throw new Error(`Unhandled route: ${path}`);
@@ -144,26 +146,29 @@ try {
     });
   });
 
-        const darkModeToggle = document.getElementById('darkModeToggle');
-                const body = document.body;
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const body = document.body;
 
-                // Check for saved dark mode preference
-                if (localStorage.getItem('darkMode') === 'enabled') {
-                    body.classList.add('dark-mode');
-                    darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
-                }
+  // Only initialize dark mode if the toggle exists on the page
+  if (darkModeToggle) {
+    // Check for saved dark mode preference
+    if (localStorage.getItem('darkMode') === 'enabled') {
+      body.classList.add('dark-mode');
+      darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+    }
 
-                darkModeToggle.addEventListener('click', () => {
-                    body.classList.toggle('dark-mode');
+    darkModeToggle.addEventListener('click', () => {
+      body.classList.toggle('dark-mode');
 
-                    if (body.classList.contains('dark-mode')) {
-                        localStorage.setItem('darkMode', 'enabled');
-                        darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
-                    } else {
-                        localStorage.setItem('darkMode', null);
-                        darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
-                    }
-                });
+      if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+        darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+      } else {
+        localStorage.setItem('darkMode', null);
+        darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
+      }
+    });
+  }
 } catch (error) {
   showError(error);
 }

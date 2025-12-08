@@ -22,30 +22,45 @@ try {
     // Global state object with data-fetching and initialization logic
     const state = {
         posts: [], // Renamed 'post' to 'posts' for clarity
+        pagination: {},
 
         // Method to fetch initial data and populate state
-        async initialize() {
+        async initialize(page = 1) {
             try {
-              const pullData = await axios.get(`/post/getAllPostCommentByFamCode`);
-            
-            // --- THE FIX IS HERE ---
-            // Manually parse the data string before using it
-            let responseData = pullData.data;
+                const pullData = await axios.get(`/post/getAllPostCommentByFamCode?page=${page}&limit=50`);
 
-            // Check if the data is a string and needs parsing (based on your screenshot)
-            if (typeof responseData === 'string') {
-                responseData = JSON.parse(responseData);
-            }
-                   
-            // 1. Assign the new 'posts' array from the parsed response
-            this.posts = responseData.message;
+                // --- THE FIX IS HERE ---
+                // Manually parse the data string before using it
+                let responseData = pullData.data;
 
-            if (this.posts.length > 0) {
-                // 2. Loop and render.
-                this.posts.forEach(post => allPost(post));
-            } else {
-                log("No post");
-            }
+                // Check if the data is a string and needs parsing (based on your screenshot)
+                if (typeof responseData === 'string') {
+                    responseData = JSON.parse(responseData);
+                }
+
+                // 1. Assign the new 'posts' array from the parsed response
+                // Handle new response structure with pagination
+                if (responseData.message && responseData.message.message) {
+                    this.posts = responseData.message.message;
+                    this.pagination = responseData.message.pagination;
+                } else {
+                    // Fallback for old structure or direct array
+                    this.posts = responseData.message || [];
+                }
+
+                // Clear existing posts if it's a new page load (optional, depends on UX)
+                // For now, we append, but for pagination usually we clear or replace.
+                // Let's clear the container for standard pagination behavior
+                id('postIt').innerHTML = '';
+
+                if (this.posts.length > 0) {
+                    // 2. Loop and render.
+                    this.posts.forEach(post => allPost(post));
+                    this.renderPagination();
+                } else {
+                    log("No post");
+                    id('postIt').innerHTML = '<p class="text-center text-muted mt-4">No posts found.</p>';
+                }
 
             } catch (error) {
                 console.error("Error fetching posts and comments:", error);
@@ -53,6 +68,57 @@ try {
 
 
             }
+        },
+
+        renderPagination() {
+            const paginationEl = id('feedPagination');
+            if (!paginationEl || !this.pagination) return;
+
+            const { current_page, last_page } = this.pagination;
+            let html = '';
+
+            // Previous Button
+            html += `
+                <li class="page-item ${current_page === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${current_page - 1}" tabindex="-1">Previous</a>
+                </li>
+            `;
+
+            // Page Numbers (Simplified range for now)
+            for (let i = 1; i <= last_page; i++) {
+                // Show first, last, current, and neighbors
+                if (i === 1 || i === last_page || (i >= current_page - 1 && i <= current_page + 1)) {
+                    html += `
+                        <li class="page-item ${i === current_page ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `;
+                } else if (i === current_page - 2 || i === current_page + 2) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+
+            // Next Button
+            html += `
+                <li class="page-item ${current_page === last_page ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${current_page + 1}">Next</a>
+                </li>
+            `;
+
+            paginationEl.innerHTML = html;
+
+            // Add event listeners
+            paginationEl.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newPage = parseInt(e.target.dataset.page);
+                    if (newPage && newPage !== current_page && newPage > 0 && newPage <= last_page) {
+                        this.initialize(newPage);
+                        // Scroll to top of feed
+                        document.querySelector('.feed-column').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
         }
     };
 

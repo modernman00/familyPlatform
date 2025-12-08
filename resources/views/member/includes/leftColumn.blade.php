@@ -4,7 +4,7 @@
                 <div class="card-header position-relative">
                     <div class="cover-photo"
                         style="height: 100px; background-color: #0a526f; border-radius: 8px 8px 0 0;"></div>
-                    <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg">
+                    <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Avatar" class="avatar profileImg">
                 </div>
 
                 <div class="card-body">

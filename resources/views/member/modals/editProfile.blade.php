@@ -10,7 +10,7 @@
             'httponly' => false,
         ]);
 
-        $_SESSION['EDIT_PROFILE_ID'] = $data['id'];
+        $_SESSION['EDIT_PROFILE_ID'] = $_SESSION['id'];
 
     @endphp
 
@@ -35,8 +35,8 @@
                         <p id="editProfileFormModal_notification"></p>
 
                         <div class="text-center mb-4">
-                            @isset($data['img'])
-                                <img src="{{ asset('img/profile/' . $data['img']) }}" alt="Profile"
+                            @isset($data['profilePics'])
+                                <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Profile"
                                     class="rounded-circle mb-1" width="122" height="122" id="profilePreview">
                                 <br>
 
