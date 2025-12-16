@@ -560,7 +560,7 @@ var renderHtmlFamily = function renderHtmlFamily(family, no) {
   if (no) {
     var kids_sib = family == "addChildren" ? "kid" : "sibling";
     var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
-    if (family === "addSiblings") {
+    if (family === "sibling") {
       optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
     }
     return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
@@ -1105,10 +1105,10 @@ __webpack_require__.r(__webpack_exports__);
 var show = function show(kids_or_sib, event) {
   try {
     // what was picked or selected
-    var value = event.target.value;
+    var value = Number(event.target.value) || 0;
 
     // childrenOnchangeValue = value;
-    var addDiv = kids_or_sib == "kids" ? "addChildren" : "addSiblings";
+    var addDiv = kids_or_sib == "children" ? "children" : "sibling";
 
     // remove the div 
     (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.removeDiv)(addDiv);
@@ -1128,7 +1128,7 @@ var show = function show(kids_or_sib, event) {
         getSelectHelp.style.fontSize = '1rem';
         getSelectHelp.style.color = '#fc2003';
         var html = (0,_html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__.renderHtmlFamily)(addDiv, no);
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('afterBegin', html);
+        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('beforeEnd', html);
       }
     }
   } catch (error) {
@@ -1138,13 +1138,13 @@ var show = function show(kids_or_sib, event) {
 
 // ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
 var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
-  var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("siblings_id");
-  var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("kids_id");
-  kidInput.addEventListener('change', function (event) {
-    return show('kids', event);
+  var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("children_id");
+  var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("sibling_id");
+  if (kidInput) kidInput.addEventListener('change', function (event) {
+    return show('children', event);
   });
-  sibInput.addEventListener('change', function (event) {
-    return show('siblings', event);
+  if (sibInput) sibInput.addEventListener('change', function (event) {
+    return show('sibling', event);
   });
 };
 onChangeKidAndSiblings();

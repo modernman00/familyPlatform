@@ -14,9 +14,9 @@
         <!-- Profile Header -->
         <div class="profile-header">
             <div class="profile-info">
-                <img src="/resources/images/profile/{{ $data['img'] }}" alt="{{ $data['firstName'] }} {{ $data['lastName'] }}" class="profile-avatar">
+                <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
                 <div class="profile-details">
-                    <h1>{{ $data['firstName'] }} {{ $data['lastName'] }}</h1>
+                    <h1>{{ $data['fullName'] }}</h1>
                     <div class="family-tree-name"> 
                       
                     </div>
@@ -35,25 +35,24 @@
                 <div class="info-card">
                     <h3><i class="bi bi-info-circle-fill me-2"></i>Basic Information</h3>
                     <div class="detail-item">
-                        <div class="detail-icon"><i class="bi bi-gender-male"></i></div>
+                        <div class="detail-icon"><i class="{{ $data['gender'] == 'Female' ? 'bi bi-gender-female' : 'bi bi-gender-male' }}"></i></div>
                         <div class="detail-content">
-                            <div class="detail-label">{{$data['gender']}}</div>
+                            <div class="detail-label">Gender</div>
                             <div class="detail-value">{{$data['gender']}}</div>
                         </div>
                     </div>
-                          <div class="detail-item">
+                    <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Date of Birth</div>
                             <div class="detail-value">{{ $data['day'] }} / {{ $data['month'] }}</div>
                         </div>
                     </div>
-
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Relationship Status</div>
-                            <div class="detail-value">{{$data['marital_status']}}</div>
+                            <div class="detail-value">{{$data['maritalStatus']}}</div>
                         </div>
                     </div>
                 </div>
@@ -65,21 +64,21 @@
                         <div class="detail-icon"><i class="bi bi-person"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Father</div>
-                            <div class="detail-value">{{ $data['father_name'] }}</div>
+                            <div class="detail-value">{{ $data['father']['fullName'] }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-person"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Mother</div>
-                            <div class="detail-value">{{ $data['mother_name'] }}</div>
+                            <div class="detail-value">{{ $data['mother']['fullName'] }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-person-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Spouse/Partner</div>
-                            <div class="detail-value">{{ $data['spouse_name'] }}</div>
+                            <div class="detail-value">{{ $data['spouse']['fullName'] }}</div>
                         </div>
                     </div>
                 </div>
@@ -89,7 +88,7 @@
                     <h3><i class="bi bi-telephone-fill me-2"></i>Contact Information</h3>
                     <div class="contact-info">
                         <div class="contact-item">
-                            <i class="bi bi-phone"></i> +{{ $data['mobile'] }}
+                            <i class="bi bi-phone"></i> {{ $data['mobile'] }}
                         </div>
                         <div class="contact-item">
                             <i class="bi bi-envelope"></i> {{ $data['email'] }}
@@ -107,26 +106,15 @@
                 <div class="info-card">
                     <h3><i class="bi bi-diagram-3-fill me-2"></i>Immediate Family</h3>
                     <div class="family-members">
-                        <div class="family-member">
-                            <img src="https://randomuser.me/api/portraits/men/65.jpg" alt="Father" class="member-avatar">
-                            <div class="member-name">SHOLA OLAOGUN</div>
-                            <div class="member-relation">Father</div>
-                        </div>
-                        <div class="family-member">
-                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Mother" class="member-avatar">
-                            <div class="member-name">ADEBOLA OLAOGUN</div>
-                            <div class="member-relation">Mother</div>
-                        </div>
-                        <div class="family-member">
-                            <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="Sister" class="member-avatar">
-                            <div class="member-name">FUNMILAYO OLAOGUN</div>
-                            <div class="member-relation">Sister</div>
-                        </div>
-                        <div class="family-member">
-                            <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="Brother" class="member-avatar">
-                            <div class="member-name">KAYODE OLAOGUN</div>
-                            <div class="member-relation">Brother</div>
-                        </div>
+                        @foreach ($relativesWithImgs as $relative)
+                        <a href="{{ route('allMembers/seeProfile/'.$relative['id']) }}">    
+                            <div class="family-member">
+                                <img src="{{ $relative['img'] }}" alt="Father" class="member-avatar">
+                                <div class="member-name">{{ $relative['fullName'] }}</div>
+                                <div class="member-relation">{{ $relative['relationship'] }}</div>
+                            </div>
+                        </a>
+                        @endforeach
                     </div>
                 </div>
 
@@ -160,21 +148,21 @@
                         <div class="detail-icon"><i class="bi bi-briefcase"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Occupation</div>
-                            <div class="detail-value">Business Owner</div>
+                            <div class="detail-value">{{$data['occupation']}}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-book"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Education</div>
-                            <div class="detail-value">MSc. Business Administration</div>
+                            <div class="detail-value">{{$data['education']}}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-star"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Interests</div>
-                            <div class="detail-value">Traveling, Photography, Community Service</div>
+                            <div class="detail-value">{{$data['interests']}}</div>
                         </div>
                     </div>
                 </div>

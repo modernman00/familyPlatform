@@ -81,6 +81,7 @@
 
 
         <script>
+
             const profile = {
                 requesterFirstName: @json($data['firstName']),
                 requesterLastName: @json($data['lastName']),
@@ -99,5 +100,5 @@
               localStorage.setItem('yourName', yourName);
 
             // Convert the object to a JSON string and store it in localStorage
-            localStorage.setItem('profile', JSON.stringify(profile));
+            // localStorage.setItem('profile', JSON.stringify(profile));
         </script>

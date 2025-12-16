@@ -40,13 +40,14 @@
 
         'contact' => [
         'mixed',
-        'label' => ['mobile number', 'email', 'country'],
-        'attribute' => ['mobile', 'email', 'country'],
-        'inputType' => ['text', 'email', 'text'],
-        'value' => [$accountData['mobile'], $accountData['email'], $accountData['country']],
+        'label' => ['mobile number', 'email', 'country', 'occupation'],
+        'attribute' => ['mobile', 'email', 'country', 'occupation'],
+        'inputType' => ['text', 'email', 'text', 'text'],
+        'value' => [$accountData['mobile'], $accountData['email'], $accountData['country'], $accountData['occupation']],
         'icon' => [
         '<i class="fa fa-envelope-square"></i>',
         '<i class="fa fa-mobile"></i>',
+        '<i class="fa fa-user"></i>',
         '<i class="fa fa-user"></i>'
         ]
         ],

@@ -993,7 +993,6 @@ axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function
   // Extract the notifications from the response
   var data = res.data.message;
   if (data) {
-    console.log(data);
     if (data.length > 0) {
       // Display the count of notifications
       var countBadge = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
@@ -1223,7 +1222,6 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     '/allMembers/getProfile': {
       // Module import commented out — placeholder for future logic
-      hide: ['.familyTreeNav'] // Hide navbars
     },
     '/accountSetting': {
       module: function module() {

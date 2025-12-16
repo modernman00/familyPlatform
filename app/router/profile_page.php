@@ -10,7 +10,8 @@ $router->map('GET', '/profilePage', 'App\controller\members\ProfilePage@index', 
 
 //commentByNo
 
-
+// get signedinuser profile 
+$router->map('GET', '/signedinuser', 'App\controller\BaseController@membersData', 'signedinuser');
 
 $router->map('POST', '/member/profilePage/profileImg', 'App\controller\members\ProfilePage@profileImage', 'profile_page_profileImg');
 

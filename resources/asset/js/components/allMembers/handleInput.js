@@ -1,141 +1,164 @@
-import { id, showError,  showNotification } from "../global";
-import { renderHtml } from "./html";
+// resources/js/allMembers/handleInput.js
+import { id, msgException, showNotification } from "../global";
 import { checkBox } from "@shared";
 import axios from "axios";
 
-const reqId = localStorage.getItem('requesterId');
-const famCode = localStorage.getItem('requesterFamCode');
+/**
+ * Render the "invite a new member" block when there is no search match.
+ *
+ * @param {HTMLElement} container
+ * @param {string} rawQuery
+ */
+const renderInviteBlock = (container, rawQuery) => {
+  const famCode = localStorage.getItem("requesterFamCode") || "";
+  const yourName = localStorage.getItem("yourName") || "";
 
-const allMembersContainer = id('allMembers');
+  container.innerHTML = `
+    <p>No matching name found – do you want us to send them a text/email to register to the platform?</p>
+    ${checkBox("newMemberRequest")} <br>
 
-const noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+    <input type="hidden" id="newMemberName" value="${rawQuery}">
 
+    <input type="text" id="newMemberRequestName" class="form-control"
+           name="newMemberRequestName"
+           placeholder="Enter their name">
 
-export const handleInput = (data, WithFamCode, renderMembers) => {
-    const searchInput = id('searchFamily');
-    const inputVal = searchInput.value.trim().toLowerCase();
+    <input type="text" id="newMemberRequestEmail" class="form-control"
+           name="newMemberRequestEmail"
+           placeholder="Enter their email address or mobile number">
 
-    allMembersContainer.innerHTML = "";
+    <p id="loader" class="loader" style="display:none;"></p>
+    <small id="newMemberRequest_help" class="form-text text-muted"></small>
 
-    if (inputVal === "") {
+    <button class="button is-primary" id="newMemberRequestBtn">Send Request</button>
+  `;
 
-        renderMembers(WithFamCode, allMembersContainer, noMemberHTML, renderHtml);
+  const nameInput = id("newMemberRequestName");
+  const emailInput = id("newMemberRequestEmail");
+  const submitBtn = id("newMemberRequestBtn");
+  const helpMsg = id("newMemberRequest_help");
 
-    } else {
-        let filteredData = data.filter(el =>
-            el.firstName.toLowerCase().includes(inputVal) || el.lastName.toLowerCase().includes(inputVal) || el.email.toLowerCase().includes(inputVal) || el.mobile.toLowerCase().includes(inputVal) || el.famCode.toLowerCase().includes(inputVal) || el.country.toLowerCase().includes(inputVal)
-        );
-        // if no match found, show a message with a checkbox to send a request to the new member to join the platform
-        // the checkbox will show a form to enter the new member's name and email or mobile number
-        // the form will have a submit button to send the request
+  // hide fields until checkbox ticked
+  nameInput.style.display = "none";
+  emailInput.style.display = "none";
+  submitBtn.style.display = "none";
 
-        if (filteredData.length === 0) {
+  const yesCheckbox = id("newMemberRequestYes");
+  if (yesCheckbox) {
+    yesCheckbox.addEventListener("click", () => {
+      nameInput.style.display = "block";
+      emailInput.style.display = "block";
+      submitBtn.style.display = "block";
+    });
+  }
 
-            allMembersContainer.innerHTML = `No matching name found-  Do you want us to send them a text/email to register to the platform</i>?</h4>${checkBox('newMemberRequest')} <br> 
-            
-            <input type="hidden" id="newMemberName" value="${inputVal}">
+  submitBtn.addEventListener("click", async () => {
+    const emailOrMobile = emailInput.value.trim();
+    const name = nameInput.value.trim();
 
-             <input type="type" id="newMemberRequestName" class="form-control" name="newMemberRequestName" data-yourName = "" placeholder="Enter their name" >
+    const mobileRegex = /^\+?[1-9]\d{1,14}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-            <input type="type" id="newMemberRequestEmail" class="form-control" name="newMemberRequestEmail" data-yourName = "" placeholder="Enter their email address or mobile number" >
-
-            <p id="loader" class="loader" style="display:none;"><p>
-            <small id="newMemberRequest_help" class="form-text text-muted"></small>
-
-            <button class="button is-primary" id="newMemberRequestBtn">Send Request</button>`;
-
-             id('newMemberRequestEmail').style.display = 'none';
-             id('newMemberRequestName').style.display = 'none';
-             id('newMemberRequestBtn').style.display = 'none';
-
-            id('newMemberRequestYes').addEventListener('click', () => {
-
-                 id('newMemberRequestName').style.display = 'block';
-                 id('newMemberRequestEmail').style.display = 'block';
-                  id('newMemberRequestBtn').style.display = 'block';
-            });
-
-            id('newMemberRequestBtn').addEventListener('click', () => {
-                const email = id('newMemberRequestEmail').value;
-                const name = id('newMemberRequestName').value;
-                const yourName = localStorage.getItem('yourName');
-                const familyCode = localStorage.getItem('requesterFamCode');
-                // check if email is an email or mobile number
-                const mobileRegex = /^\+?[1-9]\d{1,14}$/; // Simple regex for international phone numbers
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex for email addresses
-                const helpMsg = id('newMemberRequest_help');
-
-                if (!emailRegex.test(email) && !mobileRegex.test(email)) {
-                    helpMsg.innerHTML = 'Please enter a valid email address or mobile number.';
-                
-                    return;
-                }
-
-                if(!emailRegex.test(email) && mobileRegex.test(email)) {
-                    // if it is a mobile number, ensure it starts with country code
-                    if(!email.startsWith('+')) {
-                        helpMsg.innerHTML = 'Please include the country code. E.g +2348036517179';
-                 
-                        return;
-                    } else {
-                        // send a text to the mobile number
-                    }
-                } else if (emailRegex.test(email)) {
-                        if (name.length < 2) {
-                            helpMsg.innerHTML = 'Please enter a valid name with at least 2 characters.';
-                
-                    return;
-                }
-            
-                    // send an email to the email address
-                       const postObj = {
-                                mobile: "",
-                                viewPath: "msg/contactNewMember",
-                    
-                                data: {
-                                    email: email,
-                                    mobile: "",
-                                    name: name,
-                                    familyCode: familyCode,
-                                    yourName: yourName,
-                                },
-                    
-                                subject: `${yourName} Wants You: Experience the Magic of your Family Network Today!`,
-                            };
-
-                              axios.post("/register/contactNewMember", postObj).then((response) => {
-
-                                showNotification(`allMembers`, 'is-success', response.data.message);
-
-                                helpMsg.innerHTML = "";
-
-                            })
-                                .catch((error) => {
-                                    showNotification(`allMembers`, 'is-danger', error.message);
-                              
-                                });
-                    
-                }
-
-            
-                
-            });
-
-
-
-        } else {
-            const uniqueItems = {};
-
-            for (const item of filteredData) {
-                if (!uniqueItems[item.id] || item.requester_id == reqId) {
-                    uniqueItems[item.id] = item;
-                }
-            }
-
-            const filteredDataByIdAndCurrentUser = Object.values(uniqueItems);
-         
-            filteredDataByIdAndCurrentUser.forEach(renderHtml);
-        }
+    // validation
+    if (!emailRegex.test(emailOrMobile) && !mobileRegex.test(emailOrMobile)) {
+      helpMsg.textContent =
+        "Please enter a valid email address or mobile number.";
+      return;
     }
+
+    if (mobileRegex.test(emailOrMobile) && !emailOrMobile.startsWith("+")) {
+      helpMsg.textContent =
+        "Please include the country code. E.g. +2348036517179";
+      return;
+    }
+
+    if (emailRegex.test(emailOrMobile) && name.length < 2) {
+      helpMsg.textContent =
+        "Please enter a valid name with at least 2 characters.";
+      return;
+    }
+
+    // current implementation: send email only
+    if (emailRegex.test(emailOrMobile)) {
+      const postObj = {
+        mobile: "",
+        viewPath: "msg/contactNewMember",
+        data: {
+          email: emailOrMobile,
+          mobile: "",
+          name,
+          familyCode: famCode,
+          yourName,
+        },
+        subject: `${yourName} Wants You: Experience the Magic of your Family Network Today!`,
+      };
+
+      try {
+        const response = await axios.post("/register/contactNewMember", postObj);
+        showNotification("allMembers", "is-success", response.data.message);
+        helpMsg.textContent = "";
+      } catch (error) {
+        showNotification("allMembers", "is-danger", error.message);
+      }
+    }
+  });
 };
 
+/**
+ * Factory that returns a debounced search handler using the backend /allMembers/search endpoint.
+ *
+ * @param {object} options
+ * @param {Array<object>} options.familyMembers
+ * @param {Array<object>} options.directoryMembers  // currently unused but handy if you want to fall back
+ * @param {Function} options.renderMembers
+ * @param {HTMLElement} options.container
+ * @param {string} options.searchUrl  // e.g. `${URL}allMembers/search`
+ * @returns {(e: InputEvent) => void}
+ */
+export const createSearchHandler = ({
+  familyMembers,
+  renderMembers,
+  container,
+  searchUrl,
+}) => {
+  const searchInput = id("searchFamily");
+  let debounceTimer = null;
+
+  const performSearch = async () => {
+    const rawQuery = searchInput.value.trim();  // THE SEARCH QUERY
+
+
+    // empty query = back to my network
+    if (!rawQuery) {
+      renderMembers(familyMembers);
+      return;
+    }
+
+    try {
+      const response = await axios.get(searchUrl, {
+        params: { q: rawQuery },
+      });
+
+      const data = response.data || {};
+      const matches = data.message || [];
+
+      if (!matches.length) {
+        renderInviteBlock(container, rawQuery);
+        return;
+      }
+
+      // backend already orders: family first, then approved, etc.
+      container.innerHTML = "";
+      renderMembers(matches);
+    } catch (error) {
+      showNotification("allMembers", "is-danger", "Search failed. Please try again.");
+      // optional: log or surface more detail in dev builds
+      msgException(error);
+    }
+  };
+
+  return () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(performSearch, 200);
+  };
+};

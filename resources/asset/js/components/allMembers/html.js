@@ -14,28 +14,29 @@ const toSentenceCase = (str) => {
 }
 
 export const renderHtml = (el) => {
-  const famCode = localStorage.getItem('requesterFamCode')
-  const reqId = localStorage.getItem('requesterId')
+
+  log(el)
 
   try {
     if (!el) {
       // Handle the case where 'el' is falsy, such as when data is not available.
       throw new Error('there is no data')
     }
-    log(el)
 
     const theImg = `/resources/images/profile/${el.img}`;
-    const statusButtonHTML = el.status !== null ?
-      el.status :
-      'Connect';
-    const relationshipType = (el.relationship) ? el.relationship : 'Immediate Family';
+    const status = el.status?.toLowerCase() || null;
+    let statusButtonHTML = 'Connect';
+    let tooltip = '';
+    tooltip =
+      status === 'rejected'
+        ? 'You can send another request'
+        : 'Send request';
 
-    const disableButton = statusButtonHTML === "Request sent" ? "disabled" : "";
 
-    const fatherName = toSentenceCase(el.father_name);
-    const motherName = toSentenceCase(el.mother_name);
-    const spouseName = toSentenceCase(el.spouse_name);
-    // const spouse = toSentenceCase(el.spouseName);
+    if (status === 'request sent') {
+      statusButtonHTML = 'Request sent';
+    }
+    const disableButton = status === 'request sent' ? 'disabled' : '';
 
     // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
     const html = `
@@ -48,8 +49,10 @@ export const renderHtml = (el) => {
         <div class="member-card-body">
             <h3 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h3>
             <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.country}</p>
+                <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.famCode}</p>
+                  <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.email}</p>
 
-  ${el.relationType ? `
+  ${el.relationType !== 'other' ? `
     <div class="member-details">
 
          <p class="member-detail">  <i class="fa fa-link"></i><span>${el.relationType}</span></p>
@@ -66,15 +69,17 @@ export const renderHtml = (el) => {
       <button class="btn-remove" id="removeProfile${el.id}" tooltip="Remove Connection">
         <i class="fa fa-user-times"></i> Remove
       </button>
-    </div>
+    </div> 
   ` : `
     <div class="member-interests">
       <button class="btn-profile primary-action" 
               data-user-id="addFamily${el.id}" 
+              id="addFamily${el.id}"
               ${disableButton}
-              tooltip="Send Request">
+              tooltip="${tooltip}">
         <i class="fa fa-user-plus"></i> ${statusButtonHTML}
       </button>
+      <small>${tooltip}</small>
     </div>
   `}
 </div>

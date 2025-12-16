@@ -187,8 +187,6 @@ class PostMessage
             params: [$famCode, $id]
         );
 
-        p($newPost);
-
         Pusher::broadcast('posts-channel', 'new-post', $newPost);
     }
 

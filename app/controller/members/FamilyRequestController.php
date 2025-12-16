@@ -3,23 +3,34 @@
 namespace App\Controller\members;
 
 use App\classes\{
-  Select,
   Update,
   Insert,
-  PushNotificationClass
+  PushNotificationClass,
+  Pusher
 };
 
+use App\controller\BaseController;
 use App\model\SingleCustomerData;
+use Src\functionality\SendEmailFunctionality;
+use Src\SelectFn;
+use Src\SubmitForm;
+use Src\ToSendEmail;
+use Src\Select;
+use Src\UpdateFn;
 
 
-class FamilyRequestController extends Select
+class FamilyRequestController extends BaseController
 {
 
   public static function addToFamily(): void
   {
     echo "<h1> add to family</h1>";
   }
-
+  /**
+   * Summary of request
+   * /members/familyRequestMgt
+   * @return void
+   */
   public static function request(): void
   {
     try {
@@ -28,7 +39,7 @@ class FamilyRequestController extends Select
       $dataFromJs = json_decode(file_get_contents("php://input"), true);
 
       if (!$dataFromJs) {
-        msgException(errCode: 301, msg: "Invalid request data.");
+        msgException(301, "Invalid request data.");
       }
 
 
@@ -45,45 +56,39 @@ class FamilyRequestController extends Select
       // 'requesterProfileImg' => 'olutobs_13th.jpeg',
       // 'requesterFamCode' => 'MODERNMAN',}
 
+      $requesterData = BaseController::membersData();
+
       $theApproverID = $dataFromJs['approver']['approverId'];
-      $theRequesterID = $dataFromJs['requester']['requesterId'];
+      $theRequesterID = $requesterData['id'];
       $theApproverCode = $dataFromJs['approver']['approverCode'];
+      $theRequesterCode = $requesterData['famCode'];
       $approverEmail = $dataFromJs['approver']['approverEmail'];
 
       // validate the input 
 
       if (empty($theApproverID) || empty($theRequesterID) || empty($theApproverCode)) {
-        msgException(errCode: 301, msg: "Invalid request data for Request.");
+        msgException(301, "Invalid request data for Request.");
       }
 
       $tableData = [
         'approver_id' => $theApproverID,
         'requester_id' => $theRequesterID,
+        'requesterCode' => $theRequesterCode,
+        'approverCode' => $theApproverCode,
         'status' => "Request sent"
       ];
 
       // check if there is a combination of requester and approved id and the status is request sent
 
-      $query = Select::formAndMatchQuery(
-        selection: 'SELECT_AND',
-        table: 'requestMgt',
-        identifier1: 'approver_id',
-        identifier2: 'requester_id'
-      );
-
-      $result = Select::selectFn2(
-        query: $query,
-        bind: [$theApproverID, $theRequesterID]
-      );
+      $result = SelectFn::selectWhereBothIdentifiersMatch('requestMgt', 'approver_id', 'requester_id', $theApproverID, $theRequesterID);
       // if request is already made, then ignore the request
-      if ($result) {
-
-        msgSuccess(code: 200, msg: $result);
+      if ($result && $result[0]['status'] === 'Request sent') {
+        msgException(409, "Request already pending");
       } else {
 
-        // insert the request to the table. 
+        // insert the request to the table.
 
-        Insert::submitFormDynamicLastId(
+        SubmitForm::submitFormDynamicLastId(
           table: 'requestMgt',
           field: $tableData,
           lastIdCol: 'no'
@@ -92,28 +97,28 @@ class FamilyRequestController extends Select
         // SEND EMAIL TO THE APPROVER
 
         $requesterName = "
-        {$dataFromJs['requester']['requesterFirstName']} 
-        {$dataFromJs['requester']['requesterLastName']}";
+        {$requesterData['firstName']} 
+        {$requesterData['lastName']}";
 
         $approverName = "
         {$dataFromJs['approver']['approverFirstName']} 
         {$dataFromJs['approver']['approverLastName']}";
 
+        // remove the requester email so it is not confused with the approver email
+        unset($requesterData['email']);
+
         $emailArray = [
           'data' => [
             'name' => $approverName,
-            'email' =>  $approverEmail,
+            'email' => $approverEmail,
             ...$dataFromJs['approver'],
-            ...$dataFromJs['requester']
+            ...$requesterData
           ],
-          'subject' => "$requesterName sent you a family request",
+          'subject' => "Family request from $requesterName",
           'viewPath' => $dataFromJs['emailPath'],
-          // 'name' => $approverName,
-          // 'email' => 'waledevtest@gmail.com',
-          // 'email' => $dataFromJs['approver']['email'],
         ];
 
-        sendEmailGeneral(array: $emailArray, recipient: 'member');
+        ToSendEmail::sendEmailGeneral($emailArray, 'member');
 
         // SENT NOTIFICATION TO APPROVER TAB
 
@@ -131,22 +136,38 @@ class FamilyRequestController extends Select
 
         // SEND BACK THE APPROVER ID
 
-        Insert::submitFormDynamicLastId(table: 'notification', field: $notificationData, lastIdCol: 'no');
+        SubmitForm::submitFormDynamicLastId(table: 'notification', field: $notificationData, lastIdCol: 'no');
 
-        $url = getenv("MIX_APP_URLS") . "/member/request?req=$theRequesterID&appr=$theApproverID&reqCode=$theApproverCode&dec=50";
+
+        $url = "{$_ENV["MIX_APP_URLS"]}member/request?req=$theRequesterID&appr=$theApproverID&dec=50&reqCode=$theApproverCode&src=email";
+
+
+        $notificationData['approverDetails'] = $dataFromJs['approver'];
+        $notificationData['requesterDetails'] = $requesterData;
+
+        // Broadcast to the family members via Pusher to notification, friendrequestcard and increaseNotificationCount
+        Pusher::broadcast('friend-request-channel', 'new-request', $notificationData);
 
         // Send push notification to the receiver about the new friend request
         PushNotificationClass::sendPushNotification(userId: $theApproverID, message: "Friend Request from $requesterName", url: $url);
 
 
-        msgSuccess(code: 200, msg: $notificationData);
+        msgSuccess(200, "Request sent");
       }
     } catch (\Throwable $err) {
 
-      showError(th: $err);
+      showError($err);
     }
   }
-
+  /**
+   *  /member/request/[a:req]/[a:appr]/[a:dec]/[a:reqCode]/[a:src]
+   * @param mixed $req
+   * @param mixed $appr
+   * @param mixed $dec
+   * @param mixed $reqCode
+   * @param mixed $src
+   * @return void
+   */
   public static function approveDelete($req, $appr, $dec, $reqCode, $src): void
   {
 
@@ -163,7 +184,7 @@ class FamilyRequestController extends Select
       $getDecision = checkInput($dec);
       $requestCode = checkInput($reqCode);
 
-      // check if the dec is 100 or 10 (50 is approved and 10 is rejection)
+      // check if the dec is 50 or 10 (50 is approved and 10 is rejection)
 
       $decision = match ($getDecision) {
         "10" => "rejected",
@@ -182,62 +203,54 @@ class FamilyRequestController extends Select
 
       $result = Select::selectFn2(
         query: $query,
-        bind: [$approver, $requester, 'Approved']
+        bind: [$approver, $requester, 'approved']
       );
+
+      $data = [
+        'status' => $decision,
+        'requester_id' => $requester,
+        'approver_id' => $approver
+      ];
+
+      $identifier = ['approver_id', 'requester_id'];
 
       if (!$result) {
 
-        $updateClass = new Update(table: 'requestMgt');
-
-        $identifiers = [
-          'requester_id' => $requester,
-          'approver_id' => $approver
-        ];
-
-
-        if ($decision === "approved") {
-          $updateClass->updateTwoColumns(columns: ['status', 'requesterCode'], columnAnswers: ['Approved', $requestCode], identifiers: $identifiers);
-        } elseif ($decision === "rejected") {
-          $updateClass->updateTableMulti(column: 'status', columnAnswer: 'Rejected', identifiers: $identifiers);
-        }
-
+        UpdateFn::makeUpdateFn('requestMgt', $data, $identifier, 'AND');
 
         // get requester and approver details with the id 
 
-        if ($decision != "Unknown") {
+        if ($decision === "approved") {
 
-          $details = new SingleCustomerData;
-          $req = $details->getCustomerData(custId: $requester, table: ['personal', 'contact']);
-          $app = $details->getCustomerData(custId: $approver, table: ['personal', 'contact']);
+          $req = parent::findMemberById($requester);
+          $app = parent::findMemberById($approver);
 
           // ADDENDUM TO THE REQUESTER DETAIL FROM THE APPROVER AND STATUS
 
-          $req['approverName'] = "{$app['firstName']} {$app['lastName']}";
+          $req['approverName'] = $app['fullName'];
           $req['decision'] = $decision;
-          $subject = "{$app['firstName']} {$app['lastName']} approved your request";
+          $subject = "{$app['fullName']} approved your request";
 
           // email the requester that the request has been approved
 
-          toSendEmail(viewPath: 'msg/requestRequest', data: $req, subject: $subject, emailRoute: 'member');
+          SendEmailFunctionality::email('msg/requestRequest', $subject, $req, 'member');
 
-           $cleanDataNotification = [
-                'sender_id' => $approver,
-                'receiver_id' => $requester,
-                'sender_name' => cleanSession($req['approverName']),
-                'notification_name' => "Request approval",
-                'notification_date' => date("Y-m-d H:i:s"),
-                'receiver' => 'everyone filtered',
-                'notification_type' => "Request",
-                'notification_content' => $subject,
-                'notification_status' => 'new'
+          $cleanDataNotification = [
+            'sender_id' => $approver,
+            'receiver_id' => $requester,
+            'sender_name' => cleanSession($req['approverName']),
+            'notification_name' => "Request approval",
+            'notification_date' => date("Y-m-d H:i:s"),
+            'receiver' => 'everyone filtered',
+            'notification_type' => "Request",
+            'notification_content' => $subject,
+            'notification_status' => 'new'
           ];
 
 
           $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
 
-
           msgSuccess(code: 200, msg: $lastInsertedId);
-
 
           // Send push notification to the requester about the decision - Service Manager JS
           PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
@@ -252,14 +265,14 @@ class FamilyRequestController extends Select
           $requestApprovalFromProfilePage = $src ?? null;
 
           if ($requestApprovalFromProfilePage === "pp") {
-            header("location: /member/ProfilePage");
+            header("location: /profilePage");
           } else {
             view('msg/requestApprover', compact('app'));
           }
         }
-      } else{
+      } else {
         // redirect to the login page 
-        header('location: /login');
+        header("location: /profilePage");
       }
     } else {
       msgException(401, "How did you get here?");
@@ -269,7 +282,10 @@ class FamilyRequestController extends Select
     //   header('location: /');
     // }
   }
-
+  /**
+   * Summary of getApprover/members/familyRequestMgt/getApprover
+   * @return void
+   */
   public static function getApprover()
   {
 
@@ -291,13 +307,14 @@ class FamilyRequestController extends Select
    * Gets the friend request data sent to the user identified by the given ID
    * 
    * @param int $id The ID of the user
+   * /getFriendRequestById
    * 
    * @return array An array of the requester data
    */
   public static function getFriendRequestData()
   {
     try {
-      $id = checkInput($_GET['id']);
+      $id = parent::returnId();
       $result = [];
 
       $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
@@ -307,8 +324,7 @@ class FamilyRequestController extends Select
       foreach ($getRequesterDataById as $getRequesterDataById1) {
 
         if ($getRequesterDataById1['requester_id']) {
-          $custData = new SingleCustomerData();
-          $data = $custData->getCustomerData($getRequesterDataById1['requester_id'], ['personal', 'contact', 'profilePics']);
+          $data = parent::findMemberById($getRequesterDataById1['requester_id']);
 
           array_push($result, $data);
         } else {

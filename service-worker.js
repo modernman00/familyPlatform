@@ -5,22 +5,16 @@ const CacheFiles = [
   "/index",
   "/login",
   "/register",
-  "/allMembers",
-  "/member/ProfilePage",
-  "/organogram",
-  "/allMembers/getProfile",
   "/public/style.css",
   "/public/index.js",
   "/public/img/favicon/android-chrome-192x192.png",
   "/public/img/favicon/android-chrome-512x512.png",
   "/public/img/favicon/apple-touch-icon.png",
-  "/public/img/photos/",
-  "/public/img/post/",
-  "/public/img/profile/",
-  '/public/img/favicon/favicon.ico',
+  "/public/img/favicon/favicon.ico",
   "/public/img/celebrate.jpeg",
   "/public/img/favicon/favicon-32x32.png"
 ];
+
 
 // On install, cache the static resources
 self.addEventListener("install", (event) => {

@@ -69,7 +69,7 @@
                     
                         <li><hr class="dropdown-divider"></li>
 
-                            <li><a class="dropdown-item" href="/accountSetting/{{ urlencode(trim($data['id'])) ?? $_SESSION['id'] }}" >Settings</a></li>
+                            <li><a class="dropdown-item" href="/accountSetting" >Settings</a></li>
                                
                             <li><hr class="dropdown-divider"></li>
 

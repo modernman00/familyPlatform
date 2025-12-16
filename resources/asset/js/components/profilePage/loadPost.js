@@ -6,6 +6,7 @@ import Pusher from "pusher-js"
 import axios from "axios"
 import { eventHtml } from './eventHTML'
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
+import {friendRequestCard} from './htmlFolder/friendRequestCard'
 
 // set an empty array
 try {
@@ -226,6 +227,19 @@ try {
         }
     }
 
+    const famCode = localStorage.getItem('requesterFamCode');
+    const addNewFriendRequest = (data) => {
+         // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
+
+
+
+      if (famCode === data.approverDetails.approverCode) {
+        addToNotificationTab(data);
+        friendRequestCard(data.requesterDetails);
+        increaseNotificationCount();
+      } 
+    }
+
     // Subscribe to the posts channel
     const postsChannel = pusher.subscribe('posts-channel');
     postsChannel.bind('new-post', (data) => {
@@ -262,7 +276,6 @@ try {
     }
 
     const notificationChannel = pusher.subscribe('notification-channel');
-
     notificationChannel.bind('new-notification', (data) => {
         if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
             checkEventAndAdd(data);
@@ -272,6 +285,13 @@ try {
         }
     });
 
+// Subscribe to the new friend request channel
+    const friendRequestChannel = pusher.subscribe('friend-request-channel');
+    friendRequestChannel.bind('new-request', (data) => {
+       if (famCode === data.approverDetails.approverCode) {
+       addNewFriendRequest(data)
+       }
+    });
 
 
     // AUTOMATICALLY UPDATE TIMESTAMP

@@ -39,24 +39,19 @@ class Index extends BaseController
         BaseController::viewWithCsp('termOfUse');
     }
 
-    public function accountSetting($id, $mobile, $email, $country, $famCode): void
+    public function accountSetting(): void
     {
+        try {
 
+            $accountData = parent::membersData();
 
-        $accountData = [
-            'name' => checkInput($id),
-            'mobile' => checkInput($mobile),
-            'email' => checkInput($email),
-            'country' => checkInput($country),
-            'famCode' => checkInput($famCode),
-            'id' => checkInput($_SESSION['ID'])
-        ];
+            parent::viewWithCsp('accountSetting', ['accountData' => $accountData]);
 
-
-
-        if ($_SESSION['id'] == $id) {
-            BaseController::viewWithCsp('accountSetting', ['accountData' => $accountData]);
+        } catch (\Throwable $th) {
+            Utility::showError($th);
         }
+
+
     }
 
 
@@ -65,7 +60,7 @@ class Index extends BaseController
 
         // Sanitise the data and get the cleaned data
 
-        $dataToCheck =  [
+        $dataToCheck = [
             'min' => [2, 2, 2],
             'max' => [20, 16, 30],
             'data' => [
@@ -74,19 +69,20 @@ class Index extends BaseController
                 'email'
             ]
         ];
-
-        $cleanData = LoginUtility::getSanitisedInputData($_POST, $dataToCheck);
+      
 
         $tableData = [
 
-            'email' => $cleanData['email'],
-            'country' => $cleanData['country'],
-            'mobile' => $cleanData['mobile'],
-            'id' => cleanSession($_SESSION['ID'])
+            'email' => $_POST['email'],
+            'country' => $_POST['country'],
+            'mobile' => $_POST['mobile'],
+         
         ];
+        $cleanData = LoginUtility::getSanitisedInputData($tableData, $dataToCheck);
+        $cleanData['id'] = cleanSession($_SESSION['id']);
 
         $updateAccountSettingClass = new Update('contact');
-        $updateAccountSettingClass->updateMultiplePOST($tableData, 'id');
+        $updateAccountSettingClass->updateMultiplePOST($cleanData, 'id');
 
         // SUBMIT THE SPOUSAL INFORMATION
 
@@ -97,34 +93,37 @@ class Index extends BaseController
 
             $tableData = [
 
-                'spouseName' => $cleanData['spouseName'] ?? "NOT_SET",
-                'spouseEmail' => $cleanData['spouseEmail'] ?? "NOT_SET",
-                'spouseMobile' => $cleanData['spouseMobile'] ?? "NOT_SET",
-                'spouseMaidenName' => $cleanData['spouseMaidenName'] ?? "NOT_SET",
-                'id' => cleanSession($_SESSION['ID'])
+                'spous_name' => $_POST['spouse_name'] ?? "NOT_SET",
+                'spous_email' => $_POST['spouse_email'] ?? "NOT_SET",
+                'spous_mobile' => $_POST['spouse_mobile'] ?? "NOT_SET",
+                // 'spous_maidenName' => $_POST['spouse_maidenName'] ?? "NOT_SET",
+                'id' => cleanSession($_SESSION['id'])
             ];
-
+            $cleanSpouseData = LoginUtility::getSanitisedInputData($tableData, $dataToCheck);
 
             $updateAccountSettingClass = new Update('otherFamily');
-            $updateAccountSettingClass->updateMultiplePOST($tableData, 'id');
+            $updateAccountSettingClass->updateMultiplePOST($cleanSpouseData, 'id');
         }
 
         //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
 
-        $cleanData['id'] = cleanSession($_SESSION['ID']);
 
-        $kidsCount = (int) $cleanData['kids'];
-        $siblingsCount = (int) $cleanData['siblings'];
 
-        unset($cleanData['mobile'], $cleanData['email'], $cleanData['country'], $cleanData['kids'], $cleanData['siblings']);
+        $kidsCount = (int) $_POST['children'];
+        $siblingsCount = (int) $_POST['sibling'];
+
+        unset($_POST['mobile'], $_POST['email'], $_POST['country'], $_POST['children'], $_POST['sibling'], 
+        $_POST['spouse_name'], $_POST['spouse_email'], $_POST['spouse_mobile'], $_POST['spouse_maidenName'], $_POST['maritalStatus']);
+
+        $cleanChildrenSiblingData = LoginUtility::getSanitisedInputData($_POST, $dataToCheck);
 
 
         if ($kidsCount > 0) {
-            processKidSibling('kid', $kidsCount, $cleanData);
+            processKidSibling('children', $kidsCount, $cleanChildrenSiblingData);
         }
 
         if ($siblingsCount > 0) {
-            processKidSibling('sibling', $siblingsCount, $cleanData);
+            processKidSibling('sibling', $siblingsCount, $cleanChildrenSiblingData);
         }
 
         msgSuccess(200, "New Update was successfully submitted");

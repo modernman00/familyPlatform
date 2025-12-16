@@ -897,7 +897,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 0:
           _context.prev = 0;
           _context.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getFriendRequestById?id=".concat(approverId));
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getFriendRequestById");
         case 1:
           response = _context.sent;
           if (response.data.message) {
@@ -1045,16 +1045,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 var appUrl = "https://olaogun.test/";
-var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
+var approverId = localStorage.getItem('requesterId');
 var friendRequestCard = function friendRequestCard(data) {
-  var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;
-  var imageUrl = "/resources/images/profile/".concat(encodeURIComponent((_data$img = data.img) !== null && _data$img !== void 0 ? _data$img : data.requesterProfileImg));
+  var _data$firstName, _data$lastName, _data$id, _data$famCode, _data$gender, _data$occupation, _data$country;
+  var imageUrl = data.img ? "/resources/images/profile/".concat(data.profilePics) : data.requesterProfileImg;
   var firstName = encodeURIComponent((_data$firstName = data.firstName) !== null && _data$firstName !== void 0 ? _data$firstName : data.requesterFirstName);
   var lastName = encodeURIComponent((_data$lastName = data.lastName) !== null && _data$lastName !== void 0 ? _data$lastName : data.requesterLastName);
   var requestId = encodeURIComponent((_data$id = data.id) !== null && _data$id !== void 0 ? _data$id : data.requesterId);
   var requestCode = encodeURIComponent((_data$famCode = data.famCode) !== null && _data$famCode !== void 0 ? _data$famCode : data.requesterFamCode);
-  var mutualFriends = '2 mutual friends';
-  var html = "<p id=".concat(requestId, "_linkRequestCard></p>\n\n    <div class=\"d-flex align-items-center mb-3 friend-request-card\">\n      <img src=\"").concat(imageUrl, "\" alt=\"Avatar\" class=\"avatar me-3><br>\n\n        <div class=\"flex-grow-1\">\n          <h6 class=\"mb-0\">").concat(firstName, " ").concat(lastName, "</h6>\n          <small class=\"text-muted\">").concat(mutualFriends, "</small>\n        </div>\n    </div>\n\n    <div class=\"friend-request-actions mb-3\">\n\n              <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/50/").concat(requestCode, "/pp\" class=\"btn btn-sm btn-primary\" title=\"confirm\">Confirm</a>\n\n\n              <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/10\" class=\"btn btn-sm btn-outline-secondary\" title=\"Decline\">Decline</a>\n\n    </div>\n  ");
+  var gender = (_data$gender = data.gender) !== null && _data$gender !== void 0 ? _data$gender : "";
+  var occupation = (_data$occupation = data.occupation) !== null && _data$occupation !== void 0 ? _data$occupation : "";
+  var country = (_data$country = data.country) !== null && _data$country !== void 0 ? _data$country : "";
+  var mutualFriends = '';
+
+  /* New modern colorful card design */
+  var html = "<p id=".concat(requestId, "_linkRequestCard></p>\n    <div class=\"card border-0 shadow-sm mb-4 friend-request-card\" style=\"border-radius: 12px; overflow: hidden; transition: box-shadow 0.3s ease;\">\n      <div class=\"friend-request-cover\" style=\"height: 70px; background: linear-gradient(135deg, var(--primary-color), #00c6ff);\"></div>\n      <div class=\"card-body p-3 pt-0 position-relative\">\n        <div class=\"d-flex justify-content-between align-items-end mb-2\" style=\"margin-top: -35px;\">\n           <a href=\"/allMembers/seeProfile/").concat(requestId, "\" class=\"position-relative\">\n            <img src=\"").concat(imageUrl, "\" alt=\"").concat(firstName, "\" class=\"avatar rounded-circle border border-4 border-white shadow-sm\" style=\"width: 70px; height: 70px; object-fit: cover; background-color: white;\">\n             <span class=\"position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1\" style=\"width: 12px; height: 12px;\"></span>\n          </a>\n        </div>\n\n        <div class=\"mb-3\">\n           <h6 class=\"mb-0 fw-bold text-truncate\" style=\"font-size: 1.1rem;\">\n              <a href=\"/allMembers/seeProfile/").concat(requestId, "\" class=\"text-dark text-decoration-none\">").concat(firstName, " ").concat(lastName, "</a>\n            </h6>\n            ").concat(occupation ? "<div class=\"small text-muted text-truncate fw-medium\">".concat(occupation, "</div>") : '', "\n             <div class=\"d-flex align-items-center mt-1 text-muted small\">\n                ").concat(country ? "<span class=\"me-2\"><i class=\"bi bi-geo-alt-fill me-1 text-primary\"></i>".concat(country, "</span>") : '', "\n                <span>").concat(mutualFriends ? mutualFriends : 'New to interactions', "</span>\n            </div>\n        </div>\n\n        \n        <div class=\"d-flex gap-2 friend-request-actions\">\n          <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/50/").concat(requestCode, "/pp\" class=\"btn btn-primary btn-sm flex-grow-1 border-0 fw-medium shadow-sm\" style=\"border-radius: 20px; padding: 6px 0; background: linear-gradient(to right, var(--primary-color), #00c6ff);\">\n            Confirm\n          </a>\n          <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/10\" class=\"btn btn-light btn-sm flex-grow-1 border-0 fw-medium text-secondary\" style=\"border-radius: 20px; padding: 6px 0; background-color: #f0f2f5;\">\n            Decline\n          </a>\n        </div>\n      </div>\n    </div>\n  ");
   (0,_shared__WEBPACK_IMPORTED_MODULE_0__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', html);
 };
 
@@ -1393,6 +1398,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+
 
 
 
@@ -1653,6 +1660,16 @@ try {
       tooltip.innerHTML = "<div><strong>".concat(whoReacted, "</strong> and others reacted</div>");
     }
   };
+  var famCode = localStorage.getItem('requesterFamCode');
+  var addNewFriendRequest = function addNewFriendRequest(data) {
+    // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
+
+    if (famCode === data.approverDetails.approverCode) {
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
+      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_10__.friendRequestCard)(data.requesterDetails);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
+    }
+  };
 
   // Subscribe to the posts channel
   var postsChannel = pusher.subscribe('posts-channel');
@@ -1699,6 +1716,14 @@ try {
       checkEventAndAdd(data);
       (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
       (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
+    }
+  });
+
+  // Subscribe to the new friend request channel
+  var friendRequestChannel = pusher.subscribe('friend-request-channel');
+  friendRequestChannel.bind('new-request', function (data) {
+    if (famCode === data.approverDetails.approverCode) {
+      addNewFriendRequest(data);
     }
   });
 

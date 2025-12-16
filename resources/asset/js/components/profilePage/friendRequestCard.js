@@ -12,7 +12,7 @@ import { friendRequestCard } from './htmlFolder/friendRequestCard';
 const fetchFriendRequests = async () => {
   try{
 
-  const response = await axios.get(`/getFriendRequestById?id=${approverId}`)
+  const response = await axios.get(`/getFriendRequestById`)
 
       if (response.data.message) {
         response.data.message.forEach(request => waitForRequestFriendClass(request));

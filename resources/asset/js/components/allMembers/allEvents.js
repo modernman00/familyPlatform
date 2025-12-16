@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { id, showError, qSel, msgException } from '@shared';
+import { id, showError, qSel, msgException, log } from '@shared';
 import { deleteNotification } from '../global.js';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar';
 import { friendRequestCard } from '../profilePage/htmlFolder/friendRequestCard';
@@ -25,29 +25,26 @@ document.onclick = async (e) => {
       // Fetch approver details for the user
       const approverDetails = await fetchApproverData(userId);
 
-      // Prepare family request data
-      const requesterDetails = getLocalStorageProfile();
-
       const familyRequestData = {
-        requester: requesterDetails,
         approver: approverDetails,
         emailPath: 'msg/request',
-        subject: `${requesterDetails.requesterFirstName} ${requesterDetails.requesterLastName} sent you a family request`,
       };
 
       // Send the family request data to the server for processing which returns the notification details for the approvers tab
-      const response = await sendFamilyRequest(familyRequestData);
+      const result = await sendFamilyRequest(familyRequestData);
 
-      // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
-      const famCode = localStorage.getItem('requesterFamCode');
-      if (famCode === approverDetails.approverCode) {
-        addToNotificationTab(response.data.message);
-        friendRequestCard(requesterDetails);
-        increaseNotificationCount();
-      }
+      if (result.data.status === 'success' && result.data.message === 'Request sent') {
+        // Update the button's HTML and disable it
+        updateButton(targetId, 'Request Sent');
+      } else if (result.data.status === 'error' && result.data.message === 'Request already pending') {
+        // Update the button's HTML and disable it
+        updateButton(targetId, 'Request Pending');
+      } else {
+        // Update the button's HTML and disable it
+        updateButton(targetId, 'Request Failed');
+      }        
 
-      // Update the button's HTML and disable it
-      updateButton(targetId, 'Request Sent');
+
     } else if (targetId.includes('removeProfile')) {
       // Extract the user ID from the target ID
       const userId = targetId.replace('removeProfile', '');
@@ -74,21 +71,21 @@ document.onclick = async (e) => {
         }
       }
     } else if (targetId.includes('seeProfile')) {
-    
+
       // Extract the user ID from the target ID
       const userId = targetId.replace('seeProfile', '');
 
       // redirect to 'allMembers/setProfile/'+userId
       window.location.href = `/allMembers/seeProfile/${userId}`;
-      
+
     } else if (targetId.includes('familyTree')) {
-    
+
       // Extract the user ID from the target ID
       const userId = targetId.replace('familyTree', '');
 
       // redirect to 'allMembers/setProfile/'+userId
       window.location.href = `/organogram/${userId}`;
-    } 
+    }
     // else if (targetId.includes('deleteNotification')) {
     //   // Call the deleteNotification function to remove the notification
     //   deleteNotification(targetId);
@@ -120,16 +117,11 @@ async function fetchApproverData(userId) {
   }
 }
 
-// Function to retrieve requester details from local storage
-function getLocalStorageProfile() {
-  const getRequesterDetails = localStorage.getItem('profile');
-  return JSON.parse(getRequesterDetails);
-}
 
 // Function to send family request data to the server
-async function sendFamilyRequest(data) {
+function sendFamilyRequest(data) {
   try {
-    return await axios.post('/members/familyRequestMgt', data);
+    return axios.post('/members/familyRequestMgt', data);
   } catch (error) {
     showError(error);
   }

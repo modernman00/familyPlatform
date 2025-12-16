@@ -18,24 +18,35 @@ class AllMembersController extends AllMembersData
     public function index(): void
     {
         try {
-           $data = Base::membersData();
+            $data = Base::membersData();
 
             view('member/showMembers', \compact('data'));
         } catch (\Throwable $th) {
-            showError($th); 
+            showError($th);
         }
     }
 
+    /**
+     * GET /allMembers/processApiData
+     * Returns your network: same famCode + approved relationships.
+     */
     public function processApiData(): void
     {
         try {
             $VerifyJWT = SignIn::verify('users');
-            if ($VerifyJWT) {
-                $id = \cleanSession($VerifyJWT['id']);
-                $famCode = \cleanSession($VerifyJWT['famCode']);
-                $result = $this->getAllMembers($famCode, $id);
-                msgSuccess(200, $result);
+
+
+            if (!$VerifyJWT) {
+                msgException(401, 'Unauthorized');
             }
+
+            $id = (string) \cleanSession($VerifyJWT['id']);
+            $famCode = (string) \cleanSession($VerifyJWT['famCode']);
+
+            $members = $this->getAllMembers($famCode, $id);
+    
+
+            msgSuccess(200, $members, $famCode);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -51,20 +62,58 @@ class AllMembersController extends AllMembersData
         }
     }
 
+     /**
+     * GET /allMembers/allData
+     * Returns every other user (outside your famCode).
+     */
     public function getAllUsersDataFn(): void
     {
         try {
-             $VerifyJWT = SignIn::verify('users');
-            if ($VerifyJWT) {
-                $id = \cleanSession($VerifyJWT['id']);
-                $famCode = \cleanSession($VerifyJWT['famCode']);
+            $VerifyJWT = SignIn::verify('users');
+            if (!$VerifyJWT) {
+                msgException(401, 'Unauthorized');
+                return;
             }
+            $id = \cleanSession($VerifyJWT['id']);
+            $famCode = \cleanSession($VerifyJWT['famCode']);
             $result = $this->getAllUsersData($id, $famCode);
             msgSuccess(200, $result);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
+
+
+    /**
+     * GET /allMembers/search?q=...&limit=30&offset=0
+     * Server-side search across family + wider directory.
+     */
+    public function search(): void
+{
+    try {
+        $payload = SignIn::verify('users');
+
+        if (!$payload) {
+            msgException(401, 'Unauthorized');
+            return;
+        }
+
+        $requesterId = (int) cleanSession($payload['id']);
+        $famCode     = (string) cleanSession($payload['famCode']);
+
+        $term   = isset($_GET['q']) ? (string) $_GET['q'] : '';
+        $limit  = isset($_GET['limit']) ? (int) $_GET['limit'] : 30;
+        $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
+
+        $results = $this->searchMembers($requesterId, $famCode, $term, $limit, $offset);
+
+        msgSuccess(200, $results);
+    } catch (\Throwable $th) {
+        showError($th);
+        msgException(500, 'Unable to search members');
+    }
+}
+
 
 
 
@@ -83,15 +132,19 @@ class AllMembersController extends AllMembersData
     {
         try {
             //  verify token
-            $VerifyJWT = SignIn::verify();
+            $VerifyJWT = SignIn::verify('users');
             // if token is verified
 
             if (!$VerifyJWT) {
                 \redirect($_ENV['401URL']);
             }
             $id = checkInput($id);
-            $result = $this->getAllMembersById($id);
-            if (!$result) {
+            // $result = $this->getAllMembersById($id);
+            $data= Base::fullMemberData($id);
+            $relativesWithImgs = Base::collectPeopleWithImages($data, $id);
+
+         
+            if (!$data) {
                 throw new Exception("It could not process the data", 1);
             }
 
@@ -99,10 +152,7 @@ class AllMembersController extends AllMembersData
 
             $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
-            $data = null;
-            foreach ($result as $data);
-
-            view('member.getProfile', compact('data', 'pictures'));
+            view('member.getProfile', compact('data', 'pictures', 'relativesWithImgs'));
         } catch (Exception $e) {
             showError($e);
         }
@@ -113,7 +163,7 @@ class AllMembersController extends AllMembersData
     {
         try {
             //  verify token
-              $VerifyJWT = SignIn::verify('users');
+            $VerifyJWT = SignIn::verify('users');
             $result = $VerifyJWT;
 
             // if token is verified

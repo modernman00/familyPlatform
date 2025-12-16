@@ -1299,6 +1299,7 @@ function update({
     } catch (error) {
       console.log(error);
       const ErrorMsg = (0,_general_js__WEBPACK_IMPORTED_MODULE_4__.parseErrorResponse)(error);
+      const notificationId = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)(`${formId}_notification`)
       notificationId.innerHTML = `<li style="color:white; background-color:red">${ErrorMsg}</li>`;
     }
   };
@@ -2182,6 +2183,8 @@ const postFormData = async (url, formId, redirect = null, css = null) => {
             (0,_general_js__WEBPACK_IMPORTED_MODULE_2__.redirectAfterDelay)(redirect, 2000);
         }
 
+        form.reset();
+
     } catch (error) {
         const errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
         const ErrorMsg = (0,_general_js__WEBPACK_IMPORTED_MODULE_2__.parseErrorResponse)(error);
@@ -2198,9 +2201,11 @@ const processFormDataAction = (cssClass, message, formNotificationId) => {
     if (formNotificationId) {
         formNotificationId.style.display = 'block';
         formNotificationId.classList.add(cssClass);
+        
         const errorElement = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)('error');
         if (errorElement) {
             errorElement.scrollIntoView({ behavior: 'smooth' });
+            errorElement.style.color = 'white';
             errorElement.innerHTML = message;
         }
         const loader = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)('setLoader');
@@ -6523,7 +6528,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   VERSION: function() { return /* binding */ VERSION; }
 /* harmony export */ });
-const VERSION = "1.13.1";
+const VERSION = "1.13.2";
 
 /***/ }),
 

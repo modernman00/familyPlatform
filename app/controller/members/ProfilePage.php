@@ -52,7 +52,7 @@ class ProfilePage extends BaseController
 
         );
 
-        unsetSess(['auth', 'imageUploadOutcome', 'token', 'EDIT_PROFILE_ID', 'CREATE_EVENT_ID', 'changePW', 'register', 'LAST_INSERT_ID_COMMENT', 'LAST_INSERT_ID_CODE_MGT', 'LAST_INSERT_ID_POST', 'LAST_INSERT_ID_AUDIT_LOGS', 'LAST_INSERT_ID_NOTIFICATION', 'POST_COUNT', 'fName', 'lName', 'currentTime', 'LAST_INSERT_ID_EVENTS', 'LAST_INSERT_ID_events', 'email', 'id', 'famCode']);
+        unsetSess(['auth', 'imageUploadOutcome', 'token', 'EDIT_PROFILE_ID', 'CREATE_EVENT_ID', 'changePW', 'register', 'LAST_INSERT_ID_COMMENT', 'LAST_INSERT_ID_CODE_MGT', 'LAST_INSERT_ID_POST', 'LAST_INSERT_ID_AUDIT_LOGS', 'LAST_INSERT_ID_NOTIFICATION', 'POST_COUNT', 'fName', 'lName', 'currentTime', 'LAST_INSERT_ID_EVENTS', 'LAST_INSERT_ID_events', 'email', 'famCode']);
 
         try {
             $id = parent::returnId();
@@ -64,6 +64,7 @@ class ProfilePage extends BaseController
             $allData = Post::getAllPostProfilePics();
             $commentProfilePics = Post::getAllCommentProfilePics();
             $eventData = DataAll::getEventDataByFamCode($getFamCode);
+
 
             parent::viewWithCsp('member/profilePage', [
                 'data' => $memberData,
@@ -279,8 +280,8 @@ class ProfilePage extends BaseController
             $id = checkInput($_SESSION['id']);
 
             // Source and destination paths
-            $sourcePath = "resources/images/" . $imageName;
-            $destPath = "resources/images/profile/" . $imageName;
+            $sourcePath = "resources/images/post/{$imageName}";
+            $destPath = "resources/images/profile/{$imageName}";
 
             // Check if source file exists
             if (!file_exists($sourcePath)) {

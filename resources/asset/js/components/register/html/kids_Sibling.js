@@ -11,7 +11,7 @@ export const renderHtmlFamily = (family, no) => {
       <option value='Not With Spouse'>Not With Spouse</option>
     `;
 
-        if (family === "addSiblings") {
+        if (family === "sibling") {
             optionsHtml = `
                 <option value='Choose'>Choose</option>
                 <option value='Same_Mother_Father'>Same Mother & Father</option>

@@ -1,44 +1,70 @@
-import axios from "axios";
-import { id, showError } from "../global";
+// resources/js/allMembers/api.js
 import { renderHtml } from "./html";
-import { handleInput } from "./handleInput";
-import { getMultipleApiData } from "@modernman00/shared-js-lib"
+import { createSearchHandler } from "./handleInput";
+import { getApiData, id, showError, log} from "@modernman00/shared-js-lib";
 
-const config = {
-    headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-};
-const reqId = localStorage.getItem('requesterId');
 const URL = process.env.MIX_APP_URL2;
-const allMembersContainer = id('allMembers');
-const noMemberHTML = "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
 
-export const renderMembers = (data, container, noMemberMessage, html) => {
-    // container.innerHTML = "";
-    if (data) {
-        data.forEach(html);
-    } else if (!data) {
-        container.innerHTML = noMemberMessage;
-    } else {
-        data.forEach(html);
-    }
+const allMembersContainer = id("allMembers"); // main container TO SHOW THE MEMBERS
+const memberCountBadge = id("memberCount"); // member count badge
+const searchInput = id("searchFamily"); // search input
+
+const NO_MEMBER_HTML =
+  "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+
+/**
+ * Render a list of members into the main container.
+ * Also updates the member count badge.
+ *
+ * @param {Array<object>} members
+ */
+export const renderMembers = (members = []) => {
+  allMembersContainer.innerHTML = "";
+
+  // if no members, show no member html
+  if (!members.length) {
+    allMembersContainer.innerHTML = NO_MEMBER_HTML;
+    memberCountBadge.textContent = "0 Members";
+    return;
+  }
+
+  // render each member
+  members.forEach(renderHtml);
+
+  // update member count badge
+  memberCountBadge.textContent =
+    members.length === 1
+      ? "1 Member"
+      : `${members.length.toLocaleString()} Members`;
 };
 
-const url1 = `${URL}allMembers/processApiData`; // data based on famCode and reqMgt accepted and approved
-const url2 = `${URL}allMembers/allData`; // all the users data
+(async function bootstrapAllMembers() {
+  try {
+    const url = `${URL}allMembers/processApiData`; // network (family + approved)
 
-const [famCodeData, allUsers] = await getMultipleApiData(url1, url2);
+    const famCodeData = await getApiData(url);
 
-// const dataWithFamCode = filterMembersByFamCode(data);
-renderMembers(famCodeData.message, allMembersContainer, noMemberHTML, renderHtml);
-// Remove the "loader" class after rendering is complete
-id('setLoader').classList.remove('loader');
-id('searchFamily').addEventListener('input', () => handleInput(
-    allUsers.message,
-    famCodeData.message,
-    renderMembers
-)
-);
+    const familyMembers = famCodeData?.message ?? [];
+
+    // Pre-render: show only the user's network
+    renderMembers(familyMembers);
+
+    // remove loader
+    const loader = id("setLoader");
+    if (loader) loader.classList.remove("loader");
+
+    // Wire up debounced search handler
+    if (searchInput) {
+      const handleSearch = createSearchHandler({
+        familyMembers,
+        renderMembers,
+        container: allMembersContainer,
+        searchUrl: `${URL}allMembers/search`
+      });
+
+      searchInput.addEventListener("input", handleSearch);
+    }
+  } catch (error) {
+    showError(error);
+  }
+})();

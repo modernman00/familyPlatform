@@ -10,8 +10,8 @@
         <div class="organogram-header">
             <h2 class="organogram-title">
                 <i class="bi bi-diagram-3-fill"></i>
-                {{ isset($data['firstName']) ? $data['firstName'] : '' }}
-                {{ isset($data['lastName']) ? $data['lastName'] : '' }}'s Family Tree
+                {{ $data['firstName'] ?? '' }}
+                {{ $data['lastName'] ?? '' }}'s Family Tree
             </h2>
 
             <p class="organogram-subtitle">
@@ -41,15 +41,9 @@
                         <li>
                             <!-- Parents -->
                             <div class="couple-wrapper has-children">
-                                @include('member.includes.treeNode', [
-                                    'type' => 'Father',
-                                    'dataDB' => $orgData['father'],
-                                ])
+                                @include('member.includes.treeNode', ['type' => 'Father', 'dataDB' => $orgData['father']])
 
-                                @include('member.includes.treeNode', [
-                                    'type' => 'Mother',
-                                    'dataDB' => $orgData['mother'],
-                                ])
+                                @include('member.includes.treeNode', ['type' => 'Mother', 'dataDB' => $orgData['mother']])
                             </div>
 
 
@@ -61,30 +55,20 @@
                                         $hasChildren = isset($orgData['children']) && count($orgData['children']) > 0;
                                     @endphp
                                     <div class="couple-wrapper {{ $hasChildren ? 'has-children' : '' }}">
-                                        @include('member.includes.treeNode', [
-                                            'type' => 'Me',
-                                            'dataDB' => $data,
-                                        ])
+                                        @include('member.includes.treeNode', ['type' => 'Me', 'dataDB' => $data])
 
                                         @isset($orgData['spouse']['name'])
-                                            @include('member.includes.treeNode', [
-                                                'type' => 'spouse',
-                                                'dataDB' => $orgData['spouse'],
-                                            ])
+                                            @include('member.includes.treeNode', ['type' => 'spouse', 'dataDB' => $orgData['spouse']])
                                         @endisset
                                     </div>
 
-                                    {{--  check if they have children --}}
                                     {{--  check if they have children --}}
                                     @if (isset($orgData['children']) && is_array($orgData['children']) && count($orgData['children']) > 0)
                                     <ul>
                                         <li>
                                             @foreach ($orgData['children'] as $child)
                                             
-                                                    @include('member.includes.treeNode', [
-                                                        'type' => 'child',
-                                                        'dataDB' => $child,
-                                                    ])
+                                                    @include('member.includes.treeNode', ['type' => 'child', 'dataDB' => $child])
                                             
                                             @endforeach
                                         </li>
@@ -98,12 +82,9 @@
                                     @isset($orgData['siblings'])
                                         @foreach ($orgData['siblings'] as $sibling)
                                         <li>
-                                            @isset($sibling['name'])
+                                            @isset($sibling['fullName'])
                                     
-                                                @include('member.includes.treeNode', [
-                                                    'type' => 'sibling',
-                                                    'data' => $sibling,
-                                                ])
+                                                @include('member.includes.treeNode', ['type' => 'sibling', 'dataDB' => $sibling])
                                         
 
 
@@ -120,7 +101,7 @@
                                                     <ul>
                                                         <li>
                                                        
-                                                            @include('member.includes.treeNode', ['type' => $child['relationship'], 'data' => $child])
+                                                            @include('member.includes.treeNode', ['type' => $child['relationship'], 'dataDB' => $child])
 
                                                         </li>
                                                     </ul>

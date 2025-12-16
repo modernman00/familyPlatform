@@ -120,7 +120,6 @@ axios.get(notificationURL)
         const data = res.data.message;
 
         if (data) {
-            console.log(data);
 
 
             if (data.length > 0) {

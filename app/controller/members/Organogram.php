@@ -30,7 +30,7 @@ class Organogram extends SingleCustomerData
                 throw new NotFoundException('Main person ID required');
             }
 
-           $data = BaseController::membersData();
+           $data = BaseController::findMemberById($id);
 
 
             // Fetch other family members
@@ -82,63 +82,32 @@ class Organogram extends SingleCustomerData
                 if (!empty($fetchTheId)) {
 
                     foreach ($fetchTheId as $getData) {
-                        $fullData = $this->getCustomerData($getData['id'], ['personal', 'profilePics', 'contact', 'work']);
+                        $fullData = BaseController::findMemberById($getData['id']);
 
                         // set relationship for children and siblings
                         if (isset($fullData['gender'])) {
                             $fullData['relationship'] = $this->resolveRelationship($who, $fullData['gender']);
                         }
 
-                        $formatedData = $this->formatPerson($fullData);
-                        array_push($data, $formatedData);
+                        $data[] = $fullData;
                     }
                 } else {
                     $relationship = $fullData['relationship'] = $this->resolveRelationship($who, $row["{$who}_gender"]);
-                    $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
-                    array_push($data, [
-                        'name' => $row["{$who}_name"],
+                    $sex = $row['gender'] === 'Male' || $who === 'father' ? 'avatarM.png' : 'avatarF.png';
+                    $data[] = [
+                        'fullName' => $row["{$who}_name"],
                         'email' => $row["{$who}_email"],
                         'mobile' => $row["{$who}_mobile"],
                         'linked' => $row["{$who}_linked"],
                         'relationship' => $relationship,
                         'gender' => $row["{$who}_gender"],
-                        'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
-                    ]);
+                        'img' => $row['img'] ? "/resources/images/profile/{$row['img']}" : "/resources/images/profile/$sex"
+                    ];
                 }
             }
         }
 
         return $data;
-    }
-
-
-
-    /**
-     * Format main person's data from multiple tables
-     * @param array $data
-     * @return array
-     */
-    private function formatPerson(array $data): array
-    {
-        $sex = $data['gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
-
-        return [
-            'id' => $data['id'] ?? '',
-            'firstName' => $data['firstName'] ?? '',
-            'lastName' => $data['lastName'] ?? '',
-            'name' => $data['firstName'] . ' ' . $data['lastName'] ?? '',
-            'famCode' => $data['famCode'] ?? '',
-            'gender' => $data['gender'] ?? '',
-            'birthDate' => sprintf('%d-%s-%d', $data['year'] ?? 0, $data['month'] ?? '', $data['day'] ?? 0),
-            'maritalStatus' => $data['marital_status'] ?? '',
-            'email' => $data['email'] ?? null,
-            'mobile' => $data['mobile'] ?? null,
-            'father_id' => $data['father_id'] ?? null,
-            'relationship' => $data['relationship'] ?? null,
-            'country' => $data['country'] ?? null,
-            'occupation' => $data['occupation'] ?? null,
-            'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
-        ];
     }
 
 
@@ -175,7 +144,7 @@ class Organogram extends SingleCustomerData
                     if (!empty($fetchTheId)) {
 
                         foreach ($fetchTheId as $getData) {
-                            $fullData = $this->getCustomerData($getData['id'], ['personal', 'profilePics', 'contact', 'work']);
+                            $fullData = BaseController::findMemberById($getData['id']);
 
 
                             // set relationship for children and siblings
@@ -183,24 +152,21 @@ class Organogram extends SingleCustomerData
                                 $fullData['relationship'] = $this->resolveRelationship('sibling_children', $fullData['gender']);
                                 $fullData['father_id'] = $id;
                             }
+
+                            $siblingChildren[] = $fullData;
                         }
-
-
-                        $formatedData = $this->formatPerson($fullData);
-
-                        array_push($siblingChildren, $formatedData);
                     } else {
                         $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
-                        array_push($siblingChildren, [
+                        $siblingChildren[] = [
                             'father_id' => $id,
-                            'name' => $data['children_name'],
+                            'fullName' => $data['children_name'],
                             'email' => $data['children_email'],
                             'gender' => $data['children_gender'],
                             'relationship' => $this->resolveRelationship('sibling_children', $data['children_gender']),
                             // 'mobile' => $data['children_mobile'],
                             'linked' => $data['children_linked'],
-                            'img' => $data['img'] ? "public/img/profile/{$data['img']}" : "public/img/profile/$sex"
-                        ]);
+                            'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
+                        ];
                     }
                 }
             }

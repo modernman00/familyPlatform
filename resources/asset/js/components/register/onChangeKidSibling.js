@@ -10,10 +10,10 @@ import { renderHtmlFamily } from './html/kids_Sibling'
 export const show = (kids_or_sib, event) => {
     try {
         // what was picked or selected
-        const value = event.target.value;
+       const value = Number(event.target.value) || 0;
         
         // childrenOnchangeValue = value;
-        const addDiv = (kids_or_sib == "kids") ? "addChildren" : "addSiblings"
+        const addDiv = (kids_or_sib == "children") ? "children" : "sibling"
 
         // remove the div 
         removeDiv(addDiv)
@@ -35,7 +35,7 @@ export const show = (kids_or_sib, event) => {
                 getSelectHelp.style.fontSize = '1rem'
                 getSelectHelp.style.color = '#fc2003'
                 const html = renderHtmlFamily(addDiv, no)
-                id(addDiv).insertAdjacentHTML('afterBegin', html)
+                id(addDiv).insertAdjacentHTML('beforeEnd', html)
             }
         }
     } catch (error) {
@@ -46,11 +46,12 @@ export const show = (kids_or_sib, event) => {
 // ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
 const onChangeKidAndSiblings = () => {
 
-    const sibInput = id("siblings_id");
-    const kidInput = id("kids_id")
+    const kidInput = id("children_id")
+    const sibInput = id("sibling_id");
 
-    kidInput.addEventListener('change', (event) => show('kids', event));
-    sibInput.addEventListener('change', (event) => show('siblings', event));
+
+    if (kidInput) kidInput.addEventListener('change', (event) => show('children', event));
+    if (sibInput) sibInput.addEventListener('change', (event) => show('sibling', event));
 
 }
 

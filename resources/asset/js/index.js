@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     '/allMembers/getProfile': {
       // Module import commented out — placeholder for future logic
-      hide: ['.familyTreeNav'], // Hide navbars
+   
     },
     '/accountSetting': {
 

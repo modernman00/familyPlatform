@@ -15,11 +15,10 @@ const options = {
   xsrfHeaderName: 'X-XSRF-TOKEN',
 }
 
-alert("Account Setting Page")
-
 
 const process = (e) => {
   try {
+
     e.preventDefault();
     const notificationDiv = id('accountSettingForm_notification')
     const notificationMsg = id('accountSettingForm_notification_error')
