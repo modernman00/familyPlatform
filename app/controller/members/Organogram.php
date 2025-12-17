@@ -58,7 +58,6 @@ class Organogram extends SingleCustomerData
            
             ];
 
-
          view('member/organogram', compact('orgData', 'data'));
 
             // msgSuccess(200, $response);

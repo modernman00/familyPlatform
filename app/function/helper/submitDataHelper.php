@@ -36,7 +36,7 @@
 
  function insertData(string $type, array $dataArr): void
     {
-        $sql = "INSERT INTO {$type}s ({$type}_name, {$type}_email, {$type}_linked, id) 
+        $sql = "INSERT INTO {$type} ({$type}_name, {$type}_email, {$type}_linked, id) 
             VALUES (:{$type}_name, :{$type}_email, :{$type}_linked, :id)";
 
         $query = Db::connect2()->prepare($sql);

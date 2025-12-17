@@ -15,8 +15,8 @@ let mobile = [];
 let motherName = [];
 let checkEmail = [];
 
-let fName = id("firstName_id").value 
-let lName = id("lastName_id").value;
+let fName = id("firstName").value 
+let lName = id("lastName").value;
 
 /**
  *
@@ -55,9 +55,9 @@ if (getData instanceof Promise) {
     // Handle the case when getData is empty or not resolved
 }
 
-const firstAutoComplete = id("firstName_id");
-const fatherAutoComplete = id("fatherName_id");
-const motherAutoComplete = id("motherName_id");
+const firstAutoComplete = id("firstName");
+const fatherAutoComplete = id("fatherName");
+const motherAutoComplete = id("motherName");
 
 firstAutoComplete.setAttribute("autocomplete", "off");
 fatherAutoComplete.setAttribute("autocomplete", "off");
@@ -87,10 +87,10 @@ const setInput = (name, value) => {
             viewPath: "msg/contactNewMember",
 
             data: {
-                email: id(`${name}Email_id`).value,
-                mobile: id(`${name}Mobile_id`).value,
-                name: id(`${name}Name_id`).value,
-                familyCode: id(`familyCode_id`).value,
+                email: id(`${name}Email`).value,
+                mobile: id(`${name}Mobile`).value,
+                name: id(`${name}Name`).value,
+                familyCode: id(`familyCode`).value,
                 yourName: `${fName} ${lName}`,
             },
 
@@ -157,7 +157,7 @@ const spouseMobile = (event) => {
 };
 
 // Add event listeners with error handling
-id("fatherMobile_id").addEventListener("keyup", (event) => {
+id("fatherMobile").addEventListener("keyup", (event) => {
     try {
         fatherMobile(event);
     } catch (error) {
@@ -165,7 +165,7 @@ id("fatherMobile_id").addEventListener("keyup", (event) => {
     }
 });
 
-id("motherMobile_id").addEventListener("keyup", (event) => {
+id("motherMobile").addEventListener("keyup", (event) => {
     try {
         motherMobile(event);
     } catch (error) {
@@ -173,7 +173,7 @@ id("motherMobile_id").addEventListener("keyup", (event) => {
     }
 });
 
-id("spouseMobile_id").addEventListener("keyup", (event) => {
+id("spouseMobile").addEventListener("keyup", (event) => {
     try {
         spouseMobile(event);
     } catch (error) {
@@ -185,7 +185,7 @@ id("spouseMobile_id").addEventListener("keyup", (event) => {
 
 
 // check if there is a sibling or kids by email
-processKidsSiblings(checkEmail, fName, lName)
+processKidsSiblings(checkEmail, fName)
 
 
 const checkPersonalEmail = (e) => {
@@ -194,4 +194,4 @@ const checkPersonalEmail = (e) => {
 }
 
 
-id('email_id').addEventListener('keyup', checkPersonalEmail)
+id('email').addEventListener('keyup', checkPersonalEmail)

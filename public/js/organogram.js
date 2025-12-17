@@ -133,57 +133,6 @@ var initTree = function initTree() {
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/familyTree/familyData.js":
-/*!****************************************************************!*\
-  !*** ./resources/asset/js/components/familyTree/familyData.js ***!
-  \****************************************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   familyData: function() { return /* binding */ familyData; }
-/* harmony export */ });
-// Sample data for family members
-var familyData = {
-  "SHOLA OLAOGUN": {
-    image: "https://randomuser.me/api/portraits/men/75.jpg",
-    relation: "Father",
-    fullName: "SHOLA OLAOGUN",
-    birthDate: "January 15, 1950",
-    birthPlace: "Lagos, Nigeria",
-    occupation: "Business Owner",
-    education: "Bachelor of Commerce",
-    email: "shola.olaogun@example.com",
-    phone: "+44 7800 123456"
-  },
-  "ADEBOLA OLAOGUN": {
-    image: "https://randomuser.me/api/portraits/women/75.jpg",
-    relation: "Mother",
-    fullName: "ADEBOLA OLAOGUN",
-    birthDate: "March 22, 1955",
-    birthPlace: "Ibadan, Nigeria",
-    occupation: "Teacher (Retired)",
-    education: "Bachelor of Education",
-    email: "adebola.olaogun@example.com",
-    phone: "+44 7800 123457"
-  },
-  "Lafane OLAOGUN": {
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    relation: "Self",
-    fullName: "Lafane OLAOGUN",
-    birthDate: "June 15, 1975",
-    birthPlace: "Lagos, Nigeria",
-    occupation: "Business Owner",
-    education: "MSc. Business Administration",
-    email: "lafane.olaogun@example.com",
-    phone: "+44 7805 262504",
-    residence: "London, United Kingdom"
-  }
-  // Add more family members as needed
-};
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/familyTree/index.js":
 /*!***********************************************************!*\
   !*** ./resources/asset/js/components/familyTree/index.js ***!
@@ -211,24 +160,31 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
     var first = node.querySelector(nodeClass);
     return (first === null || first === void 0 ? void 0 : (_first$dataset = first.dataset) === null || _first$dataset === void 0 ? void 0 : _first$dataset.id) || null;
   };
-  var email = nodeFn('.node-email');
-  var relation = nodeFn('.node-relation');
-  var img = nodeFn('.node-img');
-  var maritalStatus = nodeFn('.node-maritalStatus');
-  var spouseName = nodeFn('.node-spouseName');
-  var occupation = nodeFn('.node-occupation');
-  var country = nodeFn('.node-country');
-  var detailData = {
-    fullName: name,
-    email: email,
-    img: img,
-    maritalStatus: maritalStatus,
-    spouseName: spouseName,
-    occupation: occupation,
-    relation: relation,
-    country: country
-  };
-  (0,_showModal__WEBPACK_IMPORTED_MODULE_2__.showPersonDetails)(detailData);
+  var personId = nodeFn('.node-id');
+  if (personId !== null && personId !== '') {
+    // then redirect to seeprofile page
+    window.location.href = "/allMembers/seeProfile/".concat(personId);
+  } else {
+    var email = nodeFn('.node-email');
+    var relation = nodeFn('.node-relation');
+    var img = nodeFn('.node-img');
+    var maritalStatus = nodeFn('.node-maritalStatus');
+    var spouseName = nodeFn('.node-spouseName');
+    var occupation = nodeFn('.node-occupation');
+    var country = nodeFn('.node-country');
+    var detailData = {
+      fullName: name,
+      email: email,
+      img: img,
+      maritalStatus: maritalStatus,
+      spouseName: spouseName,
+      occupation: occupation,
+      relation: relation,
+      country: country,
+      personId: personId
+    };
+    (0,_showModal__WEBPACK_IMPORTED_MODULE_2__.showPersonDetails)(detailData);
+  }
 });
 
 // Close modal when "X" button is clicked
@@ -279,9 +235,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   showPersonDetails: function() { return /* binding */ showPersonDetails; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-/* harmony import */ var _familyData__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./familyData */ "./resources/asset/js/components/familyTree/familyData.js");
-
- // Import the family data from './familydata'
 
 var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
 var modalBody = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('modalBody');

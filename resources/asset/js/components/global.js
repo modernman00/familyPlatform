@@ -20,19 +20,40 @@ export const log = (id, identifier = null) => {
 export const write = (input) => document.write(input)
 
 export const hideElement = (elementId) => {
-    id(elementId).style.display = "none";
+  const el = id(elementId);
+  if (!el) {
+    console.warn(`hideElement: '${elementId}' not found`);
+    return;
+  }
+  el.style.display = 'none';
 };
 
+
 export const showElement = (elementId) => {
-    id(elementId).style.display = "block";
+  const el = id(elementId);
+  if (!el) {
+    console.warn(`showElement: '${elementId}' not found`);
+    return;
+  }
+  el.style.display = 'block';
 };
 
 export const manipulateAttribute = (idName, removeOrSet, attributeType, nameValue = null) => {
 
     if (removeOrSet === "remove") {
-        id(idName).removeAttribute(attributeType)
+        const el = id(idName);
+        if (!el) {
+          console.warn(`manipulateAttribute: '${idName}' not found`);
+          return;
+        }
+        el.removeAttribute(attributeType);
     } else {
-        id(idName).setAttribute(attributeType, nameValue)
+        const el = id(idName);
+        if (!el) {
+          console.warn(`manipulateAttribute: '${idName}' not found`);
+          return;
+        }
+        el.setAttribute(attributeType, nameValue);
     }
 
 

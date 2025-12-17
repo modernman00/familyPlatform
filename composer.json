@@ -26,6 +26,7 @@
       "url": "https://github.com/modernman00/shared-lib"
     }
   ],
+  
   "require": {
     "php": "^8.3",
     "ext-gd": "*",
@@ -50,6 +51,9 @@
     "optimize-autoloader": true,
     "allow-plugins": {
       "kylekatarnls/update-helper": true
-    }
+    },
+    "platform": {
+            "php": "8.4.3"
+        }
   }
 }

@@ -39,10 +39,9 @@ export const fetchEmailData = ()=> {
     // Make a GET request and return the promise
     return axios.get(`${URL}getEmails`)
         .then(response => {
-            // Extract the data from the response
-            const data = response.data
+             const emailArray = response.data.message.map(item => item.email);
             // Return the data or do further processing
-            return data;
+            return emailArray;
         })
         .catch(error => {
             // Handle any errors that occur during the request

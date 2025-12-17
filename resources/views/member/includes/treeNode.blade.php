@@ -40,8 +40,8 @@
     <span class="node-title">{{ ucfirst($type) }}</span>
     <span class="node-name">{{ $displayName }}</span>
 
-    <span class="node-relation" data-id="{{ $relationshipLabel }}">
-        {{ $relationshipLabel }}
+    <span class="node-relation" data-id="{{ $relationshipLabel }} ">
+        {{ $relationshipLabel }} 
     </span>
 
     <span class="node-icon">

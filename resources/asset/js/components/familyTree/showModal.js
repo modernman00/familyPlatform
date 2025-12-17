@@ -1,5 +1,4 @@
  import { id } from '@shared'
- import { familyData } from './familyData' // Import the family data from './familydata'
 
  
     const personModal = id('personModal');

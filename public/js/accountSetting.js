@@ -8,12 +8,11 @@
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _register_onChangeKidSibling__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./register/onChangeKidSibling */ "./resources/asset/js/components/register/onChangeKidSibling.js");
+/* harmony import */ var _accountSettingHelpers_handleFamilyChangeBootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./accountSettingHelpers/handleFamilyChangeBootstrap */ "./resources/asset/js/components/accountSettingHelpers/handleFamilyChangeBootstrap.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./FormHelper */ "./resources/asset/js/components/FormHelper.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _kidsAndSiblings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./kidsAndSiblings */ "./resources/asset/js/components/kidsAndSiblings.js");
-/* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./api/index */ "./resources/asset/js/components/api/index.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./kidsAndSiblings */ "./resources/asset/js/components/kidsAndSiblings.js");
+/* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./api/index */ "./resources/asset/js/components/api/index.js");
 
 
 
@@ -21,65 +20,30 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.update)({
+  formId: 'accountSettingForm',
+  route: '/accountSetting',
+  buttonId: 'button',
+  redirect: '/accountSetting'
+});
 
-var formInput = document.querySelectorAll('.accountSettingForm');
-var formInputArr = Array.from(formInput);
-var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_2__["default"](formInputArr);
-var options = {
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN'
-};
-var process = function process(e) {
-  try {
-    e.preventDefault();
-    var notificationDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('accountSettingForm_notification');
-    var notificationMsg = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('accountSettingForm_notification_error');
-    notificationMsg.innerHTML = ""; // may not be needed
-    formData.massValidate();
-    // log(formData.error)
-    if (formData.error.length <= 0) {
-      // get the form data
-      var eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('accountSettingForm');
-      var eventFormEntries = new FormData(eventForm);
-      // post the form data to the database and get the last posted event no
-      axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/accountSetting", eventFormEntries, options).then(function (response) {
-        notificationDiv.style.display = "block"; // unblock the notification
-        notificationDiv.classList.add('is-success'); // add the success class
-        notificationMsg.innerHTML = response.data.message;
-      });
-      // window.location.replace("/member/profilePage")
-    } else {
-      alert('The form cannot be submitted. Please check the errors');
-      formData.clearError();
-    }
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
-  }
-};
+// Hide spouse and maiden name elements by default
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('spouse');
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('maiden_name_div');
 
-// show spouse once select is Yes
-// Add event listeners
 // Function to show spouse information based on marital status
 var showSpouse = function showSpouse() {
   // Get the value of the marital status dropdown
-  var maritalStatus = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('maritalStatus_id').value;
+  var maritalStatus = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('maritalStatus').value;
 
   // Check marital status and show relevant elements
   if (maritalStatus === "Yes - Add Husband") {
     // Display spouse section if adding husband
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showElement)('spouse');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseName_id', 'set', 'name', 'spouseName');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseEmail_id', 'set', 'name', 'spouseEmail');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseMobile_id', 'set', 'name', 'spouseMobile');
   } else if (maritalStatus === "Yes - Add Wife") {
     // Display spouse section if adding wife
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showElement)('spouseMaidenName_div');
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.showElement)('maiden_name_div');
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.showElement)('spouse');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseName_id', 'set', 'name', 'spouseName');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseEmail_id', 'set', 'name', 'spouseEmail');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseMobile_id', 'set', 'name', 'spouseMobile');
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseMaidenName_id', 'set', 'name', 'spouseMaidenName');
-    // Display maiden name and spouse sections if adding wife
   } else {
     // Hide spouse section if marital status is not "Yes"
     (0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('spouse');
@@ -87,38 +51,142 @@ var showSpouse = function showSpouse() {
 };
 
 // Add event listener to marital status dropdown to trigger showSpouse function
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('maritalStatus_id').addEventListener('change', showSpouse);
+(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('maritalStatus').addEventListener('change', showSpouse);
 
-// Hide spouse and maiden name elements by default
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('spouse');
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('spouseMaidenName_div');
-
-// remove input name attritube by default
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseName_id', 'remove', 'name');
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseMaidenName_id', 'remove', 'name');
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseEmail_id', 'remove', 'name');
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.manipulateAttribute)('spouseMobile_id', 'remove', 'name');
-(0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('submit').addEventListener('click', process);
 // GET ALL EMAILS 
-
 // Call the fetchData function to initiate the request
-
 // const emailData = []
 var fName = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('fName').textContent;
-var lastName = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('lName').textContent;
 var famCode = localStorage.getItem('requesterFamCode');
-(0,_api_index__WEBPACK_IMPORTED_MODULE_5__.fetchEmailData)().then(function (data) {
+(0,_api_index__WEBPACK_IMPORTED_MODULE_4__.fetchEmailData)().then(function (data) {
   // Do something with the fetched data
   var emailData = data;
 
   // SEND EMAIL TO THE KIDS AND processKidsSibling
-  (0,_kidsAndSiblings__WEBPACK_IMPORTED_MODULE_4__.processKidsSiblings)(emailData, fName, lastName, famCode);
+  (0,_kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__.processKidsSiblings)(emailData, fName, famCode);
 }).catch(function (error) {
   // Handle any errors that occurred during the request or processing
   console.error('Error:', error);
 });
 
 // Call the getEmailData function somewhere in your code
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/accountSettingHelpers/handleFamilyChangeBootstrap.js":
+/*!********************************************************************************************!*\
+  !*** ./resources/asset/js/components/accountSettingHelpers/handleFamilyChangeBootstrap.js ***!
+  \********************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   show: function() { return /* binding */ show; }
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _renderFamilyBootstrap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./renderFamilyBootstrap */ "./resources/asset/js/components/accountSettingHelpers/renderFamilyBootstrap.js");
+/* harmony import */ var _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../data/checkEmailObj */ "./resources/asset/js/data/checkEmailObj.js");
+/* harmony import */ var _data_checkEmailFactory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../data/checkEmailFactory */ "./resources/asset/js/data/checkEmailFactory.js");
+
+
+
+
+
+
+
+
+/**
+ * Adapted for Account Setting Page (Bootstrap 5)
+ */
+
+var syncCheckEmailObj = function syncCheckEmailObj() {
+  var _id, _id2;
+  var kids = Number((_id = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("children")) === null || _id === void 0 ? void 0 : _id.value) || 0;
+  var siblings = Number((_id2 = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("sibling")) === null || _id2 === void 0 ? void 0 : _id2.value) || 0;
+
+  // IMPORTANT: mutate the same object reference
+  Object.assign(_data_checkEmailObj__WEBPACK_IMPORTED_MODULE_3__.checkEmailObj, (0,_data_checkEmailFactory__WEBPACK_IMPORTED_MODULE_4__.makeCheckEmailObj)(kids, siblings));
+};
+var show = function show(kids_or_sib, event) {
+  try {
+    var value = Number(event.target.value) || 0;
+
+    // ✅ unique container IDs (avoid clashing with <select id="children">)
+    var containerId = "".concat(kids_or_sib, "_inputs");
+    var parentId = "".concat(kids_or_sib, "_div");
+
+    // remove the existing dynamic container
+    (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.removeDiv)(containerId);
+    var helpEl = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help"));
+    if (helpEl) helpEl.innerHTML = "";
+    if (value === 0) {
+      syncCheckEmailObj();
+      return;
+    }
+    // create the container under wrapper
+    (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.createAndAppendElement)("div", containerId, parentId);
+    if (helpEl) {
+      helpEl.innerHTML = value > 1 ? "Please, provide details for each below:" : "Please, provide details below:";
+      helpEl.classList.remove("text-danger"); // Use BS5 classes or JS logic? keeping simple
+      helpEl.style.color = ""; // Reset custom color if any
+    }
+    var container = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(containerId);
+    if (!container) return;
+    for (var i = 0; i < value; i++) {
+      var no = i + 1;
+      var html = (0,_renderFamilyBootstrap__WEBPACK_IMPORTED_MODULE_2__.renderHtmlFamilyBootstrap)(kids_or_sib, no);
+      container.insertAdjacentHTML("beforeEnd", html);
+    }
+
+    // 🔥 after DOM changes, regenerate ID lists
+    syncCheckEmailObj();
+  } catch (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+  }
+};
+
+// ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
+var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
+  var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("children");
+  var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("sibling");
+  if (kidInput) kidInput.addEventListener('change', function (event) {
+    return show('children', event);
+  });
+  if (sibInput) sibInput.addEventListener('change', function (event) {
+    return show('sibling', event);
+  });
+
+  // initialise on page load too (if selects already have values)
+  syncCheckEmailObj();
+};
+onChangeKidAndSiblings();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/accountSettingHelpers/renderFamilyBootstrap.js":
+/*!**************************************************************************************!*\
+  !*** ./resources/asset/js/components/accountSettingHelpers/renderFamilyBootstrap.js ***!
+  \**************************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderHtmlFamilyBootstrap: function() { return /* binding */ renderHtmlFamilyBootstrap; }
+/* harmony export */ });
+var renderHtmlFamilyBootstrap = function renderHtmlFamilyBootstrap(family, no) {
+  if (!no) return "";
+  var kids_sib = family === "children" ? "children" : "sibling";
+  var labelText = family === "children" ? "Child" : "Sibling";
+  var optionsHtmlText = family === "children" ? "With Spouse?" : "Relationship";
+  var optionsHtml = "\n    <option value=\"select\" disabled selected>Select status</option>\n    <option value=\"With Spouse\">With Spouse</option>\n    <option value=\"Not With Spouse\">Single / Other</option>\n  ";
+  if (family === "sibling") {
+    optionsHtml = "\n      <option value=\"select\" disabled selected>Select type</option>\n      <option value=\"Same_Mother_Father\">Same Father & Mother</option>\n      <option value=\"Same_Father\">Same Father Only</option>\n      <option value=\"Same_Mother\">Same Mother Only</option>\n    ";
+  }
+
+  // Premium, Senior Designer Card Layout
+  return "\n    <div class=\"family-member-card animate-reveal wrapper-".concat(kids_sib, "-").concat(no, "\">\n      \n      <!-- Card Header -->\n      <div class=\"d-flex justify-content-between align-items-center mb-4 border-bottom pb-2\" style=\"border-color: #f0f2f5 !important;\">\n          <div class=\"d-flex align-items-center\">\n             <div class=\"member-badge me-2\">\n                #").concat(no, "\n             </div>\n             <h6 class=\"mb-0 fw-bold text-dark text-uppercase\" style=\"letter-spacing: 0.5px; font-size: 0.9rem;\">\n                ").concat(labelText, " Information\n             </h6>\n          </div>\n          <!-- Optional: Icon or action could go here -->\n          <i class=\"bi bi-person-badge text-muted opacity-50\"></i>\n      </div>\n\n      <!-- Form Grid -->\n      <div class=\"row g-4 pl-2\">\n      \n        <!-- Relationship Select -->\n        <div class=\"col-md-5\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_option").concat(no, "\">\n               ").concat(optionsHtmlText, "\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-diagram-3\"></i></span>\n               <select class=\"form-select border-0 shadow-none bg-transparent ps-0\" name=\"").concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                  ").concat(optionsHtml, "\n               </select>\n           </div>\n        </div>\n\n        <!-- Full Name Input -->\n        <div class=\"col-md-7\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_name").concat(no, "\">\n               Full Name\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-person\"></i></span>\n               <input \n                  type=\"text\" \n                  class=\"form-control-modern\" \n                  placeholder=\"e.g. John Doe\" \n                  name=\"").concat(kids_sib, "_name").concat(no, "\" \n                  id=\"").concat(kids_sib, "_name").concat(no, "\"\n                  autocomplete=\"off\"\n               >\n           </div>\n        </div>\n\n        <!-- Email Input (Full Width) -->\n        <div class=\"col-12\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_email").concat(no, "\">\n               Email Address\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-envelope\"></i></span>\n               <input \n                  type=\"email\" \n                  class=\"form-control-modern\" \n                  placeholder=\"e.g. john.doe@example.com\" \n                  name=\"").concat(kids_sib, "_email").concat(no, "\" \n                  id=\"").concat(kids_sib, "_email").concat(no, "\"\n                  autocomplete=\"off\"\n               >\n           </div>\n           <!-- Dynamic help text area -->\n           <div class=\"form-text mt-2 ps-1\" id=\"").concat(kids_sib, "_email").concat(no, "_help\" style=\"min-height: 20px; font-size: 0.8rem;\"></div>\n        </div>\n\n      </div>\n    </div>\n  ");
+};
 
 /***/ }),
 
@@ -214,10 +282,11 @@ var postData = /*#__PURE__*/function () {
 var fetchEmailData = function fetchEmailData() {
   // Make a GET request and return the promise
   return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("".concat(URL, "getEmails")).then(function (response) {
-    // Extract the data from the response
-    var data = response.data;
+    var emailArray = response.data.message.map(function (item) {
+      return item.email;
+    });
     // Return the data or do further processing
-    return data;
+    return emailArray;
   }).catch(function (error) {
     // Handle any errors that occur during the request
     console.error('Error fetching data:', error);
@@ -237,226 +306,236 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   processKidsSiblings: function() { return /* binding */ processKidsSiblings; }
 /* harmony export */ });
-/* harmony import */ var _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../data/kidsSibling */ "./resources/asset/js/data/kidsSibling.js");
-/* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../data/checkEmailObj */ "./resources/asset/js/data/checkEmailObj.js");
+/* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
 
-var processKidsSiblings = function processKidsSiblings(checkEmailExists, firstName, lastName) {
-  var famCode = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-  var chooseEmail = [];
-  var chooseName = [];
-  var helpHTML = "";
-  // let errorHTML = ""; // Show error if applicant's email is registered
 
-  document.onkeydown = function (e) {
-    //. use the onclick to get the id of the element that was clicked
-    // 2. use event listener to get the email value (if it is not empty)
-    // 3. use the email value to check if it is in the array
-    // 4. if it is in the array, show the Yes or No Radio
-    // 5. click yes to send email to the kid or sibling
 
+var processKidsSiblings = function processKidsSiblings(emailData, firstName) {
+  var famCode = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  // normalise email list once
+  var emailSet = new Set((emailData || []).filter(Boolean).map(function (e) {
+    return String(e).toLowerCase().trim();
+  }));
+  var getFamCode = function getFamCode() {
+    var _ref, _id$value, _id;
+    return (_ref = (_id$value = (_id = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("famCode_id")) === null || _id === void 0 ? void 0 : _id.value) !== null && _id$value !== void 0 ? _id$value : famCode) !== null && _ref !== void 0 ? _ref : "";
+  };
+
+  // debounce so it doesn't fire too aggressively
+  var t = null;
+  var debounce = function debounce(fn) {
+    var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
+    return function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      clearTimeout(t);
+      t = setTimeout(function () {
+        return fn.apply(void 0, args);
+      }, wait);
+    };
+  };
+  var onInput = debounce(function (e) {
     try {
-      // create an object with the data to check
-      var elementId = e.target.id; // id of the element that was clicked or press down
-      var emailInput = e.target.value;
-      // this phase checks the id of what is being typed
-      if (!elementId) throw new Error("target id is null and empty");
+      var _id$value2, _id2;
+      var el = e.target;
+      if (!el || el.tagName !== "INPUT" || el.type !== "email") return;
+      var elementId = el.id;
+      if (!elementId) return;
 
-      // if the elementId indicate that it is a kid, then choosemail inherits all the kids array from the checkEmailObj and vis a versa
-
-      if (_data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.kidEmailInput.includes(elementId)) {
-        chooseEmail = _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.kidEmailInput;
-        chooseName = _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.kidNameInput;
-        helpHTML = (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(elementId, "_help"));
-      } else if (_data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.siblingEmail.includes(elementId)) {
-        chooseEmail = _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.siblingEmail;
-        chooseName = _data_kidsSibling__WEBPACK_IMPORTED_MODULE_0__.checkEmailObj.siblingName;
-        helpHTML = (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(elementId, "_help"));
+      // Only handle the ids we generate
+      var isKid = _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.kidEmailInput.includes(elementId);
+      var isSib = _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingEmail.includes(elementId);
+      if (!isKid && !isSib) return;
+      var emailInput = (el.value || "").toLowerCase().trim();
+      var helpEl = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(elementId, "_help"));
+      if (!helpEl) return;
+      var chooseEmail = isKid ? _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.kidEmailInput : _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingEmail;
+      var chooseName = isKid ? _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.childrenNameInput : _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingName;
+      var index = chooseEmail.indexOf(elementId);
+      var nameId = chooseName[index];
+      var nameValue = (_id$value2 = (_id2 = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)(nameId)) === null || _id2 === void 0 ? void 0 : _id2.value) !== null && _id$value2 !== void 0 ? _id$value2 : "";
+      if (emailInput.length > 0 && emailInput.length < 7) {
+        helpEl.style.display = "block";
+        helpEl.innerHTML = "Email may be too short";
+        return;
       }
-      var checkFamilyEmail = function checkFamilyEmail() {
-        //this checks the value of what is being typed
-
-        helpHTML.innerHTML = emailInput.length > 5 && emailInput.length < 7 ? "Email may be too small" : "";
-
-        // use the elementid to find the exact email value and name value
-        var index = chooseEmail.indexOf(elementId);
-        var email = (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)(chooseEmail[index]);
-        var emailValue = email.value;
-        var name = (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)(chooseName[index]);
-        var nameValue = name.value;
-
-        // if (!emailValue)
-        //     throw new Error("another round of email is empty");
-        // if (!nameValue) throw new Error("name is empty");
-        // if (!getData.length) throw new Error("data is faulty");
-        // checking family email 
-        helpHTML.style.display = "block";
-        helpHTML.innerHTML = checkEmailExists.includes(emailInput) ? "Great news! ".concat(nameValue, " is already registered on the platform") : "".concat(nameValue, " is not on the platform.Do you want us to send ").concat(nameValue, " a email to register to the platform ? ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_2__.checkBox)(elementId));
-
-        // send the email to family membersa
-
-        var setFamCode;
-        var famCodeElement = (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)('famCode_id');
-        if (famCodeElement) {
-          setFamCode = famCodeElement.value;
-        } else {
-          // Handle the case where the element is not found or not yet loaded
-          setFamCode = famCode; // Use a default value (famCode) or handle the situation accordingly
-        }
-        var processKidRadio = function processKidRadio() {
-          var postObj = {
-            mobile: "",
-            // is this needed?
-            viewPath: "msg/contactNewMember",
-            data: {
-              email: emailValue,
-              name: nameValue,
-              yourName: "".concat(firstName, " ").concat(lastName),
-              familyCode: setFamCode
-            },
-            subject: "".concat(firstName, " ").concat(lastName, " Wants You: Experience the Magic of your Family Network Today!")
-          };
-          axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/register/contactNewMember", postObj).then(function (response) {
-            helpHTML.innerHTML = response.data.message;
-            setTimeout(function () {
-              helpHTML.style.display = "none";
-            }, 5000);
-          }).catch(function (error) {
-            (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
-          });
-        };
-        (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(elementId, "Yes")).addEventListener("click", processKidRadio);
-        (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(elementId, "No")).addEventListener("click", function () {
-          return (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(elementId, "No")).style.display = "none";
-        });
-      };
-      if (chooseEmail.includes(elementId)) {
-        checkFamilyEmail();
-
-        // id(elementId).addEventListener("keyup", checkFamilyEmail);
-      }
-    } catch (error) {
-      (0,_components_global__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+      var exists = emailInput !== "" && emailSet.has(emailInput);
+      helpEl.style.display = "block";
+      helpEl.dataset.email = emailInput;
+      helpEl.dataset.name = nameValue;
+      helpEl.dataset.familyCode = getFamCode();
+      helpEl.innerHTML = exists ? "Great news! ".concat(nameValue || "This person", " is already registered on the platform") : "".concat(nameValue || "This person", " is not on the platform. Do you want us to send an email invite? ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_4__.checkBox)(elementId));
+    } catch (err) {
+      (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.showError)(err);
     }
+  }, 250);
+  var onClick = /*#__PURE__*/function () {
+    var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
+      var target, isYes, isNo, baseId, helpEl, email, name, familyCode, postObj, response, _t;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            target = e.target;
+            if (!(!target || !target.id)) {
+              _context.next = 1;
+              break;
+            }
+            return _context.abrupt("return");
+          case 1:
+            isYes = target.id.endsWith("Yes");
+            isNo = target.id.endsWith("No");
+            if (!(!isYes && !isNo)) {
+              _context.next = 2;
+              break;
+            }
+            return _context.abrupt("return");
+          case 2:
+            baseId = target.id.replace(/(Yes|No)$/, "");
+            helpEl = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(baseId, "_help"));
+            if (helpEl) {
+              _context.next = 3;
+              break;
+            }
+            return _context.abrupt("return");
+          case 3:
+            if (!isNo) {
+              _context.next = 4;
+              break;
+            }
+            helpEl.style.display = "none";
+            return _context.abrupt("return");
+          case 4:
+            if (!(helpEl.dataset.sending === "1")) {
+              _context.next = 5;
+              break;
+            }
+            return _context.abrupt("return");
+          case 5:
+            helpEl.dataset.sending = "1";
+            email = helpEl.dataset.email;
+            name = helpEl.dataset.name;
+            familyCode = helpEl.dataset.familyCode;
+            if (!(!email || !name)) {
+              _context.next = 6;
+              break;
+            }
+            helpEl.dataset.sending = "";
+            return _context.abrupt("return");
+          case 6:
+            postObj = {
+              mobile: "",
+              viewPath: "msg/contactNewMember",
+              data: {
+                email,
+                name,
+                yourName: firstName,
+                familyCode
+              },
+              subject: "".concat(firstName, " wants you to join the family network")
+            };
+            _context.next = 7;
+            return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post("/register/contactNewMember", postObj);
+          case 7:
+            response = _context.sent;
+            helpEl.innerHTML = response.data.message || "Invite sent";
+            setTimeout(function () {
+              helpEl.style.display = "none";
+            }, 5000);
+            helpEl.dataset.sending = "";
+            _context.next = 9;
+            break;
+          case 8:
+            _context.prev = 8;
+            _t = _context["catch"](0);
+            (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          case 9:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee, null, [[0, 8]]);
+    }));
+    return function onClick(_x) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+  document.addEventListener("input", onInput, true);
+  document.addEventListener("click", onClick, true);
+
+  // optional cleanup (if you ever re-init this)
+  return function () {
+    document.removeEventListener("input", onInput, true);
+    document.removeEventListener("click", onClick, true);
   };
 };
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/html/kids_Sibling.js":
-/*!*********************************************************************!*\
-  !*** ./resources/asset/js/components/register/html/kids_Sibling.js ***!
-  \*********************************************************************/
+/***/ "./resources/asset/js/data/checkEmailFactory.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/data/checkEmailFactory.js ***!
+  \******************************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtmlFamily: function() { return /* binding */ renderHtmlFamily; }
+/* harmony export */   makeCheckEmailObj: function() { return /* binding */ makeCheckEmailObj; }
 /* harmony export */ });
-var renderHtmlFamily = function renderHtmlFamily(family, no) {
-  if (no) {
-    var kids_sib = family == "addChildren" ? "kid" : "sibling";
-    var optionsHtml = "\n      <option value='Choose'>Choose</option>\n      <option value='With Spouse'>With Spouse</option>\n      <option value='Not With Spouse'>Not With Spouse</option>\n    ";
-    if (family === "sibling") {
-      optionsHtml = "\n                <option value='Choose'>Choose</option>\n                <option value='Same_Mother_Father'>Same Mother & Father</option>\n                <option value='Same_Father'>Only Same Father</option>\n                <option value='Same_Mother'>Only Same Mother</option>";
-    }
-    return "\n            <div class=\"field-body\">\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <span class=\"select is-normal is-success is-fullwidth\">\n                            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                                ").concat(optionsHtml, "\n                            </select>\n                        </span>\n                    </p>\n                </div>\n\n                <div class=\"field\">\n                    <p class=\"control is-expanded\">\n                        <input type=\"text\" placeholder = \"Enter ").concat(kids_sib, "'s full name - ").concat(no, "\"  name =").concat(kids_sib, "_name").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_name").concat(no, "\">\n                    </p>\n                </div>          \n\n                <div class=\"field\">\n                    <p class=\"control is-expanded has-icons-left\">\n                        <input type=\"email\" placeholder = \"Enter ").concat(kids_sib, "'s email - ").concat(no, "\" value = \"Please, provide email address\" name=").concat(kids_sib, "_email").concat(no, " class=\"input input is-normal \" id=\"").concat(kids_sib, "_email").concat(no, "\">\n\n                        <span class=\"icon is-small is-left\">\n                            <i class=\"fas fa-envelope\"></i>\n                        </span>\n                    </p>\n                    <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n                </div>\n\n            </div>");
-  }
+// data/checkEmailFactory.js
+var makeCheckEmailObj = function makeCheckEmailObj() {
+  var kidsCount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var siblingCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var range = function range(n) {
+    return Array.from({
+      length: n
+    }, function (_, i) {
+      return i + 1;
+    });
+  };
+  return {
+    kidEmailInput: range(kidsCount).map(function (n) {
+      return "children_email".concat(n);
+    }),
+    childrenNameInput: range(kidsCount).map(function (n) {
+      return "children_name".concat(n);
+    }),
+    siblingEmail: range(siblingCount).map(function (n) {
+      return "sibling_email".concat(n);
+    }),
+    siblingName: range(siblingCount).map(function (n) {
+      return "sibling_name".concat(n);
+    })
+  };
 };
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/register/onChangeKidSibling.js":
-/*!**********************************************************************!*\
-  !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
-  \**********************************************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   show: function() { return /* binding */ show; }
-/* harmony export */ });
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/general */ "./resources/asset/js/components/helper/general.js");
-/* harmony import */ var _html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html/kids_Sibling */ "./resources/asset/js/components/register/html/kids_Sibling.js");
-
-
-// import { getEnvironmentVariable as env} from 'environment-variable-reader'
-
-
-
-
-// let childrenOnchangeValue = 0;
-// let childrenOnchangeValue = 0;
-
-var show = function show(kids_or_sib, event) {
-  try {
-    // what was picked or selected
-    var value = Number(event.target.value) || 0;
-
-    // childrenOnchangeValue = value;
-    var addDiv = kids_or_sib == "children" ? "children" : "sibling";
-
-    // remove the div 
-    (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.removeDiv)(addDiv);
-    if (value == 0) {
-      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help")).innerHTML = "";
-    }
-    if (value > 0) {
-      // create and append the div element 
-      var parent = "".concat(kids_or_sib, "_div");
-      (0,_helper_general__WEBPACK_IMPORTED_MODULE_1__.createAndAppendElement)('div', addDiv, parent);
-      // use the loop to generate the number of input
-      for (var i = 0; i < value; i++) {
-        var no = i + 1;
-        var msg = no > 1 ? "Please, enter their names and emails below" : "Please, enter the name and email below";
-        var getSelectHelp = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help"));
-        getSelectHelp.innerHTML = msg;
-        getSelectHelp.style.fontSize = '1rem';
-        getSelectHelp.style.color = '#fc2003';
-        var html = (0,_html_kids_Sibling__WEBPACK_IMPORTED_MODULE_2__.renderHtmlFamily)(addDiv, no);
-        (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)(addDiv).insertAdjacentHTML('beforeEnd', html);
-      }
-    }
-  } catch (error) {
-    (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
-  }
-};
-
-// ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
-var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
-  var kidInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("children_id");
-  var sibInput = (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)("sibling_id");
-  if (kidInput) kidInput.addEventListener('change', function (event) {
-    return show('children', event);
-  });
-  if (sibInput) sibInput.addEventListener('change', function (event) {
-    return show('sibling', event);
-  });
-};
-onChangeKidAndSiblings();
-
-/***/ }),
-
-/***/ "./resources/asset/js/data/kidsSibling.js":
-/*!************************************************!*\
-  !*** ./resources/asset/js/data/kidsSibling.js ***!
-  \************************************************/
+/***/ "./resources/asset/js/data/checkEmailObj.js":
+/*!**************************************************!*\
+  !*** ./resources/asset/js/data/checkEmailObj.js ***!
+  \**************************************************/
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   checkEmailObj: function() { return /* binding */ checkEmailObj; }
 /* harmony export */ });
+// data/checkEmailObj.js
 var checkEmailObj = {
-  kidEmailInput: ["kid_email1", "kid_email2", "kid_email3", "kid_email4", "kid_email5", "kid_email6", "kid_email7", "kid_email8", "kid_email9", "kid_email10"],
-  kidNameInput: ["kid_name1", "kid_name2", "kid_name3", "kid_name4", "kid_name5", "kid_name6", "kid_name7", "kid_name8", "kid_name9", "kid_name10"],
-  siblingEmail: ["sibling_email1", "sibling_email2", "sibling_email3", "sibling_email4", "sibling_email5", "sibling_email6", "sibling_email7", "sibling_email8", "sibling_email9", "sibling_email10"],
-  siblingName: ["sibling_name1", "sibling_name2", "sibling_name3", "sibling_name4", "sibling_name5", "sibling_name6", "sibling_name7", "sibling_name8", "sibling_name9", "sibling_name10"]
+  kidEmailInput: [],
+  childrenNameInput: [],
+  siblingEmail: [],
+  siblingName: []
 };
 
 /***/ })

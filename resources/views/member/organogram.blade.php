@@ -47,7 +47,7 @@
                             </div>
 
 
-                            {{--  THE MAIN PERSON IN FOCUS AND IF THERE IS A SPOUSE  --}}
+                            {{--  THE MAIN PERSON IN FOCUS AND IF THERE IS A SPOUSE  --}}   
                             <ul>
                                 <li>
 
@@ -57,9 +57,13 @@
                                     <div class="couple-wrapper {{ $hasChildren ? 'has-children' : '' }}">
                                         @include('member.includes.treeNode', ['type' => 'Me', 'dataDB' => $data])
 
-                                        @isset($orgData['spouse']['name'])
-                                            @include('member.includes.treeNode', ['type' => 'spouse', 'dataDB' => $orgData['spouse']])
-                                        @endisset
+                                        @if(!empty($orgData['spouse']['fullName']) || !empty($orgData['spouse']['name']))
+                                            @include('member.includes.treeNode', [
+                                                'type' => 'spouse',
+                                                'dataDB' => $orgData['spouse']
+                                            ])
+                                        @endif
+
                                     </div>
 
                                     {{--  check if they have children --}}

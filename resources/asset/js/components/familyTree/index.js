@@ -19,26 +19,38 @@ id('familyTree').addEventListener('click', (e) => {
     return first?.dataset?.id || null;
   }
 
-  const email = nodeFn('.node-email');
-  const relation = nodeFn('.node-relation');
-  const img = nodeFn('.node-img');
-  const maritalStatus = nodeFn('.node-maritalStatus');
-  const spouseName = nodeFn('.node-spouseName');
-  const occupation = nodeFn('.node-occupation');
-  const country = nodeFn('.node-country');
+  const personId = nodeFn('.node-id');
 
-  const detailData = {
-    fullName: name,
-    email: email,
-    img: img,
-    maritalStatus: maritalStatus,
-    spouseName: spouseName,
-    occupation: occupation,
-    relation: relation,
-    country: country,
+  if (personId !== null && personId !== '') {
+    // then redirect to seeprofile page
+    window.location.href = `/allMembers/seeProfile/${personId}`;
+  } else {
+    const email = nodeFn('.node-email');
+    const relation = nodeFn('.node-relation');
+    const img = nodeFn('.node-img');
+    const maritalStatus = nodeFn('.node-maritalStatus');
+    const spouseName = nodeFn('.node-spouseName');
+    const occupation = nodeFn('.node-occupation');
+    const country = nodeFn('.node-country');
+
+
+    const detailData = {
+      fullName: name,
+      email: email,
+      img: img,
+      maritalStatus: maritalStatus,
+      spouseName: spouseName,
+      occupation: occupation,
+      relation: relation,
+      country: country,
+      personId: personId,
+    }
+
+    showPersonDetails(detailData);
   }
 
-  showPersonDetails(detailData);
+
+
 })
 
 

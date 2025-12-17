@@ -79,7 +79,7 @@
                                 ],
                                 'contact' => [
                                     [
-                                        'label' => 'Location',
+                                        'label' => 'Country',
                                         'name' => "contact['country']",
                                         'id' => 'country',
                                         'type' => 'text',

@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\controller\BaseController;
 use App\model\Post;
 use Src\LoginUtility;
-use Src\{Utility, Update, Select};
+use Src\{Utility, Select, UpdateFn, SelectFn};
 
 class Index extends BaseController
 {
@@ -60,86 +60,103 @@ class Index extends BaseController
 
         // Sanitise the data and get the cleaned data
 
-        $dataToCheck = [
-            'min' => [2, 2, 2],
-            'max' => [20, 16, 30],
-            'data' => [
-                'country',
-                'mobile',
-                'email'
-            ]
-        ];
-      
+        try {
 
-        $tableData = [
+            $_POST['id'] = cleanSession($_SESSION['id']);
 
-            'email' => $_POST['email'],
-            'country' => $_POST['country'],
-            'mobile' => $_POST['mobile'],
-         
-        ];
-        $cleanData = LoginUtility::getSanitisedInputData($tableData, $dataToCheck);
-        $cleanData['id'] = cleanSession($_SESSION['id']);
+            $allowed = ['mobile', 'email', 'country', 'occupation']; // add yours
+            $updates = [];
 
-        $updateAccountSettingClass = new Update('contact');
-        $updateAccountSettingClass->updateMultiplePOST($cleanData, 'id');
+            foreach ($allowed as $field) {
+                if (isset($_POST[$field])) {
+                    $val = trim((string) $_POST[$field]);
+                    $updates[$field] = $val;
+                }
+            }
+            // if $update is not empty update the database
+            if (!empty($updates)) {
+                $updates['id'] = $_POST['id'];
+                $data = LoginUtility::getSanitisedInputData($updates);
+                UpdateFn::updateMultiple('contact', $data, 'id');
+            }
 
-        // SUBMIT THE SPOUSAL INFORMATION
+            if (isset($_POST['occupation'])) {
+                $data = [
+                    'occupation' => checkInput($_POST['occupation']),
+                    'id' => $_POST['id']
+                ];
+                UpdateFn::updateMultiple('contact', $data, 'id');
+            }
 
-        // CHECK IF THE SELECT BOX IS SET TO Yes
-        if ($cleanData['maritalStatus'] === 'Yes - Add Husband' || $cleanData['maritalStatus'] === 'Yes - Add Wife') {
+            // SUBMIT THE SPOUSAL INFORMATION
 
-            define('NOT_SET', 'not defined');
+            // CHECK IF THE SELECT BOX IS SET TO Yes
+            if ($_POST['maritalStatus'] === 'Yes - Add Husband' || $_POST['maritalStatus'] === 'Yes - Add Wife') {
 
-            $tableData = [
+                // --- Spouse fields (only if present) ---
+                $spouseAllowed = ['spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name'];
+                $spouse = [];
+                foreach ($spouseAllowed as $f) {
+                    if (isset($_POST[$f]))
+                        $spouse[$f] = trim((string) $_POST[$f]);
+                }
+                if (!empty($spouse)) {
+                    $spouse['id'] = $_POST['id'];
+                    $cleanSpouseData = LoginUtility::getSanitisedInputData($spouse);
 
-                'spous_name' => $_POST['spouse_name'] ?? "NOT_SET",
-                'spous_email' => $_POST['spouse_email'] ?? "NOT_SET",
-                'spous_mobile' => $_POST['spouse_mobile'] ?? "NOT_SET",
-                // 'spous_maidenName' => $_POST['spouse_maidenName'] ?? "NOT_SET",
-                'id' => cleanSession($_SESSION['id'])
-            ];
-            $cleanSpouseData = LoginUtility::getSanitisedInputData($tableData, $dataToCheck);
+                   UpdateFn::updateMultiple('otherFamily', $cleanSpouseData, 'id');
+                }
+            }
+            //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
 
-            $updateAccountSettingClass = new Update('otherFamily');
-            $updateAccountSettingClass->updateMultiplePOST($cleanSpouseData, 'id');
+            if (isset($_POST['children']) || isset($_POST['sibling'])) {
+
+                $kidsCount = (int) $_POST['children'];
+                $siblingsCount = (int) $_POST['sibling'];
+                unsetPostData($_POST, ['email', 'mobile', 'country', 'occupation', 'spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name', 'children', 'sibling', 'maritalStatus', 'button']);
+                
+
+                if ($kidsCount > 0) {
+
+                    $childrenData= [];
+                    foreach ($_POST as $key => $value) {
+                        if (str_contains($key, 'children')) {
+                            $childrenData[$key] = $value;
+                        }
+                    }
+                    $childrenData['id'] = $_POST['id'];
+
+                    $cleanChildrenData = LoginUtility::getSanitisedInputData($childrenData);
+
+                    processKidSibling('children', $kidsCount, $cleanChildrenData);
+                }
+
+                if ($siblingsCount > 0) {
+                    $siblingsData= [];
+                    foreach ($_POST as $key => $value) {
+                        if (str_contains($key, 'sibling')) {
+                            $siblingsData[$key] = $value;
+                        }
+                    }
+                    $siblingsData['id'] = $_POST['id'];
+
+                    $cleanSiblingData = LoginUtility::getSanitisedInputData($siblingsData);
+                    processKidSibling('sibling', $siblingsCount, $cleanSiblingData);
+                }
+            }
+
+            msgSuccess(200, "New Update was successfully submitted");
+        } catch (\Throwable $th) {
+            showError($th);
         }
-
-        //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-
-
-
-        $kidsCount = (int) $_POST['children'];
-        $siblingsCount = (int) $_POST['sibling'];
-
-        unset($_POST['mobile'], $_POST['email'], $_POST['country'], $_POST['children'], $_POST['sibling'], 
-        $_POST['spouse_name'], $_POST['spouse_email'], $_POST['spouse_mobile'], $_POST['spouse_maidenName'], $_POST['maritalStatus']);
-
-        $cleanChildrenSiblingData = LoginUtility::getSanitisedInputData($_POST, $dataToCheck);
-
-
-        if ($kidsCount > 0) {
-            processKidSibling('children', $kidsCount, $cleanChildrenSiblingData);
-        }
-
-        if ($siblingsCount > 0) {
-            processKidSibling('sibling', $siblingsCount, $cleanChildrenSiblingData);
-        }
-
-        msgSuccess(200, "New Update was successfully submitted");
     }
 
     public static function getEmails()
     {
-        $query = Select::formAndMatchQuery(selection: 'SELECT_COL_ID', table: 'account', identifier1: 'status', column: 'email');
+        $result = SelectFn::selectColumnByIdentifier('account', 'email', 'status', 'approved');
 
-        $result = Select::selectFn2($query, ['approved']);
+        msgSuccess(200, $result);
 
-        // printArr($result);
-
-        echo json_encode($result);
-
-        return $result;
     }
 
     public static function checking()

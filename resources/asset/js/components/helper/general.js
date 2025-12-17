@@ -34,9 +34,12 @@ export const removeDiv = (div_id) => {
 export const createAndAppendElement = (elementType, setId, parent, setClass = null) => {
     const newDiv = document.createElement(elementType);
     newDiv.setAttribute('id', setId)
-    newDiv.setAttribute('class', `field ${setClass}`)
-    const parentDiv = id(parent)
-    return parentDiv.appendChild(newDiv)
+    if (setClass) newDiv.className = `field ${setClass}`;
+else newDiv.className = `field ${setId}`;
+    const parentDiv = id(parent);
+if (!parentDiv) throw new Error(`Parent element '${parent}' not found`);
+return parentDiv.appendChild(newDiv);
+
 }
 
 /**

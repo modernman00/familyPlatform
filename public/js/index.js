@@ -410,17 +410,37 @@ var write = function write(input) {
   return document.write(input);
 };
 var hideElement = function hideElement(elementId) {
-  id(elementId).style.display = "none";
+  var el = id(elementId);
+  if (!el) {
+    console.warn("hideElement: '".concat(elementId, "' not found"));
+    return;
+  }
+  el.style.display = 'none';
 };
 var showElement = function showElement(elementId) {
-  id(elementId).style.display = "block";
+  var el = id(elementId);
+  if (!el) {
+    console.warn("showElement: '".concat(elementId, "' not found"));
+    return;
+  }
+  el.style.display = 'block';
 };
 var manipulateAttribute = function manipulateAttribute(idName, removeOrSet, attributeType) {
   var nameValue = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   if (removeOrSet === "remove") {
-    id(idName).removeAttribute(attributeType);
+    var el = id(idName);
+    if (!el) {
+      console.warn("manipulateAttribute: '".concat(idName, "' not found"));
+      return;
+    }
+    el.removeAttribute(attributeType);
   } else {
-    id(idName).setAttribute(attributeType, nameValue);
+    var _el = id(idName);
+    if (!_el) {
+      console.warn("manipulateAttribute: '".concat(idName, "' not found"));
+      return;
+    }
+    _el.setAttribute(attributeType, nameValue);
   }
 };
 
@@ -698,8 +718,9 @@ var createAndAppendElement = function createAndAppendElement(elementType, setId,
   var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   var newDiv = document.createElement(elementType);
   newDiv.setAttribute('id', setId);
-  newDiv.setAttribute('class', "field ".concat(setClass));
+  if (setClass) newDiv.className = "field ".concat(setClass);else newDiv.className = "field ".concat(setId);
   var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(parent);
+  if (!parentDiv) throw new Error("Parent element '".concat(parent, "' not found"));
   return parentDiv.appendChild(newDiv);
 };
 

@@ -1,123 +1,132 @@
-import { checkEmailObj } from "../data/kidsSibling";
+import { checkEmailObj } from "../data/checkEmailObj";
 import { id, showError } from "../components/global";
 import { checkBox } from "./helper/general";
 import axios from "axios";
 
-export const processKidsSiblings = (checkEmailExists, firstName, lastName, famCode = null) => {
+export const processKidsSiblings = (emailData, firstName, famCode = null) => {
+  // normalise email list once
+  const emailSet = new Set(
+    (emailData || []).filter(Boolean).map(e => String(e).toLowerCase().trim())
+  );
 
-  let chooseEmail = [];
-  let chooseName = [];
-  let helpHTML = "";
-  // let errorHTML = ""; // Show error if applicant's email is registered
+  const getFamCode = () => id("famCode_id")?.value ?? famCode ?? "";
 
+  // debounce so it doesn't fire too aggressively
+  let t = null;
+  const debounce = (fn, wait = 200) => (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
 
-  document.onkeydown = (e) => {
-    //. use the onclick to get the id of the element that was clicked
-    // 2. use event listener to get the email value (if it is not empty)
-    // 3. use the email value to check if it is in the array
-    // 4. if it is in the array, show the Yes or No Radio
-    // 5. click yes to send email to the kid or sibling
-
+  const onInput = debounce((e) => {
     try {
-      // create an object with the data to check
-      const elementId = e.target.id; // id of the element that was clicked or press down
-      const emailInput = e.target.value;
-      // this phase checks the id of what is being typed
-      if (!elementId) throw new Error("target id is null and empty");
+      const el = e.target;
+      if (!el || el.tagName !== "INPUT" || el.type !== "email") return;
 
-      // if the elementId indicate that it is a kid, then choosemail inherits all the kids array from the checkEmailObj and vis a versa
+      const elementId = el.id;
+      if (!elementId) return;
 
-      if (checkEmailObj.kidEmailInput.includes(elementId)) {
-        chooseEmail = checkEmailObj.kidEmailInput;
-        chooseName = checkEmailObj.kidNameInput;
-        helpHTML = id(`${elementId}_help`);
+      // Only handle the ids we generate
+      const isKid = checkEmailObj.kidEmailInput.includes(elementId);
+      const isSib = checkEmailObj.siblingEmail.includes(elementId);
+      if (!isKid && !isSib) return;
 
-      } else if (checkEmailObj.siblingEmail.includes(elementId)) {
-        chooseEmail = checkEmailObj.siblingEmail;
-        chooseName = checkEmailObj.siblingName;
-        helpHTML = id(`${elementId}_help`);
+      const emailInput = (el.value || "").toLowerCase().trim();
+      const helpEl = id(`${elementId}_help`);
+      if (!helpEl) return;
 
+      const chooseEmail = isKid ? checkEmailObj.kidEmailInput : checkEmailObj.siblingEmail;
+      const chooseName = isKid ? checkEmailObj.childrenNameInput : checkEmailObj.siblingName;
+
+      const index = chooseEmail.indexOf(elementId);
+      const nameId = chooseName[index];
+      const nameValue = id(nameId)?.value ?? "";
+
+      if (emailInput.length > 0 && emailInput.length < 7) {
+        helpEl.style.display = "block";
+        helpEl.innerHTML = "Email may be too short";
+        return;
       }
 
-      const checkFamilyEmail = () => {
-        //this checks the value of what is being typed
+      const exists = emailInput !== "" && emailSet.has(emailInput);
 
-        helpHTML.innerHTML = (emailInput.length > 5 && emailInput.length < 7) ? "Email may be too small" : "";
+      helpEl.style.display = "block";
+      helpEl.dataset.email = emailInput;
+      helpEl.dataset.name = nameValue;
+      helpEl.dataset.familyCode = getFamCode();
 
-        // use the elementid to find the exact email value and name value
-        const index = chooseEmail.indexOf(elementId);
-        const email = id(chooseEmail[index]);
-        const emailValue = email.value;
-        const name = id(chooseName[index]);
-        const nameValue = name.value;
+      helpEl.innerHTML = exists
+        ? `Great news! ${nameValue || "This person"} is already registered on the platform`
+        : `${nameValue || "This person"} is not on the platform. Do you want us to send an email invite? ${checkBox(elementId)}`;
 
-        // if (!emailValue)
-        //     throw new Error("another round of email is empty");
-        // if (!nameValue) throw new Error("name is empty");
-        // if (!getData.length) throw new Error("data is faulty");
-        // checking family email 
-        helpHTML.style.display = "block";
-        helpHTML.innerHTML = checkEmailExists.includes(emailInput) ?
-          `Great news! ${nameValue} is already registered on the platform` :
-          `${nameValue} is not on the platform.Do you want us to send ${nameValue} a email to register to the platform ? ${checkBox(elementId)}`;
+    } catch (err) {
+      showError(err);
+    }
+  }, 250);
 
-        // send the email to family membersa
+  const onClick = async (e) => {
+    try {
+      const target = e.target;
+      if (!target || !target.id) return;
 
+      const isYes = target.id.endsWith("Yes");
+      const isNo = target.id.endsWith("No");
+      if (!isYes && !isNo) return;
 
-        let setFamCode;
-        const famCodeElement = id('famCode_id');
-        if (famCodeElement) {
-          setFamCode = famCodeElement.value;
-        } else {
-          // Handle the case where the element is not found or not yet loaded
-          setFamCode = famCode; // Use a default value (famCode) or handle the situation accordingly
-        }
+      const baseId = target.id.replace(/(Yes|No)$/, "");
+      const helpEl = id(`${baseId}_help`);
+      if (!helpEl) return;
 
+      if (isNo) {
+        helpEl.style.display = "none";
+        return;
+      }
 
-        const processKidRadio = () => {
-          const postObj = {
-            mobile: "", // is this needed?
-            viewPath: "msg/contactNewMember",
+      // prevent double sending
+      if (helpEl.dataset.sending === "1") return;
+      helpEl.dataset.sending = "1";
 
-            data: {
-              email: emailValue,
-              name: nameValue,
-              yourName: `${firstName} ${lastName}`,
-              familyCode: setFamCode,
-            },
+      const email = helpEl.dataset.email;
+      const name = helpEl.dataset.name;
+      const familyCode = helpEl.dataset.familyCode;
 
-            subject: `${firstName} ${lastName} Wants You: Experience the Magic of your Family Network Today!`,
-          };
+      if (!email || !name) {
+        helpEl.dataset.sending = "";
+        return;
+      }
 
-          axios
-            .post("/register/contactNewMember", postObj)
-            .then((response) => {
-              helpHTML.innerHTML = response.data.message;
-
-              setTimeout(() => {
-                helpHTML.style.display = "none";
-              }, 5000);
-            })
-            .catch((error) => {
-              showError(error);
-            });
-        };
-
-        id(`${elementId}Yes`).addEventListener("click", processKidRadio);
-
-        id(`${elementId}No`).addEventListener("click", () => (id(`${elementId}No`).style.display = "none"));
-
-
+      const postObj = {
+        mobile: "",
+        viewPath: "msg/contactNewMember",
+        data: {
+          email,
+          name,
+          yourName: firstName,
+          familyCode,
+        },
+        subject: `${firstName} wants you to join the family network`,
       };
 
-      if (chooseEmail.includes(elementId)) {
+      const response = await axios.post("/register/contactNewMember", postObj);
+      helpEl.innerHTML = response.data.message || "Invite sent";
 
-        checkFamilyEmail()
+      setTimeout(() => {
+        helpEl.style.display = "none";
+      }, 5000);
 
-        // id(elementId).addEventListener("keyup", checkFamilyEmail);
-      }
-    } catch (error) {
-      showError(error);
+      helpEl.dataset.sending = "";
+
+    } catch (err) {
+      showError(err);
     }
   };
-}
+
+  document.addEventListener("input", onInput, true);
+  document.addEventListener("click", onClick, true);
+
+  // optional cleanup (if you ever re-init this)
+  return () => {
+    document.removeEventListener("input", onInput, true);
+    document.removeEventListener("click", onClick, true);
+  };
+};
