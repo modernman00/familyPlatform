@@ -1,4 +1,4 @@
-import {id} from "../global";
+import {id} from "@modernman00/shared-js-lib";
 
 // inject the country code once one of the country is picked
 

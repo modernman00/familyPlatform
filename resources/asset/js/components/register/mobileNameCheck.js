@@ -1,13 +1,14 @@
 "use strict";
-import { id, showError, showNotification } from "../global";
-import { checkBox } from "../helper/general";
+import { id, showError, showNotification, checkBox } from "@modernman00/shared-js-lib";
 import { getAllData } from "../api/index";
 import { autocomplete } from "../helper/autocomplete";
 import axios from "axios";
 import { processKidsSiblings } from "../kidsAndSiblings"
+import { log } from "@modernman00/shared-js-lib";
 
 
 const getData = getAllData();
+
 
 let firstNameData = [];
 let fatherName = [];
@@ -35,16 +36,22 @@ const checkExistence = (baseArray, searchElement) => {
 // Check if getData is resolved
 if (getData instanceof Promise) {
     getData
-        .then((el) => {
-            el.forEach((element) => {
+            .then((el) => {
+            // ✅ destructure the array from el.message
+            const { message, status } = el;
+
+            if (status !== "success" || !Array.isArray(message)) {
+                console.error("Unexpected response shape", el);
+                return;
+            }
+
+            message.forEach((element) => {
                 checkExistence(firstNameData, element.firstName);
                 checkExistence(fatherName, element.fatherName);
                 checkExistence(motherName, element.motherName);
                 checkExistence(mobile, element.mobile);
                 checkExistence(checkEmail, element.email);
             });
-
-            // Code that relies on the data obtained from getAllData() can be placed here
         })
         .catch((error) => {
             showError(error);
@@ -56,8 +63,8 @@ if (getData instanceof Promise) {
 }
 
 const firstAutoComplete = id("firstName");
-const fatherAutoComplete = id("fatherName");
-const motherAutoComplete = id("motherName");
+const fatherAutoComplete = id("father_name");
+const motherAutoComplete = id("mother_name");
 
 firstAutoComplete.setAttribute("autocomplete", "off");
 fatherAutoComplete.setAttribute("autocomplete", "off");
@@ -157,7 +164,7 @@ const spouseMobile = (event) => {
 };
 
 // Add event listeners with error handling
-id("fatherMobile").addEventListener("keyup", (event) => {
+id("father_mobile").addEventListener("keyup", (event) => {
     try {
         fatherMobile(event);
     } catch (error) {
@@ -165,7 +172,7 @@ id("fatherMobile").addEventListener("keyup", (event) => {
     }
 });
 
-id("motherMobile").addEventListener("keyup", (event) => {
+id("mother_mobile").addEventListener("keyup", (event) => {
     try {
         motherMobile(event);
     } catch (error) {
@@ -173,7 +180,7 @@ id("motherMobile").addEventListener("keyup", (event) => {
     }
 });
 
-id("spouseMobile").addEventListener("keyup", (event) => {
+id("spouse_mobile").addEventListener("keyup", (event) => {
     try {
         spouseMobile(event);
     } catch (error) {

@@ -1,4 +1,4 @@
-import { id } from "../global"
+import { id, log } from "@modernman00/shared-js-lib"
 
 /**
  * 
@@ -6,7 +6,11 @@ import { id } from "../global"
  * @param {*} msg - messages to pass - string
  */
 const showMsg = (Id, msg = "Please, leave blank if not available") => {
-    id(Id).innerHTML = msg
+
+    const el = id(Id);
+    if (el && msg) {
+        el.innerHTML = msg;
+    }
 }
 
 // const href = "<a href='/createFamilyCode' target='_blank'>here</a>"

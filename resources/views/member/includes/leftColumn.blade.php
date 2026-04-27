@@ -17,10 +17,10 @@
 
                     <div class="d-flex justify-content-around">
 
-                        @isset($data['spouseName'])
+                        @isset($data['spouse_name'])
 
                             <div>
-                                <h6 class="mb-0">{{ $data['spouseName'] }}</h6>
+                                <h6 class="mb-0">{{ $data['spouse_name'] }}</h6>
                                 <small>Spouse</small>
                             </div>
                             

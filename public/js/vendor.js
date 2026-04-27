@@ -1286,6 +1286,7 @@ function update({
       const message = response.data.message;
 
       const notificationId = (0,_UtilityHtml_js__WEBPACK_IMPORTED_MODULE_0__.id)(`${formId}_notification`) || formId;
+      notificationId.style.display = 'block'
 
       notificationId.scrollIntoView({ behavior: 'smooth' });
 
@@ -1295,6 +1296,7 @@ function update({
       if (redirect) {
         (0,_general_js__WEBPACK_IMPORTED_MODULE_4__.redirectAfterDelay)(redirect, 2000);
       }
+
 
     } catch (error) {
       console.log(error);
@@ -8556,7 +8558,7 @@ function findKey(obj, key) {
 const _global = (() => {
   /*eslint no-undef:0*/
   if (typeof globalThis !== "undefined") return globalThis;
-  return typeof self !== "undefined" ? self : (typeof window !== 'undefined' ? window : global)
+  return typeof self !== "undefined" ? self : (typeof window !== 'undefined' ? window : __webpack_require__.g)
 })();
 
 const isContextDefined = (context) => !isUndefined(context) && context !== _global;

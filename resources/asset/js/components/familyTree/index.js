@@ -29,7 +29,7 @@ id('familyTree').addEventListener('click', (e) => {
     const relation = nodeFn('.node-relation');
     const img = nodeFn('.node-img');
     const maritalStatus = nodeFn('.node-maritalStatus');
-    const spouseName = nodeFn('.node-spouseName');
+    const spouseName = nodeFn('.node-spouse_name');
     const occupation = nodeFn('.node-occupation');
     const country = nodeFn('.node-country');
 

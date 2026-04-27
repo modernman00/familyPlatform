@@ -1,4 +1,4 @@
-import { id } from '../global';
+import { id } from '@modernman00/shared-js-lib';
 
 export const hideElement = (elementId) => {
   id(elementId).style.display = "none";

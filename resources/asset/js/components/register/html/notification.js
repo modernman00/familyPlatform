@@ -1,7 +1,7 @@
-import { id } from "../../global"
+import { id } from "@modernman00/shared-js-lib"
 
 
-export const processFormDataAction = (addClass, serverResponse) => {
+export const processFormDataAction = (addClass, serverResponse, notificationDiv, notificationMsg) => {
     // display the success information for 10sec
     notificationDiv.style.display = "block" // unblock the notification
     notificationDiv.classList.add(addClass) // add the success class

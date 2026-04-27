@@ -35,9 +35,9 @@
               <td> {{ $data['created_at'] }} </td>
                <td> {{ $data['firstName']}} 
                {{ $data['lastName'] }} </td>
-                 <td> {{ $data['spouseName'] }} </td>
-                  <td> {{ $data['fatherName'] }} </td>
-                   <td> {{ $data['motherName'] }} </td>
+                 <td> {{ $data['spouse_name'] }} </td>
+                  <td> {{ $data['father_name'] }} </td>
+                   <td> {{ $data['mother_name'] }} </td>
                      <td> {{ $data['mobile'] }} </td>
                       <td> {{ $data['country'] }} </td>
                  <td> {{ $data['email'] }} </td>

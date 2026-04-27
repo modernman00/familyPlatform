@@ -2,7 +2,7 @@
 export const dataToCheckRegister = {
     maxLength: {
         id: [
-            'firstName', 'lastName', 'spouseName', 'spouseMobile', 'motherMobile', 'fatherMobile', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation',
+            'firstName', 'lastName', 'spouse_name', 'spouse_mobile', 'mother_mobile', 'father_mobile', 'father_name', 'mother_name', 'country', 'mobile', 'email', 'occupation',
         ],
         max: [15, 15, 15, 12, 12, 12, 30, 30, 15, 13, 45, 20],
     },

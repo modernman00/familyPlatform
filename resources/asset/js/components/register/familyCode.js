@@ -1,7 +1,5 @@
-import { id } from "../global"
-const button = id("btnFamCode");
-
-
+import { id } from "@shared";
+const btnFamCode = id("btnFamCode");
 
 btnFamCode.addEventListener("click", function() {
 
