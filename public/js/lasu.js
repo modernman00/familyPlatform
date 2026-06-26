@@ -15,9 +15,14 @@ __webpack_require__.r(__webpack_exports__);
 (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("setLoader").style.display = "none";
 (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAdminLoginHandler)({
   formId: 'lasu',
+  buttonId: 'button',
+  emailId: 'email',
+  passwordId: 'password',
+  showToggleId: 'showPassword',
   route: 'lasu',
-  redirect: '/admin/reviewApps',
-  theme: 'bulma'
+  redirect: redirect,
+  theme: 'bulma',
+  recaptchaAction: 'ADMIN_LOGIN'
 });
 
 /***/ })

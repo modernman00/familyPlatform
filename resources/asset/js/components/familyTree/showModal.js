@@ -25,28 +25,41 @@ export const  showPersonDetails = (personData) => {
     </div>
     <div class="detail-grid">
       <div class="detail-item">
-        <div class="detail-label">Spouse</div>
-        <div class="detail-value">${spouseName || 'N/A'}</div>
+        <div class="detail-label">Relationship</div>
+        <div class="detail-value">${relation || 'Family Member'}</div>
       </div>
 
       <div class="detail-item">
-        <div class="detail-label">Email</div>
-        <div class="detail-value">${email}</div>
+        <div class="detail-label">Marital Status</div>
+        <div class="detail-value">${maritalStatus || 'N/A'}</div>
       </div>
 
- 
       <div class="detail-item">
         <div class="detail-label">Occupation</div>
-        <div class="detail-value">${occupation}</div>
+        <div class="detail-value">${occupation || 'Not specified'}</div>
       </div>
-      ${country ? `
+
+      <div class="detail-item">
+        <div class="detail-label">Location</div>
+        <div class="detail-value">${country || 'N/A'}</div>
+      </div>
+
+      ${spouseName ? `
         <div class="detail-item">
-          <div class="detail-label">country</div>
-          <div class="detail-value">${country}</div>
+          <div class="detail-label">Spouse / Partner</div>
+          <div class="detail-value">${spouseName}</div>
+        </div>
+      ` : ''}
+
+      ${email ? `
+        <div class="detail-item" style="grid-column: span 2;">
+          <div class="detail-label">Email Address</div>
+          <div class="detail-value">${email}</div>
         </div>
       ` : ''}
     </div>
   `;
+
 
    // Show the modal
   personModal.style.display = 'flex';

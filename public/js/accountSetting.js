@@ -26,6 +26,24 @@ __webpack_require__.r(__webpack_exports__);
   buttonId: 'button',
   redirect: '/accountSetting'
 });
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.update)({
+  formId: 'passwordForm',
+  route: '/accountSetting',
+  buttonId: 'passwordBtn',
+  redirect: '/accountSetting'
+});
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.update)({
+  formId: 'preferencesForm',
+  route: '/accountSetting',
+  buttonId: 'preferencesBtn',
+  redirect: '/accountSetting'
+});
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.update)({
+  formId: 'privacyForm',
+  route: '/accountSetting',
+  buttonId: 'privacyBtn',
+  redirect: '/accountSetting'
+});
 
 // Hide spouse and maiden name elements by default
 (0,_global__WEBPACK_IMPORTED_MODULE_1__.hideElement)('spouse');
@@ -184,8 +202,8 @@ var renderHtmlFamilyBootstrap = function renderHtmlFamilyBootstrap(family, no) {
     optionsHtml = "\n      <option value=\"select\" disabled selected>Select type</option>\n      <option value=\"Same_Mother_Father\">Same Father & Mother</option>\n      <option value=\"Same_Father\">Same Father Only</option>\n      <option value=\"Same_Mother\">Same Mother Only</option>\n    ";
   }
 
-  // Premium, Senior Designer Card Layout
-  return "\n    <div class=\"family-member-card animate-reveal wrapper-".concat(kids_sib, "-").concat(no, "\">\n      \n      <!-- Card Header -->\n      <div class=\"d-flex justify-content-between align-items-center mb-4 border-bottom pb-2\" style=\"border-color: #f0f2f5 !important;\">\n          <div class=\"d-flex align-items-center\">\n             <div class=\"member-badge me-2\">\n                #").concat(no, "\n             </div>\n             <h6 class=\"mb-0 fw-bold text-dark text-uppercase\" style=\"letter-spacing: 0.5px; font-size: 0.9rem;\">\n                ").concat(labelText, " Information\n             </h6>\n          </div>\n          <!-- Optional: Icon or action could go here -->\n          <i class=\"bi bi-person-badge text-muted opacity-50\"></i>\n      </div>\n\n      <!-- Form Grid -->\n      <div class=\"row g-4 pl-2\">\n      \n        <!-- Relationship Select -->\n        <div class=\"col-md-5\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_option").concat(no, "\">\n               ").concat(optionsHtmlText, "\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-diagram-3\"></i></span>\n               <select class=\"form-select border-0 shadow-none bg-transparent ps-0\" name=\"").concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n                  ").concat(optionsHtml, "\n               </select>\n           </div>\n        </div>\n\n        <!-- Full Name Input -->\n        <div class=\"col-md-7\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_name").concat(no, "\">\n               Full Name\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-person\"></i></span>\n               <input \n                  type=\"text\" \n                  class=\"form-control-modern\" \n                  placeholder=\"e.g. John Doe\" \n                  name=\"").concat(kids_sib, "_name").concat(no, "\" \n                  id=\"").concat(kids_sib, "_name").concat(no, "\"\n                  autocomplete=\"off\"\n               >\n           </div>\n        </div>\n\n        <!-- Email Input (Full Width) -->\n        <div class=\"col-12\">\n           <label class=\"label-premium\" for=\"").concat(kids_sib, "_email").concat(no, "\">\n               Email Address\n           </label>\n           <div class=\"input-group-modern\">\n               <span class=\"input-icon\"><i class=\"bi bi-envelope\"></i></span>\n               <input \n                  type=\"email\" \n                  class=\"form-control-modern\" \n                  placeholder=\"e.g. john.doe@example.com\" \n                  name=\"").concat(kids_sib, "_email").concat(no, "\" \n                  id=\"").concat(kids_sib, "_email").concat(no, "\"\n                  autocomplete=\"off\"\n               >\n           </div>\n           <!-- Dynamic help text area -->\n           <div class=\"form-text mt-2 ps-1\" id=\"").concat(kids_sib, "_email").concat(no, "_help\" style=\"min-height: 20px; font-size: 0.8rem;\"></div>\n        </div>\n\n      </div>\n    </div>\n  ");
+  // Match the new Account Settings "Spouse Details" container style
+  return "\n    <div class=\"p-4 rounded-3 mb-4 wrapper-".concat(kids_sib, "-").concat(no, "\" style=\"background-color: #f8fafc; border: 1px solid #e2e8f0;\">\n      \n      <h6 class=\"fw-bold mb-3 text-dark text-uppercase\" style=\"letter-spacing: 0.5px; font-size: 0.9rem;\">\n        #").concat(no, " ").concat(labelText, " Information\n      </h6>\n\n      <div class=\"row g-3\">\n      \n        <!-- Relationship Select -->\n        <div class=\"col-md-5\">\n           <label class=\"form-label\" for=\"").concat(kids_sib, "_option").concat(no, "\">\n               ").concat(optionsHtmlText, "\n           </label>\n           <select class=\"form-select\" name=\"").concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n              ").concat(optionsHtml, "\n           </select>\n        </div>\n\n        <!-- Full Name Input -->\n        <div class=\"col-md-7\">\n           <label class=\"form-label\" for=\"").concat(kids_sib, "_name").concat(no, "\">\n               Full Name\n           </label>\n           <input \n              type=\"text\" \n              class=\"form-control\" \n              placeholder=\"e.g. John Doe\" \n              name=\"").concat(kids_sib, "_name").concat(no, "\" \n              id=\"").concat(kids_sib, "_name").concat(no, "\"\n              autocomplete=\"off\"\n           >\n        </div>\n\n        <!-- Email Input (Full Width) -->\n        <div class=\"col-12\">\n           <label class=\"form-label\" for=\"").concat(kids_sib, "_email").concat(no, "\">\n               Email Address\n           </label>\n           <input \n              type=\"email\" \n              class=\"form-control\" \n              placeholder=\"e.g. john.doe@example.com\" \n              name=\"").concat(kids_sib, "_email").concat(no, "\" \n              id=\"").concat(kids_sib, "_email").concat(no, "\"\n              autocomplete=\"off\"\n           >\n           <!-- Dynamic help text area -->\n           <div class=\"form-text text-danger mt-1\" id=\"").concat(kids_sib, "_email").concat(no, "_help\" style=\"min-height: 20px; font-size: 0.8rem;\"></div>\n        </div>\n\n      </div>\n    </div>\n  ");
 };
 
 /***/ }),

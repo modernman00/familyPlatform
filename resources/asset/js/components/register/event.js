@@ -1,30 +1,23 @@
-import { id } from '@modernman00/shared-js-lib';
-
-export const hideElement = (elementId) => {
-  id(elementId).style.display = "none";
-};
-
-const showElement = (elementId) => {
-  id(elementId).style.display = "block";
-};
-
+import { id, hideElement, showElement } from '@modernman00/shared-js-lib';
 
 const showMaidenName = () => {
-  const gender = id('gender_id');
-  const maritalStatus = id('maritalStatus_id');
+  const gender = id('gender');
+  const maritalStatus = id('maritalStatus');
   
-  if (gender.value === "Female" && maritalStatus.value === "Yes") {
+  if (gender && maritalStatus && gender.value === "Female" && maritalStatus.value === "Yes") {
     showElement('maidenName_div');
   } else {
     hideElement('maidenName_div');
   }
 };
 
+
+
 export const showSpouse = () => {
 
-  const maritalStatus = id('maritalStatus_id').value;
+  const maritalStatus = id('maritalStatus');
   
-  if (maritalStatus === "Married") {
+  if (maritalStatus && maritalStatus.value === "Married") {
     showElement('spouse');
   } else {
     hideElement('spouse');
@@ -33,30 +26,40 @@ export const showSpouse = () => {
 
 
 // Add event listeners
+const maritalStatusEl = id('maritalStatus');
+if (maritalStatusEl) {
+    maritalStatusEl.addEventListener('change', showSpouse);
+}
 
-
-
-id('maritalStatus_id').addEventListener('change', showSpouse);
-id('gender_id').addEventListener('change', showMaidenName);
+const genderEl = id('gender');
+if (genderEl) {
+    genderEl.addEventListener('change', showMaidenName);
+}
 
 // Hide elements by default
 hideElement('spouse');
 hideElement('maidenName_div');
 
 // Other initializations
-id('register_notify_div').style.display = "none";
+const registerNotifyDiv = id('register_notify_div');
+if (registerNotifyDiv) registerNotifyDiv.style.display = "none";
 
 // inject student after employment status value is student 
 
 const injectStudent = () => {
-  id('employmentStatus_id').addEventListener('change', (e) => {
-    const value = e.target.value;
-    if(value === "Student") {
-        id('occupation_id').value = 'Student';
-    }
-    
-  });
+  const empStatus = id('employmentStatus');
+  if (empStatus) {
+    empStatus.addEventListener('change', (e) => {
+      const value = e.target.value;
+      if(value === "Student") {
+          const occ = id('occupation');
+          if (occ) occ.value = 'Student';
+      }
+      
+    });
+  }
 };
 
 injectStudent();
+
 

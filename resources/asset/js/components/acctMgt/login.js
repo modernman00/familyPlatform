@@ -1,18 +1,22 @@
-'use strict';
-import { createAdminLoginHandler, log} from '@shared';
+import { createAdminLoginHandler} from '@modernman00/shared-js-lib';
 
 
-// Set the redirect URL in localStorage
-localStorage.setItem('redirect', '/profilePage');
+      // Get the login URL from sessionStorage
+      const loginURL = sessionStorage.getItem('loginURL1');
 
-// Determine the redirect URL based on loginURL
-const redirect = '/code';
+      // Determine the redirect URL based on loginURL
+      const redirect = loginURL === '/lasu' ? '/admin/reviewApps' : '/login/code';
 
-// alert('redirect ' + redirect)
+
 
 createAdminLoginHandler({
   formId: 'login',
+  buttonId: 'button', // Changed from 'none' to allow manual click handling/validation
+  emailId: 'email',
+  passwordId: 'password',
+  showToggleId: 'showPassword',
   route: 'login',
   redirect: redirect,
-  theme: 'bulma'
+  theme: 'bulma',
+  recaptchaAction: 'LOGIN'
 });

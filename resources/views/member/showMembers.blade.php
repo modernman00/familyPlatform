@@ -8,13 +8,18 @@
 
 
     <!-- Header Section -->
-    <!-- Header Section -->
     <div class="members-header">
         <div class="members-container">
-            <h1 class="fw-bold mb-2">Family Members</h1>
-            <p class="lead mb-2 small">Connect with your family</p>
+            <h1 class="fw-bold mb-2">
+                <i class="bi bi-people"></i>
+                Family Directory
+            </h1>
+            <p class="lead mb-3">Stay connected with your heritage and extended family members.</p>
             <div class="d-inline-block">
-                <span class="badge bg-light text-dark rounded-pill px-3 py-2" id="memberCount">0 Members</span>
+                <span class="badge bg-white text-success rounded-pill px-4 py-2 shadow-sm" id="memberCount">
+                    <i class="bi bi-check-circle-fill me-1"></i>
+                    0 Members Connected
+                </span>
             </div>
         </div>
     </div>

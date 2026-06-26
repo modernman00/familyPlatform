@@ -35,9 +35,74 @@ class SettingController extends BaseController
         // Sanitise the data and get the cleaned data
 
         try {
-
             $_POST['id'] = cleanSession($_SESSION['id']);
 
+            // Handle the new tabs (Password, Preferences, Privacy)
+            if (isset($_POST['action'])) {
+                $action = $_POST['action'];
+
+                // 1. Change Password
+                if ($action === 'updatePassword') {
+                    $currentPassword = $_POST['current_password'] ?? '';
+                    $newPassword = $_POST['new_password'] ?? '';
+                    $confirmPassword = $_POST['confirm_password'] ?? '';
+
+                    if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+                        msgError(400, "All password fields are required.");
+                        return;
+                    }
+                    if ($newPassword !== $confirmPassword) {
+                        msgError(400, "New passwords do not match.");
+                        return;
+                    }
+                    if (strlen($newPassword) < 6) {
+                        msgError(400, "Password must be at least 6 characters.");
+                        return;
+                    }
+
+                    // Get current password hash
+                    $user = \App\model\SingleCustomerData::getCustById($_POST['id'], 'login');
+                    if (empty($user) || !password_verify($currentPassword, $user[0]['password'])) {
+                        msgError(400, "Current password is incorrect.");
+                        return;
+                    }
+
+                    // Update password
+                    $hashedPassword = \hashPassword($newPassword);
+                    UpdateFn::updateMultiple('login', ['password' => $hashedPassword, 'id' => $_POST['id']], 'id');
+
+                    msgSuccess(200, "Password successfully updated.");
+                    return;
+                }
+
+                // 2. Preferences
+                if ($action === 'updatePreferences') {
+                    $data = [
+                        'id' => $_POST['id'],
+                        'email_notifications' => isset($_POST['email_notifications']) ? 'on' : 'off',
+                        'sms_notifications' => isset($_POST['sms_notifications']) ? 'on' : 'off',
+                    ];
+                    UpdateFn::updateMultiple('contact', $data, 'id');
+                    msgSuccess(200, "Preferences successfully updated.");
+                    return;
+                }
+
+                // 3. Privacy
+                if ($action === 'updatePrivacy') {
+                    $data = [
+                        'id' => $_POST['id'],
+                        'two_factor_auth' => isset($_POST['two_factor_auth']) ? 'on' : 'off',
+                        'profile_visibility' => $_POST['profile_visibility'] ?? 'Private',
+                        'show_my_profile' => isset($_POST['show_my_profile']) ? 'on' : 'off',
+                        'data_sharing' => isset($_POST['data_sharing']) ? 'on' : 'off',
+                    ];
+                    UpdateFn::updateMultiple('contact', $data, 'id');
+                    msgSuccess(200, "Privacy settings successfully updated.");
+                    return;
+                }
+            }
+
+            // Original Profile Form Update logic
             $allowed = ['mobile', 'email', 'country', 'occupation']; // add yours
             $updates = [];
 

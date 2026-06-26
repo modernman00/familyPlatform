@@ -26,10 +26,10 @@ id('familyTree').addEventListener('click', (e) => {
     window.location.href = `/allMembers/seeProfile/${personId}`;
   } else {
     const email = nodeFn('.node-email');
-    const relation = nodeFn('.node-relation');
+    const relation = nodeFn('.node-relation-hidden');
     const img = nodeFn('.node-img');
     const maritalStatus = nodeFn('.node-maritalStatus');
-    const spouseName = nodeFn('.node-spouse_name');
+    const spouseName = nodeFn('.node-spouseName');
     const occupation = nodeFn('.node-occupation');
     const country = nodeFn('.node-country');
 

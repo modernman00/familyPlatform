@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\register;
 
-use App\classes\{
+use Src\{
     SubmitForm,
     Select,
     Db,

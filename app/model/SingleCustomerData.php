@@ -7,11 +7,13 @@ namespace App\model;
 use App\classes\InnerJoin;
 use App\classes\Select;
 
+
 class SingleCustomerData extends InnerJoin
 {
 	public function getPersonalData()
 	{
 		try {
+	
 			$result = "SELECT DISTINCT lastName, firstName, id FROM personal";
 			$result = $this->connect()->query($result);
 			return $result->fetchAll(\PDO::FETCH_ASSOC);

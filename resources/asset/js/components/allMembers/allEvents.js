@@ -27,7 +27,7 @@ document.onclick = async (e) => {
 
       const familyRequestData = {
         approver: approverDetails,
-        emailPath: 'msg/request',
+        emailPath: 'msg/request_premium',
       };
 
       // Send the family request data to the server for processing which returns the notification details for the approvers tab

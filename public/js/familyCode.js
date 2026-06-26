@@ -17,17 +17,24 @@ __webpack_require__.r(__webpack_exports__);
 
 var btnFamCode = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)("btnFamCode");
 btnFamCode.addEventListener("click", function () {
+  console.log("Generate Family Code clicked");
   try {
-    if ((0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('surname_id').value !== "") {
+    var surnameEl = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('surname');
+    if (surnameEl && surnameEl.value !== "") {
       var uniqueNumber = Date.now();
       var uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
-      var getSurname = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('surname_id').value;
+      var getSurname = surnameEl.value;
       var firstFourLetters = getSurname.substring(0, 4);
       (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
       btnFamCode.disabled = true;
+      btnFamCode.innerText = "Generated";
+    } else {
+      alert("Please enter a surname first");
     }
   } catch (error) {
-    (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)("surname_error").innerHTML = error.messages;
+    console.error("Family Code Generation Error:", error);
+    var errEl = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)("surname_error");
+    if (errEl) errEl.innerHTML = error.message || "An error occurred";
   }
 });
 
@@ -38,7 +45,7 @@ var htmlOutputDiv = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createFamCode')
 var htmlOutput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createCode');
 copyIcon.addEventListener('click', /*#__PURE__*/function () {
   var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
-    var range, selection, _t;
+    var range, selection, targetInput, _targetInput, _t;
     return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
       while (1) switch (_context.prev = _context.next) {
         case 0:
@@ -71,12 +78,19 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
           selection.removeAllRanges();
         case 4:
           copyIcon.innerHTML = "copied";
-          (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode_id').value = htmlOutput.value;
+          targetInput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode');
+          if (targetInput) {
+            targetInput.value = htmlOutput.value;
+            console.log("Family code copied to form:", htmlOutput.value);
+          } else {
+            console.error("Target input 'famCode' not found");
+          }
           _context.next = 6;
           break;
         case 5:
           copyIcon.innerHTML = "copy";
-          (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode_id').value = "";
+          _targetInput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode');
+          if (_targetInput) _targetInput.value = "";
           alert('Please generate the family code first');
         case 6:
           _context.next = 8;

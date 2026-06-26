@@ -15,7 +15,7 @@
 
 
     @endphp --}}
-    <div class="container-main">
+    <div class="container-main" style="min-height: 100vh;">
 
         @includeIf('member.includes.leftColumn')
 

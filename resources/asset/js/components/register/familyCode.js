@@ -2,26 +2,26 @@ import { id } from "@shared";
 const btnFamCode = id("btnFamCode");
 
 btnFamCode.addEventListener("click", function() {
-
+    console.log("Generate Family Code clicked");
     try {
-
-        if (id('surname_id').value !== "") {
+        const surnameEl = id('surname');
+        if (surnameEl && surnameEl.value !== "") {
             const uniqueNumber = Date.now();
-
             const uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
-
-            const getSurname = id('surname_id').value
-
+            const getSurname = surnameEl.value;
             const firstFourLetters = getSurname.substring(0, 4);
 
             id('createCode').value = `${firstFourLetters.toUpperCase()}${uniqueNumber1}`;
             btnFamCode.disabled = true;
+            btnFamCode.innerText = "Generated";
+        } else {
+            alert("Please enter a surname first");
         }
     } catch (error) {
-        id("surname_error").innerHTML = error.messages;
-
+        console.error("Family Code Generation Error:", error);
+        const errEl = id("surname_error");
+        if (errEl) errEl.innerHTML = error.message || "An error occurred";
     }
-
 });
 
 
@@ -55,13 +55,19 @@ copyIcon.addEventListener('click', async function(e) {
             }
 
             copyIcon.innerHTML = "copied";
-            id('famCode_id').value = htmlOutput.value
+            const targetInput = id('famCode');
+            if (targetInput) {
+                targetInput.value = htmlOutput.value;
+                console.log("Family code copied to form:", htmlOutput.value);
+            } else {
+                console.error("Target input 'famCode' not found");
+            }
 
         } else {
             copyIcon.innerHTML = "copy";
-            id('famCode_id').value = ""
+            const targetInput = id('famCode');
+            if (targetInput) targetInput.value = "";
             alert('Please generate the family code first')
-
         }
 
 

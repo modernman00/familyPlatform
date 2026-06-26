@@ -1,18 +1,18 @@
 <!-- Middle Column - Feed -->
 <div class="feed-column">
   <!-- Post Composer -->
-  <div class="card post-composer mb-4" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal"
-    tabindex="0">
-    <div class="card-body d-flex align-items-center">
+  <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
+    <div class="card-body d-flex align-items-center p-4">
       @isset($data['profilePics'])
-        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="profile" class="rounded-circle me-3 " width="40"
-          height="40">
+        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
       @else
-        <img src="/public/avatar/avatarF.png" alt="profile" width="40" height="40" class="rounded-circle me-3">
+        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; background-color: var(--primary-color); color: white; font-size: 1.2rem;">
+            {{ substr($data['firstName'], 0, 1) }}{{ substr($data['lastName'], 0, 1) }}
+        </div>
       @endisset
 
-      <div class="flex-grow-1">
-        <span class="text-muted">What's on your mind, {{ $data['firstName'] }}?</span>
+      <div class="flex-grow-1 rounded-pill px-4 py-3" style="background-color: var(--hover-color); cursor: pointer; transition: background-color 0.2s;">
+        <span style="color: var(--text-muted); font-size: 0.95rem;">Share a moment with your family...</span>
       </div>
     </div>
   </div>

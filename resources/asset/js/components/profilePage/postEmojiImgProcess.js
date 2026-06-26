@@ -1,5 +1,5 @@
 // Import a helper function to get elements by ID (assumed from your shared utils)
-import { showEmojiPicker } from '../emojiPicker.js';
+import { showEmojiPicker, initEmojiPickerUX } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
 
 // Get references to DOM elements used in the emoji picker and image preview - SHOW EMOJIs FOR POST
@@ -9,6 +9,7 @@ const emojiContainer = document.getElementById('emojiPickerContainer'); // Conta
 const closeEmojiBtn = document.getElementById('closeEmojiPicker'); // Close button
 
 showEmojiPicker('emojiListPost', 'data-emoji-target');
+initEmojiPickerUX('emojiPost', 'emojiPickerContainer');
 
 // 🟡 Toggle emoji picker visibility when the toggle button is clicked
 emojiToggle.addEventListener('click', () => {

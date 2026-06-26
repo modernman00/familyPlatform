@@ -218,7 +218,8 @@ class PostMessage
             results: $results,
             postId: $newComment[0]['id'],
             postOriginName: $newComment[0]['fullName'],
-            url: $url
+            url: $url,
+            notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
         );
     }
 
@@ -296,13 +297,15 @@ class PostMessage
                     results: $results,
                     postId: $data['id'],
                     postOriginName: $postOriginName,
-                    url: $url
+                    url: $url,
+                    postContent: $data['postMessage'] ?? ''
                 );
                 self::notifyMembersByPushNotification(
                     results: $results,
                     postId: $data['id'],
                     postOriginName: $postOriginName,
-                    url: $url
+                    url: $url,
+                    notificationMsg: "$postOriginName posted a new update"
                 );
             }
             msgSuccess(200, "Success");
@@ -319,7 +322,7 @@ class PostMessage
     }
 
     // Helper function to notify members by email and push notifications
-    private static function notifyMembersByEmail(array $results, string $postId, string $postOriginName, string $url): void
+    private static function notifyMembersByEmail(array $results, string $postId, string $postOriginName, string $url, string $postContent): void
     {
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
@@ -330,10 +333,11 @@ class PostMessage
 
             $data = [
                 'email' => $memberData['email'],
-                'postOriginName' => $postOriginName,
+                'authorName' => $postOriginName,
                 'url' => $url,
                 'img' => $getPostProfilePics,
-                'name' => $memberData['firstName']
+                'firstName' => $memberData['firstName'],
+                'postContent' => $postContent
             ];
 
             // Send email to all members
@@ -356,7 +360,7 @@ class PostMessage
      * 
      * @return void
      */
-    private static function notifyMembersByPushNotification(array $results, string $postId, string $postOriginName, string $url): void
+    private static function notifyMembersByPushNotification(array $results, string $postId, string $postOriginName, string $url, string $notificationMsg): void
     {
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
@@ -367,7 +371,7 @@ class PostMessage
             // Send push notification to all members WITH THE FAMILY CODE
             PushNotificationClass::sendPushNotification(
                 userId: $memberData['id'],
-                message: "$postOriginName posted a new comment",
+                message: $notificationMsg,
                 url: $url
             );
         }

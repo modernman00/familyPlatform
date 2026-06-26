@@ -38,51 +38,65 @@ export const renderHtml = (el) => {
     }
     const disableButton = status === 'request sent' ? 'disabled' : '';
 
-    // Create the HTML content based on whether the user is in the same family or not. // LinkedIn-like card design
+    // Create the HTML content based on whether the user is in the same family or not. // Refined card design
     const html = `
     <div class="member-card member_profile_${el.id}" id="${el.id}">
-
-       <div class="card-cover">
-            <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}"loading="lazy">
+        <div class="card-cover"></div>
+        
+        <div class="avatar-wrapper">
+             <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}" loading="lazy">
         </div>
 
         <div class="member-card-body">
-            <h3 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h3>
-            <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.country}</p>
-                <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.famCode}</p>
-                  <p class="member-location"><i class="bi bi-geo-alt-fill"></i> ${el.email}</p>
+            <h4 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h4>
+            
+            <p class="member-location"><i class="bi bi-geo-alt"></i> ${el.country}</p>
+            
+            <div class="member-details">
+                <div class="member-detail">
+                    <i class="bi bi-hash"></i> 
+                    <strong>${el.famCode}</strong>
+                </div>
+                <div class="member-detail">
+                    <i class="bi bi-envelope"></i> 
+                    <span class="text-truncate">${el.email}</span>
+                </div>
+                ${el.relationType !== 'other' ? `
+                <div class="member-detail">
+                    <i class="bi bi-link-45deg"></i> 
+                    <span>${el.relationType}</span>
+                </div>
+                <div class="member-detail">
+                    <i class="bi bi-calendar-check"></i> 
+                    <span>Since ${format(el.created_at)}</span>
+                </div>
+                ` : ''}
+            </div>
 
-  ${el.relationType !== 'other' ? `
-    <div class="member-details">
-
-         <p class="member-detail">  <i class="fa fa-link"></i><span>${el.relationType}</span></p>
-          <p class="member-detail"> <i class="fa fa-calendar-alt"></i><span>Member since ${format(el.created_at)}</span></p>
-    </div>
-
-    <div class="member-interests">
-      <button class="btn-profile primary-action" id="seeProfile${el.id}" tooltip="View Profile">
-        <i class="fa fa-user"></i> View Profile
-      </button>
-         <button class="btn-profile" id="familyTree${el.id}" tooltip="View Tree">
-        <i class="fa fa-sitemap"></i> Family Tree
-      </button>
-      <button class="btn-remove" id="removeProfile${el.id}" tooltip="Remove Connection">
-        <i class="fa fa-user-times"></i> Remove
-      </button>
-    </div> 
-  ` : `
-    <div class="member-interests">
-      <button class="btn-profile primary-action" 
-              data-user-id="addFamily${el.id}" 
-              id="addFamily${el.id}"
-              ${disableButton}
-              tooltip="${tooltip}">
-        <i class="fa fa-user-plus"></i> ${statusButtonHTML}
-      </button>
-      <small>${tooltip}</small>
-    </div>
-  `}
-</div>
+            <div class="member-interests">
+                ${el.relationType !== 'other' ? `
+                <button class="btn-profile" id="seeProfile${el.id}">
+                    <i class="bi bi-person"></i> View Profile
+                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn-remove" style="color: var(--primary-color); border-color: var(--accent-color);" id="familyTree${el.id}">
+                        <i class="bi bi-diagram-3"></i> Tree
+                    </button>
+                    <button class="btn-remove" id="removeProfile${el.id}">
+                        <i class="bi bi-person-x"></i> Remove
+                    </button>
+                </div>
+                ` : `
+                <button class="btn-profile" 
+                        data-user-id="addFamily${el.id}" 
+                        id="addFamily${el.id}"
+                        ${disableButton}>
+                    <i class="bi bi-person-plus"></i> ${statusButtonHTML}
+                </button>
+                <small class="text-muted" style="font-size: 0.75rem; font-weight: 500;">${tooltip}</small>
+                `}
+            </div>
+        </div>
     </div>
 `;
 

@@ -33,19 +33,25 @@
     <span class="node-country" data-id="{{ $dataDB['country'] ?? '' }}"></span>
     <span class="node-spouseName" data-id="{{ $dataDB['spouse_name'] ?? '' }}"></span>
 
+    <span class="node-icon">
+        <i class="bi bi-gender-{{ strtolower($genderClass) }}"></i>
+    </span>
+
     <div class="profile-image-container">
         <img src="{{ $img }}" alt="{{ $displayName }}" class="profile-image">
     </div>
 
-    <span class="node-title">{{ ucfirst($type) }}</span>
-    <span class="node-name">{{ $displayName }}</span>
+    <div class="node-content">
+        <span class="node-title">{{ $relationshipLabel }}</span>
+        <span class="node-name">{{ $displayName }}</span>
+        
+        @if(!empty($dataDB['occupation']))
+            <span class="node-relation">{{ $dataDB['occupation'] }}</span>
+        @else
+            <span class="node-relation">{{ ucfirst($gender) }}</span>
+        @endif
+    </div>
 
-    <span class="node-relation" data-id="{{ $relationshipLabel }} ">
-        {{ $relationshipLabel }} 
-    </span>
-
-    <span class="node-icon">
-        {{-- Bootstrap icons expect: male, female, neutral --}}
-        <i class="bi bi-gender-{{ strtolower($genderClass) }}"></i>
-    </span>
+    <span class="node-relation-hidden" data-id="{{ $relationshipLabel }} "></span>
 </a>
+

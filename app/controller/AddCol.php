@@ -4,7 +4,7 @@ namespace App\Controller;
 
 // use App\classes\Db;
 
-use App\classes\AlterTable;
+use Src\AlterTable;
 
 class AddCol
 {

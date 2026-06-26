@@ -22,56 +22,107 @@ export const showEmojiPicker = (emojiContainerId, emojiTargetDataClass) => {
 }
 
 /**
- * Render a list of emoji buttons into the picker
- * @param {Array} emojis - An array of emoji objects from emojibase
- * @param {string} emojiContainerId - The ID of the container element for the emoji buttons
- * @param {string} emojiTargetDataClass - The data class attribute for the emoji target i.e data-emoji-target
- * 
+ * Initialize UX behaviors like "click outside to close"
+ * @param {string} toggleId - ID of the button that opens the picker
+ * @param {string} containerId - ID of the picker container
  */
+export const initEmojiPickerUX = (toggleId, containerId) => {
+  const toggle = id(toggleId);
+  const container = id(containerId);
 
-const renderEmojiList = (emojis, emojiContainerId, emojiTargetDataClass) => {
+  if (!toggle || !container) return;
 
-  const emojiList = id(emojiContainerId); // Container for emoji buttons
- 
-  emojiList.innerHTML = ''; // Clear existing emojis
-
-  // Scope to the closest form
-  const form = emojiList.closest('form');
-  const emojiTarget = form.querySelector(`[${emojiTargetDataClass}]`);
-
-  // Load and render cached recent emojis first
-  const cached = JSON.parse(localStorage.getItem(EMOJI_CACHE_KEY)) || [];
-
-  cached.forEach(emoji => renderEmojiButton(emoji, 'Recent', emojiList, emojiTarget));
-
-  // Render up to 70 emojis from the filtered list
-  emojis.slice(0, 70).forEach(({ emoji, label, skins }) => {
-    renderEmojiButton(emoji, label, emojiList, emojiTarget); // Main emoji
-
-    // If skin tone variants exist, render them too
-    if (skins) {
-      skins.forEach(({ emoji: skinEmoji }) => {
-        renderEmojiButton(skinEmoji, `${label} (skin tone)`, emojiList, emojiTarget);
-      });
+  document.addEventListener('click', (e) => {
+    if (!container.classList.contains('d-none')) {
+      if (!container.contains(e.target) && !toggle.contains(e.target)) {
+        container.classList.add('d-none');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
     }
   });
 }
 
+const renderEmojiList = (emojis, emojiContainerId, emojiTargetDataClass) => {
+  const emojiList = id(emojiContainerId);
+  if (!emojiList) return;
+
+  emojiList.innerHTML = '';
+  emojiList.classList.add('modern-emoji-picker');
+
+  const form = emojiList.closest('form');
+  const emojiTarget = form.querySelector(`[${emojiTargetDataClass}]`);
+
+  const cached = JSON.parse(localStorage.getItem(EMOJI_CACHE_KEY)) || [];
+
+  if (cached.length > 0) {
+    const recentHeader = document.createElement('div');
+    recentHeader.className = 'emoji-section-header';
+    recentHeader.textContent = 'Recently Used';
+    emojiList.appendChild(recentHeader);
+
+    const recentGrid = document.createElement('div');
+    recentGrid.className = 'emoji-grid';
+    cached.forEach(emoji => renderEmojiButton(emoji, 'Recent', recentGrid, emojiTarget, emojiList));
+    emojiList.appendChild(recentGrid);
+  }
+
+  const allHeader = document.createElement('div');
+  allHeader.className = 'emoji-section-header';
+  allHeader.textContent = 'All Smileys';
+  emojiList.appendChild(allHeader);
+
+  const allGrid = document.createElement('div');
+  allGrid.className = 'emoji-grid';
+  emojis.slice(0, 100).forEach(({ emoji, label, skins }) => {
+    renderEmojiButton(emoji, label, allGrid, emojiTarget, emojiList);
+
+    if (skins) {
+      skins.forEach(({ emoji: skinEmoji }) => {
+        renderEmojiButton(skinEmoji, `${label} (skin tone)`, allGrid, emojiTarget, emojiList);
+      });
+    }
+  });
+  emojiList.appendChild(allGrid);
+}
+
 // 🟡 Create and insert a single emoji button
-const renderEmojiButton = (char, label, emojiContainer, emojiTarget) => {
+const renderEmojiButton = (char, label, emojiContainer, emojiTarget, pickerList) => {
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'emoji-btn btn btn-sm btn-light'; // Styling classes
-  btn.textContent = char; // Emoji character
-  btn.setAttribute('aria-label', label); // Accessibility label
+  btn.className = 'modern-emoji-btn';
+  btn.textContent = char;
+  btn.setAttribute('aria-label', label);
 
-  // When clicked, insert emoji into target and cache it
-  btn.addEventListener('click', () => {
-    emojiTarget.value += char;
-    cacheEmoji(char);
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (emojiTarget) {
+      const start = emojiTarget.selectionStart;
+      const end = emojiTarget.selectionEnd;
+      const text = emojiTarget.value;
+      
+      emojiTarget.value = text.substring(0, start) + char + text.substring(end);
+      
+      const newPos = start + char.length;
+      emojiTarget.setSelectionRange(newPos, newPos);
+      emojiTarget.focus();
+      
+      cacheEmoji(char);
+
+      // Auto-dismiss the picker
+      const pickerContainer = pickerList.parentElement;
+      if (pickerContainer) {
+        pickerContainer.classList.add('d-none');
+        // Update aria state on the toggle button if found
+        const form = pickerContainer.closest('form');
+        if (form) {
+          const toggle = form.querySelector('[aria-expanded="true"]');
+          if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
   });
 
-  emojiContainer.appendChild(btn); // Add button to picker
+  emojiContainer.appendChild(btn);
 }
 
 // 🟡 Save emoji to recent cache in localStorage

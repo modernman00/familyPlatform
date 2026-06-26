@@ -25,8 +25,8 @@ export const commentHTML = (data, postId) => {
       </small>
     </div>
 
-    <div class="comment-text mb-2">
-      <small>${comment}</small>
+    <div class="comment-text mb-2 p-3 shadow-sm" style="background-color: var(--hover-color); border-radius: 18px; border-top-left-radius: 4px; display: inline-block;">
+      <span style="font-size: 0.95rem; color: var(--text-color);">${comment}</span>
     </div>
 
       <div class="d-flex reaction-preview-section align-items-center mb-2 gap-2"> 

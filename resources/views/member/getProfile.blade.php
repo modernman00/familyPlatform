@@ -3,6 +3,9 @@
 @section('data-page-id', 'getProfilePage')
 {{-- custom css --}}
 @push('styles')
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/public/css/seeProfile.css">
 @endpush
 
@@ -11,19 +14,25 @@
 @section('content')
 
     <div class="profile-container">
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-info">
-                <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
-                <div class="profile-details">
-                    <h1>{{ $data['fullName'] }}</h1>
-                    <div class="family-tree-name"> 
-                      
+        <!-- Profile Hero Section -->
+        <div class="profile-hero">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <div class="profile-avatar-wrapper">
+                    <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
+                    <div class="avatar-ring"></div>
+                </div>
+                <div class="profile-main-info">
+                    <h1 class="profile-name">{{ $data['fullName'] }}</h1>
+                    <div class="profile-meta">
+                        <div class="meta-item">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>Lives in {{ $data['country'] }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="family-code-badge">{{ $data['famCode'] }}</span>
+                        </div>
                     </div>
-                    <div class="profile-location">
-                        <i class="bi bi-geo-alt-fill me-2"></i> Lives in {{ $data['country'] }}
-                    </div>
-                    <span class="badge badge-custom">{{ $data['famCode'] }}</span>
                 </div>
             </div>
         </div>

@@ -5,7 +5,13 @@
     <link rel="stylesheet" href="/public/css/images.css">
 @endpush
 @section('content')
-    <div class="container">
+    <div class="container" style="min-height: 100vh;">
+
+        <!-- Gallery Header -->
+        <div class="gallery-header mt-4">
+            <h1>Family Memories</h1>
+            <p>Relive the beautiful moments we've shared together</p>
+        </div>
 
         <!-- Slideshow Container -->
         <section class="photo-grid" id="photoGrid">

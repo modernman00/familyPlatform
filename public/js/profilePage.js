@@ -9,6 +9,7 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   initEmojiPickerUX: function() { return /* binding */ initEmojiPickerUX; },
 /* harmony export */   showEmojiPicker: function() { return /* binding */ showEmojiPicker; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
@@ -36,59 +37,97 @@ var showEmojiPicker = function showEmojiPicker(emojiContainerId, emojiTargetData
 };
 
 /**
- * Render a list of emoji buttons into the picker
- * @param {Array} emojis - An array of emoji objects from emojibase
- * @param {string} emojiContainerId - The ID of the container element for the emoji buttons
- * @param {string} emojiTargetDataClass - The data class attribute for the emoji target i.e data-emoji-target
- * 
+ * Initialize UX behaviors like "click outside to close"
+ * @param {string} toggleId - ID of the button that opens the picker
+ * @param {string} containerId - ID of the picker container
  */
-
-var renderEmojiList = function renderEmojiList(emojis, emojiContainerId, emojiTargetDataClass) {
-  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(emojiContainerId); // Container for emoji buttons
-
-  emojiList.innerHTML = ''; // Clear existing emojis
-
-  // Scope to the closest form
-  var form = emojiList.closest('form');
-  var emojiTarget = form.querySelector("[".concat(emojiTargetDataClass, "]"));
-
-  // Load and render cached recent emojis first
-  var cached = JSON.parse(localStorage.getItem(EMOJI_CACHE_KEY)) || [];
-  cached.forEach(function (emoji) {
-    return renderEmojiButton(emoji, 'Recent', emojiList, emojiTarget);
-  });
-
-  // Render up to 70 emojis from the filtered list
-  emojis.slice(0, 70).forEach(function (_ref) {
-    var emoji = _ref.emoji,
-      label = _ref.label,
-      skins = _ref.skins;
-    renderEmojiButton(emoji, label, emojiList, emojiTarget); // Main emoji
-
-    // If skin tone variants exist, render them too
-    if (skins) {
-      skins.forEach(function (_ref2) {
-        var skinEmoji = _ref2.emoji;
-        renderEmojiButton(skinEmoji, "".concat(label, " (skin tone)"), emojiList, emojiTarget);
-      });
+var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
+  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(toggleId);
+  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(containerId);
+  if (!toggle || !container) return;
+  document.addEventListener('click', function (e) {
+    if (!container.classList.contains('d-none')) {
+      if (!container.contains(e.target) && !toggle.contains(e.target)) {
+        container.classList.add('d-none');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
     }
   });
 };
+var renderEmojiList = function renderEmojiList(emojis, emojiContainerId, emojiTargetDataClass) {
+  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(emojiContainerId);
+  if (!emojiList) return;
+  emojiList.innerHTML = '';
+  emojiList.classList.add('modern-emoji-picker');
+  var form = emojiList.closest('form');
+  var emojiTarget = form.querySelector("[".concat(emojiTargetDataClass, "]"));
+  var cached = JSON.parse(localStorage.getItem(EMOJI_CACHE_KEY)) || [];
+  if (cached.length > 0) {
+    var recentHeader = document.createElement('div');
+    recentHeader.className = 'emoji-section-header';
+    recentHeader.textContent = 'Recently Used';
+    emojiList.appendChild(recentHeader);
+    var recentGrid = document.createElement('div');
+    recentGrid.className = 'emoji-grid';
+    cached.forEach(function (emoji) {
+      return renderEmojiButton(emoji, 'Recent', recentGrid, emojiTarget, emojiList);
+    });
+    emojiList.appendChild(recentGrid);
+  }
+  var allHeader = document.createElement('div');
+  allHeader.className = 'emoji-section-header';
+  allHeader.textContent = 'All Smileys';
+  emojiList.appendChild(allHeader);
+  var allGrid = document.createElement('div');
+  allGrid.className = 'emoji-grid';
+  emojis.slice(0, 100).forEach(function (_ref) {
+    var emoji = _ref.emoji,
+      label = _ref.label,
+      skins = _ref.skins;
+    renderEmojiButton(emoji, label, allGrid, emojiTarget, emojiList);
+    if (skins) {
+      skins.forEach(function (_ref2) {
+        var skinEmoji = _ref2.emoji;
+        renderEmojiButton(skinEmoji, "".concat(label, " (skin tone)"), allGrid, emojiTarget, emojiList);
+      });
+    }
+  });
+  emojiList.appendChild(allGrid);
+};
 
 // 🟡 Create and insert a single emoji button
-var renderEmojiButton = function renderEmojiButton(char, label, emojiContainer, emojiTarget) {
+var renderEmojiButton = function renderEmojiButton(char, label, emojiContainer, emojiTarget, pickerList) {
   var btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'emoji-btn btn btn-sm btn-light'; // Styling classes
-  btn.textContent = char; // Emoji character
-  btn.setAttribute('aria-label', label); // Accessibility label
+  btn.className = 'modern-emoji-btn';
+  btn.textContent = char;
+  btn.setAttribute('aria-label', label);
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (emojiTarget) {
+      var start = emojiTarget.selectionStart;
+      var end = emojiTarget.selectionEnd;
+      var text = emojiTarget.value;
+      emojiTarget.value = text.substring(0, start) + char + text.substring(end);
+      var newPos = start + char.length;
+      emojiTarget.setSelectionRange(newPos, newPos);
+      emojiTarget.focus();
+      cacheEmoji(char);
 
-  // When clicked, insert emoji into target and cache it
-  btn.addEventListener('click', function () {
-    emojiTarget.value += char;
-    cacheEmoji(char);
+      // Auto-dismiss the picker
+      var pickerContainer = pickerList.parentElement;
+      if (pickerContainer) {
+        pickerContainer.classList.add('d-none');
+        // Update aria state on the toggle button if found
+        var form = pickerContainer.closest('form');
+        if (form) {
+          var toggle = form.querySelector('[aria-expanded="true"]');
+          if (toggle) toggle.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
   });
-  emojiContainer.appendChild(btn); // Add button to picker
+  emojiContainer.appendChild(btn);
 };
 
 // 🟡 Save emoji to recent cache in localStorage
@@ -664,7 +703,7 @@ var commentHTML = function commentHTML(data, postId) {
   var image = imgURL ? "/resources/images/profile/".concat(imgURL) : "/public/avatar/avatarF.png";
   var counts = (_data$reactions$count = data === null || data === void 0 ? void 0 : (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
   var total = (_data$reactions$count2 = data === null || data === void 0 ? void 0 : (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 ? void 0 : (_data$reactions2$coun = _data$reactions2.counts) === null || _data$reactions2$coun === void 0 ? void 0 : _data$reactions2$coun.totalReactions) !== null && _data$reactions$count2 !== void 0 ? _data$reactions$count2 : 0;
-  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <small><strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong></small>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2\">\n      <small>").concat(comment, "</small>\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <small><strong>").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), "</strong></small>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat(date_created, "\" title=\"").concat(date_created, "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2 p-3 shadow-sm\" style=\"background-color: var(--hover-color); border-radius: 18px; border-top-left-radius: 4px; display: inline-block;\">\n      <span style=\"font-size: 0.95rem; color: var(--text-color);\">").concat(comment, "</span>\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
 };
 
 // i need the postid to use to show the delete button 
@@ -1077,7 +1116,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   likeCommentButton: function() { return /* binding */ likeCommentButton; }
 /* harmony export */ });
 var likeCommentButton = function likeCommentButton(data, commentLength) {
-  return "\n   <div class=\"reaction-buttons d-flex justify-content-between border-top border-bottom py-2 mb-1\">\n    <button \n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\"\n      <i class=\"bi bi-hand-thumbs-up me-1\"></i> \n      \xA0   Like \n        <b>\n          <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">\n            ").concat(data.post_likes, "\n          </span>\n        </b>\n    </button>\n\n    <button \n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-1\"></i> \n          Comment \n          (<span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">\n            ").concat(commentLength, "\n          </span>)\n          \n      </button>\n   \n    </div>\n    ");
+  return "\n   <div class=\"reaction-buttons d-flex justify-content-around border-top border-bottom py-2 mb-2 mt-3 gap-2\">\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\">\n      <i class=\"bi bi-hand-thumbs-up me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n      Like \n      <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n        <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span>\n      </span>\n    </button>\n\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n        Comment \n        <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n          <span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">").concat(commentLength, "</span>\n        </span>\n    </button>\n   \n    </div>\n    ");
 };
 
 /***/ }),
@@ -1265,28 +1304,8 @@ __webpack_require__.r(__webpack_exports__);
 
 localStorage.removeItem('redirect');
 
-// Dark Mode Toggle
-var darkModeToggle = document.getElementById('darkModeToggle');
-var body = document.body;
+// Dark Mode logic has been moved to main index.js to prevent double-firing
 
-// Only initialize dark mode if the toggle exists on the page
-if (darkModeToggle) {
-  // Check for saved dark mode preference
-  if (localStorage.getItem('darkMode') === 'enabled') {
-    body.classList.add('dark-mode');
-    darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
-  }
-  darkModeToggle.addEventListener('click', function () {
-    body.classList.toggle('dark-mode');
-    if (body.classList.contains('dark-mode')) {
-      localStorage.setItem('darkMode', 'enabled');
-      darkModeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
-    } else {
-      localStorage.setItem('darkMode', null);
-      darkModeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
-    }
-  });
-}
 
 
 
@@ -2020,6 +2039,7 @@ var emojiContainer = document.getElementById('emojiPickerContainer'); // Contain
 var closeEmojiBtn = document.getElementById('closeEmojiPicker'); // Close button
 
 (0,_emojiPicker_js__WEBPACK_IMPORTED_MODULE_0__.showEmojiPicker)('emojiListPost', 'data-emoji-target');
+(0,_emojiPicker_js__WEBPACK_IMPORTED_MODULE_0__.initEmojiPickerUX)('emojiPost', 'emojiPickerContainer');
 
 // 🟡 Toggle emoji picker visibility when the toggle button is clicked
 emojiToggle.addEventListener('click', function () {

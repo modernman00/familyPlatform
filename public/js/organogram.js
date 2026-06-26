@@ -166,10 +166,10 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
     window.location.href = "/allMembers/seeProfile/".concat(personId);
   } else {
     var email = nodeFn('.node-email');
-    var relation = nodeFn('.node-relation');
+    var relation = nodeFn('.node-relation-hidden');
     var img = nodeFn('.node-img');
     var maritalStatus = nodeFn('.node-maritalStatus');
-    var spouseName = nodeFn('.node-spouse_name');
+    var spouseName = nodeFn('.node-spouseName');
     var occupation = nodeFn('.node-occupation');
     var country = nodeFn('.node-country');
     var detailData = {
@@ -256,7 +256,7 @@ var showPersonDetails = function showPersonDetails(personData) {
     email = personData.email;
 
   // Inject HTML into modal body with person's details
-  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Spouse</div>\n        <div class=\"detail-value\">").concat(spouseName || 'N/A', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Email</div>\n        <div class=\"detail-value\">").concat(email, "</div>\n      </div>\n\n \n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation, "</div>\n      </div>\n      ").concat(country ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">country</div>\n          <div class=\"detail-value\">".concat(country, "</div>\n        </div>\n      ") : '', "\n    </div>\n  ");
+  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Relationship</div>\n        <div class=\"detail-value\">").concat(relation || 'Family Member', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Marital Status</div>\n        <div class=\"detail-value\">").concat(maritalStatus || 'N/A', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation || 'Not specified', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Location</div>\n        <div class=\"detail-value\">").concat(country || 'N/A', "</div>\n      </div>\n\n      ").concat(spouseName ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">Spouse / Partner</div>\n          <div class=\"detail-value\">".concat(spouseName, "</div>\n        </div>\n      ") : '', "\n\n      ").concat(email ? "\n        <div class=\"detail-item\" style=\"grid-column: span 2;\">\n          <div class=\"detail-label\">Email Address</div>\n          <div class=\"detail-value\">".concat(email, "</div>\n        </div>\n      ") : '', "\n    </div>\n  ");
 
   // Show the modal
   personModal.style.display = 'flex';

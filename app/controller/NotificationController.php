@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\classes\{Select, Insert};
+use Src\{Select, Insert};
 use Src\Exceptions\NotFoundException;
 use Src\Update;
 

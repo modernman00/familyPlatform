@@ -205,9 +205,9 @@ const countryCodes = {
 
 
 const injectCountryCode = () => {
-  id('country_id').addEventListener('change', (e) => {
+  id('country').addEventListener('change', (e) => {
     const value = e.target.value;
-    id('mobile_id').value = countryCodes[value] || '';
+    id('mobile').value = countryCodes[value] || '';
   });
 };
 

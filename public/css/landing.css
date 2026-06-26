@@ -1,0 +1,266 @@
+/* ==========================================================================
+   Premium Landing & Public Pages CSS (Facebook/LinkedIn Aesthetic)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --brand-primary: #0a66c2;
+    --brand-secondary: #004182;
+    --brand-success: #057642;
+    --bg-light: #f3f2ef;
+    --bg-white: #ffffff;
+    --text-main: rgba(0, 0, 0, 0.9);
+    --text-muted: rgba(0, 0, 0, 0.6);
+    --border-color: rgba(0, 0, 0, 0.08);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-light);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+}
+
+/* --- Public Navbar --- */
+.public-navbar {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.public-navbar .navbar-brand img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
+.public-navbar .nav-link {
+    color: var(--text-muted);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.2s ease;
+}
+
+.public-navbar .nav-link:hover, .public-navbar .nav-link.active {
+    color: var(--brand-primary);
+}
+
+.btn-brand {
+    background-color: var(--brand-primary);
+    color: #fff;
+    border-radius: 24px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-brand:hover {
+    background-color: var(--brand-secondary);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(10, 102, 194, 0.2);
+}
+
+.btn-brand-outline {
+    background-color: transparent;
+    color: var(--brand-primary);
+    border: 1px solid var(--brand-primary);
+    border-radius: 24px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-brand-outline:hover {
+    background-color: rgba(10, 102, 194, 0.05);
+    color: var(--brand-secondary);
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    padding: 6rem 0 4rem;
+    background-color: var(--bg-white);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+
+.hero-title span {
+    color: var(--brand-primary);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    max-width: 90%;
+}
+
+.hero-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    transform: perspective(1000px) rotateY(-5deg);
+    transition: transform 0.5s ease;
+}
+
+.hero-image:hover {
+    transform: perspective(1000px) rotateY(0deg);
+}
+
+/* --- Features Section --- */
+.features-section {
+    padding: 5rem 0;
+    background-color: var(--bg-light);
+}
+
+.feature-card {
+    background: var(--bg-white);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    height: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--brand-primary);
+    margin-bottom: 1.5rem;
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+/* --- Legal / Document Center Layout --- */
+.doc-center-header {
+    background-color: var(--brand-secondary);
+    color: #fff;
+    padding: 4rem 0 6rem;
+    text-align: center;
+}
+
+.doc-center-header h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.doc-center-content {
+    background: var(--bg-white);
+    max-width: 800px;
+    margin: -3rem auto 4rem;
+    border-radius: 12px;
+    padding: 3rem 4rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    border: 1px solid var(--border-color);
+    position: relative;
+    z-index: 10;
+}
+
+.doc-center-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.doc-center-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.doc-center-content p, .doc-center-content li {
+    font-size: 1rem;
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.doc-center-content ul {
+    margin-bottom: 1.5rem;
+    padding-left: 1.5rem;
+}
+
+/* --- Footer --- */
+.public-footer {
+    background-color: var(--bg-white);
+    border-top: 1px solid var(--border-color);
+    padding: 4rem 0 2rem;
+}
+
+.footer-heading {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-main);
+    margin-bottom: 1.5rem;
+}
+
+.footer-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.75rem;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+    color: var(--brand-primary);
+}
+
+.footer-bottom {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    .hero-section {
+        padding: 4rem 0;
+        text-align: center;
+    }
+    .hero-image {
+        margin-top: 3rem;
+    }
+    .doc-center-content {
+        padding: 2rem 1.5rem;
+        margin-top: -2rem;
+    }
+}

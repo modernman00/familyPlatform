@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use Src\Exceptions\NotFoundException;
+use App\model\{ SingleCustomerData, };
 use Src\{SelectFn, Utility};
-
-use App\model\{
-    SingleCustomerData,
-};
-use Src\functionality\{
-    SignIn,
-};
+use Src\Db;
+use Src\Exceptions\NotFoundException;
+use Src\functionality\{ SignIn, };
 
 class BaseController
 {
@@ -26,6 +22,11 @@ class BaseController
         $id = checkInput($VerifyJWT['id']);
 
         $_SESSION['id'] = $id;
+        $query = "SELECT famCode FROM personal WHERE id = ?";
+        $stmt = Db::connect2()->prepare($query);
+        $stmt->execute([$id]);
+        $famCode = $stmt->fetchColumn();
+        $_SESSION['famCode'] = $famCode;
     }
     public static function viewWithCsp($view, $data = [])
     {

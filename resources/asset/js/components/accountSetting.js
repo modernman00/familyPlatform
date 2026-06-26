@@ -13,6 +13,27 @@ update({
   redirect: '/accountSetting'
 })
 
+update({
+  formId: 'passwordForm',
+  route: '/accountSetting',
+  buttonId: 'passwordBtn',
+  redirect: '/accountSetting'
+})
+
+update({
+  formId: 'preferencesForm',
+  route: '/accountSetting',
+  buttonId: 'preferencesBtn',
+  redirect: '/accountSetting'
+})
+
+update({
+  formId: 'privacyForm',
+  route: '/accountSetting',
+  buttonId: 'privacyBtn',
+  redirect: '/accountSetting'
+})
+
 
 // Hide spouse and maiden name elements by default
 hideElement('spouse');
