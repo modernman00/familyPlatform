@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Controller\register;
+namespace App\controller\register;
 
 use App\Controller\Base;
-use App\classes\Select;
+use Src\Select;
 
 class Search extends Base
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\members;
 
 
-use App\classes\{
+use Src\{
     Select,
     VerifyToken,
     Delete
@@ -50,7 +50,7 @@ class AllMembersController extends AllMembersData
     {
         try {
             $result = $this->getAllMembersNoPics();
-            echo json_encode($result);
+            echo json_encode(['status' => 'success', 'message' => $result]);
         } catch (\Throwable $th) {
             showError($th);
         }

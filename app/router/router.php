@@ -20,6 +20,7 @@ include_once __DIR__ . "/friendRequest.php";
 include_once __DIR__ . "/pushNotification.php";
 include_once __DIR__ . "/organogram.php";
 include_once __DIR__ . "/setting.php";
+include_once __DIR__ . "/images.php";
 
 
 $router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');

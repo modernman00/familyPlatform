@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 
 use App\classes\{Db, AllFunctionalities, Pusher};
@@ -23,20 +23,12 @@ class PostLikeController extends Db
     public static function postLikes()
     {
         try {
-            $postNo = cleanSession($_GET['postNo']);
-            $count = (int) cleanSession($_GET['count']);
+            $postNo = \cleanSession($_GET['postNo']);
+            $count = (int) \cleanSession($_GET['count']);
             $count += 1;
 
-            // Update both post_likes and likes_updated_at
-
-            AllFunctionalities::updateWithTimestamp(
-                table: 'post',
-                likesColumn: 'post_likes',
-                likesValue: $count,
-                timestampColumn: 'likes_updated_at',
-                whereColumn: 'post_no',
-                whereValue: $postNo
-            );
+            $stmt = parent::connect2()->prepare("UPDATE post SET post_likes = :count, likes_updated_at = NOW() WHERE post_no = :postNo");
+            $stmt->execute(['count' => $count, 'postNo' => $postNo]);
 
             msgSuccess(200, 'success');
         } catch (\Throwable $th) {

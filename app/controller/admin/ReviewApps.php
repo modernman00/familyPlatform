@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\admin;
+namespace App\controller\admin;
 
 use App\model\ReviewAppsData;
 use App\Controller\BaseController;

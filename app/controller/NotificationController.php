@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\controller;
 
 use Src\{Select, Insert};
 use Src\Exceptions\NotFoundException;

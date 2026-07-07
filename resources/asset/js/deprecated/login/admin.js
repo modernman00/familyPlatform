@@ -1,9 +1,9 @@
 "use strict";
-import FormHelper from '../FormHelper';
-import { id, showError } from '../global'
-import { Login } from "../dataToCheck";
-import { postFormData } from "../helper/http"
-import { showPassword } from "../helper/security"
+import FormHelper from '../../components/FormHelper';
+import { id, showError } from '../../components/global'
+import { Login } from "../../components/dataToCheck";
+import { postFormData } from "../../components/helper/http"
+import { showPassword } from "../../components/helper/security"
 
 
 // block the setLoader div

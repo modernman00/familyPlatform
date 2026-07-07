@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\controller;
 
 use App\classes\Db;
 use App\classes\tables\{

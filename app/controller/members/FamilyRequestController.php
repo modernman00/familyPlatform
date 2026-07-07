@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use App\classes\{
   Update,
@@ -8,6 +8,7 @@ use App\classes\{
   PushNotificationClass,
   Pusher
 };
+use Src\CheckToken;
 
 use App\controller\BaseController;
 use App\model\SingleCustomerData;
@@ -34,6 +35,7 @@ class FamilyRequestController extends BaseController
   public static function request(): void
   {
     try {
+      CheckToken::tokenCheck();
       // printArr jS DATA 
 
       $dataFromJs = json_decode(file_get_contents("php://input"), true);

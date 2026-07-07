@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\controller;
 
 use App\model\Post;
 use Src\{Utility, SelectFn};
@@ -35,6 +35,15 @@ class Index
     public function terms(): void
     {
         Utility::view('termOfUse');
+    }
+
+    public function contact(): void
+    {
+        try {
+            Utility::view('contact');
+        } catch (\Throwable $th) {
+            Utility::showError($th);
+        }
     }
 
     public static function getEmails()

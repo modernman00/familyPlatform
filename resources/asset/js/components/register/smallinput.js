@@ -14,7 +14,7 @@ const showMsg = (Id, msg = "Please, leave blank if not available") => {
 }
 
 // const href = "<a href='/createFamilyCode' target='_blank'>here</a>"
-const famCodeButton = "<button type='button' class='js-modal-trigger' data-target='modal-familyCode' id='triggerFamCode'>here</button>"
+const famCodeButton = "<button type='button' class='btn btn-sm btn-brand-outline ms-1 py-0' style='font-size: 0.8rem; vertical-align: baseline;' id='triggerFamCode'>here</button>"
 
 showMsg('fatherMobile_help')
 showMsg('motherMobile_help')
@@ -43,10 +43,14 @@ const trigger = id('triggerFamCode')
 const close = id('modal-close-code')
 const modalClass = id('modal-familyCode')
 
-trigger.addEventListener('click', () => {
-    openModal(modalClass);
-});
+if (trigger && modalClass) {
+    trigger.addEventListener('click', () => {
+        openModal(modalClass);
+    });
+}
 
-close.addEventListener('click', () => {
-    closeModal(modalClass);
-});
+if (close && modalClass) {
+    close.addEventListener('click', () => {
+        closeModal(modalClass);
+    });
+}

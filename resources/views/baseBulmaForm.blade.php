@@ -243,7 +243,7 @@
 
             <div class="styleForm" style="margin-top: 2rem;">
 
-                <img src={{ $_ENV['APP_LOGO'] }} alt="logo" class="mb-4 form__login__logo"
+                <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo"
                     style="margin-left:43%; margin-bottom:5rem;">
 
                 {{-- <hr class="my-2"> --}}
@@ -291,6 +291,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}"  src="public/js/shared-lib.js" defer></script> --}}
 
 
+    @yield('extra_js')
 </body>
 
 </html>

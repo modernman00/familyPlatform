@@ -2,6 +2,7 @@
 
 // profile page member
 $router->map('GET', '/member/ProfilePage', 'App\controller\members\ProfilePage@index', 'opening page member');
+$router->map('GET', '/profilePage', 'App\controller\members\ProfilePage@index', 'opening page member alias');
 
 
 

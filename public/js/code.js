@@ -22,12 +22,17 @@ if (fromForgot) {
   redirectTo = '/profilePage';
 }
 if (fromForgot) sessionStorage.removeItem('fromForgot');
-console.log(redirectTo);
 (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createCodeSubmitHandler)({
   formId: 'code',
-  route: '/code',
+  route: '/login/code',
+  buttonId: 'button',
   redirect: redirectTo,
-  theme: 'bulma'
+  theme: 'bulma',
+  lengthLimitArray: {
+    id: ['code'],
+    max: [6]
+  },
+  recaptchaAction: 'LOGIN_CODE'
 });
 
 /***/ })

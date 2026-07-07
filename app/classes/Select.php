@@ -23,7 +23,7 @@ class Select extends Db
      *
      * @return null|string
      */
-    public static function formAndMatchQuery(string $selection, string $table, string|null $identifier1 = null, string|null $identifier2 = null, $identifier3 = null, string|null $column = null, $column2 = null, $orderBy = null, $limit = null, array $colArray = null): string|null
+    public static function formAndMatchQuery(string $selection, ?string $table = null, ?string $identifier1 = null, ?string $identifier2 = null, $identifier3 = null, ?string $column = null, $column2 = null, $orderBy = null, $limit = null, ?array $colArray = null): string|null
     {
         // for col dynamically - 
         if($colArray) {
@@ -77,7 +77,7 @@ class Select extends Db
      * @param string $query SELECT * FROM account WHERE id = ? || SELECT * FROM $table WHERE $dev = ? AND $dev2 = ?
      * @param array|null $bind = ['woguns@ymail.com', "wale@loaneasyfinance.com"]; 
      */
-    public function selectFn(string $query, array $bind = null): array|int|string
+    public function selectFn(string $query, ?array $bind = null): array|int|string
     {
         try {
             $sql = $query;
@@ -90,7 +90,7 @@ class Select extends Db
         }
     }
 
-    public function selectFn1(string $query, array $bind = null): array|int|string
+    public function selectFn1(string $query, ?array $bind = null): array|int|string
     {
         try {
             $sql = $query;
@@ -110,7 +110,7 @@ class Select extends Db
      * @return string|array|int 
      */
 
-     public static function selectFn2(string $query, array $bind = null): string|array|int
+     public static function selectFn2(string $query, ?array $bind = null): string|array|int
     {
         try {
             $sql = $query;
@@ -131,7 +131,7 @@ class Select extends Db
      *
      * @return mixed
      */
-    public function selectCountFn(string $query, array $bind = null): string|array|int
+    public function selectCountFn(string $query, ?array $bind = null): string|array|int
     {
         try {
             $sql = $query;
@@ -151,7 +151,7 @@ class Select extends Db
      * @return string|array|int 
      */
 
-      public static function selectCountFn2(string $query, array $bind = null): string|array|int
+      public static function selectCountFn2(string $query, ?array $bind = null): string|array|int
     {
         try {
             $sql = $query;

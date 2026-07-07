@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\register;
+namespace App\controller\register;
 
 use Src\{
     SubmitForm,
     Select,
     Db,
     CheckToken,
-    Recaptcha
+    Recaptcha,
+    LoginUtility,
+    Insert,
+    Update
 };
 use App\model\RegisterTableData;
 
@@ -80,8 +83,9 @@ class Register extends Db
         // header("Access-Control-Allow-Headers: Content-Type, 
         // Access-Control-Allow-Headers, Authorization, 
         // X-Requested-With");
-        Recaptcha::verifyCaptcha('register');
         try {
+            Recaptcha::verifyCaptcha($_POST);
+            
             // set application id 
             $generateId = $this->setId($_POST, "firstName", 'account');
             // 
@@ -89,7 +93,7 @@ class Register extends Db
 
             // Sanitise the data and get the cleaned data
 
-            $cleanData = getSanitisedInputData($generateId, $data);
+            $cleanData = LoginUtility::getSanitisedInputData($generateId, $data);
 
             // create the event entry for birthday 
 
@@ -108,7 +112,7 @@ class Register extends Db
                 throw new Exception("Your email-{$cleanData['email']} is already registered");
             }
 
-            CheckToken::tokenCheck('token');
+            CheckToken::tokenCheck();
 
             // time to submit the input data to database
 
@@ -146,14 +150,10 @@ class Register extends Db
 
                 msgSuccess(200, $successMsg);
             } catch (\Throwable $th) {
-                // Roll back the transaction on failure
-                // $connection->rollBack();
-
-                showError($th);
+                msgException(500, $th->getMessage());
             }
         } catch (\Throwable $th) {
-
-            showError($th);
+            msgException(400, $th->getMessage());
         }
     }
 

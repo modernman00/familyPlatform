@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\login;
+namespace App\controller\login;
 
 use Src\{
     Utility
@@ -25,7 +25,12 @@ class Code
     public function verify(): void
     {
         try {
-            PwdRecoveryCodeFunctionality::process();
+            if (PwdRecoveryCodeFunctionality::process()) {
+                if (isset($_SESSION['auth']['identifyCust'])) {
+                    $_SESSION['id'] = $_SESSION['auth']['identifyCust'];
+                    $_SESSION['loggedIn'] = true;
+                }
+            }
         } catch (\Throwable $th) {
             Utility::showError($th);
         }

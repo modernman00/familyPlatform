@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use App\classes\{PushNotificationClass, Pusher};
 
@@ -180,7 +180,7 @@ class PostMessage
 
     public static function getNewPostPusher()
     {
-        $id = cleanSession($_SESSION['memberId']);
+        $id = \cleanSession($_SESSION['id']);
         $famCode = checkInput($_SESSION['famCode']);
         $newPost = self::fetchNewMsg(
             fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],

@@ -38,7 +38,7 @@ try {
 // Get all "navbar-burger" elements
 
 if (window.location.pathname === '/register') {
-  qSel('.signUp').style.display = 'none'; // navbar mgt
+  qSel('.registerNav').style.display = 'none'; // navbar mgt
 
   import(
     /* webpackChunkName: 'register' */
@@ -58,15 +58,26 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
     .catch((err) => showError(err));
 } else if (
-  window.location.pathname === '/login' ||
-  window.location.pathname === '/lasu'
+  window.location.pathname === '/login' 
 ) {
-  qSel('.login').style.display = 'none'; // navbar mgt
+  qSel('.loginNav').style.display = 'none'; // navbar mgt
 
   import(
     /* webpackChunkName: 'login' */
     /* webpackPrefetch: true */
-    './components/login/'
+    './components/acctMgt/login'
+  )
+    .then((module) => module.default)
+    .catch((err) => showError(err));
+} else if (
+  window.location.pathname === '/lasu'
+) {
+  qSel('.loginNav').style.display = 'none'; // navbar mgt
+
+  import(
+    /* webpackChunkName: 'adminLogin' */
+    /* webpackPrefetch: true */
+    './components/acctMgt/adminLogin'
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
@@ -86,7 +97,7 @@ if (window.location.pathname === '/register') {
   import(
     /* webpackChunkName: 'code' */
     /* webpackPrefetch: true */
-    './components/generateCode/Code'
+    './components/acctMgt/code'
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
