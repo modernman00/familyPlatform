@@ -1,36 +1,22 @@
 "use strict";
-import { id, showError } from "@shared"
+import { id, showError } from "../global"
 
 // import { postFormData } from "../helper/http"
 
-try {
+try{
 
     // NEW MESSAGE MODAL
-    const showModal = () => id('id01').style.display = 'block'
-
+    const showModal = ()=> id('id01').style.display = 'block'
+    
     // CREATE EVENT MODAL
     const showEvent = () => id('id_event_modal').style.display = 'block'
 
-    //EVENT ACTION
+//EVENT ACTION
+    id('createEvent').addEventListener('click', showEvent)
+    id('postMsg').addEventListener('click', showModal)
 
 
-const action = () => {
-
-    const createEvent = id('createEvent')
-    const postMsg = id('postMsg')
-
-     if (createEvent) {
-          createEvent.addEventListener('click', showEvent);
-        } else if (postMsg) {
-          postMsg.addEventListener('click', showModal)
-        } 
-}
-     
-    if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', action);
-  }
-
-    // handle post message
+// handle post message
 
 } catch (e) {
     showError(e)

@@ -39,7 +39,7 @@ class Post extends Select
         return $result[0];
     }
 
-    static function postLink2Id(string|int $id): array|int|string
+    static function postLink2Id(string $id): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
@@ -92,7 +92,7 @@ class Post extends Select
      * @param [type] $custNo this is the id
      *  get the
      */
-    public static function getAllPostPics(string|int $custNo): array|int|string
+    public static function getAllPostPics(string $custNo): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);
@@ -104,27 +104,12 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    /**
-     * Fetches all comments from the database.
-     * 
-     * This function retrieves all comments from the database and returns them as an array.
-     * 
-     * @return array<int|string> The array of comments
-     */
     static function getAllComments(): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
         return parent::selectFn2(query: $query);
     }
 
-    /**
-     * Fetches all unpublished posts from the database.
-     * 
-     * This function retrieves all posts with a status of 'new' and returns them as an array.
-     * The posts are ordered in descending order by their post number.
-     * 
-     * @return array|int|string The array of unpublished posts
-     */
     static function getUnpublishedPost(): array|int|string
     {
         $query = parent::formAndMatchQuery(
@@ -139,14 +124,6 @@ class Post extends Select
 
     
 
-    /**
-     * Fetches all unpublished comments from the database.
-     * 
-     * This function retrieves all comments with a status of 'new' and returns them as an array.
-     * The comments are ordered in descending order by their comment number.
-     * 
-     * @return array|int|string The array of unpublished comments
-     */
     static function getUnpublishedComment(): array|int|string
     {
         $query = parent::formAndMatchQuery(
@@ -159,13 +136,6 @@ class Post extends Select
  
     }
 
-    /**
-     * Updates the status of a post to published
-     * 
-     * @param int|string $postNo The post number of the post to update
-     * 
-     * @return bool True if the update was successful, false otherwise
-     */
     static function updatePostByStatusAsPublished($postNo): bool
     {
         $newUpdate = new Update('post');
@@ -177,13 +147,6 @@ class Post extends Select
         return $result;
     }
 
-    /**
-     * Updates the status of a comment to published
-     *
-     * @param int|string $commentNo the comment number to be updated
-     *
-     * @return bool true if the update was successful, false otherwise
-     */
     static function updateCommentByStatusAsPublished($commentNo): bool
     {
         $newUpdate = new Update('comment');

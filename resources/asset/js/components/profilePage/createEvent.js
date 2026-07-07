@@ -11,18 +11,10 @@ const formInput = document.querySelectorAll('.eventModalForm');
 const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
-const cancelModal = () => {
 
-    const displayNone = () => id('id_event_modal').style.display = 'none'
+const displayNone = () => id('id_event_modal').style.display = 'none'
 
-    id('cancelModal').addEventListener('click', displayNone)
-
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', cancelModal);
-}
-
+id('cancelModal').addEventListener('click', displayNone)
 
 /**
  * Filters events by family code (famCode) to ensure only relevant events are shown
@@ -46,7 +38,6 @@ const options = {
  * eventForm.addEventListener('submit', process);
  */
 const process = async (e) => {
-
     try {
         e.preventDefault();
         id('error').innerHTML = ""
@@ -76,8 +67,10 @@ const process = async (e) => {
 
         axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
 
-      // redirect to the profile page to view the event
-        window.location.href = '/profilePage';
+
+        // close the modal
+        displayNone();
+
 
     } catch (error) {
         showError(error)
