@@ -1,22 +1,24 @@
-@extends('layouts.email_premium')
+@extends('email')
 
 @section('title', 'Login Verification')
-@section('subtitle', 'Your secure authentication token')
-@section('greeting', 'Hello,')
+@section('subject', 'Your Secure Authentication Token')
 
 @section('content')
-<div style="text-align: center; padding: 20px 0;">
+<div style="text-align: center; padding: 10px 0;">
     @if ($data)
-        <p style="font-size: 16px; color: #4b4b4b; margin-bottom: 25px;">Please use the following verification code to complete your login. This code is valid for 10 minutes.</p>
-        <div style="background-color: #ffffff; border: 2px dashed #dee2e6; border-radius: 12px; padding: 20px; display: inline-block;">
-            <span style="font-size: 32px; font-weight: 800; letter-spacing: 5px; color: #1c1e21;">{{ $data['code'] }}</span>
+        <p style="font-size: 16px; color: #475569; margin-bottom: 25px;">Please use the following verification code to complete your login. This code is valid for 10 minutes.</p>
+        
+        <div style="background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 25px; display: inline-block; margin-bottom: 30px;">
+            <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0f172a;">{{ $data['code'] }}</span>
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="{{ getenv('MIX_APP_URL2') }}login" style="background-color: #0a66c2; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Login Page</a>
         </div>
     @else 
-        <p style="color: #d9534f;">There was a problem generating your authentication token. Please try again.</p>
+        <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 4px;">
+            <p style="color: #991b1b; margin: 0; font-weight: 500;">There was a problem generating your authentication token. Please try again.</p>
+        </div>
     @endif
 </div>
-@endsection
-
-@section('actions')
-<a href="{{ getenv('MIX_APP_URL2') }}login" class="btn btn-primary">Go to Login Page</a>
 @endsection

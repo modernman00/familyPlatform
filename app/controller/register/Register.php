@@ -3,17 +3,11 @@ declare(strict_types=1);
 
 namespace App\controller\register;
 
-use Src\{
-    SubmitForm,
-    Select,
-    Db,
-    CheckToken,
-    Recaptcha,
-    LoginUtility
-};
 use App\model\RegisterTableData;
-
 use Exception;
+use Src\{ SubmitForm, Select, Db, CheckToken, Recaptcha, LoginUtility, CorsHandler, Limiter };
+use Src\functionality\middleware\GetRequestData;
+use Src\functionality\SendEmailFunctionality;
 
 // testing
 
@@ -31,7 +25,37 @@ final class Register extends Db
                 $registerPostData = $_POST;
                 view('registration/register', ['registerPostData' => $registerPostData]);
             } else {
-                view('registration/register');
+                $registerPostData = [];
+                $env = getenv('APP_ENV');
+                if ($env === 'development' || $env === 'local') {
+                    $registerPostData = [
+                        'firstName' => 'John',
+                        'lastName' => 'Doe',
+                        'famCode' => 'DOE123',
+                        'maritalStatus' => 'Married',
+                        'gender' => 'Male',
+                        'maidenName' => 'Smith',
+                        'spouse_name' => 'Jane Doe',
+                        'spouse_email' => 'jane@example.com',
+                        'spouse_mobile' => '447809650811',
+                        'mother_name' => 'Mary Smith',
+                        'mother_email' => 'mary@example.com',
+                        'mother_mobile' => '447809650812',
+                        'father_name' => 'Bob Doe',
+                        'father_email' => 'bob@example.com',
+                        'father_mobile' => '447809650813',
+                        'children' => '2',
+                        'sibling' => '1',
+                        'country' => 'United Kingdom',
+                        'email' => 'john.doe@example.com',
+                        'mobile' => '447809650814',
+                        'employmentStatus' => 'Full-time-employment',
+                        'occupation' => 'Software Engineer',
+                        'password' => 'Password123!',
+                        'confirm_password' => 'Password123!',
+                    ];
+                }
+                view('registration/register', ['registerPostData' => $registerPostData]);
             }
         } catch (\Throwable $e) {
 
@@ -72,55 +96,65 @@ final class Register extends Db
      */
     public function processForm()
     {
-
-
-        // required headers
-        header("Access-Control-Allow-Origin: " . getenv("APP_URL"));
-        header("Content-Type: application/json; charset=UTF-8");
-        header("Access-Control-Allow-Methods: POST");
-        header("Access-Control-Max-Age: 3600");
-        // header("Access-Control-Allow-Headers: Content-Type, 
-        // Access-Control-Allow-Headers, Authorization, 
-        // X-Requested-With");
+        CorsHandler::setHeaders();
         try {
-            Recaptcha::verifyCaptcha($_POST);
+            $input = GetRequestData::getRequestData();
+            Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
+            unset($input['action'], $input['siteKey']);  
             
             // set application id 
-            $generateId = $this->setId($_POST, "firstName", 'account');
-            // 
+            $generateId = $this->setId($input, "firstName", 'account');
             $data = $this->dataToCheck();
 
             // Sanitise the data and get the cleaned data
-
             $cleanData = LoginUtility::getSanitisedInputData($generateId, $data);
 
-            // create the event entry for birthday 
+            // hash the password and confirm_password fields
+            $cleanData = hashPasswordsInArray($cleanData);
 
+            // create the event entry for birthday 
             $birthdayEvent = $this->createBirthdayEntry($cleanData['day'], $cleanData['month'], $cleanData['firstName'], $cleanData['id']);
 
             $cleanData = [...$cleanData, ...$birthdayEvent];
 
+            // Determine initial family status
+            if (isset($input['invite_token']) && !empty($input['invite_token'])) {
+                // Future check: validate the invite token against DB
+                $cleanData['familyStatus'] = 'approved';
+            } else {
+                $cleanData['familyStatus'] = 'pending';
+            }
+
             // create sessions and some variables
-            $_SESSION['id'] = $cleanData['id'];
-            $_SESSION['firstName'] = $cleanData['firstName'];
+           sessSet('id',$cleanData['id']);
+           sessSet('firstName',$cleanData['firstName']);
+
             $firstName = $cleanData['firstName'];
 
             // check if the email already exist
-
             if (checkEmailExist($cleanData['email'])) {
                 throw new Exception("Your email-{$cleanData['email']} is already registered");
             }
 
-            CheckToken::tokenCheck();
-
+            Limiter::limit($cleanData['email']);  
+            
+            // Prevent brute-force abuse by clearing rate limits
+            Limiter::$argLimiter->reset();
+            Limiter::$ipLimiter->reset();
             // time to submit the input data to database
 
             $getTableData = RegisterTableData::createRegisterTable($cleanData);
 
+            $dbConnection = self::connect2();
+            if (!$dbConnection) {
+                throw new Exception("Database connection failed.");
+            }
+            $dbConnection->beginTransaction();
+
             try {
                 foreach ($getTableData as $tableName => $tableData) {
                     if (!SubmitForm::submitForm($tableName, $tableData)) {
-                        msgException(406, "$tableName didn't submit");
+                        throw new Exception("$tableName didn't submit");
                     }
                 }
 
@@ -137,22 +171,23 @@ final class Register extends Db
                     processKidSibling('sibling', $siblingsCount, $cleanData);
                 }
 
+                $dbConnection->commit();
 
-                $sendEmailArray = genEmailArray(
-                    "msg/appSub",
-                    $cleanData,
-                    "We have received your application",
-                );
-                sendEmailWrapper($sendEmailArray, 'member');
+                SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
+
 
                 $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
 
                 msgSuccess(200, $successMsg);
+
             } catch (\Throwable $th) {
+                if ($dbConnection->inTransaction()) {
+                    $dbConnection->rollBack();
+                }
                 msgException(500, $th->getMessage());
             }
         } catch (\Throwable $th) {
-            msgException(400, $th->getMessage());
+            showError($th);
         }
     }
 
@@ -166,7 +201,7 @@ final class Register extends Db
     {
         return [
             'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
-            'max' => [15, 15, 35, 35, 20, 16, 30, 15, 30],
+            'max' => [35, 35, 35, 35, 35, 16, 30, 50, 50],
             'data' => [
                 'firstName', 'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
             ]
@@ -213,16 +248,16 @@ final class Register extends Db
         $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Provide Info");
 
         $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName);
-        $id = random_int(1000, 900000);
-        $id .= strtoupper($idName);
-
-        //check if the reference number exist
-        $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
-        $idCheck = Select::selectFn2($query, [$id]);
-        if ($idCheck >= 1) {
-            $id = (random_int(900001, 999999));
+        
+        do {
+            $id = random_int(1000, 900000);
             $id .= strtoupper($idName);
-        }
+
+            //check if the reference number exist
+            $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
+            $idCheck = Select::selectFn2($query, [$id]);
+        } while (is_array($idCheck) && count($idCheck) > 0);
+
         $postData['id'] = $id;
         return $postData;
     }

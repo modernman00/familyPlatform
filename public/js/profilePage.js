@@ -369,15 +369,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   showEmojiPicker: function() { return /* binding */ showEmojiPicker; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
-/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
-/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
 
 var EMOJI_CACHE_KEY = 'recentEmojis'; // LocalStorage key for caching recent emojis
 
 // 🟡 Filter emojis to only include smileys (based on Unicode range)
-var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__.filter(function (e) {
+var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__.filter(function (e) {
   var code = parseInt(e.hexcode, 16); // Convert hexcode to decimal
   return code >= 0x1F600 && code <= 0x1F64F; // Emoticons block range
 });
@@ -398,8 +398,8 @@ var showEmojiPicker = function showEmojiPicker(emojiContainerId, emojiTargetData
  * @param {string} containerId - ID of the picker container
  */
 var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
-  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(toggleId);
-  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(containerId);
+  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(toggleId);
+  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(containerId);
   if (!toggle || !container) return;
   document.addEventListener('click', function (e) {
     if (!container.classList.contains('d-none')) {
@@ -411,7 +411,7 @@ var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
   });
 };
 var renderEmojiList = function renderEmojiList(emojis, emojiContainerId, emojiTargetDataClass) {
-  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(emojiContainerId);
+  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(emojiContainerId);
   if (!emojiList) return;
   emojiList.innerHTML = '';
   emojiList.classList.add('modern-emoji-picker');
@@ -1376,9 +1376,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_8__);
 
 
 
@@ -1439,7 +1439,7 @@ var process = /*#__PURE__*/function () {
           eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('eventModalForm');
           eventFormEntries = new FormData(eventForm); // POST data to create the event and notification in parallel
           _context.next = 2;
-          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_8__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_8__["default"].post('/member/notification/event', eventFormEntries, options)]);
+          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_7__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_7__["default"].post('/member/notification/event', eventFormEntries, options)]);
         case 2:
           _yield$Promise$all = _context.sent;
           _yield$Promise$all2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_yield$Promise$all, 2);
@@ -1447,7 +1447,7 @@ var process = /*#__PURE__*/function () {
           notificationResponse = _yield$Promise$all2[1];
           // Extract and get notificationNo from the responses
           notificationNo = notificationResponse.data.message; // update all members of similar famcode on their UIs using Pusher
-          axios__WEBPACK_IMPORTED_MODULE_8__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
+          axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
 
           // close the modal
           displayNone();
@@ -1534,9 +1534,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
 
 
 
@@ -1556,7 +1556,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 0:
           _context.prev = 0;
           _context.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getFriendRequestById?id=".concat(approverId));
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getFriendRequestById?id=".concat(approverId));
         case 1:
           response = _context.sent;
           if (response.data.message) {
@@ -1569,7 +1569,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 2:
           _context.prev = 2;
           _t = _context["catch"](0);
-          (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
+          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
         case 3:
           ;
         case 4:
@@ -1588,10 +1588,10 @@ var waitForRequestFriendClass = function waitForRequestFriendClass(data) {
   var observer = new MutationObserver(function (mutations, obs) {
     var requestContainer = document.querySelector('.requestFriendClass');
     if (requestContainer) {
-      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__.friendRequestCard)(data);
+      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__.friendRequestCard)(data);
       obs.disconnect(); // Stop observing once .requestFriendClass is found
     } else {
-      (0,_global__WEBPACK_IMPORTED_MODULE_2__.log)('there is no requestFriendClass');
+      (0,_global__WEBPACK_IMPORTED_MODULE_3__.log)('there is no requestFriendClass');
     }
   });
 
@@ -1885,9 +1885,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 
 
 
@@ -1925,7 +1925,7 @@ try {
             case 0:
               _context.prev = 0;
               _context.next = 1;
-              return axios__WEBPACK_IMPORTED_MODULE_9__["default"].get("/post/getAllPostCommentByFamCode");
+              return axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/post/getAllPostCommentByFamCode");
             case 1:
               pullData = _context.sent;
               // Assign fetched data to state properties
@@ -1958,6 +1958,30 @@ try {
 
   // initiate the global object
   state.initialize();
+
+  // IntersectionObserver for Infinite Scroll
+  var sentinel = document.getElementById('infinite-scroll-sentinel');
+  if (sentinel) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          console.log('Sentinel intersected! Fetching next page of posts...');
+          // Show skeleton
+          sentinel.style.display = 'block';
+
+          // Simulate network delay for the skeleton loader effect, then fetch next page
+          setTimeout(function () {
+            // In a real implementation, you would pass an offset/page to state.initialize(page)
+            // For now, we simulate the end of the list after the first fetch
+            sentinel.style.display = 'none';
+          }, 1500);
+        }
+      });
+    }, {
+      rootMargin: '100px'
+    });
+    observer.observe(sentinel);
+  }
   var updatePost = /*#__PURE__*/function () {
     var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(e) {
       var dataForUse, oldestPost, _t2;
@@ -1980,7 +2004,7 @@ try {
             (0,_post__WEBPACK_IMPORTED_MODULE_3__.appendNewPost)(dataForUse);
             _context2.prev = 1;
             _context2.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
               post_status: 'published'
             });
           case 2:
@@ -2019,7 +2043,7 @@ try {
             (0,_comment__WEBPACK_IMPORTED_MODULE_5__.appendNewComment)(dataForUse);
             _context3.prev = 1;
             _context3.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
               comment_status: 'published'
             });
           case 2:
@@ -2075,15 +2099,15 @@ try {
   // Subscribe to the event channel
 
   var checkEventAndAdd = function checkEventAndAdd(data) {
-    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_7__.eventHtml)(data);
+    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_8__.eventHtml)(data);
     return (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
   };
   var notificationChannel = pusher.subscribe('notification-channel');
   notificationChannel.bind('new-notification', function (data) {
     if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
       checkEventAndAdd(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.addToNotificationTab)(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.increaseNotificationCount)();
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
     }
   });
 

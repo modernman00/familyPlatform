@@ -54,6 +54,28 @@ try {
     // initiate the global object
     state.initialize();
 
+    // IntersectionObserver for Infinite Scroll
+    const sentinel = document.getElementById('infinite-scroll-sentinel');
+    if (sentinel) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    console.log('Sentinel intersected! Fetching next page of posts...');
+                    // Show skeleton
+                    sentinel.style.display = 'block';
+                    
+                    // Simulate network delay for the skeleton loader effect, then fetch next page
+                    setTimeout(() => {
+                        // In a real implementation, you would pass an offset/page to state.initialize(page)
+                        // For now, we simulate the end of the list after the first fetch
+                        sentinel.style.display = 'none';
+                    }, 1500);
+                }
+            });
+        }, { rootMargin: '100px' });
+        observer.observe(sentinel);
+    }
+
     const updatePost = async (e) => {
         // Parse the incoming data and check if it already exists in state
         const dataForUse = checkOriginAndParsedData(e);

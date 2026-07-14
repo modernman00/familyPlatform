@@ -8,14 +8,14 @@ use Exception;
 use PDOException;
 use PDO;
 
-use App\classes\{
+use Src\{
     InnerJoin,
     Select
 };
 
 class AllMembersData extends InnerJoin
 {
-    private const ERR_MSG = "Member Data Error";
+    private const string ERR_MSG = "Member Data Error";
 
     // public function getAllMembers(): array
     // {
@@ -85,6 +85,89 @@ class AllMembersData extends InnerJoin
     }
 
     /**
+     * Gets visible posts for multiple family codes, implementing the Unified Feed.
+     */
+    public static function getVisiblePosts(string $id, array $famCodes, int $limit, int $offset): array
+    {
+        try {
+            if (empty($famCodes)) {
+                return [];
+            }
+            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            
+            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+              FROM post
+              INNER JOIN profilePics pp ON post.id = pp.id
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = ?
+                  ) AS rm ON post.id = rm.approver_id
+            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
+            AND post.post_status = 'published'
+            ORDER BY post.date_created DESC
+            LIMIT ? OFFSET ?";
+            
+            $params = [$id];
+            $params = array_merge($params, $famCodes);
+            $params[] = $limit;
+            $params[] = $offset;
+
+            $result = parent::connect2()->prepare($query);
+            // We can't easily pass integers with execute if PDO emulation is off, but we can bind them
+            foreach ($params as $key => $val) {
+                if (is_int($val)) {
+                    $result->bindValue($key + 1, $val, PDO::PARAM_INT);
+                } else {
+                    $result->bindValue($key + 1, $val, PDO::PARAM_STR);
+                }
+            }
+            
+            $result->execute();
+            return $result->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+    /**
+     * Counts visible posts for multiple family codes.
+     */
+    public static function countVisiblePosts(string $id, array $famCodes): int
+    {
+        try {
+            if (empty($famCodes)) {
+                return 0;
+            }
+            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            
+            $query = "SELECT COUNT(*) as total
+              FROM post
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = ?
+                  ) AS rm ON post.id = rm.approver_id
+            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
+            AND post.post_status = 'published'";
+            
+            $params = [$id];
+            $params = array_merge($params, $famCodes);
+
+            $result = parent::connect2()->prepare($query);
+            foreach ($params as $key => $val) {
+                $result->bindValue($key + 1, $val, PDO::PARAM_STR);
+            }
+            $result->execute();
+            return (int) $result->fetchColumn();
+        } catch (PDOException $e) {
+            showError($e);
+            return 0;
+        }
+    }
+
+    /**
      * Retrieves a list of all members' emails and details associated with a given family code.
      *
      * This function executes a database query to fetch email addresses, family codes, 
@@ -131,8 +214,7 @@ class AllMembersData extends InnerJoin
     public function getAllMembersNoPics(): array
     {
         $table = ['personal', "contact", "profilePics", 'otherFamily'];
-        $firstTable = array_shift($table);
-        $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
+        $memberData = parent::joinAll2(para: 'id', table: $table, orderBy: 'date_created');
 
         if (!$memberData) {
 
@@ -290,25 +372,31 @@ class AllMembersData extends InnerJoin
 
     public static function getFamCode($id): array
     {
+        try {
+            $query = "SELECT family_code FROM user_families WHERE user_id = :id AND status = 'approved'";
+            $statement = parent::connect2()->prepare($query);
+            $statement->execute(['id' => $id]);
+            $results = $statement->fetchAll(PDO::FETCH_ASSOC);
+            
+            $famCodes = array_column($results, 'family_code');
+            
+            // Fallback to legacy personal table if no rows exist in user_families (for transition safety)
+            if (empty($famCodes)) {
+                $legacyQuery = "SELECT famCode FROM personal WHERE id = :id";
+                $legacyStatement = parent::connect2()->prepare($legacyQuery);
+                $legacyStatement->execute(['id' => $id]);
+                $legacyResult = $legacyStatement->fetch(PDO::FETCH_ASSOC);
+                if ($legacyResult) {
+                    $famCodes[] = $legacyResult['famCode'];
+                }
+            }
 
-        $query = Select::formAndMatchQuery(
-            selection: "SELECT_COL_ID",
-            table: "personal",
-            identifier1: "id",
-            column: 'famCode',
-        );
-
-        $result = Select::selectFn2($query, [$id]);
-
-        // if (isset($result[0]['famCode'])) {
-        // msgSuccess(200, $result[0]['famCode']);
-
-        return [
-            'famCode' => $result[0]['famCode']
-        ];
-        // } else {
-        //     // Handle the case where the query didn't return the expected result.
-        //     msgException(401, "Member not found");
-        // }
+            return [
+                'famCode' => $famCodes // Return array of codes instead of single string
+            ];
+        } catch (PDOException $e) {
+            showError($e);
+            return ['famCode' => []];
+        }
     }
 }

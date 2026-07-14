@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\model;
 
-use App\classes\InnerJoin;
-use App\classes\Select;
+use Src\InnerJoin;
+use Src\Select;
 
 
 class SingleCustomerData extends InnerJoin

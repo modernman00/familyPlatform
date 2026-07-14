@@ -22,7 +22,7 @@
     $relationshipLabel = $dataDB['relationship'] ?? ucfirst($type);
 @endphp
 
-<a class="tree-node {{ $genderClass }}" data-role="{{ $type }}">
+<a class="tree-node {{ $genderClass }}" data-role="{{ $type }}" data-registered="{{ empty($dataDB['email']) && empty($dataDB['id']) ? 'false' : 'true' }}" data-familycode="{{ $data['familyCode'] ?? '' }}">
     {{-- Data for modal (safe fallbacks everywhere) --}}
     <span class="node-email" data-id="{{ $dataDB['email'] ?? '' }}"></span>
     <span class="node-id" data-id="{{ $dataDB['id'] ?? '' }}"></span>

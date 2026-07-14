@@ -66,13 +66,15 @@ final class Event extends AllMembersData
     }
 
     // Filter members based on the event famCode
-    private static function filterMemberByFamCode(): array
+    private static function filterMemberByFamCode(string $eventFamCode): array
     {
         // Get all members' details including email, famCode, and id
         $members = self::getAllMembersCodeAndEmail();
 
-        $membersToNotify = array_filter($members, function ($member) {
-            return $member['famCode'] == self::generateFamCode();
+        $membersToNotify = array_filter($members, function ($member) use ($eventFamCode) {
+            // Check legacy famCode column or new user_families array structure
+            $memberFamilies = isset($member['user_families']) ? array_column($member['user_families'], 'family_code') : [$member['famCode']];
+            return in_array($eventFamCode, $memberFamilies) || $member['famCode'] == $eventFamCode;
         });
 
         return $membersToNotify;
@@ -222,10 +224,11 @@ final class Event extends AllMembersData
             if ($allEventData) {
                 // send other event reminders
                 foreach ($allEventData as $eventData) {
-                    // Get the famCode of the event
-                    $eventData['famCode'];
+                // Get the famCode of the event
+                $famCodeForEvent = $eventData['famCode'] ?? $eventData['eventCode'] ?? null;
+                if (!$famCodeForEvent) continue;
 
-                    $membersToNotify = self::filterMemberByFamCode();
+                $membersToNotify = self::filterMemberByFamCode($famCodeForEvent);
 
                     // Extract email addresses from the filtered members
                     $emailsToNotify = array_column($membersToNotify, 'email');

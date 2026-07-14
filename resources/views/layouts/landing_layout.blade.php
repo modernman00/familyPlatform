@@ -34,7 +34,8 @@
   <link href="/public/css/landing.css" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   
-<script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITEKEY_V3'] }}"></script>
+<script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}"></script>
+<script nonce="{{ $nonce }}">window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";</script>
 
   <style>
     /* Reset some Bulma conflicts with Bootstrap */
@@ -107,5 +108,8 @@
       });
     }
   </script>
+   <script nonce="{{ $nonce }}">
+        window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";
+    </script>
 </body>
 </html>

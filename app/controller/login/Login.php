@@ -41,9 +41,12 @@ final class Login
         // \printArr($_POST);
 
         try {
-            $result = LoginFunctionality::login(returnType: 'php');
+            $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: true);
        
             $getFamCode = AllMembersDataModel::getFamCode($result['id']);
+            
+            // Store all approved family codes in the session
+            $_SESSION['famCodes'] = $getFamCode['famCode'];
 
             msgSuccess(201, $result['message'],  $getFamCode['famCode']);
 
@@ -67,7 +70,7 @@ final class Login
         try {
             $getAdminCode = getenv('CODING');
 
-            if ($getAdminCode === $_POST['type']) {
+            if (isset($_POST['type']) && is_string($_POST['type']) && $getAdminCode === $_POST['type']) {
                 LoginFunctionality::login();
             } else {
                 msgException(406, "Invalid input - 2");

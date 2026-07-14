@@ -44,6 +44,8 @@ id('familyTree').addEventListener('click', (e) => {
       relation: relation,
       country: country,
       personId: personId,
+      isRegistered: node.dataset.registered === 'true',
+      familyCode: node.dataset.familycode
     }
 
     showPersonDetails(detailData);

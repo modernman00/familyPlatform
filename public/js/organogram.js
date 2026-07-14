@@ -181,7 +181,9 @@ var personModal = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('personModal');
       occupation: occupation,
       relation: relation,
       country: country,
-      personId: personId
+      personId: personId,
+      isRegistered: node.dataset.registered === 'true',
+      familyCode: node.dataset.familycode
     };
     (0,_showModal__WEBPACK_IMPORTED_MODULE_2__.showPersonDetails)(detailData);
   }
@@ -253,10 +255,15 @@ var showPersonDetails = function showPersonDetails(personData) {
     spouseName = personData.spouseName,
     occupation = personData.occupation,
     country = personData.country,
-    email = personData.email;
+    email = personData.email,
+    isRegistered = personData.isRegistered,
+    familyCode = personData.familyCode,
+    maritalStatus = personData.maritalStatus;
+  var inviteMessage = encodeURIComponent("Hey! I just started building our family tree and saved your spot. Our family code is ".concat(familyCode, ". Click here to join and see the rest of the family! ").concat(window.location.origin, "/register"));
+  var claimSpotHtml = !isRegistered ? "\n    <div class=\"claim-spot-section mt-4\" style=\"background: var(--card-bg); padding: 20px; border-radius: 15px; text-align: center; border: 1px dashed var(--primary-color);\">\n      <h4 style=\"color: var(--primary-color); font-family: 'Playfair Display', serif; margin-bottom: 10px;\">Claim This Spot</h4>\n      <p style=\"font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;\">Send a magic invite to let them join the tree!</p>\n      <div style=\"display: flex; gap: 10px; justify-content: center;\">\n        <a href=\"whatsapp://send?text=".concat(inviteMessage, "\" class=\"btn\" style=\"background: #25D366; color: white; border-radius: 20px; padding: 8px 20px; text-decoration: none;\"><i class=\"bi bi-whatsapp\"></i> WhatsApp</a>\n        <a href=\"sms:?body=").concat(inviteMessage, "\" class=\"btn\" style=\"background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 20px; text-decoration: none;\"><i class=\"bi bi-chat-text\"></i> SMS</a>\n      </div>\n    </div>\n  ") : '';
 
   // Inject HTML into modal body with person's details
-  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Relationship</div>\n        <div class=\"detail-value\">").concat(relation || 'Family Member', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Marital Status</div>\n        <div class=\"detail-value\">").concat(maritalStatus || 'N/A', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation || 'Not specified', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Location</div>\n        <div class=\"detail-value\">").concat(country || 'N/A', "</div>\n      </div>\n\n      ").concat(spouseName ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">Spouse / Partner</div>\n          <div class=\"detail-value\">".concat(spouseName, "</div>\n        </div>\n      ") : '', "\n\n      ").concat(email ? "\n        <div class=\"detail-item\" style=\"grid-column: span 2;\">\n          <div class=\"detail-label\">Email Address</div>\n          <div class=\"detail-value\">".concat(email, "</div>\n        </div>\n      ") : '', "\n    </div>\n  ");
+  modalBody.innerHTML = "\n    <div class=\"person-detail\">\n      <img src=\"".concat(img, "\" alt=\"").concat(fullName, "\" class=\"person-image\">\n      <div class=\"person-info\">\n        <h2 class=\"person-name\">").concat(fullName, "</h2>\n        <div class=\"person-relation\">").concat(relation, "</div>\n      </div>\n    </div>\n    <div class=\"detail-grid\">\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Relationship</div>\n        <div class=\"detail-value\">").concat(relation || 'Family Member', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Marital Status</div>\n        <div class=\"detail-value\">").concat(maritalStatus || 'N/A', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Occupation</div>\n        <div class=\"detail-value\">").concat(occupation || 'Not specified', "</div>\n      </div>\n\n      <div class=\"detail-item\">\n        <div class=\"detail-label\">Location</div>\n        <div class=\"detail-value\">").concat(country || 'N/A', "</div>\n      </div>\n\n      ").concat(spouseName ? "\n        <div class=\"detail-item\">\n          <div class=\"detail-label\">Spouse / Partner</div>\n          <div class=\"detail-value\">".concat(spouseName, "</div>\n        </div>\n      ") : '', "\n\n      ").concat(email ? "\n        <div class=\"detail-item\" style=\"grid-column: span 2;\">\n          <div class=\"detail-label\">Email Address</div>\n          <div class=\"detail-value\">".concat(email, "</div>\n        </div>\n      ") : '', "\n    </div>\n    ").concat(claimSpotHtml, "\n  ");
 
   // Show the modal
   personModal.style.display = 'flex';

@@ -4,7 +4,7 @@
 @section('data-page-id', 'register')
 
 @section('extra_css')
-<link rel="stylesheet" type="text/css" href="https://kraaden.github.io/autocomplete/autocomplete.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/autocompleter/autocomplete.min.css">
 <style>
     .register-card {
         background: white;
@@ -132,6 +132,11 @@
                                 'attribute' => ['maritalStatus', 'gender', 'maidenName'],
                                 'placeholder' => ['marital status', "gender",'maiden name'],
                                 'inputType' => ['select','select', 'text'],
+                                'value' => [
+                                    isset($registerPostData['maritalStatus']) ? $registerPostData['maritalStatus'] : '',
+                                    isset($registerPostData['gender']) ? $registerPostData['gender'] : '',
+                                    isset($registerPostData['maidenName']) ? $registerPostData['maidenName'] : ''
+                                ],
                                 'options' => [
                                     ['select', 'Married', 'Single', 'Divorced', 'Seperated', 'Widowed'],
                                     ['select', 'Male', 'Female'],
@@ -148,6 +153,11 @@
                                 'attribute' => ['spouse_name', 'spouse_email', 'spouse_mobile'],
                                 'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089'],
                                 'inputType' => ['text','email', 'text'],
+                                'value' => [
+                                    isset($registerPostData['spouse_name']) ? $registerPostData['spouse_name'] : '',
+                                    isset($registerPostData['spouse_email']) ? $registerPostData['spouse_email'] : '',
+                                    isset($registerPostData['spouse_mobile']) ? $registerPostData['spouse_mobile'] : ''
+                                ],
                                 'icon' => [
                                     '<i class="fas fa-user"></i>',
                                     '<i class="fas fa-envelope-square"></i>',
@@ -161,6 +171,11 @@
                                 'attribute' => ['mother_name', 'mother_email','mother_mobile'],
                                 'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089'],
                                 'inputType' => ['text', 'email', 'text'],
+                                'value' => [
+                                    isset($registerPostData['mother_name']) ? $registerPostData['mother_name'] : '',
+                                    isset($registerPostData['mother_email']) ? $registerPostData['mother_email'] : '',
+                                    isset($registerPostData['mother_mobile']) ? $registerPostData['mother_mobile'] : ''
+                                ],
                                 'icon' => [
                                     '<i class="fas fa-user"></i>',
                                     '<i class="fas fa-envelope-square"></i>',
@@ -173,6 +188,11 @@
                                 'attribute' => ['father_name','father_email', 'father_mobile' ],
                                 'placeholder' => ['Yommy Olaogun',"yomi@email.com", '447809789098'],
                                 'inputType' => ['text', 'text', 'text'],
+                                'value' => [
+                                    isset($registerPostData['father_name']) ? $registerPostData['father_name'] : '',
+                                    isset($registerPostData['father_email']) ? $registerPostData['father_email'] : '',
+                                    isset($registerPostData['father_mobile']) ? $registerPostData['father_mobile'] : ''
+                                ],
                                 'icon' => [
                                     '<i class="fas fa-user"></i>',
                                     '<i class="fas fa-envelope-square"></i>',
@@ -184,6 +204,10 @@
                                 'select-many',
                                 'label' => ['Numbers of children', 'Number of Siblings'],
                                 'attribute' => ['children', 'sibling'],
+                                'value' => [
+                                    isset($registerPostData['children']) ? $registerPostData['children'] : '',
+                                    isset($registerPostData['sibling']) ? $registerPostData['sibling'] : ''
+                                ],
                                 'options' => [
                                     ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                                     ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -200,6 +224,11 @@
                                 'attribute' => ['country', 'email', 'mobile'],
                                 'placeholder' => ['Your first line of address', 'toyin@yahoo.com', 'include the area code - 234 or 1 or 44'],
                                 'inputType' => ['select', 'text', 'text'],
+                                'value' => [
+                                    isset($registerPostData['country']) ? $registerPostData['country'] : '',
+                                    isset($registerPostData['email']) ? $registerPostData['email'] : '',
+                                    isset($registerPostData['mobile']) ? $registerPostData['mobile'] : ''
+                                ],
                                 'options' => [
                                     ['select', "United Kingdom", "United States", "Nigeria", "Canada", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Cape Verde", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Brazzaville)", "Congo (Kinshasa)", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "North Korea", "South Korea", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
                                 ],
@@ -216,6 +245,10 @@
                                 'attribute' => ['employmentStatus', 'occupation'],
                                 'placeholder' => ['null', 'Accountant, Housewife, Student, Business man etc'],
                                 'inputType' => ['select', 'text'],
+                                'value' => [
+                                    isset($registerPostData['employmentStatus']) ? $registerPostData['employmentStatus'] : '',
+                                    isset($registerPostData['occupation']) ? $registerPostData['occupation'] : ''
+                                ],
                                 "options" => [
                                     ['select', 'Self-employed', 'Unemployed', 'Full-time-employment', 'Student']
                                 ],
@@ -231,6 +264,10 @@
                                 'attribute' => ['password', 'confirm_password'],
                                 'placeholder' => ['xxxx', 'xxxx'],
                                 'inputType' => ['password', 'password'],
+                                'value' => [
+                                    isset($registerPostData['password']) ? $registerPostData['password'] : '',
+                                    isset($registerPostData['confirm_password']) ? $registerPostData['confirm_password'] : ''
+                                ],
                                 'icon' => [
                                     '<i class="fas fa-user-secret"></i>',
                                     '<i class="fas fa-user-secret"></i>',
@@ -245,51 +282,66 @@
                         $form->genForm();
                     @endphp
 
-                    <div id="modal-familyCode" class="modal">
-                        <div class="modal-background"></div>
-                        <div class="modal-content">
-                            <div class="box p-5" style="border-radius: 16px; border: none;">
-                                <div class="text-center mb-4">
-                                    <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 48px;" class="mb-3">
-                                    <h3 class="fw-bold" style="color: var(--brand-secondary);">Generate Family Code</h3>
-                                    <p class="text-muted small">Create a unique code to invite your family members</p>
+                    <div id="modal-familyCode" class="modal glass-modal">
+                        <div class="modal-background glass-overlay"></div>
+                        <div class="modal-content glass-card">
+                            <div class="text-center mb-4">
+                                <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 48px;" class="mb-3 logo-glow">
+                                <h3 class="fw-bold premium-text">Create Your Family Code</h3>
+                                <p class="text-muted small">Create a unique code to invite your family members</p>
+                            </div>
+                            
+                            <div class="field mt-5">
+                                <div class="control glass-input-wrapper">
+                                    <input type="text" id="surname" name="surname" class="input is-large glass-input" placeholder=" ">
+                                    <label for="surname" class="glass-floating-label">Family Surname</label>
                                 </div>
-                                
-                                @php
-                                    $codeFormArray = [
-                                        'surname_id' => 'text'
-                                    ];
-                                    $codeForm = new \Src\BuildFormBulma($codeFormArray);
-                                    $codeForm->genForm();
-                                @endphp
+                                <div id="surname_error" class="help is-danger"></div>
+                            </div>
 
-                                <div class="field mt-4">
-                                    <p class="control">
-                                        <button name="btnFamCode" id="btnFamCode" type="button" class="button is-success btnFamCode is-large is-fullwidth">
-                                            Generate Code
-                                        </button>
-                                    </p>
-                                </div>
+                            <div class="field mt-5">
+                                <button name="btnFamCode" id="btnFamCode" type="button" class="button is-large is-fullwidth btn-gradient glow-effect">
+                                    GENERATE CODE
+                                </button>
+                            </div>
 
-                                <div class="field has-addons is-expanded has-addons-centered mt-4">
+                            <div class="field mt-5 code-output-wrapper">
+                                <p class="text-muted small mb-2 text-start px-1 fw-bold" style="color: #4a5568;">Family Code</p>
+                                <div class="field has-addons is-expanded has-addons-centered code-addons">
                                     <div class="control is-expanded" id="createFamCode">
-                                        <input class="input is-large" type="text" id="createCode" placeholder="Code will appear here" readonly style="background: #f8fafc;">
+                                        <input class="input is-large glass-code-input text-center fw-bold" type="text" id="createCode" placeholder="**CODE HERE**" readonly>
                                     </div>
                                     <div class="control">
-                                        <button id="copyIcon" class="button is-primary is-large">
-                                            <i class="fa fa-copy me-2"></i> Copy
+                                        <button id="copyIcon" class="button is-large btn-coral-glow fw-bold" type="button">
+                                            Copy Code <i class="far fa-copy ms-2"></i>
                                         </button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="mt-4 text-center">
-                                    <p class="text-muted small">Share this code with your family members so they can join your secure network.</p>
-                                </div>
+                            <div class="mt-5 text-center">
+                                <p class="text-muted small">Share this code with your family members so they can join your secure network.</p>
                             </div>
                         </div>
                         <button type="button" id="modal-close-code" class="modal-close is-large" aria-label="close"></button>
                     </div>
                 </form>
+                
+                @if (getenv('APP_ENV') === 'development' || getenv('APP_ENV') === 'local')
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const dummyData = @json($registerPostData ?? []);
+                        for (const [name, val] of Object.entries(dummyData)) {
+                            const el = document.querySelector(`[name="${name}"]`);
+                            if (el && val !== null && val !== '') {
+                                el.value = val;
+                            }
+                        }
+                        const termsCheckbox = document.getElementById('checkbox');
+                        if (termsCheckbox) termsCheckbox.checked = true;
+                    });
+                </script>
+                @endif
                 
                 <div class="mt-4 text-center">
                     <p class="text-muted small">Already have an account? <a href="/login" class="fw-bold text-decoration-none" style="color: var(--brand-primary);">Log in</a></p>

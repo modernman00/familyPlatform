@@ -1,344 +1,99 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns:v="urn:schemas-microsoft-com:vml">
-
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!--[if !mso]--><!-- -->
-    <link href='https://fonts.googleapis.com/css?family=Work+Sans:300,400,500,600,700' rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Quicksand:300,400,700' rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!--<![endif]-->
-
-    <title>FAMILY COMMUNICATION</title>
-
+    <title>Family Platform Communication</title>
     <style type="text/css">
-        body {
-            width: 100%;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-            mso-margin-top-alt: 0px;
-            mso-margin-bottom-alt: 0px;
-            mso-padding-alt: 0px 0px 0px 0px;
-        }
+        /* Client-specific resets */
+        body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+        table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+        img { -ms-interpolation-mode: bicubic; }
 
-        p,
-        h1,
-        h2,
-        h3,
-        h4 {
-            margin-top: 0;
-            margin-bottom: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-        }
+        /* Reset styles */
+        img { border: 0; outline: none; text-decoration: none; max-width: 100%; }
+        body { margin: 0; padding: 0; width: 100% !important; background-color: #f8fafc; font-family: 'Inter', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        table { border-collapse: collapse !important; }
 
-        span.preheader {
-            display: none;
-            font-size: 1px;
-        }
-
-        html {
-            width: 100%;
-        }
-
-        table {
-            font-size: 14px;
-            border: 0;
-        }
-        /* ----------- responsivity ----------- */
-
-        @media only screen and (max-width: 640px) {
-            /*------ top header ------ */
-            .main-header {
-                font-size: 20px !important;
-            }
-            .main-section-header {
-                font-size: 28px !important;
-            }
-            .show {
-                display: block !important;
-            }
-            .hide {
-                display: none !important;
-            }
-            .align-center {
-                text-align: center !important;
-            }
-            .no-bg {
-                background: none !important;
-            }
-            /*----- main image -------*/
-            .main-image img {
-                width: 440px !important;
-                height: auto !important;
-            }
-            /* ====== divider ====== */
-            .divider img {
-                width: 440px !important;
-            }
-            /*-------- container --------*/
-            .container590 {
-                width: 440px !important;
-            }
-            .container580 {
-                width: 400px !important;
-            }
-            .main-button {
-                width: 220px !important;
-            }
-            /*-------- secions ----------*/
-            .section-img img {
-                width: 320px !important;
-                height: auto !important;
-            }
-            .team-img img {
-                width: 100% !important;
-                height: auto !important;
-            }
-        }
-
-        @media only screen and (max-width: 479px) {
-            /*------ top header ------ */
-            .main-header {
-                font-size: 18px !important;
-            }
-            .main-section-header {
-                font-size: 26px !important;
-            }
-            /* ====== divider ====== */
-            .divider img {
-                width: 280px !important;
-            }
-            /*-------- container --------*/
-            .container590 {
-                width: 280px !important;
-            }
-            .container590 {
-                width: 280px !important;
-            }
-            .container580 {
-                width: 260px !important;
-            }
-            /*-------- secions ----------*/
-            .section-img img {
-                width: 280px !important;
-                height: auto !important;
-            }
+        /* Mobile styles */
+        @media screen and (max-width: 600px) {
+            .email-container { width: 100% !important; padding: 10px !important; }
+            .content-card { padding: 20px !important; border-radius: 12px !important; }
+            .header-logo { max-width: 150px !important; }
+            .h1 { font-size: 24px !important; }
+            .p { font-size: 16px !important; }
         }
     </style>
-    <!--[if gte mso 9]><style type=”text/css”>
-        body {
-        font-family: arial, sans-serif!important;
-        }
-        </style>
-    <![endif]-->
 </head>
-
-
-<body class="respond" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-    <!-- pre-header -->
-    <table style="display:none!important;">
-        <tr>
-            <td>
-                <div style="overflow:hidden;display:none;font-size:1px;color:#ffffff;line-height:1px;font-family:Arial;maxheight:0px;max-width:0px;opacity:0;">
-                    FAMILY
-                </div>
-            </td>
-        </tr>
-    </table>
-    <!-- pre-header end -->
-    <!-- header -->
-    <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff">
-
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Inter', Helvetica, Arial, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 40px 0;">
         <tr>
             <td align="center">
-                <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-
+                <!-- Main Container -->
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); overflow: hidden;">
+                    
+                    <!-- Header -->
                     <tr>
-                        <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-                    </tr>
-
-                    <tr>
-                        <td align="center">
-
-                            <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-
-                                <tr>
-                                    <td align="center" height="70" style="height:70px;">
-                                        <a href="" style="display: block; border-style: none !important; border: 0 !important;">
-                                        <img src ={{$_ENV["APP_LOGO"] }} width="50" height="50" alt="LOGO" />
-                                        </a>
-                                    </td>
-                                </tr>
-
-                            </table>
+                        <td align="center" style="background: linear-gradient(135deg, #0a66c2 0%, #004182 100%); padding: 40px 20px;">
+                            <img src="{{ $_ENV['APP_LOGO'] ?? '' }}" alt="Family Platform Logo" style="display: block; height: 50px; width: auto; filter: brightness(0) invert(1);" />
                         </td>
                     </tr>
 
+                    <!-- Body Content -->
                     <tr>
-                        <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-                    </tr>
+                        <td style="padding: 40px 40px 20px 40px; color: #1e293b;" class="content-card">
+                            
+                            <h1 class="h1" style="margin: 0 0 20px 0; font-size: 28px; font-weight: 700; color: #0f172a; text-align: center; letter-spacing: -0.5px;">
+                                @yield('subject')
+                            </h1>
 
-                </table>
-            </td>
-        </tr>
-    </table>
-    <!-- end header -->
+                            <!-- Divider -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding-bottom: 30px;">
+                                        <div style="height: 3px; width: 40px; background-color: #0a66c2; border-radius: 2px;"></div>
+                                    </td>
+                                </tr>
+                            </table>
 
-    <!-- big image section -->
-
-    <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-
-        <tr>
-            <td align="center">
-                <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-
-                    <tr>
-                        <td align="center" style="color: #343434; font-size: 24px; font-family: Quicksand, Calibri, sans-serif; font-weight:700;letter-spacing: 3px; line-height: 35px;"
-                            class="main-header">
-                            <!-- section text ======-->
-
-                            <div style="line-height: 35px">
-
-                            @yield('subject')
-
-                          
-
+                            <div class="p" style="font-size: 16px; line-height: 1.6; color: #334155;">
+                                @yield('content')
                             </div>
+
                         </td>
                     </tr>
 
+                    <!-- Footer Content Inside Card -->
                     <tr>
-                        <td height="10" style="font-size: 10px; line-height: 10px;">&nbsp;</td>
-                    </tr>
-
-                    <tr>
-                        <td align="center">
-                            <table border="0" width="40" align="center" cellpadding="0" cellspacing="0" bgcolor="eeeeee">
-                                <tr>
-                                    <td height="2" style="font-size: 2px; line-height: 2px;">&nbsp;</td>
-                                </tr>
-                            </table>
+                        <td style="padding: 0 40px 40px 40px;">
+                            <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 1.6; color: #475569; font-weight: 500;">
+                                Warm regards,<br/>
+                                <span style="color: #0a66c2; font-weight: 600;">The Membership Team</span>
+                            </p>
                         </td>
                     </tr>
+                    
+                </table>
 
+                <!-- Outside Footer -->
+                <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="margin-top: 30px;">
                     <tr>
-                        <td height="20" style="font-size: 20px; line-height: 20px;">&nbsp;</td>
-                    </tr>
-
-                    <tr>
-                        <td align="left">
-                            <table border="0" width="590" align="center" cellpadding="0" cellspacing="0" class="container590">
-                                <tr>
-                                    <td align="left" style="color: #888888; font-size: 16px; font-family: 'Work Sans', Calibri, sans-serif; line-height: 24px;">
-                                        <!-- section text ======-->
-
-                                  
-                                        
-                                         {{-- <p id='shouldEmailHaveReference' style="line-height: 24px; margin-bottom:15px;">REFERENCE :
-
-                                           @yield('reference')
-
-                                         </p> --}}
-
-                                     
-                                        <p style="line-height: 24px;margin-bottom:15px;">
-
-                                            @yield('content')
-
-                                        </p>
-                                      
-                                   
-                                        <p style="line-height: 24px">
-                                             Regards,<br>
-                                            Admin Team,<br>
-                                                Membership Management<br>
-                                        </p>
-
-                                    </td>
-                                </tr>
-                            </table>
+                        <td align="center" style="padding: 0 20px;">
+                            <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b; line-height: 1.5; text-align: center;">
+                                If you have any questions regarding your account, please contact our Customer Services Team at <strong style="color: #475569;">{{ getenv('BIZ_NO') }}</strong>.
+                            </p>
+                            <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
+                                This message is confidential and intended solely for the addressee. We will never ask you to supply sensitive security details via email. 
+                            </p>
                         </td>
                     </tr>
-
-
-
-
-
                 </table>
 
             </td>
         </tr>
-
-        <tr>
-            <td height="40" style="font-size: 40px; line-height: 40px;">&nbsp;</td>
-        </tr>
-
     </table>
-
-
-    <!-- contact section -->
-    <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="ffffff" class="bg_color">
-
-        <tr>
-            <td height="60" style="font-size: 60px; line-height: 60px;">&nbsp;</td>
-        </tr>
-
-   
-
-        <tr>
-            <td height="60" style="font-size: 60px; line-height: 60px;">&nbsp;</td>
-        </tr>
-
-    </table>
-    <!-- end section -->
-
-    <!-- footer ====== -->
-    <table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="f4f4f4">
-
-        <tr>
-            <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-        </tr>
-
-        <tr>
-            <td align="center">
-
-                <table border="0" align="center" width="590" cellpadding="0" cellspacing="0" class="container590">
-
-                    <tr>
-                        <td>
-                            <table border="0" align="center" cellpadding="0" cellspacing="0" style="border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;"
-                                class="container590">
-                                <tr>
-                                    <td align="center" style="color: #aaaaaa; font-size: 14px; font-family: 'Work Sans', Calibri, sans-serif; line-height: 24px;">
-                                        <div style="line-height: 24px;">
-
-                                            <span style="color: #333333;">If you have a query regarding your account, please contact our Customer Services Team on {{ getenv('BIZ_NO') }}. *Call charges info.</span>
-                                            <p> Internet communications are not secure and therefore the we do not accept legal responsibility for the contents of this message. Although we operate anti-virus programmes, it does not accept responsibility for any damage whatsoever that is caused by viruses being passed.
-
-        This message is confidential and intended for the addressee only. We will never contact you via e-mail or via a website, asking you to supply us with any security details relating to you, your credit card details, PIN, or online account servicing. </p>
-
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-
-                        </td>
-                    </tr>
-
-                </table>
-            </td>
-        </tr>
-
-        <tr>
-            <td height="25" style="font-size: 25px; line-height: 25px;">&nbsp;</td>
-        </tr>
-
-    </table>
-    <!-- end footer ====== -->
-
 </body>
-
 </html>

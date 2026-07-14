@@ -33,23 +33,23 @@ final class PostMessage
         try {
             $VerifyJWT = SignIn::verify('users');
             $id = \cleanSession($VerifyJWT['id']);
-            $famCode = \cleanSession($VerifyJWT['famCode']);
+            $famCodes = $_SESSION['famCodes'] ?? [\cleanSession($VerifyJWT['famCode'])];
 
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
             $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
             $offset = ($page - 1) * $limit;
 
-            // 1. Get visible posts with pagination
+            // 1. Get visible posts with pagination across multiple families
             $posts = AllMembersData::getVisiblePosts(
                 $id,
-                $famCode,
+                $famCodes,
                 $limit,
                 $offset
             );
 
             // Get total count for pagination metadata
-            $total = AllMembersData::countVisiblePosts($id, $famCode);
+            $total = AllMembersData::countVisiblePosts($id, $famCodes);
             $lastPage = ceil($total / $limit);
 
 

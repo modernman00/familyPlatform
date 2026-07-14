@@ -1,6 +1,6 @@
 <?php
 
-    use App\classes\Db;
+    use Src\Db;
     
     /**
      * @param mixed $type is it kids or siblings

@@ -26,20 +26,30 @@
   @includeIf('member.modals.postImg')
 
 
-  <!-- Pagination -->
-  <nav aria-label="Feed pagination">
-    <ul class="pagination justify-content-center" id="feedPagination">
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1">Previous</a>
-      </li>
-      <li class="page-item active"><a class="page-link" href="#">1</a></li>
-      <li class="page-item"><a class="page-link" href="#">2</a></li>
-      <li class="page-item"><a class="page-link" href="#">3</a></li>
-      <li class="page-item">
-        <a class="page-link" href="#">Next</a>
-      </li>
-    </ul>
-  </nav>
+  <!-- Infinite Scroll Sentinel & Skeleton Loader -->
+  <div id="infinite-scroll-sentinel" style="padding: 20px 0; text-align: center; display: none;">
+    <!-- Skeleton loader that pulses while fetching posts -->
+    <div class="skeleton-post" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: left; animation: pulse 1.5s infinite ease-in-out;">
+      <div style="display: flex; align-items: center; margin-bottom: 15px;">
+        <div style="width: 48px; height: 48px; border-radius: 50%; background: #e2e8f0; margin-right: 15px;"></div>
+        <div style="flex-grow: 1;">
+          <div style="height: 12px; background: #e2e8f0; border-radius: 4px; width: 40%; margin-bottom: 8px;"></div>
+          <div style="height: 10px; background: #e2e8f0; border-radius: 4px; width: 20%;"></div>
+        </div>
+      </div>
+      <div style="height: 14px; background: #e2e8f0; border-radius: 4px; width: 100%; margin-bottom: 10px;"></div>
+      <div style="height: 14px; background: #e2e8f0; border-radius: 4px; width: 90%; margin-bottom: 10px;"></div>
+      <div style="height: 14px; background: #e2e8f0; border-radius: 4px; width: 60%;"></div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+  </style>
 </div>
 
 

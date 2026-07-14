@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\model;
 
-use App\classes\Select;
-use App\classes\InnerJoin;
-use App\classes\Update;
+use Src\Select;
+use Src\InnerJoin;
+use Src\Update;
 
 
 final class Post extends Select
@@ -66,19 +66,19 @@ final class Post extends Select
 
     public static function getAllPostProfilePics(): array
     {
-        return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['post'], orderBy: 'post.post_no');
+        return InnerJoin::joinAll2(para: 'id', table: ['profilePics', 'post'], orderBy: 'post.post_no');
     }
 
     public function getAllPostProfilePics2(): array
     {
         $inner = new InnerJoin;
-        return $inner->joinAll(firstTable: 'profilePics', para: 'id', table: ['post'], orderBy: 'post.date_created');
+        return $inner->joinAll(para: 'id', table: ['profilePics', 'post'], orderBy: 'post.date_created');
     }
 
 
     public static function getAllCommentProfilePics(): array
     {
-        return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
+        return InnerJoin::joinAll2(para: 'id', table: ['profilePics', 'comment'], orderBy: 'comment.date_created');
     }
 
     /**

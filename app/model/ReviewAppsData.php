@@ -2,7 +2,7 @@
 
 namespace App\model;
 
-use App\classes\InnerJoin;
+use Src\InnerJoin;
 class ReviewAppsData extends InnerJoin
 {
 	/**

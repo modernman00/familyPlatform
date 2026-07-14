@@ -57,7 +57,7 @@ final class RegisterTableData {
                 'mother_name' => $cleanPostData['mother_name'],
                 'mother_mobile' => $cleanPostData['mother_mobile'],
                 'mother_email' => $cleanPostData['mother_email'],
-                'mother_maiden' => $cleanPostData['mother_maiden'],
+                // 'mother_maiden' => $cleanPostData['mother_maiden'],
                 'otherFamCode' => $cleanPostData['familyCode'],
                 'id' => $cleanPostData['id']
             ],
@@ -84,9 +84,15 @@ final class RegisterTableData {
                 'eventType' => 'Birthday',
                 'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
                 'eventFrequency' => 'Annually',
-                'eventGroup' => 'Global',
+                // 'eventGroup' => 'Global',
                 'eventCode' => $cleanPostData['familyCode'],
                 'id' => $cleanPostData['id']
+            ],
+            'user_families' => [
+                'user_id' => $cleanPostData['id'],
+                'family_code' => $cleanPostData['familyCode'],
+                'status' => $cleanPostData['familyStatus'] ?? 'pending',
+                'role' => 'member'
             ]
 
         ];

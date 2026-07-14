@@ -1,7 +1,7 @@
 <?php
 namespace App\controller;
 
-// use App\classes\Db;
+// use Src\Db;
 
 use Src\AlterTable;
 

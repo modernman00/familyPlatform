@@ -9,6 +9,8 @@ use Src\functionality\{
     PasswordResetFunctionality,
 };
 
+use Src\Utility;
+
 
 final class PassChange extends BaseController
 {
@@ -16,9 +18,9 @@ final class PassChange extends BaseController
     public function show(): void
     {
         try {
-            PasswordResetFunctionality::show('login/passChange');
+            view2('login/passChange');
         } catch (\Throwable $th) {
-            showError($th);
+            Utility::showError($th);
         }
     }
 
@@ -28,7 +30,7 @@ final class PassChange extends BaseController
         try {
             PasswordResetFunctionality::process();
         } catch (\Throwable $th) {
-            showError($th);
+               Utility::showError($th);
         }
     }
 }

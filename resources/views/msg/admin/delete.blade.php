@@ -1,18 +1,24 @@
-@extends ('email')
-@section('title', 'email')
+@extends('email')
 
-@section('subject') 
-    MEMBERSHIP DECISION NOTIFICATION for {{ $data['firstName'] }} {{ $data['lastName'] }} 
-@endsection
+@section('title', 'Record Deleted')
+@section('subject', 'Membership Application Deleted')
 
+@if (!empty($data['id']))
 @section('reference') {{ $data['id'] }} @endsection
+@endif
 
 @section('content')
-<p>
+<p style="margin-bottom: 20px;">
+    Hello <strong>{{ $data['firstName'] }} {{ $data['lastName'] }}</strong>,
+</p>
 
- Hello
-    {{ $data['firstName'] }} {{ $data['lastName'] }},<br><br> Your application for membership of the {{ $data['lastName'] }} family platform has
-    been deleted from our system.<br><br> Thanks.<br><br>
-           
+<p style="margin-bottom: 20px;">
+    We are writing to inform you that your application record for membership to the <strong>{{ $data['lastName'] }}</strong> family platform has been permanently deleted from our system.
+</p>
 
+<div style="background-color: #f8fafc; border-left: 4px solid #94a3b8; padding: 15px 20px; border-radius: 4px; margin-bottom: 20px;">
+    <p style="margin: 0; color: #475569; font-size: 15px;">
+        If you have any questions or believe this was a mistake, please reach out directly to your family platform administrator.
+    </p>
+</div>
 @endsection

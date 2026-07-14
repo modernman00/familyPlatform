@@ -2,7 +2,7 @@
 
 namespace App\classes;
 use Minishlink\WebPush\WebPush;
-use App\classes\Select;
+use Src\Select;
 
 class PushNotificationClass extends VapidClass
 {

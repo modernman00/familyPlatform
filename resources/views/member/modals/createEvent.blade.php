@@ -16,7 +16,7 @@
 
    <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
        <div class="modal-dialog">
-           <div class="modal-content shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg);">
+           <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg);">
                
                <div class="modal-header border-0 pb-0 px-4 pt-4">
                    <h4 class="modal-title fw-bold" id="createEventModalLabel" style="font-family: 'Playfair Display', serif; color: var(--text-color);">

@@ -36,7 +36,7 @@ const formData = new FormHelper(formInputArr);
 registerHandler({
     formId:'register',
     route:'/register',
-    buttonId: 'submit',
+    buttonId: 'button',
     redirect: 'register/nextStep',
     recaptchaAction: 'SUBMIT',
     optionalFields: []

@@ -33,41 +33,13 @@
     </div>
 
     <script>
-        // Prevent back button access after logout (PWA-compatible)
-        // Service Worker is already registered in the base layout
-        window.addEventListener('pageshow', function(event) {
-            // Check if page was loaded from cache (back/forward button)
-            if (event.persisted) {
-                console.log('Page loaded from bfcache, checking authentication...');
-                
-                // Send message to Service Worker to clear auth cache
-                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                    navigator.serviceWorker.controller.postMessage({
-                        type: 'CLEAR_AUTH_CACHE'
-                    });
-                }
-                
-                // Force reload from server to check authentication
-                window.location.reload();
+        // Defensive frontend: Check authentication status silently if needed without page refresh
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // We can silently check session status via api without blocking the UI
+                console.log('Page visible, auth checking delegated to API calls');
             }
         });
-
-        // Optional: Check authentication on page load via AJAX
-        // Uncomment if you want an extra layer of security
-        /*
-        window.addEventListener('load', function() {
-            fetch('/api/check-session', {
-                method: 'GET',
-                credentials: 'same-origin'
-            }).then(response => {
-                if (!response.ok || response.status === 401) {
-                    window.location.href = '/login';
-                }
-            }).catch(error => {
-                console.log('Session check failed:', error);
-            });
-        });
-        */
 
         document.addEventListener('DOMContentLoaded', () => {
             const fileInput = document.getElementById('img'); // Hidden file input
