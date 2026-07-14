@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use App\controller\BaseController;
 use App\model\SingleCustomerData;
@@ -49,13 +49,12 @@ class Organogram extends SingleCustomerData
 
             // Build response
             $orgData = [
-                'spouse' => $spouse[0],
-                'father' => $father[0],
-                'mother' => $mother[0],
+                'spouse' => $spouse[0] ?? null,
+                'father' => $father[0] ?? null,
+                'mother' => $mother[0] ?? null,
                 'siblings' => $siblings,
                 'children' => $children,
                 'sibling_children' => $siblingChildren
-           
             ];
 
          view('member/organogram', compact('orgData', 'data'));
@@ -74,14 +73,15 @@ class Organogram extends SingleCustomerData
 
 
         foreach ($otherFamily as $row) {
-            $email = $row["{$who}_email"];
-            if (isset($email)) {
+            $email = $row["{$who}_email"] ?? null;
+            if ($email) {
                 $fetchTheId = SelectFn::selectAllRowsById('contact', 'email', $email);
 
                 if (!empty($fetchTheId)) {
 
                     foreach ($fetchTheId as $getData) {
                         $fullData = BaseController::findMemberById($getData['id']);
+                        if (!$fullData) continue;
 
                         // set relationship for children and siblings
                         if (isset($fullData['gender'])) {
@@ -91,16 +91,16 @@ class Organogram extends SingleCustomerData
                         $data[] = $fullData;
                     }
                 } else {
-                    $relationship = $fullData['relationship'] = $this->resolveRelationship($who, $row["{$who}_gender"]);
-                    $sex = $row['gender'] === 'Male' || $who === 'father' ? 'avatarM.png' : 'avatarF.png';
+                    $relationship = $this->resolveRelationship($who, $row["{$who}_gender"] ?? null);
+                    $sex = (($row["{$who}_gender"] ?? '') === 'Male' || $who === 'father') ? 'avatarM.png' : 'avatarF.png';
                     $data[] = [
-                        'fullName' => $row["{$who}_name"],
-                        'email' => $row["{$who}_email"],
-                        'mobile' => $row["{$who}_mobile"],
-                        'linked' => $row["{$who}_linked"],
+                        'fullName' => $row["{$who}_name"] ?? '',
+                        'email' => $row["{$who}_email"] ?? '',
+                        'mobile' => $row["{$who}_mobile"] ?? '',
+                        'linked' => $row["{$who}_linked"] ?? '',
                         'relationship' => $relationship,
-                        'gender' => $row["{$who}_gender"],
-                        'img' => $row['img'] ? "/resources/images/profile/{$row['img']}" : "/resources/images/profile/$sex"
+                        'gender' => $row["{$who}_gender"] ?? '',
+                        'img' => isset($row['img']) ? "/resources/images/profile/{$row['img']}" : "/resources/images/profile/$sex"
                     ];
                 }
             }
@@ -121,11 +121,9 @@ class Organogram extends SingleCustomerData
     {
         $siblingChildren = [];
         foreach ($siblings as $sibling) {
-            $id = $sibling['id'];
+            $id = $sibling['id'] ?? null;
 
-            // printArr($sibling);
-
-            if (empty($id)) continue;
+            if (!$id) continue;
 
             $children = SelectFn::selectAllRowsById('children', 'id', $id) ?? [];
             //  printArr($children);
@@ -133,8 +131,8 @@ class Organogram extends SingleCustomerData
             if (!empty($children)) {
 
                 foreach ($children as $data) {
-
-                    $email = $data["children_email"];
+                    $email = $data["children_email"] ?? null;
+                    if (!$email) continue;
 
                     // check for children detail via contact 
                     $fetchTheId = SelectFn::selectAllRowsById('contact', 'email', $email);
@@ -144,6 +142,7 @@ class Organogram extends SingleCustomerData
 
                         foreach ($fetchTheId as $getData) {
                             $fullData = BaseController::findMemberById($getData['id']);
+                            if (!$fullData) continue;
 
 
                             // set relationship for children and siblings
@@ -155,16 +154,17 @@ class Organogram extends SingleCustomerData
                             $siblingChildren[] = $fullData;
                         }
                     } else {
-                        $sex = $data['children_gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
+                        $gender = $data['children_gender'] ?? 'Female';
+                        $sex = $gender === 'Male' ? 'avatarM.png' : 'avatarF.png';
                         $siblingChildren[] = [
                             'father_id' => $id,
-                            'fullName' => $data['children_name'],
-                            'email' => $data['children_email'],
-                            'gender' => $data['children_gender'],
-                            'relationship' => $this->resolveRelationship('sibling_children', $data['children_gender']),
+                            'fullName' => $data['children_name'] ?? '',
+                            'email' => $data['children_email'] ?? '',
+                            'gender' => $gender,
+                            'relationship' => $this->resolveRelationship('sibling_children', $gender),
                             // 'mobile' => $data['children_mobile'],
-                            'linked' => $data['children_linked'],
-                            'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
+                            'linked' => $data['children_linked'] ?? '',
+                            'img' => isset($data['img']) ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex"
                         ];
                     }
                 }

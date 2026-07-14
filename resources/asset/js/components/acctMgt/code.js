@@ -14,11 +14,16 @@ if(fromForgot){
 
 if (fromForgot) sessionStorage.removeItem('fromForgot');
 
-console.log(redirectTo);
-
 createCodeSubmitHandler({
   formId: 'code', 
-  route: '/code', 
+  route: '/login/code', 
+  buttonId: 'button',
   redirect: redirectTo,
-  theme: 'bulma'
+  theme: 'bulma',
+  lengthLimitArray: {
+    id: ['code'], 
+    max: [6]
+  },
+  recaptchaAction: 'LOGIN_CODE'
+
 });

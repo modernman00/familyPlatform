@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Controller;
+namespace App\controller;
 
 class ServeImgController {
     public function ProfileDir($imgName) {
@@ -14,16 +14,21 @@ class ServeImgController {
         }
 
         // Define the path to the image directory
-        $imageDir = __DIR__ . '/../../resources/asset/profile/';
+        $imageDir = __DIR__ . '/../../public/img/profile/';
 
         // Create the full path to the image file
         $filePath = $imageDir . basename($filename);
 
         if (!file_exists($filePath)) {
-            // If the file does not exist, return a 404 Not Found response
-            http_response_code(404);
-            echo 'File not found.';
-            exit;
+            // Check for default avatars in public/avatar as fallback
+            $fallbackPath = __DIR__ . '/../../public/avatar/' . basename($filename);
+            if (file_exists($fallbackPath)) {
+                $filePath = $fallbackPath;
+            } else {
+                http_response_code(404);
+                echo 'File not found.';
+                exit;
+            }
         }
 
         // Get the file's MIME type
@@ -52,7 +57,7 @@ class ServeImgController {
         }
 
         // Define the path to the image directory
-        $imageDir = __DIR__ . '/../../resources/asset/post/';
+        $imageDir = __DIR__ . '/../../public/img/post/';
 
         // Create the full path to the image file
         $filePath = $imageDir . basename($filename);

@@ -20,7 +20,7 @@ class VerifyToken
     {
         try {
 
-            $token = $_COOKIE['waleToken'];
+            $token = $_COOKIE['waleToken'] ?? null;
 
             if (isset($token)) {
 

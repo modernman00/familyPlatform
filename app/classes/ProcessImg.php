@@ -3,7 +3,8 @@
 namespace App\classes;
 
 use App\classes\AllFunctionalities;
-use Src\{SubmitForm, FileUploader};
+use Src\functionality\middleware\FileUploadProcess;
+use Src\UpdateFn;
 
 
 class ProcessImg extends AllFunctionalities
@@ -13,32 +14,48 @@ class ProcessImg extends AllFunctionalities
     public function processProfileImage()
     {
         try {
-            if (!$_FILES) {
-                msgException(401, "Error Processing Request - PIC NOT ADDED");
+            // if (!$_FILES) {
+            //     msgException(401, "Error Processing Request - PIC NOT ADDED");
                 
-            }
+            // }
         
-            FileUploader::fileUploadSingle("public/img/profile/", 'profileImageFile');
-            // create a file path name for the database
-            $fileName = checkInputImage($_FILES['profileImageFile']['name']);
 
-            $this->profileImg = $fileName;
+            // fileUpload("public/img/profile/", 'profileImageFile');
+            // // create a file path name for the database
+           $fileName = checkInputImage($_FILES['profileImageFile']['name']);
 
-            if (!$_SESSION['id']) {
-                throw new \Exception("can't find id", 1);
-            }
+            // $this->profileImg = $fileName;
 
-            $data = [
-                'img' => $fileName,
-                'where_from' => 'profile',
-                'id' => checkInput($_SESSION['id'])
-            ];
+            // if (!$_SESSION['id']) {
+            //     throw new \Exception("can't find id", 1);
+            // }
 
-            // insert the photo to the images table
-            SubmitForm::submitForm('images', $data);
+            // $data = [
+            //     'img' => $fileName,
+            //     'where_from' => 'profile',
+            //     'id' => checkInput($_SESSION['id'])
+            // ];
+
+        
+            // $insertFile = new Insert();
+
+            // // insert the photo to the images table
+            // $insertFile->submitForm('images', $data);
+
+
+
+            $uploadResult = FileUploadProcess::process([], 'profile', 'profileImageFile', 'public/img/profile/', 'images');
+            
+            $sanitizedFileName = $uploadResult['sanitisedData']['profile']['profileImageFile'] ?? $fileName;
+
+            UpdateFn::makeUpdateFn('profilePics',[
+                'img'=> $sanitizedFileName, 
+                'id'=> $_SESSION['id']], 
+                'id', null
+            );
 
             // Update the profile_table
-            $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
+           // $this->update('profilePics', 'img', $fileName, 'id', checkInput($_SESSION['id']));
 
              msgSuccess(200, "Profile image updated");
 

@@ -75,10 +75,15 @@ export default class FormHelper {
     emailVal() {
         const emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
         let msg = `<li style=color:'red';> Please enter a valid email</li>`
-        const email = this.id('email_id').value
+        const emailEl = this.id('email_id') || this.id('email')
+        if (!emailEl) return;
+        const email = emailEl.value
         if (email.match(emailExp) === null) {
-            this.id('email_error').innerHTML = msg
-            this.id('email_error').style.color = "red"
+            const errEl = this.id('email_error')
+            if (errEl) {
+                errEl.innerHTML = msg
+                errEl.style.color = "red"
+            }
             this.error.push(msg)
         }
     }
@@ -109,22 +114,22 @@ export default class FormHelper {
 
                 const the_id = this.id(id);
 
-
                 if (the_id) {
+                    console.log(`Adding listeners to element: ${id}`);
                     // Add keyup event listener to clear errors for non-select inputs
                     the_id.addEventListener('keyup', () => {
                         if (value !== 'select') {
                             clearErrorForElement(name);
                         }
                     });
-                } else {
-                    console.error(`Element with ID '${id}' with post name '${post.name}' not found.`);
-                }
 
-                // Add change event listener to clear error message
-                the_id.addEventListener('change', () => {
-                    clearErrorForElement(name);
-                });
+                    // Add change event listener to clear error message
+                    the_id.addEventListener('change', () => {
+                        clearErrorForElement(name);
+                    });
+                } else {
+                    console.warn(`Element with ID '${id}' with post name '${post.name}' not found.`);
+                }
 
             }
         })
@@ -153,22 +158,28 @@ export default class FormHelper {
     realTimeCheckLen(input, maxi) {
         try {
             for (let i = 0; i < input.length; i++) {
-                const theData = this.id(`${input[i]}_id`);
+                let theData = this.id(`${input[i]}_id`);
+                if (!theData) theData = this.id(input[i]);
                 if (theData === null || theData === undefined || theData === "") {
-                    throw new Error(`Element with ID '${input[i]}_id' not found or is empty`);
+                    console.warn(`Element with ID '${input[i]}' not found or is empty`);
+                    continue;
                 }
                 const max = maxi[i];
                 const error = this.id(`${input[i]}_error`);
                 theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
                 theData.addEventListener('keyup', () => {
-                    error.innerHTML = (theData.value.length > max) ? `You have reached the maximum limit` : "";
+                    if (error) {
+                        error.innerHTML = (theData.value.length > max) ? `You have reached the maximum limit` : "";
+                        error.style.color = 'red';
+                    }
                     const help = this.id(`${input[i]}_help`);
-                    help.style.color = 'red';
-                    help.style.fontSize = '10px';
-                    error.style.color = 'red';
-                    setTimeout(() => {
-                        help.style.display = 'none';
-                    }, 5000);
+                    if (help) {
+                        help.style.color = 'red';
+                        help.style.fontSize = '10px';
+                        setTimeout(() => {
+                            help.style.display = 'none';
+                        }, 5000);
+                    }
                 });
             }
         } catch (error) {
@@ -186,11 +197,13 @@ export default class FormHelper {
     matchInput(first, second) {
         let error, firstInput, secondInput
         error = this.id(`${second}_error`)
-        firstInput = this.id(first + '_id')
-        secondInput = this.id(second + '_id')
-        secondInput.addEventListener('keyup', () => {
-            error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
-        })
+        firstInput = this.id(first + '_id') || this.id(first)
+        secondInput = this.id(second + '_id') || this.id(second)
+        if (firstInput && secondInput) {
+            secondInput.addEventListener('keyup', () => {
+                if (error) error.innerHTML = (secondInput.value !== firstInput.value) ? 'Your passwords do not match' : ""
+            })
+        }
     }
     /**
      *
@@ -213,11 +226,13 @@ export default class FormHelper {
      */
     duplicate(giveInput, takeInput) {
         let giver, taker;
-        giver = this.id(giveInput)
-        taker = this.id(takeInput)
-        giver.addEventListener('keyup', () => {
-            taker.value = giver.value;
-        })
+        giver = this.id(giveInput) || this.id(giveInput.replace('_id', ''))
+        taker = this.id(takeInput) || this.id(takeInput.replace('_id', ''))
+        if (giver && taker) {
+            giver.addEventListener('keyup', () => {
+                taker.value = giver.value;
+            })
+        }
     }
 
     /**

@@ -1,34 +1,32 @@
 import { nameImgTiming } from './htmlFolder/nameImageTiming'
 import { commentForm } from "./htmlFolder/commentForm"
 import { likeCommentButton } from "./htmlFolder/likeCommentButton"
-import { showPostImg, imgCount } from "./htmlFolder/showPostImages"
-import { showComment} from "./comment"
+import { showPostImg } from "./htmlFolder/showPostImages"
+import { showComment } from "./comment"
 
 
-export const html = (postArray, comment = []) => {
-  const { post_no, postMessage, id } = postArray
+export const html = (el, comment = null) => {
+  const { post_no, postMessage } = el
+  return `<div class="w3-container w3-card w3-white w3-round w3-margin post${post_no}"><br>
 
-  return `
-    <div class="post card" id="post${post_no}">
-     <div class="card-body post${post_no}" id="postIt">
-    ${nameImgTiming(postArray)}
+      ${nameImgTiming(el)}
 
-    <div class="post-content">
-    <p class="card-text"> ${postMessage} </p>
+    <hr class="w3-clear">
 
-     <div class="photo-grid grid-${imgCount(postArray)}">
-      ${showPostImg(postArray)}
-    </div>
-    </div>
+    <p class="postFont"> ${postMessage} </p>
 
-    ${likeCommentButton(postArray, comment.length)}
-    ${commentForm(postArray)}
-    <div id = 'showComment${post_no}' class="comment-section">
-    ${showComment(comment, id)}
+     ${showPostImg(el)}
 
+    ${likeCommentButton(el)}
+
+    ${commentForm(el)}
+
+    <div id = 'showComment${post_no}'>
+
+      ${showComment(comment)}
       
-    </div>
-`
+    </div><br>
+  </div>`
 }
 
 

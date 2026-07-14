@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use App\classes\{
     AllFunctionalities,
     Insert,
-    CheckToken,
     Select,
     PushNotificationClass,
     Pusher
@@ -17,6 +16,7 @@ use App\model\{EmailData, AllMembersData};
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
 use Src\SubmitForm;
+use Src\CheckToken;
 
 class Event extends AllMembersData
 {
@@ -33,7 +33,7 @@ class Event extends AllMembersData
     public static function submitEvent()
     {
         try {
-
+            CheckToken::tokenCheck();
             $retunLastId = SubmitPostData::submitToOneTablenImage(
                 table: 'events',
                 minMaxData: [

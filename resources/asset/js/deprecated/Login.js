@@ -6,7 +6,7 @@ import {
   showPassword,
   convertFormData,
 } from '@modernman00/shared-js-lib';
-import { Login } from '../dataToCheck';
+import { Login } from '../components/dataToCheck';
 
 // block the setLoader div
 

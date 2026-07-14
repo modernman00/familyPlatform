@@ -113,46 +113,52 @@ const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
 // for events -birthday etc, the connection is the famCode 
 // so linked notification will be either where id matches or famcode matches
 
-axios.get(notificationURL)
-    .then(res => {
+if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
+    axios.get(notificationURL)
+        .then(res => {
 
-        // Extract the notifications from the response
-        const data = res.data.message;
+            // Extract the notifications from the response
+            const data = res.data.message;
 
-        if (data) {
+            if (data) {
 
 
-            if (data.length > 0) {
+                if (data.length > 0) {
 
-                // Display the count of notifications
-                const countBadge = id('notification_count');
-                countBadge.innerHTML = data.length;
-                countBadge.style.display = 'flex';
+                    // Display the count of notifications
+                    const countBadge = id('notification_count');
+                    if (countBadge) {
+                        countBadge.innerHTML = data.length;
+                        countBadge.style.display = 'flex';
+                    }
 
-                // Store the notification count in session storage
-                sessionStorage.setItem('notificationCount', data.length);
+                    // Store the notification count in session storage
+                    sessionStorage.setItem('notificationCount', data.length);
 
-                // Display each notification
-                data.forEach(element => {
-                    addToNotificationTab(element);
-                });
-                // Update the timing of notifications
-                const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
-                render(updateNotificationTiming);
-            } else {
-                const countBadge = id('notification_count');
-                countBadge.innerHTML = '0';
-                countBadge.style.display = 'none';
+                    // Display each notification
+                    data.forEach(element => {
+                        addToNotificationTab(element);
+                    });
+                    // Update the timing of notifications
+                    const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+                    render(updateNotificationTiming);
+                } else {
+                    const countBadge = id('notification_count');
+                    if (countBadge) {
+                        countBadge.innerHTML = '0';
+                        countBadge.style.display = 'none';
+                    }
+                }
+
             }
 
-        }
 
-
-    })
-    .catch(error => {
-        // Handle any errors that occur during the process
-        showError(error);
-    });
+        })
+        .catch(error => {
+            // Handle any errors that occur during the process
+            showError(error);
+        });
+}
 
 
 // delete a notification 

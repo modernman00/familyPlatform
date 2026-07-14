@@ -6,3 +6,5 @@ $router->map('GET', '/comment/newComment', 'App\controller\members\PostMessage@g
 
 
 $router->map('POST', '/postCommentProfile', 'App\controller\members\ProfilePage@postComment', 'profile_page_comment');
+
+$router->map('POST', '/api/reactions/add', 'App\controller\members\CommentReactionController@addReaction', 'add_reaction');

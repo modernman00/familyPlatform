@@ -10,8 +10,7 @@ const config = {
     },
 }
 
-const URL = process.env.MIX_APP_URL2
-    // https: //laravel.com/docs/5.4/mix#environment-variables
+const URL = '/';
 
 export const getAllData = async() => {
     try {

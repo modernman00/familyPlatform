@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use PDO;
 
 use Src\Exceptions\NotFoundException;
 use Src\Exceptions\ForbiddenException;
 use App\classes\{Db, PushNotificationClass, Pusher};
-use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin};
+use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin, CheckToken};
 
 class CommentReactionController
 {
@@ -23,6 +23,7 @@ class CommentReactionController
   public function addReaction()
   {
     try {
+      CheckToken::tokenCheck();
       $userId = $_SESSION['id'] ?? null;
       $input = json_decode(file_get_contents('php://input'), true);
 
@@ -38,7 +39,9 @@ class CommentReactionController
       if (!$commentNo || !$reaction) {
         throw new NotFoundException('Comment no or reaction not found');
       }
-      preventAbuseTogglin();
+      if (function_exists('preventAbuseTogglin')) {
+        preventAbuseTogglin();
+      }
 
       // 🧩 Check if user already reacted with the same emoji
       $existing = SelectFn::selectWhereBothIdentifiersMatch(
@@ -101,7 +104,7 @@ class CommentReactionController
         userId: $userId,
         message: "$whoReacted reacted to a comment"
       );
-      Pusher::broadcast('comments-channel', 'reaction-updated', $payload);
+      Pusher::broadcast('comments-channel', 'reacted-updated', $payload);
 
       msgSuccess(200, $payload);
     } catch (\Throwable $e) {

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Controller;
+namespace App\controller;
 use Src\Utility;
+use App\controller\BaseController;
 
 
 class About {
@@ -10,7 +11,6 @@ class About {
 
     public function index(): void
     {
-       view('about');
           try {
             BaseController::viewWithCsp('about');
         } catch (\Throwable $th) {
