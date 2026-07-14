@@ -10,13 +10,13 @@ use Src\{
     Db,
     CheckToken,
     Recaptcha,
-    LoginUtility,
-    Insert,
-    Update
+    LoginUtility
 };
 use App\model\RegisterTableData;
 
 use Exception;
+
+// testing
 
 class Register extends Db
 {
