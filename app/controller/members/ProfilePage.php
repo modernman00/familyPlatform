@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Controller\members;
@@ -41,7 +40,7 @@ use App\model\AllMembersData as DataAll;
 
 use Exception;
 
-class ProfilePage extends ProcessImg
+final class ProfilePage extends ProcessImg
 {
     /**
      * @var array|null

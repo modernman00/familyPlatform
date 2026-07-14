@@ -89,7 +89,7 @@
                        <input type="hidden" name='token' value={{ $token }}>
 
                        <div class="d-flex justify-content-center mb-2">
-                           <div class="g-recaptcha" data-sitekey="{{ $_ENV['RECAPTCHA_KEY'] }}" data-theme="light"></div>
+                           <div class="g-recaptcha" data-sitekey="{{ $_ENV['RECAPTCHA_SITE_KEY'] }}" data-theme="light"></div>
                        </div>
                    </form>
                </div>

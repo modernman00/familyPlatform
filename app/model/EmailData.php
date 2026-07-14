@@ -1,8 +1,7 @@
 <?php
-
 namespace App\model;
 
-class EmailData
+final class EmailData
 {
     private null|string $username;
     private null|string $password;

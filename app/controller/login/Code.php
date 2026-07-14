@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\login;
@@ -10,9 +9,9 @@ use Src\{
 
 use Src\functionality\PwdRecoveryCodeFunctionality;
 
-class Code
+final class Code
 {
-    public function show()
+    public function show(): void
     {
         try {
             PwdRecoveryCodeFunctionality::show('login/code');

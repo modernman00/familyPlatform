@@ -6,6 +6,7 @@
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 
+    errorBaseline="psalm-baseline.xml"
 >
     <projectFiles>
         <directory name="app" />
@@ -13,4 +14,9 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <PossiblyUnusedProperty errorLevel="suppress" />
+        <UnusedClass errorLevel="suppress" />
+        <UnusedMethod errorLevel="suppress" />
+    </issueHandlers>
 </psalm>

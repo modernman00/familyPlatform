@@ -1,5 +1,4 @@
 <?php
-
 namespace App\controller\members;
 
 use App\classes\{
@@ -20,7 +19,7 @@ use Src\Select;
 use Src\UpdateFn;
 
 
-class FamilyRequestController extends BaseController
+final class FamilyRequestController extends BaseController
 {
 
   public static function addToFamily(): void
@@ -184,7 +183,7 @@ class FamilyRequestController extends BaseController
       $requester = checkInput($req);
       $approver = checkInput($appr);
       $getDecision = checkInput($dec);
-      $requestCode = checkInput($reqCode);
+      checkInput($reqCode);
 
       // check if the dec is 50 or 10 (50 is approved and 10 is rejection)
 
@@ -307,13 +306,15 @@ class FamilyRequestController extends BaseController
 
   /**
    * Gets the friend request data sent to the user identified by the given ID
-   * 
+   *
    * @param int $id The ID of the user
    * /getFriendRequestById
-   * 
-   * @return array An array of the requester data
+   *
+   * @return array[]|string An array of the requester data
+   *
+   * @psalm-return ' No Requester Data'|list{0?: array,...}
    */
-  public static function getFriendRequestData()
+  public static function getFriendRequestData(): array|string
   {
     try {
       $id = parent::returnId();
@@ -344,7 +345,7 @@ class FamilyRequestController extends BaseController
 
 
 
-  public static function test($req, $res)
+  public static function test($req, $res): void
   {
     echo $req;
     echo BR;
@@ -353,7 +354,7 @@ class FamilyRequestController extends BaseController
     view('test');
   }
 
-  public static function testURL()
+  public static function testURL(): void
   {
 
     view('test');

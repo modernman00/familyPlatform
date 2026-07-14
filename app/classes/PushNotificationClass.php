@@ -7,7 +7,7 @@ use App\classes\Select;
 class PushNotificationClass extends VapidClass
 {
   // Function to send push notifications
-  public static function sendPushNotification($userId, $message, $url=null)
+  public static function sendPushNotification(array|string|null $userId, string $message, string|null $url=null): void
   {
     // You can use the web-push-php library here to send notifications
     $subscription = self::getUserPushSubscription($userId);  // Retrieve user's push subscription details

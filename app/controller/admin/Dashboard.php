@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\admin;
@@ -7,7 +6,7 @@ namespace App\controller\admin;
 use App\Controller\BaseController;
 use Src\Utility;
 
-class Dashboard extends BaseController
+final class Dashboard extends BaseController
 {
 
     public function index(): void

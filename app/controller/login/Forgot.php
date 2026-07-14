@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\login;
@@ -10,12 +9,12 @@ use Src\{
 
 use Src\functionality\PasswordRecoveryService;
 
-class Forgot
+final class Forgot
 {
   public string $table = 'login';
   public string $email;
 
-  public function show()
+  public function show(): void
   {
     try {
       $verify = $_GET['verify'] ?? null;

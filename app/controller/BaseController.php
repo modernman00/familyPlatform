@@ -28,12 +28,12 @@ class BaseController
         $famCode = $stmt->fetchColumn();
         $_SESSION['famCode'] = $famCode;
     }
-    public static function viewWithCsp($view, $data = [])
+    public static function viewWithCsp(string $view, array $data = []): void
     {
         Utility::view($view, $data);
     }
 
-    public static function membersData()
+    public static function membersData(): array
     {
         $id = checkInput($_SESSION['id']);
         $setData = new SingleCustomerData;
@@ -50,49 +50,6 @@ class BaseController
         ]);
         $memberData['id'] = $id;
         return self::formatPerson($memberData);
-    }
-
-    public static function fullMemberData($id): array
-    {
-        $main = self::findMemberById($id);
-        // Fetch other family members
-        $spouse = self::fetchRelationsData($id, 'otherFamily', 'spouse')[0];
-        $father = self::fetchRelationsData($id, 'otherFamily', 'father')[0];
-        $mother = self::fetchRelationsData($id, 'otherFamily', 'mother')[0];
-        $siblings = self::fetchRelationsData($id, 'sibling', 'sibling');
-        $children = self::fetchRelationsData($id, 'children', 'children');
-
-        // Fetch sibling children
-
-
-        if ($spouse !== null) {
-            $main['spouse'] = $spouse;
-        }
-
-        if ($children !== null) {
-            $main['children'] = $children;
-        }
-
-
-        if ($father !== null) {
-            $main['father'] = $father;
-        }
-
-        if ($mother !== null) {
-            $main['mother'] = $mother;
-        }
-
-        if ($siblings !== null) {
-            $main['siblings'] = $siblings;
-            $siblingChildren = self::getSiblingChildren($siblings);
-
-            if ($siblingChildren !== null) {
-                $main['siblingChildren'] = $siblingChildren;
-            }
-        }
-
-        return $main;
-
     }
 
     private static function fetchRelationsData(string $id, string $table, string $who): ?array
@@ -176,7 +133,10 @@ class BaseController
 
 
 
-    public static function findMemberById($id): array
+    /**
+     * @param array|null|string $id
+     */
+    public static function findMemberById(array|string|null $id): array
     {
         $setData = new SingleCustomerData;
         $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work'];
@@ -189,7 +149,7 @@ class BaseController
         return self::formatPerson($memberData);
     }
 
-    public static function returnId()
+    public static function returnId(): array|string|null
     {
         return checkInput($_SESSION['id']);
     }
@@ -346,63 +306,6 @@ class BaseController
         return false;
     }
 
-
-    /**
-     * Walk through any nested family array, collect people with proper images.
-     * Excludes $excludeId, and returns the first $limit matches as a flat array.
-     */
-    public static function collectPeopleWithImages(array $data, string $excludeId, int $limit = 4): array
-    {
-        $found = [];
-        $seen = [];
-
-        $walk = function ($node) use (&$walk, &$found, &$seen, $excludeId, $limit) {
-            if (count($found) >= $limit)
-                return;
-            if (!is_array($node))
-                return;
-
-            $looksLikePerson =
-                isset($node['id']) ||
-                isset($node['fullName']) ||
-                array_key_exists('img', $node) ||
-                array_key_exists('profilePics', $node) ||
-                array_key_exists('profilepics', $node);
-
-            if ($looksLikePerson) {
-                $id = $node['id'] ?? null;
-
-                // exclude you
-                if ($id !== null && $id === $excludeId) {
-                    // do nothing
-                } else {
-                    // de-dupe by id if present
-                    if ($id !== null && isset($seen[$id])) {
-                        // already added
-                    } else {
-                        if (self::hasProperImage($node)) {
-                            $found[] = $node;
-                            if ($id !== null)
-                                $seen[$id] = true;
-                            if (count($found) >= $limit)
-                                return;
-                        }
-                    }
-                }
-            }
-
-            foreach ($node as $v) {
-                if (is_array($v)) {
-                    $walk($v);
-                    if (count($found) >= $limit)
-                        return;
-                }
-            }
-        };
-
-        $walk($data);
-        return $found; // always a flat list
-    }
 
 
 

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Controller\members;
@@ -13,7 +12,7 @@ use Src\{
 use App\model\AllMembersData;
 use Exception;
 
-class AllMembersController extends AllMembersData
+final class AllMembersController extends AllMembersData
 {
     public function index(): void
     {

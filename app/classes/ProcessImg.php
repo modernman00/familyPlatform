@@ -11,7 +11,7 @@ class ProcessImg extends AllFunctionalities
 {
     public $profileImg;
 
-    public function processProfileImage()
+    public function processProfileImage(): void
     {
         try {
             // if (!$_FILES) {
@@ -67,8 +67,7 @@ class ProcessImg extends AllFunctionalities
     /**
      * picsSource will either be post or profile or even avatar. it is from the public/img Directory
      */
-
-    public static function showPostImg(string $picsSource)
+    public static function showPostImg(string $picsSource): string
     {
         //$imgName = checkInput($_GET['pics']);
          $imgName = $_GET['pics'];

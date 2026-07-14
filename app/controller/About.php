@@ -1,11 +1,10 @@
 <?php
-
 namespace App\controller;
 use Src\Utility;
 use App\controller\BaseController;
 
 
-class About {
+final class About {
 
     //private $var = "delta";
 

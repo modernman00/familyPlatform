@@ -8,7 +8,7 @@ use App\model\Post;
 use App\model\AllMembersData as DataAll;
 use Src\Exceptions\NotFoundException;
 
-class ProfilepageService
+final class ProfilepageService
 {
     public function getProfileData($userId): array
     {

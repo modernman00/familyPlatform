@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller;
@@ -11,7 +10,7 @@ use App\classes\{
 };
 
 
-class TestClass extends Db
+final class TestClass extends Db
 {
 
     public static function Organogram() {

@@ -1,12 +1,11 @@
 <?php
-
 namespace App\controller;
 use Src\ToSendEmail;
 
 use Exception;
 
 
-class General
+final class General
 {
 
     public function sendTextToMember(): void

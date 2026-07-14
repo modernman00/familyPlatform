@@ -1,12 +1,11 @@
 <?php
-
 namespace App\controller;
 
 // use App\classes\Db;
 
 use Src\AlterTable;
 
-class AddCol
+final class AddCol
 {
 
     public function addCol(): void

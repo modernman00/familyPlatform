@@ -1,6 +1,4 @@
 <?php
-
-
 declare(strict_types=1);
 
 namespace App\controller\members;
@@ -10,7 +8,7 @@ use App\classes\{Db, AllFunctionalities, Pusher};
 use App\model\Post;
 
 
-class PostLikeController extends Db
+final class PostLikeController extends Db
 {
 
     /**
@@ -39,14 +37,12 @@ class PostLikeController extends Db
 
     /**
      * Broadcasts the like count for a specific post to all clients.
-     * 
+     *
      * @param int $postId
      * @param int $likeCount
      * @param string $likeCounterId
      */
-
-  
-    public static function getNewLikesPusher()
+    public static function getNewLikesPusher(): void
     {
         try {
             // Fetch updated like counts from the database

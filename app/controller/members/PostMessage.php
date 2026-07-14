@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\members;
@@ -16,17 +15,17 @@ use Src\DeleteFn;
 use Src\Utility;
 use Src\functionality\SignIn;
 
-class PostMessage
+final class PostMessage
 {
 
     /**
      * Index
-     * 
+     *
      * Gets all the post on the profile page
-     * 
+     *
      * Sets the count of all the posts in the session variable
-     * 
-
+     *
+     * @return void
      */
     public static function index()
     {
@@ -82,7 +81,6 @@ class PostMessage
                 $comments = AllMembersData::commentProfilePicByPostNo($post['post_no']);
 
                 if (!$comments) {
-                    $comments = [];
                     continue; // No comments for this post, move to the next post
                 }
 
@@ -128,7 +126,7 @@ class PostMessage
     }
 
     // update post and comment as published 
-    public static function updatePostAsPublished($postNo)
+    public static function updatePostAsPublished($postNo): void
     {
         try {
             Post::updatePostByStatusAsPublished($postNo);
@@ -138,7 +136,7 @@ class PostMessage
         }
     }
 
-    public static function updateCommentAsPublished($commentNo)
+    public static function updateCommentAsPublished($commentNo): void
     {
         try {
             Post::updateCommentByStatusAsPublished($commentNo);
@@ -151,6 +149,11 @@ class PostMessage
 
 
     // build for Pusher library
+    /**
+     * @return array|null
+     *
+     * @psalm-return list{0?: mixed,...}|null
+     */
     private static function fetchNewMsg(callable $fetchFunction, ?array $params = null)
     {
         try {
@@ -225,7 +228,7 @@ class PostMessage
 
 
     // delete comment
-    public static function deleteComment($commentNo)
+    public static function deleteComment($commentNo): void
     {
         try {
             $userId = $_SESSION['id'];
@@ -315,7 +318,7 @@ class PostMessage
     }
 
     // Helper function to construct post URL
-    private static function buildPostUrl($postNo): string
+    private static function buildPostUrl(int|string $postNo): string
     {
         $getUrl = getenv('MIX_APP_URL');
         return "$getUrl/profilePage?#post$postNo";
@@ -378,7 +381,7 @@ class PostMessage
     }
 
     // HELPER FUNCTION TO GET THE PROFILE PICS FOR COMMENTS AND POST 
-    private static function getProfilePicsForPostAndComment($postId): string|null
+    private static function getProfilePicsForPostAndComment(string $postId): string|null
     {
         $result = Post::getProfilePics($postId);
         return $result[0]["img"];

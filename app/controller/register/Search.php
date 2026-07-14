@@ -1,11 +1,10 @@
 <?php
-
 namespace App\controller\register;
 
 use App\Controller\Base;
 use Src\Select;
 
-class Search extends Base
+final class Search extends Base
 {
     public function index(): void
     {
@@ -34,7 +33,10 @@ class Search extends Base
         }
     }
 
-    private function checkBox($subject): string
+    /**
+     * @param array|null|string $subject
+     */
+    private function checkBox(array|string|null $subject): string
     {
         return "<div class='form-check form-check-inline'>
             <input class='form-check-input' type='radio' id='{$subject}Yes' name = '{$subject}Checkbox' value=Yes'>

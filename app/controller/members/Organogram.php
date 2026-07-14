@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\members;
@@ -12,7 +11,7 @@ use Src\Exceptions\NotFoundException;
 use Src\functionality\SignIn;
 
 
-class Organogram extends SingleCustomerData
+final class Organogram extends SingleCustomerData
 {
     /**
      * Fetch full family data for the main person
@@ -65,7 +64,12 @@ class Organogram extends SingleCustomerData
         }
     }
 
-    private function fetchRelationsData(string $id, string $table, string $who)
+    /**
+     * @return array[]|null
+     *
+     * @psalm-return list{0?: array,...}|null
+     */
+    private function fetchRelationsData(string $id, string $table, string $who): array|null
     {
         $data = [];
         $otherFamily = SelectFn::selectAllRowsById($table, 'id', $id) ?? [];

@@ -1,8 +1,10 @@
-<?php 
-
+<?php
 namespace App\controller;
 
-class ServeImgController {
+final class ServeImgController {
+    /**
+     * @return never
+     */
     public function ProfileDir($imgName) {
         $filename = $imgName;
 
@@ -46,6 +48,9 @@ class ServeImgController {
     }
 
 
+    /**
+     * @return never
+     */
     public function PostDir($imgName) {
         $filename = $imgName;
 

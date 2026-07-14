@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\members;
@@ -18,7 +17,7 @@ use Src\LoginUtility;
 use Src\SubmitForm;
 use Src\CheckToken;
 
-class Event extends AllMembersData
+final class Event extends AllMembersData
 {
     /**
      * @throws \Throwable
@@ -56,12 +55,12 @@ class Event extends AllMembersData
         }
     }
 
-    private static function generateFamCode(): string
+    private static function generateFamCode(): array|string|null
     {
         return checkInput($_SESSION['famCode']);
     }
 
-    private static function getSenderName(): string
+    private static function getSenderName(): array|string|null
     {
         return checkInput($_SESSION['fullName']);
     }
@@ -224,7 +223,7 @@ class Event extends AllMembersData
                 // send other event reminders
                 foreach ($allEventData as $eventData) {
                     // Get the famCode of the event
-                    $eventFamCode = $eventData['famCode'];
+                    $eventData['famCode'];
 
                     $membersToNotify = self::filterMemberByFamCode();
 
@@ -243,7 +242,7 @@ class Event extends AllMembersData
         }
     }
 
-    private static function sendBulkNotification($data, $subject, $email)
+    private static function sendBulkNotification(array $data, string $subject, array $email): void
     {
 
         // $allEmails = getAllEmails();
@@ -255,7 +254,7 @@ class Event extends AllMembersData
         // }
 
         ob_start();
-        $emailPage = view(path: 'msg/events/event', data: compact('data'));
+        view(path: 'msg/events/event', data: compact('data'));
         $emailContent = ob_get_contents();
         ob_end_clean();
 
@@ -263,10 +262,13 @@ class Event extends AllMembersData
         sendBulkEmail(emailAddresses: $email, subject: $subject, message: $emailContent);
     }
     /**
-     * this function extends the event date on the due date 
+     * this function extends the event date on the due date
+     *
+     * @param (mixed|string)[] $data
+     *
+     * @psalm-param array{emailHTMLContent: string,...} $data
      */
-
-    private static function extendEventByFrequency($data)
+    private static function extendEventByFrequency(array $data)
     {
 
         if ($data['eventFrequency']) {
@@ -291,7 +293,10 @@ class Event extends AllMembersData
 
     // this is a sub function to extendEventByFrequency
 
-    private static function processEventUpdate($dateEvent, string $extendBy, string $no)
+    /**
+     * @param array|null|string $dateEvent
+     */
+    private static function processEventUpdate(array|string|null $dateEvent, string $extendBy, string $no)
     {
         $newEventDate = modifyDate($dateEvent, $extendBy, 'date_add')['date'];
 

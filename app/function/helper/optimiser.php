@@ -1,6 +1,6 @@
 <?php 
 
-function printMemory ()
+function printMemory (): void
 {
     /** Currently used memory */
     $mem_usage = memory_get_usage(true);

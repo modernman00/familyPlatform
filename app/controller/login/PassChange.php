@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\login;
@@ -11,7 +10,7 @@ use Src\functionality\{
 };
 
 
-class PassChange extends BaseController
+final class PassChange extends BaseController
 {
 
     public function show(): void

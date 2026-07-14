@@ -238,12 +238,7 @@
                             ],
                             'checkbox' => 'By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>',
                             'token'=> 'token',
-                            'Submit form'=> [
-                                'button_captcha',
-                                'js'=> 'processForm',
-                                'key'=>getenv('RECAPTCHA_KEY'),
-                                'action'=> 'register'
-                            ],
+                            'Submit form'=> 'button',
                         ];
 
                         $form = new \Src\BuildFormBulma($formArray);

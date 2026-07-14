@@ -1,14 +1,18 @@
-<?php 
-
+<?php
 declare(strict_types=1);
 
 namespace App\model;
 
-class RegisterTableData {
+final class RegisterTableData {
 
 
 
-  public static function createRegisterTable(array $cleanPostData) {
+  /**
+   * @return (int|mixed|string)[][]
+   *
+   * @psalm-return array{personal: array{firstName: mixed, lastName: mixed, famCode: mixed, kids: mixed, gender: 'Male'|mixed, siblings: mixed, day: mixed, month: mixed, year: mixed, id: mixed}, work: array{employmentStatus: mixed, occupation: mixed, id: mixed}, contact: array{email: mixed, country: mixed, mobile: mixed, id: mixed}, account: array{email: mixed, password: mixed, status: 'new', type: 'member', id: mixed}, otherFamily: array{spouse_name: mixed, spouse_mobile: mixed, spouse_email: mixed, father_name: mixed, father_mobile: mixed, father_email: mixed, mother_name: mixed, mother_mobile: mixed, mother_email: mixed, mother_maiden: mixed, otherFamCode: mixed, id: mixed}, post: array{fullName: mixed, postMessage: 'Hey, welcome to your page', profileImg: 'avatarF.png'|'avatarM.png', id: mixed}, comment: array{fullName: mixed, comment: 'Your comment will show here', profileImg: 'avatarF.png'|'avatarM.png', post_no: 1000, id: mixed}, profilePics: array{img: 'avatarF.png'|'avatarM.png', id: mixed}, events: array{eventName: string, eventDate: mixed, eventType: 'Birthday', eventDescription: string, eventFrequency: 'Annually', eventGroup: 'Global', eventCode: mixed, id: mixed}}
+   */
+  public static function createRegisterTable(array $cleanPostData): array {
         // Access the cleanPostData directly, as it's promoted to a class property
         $profileAvatar = $cleanPostData['gender'] === "Male" ? "avatarM.png" : "avatarF.png";
         return [

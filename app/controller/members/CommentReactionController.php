@@ -1,5 +1,4 @@
 <?php
-
 namespace App\controller\members;
 
 use PDO;
@@ -9,115 +8,19 @@ use Src\Exceptions\ForbiddenException;
 use App\classes\{Db, PushNotificationClass, Pusher};
 use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin, CheckToken};
 
-class CommentReactionController
+final class CommentReactionController
 {
-
-  /**
-   * Expected JSON input:
-   * {
-   *   "comment_no": int,
-   *   "reaction": string, // emoji or shortcode
-   *   "label": string     // semantic label like 'love', 'sad'
-   * }
-   */
-  public function addReaction()
-  {
-    try {
-      CheckToken::tokenCheck();
-      $userId = $_SESSION['id'] ?? null;
-      $input = json_decode(file_get_contents('php://input'), true);
-
-      $commentNo = $input['comment_no'] ?? null;
-      $reaction = $input['reaction'] ?? null;
-      $label = $input['label'] ?? null;
-
-
-      if (!$userId) {
-        throw new ForbiddenException("User not authenticated");
-      }
-
-      if (!$commentNo || !$reaction) {
-        throw new NotFoundException('Comment no or reaction not found');
-      }
-      if (function_exists('preventAbuseTogglin')) {
-        preventAbuseTogglin();
-      }
-
-      // 🧩 Check if user already reacted with the same emoji
-      $existing = SelectFn::selectWhereBothIdentifiersMatch(
-        table: 'comment_reactions',
-        identifier1: 'comment_no',
-        identifier2: 'id',
-        identifier1Answer: $commentNo,
-        identifier2Answer: $userId
-      );
-
-      if ($existing && $existing[0]['label'] === $label) {
-        // 👀 Avoid redundant updates (same emoji again)
-        msgSuccess(200, 'Reaction unchanged');
-        return;
-      }
-
-      // 🧠 will only update if the emoji is differnt
-      if ($existing && $existing[0]['label'] !== $label) {
-
-
-
-        UpdateFn::makeUpdateFn(
-          table: 'comment_reactions',
-          identifier: ['comment_no', 'id'],
-          data: [
-            'reaction' => $reaction,
-            'label' => $label,
-            'id' => $userId,
-            'comment_no' => $commentNo
-          ],
-          logic: 'AND'
-        );
-      } else {
-        SubmitForm::submitForm(
-          table: 'comment_reactions',
-          fields: [
-            'comment_no' => $commentNo,
-            'id' => $userId,
-            'reaction' => $reaction,
-            'label' => $label
-          ]
-        );
-      }
-
-      // 🧮 Count total reactions and who reacted
-      $countReaction = self::countReactions($commentNo);
-      $whoReacted = self::getReactions($commentNo);
-
-      // 🟢 Pusher broadcast payload
-      $payload = [
-        'commentNo' => $commentNo,
-        'reaction' => $reaction,
-        'label' => $label,
-        'countReaction' => $countReaction,
-        'whoReacted' => $whoReacted
-      ];
-
-      // 🚀 Send push notification
-      PushNotificationClass::sendPushNotification(
-        userId: $userId,
-        message: "$whoReacted reacted to a comment"
-      );
-      Pusher::broadcast('comments-channel', 'reacted-updated', $payload);
-
-      msgSuccess(200, $payload);
-    } catch (\Throwable $e) {
-      \showError($e);
-    }
-  }
 
   /**
    * Count the total number of reactions for a given comment
    *
    * @param int $commentNo The comment number to count reactions for
-   * @return array An associative array with the count of each reaction type and the comment number
+   *
+   * @return int[]|null An associative array with the count of each reaction type and the comment number
+   *
    * @throws \Throwable If an error occurs while executing the query
+   *
+   * @psalm-return array{totalReactions: int<min, max>,...}|null
    */
   private static function countReactions($commentNo)
   {
@@ -191,7 +94,12 @@ class CommentReactionController
   }
 
   // get who have reacted to a comment
-  private static function getReactions($commentNo)
+  /**
+   * @param int|string $commentNo
+   *
+   * @return array|bool|null
+   */
+  private static function getReactions(string|int $commentNo)
   {
     try {
       // Now fetch who reacted (limit for tooltip)

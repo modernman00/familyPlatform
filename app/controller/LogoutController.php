@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller;
@@ -10,7 +9,7 @@ use Monolog\Logger;
 use Src\CorsHandler;
 use Src\LoggedOut;
 
-class LogoutController extends BaseController
+final class LogoutController extends BaseController
 {
     public function signout(array $redirect = []): void
     {

@@ -16,4 +16,4 @@ define('BASE_PATH', realpath(__DIR__ . '/../../'));
 $dotEnv = Dotenv::createUnsafeImmutable(BASE_PATH);
 $dotEnv->load();
 
-$logger = LoggerFactory::createWithMailer();
+LoggerFactory::createWithMailer();

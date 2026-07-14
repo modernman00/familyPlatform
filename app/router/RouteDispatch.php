@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\router;
@@ -10,12 +9,15 @@ use AltoRouter;
 use Src\Exceptions\HttpException;
 
 
-class RouteDispatch
+final class RouteDispatch
 {
     protected $match;
     protected $controller;
     protected $method;
 
+    /**
+     * @return void
+     */
     public function dispatch(AltoRouter $router)
 {
     try {

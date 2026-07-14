@@ -1,5 +1,4 @@
-<?php 
-
+<?php
 namespace App\controller\members;
 
 use App\controller\BaseController;
@@ -7,7 +6,7 @@ use Src\{Utility, LoginUtility, UpdateFn, UpdateData };
 
 
 
-class SettingController extends BaseController
+final class SettingController extends BaseController
 {
     public function index(): void
     {
@@ -27,6 +26,9 @@ class SettingController extends BaseController
     }
 
 
+    /**
+     * @return void
+     */
     public function post()
     {
         // This is a protected route — enforce auth here explicitly

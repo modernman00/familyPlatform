@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller;
@@ -12,11 +11,11 @@ use App\model\AllMembersData as Members;
 
 
 // class Testphp extends Select implements Iterator
-class Testphp extends Select
+final class Testphp extends Select
 {
     public $time = 90;
 
-    public static function showWord()
+    public static function showWord(): void
     {
         echo "it is working";
     }
@@ -32,14 +31,14 @@ class Testphp extends Select
             echo json_encode($results);
     }
 
-    public function index()
+    public function index(): void
     {
 
         $time = null;
         $sch = null;
         $_SESSION['ID'] = "ID";
 
-        $check = $time ??= $sch ??= $_SESSION['ID'];
+        $check = $_SESSION['ID'];
 
         echo $check;
         //         // php7
@@ -49,7 +48,6 @@ class Testphp extends Select
         echo $number ??= "Value not getting it";
 
         $number = [1, 2, 3, 3, 4, 5, 6];
-        $num = [10, 20, 30, 30, 40, 50, 60];
         $name = ['olawale', 'james', 'emily'];
         echo BR;
         var_dump($number2 ??= "fhhfhf");
@@ -121,14 +119,14 @@ class Testphp extends Select
         //         echo foo2($ten, $olp);
 
 
-        function getInput(int | float ...$number)
+        function getInput(int | float ...$number): int|float
         {
             return array_sum($number);
         }
         echo BR;
         echo getInput(12, 23, 44, 45) . BR;
 
-        function getInput2(...$arg)
+        function getInput2(...$arg): void
         {
             printArr($arg);
         }
@@ -241,9 +239,14 @@ class Testphp extends Select
 
     // GENERATOR 
 
-    public function getGenerator()
+    public function getGenerator(): void
     {
-        function getRange($max = 10)
+        /**
+         * @return int[]
+         *
+         * @psalm-return list{0?: int<1, max>,...}
+         */
+        function getRange($max = 10): array
         {
             $array = [];
 
@@ -259,9 +262,12 @@ class Testphp extends Select
         }
     }
 
-    public function getGenerator2()
+    public function getGenerator2(): void
     {
-        function getRange2($max = 10)
+        /**
+         * @psalm-return \Generator<int, int<1, max>, mixed, void>
+         */
+        function getRange2($max = 10): \Generator
         {
             for ($i = 1; $i < $max; $i++) {
                 yield $i;
@@ -273,9 +279,12 @@ class Testphp extends Select
         }
     }
     // generator as a key value pair
-    public function getGenerator3()
+    public function getGenerator3(): void
     {
-        function getRange3($max = 10)
+        /**
+         * @psalm-return \Generator<int<1, max>, int, mixed, void>
+         */
+        function getRange3($max = 10): \Generator
         {
             for ($i = 1; $i < $max; $i++) {
                 $value = $i * mt_rand();
@@ -289,8 +298,13 @@ class Testphp extends Select
     }
     // sending values to generator 
 
-    public function getGenerator4()
+    public function getGenerator4(): void
     {
+        /**
+         * @return \Generator
+         *
+         * @psalm-return \Generator<int, int<1, max>, mixed, void>
+         */
         function getRange4($max = 10)
         {
             for ($i = 1; $i < $max; $i++) {
@@ -303,39 +317,39 @@ class Testphp extends Select
         }
     }
 
-    function printIterable(iterable $myIterable)
+    function printIterable(iterable $myIterable): void
     {
         foreach ($myIterable as $item) {
             echo $item;
         }
     }
 
-    function current()
+    function current(): string
     {
         $arr = ["a", "b", "c", "d"];
         $arrayValue = array_values($arr);
         return $arrayValue[0];
     }
 
-    public function key()
+    public function key(): int
     {
         $pointer = 0;
         return $pointer;
     }
 
-    public function next()
+    public function next(): int
     {
         $pointer = 0;
         return $pointer++;
     }
 
-    public function rewind()
+    public function rewind(): int
     {
 
         return $pointer = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         // count() indicates how many items are in the list
         $pointer = 0;

@@ -6,7 +6,7 @@ use Pusher\Pusher as PusherNotification;
 
 class Pusher  {
      
-    public static function pusher()
+    public static function pusher(): PusherNotification
     {
         $pusher = new PusherNotification(
             getenv('MIX_PUSHER_APP_KEY'),
@@ -20,7 +20,7 @@ class Pusher  {
         return $pusher;
     }
 
-    public static function broadcast($theChannel, $theEvent, $theData)
+    public static function broadcast(string $theChannel, string $theEvent, array $theData): void
     {
         $pusher = self::pusher();
         $pusher->trigger($theChannel, $theEvent, $theData);

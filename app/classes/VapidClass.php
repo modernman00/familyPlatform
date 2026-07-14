@@ -23,42 +23,16 @@ class VapidClass
     }
 
     // Function to send push notifications
-    public function sendPushNotifications($subscriptionData, $payload, $auth)
-    {
-        $subscription = Subscription::create([
-            'endpoint' => $subscriptionData['endpoint'],
-            'keys' => [
-                'p256dh' => $subscriptionData['keys']['p256dh'],
-                'auth' => $subscriptionData['keys']['auth'],
-            ],
-        ]);
-
-        // Create a new WebPush instance
-        $webPush = new WebPush($auth);
-
-        // Send the push notification
-        $webPush->sendNotification(
-            $subscription,
-            $payload // The notification payload (JSON string)
-        );
 
 
-        // Handle any errors or confirmations
-        foreach ($webPush->flush() as $report) {
-            if ($report->isSuccess()) {
-                echo "Notification sent successfully!";
-            } else {
-                echo "Failed to send notification: " . $report->getReason();
-            }
-        }
-
-
-
-
-
-    }
-
-    public static function urlBase64ToUint8Array($base64String) 
+    /**
+     * @param false|string $base64String
+     *
+     * @return int[]
+     *
+     * @psalm-return list{0?: int<0, 255>,...}
+     */
+    public static function urlBase64ToUint8Array(string|false $base64String): array 
     {
         $padding = str_repeat('=', (4 - strlen($base64String) % 4) % 4);
         $base64 = strtr($base64String . $padding, '-_', '+/');

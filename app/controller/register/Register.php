@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\register;
@@ -18,7 +17,7 @@ use Exception;
 
 // testing
 
-class Register extends Db
+final class Register extends Db
 {
 
     public function index(): void
@@ -40,7 +39,7 @@ class Register extends Db
         }
     }
 
-    public function createFamilyCode()
+    public function createFamilyCode(): void
     {
         try {
 

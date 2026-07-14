@@ -1,11 +1,10 @@
 <?php
-
 namespace App\controller;
 
 use App\model\Post;
 use Src\{Utility, SelectFn};
 
-class Index 
+final class Index 
 {
     public function index(): void
     {
@@ -46,7 +45,7 @@ class Index
         }
     }
 
-    public static function getEmails()
+    public static function getEmails(): void
     {
         $result = SelectFn::selectColumnByIdentifier('account', 'email', 'status', 'approved');
 
@@ -54,14 +53,14 @@ class Index
 
     }
 
-    public static function checking()
+    public static function checking(): void
     {
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
 
-        $maxDuration = 300; // 5 minutes
-        $startTime = time();
+         // 5 minutes
+        time();
 
         while (true) {
             $getUnpublishedPost = Post::getUnpublishedPost();

@@ -30,7 +30,10 @@ class AllMembersData extends InnerJoin
     //     return $memberData;
     // }
 
-    public function getAllMembers($id): array
+    /**
+     * @param array|null|string $id
+     */
+    public function getAllMembers(array|string|null $id): array
     {
         try {
             $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.fatherName, ofm.motherName, ofm.spouseName, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
@@ -58,29 +61,6 @@ class AllMembersData extends InnerJoin
 
 
     // this code picks all the famcode and those who accepted the request. 
-
-    public static function postProfilePicByFamCode($famCode, $id): array
-    {
-        try {
-            $query = "SELECT post.*, profilePics.img, profilePics.id, rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
-              FROM post
-              INNER JOIN profilePics ON post.id = profilePics.id
-              LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = :id
-                  ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode = :famCode || post.id = rm.approver_id)
-            ORDER BY post.date_created DESC";
-            $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode, 'id' => $id]);
-
-            return $result->fetchAll();
-        } catch (PDOException $e) {
-            showError($e);
-            return [];
-        }
-    }
 
     public static function getUnpublishedPostByFamCode($famCode, $id): array
     {
@@ -113,9 +93,11 @@ class AllMembersData extends InnerJoin
      * returns an empty array.
      *
      * @param string $famCode The family code used to filter members.
+     * @param array|null|string $id
+     *
      * @return array An array containing the email, family code, first name, last name, and ID of each member.
      */
-    public static function AllMembersEmailByFamCode($famCode, $id): array
+    public static function AllMembersEmailByFamCode($famCode, array|string|null $id): array
     {
         try {
             $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id 
@@ -161,22 +143,7 @@ class AllMembersData extends InnerJoin
         return $memberData;
     }
 
-    public static function getAllMembersNoPicsStatic(): array
-    {
-        $table = ['personal', "contact", "profilePics", 'otherFamily'];
-        $firstTable = array_shift($table);
-        $memberData = parent::joinAll4(firstTable: $firstTable, para: 'id', table: $table, orderBy: 'date_created');
-
-        if (!$memberData) {
-
-            throw new Exception(self::ERR_MSG, 400);
-        }
-
-
-        return $memberData;
-    }
-
-    public function getAllMembersById($id)
+    public function getAllMembersById(array|string|null $id): array|bool
     {
 
         $table = ['personal', 'otherFamily', 'profilePics', 'post',  'contact'];
@@ -210,7 +177,10 @@ class AllMembersData extends InnerJoin
     }
 
     // show information of events within 7 days , 1 days and on the current date
-    public static function getEventDataByNo($eventNo): array
+    /**
+     * @param array|null|string $eventNo
+     */
+    public static function getEventDataByNo(array|string|null $eventNo): array
     {
         try {
             $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency,  events.eventDescription, personal.firstName, personal.lastName, personal.famCode
@@ -234,7 +204,10 @@ class AllMembersData extends InnerJoin
         }
     }
 
-    public static function getEventDataByFamCode($famCode): array
+    /**
+     * @param array|null|string $famCode
+     */
+    public static function getEventDataByFamCode(array|string|null $famCode): array
     {
         try {
             $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
@@ -283,7 +256,14 @@ class AllMembersData extends InnerJoin
 
 
 
-    public static function getFriendRequestData($id, $status)
+    /**
+     * @psalm-param 'Request sent' $status
+     *
+     * @return array[]|null|string
+     *
+     * @psalm-return ' No Requester Data'|list{0?: array,...}|null
+     */
+    public static function getFriendRequestData(string $id, string $status)
     {
         try {
             $result = [];
@@ -306,51 +286,7 @@ class AllMembersData extends InnerJoin
         }
     }
 
-    public static function getMembers($table, $orderBy): array
-    {
-        $firstTable = array_shift($table);
-        $memberData = parent::joinAll2($firstTable, 'id', $table, $orderBy);
-        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
-    }
-
-    public static function getBirthdayMonth()
-    {
-        try {
-
-            $select = Select::formAndMatchQuery(selection: "SELECT_COL_DYNAMICALLY", colArray: ['day', 'month', 'firstName'], table: "personal");
-            return Select::selectFn2(query: $select);
-        } catch (\Throwable $th) {
-            showError($th);
-        }
-    }
-
     // Just get the member's name
-
-    public static function getMemberName($id)
-    {
-
-        $column = ['firstName', 'lastName', 'famCode'];
-
-        $query = Select::formAndMatchQuery(
-            selection: "SELECT_COL_DYNAMICALLY_ID",
-            colArray: $column,
-            table: "personal",
-            identifier1: "id"
-        );
-
-        $result = Select::selectFn2($query, [$id]);
-
-        if (isset($result[0]['firstName'], $result[0]['lastName'])) {
-            return [
-                'fName' => $result[0]['firstName'],
-                'lName' => $result[0]['lastName'],
-                'famCode' => $result[0]['famCode']
-            ];
-        } else {
-            // Handle the case where the query didn't return the expected result.
-            msgException(401, "Member not found");
-        }
-    }
 
     public static function getFamCode($id): array
     {

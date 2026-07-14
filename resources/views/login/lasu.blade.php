@@ -30,7 +30,7 @@
                             'Login' => [
                                 'button_captcha',
                                 'js' => 'LoginSubmission',
-                                'key' => getenv('RECAPTCHA_KEY'),
+                                'key' => getenv('RECAPTCHA_SITE_KEY'),
                                 'action' => 'login'
                             ],
                             'showPassword' => 'showPassword',

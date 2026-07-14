@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\model;
@@ -9,7 +8,7 @@ use App\classes\InnerJoin;
 use App\classes\Update;
 
 
-class Post extends Select
+final class Post extends Select
 {
 
     static function commentLink2Post($postNo): array|int|string
@@ -18,7 +17,10 @@ class Post extends Select
         return parent::selectFn2(query: $query, bind: [$postNo]);
     }
 
-    public static function commentLink2Img($imgPath): array|int|string
+    /**
+     * @param array|null|string $imgPath
+     */
+    public static function commentLink2Img(array|string|null $imgPath): array|int|string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "picture");
         return parent::selectFn2(query: $query, bind: [$imgPath]);
@@ -79,7 +81,10 @@ class Post extends Select
         return InnerJoin::joinAll2(firstTable: 'profilePics', para: 'id', table: ['comment'], orderBy: 'comment.date_created');
     }
 
-    public static function getProfilePicsById($id): string
+    /**
+     * @param array|null|string $id
+     */
+    public static function getProfilePicsById(array|string|null $id): string
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_COL_ID", table: 'profilePics', column: 'img', identifier1: "id");
         $result =  parent::selectFn2(query: $query, bind: [$id]);
@@ -147,7 +152,10 @@ class Post extends Select
         return $result;
     }
 
-    static function updateCommentByStatusAsPublished($commentNo): bool
+    /**
+     * @param int|null|string $commentNo
+     */
+    static function updateCommentByStatusAsPublished(int|string|null $commentNo): bool
     {
         $newUpdate = new Update('comment');
         $result =  $newUpdate->updateTable(column: 'comment_status', columnAnswer: "published", identifier: 'comment_no', identifierAnswer: $commentNo);

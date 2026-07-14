@@ -1,5 +1,4 @@
 <?php
-
 namespace App\controller;
 
 use Src\{Select, Insert};
@@ -7,10 +6,13 @@ use Src\Exceptions\NotFoundException;
 use Src\Update;
 
 
-class NotificationController extends Select
+final class NotificationController extends Select
 {
     // get all the notifications and show on the profile page
     // TODO - Only show notification that are not already clicked on and associated with family member and code 
+    /**
+     * @return array|int|null|string
+     */
     public static function index()
     {
         try {
@@ -34,6 +36,8 @@ class NotificationController extends Select
      * matches either the notification ID or family code. The results are ordered by
      * creation date in ascending order. Upon successful retrieval, it returns the data and
      * sends a success message. In case of an exception, it handles the error appropriately.
+     *
+     * @return array|int|null|string
      */
     public static function notificationById($id, $famCode)
     {
@@ -63,6 +67,9 @@ class NotificationController extends Select
     }
 
     // make notification as read 
+    /**
+     * @return void
+     */
     public static function notificationRead($no)
     {
         try {
@@ -101,7 +108,7 @@ class NotificationController extends Select
      *
      * @throws \Exception
      */
-    public static function postSubscriberData()
+    public static function postSubscriberData(): void
     {
         try {
 

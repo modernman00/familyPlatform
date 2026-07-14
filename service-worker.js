@@ -102,8 +102,9 @@ function staleWhileRevalidateStrategy(request) {
   return caches.match(request).then((cachedResponse) => {
     const fetchPromise = fetch(request).then((networkResponse) => {
       if (networkResponse && networkResponse.status === 200) {
+        const responseToCache = networkResponse.clone();
         caches.open(CacheName).then((cache) => {
-          cache.put(request, networkResponse.clone());
+          cache.put(request, responseToCache);
         });
       }
       return networkResponse;

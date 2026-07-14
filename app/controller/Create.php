@@ -1,5 +1,4 @@
 <?php
-
 namespace App\controller;
 
 use App\classes\Db;
@@ -16,7 +15,7 @@ use App\classes\tables\{
     Notification
 };
 
-class Create extends Db
+final class Create extends Db
 {
     public function index(): void
     {

@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\controller\admin;
@@ -10,13 +9,13 @@ use Src\Update;
 use Src\functionality\SendEmailFunctionality;
 use Src\DeleteFn;
 
-class ReviewApps extends ReviewAppsData
+final class ReviewApps extends ReviewAppsData
 {
     private $id;
     private const REDIRECT = "/admin/reviewApps";
 
     // get the new application page 
-    public function get()
+    public function get(): void
     {
         $result = $this->index();
         BaseController::viewWithCsp('admin/ReviewApps', ['result' => $result, 'no' => 1]);
@@ -40,7 +39,7 @@ class ReviewApps extends ReviewAppsData
     }
 
     // // update the account status in the decision table 
-    private function updateAccountStatus(string $acctStatus)
+    private function updateAccountStatus(string $acctStatus): void
     {
         $accountUpdate = new Update('account');
         $accountUpdate->updateTable(column: 'status', columnAnswer: $acctStatus, identifier: 'id', identifierAnswer: $this->id);
