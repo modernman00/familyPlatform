@@ -1,5 +1,361 @@
 (self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["profilePage"],{
 
+/***/ "./resources/asset/js/components/FormHelper.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/FormHelper.js ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": function() { return /* binding */ FormHelper; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+
+
+
+
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+var FormHelper = /*#__PURE__*/function () {
+  function FormHelper(data) {
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, FormHelper);
+    if (!Array.isArray(data)) throwError('data must be an array of form elements');
+    this.data = data;
+    this.error = [];
+    this.result = 0;
+  }
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(FormHelper, [{
+    key: "id",
+    value: function id(x) {
+      return document.getElementById(x);
+    }
+
+    /**
+     * general validation; check empty status, at least a single input, mobile length, white space
+     */
+  }, {
+    key: "getData",
+    value: function getData() {
+      return this.data;
+    }
+  }, {
+    key: "validateField",
+    value: function validateField(value) {
+      var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'general';
+      var regexes = {
+        email: /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-Z0-9]{2,4}$/
+        // Add more regexes as needed
+      };
+      return type === 'email' ? regexes.email.test(value) : value.trim() !== '';
+    }
+  }, {
+    key: "massValidate",
+    value: function massValidate() {
+      var _this = this;
+      // const reg = /[a-zA-Z0-9./@]/g;
+      this.data.forEach(function (et) {
+        var _iterator = _createForOfIteratorHelper(et),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var post = _step.value;
+            // capture the error to a variable
+            var errMsg = _this.id("".concat(post.name, "_error"));
+            var postName = post.name.replace('_', ' ');
+            var asterisk = "*";
+
+            // rid it off the submit and token
+            if (['submit', 'button', 'showPassword_id', 'g-recaptcha-response', 'cancel', 'token', 'checkbox_id'].includes(post.name) || ['button'].includes(post.id) || ['button'].includes(post.type)) return;
+            // check if there is no value
+
+            if (['spouse_name', 'spouse_mobile', 'spouse_email', 'father_mobile', 'father_email', 'mother_mobile', 'maiden_name', 'mother_email'].includes(post.name)) {
+              // post.value is not prpvided if it is not provided 
+              post.value = post.value === "" ? "Not Provided" : post.value;
+            }
+            if (post.value === '' || post.value === 'select') {
+              if (!_this.validateField(post.value)) {
+                if (errMsg) {
+                  var _post$placeholder;
+                  errMsg.innerHTML = "".concat((_post$placeholder = post.placeholder) !== null && _post$placeholder !== void 0 ? _post$placeholder : asterisk, " cannot be left empty");
+                  errMsg.style.color = 'red';
+                }
+                _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
+                _this.result = false;
+              }
+            }
+            if (post.name === 'email' && !_this.validateField(post.value, 'email')) {
+              _this.error.push('<li style="color: red;">Please enter a valid email</li>');
+              if (errMsg) errMsg.innerHTML = '* Please enter a valid email';
+              _this.result = false;
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    }
+  }, {
+    key: "emailVal",
+    value: function emailVal() {
+      var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+      var msg = "<li style=color:'red';> Please enter a valid email</li>";
+      var emailEl = this.id('email_id') || this.id('email');
+      if (!emailEl) return;
+      var email = emailEl.value;
+      if (email.match(emailExp) === null) {
+        var errEl = this.id('email_error');
+        if (errEl) {
+          errEl.innerHTML = msg;
+          errEl.style.color = "red";
+        }
+        this.error.push(msg);
+      }
+    }
+  }, {
+    key: "clearError",
+    value: function clearError() {
+      var _this2 = this;
+      this.error = []; // Empty the error array
+
+      // Define a function to clear error messages for a given input element
+      var clearErrorForElement = function clearErrorForElement(elementName) {
+        var errorElement = _this2.id("".concat(elementName, "_error"));
+        if (errorElement) {
+          errorElement.innerHTML = '';
+        }
+      };
+      this.data.forEach(function (el) {
+        var _iterator2 = _createForOfIteratorHelper(el),
+          _step2;
+        try {
+          var _loop = function _loop() {
+            var post = _step2.value;
+            var id = post.id,
+              name = post.name,
+              value = post.value;
+
+            // Skip certain input types
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+              return 1; // continue
+            }
+            var the_id = _this2.id(id);
+            if (the_id) {
+              console.log("Adding listeners to element: ".concat(id));
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
+              });
+
+              // Add change event listener to clear error message
+              the_id.addEventListener('change', function () {
+                clearErrorForElement(name);
+              });
+            } else {
+              console.warn("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
+            }
+          };
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            if (_loop()) continue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      });
+    }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+          _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
+
+    /**
+     *
+     * @param {input is the id of the input/ this is an array [as, it, it]} input
+     * @param {* this is the max policy and it must be an integer} maxi
+     */
+  }, {
+    key: "realTimeCheckLen",
+    value: function realTimeCheckLen(input, maxi) {
+      var _this3 = this;
+      try {
+        var _loop2 = function _loop2(i) {
+          var theData = _this3.id("".concat(input[i], "_id"));
+          if (!theData) theData = _this3.id(input[i]);
+          if (theData === null || theData === undefined || theData === "") {
+            console.warn("Element with ID '".concat(input[i], "' not found or is empty"));
+            return 1; // continue
+          }
+          var max = maxi[i];
+          var error = _this3.id("".concat(input[i], "_error"));
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
+          theData.addEventListener('keyup', function () {
+            if (error) {
+              error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+              error.style.color = 'red';
+            }
+            var help = _this3.id("".concat(input[i], "_help"));
+            if (help) {
+              help.style.color = 'red';
+              help.style.fontSize = '10px';
+              setTimeout(function () {
+                help.style.display = 'none';
+              }, 5000);
+            }
+          });
+        };
+        for (var i = 0; i < input.length; i++) {
+          if (_loop2(i)) continue;
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    /**
+     * the id for the password error should be password_help
+     * the id for your confirm pasword should confirm_password
+     * it will return an error message to the password_help input
+     */
+  }, {
+    key: "matchInput",
+    value: function matchInput(first, second) {
+      var error, firstInput, secondInput;
+      error = this.id("".concat(second, "_error"));
+      firstInput = this.id(first + '_id') || this.id(first);
+      secondInput = this.id(second + '_id') || this.id(second);
+      if (firstInput && secondInput) {
+        secondInput.addEventListener('keyup', function () {
+          if (error) error.innerHTML = secondInput.value !== firstInput.value ? 'Your passwords do not match' : "";
+        });
+      }
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
+  }, {
+    key: "injectData",
+    value: function injectData(idArray, html) {
+      var idData;
+      for (var i = 0; i < idArray.length; i++) {
+        idData = this.id(idArray[i]);
+        idData.innerHTML = html[i];
+      }
+    }
+
+    /**
+     *
+     * @param {this is an id and its value is for duplication} firstInput
+     * @param {* another id that accepts the value of the firstInput} takeFirstInput
+     */
+  }, {
+    key: "duplicate",
+    value: function duplicate(giveInput, takeInput) {
+      var giver, taker;
+      giver = this.id(giveInput) || this.id(giveInput.replace('_id', ''));
+      taker = this.id(takeInput) || this.id(takeInput.replace('_id', ''));
+      if (giver && taker) {
+        giver.addEventListener('keyup', function () {
+          taker.value = giver.value;
+        });
+      }
+    }
+
+    /**
+     *
+     * @param {current input that is being type to. the value is what will be checked realtime. the id is needed} input
+     * @param {* the url to get the info to . example is /search?hint} url
+     * @param {enter the id of the output element} output
+     */
+  }, {
+    key: "realTimeServer",
+    value: function realTimeServer(input, url, outputId) {
+      var theInput, inputVal, output;
+      theInput = this.id(input);
+      output = this.id(outputId);
+      theInput.addEventListener('keyup', function () {
+        inputVal = theInput.value;
+        if (inputVal == 0) {
+          output.innerHTML = "";
+          return;
+        } else {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              output.innerHTML = this.responseText;
+            }
+          };
+          xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+          xmlhttp.send();
+        }
+      });
+    }
+  }, {
+    key: "isChecked",
+    value: function isChecked(yesId, noId, hiddenInput) {
+      var _this4 = this;
+      var checked = function checked() {
+        if (_this4.id(yesId).checked) {
+          alert('check');
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        } else if (_this4.id(noId).checked) {
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        }
+      };
+      this.id(yesId).addEventListener('click', checked);
+      this.id(noId).addEventListener('click', checked);
+    }
+  }, {
+    key: "previousAddress",
+    value: function previousAddress() {
+      var _this5 = this;
+      var timeAddy = this.id('time_at_address_id');
+      var prevAddy = this.id('previous_address_class');
+      var showPrev = function showPrev() {
+        if (timeAddy.value != '3 years+') {
+          prevAddy.style.display = 'block';
+          _this5.id('previous_address_help').innerHTML = "Please enter your full address: House No, Street Name, Town/City and Post Code";
+        } else {
+          prevAddy.style.display = 'none';
+        }
+      };
+      timeAddy.addEventListener('change', showPrev);
+    }
+  }]);
+}();
+
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/emojiPicker.js":
 /*!******************************************************!*\
   !*** ./resources/asset/js/components/emojiPicker.js ***!
@@ -13,15 +369,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   showEmojiPicker: function() { return /* binding */ showEmojiPicker; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
-/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
-/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
 
 var EMOJI_CACHE_KEY = 'recentEmojis'; // LocalStorage key for caching recent emojis
 
 // 🟡 Filter emojis to only include smileys (based on Unicode range)
-var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__.filter(function (e) {
+var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__.filter(function (e) {
   var code = parseInt(e.hexcode, 16); // Convert hexcode to decimal
   return code >= 0x1F600 && code <= 0x1F64F; // Emoticons block range
 });
@@ -42,8 +398,8 @@ var showEmojiPicker = function showEmojiPicker(emojiContainerId, emojiTargetData
  * @param {string} containerId - ID of the picker container
  */
 var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
-  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(toggleId);
-  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(containerId);
+  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(toggleId);
+  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(containerId);
   if (!toggle || !container) return;
   document.addEventListener('click', function (e) {
     if (!container.classList.contains('d-none')) {
@@ -55,7 +411,7 @@ var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
   });
 };
 var renderEmojiList = function renderEmojiList(emojis, emojiContainerId, emojiTargetDataClass) {
-  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(emojiContainerId);
+  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(emojiContainerId);
   if (!emojiList) return;
   emojiList.innerHTML = '';
   emojiList.classList.add('modern-emoji-picker');
@@ -255,6 +611,215 @@ var imagePreview = function imagePreview(fileInputId, previewListId, fileNamesDi
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
+/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
+/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
+/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
+/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
+/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
+/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
+/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
+/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
+/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
+/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
+/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+
+
+
+
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  if (setClass) newDiv.className = "field ".concat(setClass);else newDiv.className = "field ".concat(setId);
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(parent);
+  if (!parentDiv) throw new Error("Parent element '".concat(parent, "' not found"));
+  return parentDiv.appendChild(newDiv);
+};
+
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_2___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase();
+      // you can also use AJAX requests instead of preloaded data
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return (0,_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__["default"])(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).checked) {
+      alert('check');
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).checked) {
+      alert('check No');
+    }
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[<?/>]+/g;
+      var result = data.match(regex);
+      if (result === null) return true;
+    }
+  }
+};
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
+
+/**
+ * Converts a string to sentence case.
+ *
+ * Sentence case is a string where the first letter of each word is capitalized, and the rest of the letters are in lowercase.
+ *
+ * @param {string} str The string to convert to sentence case.
+ * @returns {string} A new string in sentence case.
+ */
+var toSentenceCase = function toSentenceCase(str) {
+  return str.toLowerCase() // Convert the string to lowercase
+  .split(' ') // Split the string into words
+  .map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }) // Capitalize the first letter of each word
+  .join(' '); // Join the words back into a string
+};
+var convertFormData = function convertFormData(formId) {
+  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSelAll)(formId);
+  var formInputArr = Array.from(formInput);
+  return new _FormHelper__WEBPACK_IMPORTED_MODULE_3__["default"](formInputArr);
+};
+var showResponse = function showResponse(theId, message, status) {
+  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(theId);
+  var col = status ? 'green' : 'red';
+  responseEl.innerHTML = message;
+  responseEl.style.color = 'green';
+  responseEl.style.backgroundColor = col;
+  responseEl.style.color = 'white';
+  setTimeout(function () {
+    responseEl.innerHTML = '';
+  }, 5000); // Disappear after 5 seconds
+};
+
+/**
+   *
+   * @param {input is the id of the input/ this is an array [as, it, it]} input
+   * @param {* this is the max policy and it must be an integer} maxi
+   */
+
+var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
+  try {
+    var _loop = function _loop(i) {
+      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_id"));
+      if (theData === null || theData === undefined || theData === "") {
+        throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+      }
+      var max = maxi[i];
+      var error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_error"));
+      theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
+      theData.addEventListener('keyup', function () {
+        error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+        var help = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_help"));
+        help.style.color = 'red';
+        help.style.fontSize = '10px';
+        error.style.color = 'red';
+        setTimeout(function () {
+          help.style.display = 'none';
+        }, 5000);
+      });
+    };
+    for (var i = 0; i < input.length; i++) {
+      _loop(i);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/helper/images.js":
 /*!********************************************************!*\
   !*** ./resources/asset/js/components/helper/images.js ***!
@@ -284,6 +849,296 @@ var showImageFileUploadFn = function showImageFileUploadFn(uploadBtn, inputId, f
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/navbar.js":
+/*!*************************************************!*\
+  !*** ./resources/asset/js/components/navbar.js ***!
+  \*************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   addToNotificationTab: function() { return /* binding */ addToNotificationTab; },
+/* harmony export */   increaseNotificationCount: function() { return /* binding */ increaseNotificationCount; }
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+
+
+
+
+// const timeAgo = (x) => format(x)
+
+
+// import { html } from './profilePage/html';
+
+// Update notification badge
+function updateNotificationBadge(change) {
+  var badge = document.querySelector('.notification-badge');
+  var count = parseInt(badge.textContent);
+  count += change;
+  if (count <= 0) {
+    badge.style.display = 'none';
+  } else {
+    badge.textContent = count;
+    badge.style.display = 'flex';
+  }
+}
+var postAgoNotification = function postAgoNotification(date) {
+  return "\n  <div class=\"notification_timeago w3-left w3-opacity\" datetime='".concat(date, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "'> ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date), "\n  </div>");
+};
+// this is the notification htnl 
+var notificationHTML = function notificationHTML(data) {
+  // Map notification types to icon classes
+  // Map type → { icon, colour }
+  var iconMap = {
+    friend_request: {
+      icon: "fa-solid fa-user-plus",
+      color: "text-primary"
+    },
+    // Blue
+    like: {
+      icon: "fa-solid fa-thumbs-up",
+      color: "text-success"
+    },
+    // Green
+    comment: {
+      icon: "fa-solid fa-comment-dots",
+      color: "text-info"
+    },
+    // Cyan
+    Anniversary: {
+      icon: "fa-solid fa-cake-candles",
+      color: "text-warning"
+    },
+    // Gold
+    Birthday: {
+      icon: "fa-solid fa-cake-candles",
+      color: "text-warning"
+    },
+    // Gold
+    Wedding: {
+      icon: "fa-solid fa-heart",
+      color: "text-warning"
+    },
+    // Gold
+    new_post: {
+      icon: "fa-solid fa-file-lines",
+      color: "text-purple"
+    },
+    // Custom purple
+    House_Warming: {
+      icon: "fa-solid fa-house",
+      color: "text-orange"
+    },
+    // Orange
+    Reunion: {
+      icon: "fa-solid fa-people-group",
+      color: "text-pink"
+    },
+    // Pink
+    Party: {
+      icon: "fa-solid fa-champagne-glasses",
+      color: "text-danger"
+    },
+    // Red
+    Meeting: {
+      icon: "fa-solid fa-handshake",
+      color: "text-teal"
+    },
+    // Teal
+    default: {
+      icon: "fa-solid fa-bell",
+      color: "text-secondary"
+    } // Grey
+  };
+  var _ref = iconMap[data.notification_type] || iconMap.default,
+    icon = _ref.icon,
+    color = _ref.color;
+  var readOrUnread = data.notification_status === 'new' ? 'unread' : 'read';
+  var sender_id = data.sender_id,
+    notification_name = data.notification_name,
+    notification_content = data.notification_content,
+    created_at = data.created_at,
+    no = data.no;
+
+  // generate random numbers to make the notification unique
+
+  var randomNumber = Math.floor(100 + Math.random() * 900);
+  return "<a id = \"notificationBar".concat(sender_id).concat(randomNumber, "\" href=\"#linkNotification").concat(no, "\"  class=\"list-group-item list-group-item-action d-flex align-items-start notification_real_time ").concat(readOrUnread, " notification-item linkRequestCard\">\n\n    \n            <div class=\"notification-icon ").concat(color, "\">\n                <i class=\"").concat(icon, "\"></i></div>\n            <div class=\"notification-text\">\n                <strong>").concat(notification_name, "</strong><br>\n                <small>").concat(notification_content, "</small>\n                <div class=\"notification-time\"> ").concat(postAgoNotification(created_at), " </div>\n            </div>\n            <button class=\"notification-delete btn btn-sm btn-outline-secondary btn-light\" \n                 \" \n                    data-no=\"").concat(no, "\"\n                    data-is=\"").concat(sender_id, "\"\n                    type=\"submit\"\n                    id=\"deleteNotification").concat(sender_id).concat(randomNumber, "\"\n                    aria-label=\"Delete notification\">\n               <i class=\"fa-solid fa-trash\"></i>\n            </button>\n \n\n  </a>\n\n\n  ");
+};
+
+// CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
+
+var increaseNotificationCount = function increaseNotificationCount() {
+  var currentNotificationCount = parseInt(sessionStorage.getItem('notificationCount')) + 1;
+  (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count').innerHTML = currentNotificationCount;
+};
+var addToNotificationTab = function addToNotificationTab(data) {
+  return (0,_shared__WEBPACK_IMPORTED_MODULE_1__.qSel)('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
+};
+var yourId = localStorage.getItem('requesterId');
+var famCode = localStorage.getItem('requesterFamCode');
+var notificationURL = "/member/notifications/id/".concat(yourId, "/").concat(famCode);
+
+// get all the notification and display them 
+// they are already filtered by famCode and id 
+// for the family request, connection is done by id
+// for events -birthday etc, the connection is the famCode 
+// so linked notification will be either where id matches or famcode matches
+
+if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
+  axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(notificationURL).then(function (res) {
+    // Extract the notifications from the response
+    var data = res.data.message;
+    if (data) {
+      if (data.length > 0) {
+        // Display the count of notifications
+        var countBadge = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
+        if (countBadge) {
+          countBadge.innerHTML = data.length;
+          countBadge.style.display = 'flex';
+        }
+
+        // Store the notification count in session storage
+        sessionStorage.setItem('notificationCount', data.length);
+
+        // Display each notification
+        data.forEach(function (element) {
+          addToNotificationTab(element);
+        });
+        // Update the timing of notifications
+        var updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+        (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.render)(updateNotificationTiming);
+      } else {
+        var _countBadge = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
+        if (_countBadge) {
+          _countBadge.innerHTML = '0';
+          _countBadge.style.display = 'none';
+        }
+      }
+    }
+  }).catch(function (error) {
+    // Handle any errors that occur during the process
+    (0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+  });
+}
+
+// delete a notification 
+
+// delete notification 
+
+// document.addEventListener('click', async (e) => {
+//     const id = e.target.id;
+//        log(id)
+//     // if (!id.includes('deleteNotification')) return;
+
+//     // const deleteBtn = id(id);
+//     // const sender_id = deleteBtn.getAttribute('data-id');
+
+//     // const url = `/removeNotification/${yourId}/${famCode}/${sender_id}`
+//     // const response = axios.put(url)
+
+//     // if (response.data.message === "Notification marked as read") {
+
+//     //     // remove a html element with notificationBar after 2 mins 
+//     //     qSel(`#${deleteBtn.id}`).closest('.notification_real_time')?.remove();
+
+//     //     // reduce the notification count as you have deleted the notification
+
+//     //     const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
+//     //     id('notification_count').innerHTML = newValues;
+//     // } else {
+//     //     msgException("Error removing notification" + " " + response.data.message);
+//     // }
+// })
+
+var notificationBtn = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notificationBtn');
+var notificationDropdown = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notificationDropdown');
+var markAllReadBtn = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('markAllRead');
+var notificationCount = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
+
+// Only add event listeners if notification elements exist on the page
+if (notificationBtn && notificationDropdown) {
+  // Toggle dropdown visibility
+  notificationBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    notificationDropdown.classList.toggle('show');
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function (e) {
+    if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+      notificationDropdown.classList.remove('show');
+    }
+  });
+
+  // Prevent dropdown from closing when clicking inside it
+  notificationDropdown.addEventListener('click', function (e) {
+    e.stopPropagation();
+  });
+}
+
+// Mark all as read functionality (only if button exists)
+if (markAllReadBtn && notificationCount) {
+  markAllReadBtn.addEventListener('click', function () {
+    var unreadItems = document.querySelectorAll('.notification-item.unread');
+    unreadItems.forEach(function (item) {
+      item.classList.remove('unread');
+    });
+
+    // Update notification count
+    notificationCount.textContent = '0';
+    notificationCount.style.display = 'none';
+  });
+}
+
+/* run once, after the dropdown HTML is in the page */
+var initDeleteOnce = function initDeleteOnce() {
+  var tab = document.getElementById('notification_tab'); // static parent
+  if (!tab) return;
+  tab.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[id*="deleteNotification"]');
+    if (!btn) return; // not a delete button → ignore
+
+    e.stopPropagation(); // keep dropdown open
+    var bannerId = btn.id.replace('deleteNotification', 'notificationBar');
+    var no = btn.getAttribute('data-no');
+    var url = "/removeNotification/".concat(no);
+    axios__WEBPACK_IMPORTED_MODULE_3__["default"].put(url).then(function (response) {
+      if (response.data.message === 'Notification marked as read') {
+        var _document$getElementB;
+        // remove a html element with notificationBar after 2 mins
+        (_document$getElementB = document.getElementById(bannerId)) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.remove();
+
+        // reduce the notification count as you have deleted the notification
+        var currentCount = parseInt(sessionStorage.getItem('notificationCount')) - 1;
+        var newValues = currentCount > 0 ? currentCount : 0;
+        sessionStorage.setItem('notificationCount', newValues);
+        var countBadge = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('notification_count');
+        countBadge.innerHTML = newValues;
+        if (newValues <= 0) {
+          countBadge.style.display = 'none';
+        } else {
+          countBadge.style.display = 'flex';
+        }
+      } else {
+        (0,_shared__WEBPACK_IMPORTED_MODULE_1__.msgException)('Error removing notification' + ' ' + response.data.message);
+      }
+      // your counter routine
+    });
+  });
+};
+
+/* safe entry point */
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initDeleteOnce) : initDeleteOnce();
+
+///member/notifications
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/profilePage/allEvents.js":
 /*!****************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/allEvents.js ***!
@@ -292,19 +1147,11 @@ var showImageFileUploadFn = function showImageFileUploadFn(uploadBtn, inputId, f
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
-/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _emojiPicker_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../emojiPicker.js */ "./resources/asset/js/components/emojiPicker.js");
-/* harmony import */ var _indexDB_reactions_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./indexDB/reactions.js */ "./resources/asset/js/components/profilePage/indexDB/reactions.js");
-/* harmony import */ var _showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./showEmojiOnComment.js */ "./resources/asset/js/components/profilePage/showEmojiOnComment.js");
-
-
-
-
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
@@ -319,30 +1166,29 @@ try {
 
   // CLICK EVENT get the comment and like button from the document
   document.addEventListener('click', /*#__PURE__*/function () {
-    var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2___default().mark(function _callee(e) {
-      var elementId, postId, postImgId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, emojiToggler, emojiListElement, emojiList, idForm, _postId, form, formEntries, inputComment, idInputComment, _id, _id2, _commentFormId, postMessage, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, postNo, imgClass, imagesInGroup, initialIndex, commentNo, commentElement, _response, reactionOptionDiv, reactionOptionDivId, _commentNo, emojiContent, theLabel, _response2, button, countEl, preview, _response2$data$messa, label, reaction, countReaction, emoji, reactionBar, _t;
-      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2___default().wrap(function (_context) {
+    var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
+      var elementId, postId, likeCounterId, likeCounterVal, encodedLikeCounterVal, commentFormId, idForm, form, formEntries, inputComment, idInputComment, formExtra, formData, requesterFamCodeValue, response, friendRequestSection, _t;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             //document.onclick = async (e) => {
             elementId = e.target.id;
-            postId = e.target.name;
-            postImgId = e.target.dataset.postimgid; // Handle Like Button Click
+            postId = e.target.name; // Handle Like Button Click
             if (!elementId.includes("likeButton")) {
               _context.next = 3;
               break;
             }
             // replace button with Counter to get the span id 
             likeCounterId = elementId.replace('Button', 'Counter'); // trim removes leading and trailing spaces
-            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
+            likeCounterVal = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
             encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
             _context.next = 1;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
+            return axios__WEBPACK_IMPORTED_MODULE_3__["default"].put("/profileCard/postLikes?postNo=".concat(postId, "&count=").concat(encodedLikeCounterVal, "&likeCounterId=").concat(likeCounterId));
           case 1:
             _context.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getNewLikesPusher");
+            return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/getNewLikesPusher");
           case 2:
-            _context.next = 25;
+            _context.next = 15;
             break;
           case 3:
             if (!elementId.includes("initComment")) {
@@ -350,320 +1196,99 @@ try {
               break;
             }
             commentFormId = elementId.replace('init', 'form');
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(commentFormId).classList.toggle('d-none');
-            _context.next = 25;
+            (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(commentFormId).style.display = "block";
+
+            // Handle Comment Submission
+            _context.next = 15;
             break;
           case 4:
-            if (!elementId.includes("emojiToggle")) {
-              _context.next = 5;
-              break;
-            }
-            emojiToggler = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(elementId);
-            emojiListElement = elementId.replace('emojiToggle', 'emojiCommentPickerList');
-            emojiList = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(emojiListElement); // Container for emoji buttons
-            // 🟡 Toggle emoji picker visibility when the toggle button is clicked
-            // emojiToggler.addEventListener('click', () => {
-            emojiList.classList.toggle('d-none'); // Show/hide the emoji list
-            emojiToggler.setAttribute('aria-expanded', emojiList.classList.contains('d-none') ? 'false' : 'true');
-            // });
-
-            // comment form emoji picker
-            (0,_emojiPicker_js__WEBPACK_IMPORTED_MODULE_5__.showEmojiPicker)(emojiListElement, 'data-commentEmoji-target');
-            _context.next = 25;
-            break;
-          case 5:
             if (!elementId.includes("submitComment")) {
-              _context.next = 10;
+              _context.next = 8;
               break;
             }
             e.preventDefault();
 
             //idForm == formComment511
-            idForm = elementId.replace("submit", "form");
-            _postId = elementId.replace("submitComment", ""); // make the comment form disappear
-            // id(idForm).style.display = "none"
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(idForm).classList.add('d-none');
+            idForm = elementId.replace("submit", "form"); // make the comment form disappear
+            (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(idForm).style.display = "none";
             // extract the form entries
-            form = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(idForm);
+            form = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(idForm);
             formEntries = new FormData(form); // if the comment form input is empty. Get the input id and check 
             inputComment = idForm.replace("form", "input");
-            idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(inputComment);
+            idInputComment = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)(inputComment);
             if (!(idInputComment.value == null || idInputComment.value == "")) {
-              _context.next = 6;
+              _context.next = 5;
               break;
             }
             alert("Please enter a comment before submitting");
-            _context.next = 9;
+            _context.next = 7;
             break;
+          case 5:
+            _context.next = 6;
+            return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post('/postCommentProfile', formEntries, options);
           case 6:
             _context.next = 7;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/postCommentProfile', formEntries, options);
+            return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/getNewCommentPusher");
           case 7:
-            _context.next = 8;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getNewCommentPusher");
-          case 8:
-            // hide the emoji picker after submission
-
-            (_id = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("emojiCommentPickerList".concat(_postId))) === null || _id === void 0 ? void 0 : _id.classList.toggle('d-none');
-            _commentFormId = elementId.replace('submit', 'form');
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.formReset)(idForm);
-            // Hide the form explicitly
-            (_id2 = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)(_commentFormId)) === null || _id2 === void 0 ? void 0 : _id2.classList.add('d-none');
-          case 9:
-            _context.next = 25;
+            _context.next = 15;
             break;
-          case 10:
+          case 8:
             if (!elementId.includes("submitPost")) {
-              _context.next = 17;
+              _context.next = 14;
               break;
             }
             e.preventDefault();
-
-            // check if the post message is empty
-            postMessage = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('postMessage').value.trim();
-            if (!(postMessage === "")) {
-              _context.next = 11;
-              break;
-            }
-            alert("Post message cannot be empty");
-            return _context.abrupt("return");
-          case 11:
-            // validate the file input if any
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.fileUploadSizeValidation)('post_img', 3);
-            formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('formPostMessageModal');
+            formExtra = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('formPostMessageModal');
             formData = new FormData(formExtra); // get the requesterFamCode from the localStorage 
             requesterFamCodeValue = localStorage.getItem('requesterFamCode'); // Append the new form entry to the FormData object
             formData.append('postFamCode', requesterFamCodeValue);
-            _context.prev = 12;
-            _context.next = 13;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/member/profilePage/post", formData, options);
-          case 13:
+            _context.prev = 9;
+            _context.next = 10;
+            return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/member/profilePage/post", formData, options);
+          case 10:
             response = _context.sent;
-            console.log(response.data);
-
-            // Assuming the response contains the new post number in response.data.token
-            // You can adjust this based on your actual response structure
-
-            // Cache the new post data if needed
-            // await cachePost(response.data.newPost);
-
-            // 2. Notify members of similar famcode about the post by email
-            // 3. Update all members of similar famcode on their UIs using Pusher
-            _context.next = 14;
-            return Promise.all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/post/getNewPostAndEmail?newPostNo=" + response.data.token), axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getNewPostPusher")]);
-          case 14:
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.formReset)("formPostMessageModal");
-            // redirect to the profile page
-            window.location.href = '/profilePage';
-            _context.next = 16;
+            _context.next = 11;
+            return Promise.all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message), axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("/getNewPostPusher")]);
+          case 11:
+            // Hide the modal and reset the form
+            (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('id01').style.display = 'none';
+            (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("formPostMessageModal").reset();
+            _context.next = 13;
             break;
-          case 15:
-            _context.prev = 15;
-            _t = _context["catch"](12);
-            console.error("An error occurred:", _t.response);
+          case 12:
+            _context.prev = 12;
+            _t = _context["catch"](9);
+            console.error("An error occurred:", _t);
             // Optionally, display an error message to the user
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('formPostMessageModal_notification').innerHTML = 'There was an error submitting your post. Please try again later.';
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('formPostMessageModal_notification').classList.add('is-danger');
-            (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('formPostMessageModal_notification').style.display = 'block';
-          case 16:
-            _context.next = 25;
+            alert("There was an error processing your request. Please try again.");
+          case 13:
+            _context.next = 15;
             break;
-          case 17:
-            if (!e.target.classList.contains('linkRequestCard')) {
-              _context.next = 18;
-              break;
-            }
-            // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
-            friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
-            if (friendRequestSection) {
-              friendRequestSection.scrollIntoView({
-                behavior: "smooth"
-              });
-            }
-            _context.next = 25;
-            break;
-          case 18:
-            if (!e.target.classList.contains('grid-image')) {
-              _context.next = 19;
-              break;
-            }
-            if (e.target.classList.contains('grid-image')) {
-              postNo = e.target.dataset.postno;
-              imgClass = ".zoomable-image".concat(postNo);
-              imagesInGroup = Array.from(document.querySelectorAll(imgClass));
-              initialIndex = imagesInGroup.findIndex(function (img) {
-                return img.src === e.target.src;
-              });
-              if (initialIndex !== -1) {
-                (0,_global__WEBPACK_IMPORTED_MODULE_3__.initializeImageModal)(imgClass, initialIndex, 'imageModal', 'modalImage', 'imageModalClose');
+          case 14:
+            if (elementId && elementId.includes('deleteNotification')) {
+              (0,_global__WEBPACK_IMPORTED_MODULE_2__.deleteNotification)(elementId);
+            } // take you to the request card for approval or denial
+            else if (e.target.classList.contains('linkRequestCard')) {
+              // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+              friendRequestSection = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(e.target.getAttribute('data-id'), "_linkRequestCard"));
+              if (friendRequestSection) {
+                friendRequestSection.scrollIntoView({
+                  behavior: "smooth"
+                });
               }
             }
-            _context.next = 25;
-            break;
-          case 19:
-            if (!elementId.includes('removeCommentIcon')) {
-              _context.next = 23;
-              break;
-            }
-            // get the comment no
-            commentNo = elementId.replace('removeCommentIcon', ''); // Ask user to confirm before deleting (safety check)
-            if (!confirm('Are you sure you want to remove this comment?')) {
-              _context.next = 22;
-              break;
-            }
-            // Find the comment element and remove it from page
-            commentElement = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("commentDiv".concat(commentNo));
-            if (!commentElement) {
-              _context.next = 21;
-              break;
-            }
-            _context.next = 20;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].delete("/deleteComment/".concat(commentNo));
-          case 20:
-            _response = _context.sent;
-            alert(_response.data.message);
-            _context.next = 22;
-            break;
-          case 21:
-            alert('Comment not found');
-          case 22:
-            _context.next = 25;
-            break;
-          case 23:
-            if (!e.target.closest('[id^="reaction-option-"]')) {
-              _context.next = 25;
-              break;
-            }
-            reactionOptionDiv = e.target.closest('[id^="reaction-option-"]');
-            reactionOptionDivId = reactionOptionDiv.getAttribute('id');
-            _commentNo = reactionOptionDiv.getAttribute('data-option-no');
-            emojiContent = reactionOptionDiv.textContent;
-            theLabel = reactionOptionDiv.dataset.label; // post to the comment_reactions table
-            _context.next = 24;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/commentReaction", {
-              comment_no: _commentNo,
-              reaction: emojiContent,
-              label: theLabel
-            });
-          case 24:
-            _response2 = _context.sent;
-            button = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("like-button-".concat(_commentNo));
-            countEl = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("like-count-".concat(_commentNo));
-            preview = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-preview-".concat(_commentNo)); // destructure the response to get the reaction summary
-            _response2$data$messa = _response2.data.message, label = _response2$data$messa.label, reaction = _response2$data$messa.reaction, countReaction = _response2$data$messa.countReaction;
-            if (label) button.querySelector('span').textContent = label;
-            emoji = (0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_7__.renderTopReactions)(countReaction, _commentNo);
-            if (reaction) preview.innerHTML = emoji;
-            if (countEl) countEl.textContent = countReaction.totalReactions;
-
-            // hide the reaction bar after selection
-            reactionBar = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-bar-".concat(_commentNo));
-            if (reactionBar) {
-              reactionBar.classList.remove('show');
-            }
-          case 25:
+          case 15:
           case "end":
             return _context.stop();
         }
-      }, _callee, null, [[12, 15]]);
+      }, _callee, null, [[9, 12]]);
     }));
     return function (_x) {
       return _ref.apply(this, arguments);
     };
   }());
-
-  // MOUSE ENTER OVER THE LIKE BUTTON TO SHOW REACTION OPTIONS
-  document.addEventListener('mouseover', /*#__PURE__*/function () {
-    var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2___default().mark(function _callee2(e) {
-      var reactionDiv, elementId, elementName, commentNo, reactionBar, _commentNo2, getResponse, _getResponse$data$mes, counts, who, whoList, emojiSummary, tooltip;
-      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_2___default().wrap(function (_context2) {
-        while (1) switch (_context2.prev = _context2.next) {
-          case 0:
-            reactionDiv = e.target.closest('.reaction-button'); //1 mouseover on the like button to show the reaction-option div
-            if (reactionDiv) {
-              elementId = reactionDiv.id;
-              elementName = reactionDiv.name;
-              commentNo = reactionDiv.dataset.commentNo; //2 show the reaction bar - reaction-option class
-              reactionBar = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-bar-".concat(commentNo));
-              if (reactionBar) {
-                reactionBar.classList.toggle('show');
-              } else {
-                reactionBar.classList.remove('show');
-              }
-            }
-
-            // MOUSE ENTER OVER THE REACTION PREVIEW OR COUNT TO SHOW TOOLTIP
-            if (!(e.target.classList.contains('reaction-preview') || e.target.classList.contains('reaction-count'))) {
-              _context2.next = 3;
-              break;
-            }
-            _commentNo2 = e.target.id.replace('reaction-preview-', '').replace('like-count-', ''); // fetch and show the reaction summary tooltip  
-            _context2.next = 1;
-            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/commentReactionSummary/".concat(_commentNo2));
-          case 1:
-            getResponse = _context2.sent;
-            _getResponse$data$mes = getResponse.data.message, counts = _getResponse$data$mes.counts, who = _getResponse$data$mes.who;
-            whoList = who.map(function (u) {
-              return "<div class=\"who-reacted\">".concat(u.reaction, " ").concat(u.firstName, " ").concat(u.lastName, "</div>");
-            }).join(''); // Create a summary of reactions that actually occurred
-            emojiSummary = Object.entries(counts).filter(function (_ref3) {
-              var _ref4 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref3, 2),
-                reactionType = _ref4[0],
-                count = _ref4[1];
-              return Number(count) > 0;
-            }) // Keep only reactions with a count greater than 0
-            .map(function (_ref5) {
-              var _ref6 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref5, 2),
-                reactionType = _ref6[0],
-                count = _ref6[1];
-              return "<span>".concat(reactionType, " ").concat(count, "</span>"); // Convert each to a span element
-            }).join(' '); // Combine all spans into one string with spaces in between
-            // tooltip display
-            tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-summary-".concat(_commentNo2));
-            if (tooltip) {
-              _context2.next = 2;
-              break;
-            }
-            return _context2.abrupt("return");
-          case 2:
-            if (tooltip) tooltip.style.display = 'block';
-            tooltip.innerHTML = "<div class=\"loading-tooltip\">Loading...</div>";
-            tooltip.style.display = 'block';
-            tooltip.innerHTML = "\n                    <div class=\"tooltip-body\">".concat(whoList, "</div>\n            ");
-
-            // Hide the tooltip after 5 seconds
-            setTimeout(function () {
-              tooltip.style.display = 'none';
-            }, 4000);
-            tooltip.classList.remove('show');
-          case 3:
-          case "end":
-            return _context2.stop();
-        }
-      }, _callee2);
-    }));
-    return function (_x2) {
-      return _ref2.apply(this, arguments);
-    };
-  }());
-  document.addEventListener('mouseover', function (e) {
-    var target = e.target.closest('.reaction-button');
-    if (!target) return;
-    var commentNo = target.dataset.commentNo;
-    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-summary-".concat(commentNo));
-    if (tooltip) tooltip.style.display = 'block';
-  });
-  document.addEventListener('mouseout', function (e) {
-    var target = e.target.closest('.reaction-button');
-    if (!target) return;
-    var commentNo = target.dataset.commentNo;
-    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)("reaction-summary-".concat(commentNo));
-    if (tooltip) tooltip.style.display = 'none';
-  });
-
-  // MOUSE LEAVE
 } catch (e) {
-  (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(e);
+  showError(e);
 }
 
 /***/ }),
@@ -751,9 +1376,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_7__);
 
 
 
@@ -768,15 +1393,10 @@ __webpack_require__.r(__webpack_exports__);
 var formInput = document.querySelectorAll('.eventModalForm');
 var formInputArr = Array.from(formInput);
 var formData = new _FormHelper__WEBPACK_IMPORTED_MODULE_4__["default"](formInputArr);
-var cancelModal = function cancelModal() {
-  var displayNone = function displayNone() {
-    return (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('id_event_modal').style.display = 'none';
-  };
-  (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('cancelModal').addEventListener('click', displayNone);
+var displayNone = function displayNone() {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('id_event_modal').style.display = 'none';
 };
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', cancelModal);
-}
+(0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('cancelModal').addEventListener('click', displayNone);
 
 /**
  * Filters events by family code (famCode) to ensure only relevant events are shown
@@ -819,7 +1439,7 @@ var process = /*#__PURE__*/function () {
           eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('eventModalForm');
           eventFormEntries = new FormData(eventForm); // POST data to create the event and notification in parallel
           _context.next = 2;
-          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_7__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_7__["default"].post('/member/notification/event', eventFormEntries, options)]);
+          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_8__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_8__["default"].post('/member/notification/event', eventFormEntries, options)]);
         case 2:
           _yield$Promise$all = _context.sent;
           _yield$Promise$all2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_yield$Promise$all, 2);
@@ -827,10 +1447,10 @@ var process = /*#__PURE__*/function () {
           notificationResponse = _yield$Promise$all2[1];
           // Extract and get notificationNo from the responses
           notificationNo = notificationResponse.data.message; // update all members of similar famcode on their UIs using Pusher
-          axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
+          axios__WEBPACK_IMPORTED_MODULE_8__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
 
-          // redirect to the profile page to view the event
-          window.location.href = '/profilePage';
+          // close the modal
+          displayNone();
           _context.next = 4;
           break;
         case 3:
@@ -889,7 +1509,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 var eventHtml = function eventHtml(data) {
-  return " <div class=\"event-card card mb-3\">\n                <div class=\"card-body\">\n                    <div class=\"d-flex\">\n                        <div class=\"flex-grow-1\">\n                            <small class='eventInfo'>\n            <strong><strong>RSVP: </strong> ".concat(data.sender_name, "</small><br>\n                            <small class='eventInfo'><strong>Event: </strong>").concat(data.notification_name, "</small><br>\n                            <small class='eventInfo'><strong>Type: </strong>").concat(data.notification_type, "</small><br>\n                            <small class='eventInfo'><strong>Description: </strong> ").concat(data.notification_content, "</small><br>\n                            <small class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.notification_date), " </small><br>\n        \n         \n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n\n             <div class=\"mt-2 rsvp-buttons d-flex\">\n                                        <button class=\"btn btn-sm btn-outline-primary\">Going</button>\n                                        <button class=\"btn btn-sm btn-outline-secondary\">Maybe</button>\n                                        <button class=\"btn btn-sm btn-outline-danger\">Decline</button>\n                                    </div>\n\n               </div>\n                            </div>\n                        </div>\n                    </div>\n           <hr>");
+  return "<p class='eventInfo'>\n            <strong>RSVP: </strong> ".concat(data.sender_name, "</p>\n            <p class='eventInfo'><strong>Event: </strong>").concat(data.notification_name, "</p>\n            <p class='eventInfo'><strong>Date: </strong>").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.date2String)(data.notification_date), " </p>\n            <p class='eventInfo'><strong>Type: </strong>").concat(data.notification_type, "</p>\n            <p class='eventInfo'><strong>Description: </strong> ").concat(data.notification_content, "</p>\n            <input type='hidden' name='event_no' id='event").concat(data.no, "' value='").concat(data.no, "'>\n\n            \n           <hr>");
 
   //                        <button 
   //     type="button" 
@@ -914,9 +1534,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
 
 
 
@@ -936,7 +1556,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 0:
           _context.prev = 0;
           _context.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getFriendRequestById");
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getFriendRequestById?id=".concat(approverId));
         case 1:
           response = _context.sent;
           if (response.data.message) {
@@ -949,7 +1569,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 2:
           _context.prev = 2;
           _t = _context["catch"](0);
-          (0,_shared__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
         case 3:
           ;
         case 4:
@@ -968,10 +1588,10 @@ var waitForRequestFriendClass = function waitForRequestFriendClass(data) {
   var observer = new MutationObserver(function (mutations, obs) {
     var requestContainer = document.querySelector('.requestFriendClass');
     if (requestContainer) {
-      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__.friendRequestCard)(data);
+      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__.friendRequestCard)(data);
       obs.disconnect(); // Stop observing once .requestFriendClass is found
     } else {
-      (0,_shared__WEBPACK_IMPORTED_MODULE_3__.log)('there is no requestFriendClass');
+      (0,_global__WEBPACK_IMPORTED_MODULE_2__.log)('there is no requestFriendClass');
     }
   });
 
@@ -990,34 +1610,6 @@ var countFriendRequest = function countFriendRequest(friend) {
 // Fetch and render friend requests on page load
 
 fetchFriendRequests();
-
-// Friend Request Actions
-var confirmRequestButtons = document.querySelectorAll('.confirm-request');
-var deleteRequestButtons = document.querySelectorAll('.delete-request');
-confirmRequestButtons.forEach(function (button) {
-  button.addEventListener('click', function () {
-    var card = this.closest('.card-body');
-    var alert = document.createElement('div');
-    alert.className = 'alert alert-success';
-    alert.textContent = 'Friend request confirmed!';
-    card.innerHTML = '';
-    card.appendChild(alert);
-
-    // Update notification badge
-    updateNotificationBadge(-1);
-  });
-});
-deleteRequestButtons.forEach(function (button) {
-  button.addEventListener('click', function () {
-    var card = this.closest('.card');
-    card.style.opacity = '0';
-    setTimeout(function () {
-      card.remove();
-      // Update notification badge
-      updateNotificationBadge(-1);
-    }, 300);
-  });
-});
 
 /***/ }),
 
@@ -1042,12 +1634,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var html = function html(postArray) {
-  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  var post_no = postArray.post_no,
-    postMessage = postArray.postMessage,
-    id = postArray.id;
-  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(postArray), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(postArray), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(postArray), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(postArray, comment.length), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(postArray), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment, id), "\n\n      \n    </div>\n");
+var html = function html(el) {
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var post_no = el.post_no,
+    postMessage = el.postMessage;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -1063,9 +1654,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   commentForm: function() { return /* binding */ commentForm; }
 /* harmony export */ });
-var commentForm = function commentForm(_ref) {
-  var post_no = _ref.post_no;
-  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(post_no, "\" enctype=\"multipart/form-data\" class=\"mb-4 d-none formComment").concat(post_no, "\">\n\n      <input type=\"hidden\" name=\"post_no\" value=\"").concat(post_no, "\"/>\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"> </div>\n\n        <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n        <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n      <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n        <div class=\"d-flex gap-2\">\n            <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" title=\"add emoji\" \n              id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\uD83D\uDE0A\n              </button>\n\n            <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\" aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n        </div>\n      \n        <button type=\"submit\" id=\"submitComment").concat(post_no, "\" class=\"btn btn-outline-primary btn-sm submitComment\"> Submit </button>\n      \n            \n      </div>\n    </form>\n  ");
+var commentForm = function commentForm(data) {
+  var post_no = data.post_no;
+  return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
 };
 
 /***/ }),
@@ -1081,25 +1672,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   friendRequestCard: function() { return /* binding */ friendRequestCard; }
 /* harmony export */ });
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 
 var appUrl = "https://olaogun.test/";
-var approverId = localStorage.getItem('requesterId');
+var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
 var friendRequestCard = function friendRequestCard(data) {
-  var _data$firstName, _data$lastName, _data$id, _data$famCode, _data$gender, _data$occupation, _data$country;
-  var imageUrl = data.img ? "/resources/images/profile/".concat(data.profilePics) : data.requesterProfileImg;
+  var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;
+  var imageUrl = "/public/img/profile/".concat(encodeURIComponent((_data$img = data.img) !== null && _data$img !== void 0 ? _data$img : data.requesterProfileImg));
   var firstName = encodeURIComponent((_data$firstName = data.firstName) !== null && _data$firstName !== void 0 ? _data$firstName : data.requesterFirstName);
   var lastName = encodeURIComponent((_data$lastName = data.lastName) !== null && _data$lastName !== void 0 ? _data$lastName : data.requesterLastName);
   var requestId = encodeURIComponent((_data$id = data.id) !== null && _data$id !== void 0 ? _data$id : data.requesterId);
   var requestCode = encodeURIComponent((_data$famCode = data.famCode) !== null && _data$famCode !== void 0 ? _data$famCode : data.requesterFamCode);
-  var gender = (_data$gender = data.gender) !== null && _data$gender !== void 0 ? _data$gender : "";
-  var occupation = (_data$occupation = data.occupation) !== null && _data$occupation !== void 0 ? _data$occupation : "";
-  var country = (_data$country = data.country) !== null && _data$country !== void 0 ? _data$country : "";
-  var mutualFriends = '';
-
-  /* New modern colorful card design */
-  var html = "<p id=".concat(requestId, "_linkRequestCard></p>\n    <div class=\"card border-0 shadow-sm mb-4 friend-request-card\" style=\"border-radius: 12px; overflow: hidden; transition: box-shadow 0.3s ease;\">\n      <div class=\"friend-request-cover\" style=\"height: 70px; background: linear-gradient(135deg, var(--primary-color), #00c6ff);\"></div>\n      <div class=\"card-body p-3 pt-0 position-relative\">\n        <div class=\"d-flex justify-content-between align-items-end mb-2\" style=\"margin-top: -35px;\">\n           <a href=\"/allMembers/seeProfile/").concat(requestId, "\" class=\"position-relative\">\n            <img src=\"").concat(imageUrl, "\" alt=\"").concat(firstName, "\" class=\"avatar rounded-circle border border-4 border-white shadow-sm\" style=\"width: 70px; height: 70px; object-fit: cover; background-color: white;\">\n             <span class=\"position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1\" style=\"width: 12px; height: 12px;\"></span>\n          </a>\n        </div>\n\n        <div class=\"mb-3\">\n           <h6 class=\"mb-0 fw-bold text-truncate\" style=\"font-size: 1.1rem;\">\n              <a href=\"/allMembers/seeProfile/").concat(requestId, "\" class=\"text-dark text-decoration-none\">").concat(firstName, " ").concat(lastName, "</a>\n            </h6>\n            ").concat(occupation ? "<div class=\"small text-muted text-truncate fw-medium\">".concat(occupation, "</div>") : '', "\n             <div class=\"d-flex align-items-center mt-1 text-muted small\">\n                ").concat(country ? "<span class=\"me-2\"><i class=\"bi bi-geo-alt-fill me-1 text-primary\"></i>".concat(country, "</span>") : '', "\n                <span>").concat(mutualFriends ? mutualFriends : 'New to interactions', "</span>\n            </div>\n        </div>\n\n        \n        <div class=\"d-flex gap-2 friend-request-actions\">\n          <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/50/").concat(requestCode, "/pp\" class=\"btn btn-primary btn-sm flex-grow-1 border-0 fw-medium shadow-sm\" style=\"border-radius: 20px; padding: 6px 0; background: linear-gradient(to right, var(--primary-color), #00c6ff);\">\n            Confirm\n          </a>\n          <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/10\" class=\"btn btn-light btn-sm flex-grow-1 border-0 fw-medium text-secondary\" style=\"border-radius: 20px; padding: 6px 0; background-color: #f0f2f5;\">\n            Decline\n          </a>\n        </div>\n      </div>\n    </div>\n  ");
-  (0,_shared__WEBPACK_IMPORTED_MODULE_0__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', html);
+  var html = "<p id=".concat(requestId, "_linkRequestCard></p>\n\n\n  <img src=\"").concat(imageUrl, "\" alt=\"Avatar\" style=\"width:50%\"><br>\n\n   <span>").concat(firstName, " ").concat(lastName, "</span>\n\n\n    <div class=\"w3-row w3-opacity\">\n      <div class=\"w3-half\">\n        <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/50/").concat(requestCode, "/pp\" style=\"text-decoration: none;\">\n          <button class=\"w3-button w3-block w3-green w3-section\" title=\"Accept\"><i class=\"fa fa-check\"></i></button>\n        </a>\n      </div>\n      \n      <div class=\"w3-half\">\n        <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/10\" style=\"text-decoration: none;\">\n          <button class=\"w3-button w3-block w3-red w3-section\" title=\"Decline\"><i class=\"fa fa-remove\"></i></button>\n        </a>\n      </div>\n    </div>\n  ");
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', html);
 };
 
 /***/ }),
@@ -1133,38 +1718,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   nameImgTiming: function() { return /* binding */ nameImgTiming; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-
 
 var timeAgo = function timeAgo(x) {
   return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
 };
-
-// const fullName = (fullName) => {
-//   return `<h6 id="fullName"><b>${fullName}</b> </h6>`
-// }
-
-// const postedAt = (date) => {
-//   return `<div class="timeago postTimeCal w3-right w3-opacity"  datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
-// }
-
-// export const nameImgTiming2 = (data) => {
-
-//     const img = (data.profileImg) ? `/public/img/profile/${data.profileImg}` : "/public/avatar/avatarF.png"
-
-//     return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}"> 
-//       <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">
-//         </a>
-//         ${postedAt(data)} ${fullName(data.fullName)}`
-// }
-
+var fullName = function fullName(_fullName) {
+  return "<h6 id=\"fullName\"><b>".concat(_fullName, "</b> </h6>");
+};
+var postedAt = function postedAt(date) {
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+};
 var nameImgTiming = function nameImgTiming(data) {
-  var profileImg = data.profileImg,
-    fullName = data.fullName,
-    date_created = data.date_created,
-    post_time = data.post_time;
-  var img = profileImg ? "/resources/images/profile/".concat(profileImg) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex align-items-center mb-3\">\n\n            <img src=\"".concat(img, "\" alt=\"Profile\" class=\"rounded-circle me-3 postImg\" width=\"40\" height=\"40\">\n                        \n            <div>\n                <h6 class=\"mb-0\">").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), " </h6>\n\n                <small class=\"text-muted\">posted </small><small class=\"text-muted timeago postTimeCal\" title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "' datetime='").concat(date_created, "'> ").concat(timeAgo(post_time), "</small>\n            </div>\n            </div>");
+  var img = data.profileImg ? "/public/img/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png";
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
 };
 
 /***/ }),
@@ -1178,7 +1744,6 @@ var nameImgTiming = function nameImgTiming(data) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   imgCount: function() { return /* binding */ imgCount; },
 /* harmony export */   showPostImg: function() { return /* binding */ showPostImg; }
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
@@ -1189,26 +1754,12 @@ var showPostImg = function showPostImg(data) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n        <img \n          src=\"/resources/images/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          data-postImgId=\"").concat(postNo).concat(imgElement, "\"\n          data-imgIndex=\"").concat(i, "\"\n          data-postNo=\"").concat(postNo, "\"\n          class=\"grid-image zoomable-image").concat(postNo, "\" \n          id=\"postImage").concat(i, "\"\n          >\n  ");
+    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/public/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>\n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
   }).join('');
-
-  // ✅ Optional: return both HTML and count for contributor-safe rendering
-  return imgElements;
-};
-var imgCount = function imgCount(data) {
-  // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
-  var postImagesWithValues = Object.keys(data).filter(function (key) {
-    return key.startsWith('post_img') && data[key] !== null;
-  }).map(function (el) {
-    return data[el];
-  });
-  var imageCount = postImagesWithValues.length;
-
-  // ✅ Optional: return both HTML and count for contributor-safe rendering
-  return imageCount;
+  return "\n    <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n      ".concat(imgElements, "\n      <br>\n    </div>\n  ");
 };
 
 /***/ }),
@@ -1223,58 +1774,51 @@ var imgCount = function imgCount(data) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 /* harmony import */ var _helper_images__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/images */ "./resources/asset/js/components/helper/images.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 
 
 
 
 
-
-// id('profilePics').addEventListener('click', ()=> id('formProfilePics').style.display ="block"
-
-// );
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePics').addEventListener('click', function () {
+  return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('formProfilePics').style.display = "block";
+});
 
 // FOR PROFILE IMAGE CHANGE
-// showImageFileUploadFn('uploadButtonProfilePics', 'profileImageFile', 'profileImgFileNames')
+(0,_helper_images__WEBPACK_IMPORTED_MODULE_1__.showImageFileUploadFn)('uploadButtonProfilePics', 'profileImageFile', 'profileImgFileNames');
 
-// // FOR POST MODAL IMAGE UPLOAD  
+// FOR POST MODAL IMAGE UPLOAD  
 
-// showImageFileUploadFn('uploadButton', 'post_img', 'postModalImgFileNames')
+(0,_helper_images__WEBPACK_IMPORTED_MODULE_1__.showImageFileUploadFn)('uploadButton', 'post_img', 'postModalImgFileNames');
+(0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('submitProfilePics').addEventListener('click', function () {
+  23;
 
-// id('submitProfilePics').addEventListener('click', ()=> {23
+  // Get the form element
+  var form = document.getElementById("formProfilePics");
 
-//   // Get the form element
-//     const form = document.getElementById("formProfilePics");
+  // Create a FormData object and append the form data to it
+  var formData = new FormData(form);
+  var options = {
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN'
+  };
+  // send form data using axios post method
 
-//     // Create a FormData object and append the form data to it
-//     const formData = new FormData(form);
-
-//     const options = {
-//         xsrfCookieName: 'XSRF-TOKEN',
-//         xsrfHeaderName: 'X-XSRF-TOKEN',
-//     }
-//     // send form data using axios post method
-
-//     axios.post('/member/profilePage/profileImg', formData, options)
-//     .then((response) => {
-
-//       id('profilePicsNotification').innerHTML = response.data
-//       log(response.data, "profilePicsNotification")
-
-//       if(response.data.message === "Profile image updated") {
-//         id('profilePicsNotification').classList.add('w3-green')
-//         id('profilePicsNotification').innerHTML = response.data.message
-//         // Reload the page
-//         location.reload();
-
-//       }
-//     })
-//     .catch((error) => {
-//        id('profilePicsNotification').classList.add('w3-red')
-//       id('profilePicsNotification').innerHTML = error.message
-//     });
-
-//   id('profilePicsNotification').innerHTML = ""
-// })
+  axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/member/profilePage/profileImg', formData, options).then(function (response) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data;
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.log)(response.data, "profilePicsNotification");
+    if (response.data.message === "Profile image updated") {
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').classList.add('w3-green');
+      (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = response.data.message;
+      // Reload the page
+      location.reload();
+    }
+  }).catch(function (error) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').classList.add('w3-red');
+    (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = error.message;
+  });
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('profilePicsNotification').innerHTML = "";
+});
 
 /***/ }),
 
@@ -1324,79 +1868,6 @@ localStorage.removeItem('redirect');
 
 /***/ }),
 
-/***/ "./resources/asset/js/components/profilePage/indexDB/reactions.js":
-/*!************************************************************************!*\
-  !*** ./resources/asset/js/components/profilePage/indexDB/reactions.js ***!
-  \************************************************************************/
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   cacheReaction: function() { return /* binding */ cacheReaction; }
-/* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-
-
-/**
- * Creates a local database in the browser
- * Stores reactions using a unique comment number
- * Lets you save and retrieve reactions without needing a server 
- */
-
-/**
- * This opens (or creates) a database called reactions.
- * The 1 is the version number — useful when upgrading the database structure later.
- */
-var dbPromise = indexedDB.open('reactions', 1);
-
-/**
- * This runs only when the database is new or its version changes.
- * It creates a store (like a table) called 'reactions'.
- * Each item in this store will use commentNo as its unique ID (called a keyPath).
- */
-dbPromise.onupgradeneeded = function (e) {
-  var db = e.target.result;
-  db.createObjectStore('reactions', {
-    keyPath: 'commentNo'
-  });
-};
-
-/**
- * This function retrieves a reaction from the database using its commentNo
- * It opens a read-only transaction and fetches the matching record.} commentNo 
- */
-function cacheReaction(_x, _x2) {
-  return _cacheReaction.apply(this, arguments);
-}
-function _cacheReaction() {
-  _cacheReaction = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(commentNo, data) {
-    var db, tx;
-    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
-      while (1) switch (_context.prev = _context.next) {
-        case 0:
-          _context.next = 1;
-          return dbPromise;
-        case 1:
-          db = _context.sent.result;
-          tx = db.transaction('reactions', 'readwrite');
-          tx.objectStore('reactions').put({
-            commentNo,
-            data
-          });
-        case 2:
-        case "end":
-          return _context.stop();
-      }
-    }, _callee);
-  }));
-  return _cacheReaction.apply(this, arguments);
-}
-
-/***/ }),
-
 /***/ "./resources/asset/js/components/profilePage/loadPost.js":
 /*!***************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/loadPost.js ***!
@@ -1414,11 +1885,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
-
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 
 
 
@@ -1444,115 +1913,52 @@ try {
 
   // Global state object with data-fetching and initialization logic
   var state = {
-    posts: [],
-    // Renamed 'post' to 'posts' for clarity
-    pagination: {},
+    post: [],
+    comment: [],
     // Method to fetch initial data and populate state
     initialize() {
-      var _arguments = arguments,
-        _this = this;
+      var _this = this;
       return (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee() {
-        var page, pullData, responseData, _t;
+        var pullData, _t;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
-              page = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : 1;
-              _context.prev = 1;
-              _context.next = 2;
-              return axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/post/getAllPostCommentByFamCode?page=".concat(page, "&limit=50"));
-            case 2:
+              _context.prev = 0;
+              _context.next = 1;
+              return axios__WEBPACK_IMPORTED_MODULE_9__["default"].get("/post/getAllPostCommentByFamCode");
+            case 1:
               pullData = _context.sent;
-              // --- THE FIX IS HERE ---
-              // Manually parse the data string before using it
-              responseData = pullData.data; // Check if the data is a string and needs parsing (based on your screenshot)
-              if (typeof responseData === 'string') {
-                responseData = JSON.parse(responseData);
-              }
+              // Assign fetched data to state properties
+              _this.post = pullData.data.message.post;
+              _this.comment = pullData.data.message.comment;
+              _this.comment = _this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
 
-              // 1. Assign the new 'posts' array from the parsed response
-              // Handle new response structure with pagination
-              if (responseData.message && responseData.message.message) {
-                _this.posts = responseData.message.message;
-                _this.pagination = responseData.message.pagination;
-              } else {
-                // Fallback for old structure or direct array
-                _this.posts = responseData.message || [];
-              }
-
-              // Clear existing posts if it's a new page load (optional, depends on UX)
-              // For now, we append, but for pagination usually we clear or replace.
-              // Let's clear the container for standard pagination behavior
-              (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').innerHTML = '';
-              if (_this.posts.length > 0) {
-                // 2. Loop and render.
-                _this.posts.forEach(function (post) {
-                  return (0,_post__WEBPACK_IMPORTED_MODULE_3__.allPost)(post);
+              if (_this.post.length > 0) {
+                // Render posts and comments on the page after data is loaded
+                _this.post.forEach(function (data) {
+                  return (0,_post__WEBPACK_IMPORTED_MODULE_3__.allPost)(data, _this.comment);
                 });
-                _this.renderPagination();
               } else {
                 (0,_global__WEBPACK_IMPORTED_MODULE_2__.log)("No post");
-                (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('postIt').innerHTML = '<p class="text-center text-muted mt-4">No posts found.</p>';
               }
-              _context.next = 4;
+              _context.next = 3;
               break;
-            case 3:
-              _context.prev = 3;
-              _t = _context["catch"](1);
+            case 2:
+              _context.prev = 2;
+              _t = _context["catch"](0);
               console.error("Error fetching posts and comments:", _t);
-              (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
-            case 4:
+            case 3:
             case "end":
               return _context.stop();
           }
-        }, _callee, null, [[1, 3]]);
+        }, _callee, null, [[0, 2]]);
       }))();
-    },
-    renderPagination() {
-      var _this2 = this;
-      var paginationEl = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('feedPagination');
-      if (!paginationEl || !this.pagination) return;
-      var _this$pagination = this.pagination,
-        current_page = _this$pagination.current_page,
-        last_page = _this$pagination.last_page;
-      var html = '';
-
-      // Previous Button
-      html += "\n                <li class=\"page-item ".concat(current_page === 1 ? 'disabled' : '', "\">\n                    <a class=\"page-link\" href=\"#\" data-page=\"").concat(current_page - 1, "\" tabindex=\"-1\">Previous</a>\n                </li>\n            ");
-
-      // Page Numbers (Simplified range for now)
-      for (var i = 1; i <= last_page; i++) {
-        // Show first, last, current, and neighbors
-        if (i === 1 || i === last_page || i >= current_page - 1 && i <= current_page + 1) {
-          html += "\n                        <li class=\"page-item ".concat(i === current_page ? 'active' : '', "\">\n                            <a class=\"page-link\" href=\"#\" data-page=\"").concat(i, "\">").concat(i, "</a>\n                        </li>\n                    ");
-        } else if (i === current_page - 2 || i === current_page + 2) {
-          html += "<li class=\"page-item disabled\"><span class=\"page-link\">...</span></li>";
-        }
-      }
-
-      // Next Button
-      html += "\n                <li class=\"page-item ".concat(current_page === last_page ? 'disabled' : '', "\">\n                    <a class=\"page-link\" href=\"#\" data-page=\"").concat(current_page + 1, "\">Next</a>\n                </li>\n            ");
-      paginationEl.innerHTML = html;
-
-      // Add event listeners
-      paginationEl.querySelectorAll('.page-link').forEach(function (link) {
-        link.addEventListener('click', function (e) {
-          e.preventDefault();
-          var newPage = parseInt(e.target.dataset.page);
-          if (newPage && newPage !== current_page && newPage > 0 && newPage <= last_page) {
-            _this2.initialize(newPage);
-            // Scroll to top of feed
-            document.querySelector('.feed-column').scrollIntoView({
-              behavior: 'smooth'
-            });
-          }
-        });
-      });
     }
   };
 
   // initiate the global object
   state.initialize();
-  var addNewPost = /*#__PURE__*/function () {
+  var updatePost = /*#__PURE__*/function () {
     var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(e) {
       var dataForUse, oldestPost, _t2;
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
@@ -1574,7 +1980,7 @@ try {
             (0,_post__WEBPACK_IMPORTED_MODULE_3__.appendNewPost)(dataForUse);
             _context2.prev = 1;
             _context2.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
               post_status: 'published'
             });
           case 2:
@@ -1590,13 +1996,13 @@ try {
         }
       }, _callee2, null, [[1, 3]]);
     }));
-    return function addNewPost(_x) {
+    return function updatePost(_x) {
       return _ref.apply(this, arguments);
     };
   }();
-  var addNewComment = /*#__PURE__*/function () {
+  var updateComment = /*#__PURE__*/function () {
     var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(e) {
-      var dataForUse, commentCounterEl, commentCount, _t3;
+      var dataForUse, _t3;
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
         while (1) switch (_context3.prev = _context3.next) {
           case 0:
@@ -1611,14 +2017,9 @@ try {
             // check if dataForUse length is greater than 0 and if yes foreach to lop 
 
             (0,_comment__WEBPACK_IMPORTED_MODULE_5__.appendNewComment)(dataForUse);
-            commentCounterEl = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("commentCounter".concat(dataForUse.post_no));
-            if (commentCounterEl) {
-              commentCount = parseInt(commentCounterEl.textContent); // get the current value and convert it to a number 
-              commentCounterEl.textContent = commentCount + 1;
-            }
             _context3.prev = 1;
             _context3.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
               comment_status: 'published'
             });
           case 2:
@@ -1634,25 +2035,10 @@ try {
         }
       }, _callee3, null, [[1, 3]]);
     }));
-    return function addNewComment(_x2) {
+    return function updateComment(_x2) {
       return _ref2.apply(this, arguments);
     };
   }();
-  var deleteComment = function deleteComment(data) {
-    var no = data.commentNo;
-    var postNo = data.postNo;
-    var commentEl = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("commentDiv".concat(no));
-    if (commentEl) commentEl.remove();
-    var commentCounterEl = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("commentCounter".concat(postNo));
-    if (commentCounterEl) {
-      var commentCount = parseInt(commentCounterEl.textContent);
-      // get the current value and convert it to a number 
-
-      if (commentCount > 0) {
-        commentCounterEl.textContent = commentCount - 1;
-      }
-    }
-  };
   var updateLike = function updateLike(e) {
     // Parse the incoming data and check if it already exists in state
     var dataForUse = checkOriginAndParsedData(e);
@@ -1661,40 +2047,12 @@ try {
       likeElement.innerHTML = parseInt(dataForUse.likeCounter);
     }
   };
-  var reactionUpdated = function reactionUpdated(_ref3) {
-    var commentNo = _ref3.commentNo,
-      reaction = _ref3.reaction,
-      countReaction = _ref3.countReaction,
-      whoReacted = _ref3.whoReacted;
-    var likeCount = (0,_global__WEBPACK_IMPORTED_MODULE_2__.qSel)("#like-count-".concat(commentNo));
-    var preview = (0,_global__WEBPACK_IMPORTED_MODULE_2__.qSel)("#reaction-preview-".concat(commentNo));
-    if (likeCount) {
-      likeCount.textContent = countReaction[reaction] || 0;
-    }
-    if (preview) {
-      preview.innerHTML = "\n            <span title=\"".concat(whoReacted, " reacted with ").concat(reaction, "\">").concat(reaction, "</span>\n        ");
-    }
-    var tooltip = (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)("reaction-summary-".concat(commentNo));
-    if (tooltip) {
-      tooltip.innerHTML = "<div><strong>".concat(whoReacted, "</strong> and others reacted</div>");
-    }
-  };
-  var famCode = localStorage.getItem('requesterFamCode');
-  var addNewFriendRequest = function addNewFriendRequest(data) {
-    // ADD TO THE NOTIFICATION TAB OF THE APPROVER if the famcode on local storage is the same as the approverFamCode
-
-    if (famCode === data.approverDetails.approverCode) {
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
-      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_10__.friendRequestCard)(data.requesterDetails);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
-    }
-  };
 
   // Subscribe to the posts channel
   var postsChannel = pusher.subscribe('posts-channel');
   postsChannel.bind('new-post', function (data) {
     data.forEach(function (item) {
-      return addNewPost(item);
+      return updatePost(item);
     });
   });
 
@@ -1702,16 +2060,7 @@ try {
   var commentsChannel = pusher.subscribe('comments-channel');
   commentsChannel.bind('new-comment', function (data) {
     data.forEach(function (item) {
-      return addNewComment(item);
-    });
-  });
-  commentsChannel.bind('delete-comment', function (data) {
-    deleteComment(data);
-  });
-  commentsChannel.bind('reacted-updated', function (data) {
-    if (!Array.isArray(data)) data = [data];
-    data.forEach(function (item) {
-      return reactionUpdated(item);
+      return updateComment(item);
     });
   });
 
@@ -1726,23 +2075,15 @@ try {
   // Subscribe to the event channel
 
   var checkEventAndAdd = function checkEventAndAdd(data) {
-    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_8__.eventHtml)(data);
+    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_7__.eventHtml)(data);
     return (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
   };
   var notificationChannel = pusher.subscribe('notification-channel');
   notificationChannel.bind('new-notification', function (data) {
     if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
       checkEventAndAdd(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
-    }
-  });
-
-  // Subscribe to the new friend request channel
-  var friendRequestChannel = pusher.subscribe('friend-request-channel');
-  friendRequestChannel.bind('new-request', function (data) {
-    if (famCode === data.approverDetails.approverCode) {
-      addNewFriendRequest(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.addToNotificationTab)(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.increaseNotificationCount)();
     }
   });
 
@@ -1841,7 +2182,7 @@ var setupLongPressReaction = function setupLongPressReaction(commentNo) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
 
@@ -1851,32 +2192,21 @@ __webpack_require__.r(__webpack_exports__);
 try {
   // NEW MESSAGE MODAL
   var showModal = function showModal() {
-    return (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id01').style.display = 'block';
   };
 
   // CREATE EVENT MODAL
   var showEvent = function showEvent() {
-    return (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
+    return (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('id_event_modal').style.display = 'block';
   };
 
   //EVENT ACTION
-
-  var action = function action() {
-    var createEvent = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent');
-    var postMsg = (0,_shared__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg');
-    if (createEvent) {
-      createEvent.addEventListener('click', showEvent);
-    } else if (postMsg) {
-      postMsg.addEventListener('click', showModal);
-    }
-  };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', action);
-  }
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('createEvent').addEventListener('click', showEvent);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.id)('postMsg').addEventListener('click', showModal);
 
   // handle post message
 } catch (e) {
-  (0,_shared__WEBPACK_IMPORTED_MODULE_0__.showError)(e);
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.showError)(e);
 }
 
 /***/ }),
@@ -1954,29 +2284,26 @@ __webpack_require__.r(__webpack_exports__);
 var famCode = localStorage.getItem('requesterFamCode');
 /**
  * Renders a post and its associated comments in the DOM.
- * * This function now expects a single, complete post object (postData) 
- * which already contains its comments in the 'comments' key, as provided 
- * by the refactored PHP backend.
+ * 
+ * This function takes a post object and an array of comment data,
+ * filters the comments to include only those associated with the 
+ * given post, generates HTML for the post using the `html` function, 
+ * and appends it to the 'postIt' container in the DOM.
  *
- * @param {Object} postData - The post object containing post data, and a nested 'comments' array.
+ * @param {Object} el - The post object containing post data, including post number.
+ * @param {Array} commentData - An array of comment objects associated with posts.
+ * @returns {boolean} - Returns false if the post object is invalid.
  */
-var allPost = function allPost(postData) {
-  // <-- Removed commentData parameter
-
-  // Check for valid post data
-  if (!postData || typeof postData.post_no === 'undefined') {
-    (0,_global__WEBPACK_IMPORTED_MODULE_1__.msgException)('Invalid post data structure received.');
-    return;
+var allPost = function allPost(postData, commentData) {
+  if (!postData || !Array.isArray(commentData)) {
+    (0,_global__WEBPACK_IMPORTED_MODULE_1__.msgException)('Invalid post data');
   }
-
-  // 1. The comments array is now directly available inside the postData object.
-  // We use the logical OR (|| []) to ensure it's always an array, even if the key is missing.
-  var postComments = postData.comments || [];
-
-  // 2. Pass the post data and its now-ready-to-use comment array to the HTML function
-  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postData, postComments);
-
-  // 3. Insert the post HTML into the container
+  var postNo = parseInt(postData.post_no);
+  var filterComment = commentData.filter(function (comm) {
+    return parseInt(comm.post_no) === postNo;
+  }); // filter the comment to an array
+  var postHtml = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postData, filterComment);
+  // if(postFamCode === famCode) {
   (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)('postIt').insertAdjacentHTML('beforeend', postHtml);
 };
 
@@ -1991,8 +2318,8 @@ var allPost = function allPost(postData) {
  * @param {Object} el - The post object containing post data, including post number.
  * @returns {boolean} - Returns false if the post object is invalid.
  */
-var appendNewPost = function appendNewPost(postArray) {
-  var post_no = postArray.post_no;
+var appendNewPost = function appendNewPost(el) {
+  var post_no = el.post_no;
   // Generate the IDs for the comment form and its components const 
   var commentFormId = "formComment".concat(post_no);
   var inputCommentId = "inputComment".concat(post_no);
@@ -2005,7 +2332,7 @@ var appendNewPost = function appendNewPost(postArray) {
 
   // If the comment form components do not exist, create and append the new post
   if (!commentForm1 || !inputComment || !submitComment) {
-    var appendHTML = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(postArray);
+    var appendHTML = (0,_html__WEBPACK_IMPORTED_MODULE_0__.html)(el);
 
     // Ensure the post belongs to the correct family code
     // if (el.postFamCode === famCode) {

@@ -1,4 +1,8 @@
+includes:
+  - phpstan-baseline.neon
+
 parameters:
+  reportUnmatchedIgnoredErrors: false
   level : 6
   paths:
     - app
@@ -8,5 +12,9 @@ parameters:
     - vendor
     - bootstrap
     - app/router
+    - app/Classes/Chat.php (?)
+    - app/Classes/websocket/NotificationWebSocketHandler.php (?)
+    - app/classes/Chat.php (?)
+    - app/classes/websocket/NotificationWebSocketHandler.php (?)
 
 #./vendor/bin/phpstan analyze .

@@ -72,8 +72,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
 
 
 
@@ -81,7 +81,7 @@ __webpack_require__.r(__webpack_exports__);
 
 // import Cookies from 'js-cookie'
 
-(0,axios_retry__WEBPACK_IMPORTED_MODULE_4__["default"])(axios__WEBPACK_IMPORTED_MODULE_3__["default"], {
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_3__["default"])(axios__WEBPACK_IMPORTED_MODULE_4__["default"], {
   retries: 3
 });
 
@@ -155,7 +155,7 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.prev = 3;
           _context.next = 4;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url, formEntries, options);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url, formEntries, options);
         case 4:
           response = _context.sent;
           if (!(response.status < 200 || response.status >= 300)) {
@@ -302,7 +302,7 @@ var getApiData = /*#__PURE__*/function () {
             }
           };
           _context2.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(URL, config);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(URL, config);
         case 2:
           fetch = _context2.sent;
           return _context2.abrupt("return", fetch.data);
@@ -341,7 +341,7 @@ var getMultipleApiData = /*#__PURE__*/function () {
             }
           };
           _context3.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url2, config)]);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(url2, config)]);
         case 2:
           fetch = _context3.sent;
           return _context3.abrupt("return", fetch);
@@ -383,7 +383,7 @@ var postMultipleApiData = /*#__PURE__*/function () {
             }
           };
           _context4.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url2, formData, config)]);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url2, formData, config)]);
         case 2:
           fetch = _context4.sent;
           return _context4.abrupt("return", fetch);

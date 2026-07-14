@@ -20,12 +20,6 @@
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		if (!(moduleId in __webpack_modules__)) {
-/******/ 			delete __webpack_module_cache__[moduleId];
-/******/ 			var e = new Error("Cannot find module '" + moduleId + "'");
-/******/ 			e.code = 'MODULE_NOT_FOUND';
-/******/ 			throw e;
-/******/ 		}
 /******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
@@ -185,6 +179,7 @@
 /******/ 				script = document.createElement('script');
 /******/ 		
 /******/ 				script.charset = 'utf-8';
+/******/ 				script.timeout = 120;
 /******/ 				if (__webpack_require__.nc) {
 /******/ 					script.setAttribute("nonce", __webpack_require__.nc);
 /******/ 				}
@@ -281,7 +276,6 @@
 /******/ 			if((!__webpack_require__.o(installedChunks, chunkId) || installedChunks[chunkId] === undefined) && !/^(\/js\/manifest|css\/main)$/.test(chunkId)) {
 /******/ 				installedChunks[chunkId] = null;
 /******/ 				var link = document.createElement('link');
-/******/ 				link.charset = 'utf-8';
 /******/ 		
 /******/ 				if (__webpack_require__.nc) {
 /******/ 					link.setAttribute("nonce", __webpack_require__.nc);

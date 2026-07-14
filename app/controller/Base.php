@@ -2,10 +2,10 @@
 
 namespace App\controller;
 
-use Src\AllFunctionalities;
+use App\classes\AllFunctionalities;
 
 /** @package App\controller */
-class Base extends Allfunctionalities
+class Base extends AllFunctionalities
 {
 
 

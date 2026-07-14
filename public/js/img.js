@@ -21,8 +21,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
 
 
 
@@ -30,7 +30,7 @@ __webpack_require__.r(__webpack_exports__);
 
 // import Cookies from 'js-cookie'
 
-(0,axios_retry__WEBPACK_IMPORTED_MODULE_4__["default"])(axios__WEBPACK_IMPORTED_MODULE_3__["default"], {
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_3__["default"])(axios__WEBPACK_IMPORTED_MODULE_4__["default"], {
   retries: 3
 });
 
@@ -104,7 +104,7 @@ var postFormData = /*#__PURE__*/function () {
           }; // AXIOS POST FUNCTIONALITY
           _context.prev = 3;
           _context.next = 4;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url, formEntries, options);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url, formEntries, options);
         case 4:
           response = _context.sent;
           if (!(response.status < 200 || response.status >= 300)) {
@@ -251,7 +251,7 @@ var getApiData = /*#__PURE__*/function () {
             }
           };
           _context2.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(URL, config);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(URL, config);
         case 2:
           fetch = _context2.sent;
           return _context2.abrupt("return", fetch.data);
@@ -290,7 +290,7 @@ var getMultipleApiData = /*#__PURE__*/function () {
             }
           };
           _context3.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].get(url2, config)]);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(url2, config)]);
         case 2:
           fetch = _context3.sent;
           return _context3.abrupt("return", fetch);
@@ -332,7 +332,7 @@ var postMultipleApiData = /*#__PURE__*/function () {
             }
           };
           _context4.next = 2;
-          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].all([axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url2, formData, config)]);
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].all([axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_4__["default"].post(url2, formData, config)]);
         case 2:
           fetch = _context4.sent;
           return _context4.abrupt("return", fetch);
@@ -476,12 +476,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var html = function html(postArray) {
-  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-  var post_no = postArray.post_no,
-    postMessage = postArray.postMessage,
-    id = postArray.id;
-  return "\n    <div class=\"post card\" id=\"post".concat(post_no, "\">\n     <div class=\"card-body post").concat(post_no, "\" id=\"postIt\">\n    ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(postArray), "\n\n    <div class=\"post-content\">\n    <p class=\"card-text\"> ").concat(postMessage, " </p>\n\n     <div class=\"photo-grid grid-").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.imgCount)(postArray), "\">\n      ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(postArray), "\n    </div>\n    </div>\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(postArray, comment.length), "\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(postArray), "\n    <div id = 'showComment").concat(post_no, "' class=\"comment-section\">\n    ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment, id), "\n\n      \n    </div>\n");
+var html = function html(el) {
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var post_no = el.post_no,
+    postMessage = el.postMessage;
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -496,9 +495,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   commentForm: function() { return /* binding */ commentForm; }
 /* harmony export */ });
-var commentForm = function commentForm(_ref) {
-  var post_no = _ref.post_no;
-  return "\n    <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n    <form action=\"/postCommentProfile\" method=\"post\" id=\"formComment").concat(post_no, "\" enctype=\"multipart/form-data\" class=\"mb-4 d-none formComment").concat(post_no, "\">\n\n      <input type=\"hidden\" name=\"post_no\" value=\"").concat(post_no, "\"/>\n\n       <div id=\"emojiCommentPickerList").concat(post_no, "\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"> </div>\n\n        <div id=\"gifPickerList\" class=\"d-flex flex-wrap gap-2 mt-2 d-none\" role=\"listbox\" aria-hidden=\"true\"></div>\n\n        <textarea class=\"form-control inputComment mb-3\" data-commentEmoji-target id=\"inputComment").concat(post_no, "\" name=\"comment\" rows=2> </textarea/>\n                \n      <div class=\"mt-3 d-flex justify-content-between align-items-center position-relative\">\n        <div class=\"d-flex gap-2\">\n            <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" title=\"add emoji\" \n              id=\"emojiToggle").concat(post_no, "\"aria-expanded=\"false\" aria-controls=\"emojiPickerList\">\uD83D\uDE0A\n              </button>\n\n            <button type=\"button\" class=\"btn btn-sm btn-outline-secondary\" id=\"stickerToggle").concat(post_no, "\"  title=\"Stickers\" aria-label=\"Stickers\">\uD83C\uDFF7\uFE0F</button>\n        </div>\n      \n        <button type=\"submit\" id=\"submitComment").concat(post_no, "\" class=\"btn btn-outline-primary btn-sm submitComment\"> Submit </button>\n      \n            \n      </div>\n    </form>\n  ");
+var commentForm = function commentForm(data) {
+  var post_no = data.post_no;
+  return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
 };
 
 /***/ }),
@@ -530,38 +529,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   nameImgTiming: function() { return /* binding */ nameImgTiming; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-
 
 var timeAgo = function timeAgo(x) {
   return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
 };
-
-// const fullName = (fullName) => {
-//   return `<h6 id="fullName"><b>${fullName}</b> </h6>`
-// }
-
-// const postedAt = (date) => {
-//   return `<div class="timeago postTimeCal w3-right w3-opacity"  datetime='${date.date_created}' title='${format(date.date_created)}'> ${timeAgo(date.post_time)}</div>`
-// }
-
-// export const nameImgTiming2 = (data) => {
-
-//     const img = (data.profileImg) ? `/public/img/profile/${data.profileImg}` : "/public/avatar/avatarF.png"
-
-//     return `<a href="/profilepage/img?dir=img&pics=${data.img}&pID=${data.post_no}&path=profile&id=${data.id}"> 
-//       <img src=${img} alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">
-//         </a>
-//         ${postedAt(data)} ${fullName(data.fullName)}`
-// }
-
+var fullName = function fullName(_fullName) {
+  return "<h6 id=\"fullName\"><b>".concat(_fullName, "</b> </h6>");
+};
+var postedAt = function postedAt(date) {
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
+};
 var nameImgTiming = function nameImgTiming(data) {
-  var profileImg = data.profileImg,
-    fullName = data.fullName,
-    date_created = data.date_created,
-    post_time = data.post_time;
-  var img = profileImg ? "/resources/images/profile/".concat(profileImg) : "/public/avatar/avatarF.png";
-  return "<div class=\"d-flex align-items-center mb-3\">\n\n            <img src=\"".concat(img, "\" alt=\"Profile\" class=\"rounded-circle me-3 postImg\" width=\"40\" height=\"40\">\n                        \n            <div>\n                <h6 class=\"mb-0\">").concat((0,_shared__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName), " </h6>\n\n                <small class=\"text-muted\">posted </small><small class=\"text-muted timeago postTimeCal\" title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "' datetime='").concat(date_created, "'> ").concat(timeAgo(post_time), "</small>\n            </div>\n            </div>");
+  var img = data.profileImg ? "/public/img/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png";
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
 };
 
 /***/ }),
@@ -574,7 +554,6 @@ var nameImgTiming = function nameImgTiming(data) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   imgCount: function() { return /* binding */ imgCount; },
 /* harmony export */   showPostImg: function() { return /* binding */ showPostImg; }
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
@@ -585,26 +564,12 @@ var showPostImg = function showPostImg(data) {
     return data[el];
   });
   var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
-    return "\n        <img \n          src=\"/resources/images/post/".concat(imgElement, "\" \n          alt=\"images").concat(i, "\" \n          data-postImgId=\"").concat(postNo).concat(imgElement, "\"\n          data-imgIndex=\"").concat(i, "\"\n          data-postNo=\"").concat(postNo, "\"\n          class=\"grid-image zoomable-image").concat(postNo, "\" \n          id=\"postImage").concat(i, "\"\n          >\n  ");
+    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(imgElement, "&pID=").concat(postNo, "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/public/img/post/").concat(imgElement, "\" style=\"width:100%\" alt=\"images").concat(i, "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat(i, "\">\n      </div>\n    </a>\n  ");
   };
   var imgElements = postImagesWithValues.map(function (pics, i) {
     return picsImgHtml(pics, i, data.post_no);
   }).join('');
-
-  // ✅ Optional: return both HTML and count for contributor-safe rendering
-  return imgElements;
-};
-var imgCount = function imgCount(data) {
-  // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
-  var postImagesWithValues = Object.keys(data).filter(function (key) {
-    return key.startsWith('post_img') && data[key] !== null;
-  }).map(function (el) {
-    return data[el];
-  });
-  var imageCount = postImagesWithValues.length;
-
-  // ✅ Optional: return both HTML and count for contributor-safe rendering
-  return imageCount;
+  return "\n    <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n      ".concat(imgElements, "\n      <br>\n    </div>\n  ");
 };
 
 /***/ }),

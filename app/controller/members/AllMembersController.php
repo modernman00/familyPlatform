@@ -57,9 +57,9 @@ class AllMembersController extends AllMembersData
     }
 
 
-    /**
-     * @return never
-     */
+    // /**
+    //  * @return never
+    //  */
     // public function setProfile($id)
     // {
     //     $id = checkInput($id);
@@ -80,6 +80,7 @@ class AllMembersController extends AllMembersData
             if (!$result) {
                 $tokenErr = "Authentication failed";
                 view('error/genError', ['error' => $tokenErr]);
+                return;
             }
 
             $id = checkInput($id);

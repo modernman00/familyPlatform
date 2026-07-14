@@ -79,7 +79,7 @@ class Login
     }
 
     /**
-     * @return never
+     * @return void
      */
     public function adminSignOut(): void
     {
