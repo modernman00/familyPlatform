@@ -44,9 +44,7 @@
     "phpstan/phpstan": "^2.1.16",
     "friendsofphp/php-cs-fixer": "^3.75"
   },
-  "bin-dir": [
-    "local-php-security-checker"
-  ],
+
   "config": {
     "optimize-autoloader": true,
     "allow-plugins": {
