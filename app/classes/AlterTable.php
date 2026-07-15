@@ -8,7 +8,7 @@ class AlterTable extends AllFunctionalities
 {
 
 
-    /**
+    /**@@@
      * dataArr - this is array of the new column name to be updated ['payment', 'dob]
      */
 
