@@ -1,34 +1,14 @@
 "use strict";
-import { id, showError } from '../global'
-import { postFormData } from "../helper/http"
+import { createCodeSubmitHandler, qSelAll, id } from '@modernman00/shared-js-lib';
 
-// block the setLoader div
+// get the redirect from the login script (getstorage) or default to profile page
+const location = localStorage.getItem('redirect') || '/member/ProfilePage';
 
-id("setLoader").style.display = "none";
-
-
-
-const LoginCode = (e) => {
-    try {
-       
-        e.preventDefault();
-        // just in case there was an earlier error notification - remove it
-        const codeNotification = id('codeForm_notification');
-
-        if (codeNotification.classList.contains('is-danger')) {
-            codeNotification.classList.remove('is-danger');
-        }
-
-        id('setLoader').style.display = "block"
-
-        // get the direct from the login script (getstorage)
-        const location = localStorage.getItem('redirect')
-
-        postFormData("/login/code", "codeForm", location)
-
-    } catch (err) {
-        showError(err)
-    }
-}
-
-id('submit').addEventListener('click', LoginCode)
+// Initialize the primary handler
+createCodeSubmitHandler({
+  formId: 'code', 
+  route: '/login/code', 
+  redirect: location,
+  theme: 'bootstrap',
+  recaptchaAction: 'CODE'
+});

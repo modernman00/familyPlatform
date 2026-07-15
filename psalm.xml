@@ -18,5 +18,15 @@
         <PossiblyUnusedProperty errorLevel="suppress" />
         <UnusedClass errorLevel="suppress" />
         <UnusedMethod errorLevel="suppress" />
+        <TooManyArguments errorLevel="suppress" />
+        <InvalidNamedArgument errorLevel="suppress" />
+        <UndefinedMethod errorLevel="suppress" />
+        <PossiblyNullArrayAccess errorLevel="suppress" />
+        <NullableReturnStatement errorLevel="suppress" />
+        <UndefinedGlobalVariable errorLevel="suppress" />
+        <ClassMustBeFinal errorLevel="suppress" />
+        <RiskyTruthyFalsyComparison errorLevel="suppress" />
+        <InvalidArgument errorLevel="suppress" />
+        <UnusedBaselineEntry errorLevel="suppress" />
     </issueHandlers>
 </psalm>

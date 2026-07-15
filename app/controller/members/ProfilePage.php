@@ -227,6 +227,22 @@ final class ProfilePage extends ProcessImg
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
 
+                // Handle Poll Data
+                $pollQuestion = isset($_POST['poll_question']) ? htmlspecialchars(trim($_POST['poll_question']), ENT_QUOTES, 'UTF-8') : null;
+                $pollOptionsRaw = $_POST['poll_options'] ?? [];
+                
+                $pollOptions = [];
+                foreach ($pollOptionsRaw as $opt) {
+                    $cleanOpt = htmlspecialchars(trim($opt), ENT_QUOTES, 'UTF-8');
+                    if (!empty($cleanOpt)) {
+                        $pollOptions[] = $cleanOpt;
+                    }
+                }
+                
+                if (!empty($pollQuestion) && count($pollOptions) >= 2) {
+                    \App\model\PollData::createPoll((int)$result, $pollQuestion, $pollOptions);
+                }
+
                 msgSuccess(200, $result);
             }
 

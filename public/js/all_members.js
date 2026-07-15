@@ -366,11 +366,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
-/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../global.js */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
-/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global.js */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
 
 
 
@@ -441,16 +441,16 @@ document.onclick = /*#__PURE__*/function () {
             _context.next = 5;
             break;
           }
-          notificationHTML = (0,_shared__WEBPACK_IMPORTED_MODULE_3__.qSel)(".member_profile_".concat(_userId));
+          notificationHTML = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.qSel)(".member_profile_".concat(_userId));
           _context.next = 4;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].delete(url);
+          return axios__WEBPACK_IMPORTED_MODULE_6__["default"]["delete"](url);
         case 4:
           response = _context.sent;
           if (response.data.message === 'success') {
             // remove a html element with call member_profile
             notificationHTML.remove();
           } else {
-            (0,_shared__WEBPACK_IMPORTED_MODULE_3__.msgException)("Error deleting profile");
+            (0,_shared__WEBPACK_IMPORTED_MODULE_2__.msgException)("Error deleting profile");
           }
         case 5:
           _context.next = 7;
@@ -472,7 +472,7 @@ document.onclick = /*#__PURE__*/function () {
           _context.prev = 8;
           _t = _context["catch"](0);
           // Handle any errors that occur during execution
-          (0,_shared__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          (0,_shared__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
         case 9:
         case "end":
           return _context.stop();
@@ -496,7 +496,7 @@ function _fetchApproverData() {
         case 0:
           _context2.prev = 0;
           _context2.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
+          return axios__WEBPACK_IMPORTED_MODULE_6__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
         case 1:
           result = _context2.sent;
           approverDetails = {
@@ -522,15 +522,15 @@ function _fetchApproverData() {
 }
 function sendFamilyRequest(data) {
   try {
-    return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/members/familyRequestMgt', data);
+    return axios__WEBPACK_IMPORTED_MODULE_6__["default"].post('/members/familyRequestMgt', data);
   } catch (error) {
-    (0,_shared__WEBPACK_IMPORTED_MODULE_3__.showError)(error);
+    (0,_shared__WEBPACK_IMPORTED_MODULE_2__.showError)(error);
   }
 }
 
 // Function to update the button's HTML and disable it
 function updateButton(targetId, newHTML) {
-  var theTargetId = (0,_shared__WEBPACK_IMPORTED_MODULE_3__.id)(targetId);
+  var theTargetId = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)(targetId);
   theTargetId.innerHTML = newHTML;
   theTargetId.disabled = true;
 }
@@ -547,7 +547,7 @@ function updateButton(targetId, newHTML) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderMembers: function() { return /* binding */ renderMembers; }
+/* harmony export */   "renderMembers": function() { return /* binding */ renderMembers; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -648,7 +648,7 @@ var renderMembers = function renderMembers() {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   createSearchHandler: function() { return /* binding */ createSearchHandler; }
+/* harmony export */   "createSearchHandler": function() { return /* binding */ createSearchHandler; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -845,7 +845,7 @@ var createSearchHandler = function createSearchHandler(_ref2) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtml: function() { return /* binding */ renderHtml; }
+/* harmony export */   "renderHtml": function() { return /* binding */ renderHtml; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -913,22 +913,22 @@ __webpack_require__.r(__webpack_exports__);
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
-/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
-/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
-/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
-/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
-/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
-/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
-/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
-/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
-/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
-/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
-/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
-/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
-/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
-/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
-/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
+/* harmony export */   "autoCompleter": function() { return /* binding */ autoCompleter; },
+/* harmony export */   "checkBox": function() { return /* binding */ checkBox; },
+/* harmony export */   "checkBox2": function() { return /* binding */ checkBox2; },
+/* harmony export */   "convertFormData": function() { return /* binding */ convertFormData; },
+/* harmony export */   "createAndAppendElement": function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   "distinctValue": function() { return /* binding */ distinctValue; },
+/* harmony export */   "isChecked": function() { return /* binding */ isChecked; },
+/* harmony export */   "loaderIcon": function() { return /* binding */ loaderIcon; },
+/* harmony export */   "loaderIconBootstrap": function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   "loaderIconBulma": function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   "matchInput": function() { return /* binding */ matchInput; },
+/* harmony export */   "matchRegex": function() { return /* binding */ matchRegex; },
+/* harmony export */   "realTimeCheckLen": function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   "removeDiv": function() { return /* binding */ removeDiv; },
+/* harmony export */   "showResponse": function() { return /* binding */ showResponse; },
+/* harmony export */   "toSentenceCase": function() { return /* binding */ toSentenceCase; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -1121,8 +1121,8 @@ var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   addToNotificationTab: function() { return /* binding */ addToNotificationTab; },
-/* harmony export */   increaseNotificationCount: function() { return /* binding */ increaseNotificationCount; }
+/* harmony export */   "addToNotificationTab": function() { return /* binding */ addToNotificationTab; },
+/* harmony export */   "increaseNotificationCount": function() { return /* binding */ increaseNotificationCount; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -1410,7 +1410,7 @@ document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded'
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   friendRequestCard: function() { return /* binding */ friendRequestCard; }
+/* harmony export */   "friendRequestCard": function() { return /* binding */ friendRequestCard; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 

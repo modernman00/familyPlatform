@@ -3,6 +3,7 @@ import { commentForm } from "./htmlFolder/commentForm"
 import { likeCommentButton } from "./htmlFolder/likeCommentButton"
 import { showPostImg } from "./htmlFolder/showPostImages"
 import { showComment } from "./comment"
+import { renderPoll, renderReactions } from "./htmlFolder/engagementHtml"
 
 
 export const html = (el, comment = null) => {
@@ -16,6 +17,9 @@ export const html = (el, comment = null) => {
     <p class="postFont"> ${postMessage} </p>
 
      ${showPostImg(el)}
+     
+     ${renderPoll(el?.poll)}
+     ${renderReactions(el)}
 
     ${likeCommentButton(el)}
 

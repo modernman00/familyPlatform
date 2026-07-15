@@ -14,7 +14,7 @@
 
 
     <hr class="my-2">
-    <form action="/forgot" id="forgot" method="post" class="styleform_form">
+    <form id="forgot" method="post" class="styleform_form">
         <div class="form-group">
             <br>
             <div class='row'>

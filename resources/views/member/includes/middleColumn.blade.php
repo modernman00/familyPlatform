@@ -17,6 +17,16 @@
     </div>
   </div>
 
+  <!-- Memories Section (Hidden until loaded) -->
+  <div id="memories-container" style="display: none; margin-bottom: 24px;">
+    <div class="card border-0 shadow-sm" style="border-radius: 16px; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);">
+      <div class="card-body p-4">
+        <h5 class="fw-bold text-primary mb-3"><i class="fa fa-history me-2"></i> On This Day</h5>
+        <div id="memories-content"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Posts -->
   <div class="postIt" id="postIt">
 

@@ -16,6 +16,12 @@ var loginURL = sessionStorage.getItem('loginURL1');
 
 // Determine the redirect URL based on loginURL
 var redirect = loginURL === '/lasu' ? '/admin/reviewApps' : '/login/code';
+
+// Critically ensure the redirect storage is reset to ProfilePage for normal logins,
+// otherwise an aborted Forgot Password flow will falsely hijack the redirect.
+if (loginURL !== '/lasu') {
+  localStorage.setItem('redirect', '/member/ProfilePage');
+}
 (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAdminLoginHandler)({
   formId: 'login',
   buttonId: 'button',

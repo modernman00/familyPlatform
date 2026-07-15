@@ -9,26 +9,26 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkElements: function() { return /* binding */ checkElements; },
-/* harmony export */   checkManyElements: function() { return /* binding */ checkManyElements; },
-/* harmony export */   date2String: function() { return /* binding */ date2String; },
-/* harmony export */   deleteNotification: function() { return /* binding */ deleteNotification; },
-/* harmony export */   hideElement: function() { return /* binding */ hideElement; },
-/* harmony export */   id: function() { return /* binding */ id; },
-/* harmony export */   idInnerHTML: function() { return /* binding */ idInnerHTML; },
-/* harmony export */   idValue: function() { return /* binding */ idValue; },
-/* harmony export */   log: function() { return /* binding */ log; },
-/* harmony export */   manipulateAttribute: function() { return /* binding */ manipulateAttribute; },
-/* harmony export */   msgException: function() { return /* binding */ msgException; },
-/* harmony export */   qSel: function() { return /* binding */ qSel; },
-/* harmony export */   qSelAll: function() { return /* binding */ qSelAll; },
-/* harmony export */   qSelInnerHTML: function() { return /* binding */ qSelInnerHTML; },
-/* harmony export */   qSelValue: function() { return /* binding */ qSelValue; },
-/* harmony export */   showElement: function() { return /* binding */ showElement; },
-/* harmony export */   showError: function() { return /* binding */ showError; },
-/* harmony export */   showNotification: function() { return /* binding */ showNotification; },
-/* harmony export */   warningSign: function() { return /* binding */ warningSign; },
-/* harmony export */   write: function() { return /* binding */ write; }
+/* harmony export */   "checkElements": function() { return /* binding */ checkElements; },
+/* harmony export */   "checkManyElements": function() { return /* binding */ checkManyElements; },
+/* harmony export */   "date2String": function() { return /* binding */ date2String; },
+/* harmony export */   "deleteNotification": function() { return /* binding */ deleteNotification; },
+/* harmony export */   "hideElement": function() { return /* binding */ hideElement; },
+/* harmony export */   "id": function() { return /* binding */ id; },
+/* harmony export */   "idInnerHTML": function() { return /* binding */ idInnerHTML; },
+/* harmony export */   "idValue": function() { return /* binding */ idValue; },
+/* harmony export */   "log": function() { return /* binding */ log; },
+/* harmony export */   "manipulateAttribute": function() { return /* binding */ manipulateAttribute; },
+/* harmony export */   "msgException": function() { return /* binding */ msgException; },
+/* harmony export */   "qSel": function() { return /* binding */ qSel; },
+/* harmony export */   "qSelAll": function() { return /* binding */ qSelAll; },
+/* harmony export */   "qSelInnerHTML": function() { return /* binding */ qSelInnerHTML; },
+/* harmony export */   "qSelValue": function() { return /* binding */ qSelValue; },
+/* harmony export */   "showElement": function() { return /* binding */ showElement; },
+/* harmony export */   "showError": function() { return /* binding */ showError; },
+/* harmony export */   "showNotification": function() { return /* binding */ showNotification; },
+/* harmony export */   "warningSign": function() { return /* binding */ warningSign; },
+/* harmony export */   "write": function() { return /* binding */ write; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -263,7 +263,7 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/login/forgot') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signup_login').style.display = 'none'; // navbar mgt
 
-  Promise.all(/*! import() | forgotPwd */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("forgotPwd")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | forgotPwd */ "forgotPwd").then(__webpack_require__.bind(__webpack_require__, /*! ./components/forgotPwd/ */ "./resources/asset/js/components/forgotPwd/index.js")).then(function (module) {
     return module.default;
   }).catch(function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);
@@ -288,7 +288,7 @@ if (window.location.pathname === '/register') {
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.login').style.display = 'none'; // navbar mgt
   (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.signUp').style.display = 'none'; // navbar mgt
   // qSel('#loader').style.display ="none" // loader
-  Promise.all(/*! import() | changePW */[__webpack_require__.e("/js/vendor"), __webpack_require__.e("changePW")]).then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
+  __webpack_require__.e(/*! import() | changePW */ "changePW").then(__webpack_require__.bind(__webpack_require__, /*! ./components/changePW/ */ "./resources/asset/js/components/changePW/index.js")).then(function (module) {
     return module.default;
   }).catch(function (err) {
     return (0,_components_global__WEBPACK_IMPORTED_MODULE_0__.showError)(err);

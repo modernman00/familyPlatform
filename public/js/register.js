@@ -365,15 +365,15 @@ var FormHelper = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   fetchEmailData: function() { return /* binding */ fetchEmailData; },
-/* harmony export */   getAllData: function() { return /* binding */ getAllData; },
-/* harmony export */   postData: function() { return /* binding */ postData; }
+/* harmony export */   "fetchEmailData": function() { return /* binding */ fetchEmailData; },
+/* harmony export */   "getAllData": function() { return /* binding */ getAllData; },
+/* harmony export */   "postData": function() { return /* binding */ postData; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
 
 
@@ -394,14 +394,14 @@ var getAllData = /*#__PURE__*/function () {
         case 0:
           _context.prev = 0;
           _context.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("".concat(URL, "allMembers/processApiData2"), config);
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("".concat(URL, "allMembers/processApiData2"), config);
         case 1:
           response = _context.sent;
           return _context.abrupt("return", response.data);
         case 2:
           _context.prev = 2;
           _t = _context["catch"](0);
-          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
           // You can perform additional error handling actions if needed
           throw _t;
         case 3:
@@ -422,7 +422,7 @@ var postData = /*#__PURE__*/function () {
         case 0:
           _context2.prev = 0;
           _context2.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post(url, object);
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url, object);
         case 1:
           response = _context2.sent;
           console.log(response);
@@ -431,7 +431,7 @@ var postData = /*#__PURE__*/function () {
         case 2:
           _context2.prev = 2;
           _t2 = _context2["catch"](0);
-          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t2);
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t2);
           // You can perform additional error handling actions if needed
           throw _t2;
         case 3:
@@ -446,7 +446,7 @@ var postData = /*#__PURE__*/function () {
 }();
 var fetchEmailData = function fetchEmailData() {
   // Make a GET request and return the promise
-  return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("".concat(URL, "getEmails")).then(function (response) {
+  return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("".concat(URL, "getEmails")).then(function (response) {
     var emailArray = response.data.message.map(function (item) {
       return item.email;
     });
@@ -470,8 +470,8 @@ var fetchEmailData = function fetchEmailData() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   Login: function() { return /* binding */ Login; },
-/* harmony export */   dataToCheckRegister: function() { return /* binding */ dataToCheckRegister; }
+/* harmony export */   "Login": function() { return /* binding */ Login; },
+/* harmony export */   "dataToCheckRegister": function() { return /* binding */ dataToCheckRegister; }
 /* harmony export */ });
 
 
@@ -508,7 +508,7 @@ var Login = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autocomplete: function() { return /* binding */ autocomplete; }
+/* harmony export */   "autocomplete": function() { return /* binding */ autocomplete; }
 /* harmony export */ });
 var autocomplete = function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
@@ -626,22 +626,22 @@ var autocomplete = function autocomplete(inp, arr) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
-/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
-/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
-/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
-/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
-/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
-/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
-/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
-/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
-/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
-/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
-/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
-/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
-/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
-/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
-/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
+/* harmony export */   "autoCompleter": function() { return /* binding */ autoCompleter; },
+/* harmony export */   "checkBox": function() { return /* binding */ checkBox; },
+/* harmony export */   "checkBox2": function() { return /* binding */ checkBox2; },
+/* harmony export */   "convertFormData": function() { return /* binding */ convertFormData; },
+/* harmony export */   "createAndAppendElement": function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   "distinctValue": function() { return /* binding */ distinctValue; },
+/* harmony export */   "isChecked": function() { return /* binding */ isChecked; },
+/* harmony export */   "loaderIcon": function() { return /* binding */ loaderIcon; },
+/* harmony export */   "loaderIconBootstrap": function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   "loaderIconBulma": function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   "matchInput": function() { return /* binding */ matchInput; },
+/* harmony export */   "matchRegex": function() { return /* binding */ matchRegex; },
+/* harmony export */   "realTimeCheckLen": function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   "removeDiv": function() { return /* binding */ removeDiv; },
+/* harmony export */   "showResponse": function() { return /* binding */ showResponse; },
+/* harmony export */   "toSentenceCase": function() { return /* binding */ toSentenceCase; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -835,7 +835,7 @@ var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   processKidsSiblings: function() { return /* binding */ processKidsSiblings; }
+/* harmony export */   "processKidsSiblings": function() { return /* binding */ processKidsSiblings; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -1021,7 +1021,7 @@ var processKidsSiblings = function processKidsSiblings(emailData, firstName) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showSpouse: function() { return /* binding */ showSpouse; }
+/* harmony export */   "showSpouse": function() { return /* binding */ showSpouse; }
 /* harmony export */ });
 /* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
@@ -1200,7 +1200,7 @@ copyIcon.addEventListener('click', /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderHtmlFamily: function() { return /* binding */ renderHtmlFamily; }
+/* harmony export */   "renderHtmlFamily": function() { return /* binding */ renderHtmlFamily; }
 /* harmony export */ });
 // register/html/kids_Sibling.js
 var renderHtmlFamily = function renderHtmlFamily(family, no) {
@@ -1481,8 +1481,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../api/index */ "./resources/asset/js/components/api/index.js");
 /* harmony import */ var _helper_autocomplete__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../helper/autocomplete */ "./resources/asset/js/components/helper/autocomplete.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _kidsAndSiblings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../kidsAndSiblings */ "./resources/asset/js/components/kidsAndSiblings.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../kidsAndSiblings */ "./resources/asset/js/components/kidsAndSiblings.js");
 
 
 
@@ -1571,7 +1571,7 @@ var setInput = function setInput(name, value) {
       },
       subject: "".concat(fName, " ").concat(lName, " Wants You: Experience the Magic of your Family Network Today!")
     };
-    axios__WEBPACK_IMPORTED_MODULE_3__["default"].post("/register/contactNewMember", postObj).then(function (response) {
+    axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/register/contactNewMember", postObj).then(function (response) {
       (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showNotification)("".concat(name, "Mobile_help"), 'is-success', response.data.message);
       genId.innerHTML = "";
     }).catch(function (error) {
@@ -1644,7 +1644,7 @@ var spouseMobile = function spouseMobile(event) {
 // create the data for the function below
 
 // check if there is a sibling or kids by email
-(0,_kidsAndSiblings__WEBPACK_IMPORTED_MODULE_4__.processKidsSiblings)(checkEmail, fName);
+(0,_kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__.processKidsSiblings)(checkEmail, fName);
 var checkPersonalEmail = function checkPersonalEmail(e) {
   var email = e.target.value;
   (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("email_error").innerHTML = checkEmail.includes(email) ? "YOU HAVE ALREADY REGISTERED ON THE PLATFORM" : "";
@@ -1707,7 +1707,7 @@ document.addEventListener('keydown', function (event) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   show: function() { return /* binding */ show; }
+/* harmony export */   "show": function() { return /* binding */ show; }
 /* harmony export */ });
 /* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _html_kids_Sibling__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html/kids_Sibling */ "./resources/asset/js/components/register/html/kids_Sibling.js");
@@ -1913,7 +1913,7 @@ if (close && modalClass) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   makeCheckEmailObj: function() { return /* binding */ makeCheckEmailObj; }
+/* harmony export */   "makeCheckEmailObj": function() { return /* binding */ makeCheckEmailObj; }
 /* harmony export */ });
 // data/checkEmailFactory.js
 var makeCheckEmailObj = function makeCheckEmailObj() {
@@ -1953,7 +1953,7 @@ var makeCheckEmailObj = function makeCheckEmailObj() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   checkEmailObj: function() { return /* binding */ checkEmailObj; }
+/* harmony export */   "checkEmailObj": function() { return /* binding */ checkEmailObj; }
 /* harmony export */ });
 // data/checkEmailObj.js
 var checkEmailObj = {

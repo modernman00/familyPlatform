@@ -74,8 +74,27 @@
                             <button type="button" class="btn-composer-action" title="Stickers">
                                 <i class="bi bi-tag"></i>
                             </button>
+                            <button type="button" class="btn-composer-action text-primary fw-bold" id="addPollBtn" title="Create Poll">
+                                <i class="bi bi-bar-chart-fill"></i> Poll
+                            </button>
                         </div>
 
+                        <!-- Poll Creation UI (Hidden by Default) -->
+                        <div id="pollCreationContainer" class="w-100 mt-3 d-none bg-light p-3 rounded border">
+                            <h6 class="fw-bold mb-2 text-primary">Create a Poll</h6>
+                            <input type="text" name="poll_question" class="form-control mb-2 border-primary" placeholder="Ask a question..." style="border-radius: 10px;">
+                            <div id="pollOptionsContainer">
+                                <input type="text" name="poll_options[]" class="form-control mb-2" placeholder="Option 1" style="border-radius: 10px;">
+                                <input type="text" name="poll_options[]" class="form-control mb-2" placeholder="Option 2" style="border-radius: 10px;">
+                            </div>
+                            <button type="button" id="addPollOptionBtn" class="btn btn-sm btn-outline-primary rounded-pill mt-1">
+                                <i class="bi bi-plus-circle"></i> Add Option
+                            </button>
+                            <button type="button" id="removePollBtn" class="btn btn-sm btn-outline-danger rounded-pill mt-1 ms-2">
+                                Cancel Poll
+                            </button>
+                        </div>
+                        
                         <div id="emojiPickerContainer"
                             class="d-none position-absolute modern-emoji-picker"
                             style="z-index: 1000; bottom: 55px; left: 24px;">

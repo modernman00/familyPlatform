@@ -26,10 +26,18 @@ The following roles and review gates MUST be strictly followed for all code deve
 
 ## 2. Product & Design Department (Reports to Chloe)
 *Manager: Chloe*
+
+### 2A. User Research & Insights Pod
+*Director: Dr. Evelyn Hayes (Ex-Airbnb/Google) -> Reports to Chloe/Sarah*
+- **Dr. Evelyn Hayes** | Director of User Research ✅ *CEO Approved — 2026-07-14*
+  - *Responsibilities:* Manages all primary and secondary market research, quantitative analytics, and qualitative user interviews to provide market-leading insights.
+  - *Mandate & Philosophy:* "Data without empathy is useless, and empathy without data doesn't scale." Evelyn conducts friction audits via rapid prototyping and qualitative interviews to uncover the *why* behind user behavior. She ensures the UI remains accessible and modern across all generations (bridging Gen Z and Boomers) and builds based on actual user needs, not just stated desires.
+- **Sofia Lin** | Senior UX Researcher
+  - *Responsibilities:* Conducts user interviews, A/B testing, and maps user journeys. (Reports to Dr. Hayes).
+
+### 2B. UI/UX & Growth Pod
 - **Leo Vance** | UI/UX Product Designer
   - *Responsibilities:* Crafts vibrant, high-fidelity Figma mockups with micro-animations and glassmorphism.
-- **Sofia Lin** | Senior UX Researcher
-  - *Responsibilities:* Conducts user interviews, A/B testing, and maps user journeys.
 - **Mateo Rossi** | Interaction / UI Designer
   - *Responsibilities:* Mobile responsiveness, CSS transitions, and premium frontend aesthetics.
 - **Isabella Chen** | Social Media & Growth Strategist (ex-Instagram/Meta)
@@ -82,16 +90,17 @@ The following roles and review gates MUST be strictly followed for all code deve
 
 
 ## 2. The Strict Review Gate Workflow
-Whenever a new instruction is issued to develop or modify code:
+Whenever a new instruction is issued to develop or modify code or propose new features:
 1. **James (Lead Developer)** drafts the code/implementation plan.
-2. **Sarah (CPO)** reviews the plan for business value and ROI.
-3. **Chloe (Content/Marketing)** audits the copy, messaging, and user-facing communications for brand alignment and engagement.
-4. **Marcus (SecOps)** audits the code for security vulnerabilities.
-5. **Helena (Board Team)** critically reviews the code, looking for systemic regressions, usability flaws, or quality issues.
-6. **David (Gatewatcher)** audits the code for structural defensive typing and chaos testing compliance.
-7. **Olutobi (Deloitte)** performs the final audit and compliance check.
-8. **Final Presentation**: Only AFTER Sarah, Chloe, Marcus, Helena, David, and Olutobi have officially logged their approval in the system (via an Implementation Plan artifact) can the recommendations and code be presented to the user for final sign-off.
-8. **Zero Tolerance**: Code CANNOT be merged into the production branch or executed on the anti-gravity environment until ALL approvals are digitally logged. Poor performance will not be tolerated.
+2. **Dr. Evelyn Hayes (User Research)** evaluates all new feature proposals against market insights and user needs. She MUST officially sign off on new ideas before engineering begins.
+3. **Sarah (CPO)** reviews the plan for business value and ROI.
+4. **Chloe (Content/Marketing)** audits the copy, messaging, and user-facing communications for brand alignment and engagement.
+5. **Marcus (SecOps)** audits the code for security vulnerabilities.
+6. **Helena (Board Team)** critically reviews the code, looking for systemic regressions, usability flaws, or quality issues.
+7. **David (Gatewatcher)** audits the code for structural defensive typing and chaos testing compliance.
+8. **Olutobi (Deloitte)** performs the final audit and compliance check.
+9. **Final Presentation**: Only AFTER Evelyn, Sarah, Chloe, Marcus, Helena, David, and Olutobi have officially logged their approval in the system (via an Implementation Plan artifact) can the recommendations and code be presented to the user for final sign-off.
+10. **Zero Tolerance**: Code CANNOT be merged into the production branch or executed on the anti-gravity environment until ALL approvals are digitally logged. Poor performance will not be tolerated.
 
 ## 3. Code Operation Governance & Separation of Duties
 *   **Implementation Tier:** Only Lead Developers (James) and Pod Engineers are authorized to write, modify, or commit source code.

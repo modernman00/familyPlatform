@@ -20,7 +20,12 @@ import "./longPress" // long press for reaction options
 
 
 
-// import "./newPage"
+import { initEngagementListeners, initMemories } from "./engagement"
+
+document.addEventListener('DOMContentLoaded', () => {
+    initEngagementListeners();
+    initMemories();
+});
 
 
 

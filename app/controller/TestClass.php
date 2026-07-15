@@ -3,11 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use App\classes\{
-
-    Db,
-
-};
+use Src\Db;
 
 
 final class TestClass extends Db

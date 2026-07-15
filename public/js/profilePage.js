@@ -365,19 +365,19 @@ var FormHelper = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   initEmojiPickerUX: function() { return /* binding */ initEmojiPickerUX; },
-/* harmony export */   showEmojiPicker: function() { return /* binding */ showEmojiPicker; }
+/* harmony export */   "initEmojiPickerUX": function() { return /* binding */ initEmojiPickerUX; },
+/* harmony export */   "showEmojiPicker": function() { return /* binding */ showEmojiPicker; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
-/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
-/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! emojibase-data/en/data.json */ "./node_modules/emojibase-data/en/data.json");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
 
 
 var EMOJI_CACHE_KEY = 'recentEmojis'; // LocalStorage key for caching recent emojis
 
 // 🟡 Filter emojis to only include smileys (based on Unicode range)
-var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_1__.filter(function (e) {
+var smileys = emojibase_data_en_data_json__WEBPACK_IMPORTED_MODULE_2__.filter(function (e) {
   var code = parseInt(e.hexcode, 16); // Convert hexcode to decimal
   return code >= 0x1F600 && code <= 0x1F64F; // Emoticons block range
 });
@@ -398,8 +398,8 @@ var showEmojiPicker = function showEmojiPicker(emojiContainerId, emojiTargetData
  * @param {string} containerId - ID of the picker container
  */
 var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
-  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(toggleId);
-  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(containerId);
+  var toggle = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(toggleId);
+  var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(containerId);
   if (!toggle || !container) return;
   document.addEventListener('click', function (e) {
     if (!container.classList.contains('d-none')) {
@@ -411,7 +411,7 @@ var initEmojiPickerUX = function initEmojiPickerUX(toggleId, containerId) {
   });
 };
 var renderEmojiList = function renderEmojiList(emojis, emojiContainerId, emojiTargetDataClass) {
-  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)(emojiContainerId);
+  var emojiList = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(emojiContainerId);
   if (!emojiList) return;
   emojiList.innerHTML = '';
   emojiList.classList.add('modern-emoji-picker');
@@ -508,7 +508,7 @@ var cacheEmoji = function cacheEmoji(char) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   imagePreview: function() { return /* binding */ imagePreview; }
+/* harmony export */   "imagePreview": function() { return /* binding */ imagePreview; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 
@@ -620,22 +620,22 @@ var imagePreview = function imagePreview(fileInputId, previewListId, fileNamesDi
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   autoCompleter: function() { return /* binding */ autoCompleter; },
-/* harmony export */   checkBox: function() { return /* binding */ checkBox; },
-/* harmony export */   checkBox2: function() { return /* binding */ checkBox2; },
-/* harmony export */   convertFormData: function() { return /* binding */ convertFormData; },
-/* harmony export */   createAndAppendElement: function() { return /* binding */ createAndAppendElement; },
-/* harmony export */   distinctValue: function() { return /* binding */ distinctValue; },
-/* harmony export */   isChecked: function() { return /* binding */ isChecked; },
-/* harmony export */   loaderIcon: function() { return /* binding */ loaderIcon; },
-/* harmony export */   loaderIconBootstrap: function() { return /* binding */ loaderIconBootstrap; },
-/* harmony export */   loaderIconBulma: function() { return /* binding */ loaderIconBulma; },
-/* harmony export */   matchInput: function() { return /* binding */ matchInput; },
-/* harmony export */   matchRegex: function() { return /* binding */ matchRegex; },
-/* harmony export */   realTimeCheckLen: function() { return /* binding */ realTimeCheckLen; },
-/* harmony export */   removeDiv: function() { return /* binding */ removeDiv; },
-/* harmony export */   showResponse: function() { return /* binding */ showResponse; },
-/* harmony export */   toSentenceCase: function() { return /* binding */ toSentenceCase; }
+/* harmony export */   "autoCompleter": function() { return /* binding */ autoCompleter; },
+/* harmony export */   "checkBox": function() { return /* binding */ checkBox; },
+/* harmony export */   "checkBox2": function() { return /* binding */ checkBox2; },
+/* harmony export */   "convertFormData": function() { return /* binding */ convertFormData; },
+/* harmony export */   "createAndAppendElement": function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   "distinctValue": function() { return /* binding */ distinctValue; },
+/* harmony export */   "isChecked": function() { return /* binding */ isChecked; },
+/* harmony export */   "loaderIcon": function() { return /* binding */ loaderIcon; },
+/* harmony export */   "loaderIconBootstrap": function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   "loaderIconBulma": function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   "matchInput": function() { return /* binding */ matchInput; },
+/* harmony export */   "matchRegex": function() { return /* binding */ matchRegex; },
+/* harmony export */   "realTimeCheckLen": function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   "removeDiv": function() { return /* binding */ removeDiv; },
+/* harmony export */   "showResponse": function() { return /* binding */ showResponse; },
+/* harmony export */   "toSentenceCase": function() { return /* binding */ toSentenceCase; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -829,7 +829,7 @@ var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showImageFileUploadFn: function() { return /* binding */ showImageFileUploadFn; }
+/* harmony export */   "showImageFileUploadFn": function() { return /* binding */ showImageFileUploadFn; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 
@@ -858,8 +858,8 @@ var showImageFileUploadFn = function showImageFileUploadFn(uploadBtn, inputId, f
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   addToNotificationTab: function() { return /* binding */ addToNotificationTab; },
-/* harmony export */   increaseNotificationCount: function() { return /* binding */ increaseNotificationCount; }
+/* harmony export */   "addToNotificationTab": function() { return /* binding */ addToNotificationTab; },
+/* harmony export */   "increaseNotificationCount": function() { return /* binding */ increaseNotificationCount; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -1302,9 +1302,9 @@ try {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   appendNewComment: function() { return /* binding */ appendNewComment; },
-/* harmony export */   commentHTML: function() { return /* binding */ commentHTML; },
-/* harmony export */   showComment: function() { return /* binding */ showComment; }
+/* harmony export */   "appendNewComment": function() { return /* binding */ appendNewComment; },
+/* harmony export */   "commentHTML": function() { return /* binding */ commentHTML; },
+/* harmony export */   "showComment": function() { return /* binding */ showComment; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
@@ -1376,9 +1376,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
 /* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 /* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_7__);
 
 
 
@@ -1439,7 +1439,7 @@ var process = /*#__PURE__*/function () {
           eventForm = (0,_global__WEBPACK_IMPORTED_MODULE_3__.id)('eventModalForm');
           eventFormEntries = new FormData(eventForm); // POST data to create the event and notification in parallel
           _context.next = 2;
-          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_7__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_7__["default"].post('/member/notification/event', eventFormEntries, options)]);
+          return Promise.all([axios__WEBPACK_IMPORTED_MODULE_8__["default"].post("/member/profilePage/event", eventFormEntries, options), axios__WEBPACK_IMPORTED_MODULE_8__["default"].post('/member/notification/event', eventFormEntries, options)]);
         case 2:
           _yield$Promise$all = _context.sent;
           _yield$Promise$all2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_yield$Promise$all, 2);
@@ -1447,7 +1447,7 @@ var process = /*#__PURE__*/function () {
           notificationResponse = _yield$Promise$all2[1];
           // Extract and get notificationNo from the responses
           notificationNo = notificationResponse.data.message; // update all members of similar famcode on their UIs using Pusher
-          axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
+          axios__WEBPACK_IMPORTED_MODULE_8__["default"].get("/member/notification/event?notificationNo=".concat(notificationNo));
 
           // close the modal
           displayNone();
@@ -1493,6 +1493,239 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/asset/js/components/profilePage/engagement.js":
+/*!*****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/engagement.js ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "handlePollVote": function() { return /* binding */ handlePollVote; },
+/* harmony export */   "handleReaction": function() { return /* binding */ handleReaction; },
+/* harmony export */   "initEngagementListeners": function() { return /* binding */ initEngagementListeners; },
+/* harmony export */   "initMemories": function() { return /* binding */ initMemories; },
+/* harmony export */   "loadMemories": function() { return /* binding */ loadMemories; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
+
+
+var handleReaction = /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(postNo, reactionType) {
+    var formData, response, data, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          formData = new FormData();
+          formData.append('post_no', postNo);
+          formData.append('reaction_type', reactionType);
+          _context.next = 1;
+          return fetch('/api/engagement/react', {
+            method: 'POST',
+            body: formData
+          });
+        case 1:
+          response = _context.sent;
+          _context.next = 2;
+          return response.json();
+        case 2:
+          data = _context.sent;
+          return _context.abrupt("return", data);
+        case 3:
+          _context.prev = 3;
+          _t = _context["catch"](0);
+          console.error('Reaction error:', _t);
+          return _context.abrupt("return", null);
+        case 4:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 3]]);
+  }));
+  return function handleReaction(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+var handlePollVote = /*#__PURE__*/function () {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(optionId) {
+    var formData, response, data, _t2;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          formData = new FormData();
+          formData.append('option_id', optionId);
+          _context2.next = 1;
+          return fetch('/api/engagement/vote', {
+            method: 'POST',
+            body: formData
+          });
+        case 1:
+          response = _context2.sent;
+          _context2.next = 2;
+          return response.json();
+        case 2:
+          data = _context2.sent;
+          return _context2.abrupt("return", data);
+        case 3:
+          _context2.prev = 3;
+          _t2 = _context2["catch"](0);
+          console.error('Vote error:', _t2);
+          return _context2.abrupt("return", null);
+        case 4:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[0, 3]]);
+  }));
+  return function handlePollVote(_x3) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+var loadMemories = /*#__PURE__*/function () {
+  var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3() {
+    var response, data, _t3;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 1;
+          return fetch('/api/engagement/memories');
+        case 1:
+          response = _context3.sent;
+          _context3.next = 2;
+          return response.json();
+        case 2:
+          data = _context3.sent;
+          return _context3.abrupt("return", (data === null || data === void 0 ? void 0 : data.data) || []);
+        case 3:
+          _context3.prev = 3;
+          _t3 = _context3["catch"](0);
+          console.error('Memory load error:', _t3);
+          return _context3.abrupt("return", []);
+        case 4:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[0, 3]]);
+  }));
+  return function loadMemories() {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+var initEngagementListeners = function initEngagementListeners() {
+  document.addEventListener('click', /*#__PURE__*/function () {
+    var _ref4 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee4(e) {
+      var btn, optionId, res, _btn, postNo, reaction, _res;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
+          case 0:
+            if (!e.target.closest('.poll-option-btn')) {
+              _context4.next = 2;
+              break;
+            }
+            btn = e.target.closest('.poll-option-btn');
+            optionId = btn.getAttribute('data-option-id');
+            if (!optionId) {
+              _context4.next = 2;
+              break;
+            }
+            btn.disabled = true;
+            _context4.next = 1;
+            return handlePollVote(optionId);
+          case 1:
+            res = _context4.sent;
+            if ((res === null || res === void 0 ? void 0 : res.status) === 'success') {
+              // Trigger a reload of the post or re-fetch to show new bars
+              window.dispatchEvent(new Event('refresh-feed'));
+              // For immediate visual feedback, just reload page for now or wait for pusher
+              window.location.reload();
+            }
+            btn.disabled = false;
+          case 2:
+            if (!e.target.closest('.reaction-btn')) {
+              _context4.next = 4;
+              break;
+            }
+            _btn = e.target.closest('.reaction-btn');
+            postNo = _btn.getAttribute('data-post-no');
+            reaction = _btn.getAttribute('data-reaction');
+            if (!(postNo && reaction)) {
+              _context4.next = 4;
+              break;
+            }
+            _context4.next = 3;
+            return handleReaction(postNo, reaction);
+          case 3:
+            _res = _context4.sent;
+            if ((_res === null || _res === void 0 ? void 0 : _res.status) === 'success') {
+              // Trigger a reload of the post or re-fetch to show new bars
+              window.location.reload();
+            }
+          case 4:
+          case "end":
+            return _context4.stop();
+        }
+      }, _callee4);
+    }));
+    return function (_x4) {
+      return _ref4.apply(this, arguments);
+    };
+  }());
+};
+var initMemories = /*#__PURE__*/function () {
+  var _ref5 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee5() {
+    var container, content, memories, htmlStr, _t4;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context5) {
+      while (1) switch (_context5.prev = _context5.next) {
+        case 0:
+          container = document.getElementById('memories-container');
+          content = document.getElementById('memories-content');
+          if (!(!container || !content)) {
+            _context5.next = 1;
+            break;
+          }
+          return _context5.abrupt("return");
+        case 1:
+          _context5.prev = 1;
+          _context5.next = 2;
+          return loadMemories();
+        case 2:
+          memories = _context5.sent;
+          if (memories && memories.length > 0) {
+            container.style.display = 'block';
+            htmlStr = '';
+            memories.forEach(function (memory) {
+              // Pass an empty array for comments to the html function since memories don't eager load comments initially
+              htmlStr += (0,_html__WEBPACK_IMPORTED_MODULE_2__.html)(memory, []);
+            });
+            content.innerHTML = htmlStr;
+          }
+          _context5.next = 4;
+          break;
+        case 3:
+          _context5.prev = 3;
+          _t4 = _context5["catch"](1);
+          console.error('Failed to load memories:', _t4);
+        case 4:
+        case "end":
+          return _context5.stop();
+      }
+    }, _callee5, null, [[1, 3]]);
+  }));
+  return function initMemories() {
+    return _ref5.apply(this, arguments);
+  };
+}();
+
+/***/ }),
+
 /***/ "./resources/asset/js/components/profilePage/eventHTML.js":
 /*!****************************************************************!*\
   !*** ./resources/asset/js/components/profilePage/eventHTML.js ***!
@@ -1502,7 +1735,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   eventHtml: function() { return /* binding */ eventHtml; }
+/* harmony export */   "eventHtml": function() { return /* binding */ eventHtml; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
 "use static";
@@ -1534,9 +1767,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
-/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
 
 
 
@@ -1556,7 +1789,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 0:
           _context.prev = 0;
           _context.next = 1;
-          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/getFriendRequestById?id=".concat(approverId));
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get("/getFriendRequestById?id=".concat(approverId));
         case 1:
           response = _context.sent;
           if (response.data.message) {
@@ -1569,7 +1802,7 @@ var fetchFriendRequests = /*#__PURE__*/function () {
         case 2:
           _context.prev = 2;
           _t = _context["catch"](0);
-          (0,_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          (0,_global__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
         case 3:
           ;
         case 4:
@@ -1588,10 +1821,10 @@ var waitForRequestFriendClass = function waitForRequestFriendClass(data) {
   var observer = new MutationObserver(function (mutations, obs) {
     var requestContainer = document.querySelector('.requestFriendClass');
     if (requestContainer) {
-      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_4__.friendRequestCard)(data);
+      (0,_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_3__.friendRequestCard)(data);
       obs.disconnect(); // Stop observing once .requestFriendClass is found
     } else {
-      (0,_global__WEBPACK_IMPORTED_MODULE_3__.log)('there is no requestFriendClass');
+      (0,_global__WEBPACK_IMPORTED_MODULE_2__.log)('there is no requestFriendClass');
     }
   });
 
@@ -1622,13 +1855,15 @@ fetchFriendRequests();
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   html: function() { return /* binding */ html; }
+/* harmony export */   "html": function() { return /* binding */ html; }
 /* harmony export */ });
 /* harmony import */ var _htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./htmlFolder/nameImageTiming */ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js");
 /* harmony import */ var _htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./htmlFolder/commentForm */ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js");
 /* harmony import */ var _htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./htmlFolder/likeCommentButton */ "./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js");
 /* harmony import */ var _htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/showPostImages */ "./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js");
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
+/* harmony import */ var _htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./htmlFolder/engagementHtml */ "./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js");
+
 
 
 
@@ -1638,7 +1873,7 @@ var html = function html(el) {
   var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
   var post_no = el.post_no,
     postMessage = el.postMessage;
-  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    <p class=\"postFont\"> ").concat(postMessage, " </p>\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n     \n     ").concat((0,_htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__.renderPoll)(el === null || el === void 0 ? void 0 : el.poll), "\n     ").concat((0,_htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__.renderReactions)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
 };
 
 /***/ }),
@@ -1652,11 +1887,88 @@ var html = function html(el) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   commentForm: function() { return /* binding */ commentForm; }
+/* harmony export */   "commentForm": function() { return /* binding */ commentForm; }
 /* harmony export */ });
 var commentForm = function commentForm(data) {
   var post_no = data.post_no;
   return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js":
+/*!********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderPoll": function() { return /* binding */ renderPoll; },
+/* harmony export */   "renderReactions": function() { return /* binding */ renderReactions; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+
+var renderPoll = function renderPoll(poll) {
+  if (!poll || !poll.options || !Array.isArray(poll.options)) return '';
+
+  // Safely fallback the question text
+  var questionText = poll.question || '';
+  var html = "<div class=\"poll-container mt-3 p-3 bg-light rounded border border-light-subtle\">\n        <h6 class=\"fw-bold mb-3\"><i class=\"fa fa-bar-chart me-2 text-primary\"></i>".concat(questionText, "</h6>\n        <div class=\"poll-options\">");
+  poll.options.forEach(function (opt) {
+    // Multi-select is supported on backend. user_voted_option_id is an array now
+    var isVoted = poll.user_voted_option_id && Array.isArray(poll.user_voted_option_id) && poll.user_voted_option_id.includes(opt.option_id);
+    var percentage = (opt === null || opt === void 0 ? void 0 : opt.percentage) || 0;
+    var barWidth = percentage + '%';
+    var bgClass = isVoted ? 'bg-primary' : 'bg-secondary';
+    var optionText = (opt === null || opt === void 0 ? void 0 : opt.option_text) || '';
+    html += "\n            <div class=\"poll-option mb-2 position-relative\">\n                <button class=\"poll-option-btn w-100 text-start btn btn-outline-".concat(isVoted ? 'primary' : 'secondary', " position-relative overflow-hidden\" \n                        data-option-id=\"").concat((opt === null || opt === void 0 ? void 0 : opt.option_id) || '', "\" style=\"z-index: 1;\">\n                    <span class=\"position-relative\" style=\"z-index: 2; mix-blend-mode: difference; color: white;\">\n                        ").concat(optionText, "\n                    </span>\n                    <span class=\"float-end position-relative fw-bold\" style=\"z-index: 2; mix-blend-mode: difference; color: white;\">\n                        ").concat(percentage, "%\n                    </span>\n                    <div class=\"position-absolute top-0 start-0 h-100 ").concat(bgClass, "\" \n                         style=\"width: ").concat(barWidth, "; opacity: 0.5; transition: width 0.5s ease; z-index: 0;\"></div>\n                </button>\n            </div>\n        ");
+  });
+  html += "</div>\n        <small class=\"text-muted mt-2 d-block\">".concat((poll === null || poll === void 0 ? void 0 : poll.total_votes) || 0, " votes</small>\n    </div>");
+  return html;
+};
+var renderReactions = function renderReactions(el) {
+  // Emojis: Like 👍, Love ❤️, Haha 😂, Shock 😲, Sad 😢
+  var emojis = {
+    'like': '👍',
+    'love': '❤️',
+    'haha': '😂',
+    'shock': '😲',
+    'sad': '😢'
+  };
+  var reactions = (el === null || el === void 0 ? void 0 : el.reactions) || [];
+  var userReaction = (el === null || el === void 0 ? void 0 : el.user_reaction) || null;
+  var postNo = (el === null || el === void 0 ? void 0 : el.post_no) || '';
+  if (!postNo) return '';
+  var summaryHtml = '';
+  var totalReactions = 0;
+  var counts = {
+    like: 0,
+    love: 0,
+    haha: 0,
+    shock: 0,
+    sad: 0
+  };
+  reactions.forEach(function (r) {
+    if (r && r.reaction_type && r.count) {
+      counts[r.reaction_type] = parseInt(r.count, 10) || 0;
+      totalReactions += counts[r.reaction_type];
+    }
+  });
+  if (totalReactions > 0) {
+    summaryHtml = "<div class=\"reaction-summary mt-2 mb-2 px-2 py-1 bg-light rounded d-inline-block shadow-sm\">\n            ".concat(counts.like > 0 ? "\uD83D\uDC4D ".concat(counts.like) : '', "\n            ").concat(counts.love > 0 ? "\u2764\uFE0F ".concat(counts.love) : '', "\n            ").concat(counts.haha > 0 ? "\uD83D\uDE02 ".concat(counts.haha) : '', "\n            ").concat(counts.shock > 0 ? "\uD83D\uDE32 ".concat(counts.shock) : '', "\n            ").concat(counts.sad > 0 ? "\uD83D\uDE22 ".concat(counts.sad) : '', "\n        </div>");
+  }
+  var barHtml = "<div class=\"reaction-bar d-flex gap-2 mt-2 align-items-center\">";
+  for (var _i = 0, _Object$entries = Object.entries(emojis); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_Object$entries[_i], 2),
+      type = _Object$entries$_i[0],
+      emoji = _Object$entries$_i[1];
+    var isActive = userReaction === type;
+    barHtml += "\n            <button class=\"btn btn-sm reaction-btn ".concat(isActive ? 'btn-primary' : 'btn-light text-dark', " rounded-pill shadow-sm\" \n                    data-post-no=\"").concat(postNo, "\" data-reaction=\"").concat(type, "\"\n                    style=\"transition: transform 0.2s; ").concat(isActive ? 'transform: scale(1.1);' : '', "\">\n                ").concat(emoji, " <span class=\"d-none d-md-inline ms-1 text-capitalize\" style=\"font-size: 0.8rem;\">").concat(type, "</span>\n            </button>\n        ");
+  }
+  barHtml += "</div>";
+  return "<div class=\"engagement-section mt-3\">\n        ".concat(summaryHtml, "\n        ").concat(barHtml, "\n    </div>");
 };
 
 /***/ }),
@@ -1670,7 +1982,7 @@ var commentForm = function commentForm(data) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   friendRequestCard: function() { return /* binding */ friendRequestCard; }
+/* harmony export */   "friendRequestCard": function() { return /* binding */ friendRequestCard; }
 /* harmony export */ });
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
 
@@ -1698,7 +2010,7 @@ var friendRequestCard = function friendRequestCard(data) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   likeCommentButton: function() { return /* binding */ likeCommentButton; }
+/* harmony export */   "likeCommentButton": function() { return /* binding */ likeCommentButton; }
 /* harmony export */ });
 var likeCommentButton = function likeCommentButton(data, commentLength) {
   return "\n   <div class=\"reaction-buttons d-flex justify-content-around border-top border-bottom py-2 mb-2 mt-3 gap-2\">\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\">\n      <i class=\"bi bi-hand-thumbs-up me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n      Like \n      <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n        <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span>\n      </span>\n    </button>\n\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n        Comment \n        <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n          <span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">").concat(commentLength, "</span>\n        </span>\n    </button>\n   \n    </div>\n    ");
@@ -1715,22 +2027,29 @@ var likeCommentButton = function likeCommentButton(data, commentLength) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   nameImgTiming: function() { return /* binding */ nameImgTiming; }
+/* harmony export */   "nameImgTiming": function() { return /* binding */ nameImgTiming; }
 /* harmony export */ });
 /* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
 
 var timeAgo = function timeAgo(x) {
-  return (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x);
+  return x ? (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x) : '';
 };
 var fullName = function fullName(_fullName) {
-  return "<h6 id=\"fullName\"><b>".concat(_fullName, "</b> </h6>");
+  return "<h6 id=\"fullName\"><b>".concat(_fullName || 'Unknown User', "</b> </h6>");
 };
 var postedAt = function postedAt(date) {
+  if (!(date !== null && date !== void 0 && date.date_created) || !(date !== null && date !== void 0 && date.post_time)) return '';
   return "<div class=\"timeago postTimeCal w3-right w3-opacity\"  datetime='".concat(date.date_created, "' title='").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created), "'> ").concat(timeAgo(date.post_time), "</div>");
 };
+var familyBadge = function familyBadge(famCode) {
+  return famCode ? "<span class=\"w3-badge w3-small w3-blue w3-margin-left\" style=\"font-weight: normal; padding: 2px 6px;\">Family: ".concat(famCode, "</span>") : '';
+};
 var nameImgTiming = function nameImgTiming(data) {
-  var img = data.profileImg ? "/public/img/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png";
-  return "<a href=\"/profilepage/img?dir=img&pics=".concat(data.img, "&pID=").concat(data.post_no, "&path=profile&id=").concat(data.id, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " ").concat(fullName(data.fullName));
+  var img = data !== null && data !== void 0 && data.profileImg ? "/public/img/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png";
+  var pId = (data === null || data === void 0 ? void 0 : data.post_no) || '';
+  var uId = (data === null || data === void 0 ? void 0 : data.id) || '';
+  var imgParam = (data === null || data === void 0 ? void 0 : data.img) || '';
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgParam, "&pID=").concat(pId, "&path=profile&id=").concat(uId, "\"> <img src=").concat(img, " alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), " \n        <div style=\"display: flex; align-items: center;\">\n            ").concat(fullName(data === null || data === void 0 ? void 0 : data.fullName), " ").concat(familyBadge(data === null || data === void 0 ? void 0 : data.postFamCode), "\n        </div>");
 };
 
 /***/ }),
@@ -1744,7 +2063,7 @@ var nameImgTiming = function nameImgTiming(data) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showPostImg: function() { return /* binding */ showPostImg; }
+/* harmony export */   "showPostImg": function() { return /* binding */ showPostImg; }
 /* harmony export */ });
 var showPostImg = function showPostImg(data) {
   // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
@@ -1844,6 +2163,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _postEmojiImgProcess__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./postEmojiImgProcess */ "./resources/asset/js/components/profilePage/postEmojiImgProcess.js");
 /* harmony import */ var _longPress__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./longPress */ "./resources/asset/js/components/profilePage/longPress.js");
 /* harmony import */ var _longPress__WEBPACK_IMPORTED_MODULE_11___default = /*#__PURE__*/__webpack_require__.n(_longPress__WEBPACK_IMPORTED_MODULE_11__);
+/* harmony import */ var _engagement__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./engagement */ "./resources/asset/js/components/profilePage/engagement.js");
 
 
 localStorage.removeItem('redirect');
@@ -1864,7 +2184,11 @@ localStorage.removeItem('redirect');
 // import "./commentEmojiTest"
  // long press for reaction options
 
-// import "./newPage"
+
+document.addEventListener('DOMContentLoaded', function () {
+  (0,_engagement__WEBPACK_IMPORTED_MODULE_12__.initEngagementListeners)();
+  (0,_engagement__WEBPACK_IMPORTED_MODULE_12__.initMemories)();
+});
 
 /***/ }),
 
@@ -1885,9 +2209,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
-/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _eventHTML__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./eventHTML */ "./resources/asset/js/components/profilePage/eventHTML.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
 
 
 
@@ -1925,7 +2249,7 @@ try {
             case 0:
               _context.prev = 0;
               _context.next = 1;
-              return axios__WEBPACK_IMPORTED_MODULE_7__["default"].get("/post/getAllPostCommentByFamCode");
+              return axios__WEBPACK_IMPORTED_MODULE_9__["default"].get("/post/getAllPostCommentByFamCode");
             case 1:
               pullData = _context.sent;
               // Assign fetched data to state properties
@@ -2004,7 +2328,7 @@ try {
             (0,_post__WEBPACK_IMPORTED_MODULE_3__.appendNewPost)(dataForUse);
             _context2.prev = 1;
             _context2.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updatePostByStatusAsPublished/".concat(dataForUse.post_no), {
               post_status: 'published'
             });
           case 2:
@@ -2043,7 +2367,7 @@ try {
             (0,_comment__WEBPACK_IMPORTED_MODULE_5__.appendNewComment)(dataForUse);
             _context3.prev = 1;
             _context3.next = 2;
-            return axios__WEBPACK_IMPORTED_MODULE_7__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
+            return axios__WEBPACK_IMPORTED_MODULE_9__["default"].put("/updateCommentByStatusAsPublished/".concat(dataForUse.comment_no), {
               comment_status: 'published'
             });
           case 2:
@@ -2099,15 +2423,15 @@ try {
   // Subscribe to the event channel
 
   var checkEventAndAdd = function checkEventAndAdd(data) {
-    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_8__.eventHtml)(data);
+    var appendEvent = (0,_eventHTML__WEBPACK_IMPORTED_MODULE_7__.eventHtml)(data);
     return (0,_global__WEBPACK_IMPORTED_MODULE_2__.id)('eventList').insertAdjacentHTML('afterbegin', appendEvent);
   };
   var notificationChannel = pusher.subscribe('notification-channel');
   notificationChannel.bind('new-notification', function (data) {
     if (localStorage.getItem('requesterFamCode') === data.receiver_id) {
       checkEventAndAdd(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.addToNotificationTab)(data);
-      (0,_navbar__WEBPACK_IMPORTED_MODULE_9__.increaseNotificationCount)();
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.addToNotificationTab)(data);
+      (0,_navbar__WEBPACK_IMPORTED_MODULE_8__.increaseNotificationCount)();
     }
   });
 
@@ -2298,8 +2622,8 @@ if ('periodicSync' in navigator) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   allPost: function() { return /* binding */ allPost; },
-/* harmony export */   appendNewPost: function() { return /* binding */ appendNewPost; }
+/* harmony export */   "allPost": function() { return /* binding */ allPost; },
+/* harmony export */   "appendNewPost": function() { return /* binding */ appendNewPost; }
 /* harmony export */ });
 /* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
@@ -2406,6 +2730,36 @@ if (closeEmojiBtn) {
   });
 }
 (0,_fileUploadPreview__WEBPACK_IMPORTED_MODULE_1__.imagePreview)('imageUpload', 'imagePreviewList', 'postModalImgFileNames', 'imagePreviewContainer', 'closeImagePreview');
+
+// Poll Creation UI Logic
+var addPollBtn = document.getElementById('addPollBtn');
+var pollContainer = document.getElementById('pollCreationContainer');
+var addOptionBtn = document.getElementById('addPollOptionBtn');
+var optionsContainer = document.getElementById('pollOptionsContainer');
+var removePollBtn = document.getElementById('removePollBtn');
+if (addPollBtn && pollContainer) {
+  addPollBtn.addEventListener('click', function () {
+    pollContainer.classList.remove('d-none');
+  });
+  removePollBtn.addEventListener('click', function () {
+    pollContainer.classList.add('d-none');
+    // Reset inputs
+    var inputs = pollContainer.querySelectorAll('input');
+    inputs.forEach(function (input) {
+      return input.value = '';
+    });
+  });
+  addOptionBtn.addEventListener('click', function () {
+    var optionCount = optionsContainer.querySelectorAll('input').length + 1;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.name = 'poll_options[]';
+    input.className = 'form-control mb-2';
+    input.placeholder = "Option ".concat(optionCount);
+    input.style.borderRadius = '10px';
+    optionsContainer.appendChild(input);
+  });
+}
 
 /***/ }),
 
@@ -2543,7 +2897,7 @@ rsvpButtons.forEach(function (button) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   renderTopReactions: function() { return /* binding */ renderTopReactions; }
+/* harmony export */   "renderTopReactions": function() { return /* binding */ renderTopReactions; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
 /* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");

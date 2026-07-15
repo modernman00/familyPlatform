@@ -9,7 +9,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   initTree: function() { return /* binding */ initTree; }
+/* harmony export */   "initTree": function() { return /* binding */ initTree; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 /* harmony import */ var _showModal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./showModal */ "./resources/asset/js/components/familyTree/showModal.js");
@@ -234,7 +234,7 @@ instructionsToggle === null || instructionsToggle === void 0 ? void 0 : instruct
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   showPersonDetails: function() { return /* binding */ showPersonDetails; }
+/* harmony export */   "showPersonDetails": function() { return /* binding */ showPersonDetails; }
 /* harmony export */ });
 /* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
 

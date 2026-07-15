@@ -40,7 +40,7 @@ class Auth extends JwtHandler
      *
      * @psalm-return 'SUCCESSFUL'|null
      */
-    protected function fetchUser($user_id)
+    public static function fetchUser(int|string $user_id, int $tokenVersion = 1): ?string
     {
         try {
             $query = "SELECT `email` FROM `account` WHERE `id`=?";
@@ -54,5 +54,6 @@ class Auth extends JwtHandler
         } catch (\PDOException $e) {
             showErrorExp($e);
         }
+        return null;
     }
 }

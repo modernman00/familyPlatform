@@ -114,7 +114,6 @@ class AllMembersData extends InnerJoin
             $params[] = $offset;
 
             $result = parent::connect2()->prepare($query);
-            // We can't easily pass integers with execute if PDO emulation is off, but we can bind them
             foreach ($params as $key => $val) {
                 if (is_int($val)) {
                     $result->bindValue($key + 1, $val, PDO::PARAM_INT);
@@ -124,7 +123,102 @@ class AllMembersData extends InnerJoin
             }
             
             $result->execute();
-            return $result->fetchAll(PDO::FETCH_ASSOC);
+            $posts = $result->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch attached polls and reactions (Engagement Integration)
+            if (!empty($posts)) {
+                $postIds = array_column($posts, 'post_no');
+                
+                $polls = PollData::getPollsForPosts($postIds, $id);
+                $reactions = ReactionData::getReactionsForPosts($postIds);
+                $userReactions = ReactionData::getUserReactionsForPosts($id, $postIds);
+
+                // Re-map into posts array
+                foreach ($posts as &$post) {
+                    $pNo = $post['post_no'];
+                    $post['poll'] = $polls[$pNo] ?? null;
+                    
+                    $post['reactions'] = array_filter($reactions, function($r) use ($pNo) {
+                        return $r['post_no'] == $pNo;
+                    });
+                    
+                    $post['user_reaction'] = null;
+                    foreach ($userReactions as $ur) {
+                        if ($ur['post_no'] == $pNo) {
+                            $post['user_reaction'] = $ur['reaction_type'];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return $posts;
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+    /**
+     * Gets posts from exactly one year ago today
+     */
+    public static function getMemories(string $id, array $famCodes): array
+    {
+        try {
+            if (empty($famCodes)) return [];
+            
+            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            
+            // Query for posts created exactly 1 year ago (matching month and day)
+            // Use range scan instead of DATE() function for index optimization
+            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
+              FROM post
+              INNER JOIN profilePics pp ON post.id = pp.id
+              LEFT JOIN (
+                      SELECT requester_id, approver_id, status, requesterCode
+                      FROM requestMgt
+                      WHERE requester_id IS NOT NULL AND requester_id = ?
+                  ) AS rm ON post.id = rm.approver_id
+            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
+            AND post.post_status = 'published'
+            AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+            AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
+            ORDER BY post.date_created DESC";
+            
+            $params = [$id];
+            $params = array_merge($params, $famCodes);
+
+            $result = parent::connect2()->prepare($query);
+            foreach ($params as $key => $val) {
+                $result->bindValue($key + 1, $val, PDO::PARAM_STR);
+            }
+            
+            $result->execute();
+            $posts = $result->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch attached polls and reactions
+            if (!empty($posts)) {
+                $postIds = array_column($posts, 'post_no');
+                
+                $polls = PollData::getPollsForPosts($postIds, $id);
+                $reactions = ReactionData::getReactionsForPosts($postIds);
+                $userReactions = ReactionData::getUserReactionsForPosts($id, $postIds);
+
+                foreach ($posts as &$post) {
+                    $pNo = $post['post_no'];
+                    $post['poll'] = $polls[$pNo] ?? null;
+                    $post['reactions'] = array_filter($reactions, function($r) use ($pNo) { return $r['post_no'] == $pNo; });
+                    $post['user_reaction'] = null;
+                    foreach ($userReactions as $ur) {
+                        if ($ur['post_no'] == $pNo) {
+                            $post['user_reaction'] = $ur['reaction_type'];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return $posts;
         } catch (PDOException $e) {
             showError($e);
             return [];

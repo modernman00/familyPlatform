@@ -175,294 +175,6 @@ parameters:
 			path: app/classes/Auth.php
 
 		-
-			message: '#^Method App\\classes\\BuildFormBStrap\:\:__construct\(\) has parameter \$question with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBStrap\:\:createDay\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBStrap\:\:createYear\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBStrap\:\:setEntKey\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBStrap\:\:setEntValue\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBStrap\:\:\$entKey type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBStrap\:\:\$entValue type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBStrap\:\:\$setDay type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBStrap\:\:\$setYear type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Result of method App\\classes\\BuildFormBStrap\:\:getDay\(\) \(void\) is used\.$#'
-			identifier: method.void
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Result of method App\\classes\\BuildFormBStrap\:\:getYear\(\) \(void\) is used\.$#'
-			identifier: method.void
-			count: 1
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Variable \$option might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/classes/BuildFormBStrap.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:__construct\(\) has parameter \$question with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:createDay\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:createYear\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:getDay\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:setEntKey\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Method App\\classes\\BuildFormBulma\:\:setEntValue\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Parameter \#1 \$value of function count expects array\|Countable, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBulma\:\:\$entKey type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBulma\:\:\$entValue type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBulma\:\:\$setDay type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Property App\\classes\\BuildFormBulma\:\:\$setYear type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Result of method App\\classes\\BuildFormBulma\:\:getYear\(\) \(void\) is used\.$#'
-			identifier: method.void
-			count: 1
-			path: app/classes/BuildFormBulma.php
-
-		-
-			message: '#^Access to an undefined property App\\classes\\Chat\:\:\$clients\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Access to property \$resourceId on an unknown class Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 3
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Call to method close\(\) on an unknown class Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Method App\\classes\\Chat\:\:onMessage\(\) has parameter \$msg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\Chat\:\:onClose\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\Chat\:\:onError\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\Chat\:\:onOpen\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Parameter \$from of method App\\classes\\Chat\:\:onMessage\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Property App\\classes\\Chat\:\:\$client with generic class SplObjectStorage does not specify its types\: TObject, TData$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/classes/Chat.php
-
-		-
-			message: '#^Instantiated class App\\exceptions\\NotFoundException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/CheckToken.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\[type\] \$token  this token is the same for session and post\)\: Unexpected token "\[", expected type at offset 54 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/classes/CheckToken.php
-
-		-
-			message: '#^Throwing object of an unknown class App\\exceptions\\NotFoundException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/CheckToken.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$allowedOrigin \(string\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/classes/CorsHandler.php
-
-		-
-			message: '#^Method App\\classes\\CorsHandler\:\:setHeaders\(\) has parameter \$allowedHeaders with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/CorsHandler.php
-
-		-
-			message: '#^Method App\\classes\\Db\:\:connect\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Method App\\classes\\Db\:\:connect2\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Method App\\classes\\Db\:\:connectSql\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Method App\\classes\\Db\:\:dbVariables\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Undefined variable\: \$conn$#'
-			identifier: variable.undefined
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Variable \$conn in isset\(\) always exists and is always null\.$#'
-			identifier: isset.variable
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Variable \$conn in isset\(\) is never defined\.$#'
-			identifier: isset.variable
-			count: 1
-			path: app/classes/Db.php
-
-		-
-			message: '#^Deprecated in PHP 8\.4\: Parameter \#5 \$column \(string\) is implicitly nullable via default value null\.$#'
-			identifier: parameter.implicitlyNullable
-			count: 1
-			path: app/classes/Delete.php
-
-		-
-			message: '#^Method App\\classes\\Delete\:\:deleteFn\(\) should return bool but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Delete.php
-
-		-
-			message: '#^Method App\\classes\\Delete\:\:formAndMatchQuery\(\) has parameter \$limit with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Delete.php
-
-		-
 			message: '#^Call to method pushHandler\(\) on an unknown class Whoops\\Run\.$#'
 			identifier: class.notFound
 			count: 2
@@ -577,64 +289,28 @@ parameters:
 			path: app/classes/EventEmitter.php
 
 		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinAll\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^App\\classes\\Insert\:\:submitForm2\(\) calls parent\:\:connect2\(\) but App\\classes\\Insert does not extend any class\.$#'
+			identifier: class.noParent
 			count: 1
-			path: app/classes/InnerJoin.php
+			path: app/classes/Insert.php
 
 		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinAll2\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
+			message: '#^App\\classes\\Insert\:\:submitFormDynamic\(\) calls parent\:\:connect2\(\) but App\\classes\\Insert does not extend any class\.$#'
+			identifier: class.noParent
+			count: 2
+			path: app/classes/Insert.php
 
 		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinAll3\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
+			message: '#^App\\classes\\Insert\:\:submitFormDynamicLastId\(\) calls parent\:\:connect2\(\) but App\\classes\\Insert does not extend any class\.$#'
+			identifier: class.noParent
 			count: 1
-			path: app/classes/InnerJoin.php
+			path: app/classes/Insert.php
 
 		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinAll4\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinParam\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinParam\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinParamAnd\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinParamOr\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Method App\\classes\\InnerJoin\:\:joinParamOr\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/InnerJoin.php
-
-		-
-			message: '#^Variable \$firstTable in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.variable
-			count: 7
-			path: app/classes/InnerJoin.php
+			message: '#^Call to an undefined method App\\classes\\Insert\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/classes/Insert.php
 
 		-
 			message: '#^Method App\\classes\\Insert\:\:insertDataRedirect\(\) has no return type specified\.$#'
@@ -727,126 +403,6 @@ parameters:
 			path: app/classes/Insert.php
 
 		-
-			message: '#^Method App\\classes\\JwtHandler\:\:errMsg\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:errMsg\(\) has parameter \$msg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:jwtDecodeData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:jwtDecodeData\(\) has parameter \$jwtToken with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:jwtEncodeData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:jwtEncodeData\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Method App\\classes\\JwtHandler\:\:jwtEncodeData\(\) has parameter \$serverName with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Parameter \#3 \$headers of static method Firebase\\JWT\\JWT\:\:decode\(\) expects stdClass\|null, array\<int, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Parameter \#3 \$headers of static method Firebase\\JWT\\JWT\:\:decode\(\) is passed by reference, so it expects variables only\.$#'
-			identifier: argument.byRef
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Property App\\classes\\JwtHandler\:\:\$expired has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Property App\\classes\\JwtHandler\:\:\$issuedAt has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Property App\\classes\\JwtHandler\:\:\$jwt has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Property App\\classes\\JwtHandler\:\:\$jwtSecret has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Property App\\classes\\JwtHandler\:\:\$token has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/JwtHandler.php
-
-		-
-			message: '#^Instantiated class App\\Exceptions\\TooManyRequestsException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
-			message: '#^Method App\\classes\\Limiter\:\:limit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
-			message: '#^Method App\\classes\\Limiter\:\:limit\(\) has parameter \$arg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
-			message: '#^Property App\\classes\\Limiter\:\:\$argLimiter has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
-			message: '#^Property App\\classes\\Limiter\:\:\$ipLimiter has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
-			message: '#^Throwing object of an unknown class App\\Exceptions\\TooManyRequestsException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Limiter.php
-
-		-
 			message: '#^Call to an undefined method App\\classes\\Paginate\:\:selectCountAll\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -913,8 +469,14 @@ parameters:
 			path: app/classes/Paginate.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
+			message: '#^Call to static method formAndMatchQuery\(\) on an unknown class App\\classes\\Select\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/classes/Pass.php
+
+		-
+			message: '#^Call to static method selectCountFn2\(\) on an unknown class App\\classes\\Select\.$#'
+			identifier: class.notFound
 			count: 1
 			path: app/classes/Pass.php
 
@@ -955,18 +517,6 @@ parameters:
 			path: app/classes/Pass.php
 
 		-
-			message: '#^Method App\\classes\\ProcessImg\:\:processProfileImage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/ProcessImg.php
-
-		-
-			message: '#^Method App\\classes\\ProcessImg\:\:showPostImg\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/ProcessImg.php
-
-		-
 			message: '#^Property App\\classes\\ProcessImg\:\:\$profileImg has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -979,82 +529,16 @@ parameters:
 			path: app/classes/PushNotificationClass.php
 
 		-
-			message: '#^Method App\\classes\\PushNotificationClass\:\:sendPushNotification\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\classes\\PushNotificationClass\:\:sendPushNotification\(\) has parameter \$userId with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/classes/PushNotificationClass.php
 
 		-
-			message: '#^Method App\\classes\\PushNotificationClass\:\:sendPushNotification\(\) has parameter \$message with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/PushNotificationClass.php
-
-		-
-			message: '#^Method App\\classes\\PushNotificationClass\:\:sendPushNotification\(\) has parameter \$url with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/PushNotificationClass.php
-
-		-
-			message: '#^Method App\\classes\\PushNotificationClass\:\:sendPushNotification\(\) has parameter \$userId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/PushNotificationClass.php
-
-		-
-			message: '#^Method App\\classes\\Pusher\:\:broadcast\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\classes\\Pusher\:\:broadcast\(\) has parameter \$theData with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/classes/Pusher.php
-
-		-
-			message: '#^Method App\\classes\\Pusher\:\:broadcast\(\) has parameter \$theChannel with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Pusher.php
-
-		-
-			message: '#^Method App\\classes\\Pusher\:\:broadcast\(\) has parameter \$theData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Pusher.php
-
-		-
-			message: '#^Method App\\classes\\Pusher\:\:broadcast\(\) has parameter \$theEvent with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Pusher.php
-
-		-
-			message: '#^Method App\\classes\\Pusher\:\:pusher\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Pusher.php
-
-		-
-			message: '#^Instantiated class App\\Exceptions\\CaptchaVerificationException not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Recaptcha.php
-
-		-
-			message: '#^Method App\\classes\\Recaptcha\:\:verifyCaptcha\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Recaptcha.php
-
-		-
-			message: '#^Method App\\classes\\Recaptcha\:\:verifyCaptcha\(\) has parameter \$action with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Recaptcha.php
-
-		-
-			message: '#^Throwing object of an unknown class App\\Exceptions\\CaptchaVerificationException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/Recaptcha.php
 
 		-
 			message: '#^Method App\\classes\\Request\:\:all\(\) has no return type specified\.$#'
@@ -1171,264 +655,6 @@ parameters:
 			path: app/classes/Sanitise.php
 
 		-
-			message: '#^Function returnErrorCode not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:combineSelect\(\) has parameter \$array with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:formAndMatchQuery\(\) has parameter \$colArray with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:formAndMatchQuery\(\) has parameter \$column2 with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:formAndMatchQuery\(\) has parameter \$identifier3 with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:formAndMatchQuery\(\) has parameter \$limit with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:formAndMatchQuery\(\) has parameter \$orderBy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn\(\) has parameter \$bind with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn\(\) should return array\|int\|string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn2\(\) has parameter \$bind with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn2\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectCountFn2\(\) should return array\|int\|string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn\(\) has parameter \$bind with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn\(\) should return array\|int\|string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn1\(\) has parameter \$bind with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn1\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn1\(\) should return array\|int\|string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn2\(\) has parameter \$bind with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn2\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Select\:\:selectFn2\(\) should return array\|int\|string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\[type\] \$limit \(example\) LIMIT 5; use if you want order\)\: Unexpected token "\[", expected type at offset 566 on line 10$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\[type\] \$orderBy \(example\) ORDER BY id DESC; use if you want order by\)\: Unexpected token "\[", expected type at offset 483 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\[type\] \$selection \- the selection match\(SELECT_OR, SELECT_AND, SELECT_ALL, SELECT_COL_ID, SELECT_ONE, SELECT_GREATER, SELECT_GREATER_EQUAL, SELECT_COUNT_TWO, SELECT_COUNT_ONE, SELECT_COL, SELECT_COUNT_ALL, SELECT_DISTINCT, SELECT_AVERAGE, SELECT_AVERAGE_ALL, SELECT_SUM_ALL\)\)\: Unexpected token "\[", expected type at offset 54 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\[type\] \$table\)\: Unexpected token "\[", expected type at offset 343 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$table$#'
-			identifier: parameter.notFound
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^PHPDoc tag @return with type mixed is not subtype of native type array\|int\|string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: app/classes/Select.php
-
-		-
-			message: '#^Variable \$implodeColArray might not be defined\.$#'
-			identifier: variable.undefined
-			count: 3
-			path: app/classes/Select.php
-
-		-
-			message: '#^Method App\\classes\\Transaction\:\:beginTransaction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Transaction.php
-
-		-
-			message: '#^Method App\\classes\\Transaction\:\:commit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Transaction.php
-
-		-
-			message: '#^Method App\\classes\\Transaction\:\:lastId\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Transaction.php
-
-		-
-			message: '#^Method App\\classes\\Transaction\:\:rollback\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Transaction.php
-
-		-
-			message: '#^Expression "PHP_EOL" on a separate line does not do anything\.$#'
-			identifier: expr.resultUnused
-			count: 2
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateMultiplePOST\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTable\(\) has parameter \$columnAnswer with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTableMulti\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTableMulti\(\) has parameter \$identifiers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTwoColumns\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTwoColumns\(\) has parameter \$columnAnswers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTwoColumns\(\) has parameter \$columns with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Method App\\classes\\Update\:\:updateTwoColumns\(\) has parameter \$identifiers with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/Update.php
-
-		-
-			message: '#^Call to an undefined method Minishlink\\WebPush\\WebPush\:\:sendNotification\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
 			message: '#^Method App\\classes\\VapidClass\:\:index\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
@@ -1437,42 +663,6 @@ parameters:
 		-
 			message: '#^Method App\\classes\\VapidClass\:\:index\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:sendPushNotifications\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:sendPushNotifications\(\) has parameter \$auth with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:sendPushNotifications\(\) has parameter \$payload with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:sendPushNotifications\(\) has parameter \$subscriptionData with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:urlBase64ToUint8Array\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/VapidClass.php
-
-		-
-			message: '#^Method App\\classes\\VapidClass\:\:urlBase64ToUint8Array\(\) has parameter \$base64String with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/classes/VapidClass.php
 
@@ -1501,10 +691,10 @@ parameters:
 			path: app/classes/VerifyToken.php
 
 		-
-			message: '#^Method App\\classes\\VirusScan\:\:__construct\(\) has parameter \$tempFileLocation with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Call to an undefined method App\\classes\\tables\\Account\:\:connect\(\)\.$#'
+			identifier: method.notFound
 			count: 1
-			path: app/classes/VirusScan.php
+			path: app/classes/tables/account.php
 
 		-
 			message: '#^Method App\\classes\\tables\\Account\:\:index\(\) has no return type specified\.$#'
@@ -1513,10 +703,22 @@ parameters:
 			path: app/classes/tables/account.php
 
 		-
+			message: '#^Call to an undefined method App\\classes\\tables\\Contact\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/contact.php
+
+		-
 			message: '#^Method App\\classes\\tables\\Contact\:\:index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/classes/tables/contact.php
+
+		-
+			message: '#^Call to an undefined method App\\classes\\tables\\FriendRequest\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/friendRequest.php
 
 		-
 			message: '#^Method App\\classes\\tables\\FriendRequest\:\:index\(\) has no return type specified\.$#'
@@ -1531,10 +733,22 @@ parameters:
 			path: app/classes/tables/interest.php
 
 		-
+			message: '#^Call to an undefined method App\\classes\\tables\\Kids\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/kids.php
+
+		-
 			message: '#^Method App\\classes\\tables\\Kids\:\:index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/classes/tables/kids.php
+
+		-
+			message: '#^Call to an undefined static method App\\classes\\Insert\:\:connect2\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/classes/tables/notification.php
 
 		-
 			message: '#^Method App\\classes\\tables\\Notification\:\:index\(\) has no return type specified\.$#'
@@ -1543,10 +757,22 @@ parameters:
 			path: app/classes/tables/notification.php
 
 		-
+			message: '#^Call to an undefined method App\\classes\\tables\\OtherFamily\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/otherFamily.php
+
+		-
 			message: '#^Method App\\classes\\tables\\OtherFamily\:\:index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/classes/tables/otherFamily.php
+
+		-
+			message: '#^Call to an undefined method App\\classes\\tables\\Personal\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/personal.php
 
 		-
 			message: '#^Method App\\classes\\tables\\Personal\:\:index\(\) has no return type specified\.$#'
@@ -1555,100 +781,28 @@ parameters:
 			path: app/classes/tables/personal.php
 
 		-
+			message: '#^Call to an undefined method App\\classes\\tables\\Siblings\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/siblings.php
+
+		-
 			message: '#^Method App\\classes\\tables\\Siblings\:\:index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/classes/tables/siblings.php
 
 		-
+			message: '#^Call to an undefined method App\\Classes\\Tables\\Work\:\:connect\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/classes/tables/work.php
+
+		-
 			message: '#^Class App\\classes\\Insert referenced with incorrect case\: App\\Classes\\Insert\.$#'
 			identifier: class.nameCase
 			count: 2
 			path: app/classes/tables/work.php
-
-		-
-			message: '#^Access to property \$resourceId on an unknown class Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 2
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Call to method close\(\) on an unknown class Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:broadcast\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:broadcast\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onClose\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onError\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onMessage\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onMessage\(\) has parameter \$msg with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onOpen\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onClose\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onError\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Parameter \$conn of method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onOpen\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Parameter \$from of method App\\classes\\websocket\\NotificationWebSocketHandler\:\:onMessage\(\) has invalid type Ratchet\\ConnectionInterface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
-
-		-
-			message: '#^Property App\\classes\\websocket\\NotificationWebSocketHandler\:\:\$clients has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: app/classes/websocket/NotificationWebSocketHandler.php
 
 		-
 			message: '#^Call to method addNewCol\(\) on an unknown class Src\\AlterTable\.$#'
@@ -1681,26 +835,14 @@ parameters:
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Method App\\controller\\BaseController\:\:collectPeopleWithImages\(\) has parameter \$data with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
-			message: '#^Method App\\controller\\BaseController\:\:collectPeopleWithImages\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
 			message: '#^Method App\\controller\\BaseController\:\:fetchRelationsData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Method App\\controller\\BaseController\:\:findMemberById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\BaseController\:\:findMemberById\(\) has parameter \$id with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
 
@@ -1718,18 +860,6 @@ parameters:
 
 		-
 			message: '#^Method App\\controller\\BaseController\:\:formatPerson\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
-			message: '#^Method App\\controller\\BaseController\:\:fullMemberData\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
-			message: '#^Method App\\controller\\BaseController\:\:fullMemberData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
@@ -1753,32 +883,20 @@ parameters:
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Method App\\controller\\BaseController\:\:membersData\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\BaseController\:\:membersData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Method App\\controller\\BaseController\:\:returnId\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\BaseController\:\:returnId\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Method App\\controller\\BaseController\:\:viewWithCsp\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
-			message: '#^Method App\\controller\\BaseController\:\:viewWithCsp\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/BaseController.php
-
-		-
-			message: '#^Method App\\controller\\BaseController\:\:viewWithCsp\(\) has parameter \$view with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\BaseController\:\:viewWithCsp\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/BaseController.php
 
@@ -1789,8 +907,20 @@ parameters:
 			path: app/controller/BaseController.php
 
 		-
-			message: '#^Strict comparison using \!\=\= between array and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
+			message: '#^Static method App\\controller\\BaseController\:\:fetchRelationsData\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/controller/BaseController.php
+
+		-
+			message: '#^Static method App\\controller\\BaseController\:\:getSiblingChildren\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/controller/BaseController.php
+
+		-
+			message: '#^Static method App\\controller\\BaseController\:\:hasProperImage\(\) is unused\.$#'
+			identifier: method.unused
 			count: 1
 			path: app/controller/BaseController.php
 
@@ -1831,18 +961,6 @@ parameters:
 			path: app/controller/General.php
 
 		-
-			message: '#^Method App\\controller\\Index\:\:checking\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Index.php
-
-		-
-			message: '#^Method App\\controller\\Index\:\:getEmails\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Index.php
-
-		-
 			message: '#^While loop condition is always true\.$#'
 			identifier: while.alwaysTrue
 			count: 1
@@ -1879,14 +997,14 @@ parameters:
 			path: app/controller/NotificationController.php
 
 		-
-			message: '#^Method App\\controller\\NotificationController\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\NotificationController\:\:index\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/NotificationController.php
 
 		-
-			message: '#^Method App\\controller\\NotificationController\:\:notificationById\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\NotificationController\:\:index\(\) should return array\|int\|string\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/controller/NotificationController.php
 
@@ -1903,8 +1021,14 @@ parameters:
 			path: app/controller/NotificationController.php
 
 		-
-			message: '#^Method App\\controller\\NotificationController\:\:notificationRead\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\NotificationController\:\:notificationById\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controller/NotificationController.php
+
+		-
+			message: '#^Method App\\controller\\NotificationController\:\:notificationById\(\) should return array\|int\|string\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/controller/NotificationController.php
 
@@ -1915,26 +1039,8 @@ parameters:
 			path: app/controller/NotificationController.php
 
 		-
-			message: '#^Method App\\controller\\NotificationController\:\:postSubscriberData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/NotificationController.php
-
-		-
-			message: '#^Method App\\controller\\ServeImgController\:\:PostDir\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/ServeImgController.php
-
-		-
 			message: '#^Method App\\controller\\ServeImgController\:\:PostDir\(\) has parameter \$imgName with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/ServeImgController.php
-
-		-
-			message: '#^Method App\\controller\\ServeImgController\:\:ProfileDir\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/ServeImgController.php
 
@@ -1957,26 +1063,8 @@ parameters:
 			path: app/controller/Testphp.php
 
 		-
-			message: '#^Function App\\controller\\getInput\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Function App\\controller\\getInput2\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
 			message: '#^Function App\\controller\\getInput2\(\) has parameter \$arg with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Function App\\controller\\getRange\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/Testphp.php
 
@@ -1987,32 +1075,14 @@ parameters:
 			path: app/controller/Testphp.php
 
 		-
-			message: '#^Function App\\controller\\getRange2\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
 			message: '#^Function App\\controller\\getRange2\(\) has parameter \$max with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: app/controller/Testphp.php
 
 		-
-			message: '#^Function App\\controller\\getRange3\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
 			message: '#^Function App\\controller\\getRange3\(\) has parameter \$max with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Function App\\controller\\getRange4\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/Testphp.php
 
@@ -2071,80 +1141,8 @@ parameters:
 			path: app/controller/Testphp.php
 
 		-
-			message: '#^Method App\\controller\\Testphp\:\:current\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:getGenerator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:getGenerator2\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:getGenerator3\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:getGenerator4\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:key\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:next\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:printIterable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
 			message: '#^Method App\\controller\\Testphp\:\:printIterable\(\) has parameter \$myIterable with no value type specified in iterable type iterable\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:rewind\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:showWord\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Method App\\controller\\Testphp\:\:valid\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/Testphp.php
 
@@ -2191,18 +1189,6 @@ parameters:
 			path: app/controller/Testphp.php
 
 		-
-			message: '#^Variable \$sch on left side of \?\?\= always exists and is always null\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
-			message: '#^Variable \$time on left side of \?\?\= always exists and is always null\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: app/controller/Testphp.php
-
-		-
 			message: '#^Class App\\controller\\BaseController referenced with incorrect case\: App\\Controller\\BaseController\.$#'
 			identifier: class.nameCase
 			count: 2
@@ -2215,20 +1201,8 @@ parameters:
 			path: app/controller/admin/ReviewApps.php
 
 		-
-			message: '#^Method App\\controller\\admin\\ReviewApps\:\:get\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/admin/ReviewApps.php
-
-		-
 			message: '#^Method App\\controller\\admin\\ReviewApps\:\:getCustomerData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/admin/ReviewApps.php
-
-		-
-			message: '#^Method App\\controller\\admin\\ReviewApps\:\:updateAccountStatus\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/admin/ReviewApps.php
 
@@ -2239,22 +1213,10 @@ parameters:
 			path: app/controller/admin/ReviewApps.php
 
 		-
-			message: '#^Method App\\controller\\login\\Code\:\:show\(\) has no return type specified\.$#'
+			message: '#^Method App\\controller\\login\\Code\:\:resendCode\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: app/controller/login/Code.php
-
-		-
-			message: '#^Method App\\controller\\login\\Forgot\:\:show\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/login/Forgot.php
-
-		-
-			message: '#^Static method Src\\functionality\\PasswordRecoveryService\:\:show\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: app/controller/login/Forgot.php
 
 		-
 			message: '#^Class App\\controller\\BaseController referenced with incorrect case\: App\\Controller\\BaseController\.$#'
@@ -2287,12 +1249,6 @@ parameters:
 			path: app/controller/members/AllMembersController.php
 
 		-
-			message: '#^Method App\\Controller\\members\\AllMembersController\:\:getProfile\(\) should never return but return statement found\.$#'
-			identifier: return.never
-			count: 1
-			path: app/controller/members/AllMembersController.php
-
-		-
 			message: '#^Method App\\Controller\\members\\AllMembersController\:\:removeProfile\(\) has parameter \$apr with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2305,19 +1261,13 @@ parameters:
 			path: app/controller/members/AllMembersController.php
 
 		-
-			message: '#^Method App\\controller\\members\\CommentReactionController\:\:addReaction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/members/CommentReactionController.php
+			message: '#^Call to an undefined static method App\\controller\\members\\ApprovalController\:\:connect2\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: app/controller/members/ApprovalController.php
 
 		-
-			message: '#^Method App\\controller\\members\\CommentReactionController\:\:countReactions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/controller/members/CommentReactionController.php
-
-		-
-			message: '#^Method App\\controller\\members\\CommentReactionController\:\:countReactions\(\) should return array but return statement is missing\.$#'
+			message: '#^Method App\\controller\\members\\CommentReactionController\:\:countReactions\(\) should return array\<mixed\>\|null but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
 			path: app/controller/members/CommentReactionController.php
@@ -2329,14 +1279,14 @@ parameters:
 			path: app/controller/members/CommentReactionController.php
 
 		-
-			message: '#^Method App\\controller\\members\\CommentReactionController\:\:getReactions\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\members\\CommentReactionController\:\:getReactions\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/CommentReactionController.php
 
 		-
-			message: '#^Method App\\controller\\members\\CommentReactionController\:\:getReactions\(\) has parameter \$commentNo with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\members\\CommentReactionController\:\:getReactions\(\) should return array\|bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/controller/members/CommentReactionController.php
 
@@ -2357,6 +1307,18 @@ parameters:
 			identifier: argument.unknown
 			count: 1
 			path: app/controller/members/CommentReactionController.php
+
+		-
+			message: '#^Call to static method formAndMatchQuery\(\) on an unknown class App\\classes\\Select\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/controller/members/Event.php
+
+		-
+			message: '#^Call to static method selectFn2\(\) on an unknown class App\\classes\\Select\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/controller/members/Event.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$id \(array\) is implicitly nullable via default value null\.$#'
@@ -2401,13 +1363,19 @@ parameters:
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Method App\\controller\\members\\Event\:\:extendEventByFrequency\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\members\\Event\:\:filterMemberByFamCode\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Method App\\controller\\members\\Event\:\:filterMemberByFamCode\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method App\\controller\\members\\Event\:\:generateFamCode\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/controller/members/Event.php
+
+		-
+			message: '#^Method App\\controller\\members\\Event\:\:getSenderName\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Event.php
@@ -2419,32 +1387,20 @@ parameters:
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Method App\\controller\\members\\Event\:\:processEventUpdate\(\) has parameter \$dateEvent with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\members\\Event\:\:processEventUpdate\(\) has parameter \$dateEvent with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Event.php
 
 		-
-			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has parameter \$data with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/Event.php
-
-		-
-			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has parameter \$email with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/Event.php
-
-		-
-			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has parameter \$subject with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\members\\Event\:\:sendBulkNotification\(\) has parameter \$email with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Event.php
 
@@ -2461,12 +1417,6 @@ parameters:
 			path: app/controller/members/FamilyRequestController.php
 
 		-
-			message: '#^Method App\\controller\\members\\FamilyRequestController\:\:test\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/members/FamilyRequestController.php
-
-		-
 			message: '#^Method App\\controller\\members\\FamilyRequestController\:\:test\(\) has parameter \$req with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2475,12 +1425,6 @@ parameters:
 		-
 			message: '#^Method App\\controller\\members\\FamilyRequestController\:\:test\(\) has parameter \$res with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/FamilyRequestController.php
-
-		-
-			message: '#^Method App\\controller\\members\\FamilyRequestController\:\:testURL\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/members/FamilyRequestController.php
 
@@ -2497,8 +1441,8 @@ parameters:
 			path: app/controller/members/Organogram.php
 
 		-
-			message: '#^Method App\\controller\\members\\Organogram\:\:fetchRelationsData\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\members\\Organogram\:\:fetchRelationsData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/members/Organogram.php
 
@@ -2533,8 +1477,8 @@ parameters:
 			path: app/controller/members/Organogram.php
 
 		-
-			message: '#^Method App\\controller\\members\\PostLikeController\:\:getNewLikesPusher\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^App\\controller\\members\\PostLikeController\:\:postLikes\(\) calls parent\:\:connect2\(\) but App\\controller\\members\\PostLikeController does not extend any class\.$#'
+			identifier: class.noParent
 			count: 1
 			path: app/controller/members/PostLikeController.php
 
@@ -2557,38 +1501,8 @@ parameters:
 			path: app/controller/members/PostLikeController.php
 
 		-
-			message: '#^Call to an undefined static method App\\model\\AllMembersData\:\:countVisiblePosts\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Call to an undefined static method App\\model\\AllMembersData\:\:getVisiblePosts\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:buildPostUrl\(\) has parameter \$postNo with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:deleteComment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
 			message: '#^Method App\\controller\\members\\PostMessage\:\:deleteComment\(\) has parameter \$commentNo with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:fetchNewMsg\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/members/PostMessage.php
 
@@ -2599,14 +1513,8 @@ parameters:
 			path: app/controller/members/PostMessage.php
 
 		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:getProfilePicsForPostAndComment\(\) has parameter \$postId with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\members\\PostMessage\:\:fetchNewMsg\(\) should return array\<int\<0, max\>, mixed\>\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/controller/members/PostMessage.php
 
@@ -2623,20 +1531,8 @@ parameters:
 			path: app/controller/members/PostMessage.php
 
 		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:updateCommentAsPublished\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
 			message: '#^Method App\\controller\\members\\PostMessage\:\:updateCommentAsPublished\(\) has parameter \$commentNo with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/controller/members/PostMessage.php
-
-		-
-			message: '#^Method App\\controller\\members\\PostMessage\:\:updatePostAsPublished\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: app/controller/members/PostMessage.php
 
@@ -2797,28 +1693,10 @@ parameters:
 			path: app/controller/members/SettingController.php
 
 		-
-			message: '#^Method App\\controller\\members\\SettingController\:\:post\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/controller/members/SettingController.php
-
-		-
 			message: '#^Unreachable statement \- code above always terminates\.$#'
 			identifier: deadCode.unreachable
 			count: 1
 			path: app/controller/members/opp.php
-
-		-
-			message: '#^Function genEmailArray not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: app/controller/register/Register.php
-
-		-
-			message: '#^Function sendEmailWrapper not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: app/controller/register/Register.php
 
 		-
 			message: '#^Method App\\controller\\register\\Register\:\:createBirthdayEntry\(\) has parameter \$day with no type specified\.$#'
@@ -2851,8 +1729,8 @@ parameters:
 			path: app/controller/register/Register.php
 
 		-
-			message: '#^Method App\\controller\\register\\Register\:\:createFamilyCode\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\controller\\register\\Register\:\:dataToCheck\(\) should return array\{min\: array\{2, 2, 2, 2, 2, 2, 2, 2, \.\.\.\}, max\: array\{15, 15, 35, 35, 20, 16, 30, 15, \.\.\.\}, data\: array\{''firstName'', ''lastName'', ''fatherName'', ''motherName'', ''country'', ''mobile'', ''email'', ''occupation'', \.\.\.\}\} but returns array\{min\: array\{2, 2, 2, 2, 2, 2, 2, 2, \.\.\.\}, max\: array\{35, 35, 35, 35, 35, 16, 30, 50, \.\.\.\}, data\: array\{''firstName'', ''lastName'', ''fatherName'', ''motherName'', ''country'', ''mobile'', ''email'', ''occupation'', \.\.\.\}\}\.$#'
+			identifier: return.type
 			count: 1
 			path: app/controller/register/Register.php
 
@@ -2893,8 +1771,8 @@ parameters:
 			path: app/controller/register/Search.php
 
 		-
-			message: '#^Method App\\controller\\register\\Search\:\:checkBox\(\) has parameter \$subject with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\controller\\register\\Search\:\:checkBox\(\) has parameter \$subject with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/controller/register/Search.php
 
@@ -2908,12 +1786,6 @@ parameters:
 			message: '#^Constant BR not found\.$#'
 			identifier: constant.notFound
 			count: 2
-			path: app/function/helper/optimiser.php
-
-		-
-			message: '#^Function printMemory\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: app/function/helper/optimiser.php
 
 		-
@@ -2947,8 +1819,8 @@ parameters:
 			path: app/function/helper/submitDataHelper.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:AllMembersEmailByFamCode\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:AllMembersEmailByFamCode\(\) has parameter \$id with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -2971,14 +1843,20 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
+			message: '#^Method App\\model\\AllMembersData\:\:countVisiblePosts\(\) has parameter \$famCodes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/AllMembersData.php
+
+		-
 			message: '#^Method App\\model\\AllMembersData\:\:getAllEventData\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getAllMembers\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:getAllMembers\(\) has parameter \$id with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -2989,14 +1867,14 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getAllMembersById\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\model\\AllMembersData\:\:getAllMembersById\(\) has parameter \$id with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getAllMembersById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:getAllMembersById\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -3013,20 +1891,8 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getAllMembersNoPicsStatic\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method App\\model\\AllMembersData\:\:getEventDataByFamCode\(\) has parameter \$famCode with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getBirthdayMonth\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getEventDataByFamCode\(\) has parameter \$famCode with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -3037,8 +1903,8 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getEventDataByNo\(\) has parameter \$eventNo with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:getEventDataByNo\(\) has parameter \$eventNo with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -3061,49 +1927,25 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getFriendRequestData\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\model\\AllMembersData\:\:getFriendRequestData\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getFriendRequestData\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:getFriendRequestData\(\) should return array\<int\<0, max\>, mixed\>\|string\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getFriendRequestData\(\) has parameter \$status with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\AllMembersData\:\:getMemories\(\) has parameter \$famCodes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:getMemberName\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getMemberName\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getMembers\(\) has parameter \$orderBy with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getMembers\(\) has parameter \$table with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:getMembers\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method App\\model\\AllMembersData\:\:getMemories\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/AllMembersData.php
@@ -3127,20 +1969,26 @@ parameters:
 			path: app/model/AllMembersData.php
 
 		-
-			message: '#^Method App\\model\\AllMembersData\:\:postProfilePicByFamCode\(\) has parameter \$famCode with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:postProfilePicByFamCode\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/AllMembersData.php
-
-		-
-			message: '#^Method App\\model\\AllMembersData\:\:postProfilePicByFamCode\(\) return type has no value type specified in iterable type array\.$#'
+			message: '#^Method App\\model\\AllMembersData\:\:getVisiblePosts\(\) has parameter \$famCodes with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/AllMembersData.php
+
+		-
+			message: '#^Method App\\model\\AllMembersData\:\:getVisiblePosts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/AllMembersData.php
+
+		-
+			message: '#^Method Src\\InnerJoin\:\:joinParam\(\) invoked with 5 parameters, 4 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/model/AllMembersData.php
+
+		-
+			message: '#^Parameter \#3 \$table of method Src\\InnerJoin\:\:joinParam\(\) expects array, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: app/model/AllMembersData.php
 
@@ -3181,14 +2029,32 @@ parameters:
 			path: app/model/EmailData.php
 
 		-
+			message: '#^Method App\\model\\PollData\:\:createPoll\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/PollData.php
+
+		-
+			message: '#^Method App\\model\\PollData\:\:getPollsForPosts\(\) has parameter \$postIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/PollData.php
+
+		-
+			message: '#^Method App\\model\\PollData\:\:getPollsForPosts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/PollData.php
+
+		-
 			message: '#^Method App\\model\\Post\:\:commentByNo\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/Post.php
 
 		-
-			message: '#^Method App\\model\\Post\:\:commentLink2Img\(\) has parameter \$imgPath with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\Post\:\:commentLink2Img\(\) has parameter \$imgPath with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/Post.php
 
@@ -3265,8 +2131,8 @@ parameters:
 			path: app/model/Post.php
 
 		-
-			message: '#^Method App\\model\\Post\:\:getProfilePicsById\(\) has parameter \$id with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\Post\:\:getProfilePicsById\(\) has parameter \$id with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/Post.php
 
@@ -3295,12 +2161,6 @@ parameters:
 			path: app/model/Post.php
 
 		-
-			message: '#^Method App\\model\\Post\:\:updateCommentByStatusAsPublished\(\) has parameter \$commentNo with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/model/Post.php
-
-		-
 			message: '#^Method App\\model\\Post\:\:updatePostByStatusAsPublished\(\) has parameter \$postNo with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -3316,10 +2176,28 @@ parameters:
 			path: app/model/Post.php
 
 		-
-			message: '#^Method App\\model\\RegisterTableData\:\:createRegisterTable\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\model\\ReactionData\:\:getReactionsForPosts\(\) has parameter \$postIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/model/RegisterTableData.php
+			path: app/model/ReactionData.php
+
+		-
+			message: '#^Method App\\model\\ReactionData\:\:getReactionsForPosts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/ReactionData.php
+
+		-
+			message: '#^Method App\\model\\ReactionData\:\:getUserReactionsForPosts\(\) has parameter \$postIds with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/ReactionData.php
+
+		-
+			message: '#^Method App\\model\\ReactionData\:\:getUserReactionsForPosts\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/model/ReactionData.php
 
 		-
 			message: '#^Method App\\model\\RegisterTableData\:\:createRegisterTable\(\) has parameter \$cleanPostData with no value type specified in iterable type array\.$#'
@@ -3328,26 +2206,44 @@ parameters:
 			path: app/model/RegisterTableData.php
 
 		-
-			message: '#^Method App\\model\\ReviewAppsData\:\:getWithId\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\model\\RegisterTableData\:\:createRegisterTable\(\) should return array\{personal\: array\{firstName\: mixed, lastName\: mixed, famCode\: mixed, kids\: mixed, gender\: mixed, siblings\: mixed, day\: mixed, month\: mixed, \.\.\.\}, work\: array\{employmentStatus\: mixed, occupation\: mixed, id\: mixed\}, contact\: array\{email\: mixed, country\: mixed, mobile\: mixed, id\: mixed\}, account\: array\{email\: mixed, password\: mixed, status\: ''new'', type\: ''member'', id\: mixed\}, otherFamily\: array\{spouse_name\: mixed, spouse_mobile\: mixed, spouse_email\: mixed, father_name\: mixed, father_mobile\: mixed, father_email\: mixed, mother_name\: mixed, mother_mobile\: mixed, \.\.\.\}, post\: array\{fullName\: mixed, postMessage\: ''Hey, welcome to…'', profileImg\: ''avatarF\.png''\|''avatarM\.png'', id\: mixed\}, comment\: array\{fullName\: mixed, comment\: ''Your comment will…'', profileImg\: ''avatarF\.png''\|''avatarM\.png'', post_no\: 1000, id\: mixed\}, profilePics\: array\{img\: ''avatarF\.png''\|''avatarM\.png'', id\: mixed\}, \.\.\.\} but returns array\{personal\: array\{firstName\: mixed, lastName\: mixed, famCode\: mixed, kids\: mixed, gender\: mixed, siblings\: mixed, day\: mixed, month\: mixed, \.\.\.\}, work\: array\{employmentStatus\: mixed, occupation\: mixed, id\: mixed\}, contact\: array\{email\: mixed, country\: mixed, mobile\: mixed, id\: mixed\}, account\: array\{email\: mixed, password\: mixed, status\: ''new'', type\: ''member'', id\: mixed\}, otherFamily\: array\{spouse_name\: mixed, spouse_mobile\: mixed, spouse_email\: mixed, father_name\: mixed, father_mobile\: mixed, father_email\: mixed, mother_name\: mixed, mother_mobile\: mixed, \.\.\.\}, post\: array\{fullName\: mixed, postMessage\: ''Hey, welcome to…'', profileImg\: ''avatarF\.png''\|''avatarM\.png'', id\: mixed\}, comment\: array\{fullName\: mixed, comment\: ''Your comment will…'', profileImg\: ''avatarF\.png''\|''avatarM\.png'', post_no\: 1000, id\: mixed\}, profilePics\: array\{img\: ''avatarF\.png''\|''avatarM\.png'', id\: mixed\}, \.\.\.\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/model/RegisterTableData.php
+
+		-
+			message: '#^Method App\\model\\ReviewAppsData\:\:getWithId\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: app/model/ReviewAppsData.php
 
 		-
-			message: '#^Method App\\model\\ReviewAppsData\:\:index\(\) has no return type specified\.$#'
-			identifier: missingType.return
+			message: '#^Method App\\model\\ReviewAppsData\:\:getWithId\(\) should return array\|bool\|null but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: app/model/ReviewAppsData.php
 
 		-
-			message: '#^Method App\\model\\SingleCustomerData\:\:getCustById\(\) has parameter \$custId with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\ReviewAppsData\:\:index\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/model/SingleCustomerData.php
+			path: app/model/ReviewAppsData.php
 
 		-
-			message: '#^Method App\\model\\SingleCustomerData\:\:getCustById\(\) has parameter \$table with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\model\\ReviewAppsData\:\:index\(\) should return array\|bool\|null but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: app/model/ReviewAppsData.php
+
+		-
+			message: '#^Unknown parameter \$firstTable in call to method Src\\InnerJoin\:\:joinParam\(\)\.$#'
+			identifier: argument.unknown
+			count: 2
+			path: app/model/ReviewAppsData.php
+
+		-
+			message: '#^Call to an undefined method App\\model\\SingleCustomerData\:\:joinParamOr\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: app/model/SingleCustomerData.php
 
@@ -3370,34 +2266,16 @@ parameters:
 			path: app/model/SingleCustomerData.php
 
 		-
-			message: '#^Method App\\model\\SingleCustomerData\:\:getCustomerData2\(\) has parameter \$table with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/model/SingleCustomerData.php
-
-		-
-			message: '#^Method App\\model\\SingleCustomerData\:\:getCustomerData2\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/model/SingleCustomerData.php
-
-		-
-			message: '#^Method App\\model\\SingleCustomerData\:\:getPersonalData\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/model/SingleCustomerData.php
-
-		-
 			message: '#^Result of function msgException \(void\) is used\.$#'
 			identifier: function.void
 			count: 1
 			path: app/model/SingleCustomerData.php
 
 		-
-			message: '#^Variable \$result on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.variable
+			message: '#^Method App\\Services\\LoginAnomalyService\:\:check\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
-			path: app/model/SingleCustomerData.php
+			path: app/services/LoginAnomalyService.php
 
 		-
 			message: '#^Method App\\Services\\ProfilepageService\:\:getProfileData\(\) has parameter \$userId with no type specified\.$#'

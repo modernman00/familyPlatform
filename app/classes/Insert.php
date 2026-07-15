@@ -6,6 +6,7 @@ use Exception;
 use PDOException;
 
 use Src\Transaction;
+use Src\Db;
 
 class Insert extends Db
 {

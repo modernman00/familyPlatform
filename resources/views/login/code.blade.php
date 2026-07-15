@@ -12,7 +12,7 @@
                 </div>
 
     <hr class="my-2">
-    <form action="" id="code" method="post" class="styleform_form code">
+    <form action="" id="code" class="styleform_form code">
         <div class="form-group">
             <br>
             <div class='row'>
@@ -32,11 +32,11 @@
                  @endphp
 
                 <br>
-
-
+            </div>
+        </div>
     </form>
-
-
-
-
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
