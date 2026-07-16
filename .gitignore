@@ -33,3 +33,11 @@ server.crt
 localhost-key.pem
 localhost.pem
 *.pem
+mysql.session.sql
+.agents/
+scratch.php
+test.drawio
+mysql.session.sql
+.agents/
+scratch.php
+test.drawio
