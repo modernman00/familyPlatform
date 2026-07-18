@@ -1,23 +1,24 @@
 <?php
 
-namespace App\classes\tables;
+namespace App\Classes\Tables;
 
 use PDOException;
 use App\classes\Insert;
 
-class Siblings extends Insert
+class Kids extends Insert
 {
 
     public function index()
     {
         try {
-                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`siblings` ( 
+                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`kids` ( 
                     `no` INT NOT NULL AUTO_INCREMENT , 
                     `id` VARCHAR(255) NOT NULL , 
                 `kid_name` TEXT NOT NULL , 
                 `kid_email` TEXT NOT NULL ,
                 `kid_linked` TEXT NOT NULL,
-                                
+              
+                                  
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , 
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, 
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP , 

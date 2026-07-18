@@ -3,7 +3,7 @@ includes:
 
 parameters:
   reportUnmatchedIgnoredErrors: false
-  level : 6
+  level: 8
   paths:
     - app
     

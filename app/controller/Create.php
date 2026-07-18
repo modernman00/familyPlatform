@@ -2,7 +2,7 @@
 namespace App\controller;
 
 use Src\Db;
-use App\classes\tables\{
+use App\Classes\Tables\{
     Contact,
     Personal,
     Work,

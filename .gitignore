@@ -26,9 +26,6 @@ public/js
 olaogun.test-key.pem
 olaogun.test.pem 
 
-
-
-
 server.crt
 localhost-key.pem
 localhost.pem
@@ -37,7 +34,52 @@ mysql.session.sql
 .agents/
 scratch.php
 test.drawio
-mysql.session.sql
-.agents/
-scratch.php
-test.drawio
+*.key
+*.crt
+.env
+*.log
+deployment_audit.log
+# --- Automated TAT / Shola SecOps Rules ---
+# Environment config
+.env.*
+!.env.example
+# Crypto / Keys
+*.cert
+# Databases
+*.sqlite
+*.sql
+# Logs & Dumps
+npm-debug.log*
+yarn-error.log*
+core.*
+bootstrap/log/
+# Dependencies
+vendor/
+node_modules/
+# Testing & Scratch
+tests/
+scratch/
+*test*.php
+phpunit.xml
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+.phpunit.cache
+*.cache
+coverage/
+# OS Artifacts
+.DS_Store
+# User Uploads & Framework Caches
+public/uploads/
+storage/logs/
+storage/framework/
+# IDE Configs
+.vscode/
+.idea/
+# ------------------------------------------
+storage/reports/
+storage/uploads/
+**/uploads/
+**/upload/
+**/user_images/

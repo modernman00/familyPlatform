@@ -1,6 +1,6 @@
 <?php
 
-namespace App\classes\tables;
+namespace App\Classes\Tables;
 
 use PDOException;
 use App\classes\Insert;

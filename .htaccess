@@ -1,3 +1,11 @@
+# -------------------------------------------------------
+# BLOCK DIRECT ACCESS TO SENSITIVE FILES (TAT HOTFIX)
+# -------------------------------------------------------
+<FilesMatch "(^\.env|composer\.(json|lock)|package\.json|package-lock\.json|\.gitignore|phpunit\.xml|phpstan\.neon|\.sql|\.sh|\.bash|\.log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
 # Remove the question mark from the request but maintain the query string
 RewriteEngine On
 

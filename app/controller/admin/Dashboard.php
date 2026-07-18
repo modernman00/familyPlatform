@@ -8,6 +8,14 @@ use Src\Utility;
 
 final class Dashboard extends BaseController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $verifyJWT = \Src\functionality\SignIn::verify();
+        if (is_null($verifyJWT) || empty($verifyJWT['id'])) {
+            throw new \Src\Exceptions\UnauthorisedException("Unauthorized access to administrative dashboard.");
+        }
+    }
 
     public function index(): void
     {

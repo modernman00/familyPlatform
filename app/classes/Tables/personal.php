@@ -1,29 +1,36 @@
 <?php
 
-namespace App\classes\tables;
+namespace App\Classes\Tables;
 
 use PDOException;
 use App\classes\Insert;
 
-class Kids extends Insert
+class Personal extends Insert
 {
 
     public function index()
     {
         try {
-                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`kids` ( 
+                $sql = "CREATE TABLE IF NOT EXISTS  `family`.`personal` ( 
                     `no` INT NOT NULL AUTO_INCREMENT , 
                     `id` VARCHAR(255) NOT NULL , 
-                `kid_name` TEXT NOT NULL , 
-                `kid_email` TEXT NOT NULL ,
-                `kid_linked` TEXT NOT NULL,
-              
-                                  
+                `firstName` TEXT NOT NULL , 
+                `lastName` TEXT NOT NULL ,
+                `alias` TEXT NOT NULL ,
+                `spouse` TEXT NOT NULL ,
+                `spouseEmail` TEXT NOT NULL ,
+                `fatherName` TEXT NOT NULL,
+                `fatherEmail` TEXT NOT NULL,
+                `motherName` TEXT NOT NULL,
+                `motherEmail` TEXT NOT NULL,
+                `birthDate` DATE NOT NULL,
+                `kids` INT NOT NULL,
+                `gender` TEXT NOT NULL,
+                `noSiblings` INT NOT NULL,                      
                 `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , 
                 `updated_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP, 
                 `deleted_at` TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP , 
                 PRIMARY KEY (`no`),
-                 FOREIGN KEY (`id`) REFERENCES personal(`id`),
                 INDEX `id` (`id`))";
 
                 $conn = $this->connect();

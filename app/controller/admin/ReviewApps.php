@@ -14,6 +14,17 @@ final class ReviewApps extends ReviewAppsData
     private $id;
     private const REDIRECT = "/admin/reviewApps";
 
+    public function __construct()
+    {
+        $verifyJWT = \Src\functionality\SignIn::verify();
+        if (is_null($verifyJWT) || empty($verifyJWT['id'])) {
+            throw new \Src\Exceptions\UnauthorisedException("Unauthorized access to administrative area.");
+        }
+        
+        // Optional: Add explicit role check here if your JWT payload supports it
+        // if ($verifyJWT['role'] !== 'admin') { throw new UnauthorisedException("Forbidden"); }
+    }
+
     // get the new application page 
     public function get(): void
     {

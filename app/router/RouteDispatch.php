@@ -7,6 +7,8 @@ use Src\Exceptions\NotFoundException;
 
 use AltoRouter;
 use Src\Exceptions\HttpException;
+use Src\Exceptions\UnauthorisedException;
+use Src\functionality\SignIn;
 
 
 final class RouteDispatch
@@ -40,6 +42,38 @@ final class RouteDispatch
         if (!method_exists($controller, $method)) {
             throw new NotFoundException("Method {$method} not found in {$controller}");
         }
+
+        // --- FAIL-CLOSED ROUTER-LEVEL AUTHENTICATION ---
+        // Whitelist of controllers that do NOT require authentication.
+        $publicControllers = [
+            'App\controller\Index',
+            'App\controller\LoginController',
+            'App\controller\RegisterController',
+            'App\controller\LoginCodeController',
+            'App\controller\ForgotPasswordController',
+            'App\controller\CronController'
+        ];
+
+        if (!in_array($controller, $publicControllers, true)) {
+            if (empty($_SESSION['id'])) {
+                $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token';
+                if (empty($_COOKIE[$tokenName])) {
+                    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                        throw new UnauthorisedException("Unauthorized");
+                    }
+                    redirect('login');
+                    return;
+                }
+
+                $VerifyJWT = SignIn::verify();
+                if (!\is_array($VerifyJWT) || empty($VerifyJWT['id'])) {
+                    throw new NotFoundException('Error Request_2');
+                }
+                $id = checkInput($VerifyJWT['id']);
+                $_SESSION['id'] = $id;
+            }
+        }
+        // -----------------------------------------------
 
         call_user_func_array([new $controller, $method], $this->match['params']);
 

@@ -17,6 +17,10 @@ final class Login
 
     public function show(): void
     {
+        if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users')) {
+            redirect('/profilePage');
+            return;
+        }
         try {
 
             BaseController::viewWithCsp('login/login');
@@ -28,6 +32,10 @@ final class Login
 
     public function showAdmin(): void
     {
+        if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin')) {
+            redirect('/admin/dashboard');
+            return;
+        }
         try {
             BaseController::viewWithCsp('login/lasu');
         } catch (\Throwable $e) {

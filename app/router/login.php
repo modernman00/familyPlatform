@@ -5,6 +5,12 @@ $router->map('GET', '/login', 'App\controller\login\Login@show', 'login');
 
 $router->map('POST', '/login', 'App\controller\login\Login@login', 'Customer Login');
 
+// WebAuthn Routes
+$router->map('POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');
+$router->map('POST', '/webauthn/register', 'Src\functionality\WebAuthnFunctionality@registerDevice', 'WebAuthn Register');
+$router->map('POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunctionality@getLoginOptions', 'WebAuthn Login Options');
+$router->map('POST', '/webauthn/login', 'Src\functionality\WebAuthnFunctionality@login', 'WebAuthn Login');
+
 $router->map('GET', '/lasu', 'App\controller\login\Login@showAdmin', 'Admin Login Page');
 
 $router->map('POST', '/lasu', 'App\controller\login\Login@login', 'admin_Login');
