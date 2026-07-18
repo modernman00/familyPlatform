@@ -15,7 +15,7 @@ set -e # Exit immediately if a command exits with a non-zero status.
 SSH_USER="bestiias"
 SSH_HOST="premium145.web-hosting.com"
 SSH_PORT="21098" # Default Namecheap SSH port is often 21098
-REMOTE_DIR="/home/bestiias/familyplatform"
+REMOTE_DIR="/home/bestiias/myfamilyplatform"
 # ---------------------
 
 echo "🚀 Starting Deployment Pipeline..."
