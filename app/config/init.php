@@ -40,10 +40,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 if (!isset($_SESSION['token'])) {
     $token = bin2hex(random_bytes(32));
     $_SESSION['token'] = $token;
-
 }
 
-if (!isset($_COOKIE['XSRF-TOKEN'])) {
+if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['token']) {
     $token = $_SESSION['token'];
     setcookie('XSRF-TOKEN', $token, [
         'expires' => time() + $cookieExpire, 

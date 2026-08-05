@@ -11,6 +11,7 @@ const formData = new FormHelper(formInputArr);
 
     try {
 
+
         formData.clearError();
         // set the maxlength, check the length of the value, raise error
         formData.realTimeCheckLen(

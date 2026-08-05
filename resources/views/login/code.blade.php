@@ -22,14 +22,14 @@
                     $formArray = [
                         "code_notification"=> "showError",
                         'code' => 'text',
-                        'token' => 'token',
-                          'submit' => 'button',
+                        'submit' => 'button',
                     ];
 
                     $form = new Src\BuildFormBulma($formArray);
                     $form->genForm();
 
                  @endphp
+                 <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
 
                 <br>
             </div>

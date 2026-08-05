@@ -24,11 +24,12 @@ class SingleCustomerData extends InnerJoin
 	{
 		try {
 			$para = "id";
-			// remove the first element of the array
-			$firstTable = array_shift($table);
-			$result = $this->joinParamOr(firstTable: $firstTable, para: $para, table: $table, id: $custId);
+			$result = $this->joinParam(para: $para, paraWhere: $para, table: $table, bind: $custId);
 
-			$result ?? \msgException(401, 'result not found');
+			if (!is_array($result) || empty($result)) {
+				\msgException(401, 'result not found');
+				return false;
+			}
 			$result = $result[0];
 			unset($result['password']);
 
@@ -46,6 +47,9 @@ class SingleCustomerData extends InnerJoin
 	public static function getCustById(int|string|null $custId, string $table): array|string|int
 	{
 		$result = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
+		if ($result === null) {
+			return [];
+		}
 		return Select::selectFn2(query: $result, bind: [$custId]);
 	}
 }

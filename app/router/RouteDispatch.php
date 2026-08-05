@@ -49,9 +49,13 @@ final class RouteDispatch
             'App\controller\Index',
             'App\controller\LoginController',
             'App\controller\RegisterController',
-            'App\controller\LoginCodeController',
             'App\controller\ForgotPasswordController',
-            'App\controller\CronController'
+            'App\controller\CronController',
+            'App\controller\register\Register',
+            'App\controller\General',
+            'App\controller\login\Login',
+            'App\controller\login\Code',
+            'App\controller\login\Forgot'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {

@@ -274,13 +274,14 @@
                                 ]
                             ],
                             'checkbox' => 'By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>',
-                            'token'=> 'token',
                             'Submit form'=> 'button',
                         ];
 
                         $form = new \Src\BuildFormBulma($formArray);
                         $form->genForm();
                     @endphp
+                    <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
+                </form>
 
                     <div id="modal-familyCode" class="modal glass-modal">
                         <div class="modal-background glass-overlay"></div>
@@ -325,7 +326,7 @@
                         </div>
                         <button type="button" id="modal-close-code" class="modal-close is-large" aria-label="close"></button>
                     </div>
-                </form>
+                
                 
                 @if (getenv('APP_ENV') === 'development' || getenv('APP_ENV') === 'local')
                 <script>

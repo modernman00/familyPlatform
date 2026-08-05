@@ -1,150 +1,90 @@
 "use strict";
 import { id, showError, showNotification, checkBox } from "@modernman00/shared-js-lib";
-import { getAllData } from "../api/index";
-import { autocomplete } from "../helper/autocomplete";
 import axios from "axios";
 import { processKidsSiblings } from "../kidsAndSiblings"
 import { log } from "@modernman00/shared-js-lib";
 
-
-const getData = getAllData();
-
-
-let firstNameData = [];
-let fatherName = [];
-let mobile = [];
-let motherName = [];
-let checkEmail = [];
-
 let fName = id("firstName").value 
 let lName = id("lastName").value;
 
-/**
- *
- * @param {* array} baseArray the array to check against ["Banana", "Orange", "Apple", "Mango"];
- * @param {* string || integer} searchElement  the element to search against ("Mango")
- */
-
-const checkExistence = (baseArray, searchElement) => {
-    if (!Array.isArray(baseArray)) {
-        baseArray = []; // Initialize as an array if it's not already
-    }
-    if (baseArray.includes(searchElement) === false) {
-        baseArray.push(searchElement);
+const checkContactExists = async (mobileValue, emailValue) => {
+    try {
+        const payload = {};
+        if (mobileValue) payload.mobile = mobileValue;
+        if (emailValue) payload.email = emailValue;
+        
+        const response = await axios.post('/register/checkContact', payload);
+        return response?.data?.exists || false;
+    } catch (error) {
+        showError(error);
+        return false;
     }
 };
-// Check if getData is resolved
-if (getData instanceof Promise) {
-    getData
-            .then((el) => {
-            // ✅ destructure the array from el.message
-            const { message, status } = el;
 
-            if (status !== "success" || !Array.isArray(message)) {
-                console.error("Unexpected response shape", el);
-                return;
-            }
-
-            message.forEach((element) => {
-                checkExistence(firstNameData, element.firstName);
-                checkExistence(fatherName, element.fatherName);
-                checkExistence(motherName, element.motherName);
-                checkExistence(mobile, element.mobile);
-                checkExistence(checkEmail, element.email);
-            });
-        })
-        .catch((error) => {
-            showError(error);
-            // Handle the error appropriately
-        });
-} else {
-    console.log('getData is empty or not resolved');
-    // Handle the case when getData is empty or not resolved
-}
-
-const firstAutoComplete = id("firstName");
-const fatherAutoComplete = id("father_name");
-const motherAutoComplete = id("mother_name");
-
-firstAutoComplete.setAttribute("autocomplete", "off");
-fatherAutoComplete.setAttribute("autocomplete", "off");
-motherAutoComplete.setAttribute("autocomplete", "off");
-
-// AUTOCOMPLETE
-autocomplete(firstAutoComplete, firstNameData);
-autocomplete(fatherAutoComplete, fatherName);
-autocomplete(motherAutoComplete, motherName);
-
-// CHECK THE MOBILE OF MOTHER AND FATHER
-
-const setInput = (name, value) => {
+const setInput = async (name, value) => {
     const sex = name === "father" ? "him" : "her";
     const genId = id(`${name}Mobile_error`);
     genId.style.display = "block";
 
+    const exists = await checkContactExists(value, null);
 
-    genId.innerHTML = mobile.includes(value) || email.includes(value) ?
+    genId.innerHTML = exists ?
         `Great news that your ${name} is already on the platform` :
         `<h4><i>Your ${name} is not on the platform. Do you want us to send ${sex} a text/email to register to the platform</i>?</h4>${checkBox(name)}`;
 
+    if (!exists) {
+        function processRadio() {
+            const postObj = {
+                mobile: value,
+                viewPath: "msg/contactNewMember",
 
-    function processRadio() {
-        const postObj = {
-            mobile: value,
-            viewPath: "msg/contactNewMember",
+                data: {
+                    email: id(`${name}_email`)?.value || "",
+                    mobile: id(`${name}_mobile`)?.value || "",
+                    name: id(`${name}_name`)?.value || "",
+                    familyCode: id(`famCode`)?.value || id('familyCode')?.value || "",
+                    yourName: `${fName} ${lName}`,
+                },
 
-            data: {
-                email: id(`${name}Email`).value,
-                mobile: id(`${name}Mobile`).value,
-                name: id(`${name}Name`).value,
-                familyCode: id(`familyCode`).value,
-                yourName: `${fName} ${lName}`,
-            },
+                subject: `${fName} ${lName} Wants You: Experience the Magic of your Family Network Today!`,
+            };
 
-            subject: `${fName} ${lName} Wants You: Experience the Magic of your Family Network Today!`,
-        };
-
-        axios
-            .post("/register/contactNewMember", postObj)
-            .then((response) => {
-
-                showNotification(`${name}Mobile_help`, 'is-success', response.data.message);
-
-                genId.innerHTML = "";
-
-            })
-            .catch((error) => {
-                showNotification(`${name}Mobile_error`, 'is-danger', error.message);
-                showError(error);
-            });
+            axios
+                .post("/register/contactNewMember", postObj)
+                .then((response) => {
+                    showNotification(`${name}Mobile_help`, 'is-success', response?.data?.message || "Success");
+                    genId.innerHTML = "";
+                })
+                .catch((error) => {
+                    showNotification(`${name}Mobile_error`, 'is-danger', error?.message || "An error occurred");
+                    showError(error);
+                });
+        }
+        
+        // Wait for DOM update
+        setTimeout(() => {
+            id(`${name}Yes`)?.addEventListener("click", processRadio);
+            id(`${name}No`)?.addEventListener(
+                "click",
+                () => (genId.style.display = "none")
+            );
+        }, 100);
     }
-    id(`${name}Yes`).addEventListener("click", processRadio);
-    id(`${name}No`).addEventListener(
-        "click",
-        () => (genId.style.display = "none"),
-    );
 };
 
-// *
-// Handle mobile filtering
-// for different individuals.*@param { Object }
-// event - The event object.*@param { string }
-// name - The name of the individual("father", "mother", "spouse").*/
-
-const mobileFilter = (event, name) => {
+const mobileFilter = async (event, name) => {
     try {
         const value = event.target.value;
 
         if (!value) {
-            throw new Error("Number value is empty");
+            return;
         }
 
         if (value.length >= 11) {
-            setInput(name, value);
+            await setInput(name, value);
         }
     } catch (error) {
         showError(error);
-        // Perform additional error handling or logging if needed
     }
 };
 
@@ -164,7 +104,7 @@ const spouseMobile = (event) => {
 };
 
 // Add event listeners with error handling
-id("father_mobile").addEventListener("keyup", (event) => {
+id("father_mobile")?.addEventListener("keyup", (event) => {
     try {
         fatherMobile(event);
     } catch (error) {
@@ -172,7 +112,7 @@ id("father_mobile").addEventListener("keyup", (event) => {
     }
 });
 
-id("mother_mobile").addEventListener("keyup", (event) => {
+id("mother_mobile")?.addEventListener("keyup", (event) => {
     try {
         motherMobile(event);
     } catch (error) {
@@ -180,7 +120,7 @@ id("mother_mobile").addEventListener("keyup", (event) => {
     }
 });
 
-id("spouse_mobile").addEventListener("keyup", (event) => {
+id("spouse_mobile")?.addEventListener("keyup", (event) => {
     try {
         spouseMobile(event);
     } catch (error) {
@@ -188,17 +128,23 @@ id("spouse_mobile").addEventListener("keyup", (event) => {
     }
 });
 
-// create the data for the function below
 
+// processKidsSiblings needs array of emails, but we removed eager fetch
+// We will just pass an empty array to it for now.
+processKidsSiblings([], fName);
 
-// check if there is a sibling or kids by email
-processKidsSiblings(checkEmail, fName)
-
-
+// Use a simple debounce for email check
+let emailTimeout;
 const checkPersonalEmail = (e) => {
-    const email = e.target.value;
-    id("email_error").innerHTML = checkEmail.includes(email) ? `YOU HAVE ALREADY REGISTERED ON THE PLATFORM` : ``;
+    clearTimeout(emailTimeout);
+    emailTimeout = setTimeout(async () => {
+        const email = e.target.value;
+        if (!email) return;
+        const exists = await checkContactExists(null, email);
+        if (id("email_error")) {
+            id("email_error").innerHTML = exists ? `YOU HAVE ALREADY REGISTERED ON THE PLATFORM` : ``;
+        }
+    }, 500);
 }
 
-
-id('email').addEventListener('keyup', checkPersonalEmail)
+id('email')?.addEventListener('keyup', checkPersonalEmail);

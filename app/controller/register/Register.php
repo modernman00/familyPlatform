@@ -261,4 +261,62 @@ final class Register extends Db
         $postData['id'] = $id;
         return $postData;
     }
+
+    /**
+     * Check if a contact (mobile or email) exists in the database.
+     * Used asynchronously on the registration form to avoid leaking PII.
+     */
+    public function checkContact(): void
+    {
+        CorsHandler::setHeaders();
+        try {
+            // Read JSON payload
+            $rawInput = file_get_contents('php://input');
+            $input = $rawInput !== false ? json_decode($rawInput, true) : null;
+            if (!is_array($input)) {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
+                return;
+            }
+            
+            $mobile = !empty($input['mobile']) ? checkInput($input['mobile']) : null;
+            $email = !empty($input['email']) ? checkInput($input['email']) : null;
+            
+            if (!$mobile && !$email) {
+                echo json_encode(['status' => 'error', 'message' => 'No mobile or email provided']);
+                return;
+            }
+
+            $dbConnection = self::connect2();
+            if (!$dbConnection) {
+                echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
+                return;
+            }
+
+            $exists = false;
+            
+            if ($mobile) {
+                $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE mobile = ?");
+                $stmt->execute([$mobile]);
+                if ($stmt->fetchColumn() > 0) {
+                    $exists = true;
+                }
+            } 
+            
+            if ($email && !$exists) {
+                $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE email = ?");
+                $stmt->execute([$email]);
+                if ($stmt->fetchColumn() > 0) {
+                    $exists = true;
+                }
+            }
+
+            echo json_encode(['status' => 'success', 'exists' => $exists]);
+            return;
+            
+        } catch (\Throwable $th) {
+            error_log((string)$th);
+            echo json_encode(['status' => 'error', 'message' => 'An internal error occurred']);
+            return;
+        }
+    }
 }

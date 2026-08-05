@@ -14,88 +14,90 @@ final class RegisterTableData {
    */
   public static function createRegisterTable(array $cleanPostData): array {
         // Access the cleanPostData directly, as it's promoted to a class property
-        $profileAvatar = $cleanPostData['gender'] === "Male" ? "avatarM.png" : "avatarF.png";
-        return [
+        $profileAvatar = (isset($cleanPostData['gender']) && $cleanPostData['gender'] === "Male") ? "avatarM.png" : "avatarF.png";
+        
+        $tables = [
             'personal' =>  [
-                'firstName' => $cleanPostData['firstName'],
-                'lastName' => $cleanPostData['lastName'],
-                'famCode' => $cleanPostData['familyCode'],
-                'kids' => $cleanPostData['kids'],
-                'gender' => $cleanPostData['gender'],
-                'siblings' => $cleanPostData['siblings'],
-                'day' => $cleanPostData['day'],
-                'month' => $cleanPostData['month'],
-                'year' => $cleanPostData['year'],
-                'id' => $cleanPostData['id'],
+                'firstName' => $cleanPostData['firstName'] ?? null,
+                'lastName' => $cleanPostData['lastName'] ?? null,
+                'famCode' => $cleanPostData['famCode'] ?? null,
+                'kids' => $cleanPostData['children'] ?? null,
+                'gender' => $cleanPostData['gender'] ?? null,
+                'siblings' => $cleanPostData['sibling'] ?? null,
+                'day' => $cleanPostData['day'] ?? null,
+                'month' => $cleanPostData['month'] ?? null,
+                'year' => $cleanPostData['year'] ?? null,
+                'id' => $cleanPostData['id'] ?? null,
             ],
             'work' => [
-                'employmentStatus' => $cleanPostData['employmentStatus'],
-                'occupation' => $cleanPostData['occupation'],
-                'id' => $cleanPostData['id']
+                'employmentStatus' => $cleanPostData['employmentStatus'] ?? null,
+                'occupation' => $cleanPostData['occupation'] ?? null,
+                'id' => $cleanPostData['id'] ?? null
             ],
             'contact' => [
-
-                'email' => $cleanPostData['email'],
-                'country' => $cleanPostData['country'],
-                'mobile' => $cleanPostData['mobile'],
-                'id' => $cleanPostData['id'],
+                'email' => $cleanPostData['email'] ?? null,
+                'country' => $cleanPostData['country'] ?? null,
+                'mobile' => $cleanPostData['mobile'] ?? null,
+                'id' => $cleanPostData['id'] ?? null,
             ],
             'account' => [
-                'email' => $cleanPostData['email'],
-                'password' => $cleanPostData['password'],
+                'email' => $cleanPostData['email'] ?? null,
+                'password' => $cleanPostData['password'] ?? null,
                 'status' => 'new',
                 'type' => 'member',
-                'id' => $cleanPostData['id'],
+                'id' => $cleanPostData['id'] ?? null,
             ],
             'otherFamily' => [
-                'spouse_name' => $cleanPostData['spouse_name'],
-                'spouse_mobile' => $cleanPostData['spouse_mobile'],
-                'spouse_email' => $cleanPostData['spouse_email'],
-                'father_name' => $cleanPostData['father_name'],
-                'father_mobile' => $cleanPostData['father_mobile'],
-                'father_email' => $cleanPostData['father_email'],
-                'mother_name' => $cleanPostData['mother_name'],
-                'mother_mobile' => $cleanPostData['mother_mobile'],
-                'mother_email' => $cleanPostData['mother_email'],
-                // 'mother_maiden' => $cleanPostData['mother_maiden'],
-                'otherFamCode' => $cleanPostData['familyCode'],
-                'id' => $cleanPostData['id']
+                'spouse_name' => $cleanPostData['spouse_name'] ?? null,
+                'spouse_mobile' => $cleanPostData['spouse_mobile'] ?? null,
+                'spouse_email' => $cleanPostData['spouse_email'] ?? null,
+                'father_name' => $cleanPostData['father_name'] ?? null,
+                'father_mobile' => $cleanPostData['father_mobile'] ?? null,
+                'father_email' => $cleanPostData['father_email'] ?? null,
+                'mother_name' => $cleanPostData['mother_name'] ?? null,
+                'mother_mobile' => $cleanPostData['mother_mobile'] ?? null,
+                'mother_email' => $cleanPostData['mother_email'] ?? null,
+                'otherFamCode' => $cleanPostData['famCode'] ?? null,
+                'id' => $cleanPostData['id'] ?? null
             ],
             'post' => [
-                'fullName' => $cleanPostData['firstName'],
+                'fullName' => $cleanPostData['firstName'] ?? null,
                 'postMessage' => "Hey, welcome to your page",
                 'profileImg' => $profileAvatar,
-                'id' => $cleanPostData['id']
+                'id' => $cleanPostData['id'] ?? null
             ],
             'comment' => [
-                'fullName' => $cleanPostData['firstName'],
+                'fullName' => $cleanPostData['firstName'] ?? null,
                 'comment' => "Your comment will show here",
                 'profileImg' => $profileAvatar,
                 'post_no' => 1000,
-                'id' => $cleanPostData['id']
+                'id' => $cleanPostData['id'] ?? null
             ],
             'profilePics' => [
                 'img' => $profileAvatar,
-                'id' => $cleanPostData['id']
+                'id' => $cleanPostData['id'] ?? null
             ],
             'events' => [
-                'eventName' => "{$cleanPostData['firstName']} Birthday",
-                'eventDate' => $cleanPostData['eventDate'],
+                'eventName' => (isset($cleanPostData['firstName']) ? $cleanPostData['firstName'] : 'Unknown') . " Birthday",
+                'eventDate' => $cleanPostData['eventDate'] ?? null,
                 'eventType' => 'Birthday',
-                'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
+                'eventDescription' => (isset($cleanPostData['firstName']) ? $cleanPostData['firstName'] : 'Unknown') . " is adding another year",
                 'eventFrequency' => 'Annually',
-                // 'eventGroup' => 'Global',
-                'eventCode' => $cleanPostData['familyCode'],
-                'id' => $cleanPostData['id']
-            ],
-            'user_families' => [
-                'user_id' => $cleanPostData['id'],
-                'family_code' => $cleanPostData['familyCode'],
+                'eventCode' => $cleanPostData['famCode'] ?? null,
+                'id' => $cleanPostData['id'] ?? null
+            ]
+        ];
+
+        if (!empty($cleanPostData['famCode'])) {
+            $tables['user_families'] = [
+                'user_id' => $cleanPostData['id'] ?? null,
+                'family_code' => $cleanPostData['famCode'],
                 'status' => $cleanPostData['familyStatus'] ?? 'pending',
                 'role' => 'member'
-            ]
+            ];
+        }
 
-        ];
+        return $tables;
   }
 
 
