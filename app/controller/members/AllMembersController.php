@@ -6,11 +6,12 @@ namespace App\Controller\members;
 
 use Src\{
     Select,
-    VerifyToken,
     Delete
 };
 use App\model\AllMembersData;
+use App\controller\BaseController;
 use Exception;
+use Src\functionality\SignIn;
 
 final class AllMembersController extends AllMembersData
 {
@@ -27,19 +28,15 @@ final class AllMembersController extends AllMembersData
     public function processApiData(): void
     {
         try {
-            $id = checkInput($_GET['id']);
-            $tokenVerify = new VerifyToken();
-
-            $tokenConfirm = $tokenVerify->profilePage();
-
-            if (!$tokenConfirm) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
+            $id = $_SESSION['id'] ?? null;
+            if (!$id) {
+                $tokenVerify = SignIn::verify();
+                $id = $tokenVerify['id'] ?? null;
             }
 
             $result = $this->getAllMembers($id);
 
-            echo json_encode($result);
+            msgSuccess(200, $result);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -70,32 +67,41 @@ final class AllMembersController extends AllMembersData
     public function getProfile($id): void
     {
         try {
-            //  verify token
-            $tokenVerify = new verifyToken();
-            $result = $tokenVerify->profilePage();
-
-            // if token is verified
-
-            if (!$result) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
-                return;
+            $sessId = $_SESSION['id'] ?? null;
+            if (!$sessId) {
+                SignIn::verify();
             }
 
             $id = checkInput($id);
-            $result = $this->getAllMembersById($id);
-            if (!$result) {
-                throw new Exception("It could not process the data", 1);
-            }
+            $data = BaseController::findMemberById($id);
 
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
+            $pictures = Select::selectFn2(query: $query, bind: [$id]) ?? [];
 
-            $pictures = Select::selectFn2(query: $query, bind: [$id]);
+            // Fetch relatives for immediate family card
+            $relativesWithImgs = [];
+            $roles = [
+                ['table' => 'otherFamily', 'who' => 'spouse', 'defaultRel' => 'Spouse'],
+                ['table' => 'otherFamily', 'who' => 'father', 'defaultRel' => 'Father'],
+                ['table' => 'otherFamily', 'who' => 'mother', 'defaultRel' => 'Mother'],
+                ['table' => 'sibling', 'who' => 'sibling', 'defaultRel' => 'Sibling'],
+                ['table' => 'children', 'who' => 'children', 'defaultRel' => 'Child'],
+            ];
 
-            $data = null;
-            foreach ($result as $data);
+            foreach ($roles as $role) {
+                $relations = BaseController::fetchRelationsData($id, $role['table'], $role['who']);
+                if (!empty($relations) && is_array($relations)) {
+                    foreach ($relations as $rel) {
+                        if (!empty($rel['fullName'])) {
+                            $rel['relationship'] = $rel['relationship'] ?? $role['defaultRel'];
+                            $rel['img'] = !empty($rel['profilePics']) ? "/public/img/profile/{$rel['profilePics']}" : ($rel['img'] ?? '/public/img/profile/avatarM.png');
+                            $relativesWithImgs[] = $rel;
+                        }
+                    }
+                }
+            }
 
-            view('member/getProfile', compact('data', 'pictures'));
+            view('member/getProfile', compact('data', 'pictures', 'relativesWithImgs'));
         } catch (Exception $e) {
             showError($e);
         }
@@ -106,16 +112,8 @@ final class AllMembersController extends AllMembersData
     {
         try {
             //  verify token
-            $tokenVerify = new verifyToken();
-            $result = $tokenVerify->profilePage();
-
-            // if token is verified
-
-            if (!$result) {
-                $tokenErr = "Authentication failed";
-                view('error/genError', ['error' => $tokenErr]);
-                return false; // Ensure the function exits if authentication fails
-            }
+            
+SignIn::verify();
 
             // Sanitize inputs 
             $apr = checkInput($apr); 
@@ -145,4 +143,35 @@ final class AllMembersController extends AllMembersData
             return false;
         }
     }
+
+    /**
+     * GET /allMembers/search?q=...&limit=30&offset=0
+     * Server-side search across family + wider directory.
+     */
+    public function search(): void
+    {
+        try {
+            $payload = SignIn::verify('users');
+
+            if (!$payload) {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            $requesterId = (int) cleanSession((string)($payload['id'] ?? ''));
+            $famCode     = (string) cleanSession((string)($payload['famCode'] ?? ''));
+
+            $term   = isset($_GET['q']) ? (string) $_GET['q'] : '';
+            $limit  = isset($_GET['limit']) ? (int) $_GET['limit'] : 30;
+            $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
+
+            $results = $this->searchMembers($requesterId, $famCode, $term, $limit, $offset);
+
+            msgSuccess(200, $results);
+        } catch (\Throwable $th) {
+            showError($th);
+            msgException(500, 'Unable to search members');
+        }
+    }
 }
+

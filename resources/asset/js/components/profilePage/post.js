@@ -1,5 +1,5 @@
 import { html } from "./html"
-import { id, log, msgException, showError } from '../global'
+import { id, log, msgException, showError } from '@modernman00/shared-js-lib'
 
 
 const famCode = localStorage.getItem('requesterFamCode');

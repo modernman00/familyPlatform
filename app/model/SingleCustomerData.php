@@ -18,25 +18,46 @@ class SingleCustomerData extends InnerJoin
 	 * @param string $custId THE ID OF THE CUST
 	 * @param array $table THE TABLE TO INNERJOIN
 	 * ONLY USE THIS FUNCTION TO GET A SINGLE STATE
-	 * @return array
+	 * @return array|bool
 	 */
 	public function getCustomerData(string $custId, array $table): array | bool
 	{
 		try {
-			$para = "id";
-			$result = $this->joinParam(para: $para, paraWhere: $para, table: $table, bind: $custId);
+			if (empty($table)) {
+				return false;
+			}
 
-			if (!is_array($result) || empty($result)) {
+			// 1. Fetch the base data from the first table (usually 'personal')
+			$firstTable = array_shift($table);
+			$firstTable = \Src\Utility::checkInput($firstTable);
+			$baseDataRows = \Src\SelectFn::selectAllRowsById($firstTable, 'id', $custId);
+
+			if (!is_array($baseDataRows) || empty($baseDataRows)) {
 				\msgException(401, 'result not found');
 				return false;
 			}
-			$result = $result[0];
-			unset($result['password']);
 
+			$mergedData = $baseDataRows[0]; // Start with the first table's row
 
-			// foreach ($result as $result);
-			// unset($result[0]['password']);
-			return $result;
+			// 2. Fetch from remaining tables and array_merge if data exists
+			foreach ($table as $tab) {
+				$tab = \Src\Utility::checkInput($tab);
+				$rowData = \Src\SelectFn::selectAllRowsById($tab, 'id', $custId);
+				
+				if (is_array($rowData) && !empty($rowData)) {
+					// We take the first row (since getCustomerData is for a single flat profile state)
+					$mergedData = array_merge($mergedData, $rowData[0]);
+				}
+			}
+
+			// 3. Ensure the primary ID is retained in case a JOINed table overwrote it with null/empty
+			$mergedData['id'] = $baseDataRows[0]['id'];
+
+			if (isset($mergedData['password'])) {
+				unset($mergedData['password']);
+			}
+
+			return $mergedData;
 		} catch (\PDOException $e) {
 			showError($e);
 			return false;

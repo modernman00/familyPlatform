@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace App\model;
 
-use Src\Select;
 use Src\InnerJoin;
+use Src\Select;
+use Src\SelectFn;
 use Src\Update;
 
 
@@ -34,17 +35,14 @@ final class Post extends Select
     }
 
 
-    static function postByNo(int|string $postNo): array|int|string
+    public static function postByNo(int|string $postNo): array|int|string
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "post_no");
-        $result = parent::selectFn2(query: $query, bind: [$postNo]);
-        return $result[0];
+        return SelectFn::selectOneRow('post', 'post_no', (string) $postNo) ?? [];
     }
 
     static function postLink2Id(string $id): array|int|string
     {
-        $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
-        return parent::selectFn2(query: $query, bind: [$id]);
+        return SelectFn::selectOneRow('post', 'id', (string) $id) ?? [];
     }
 
     static function getAllPost(): array|int|string
@@ -131,14 +129,8 @@ final class Post extends Select
 
     static function getUnpublishedComment(): array|int|string
     {
-        $query = parent::formAndMatchQuery(
-            selection: "SELECT_ONE", 
-            table: 'comment', 
-            identifier1: 'comment_status', 
-            orderBy: "ORDER BY comment_no DESC"
-        );
+        $query = "SELECT * FROM comment WHERE comment_status = ? ORDER BY comment_no DESC";
         return parent::selectFn2(query: $query, bind: ["new"]);
- 
     }
 
     static function updatePostByStatusAsPublished($postNo): bool

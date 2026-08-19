@@ -1,16 +1,5 @@
-<!-- Post Composer Modal -->
 @php
-
-    $token = urlencode(base64_encode(random_bytes(32)));
-    $_SESSION['token'] = $token;
-    setcookie('XSRF-TOKEN-EDITPROFILEFORM', $token, [
-        'expires' => time() + 900,
-        'path' => '/',
-        'samesite' => 'Lax',
-        'secure' => ($_ENV['APP_ENV'] ?? 'production') === 'production',
-        'httponly' => false,
-    ]);
-
+    $token = $_SESSION['token'] ?? '';
 @endphp
 <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
     <div class="modal-dialog">
@@ -26,13 +15,16 @@
             <div class="modal-body px-4 pt-3">
     
                 <div class="d-flex align-items-center mb-4">
-                    @isset($data['profilePics'])
-                        <img src="{{ route('resources/images/profile/' . $data['profilePics']) }}" alt="Avatar"
+                    @if(isset($data['img']))
+                        <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar"
+                            class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
+                    @elseif(isset($data['profilePics']))
+                        <img src="/public/img/profile/{{ $data['profilePics'] }}" alt="Avatar"
                             class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
                     @else
-                        <img src="{{ asset('img/avatar/avatarF.png') }}" alt="Avatar" width="48" height="48"
+                        <img src="/public/img/profile/avatarM.png" alt="Avatar" width="48" height="48"
                             class="rounded-circle me-3 shadow-sm">
-                    @endisset
+                    @endif
                     <div>
                         <h6 class="mb-0 fw-bold" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
                         <small class="text-muted"><i class="bi bi-people-fill"></i> Family Members</small>

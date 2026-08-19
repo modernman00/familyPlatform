@@ -1,5 +1,5 @@
 @extends ('layouts.profileBase')
-@section('title', 'Family Tree')
+@section('title', 'Family Tree & Organogram')
 @section('data-page-id', 'organogram')
 @push('styles')
     <link rel="stylesheet" href="/public/css/organogram.css">
@@ -7,42 +7,56 @@
 @section('content')
 
 <div class="organogram-container-fluid">
+    <!-- Header Section -->
     <div class="organogram-header">
         <div class="header-container">
-            <h2 class="organogram-title fw-bold">
-                <i class="bi bi-diagram-3"></i>
-                {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
-            </h2>
+            <div class="header-top-row">
+                <div>
+                    <h2 class="organogram-title fw-bold">
+                        <i class="bi bi-diagram-3"></i>
+                        {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
+                    </h2>
+                    <p class="organogram-subtitle">
+                        Explore your family heritage, partners, and lineage. Click any person to see their details and full profile.
+                    </p>
+                </div>
 
-            <p class="organogram-subtitle lead small">
-                Explore your family heritage and connections. Drag to navigate, scroll to zoom, and click any profile to see details.
-            </p>
+                <!-- Search & Quick Find -->
+                <div class="header-actions">
+                    <div class="search-box-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" id="memberSearchInput" class="member-search-input" placeholder="Find relative in tree..." autocomplete="off">
+                        <div id="searchDropdown" class="search-dropdown"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Tree Workspace Container -->
     <div class="organogram-container">
+        <div class="tree-container" id="treeContainer">
+            <!-- Instructions Guide -->
+            <button class="instructions-toggle" id="instructionsToggle" title="View Navigation Guide">
+                <i class="bi bi-question-circle"></i>
+            </button>
 
-        <!-- Collapsible Instructions -->
-        <button class="instructions-toggle" id="instructionsToggle" title="View Navigation Guide">
-            <i class="bi bi-question-circle"></i>
-        </button>
+            <div class="instructions collapsed" id="instructions">
+                <h4><i class="bi bi-info-circle"></i> Navigation Guide</h4>
+                <ul>
+                    <li><i class="bi bi-hand-index-thumb"></i> <strong>Click</strong> on any node to view person details & history</li>
+                    <li><i class="bi bi-mouse"></i> <strong>Scroll</strong> mouse wheel to zoom in or out</li>
+                    <li><i class="bi bi-arrows-move"></i> <strong>Drag</strong> anywhere to pan across the family tree</li>
+                    <li><i class="bi bi-plus-circle"></i> Use the <strong>Zoom Buttons</strong> on the bottom right</li>
+                </ul>
+            </div>
 
-        <div class="instructions collapsed" id="instructions">
-            <h4><i class="bi bi-info-circle"></i> Navigation Guide</h4>
-            <ul>
-                <li><i class="bi bi-hand-index-thumb"></i> <strong>Click</strong> to view person details</li>
-                <li><i class="bi bi-mouse"></i> <strong>Scroll</strong> to zoom in or out</li>
-                <li><i class="bi bi-arrows-move"></i> <strong>Drag</strong> to move around the tree</li>
-                <li><i class="bi bi-plus-circle"></i> Use <strong>Zoom Buttons</strong> for control</li>
-            </ul>
-        </div>
-
-        <div class="tree-container">
+            <!-- Dynamic Graph Canvas / Wrapper -->
             <div class="tree-wrapper" id="treeWrapper">
                 <div class="tree" id="familyTree">
                     <ul>
                         <li>
-                            <!-- Parents -->
+                            <!-- Generation: Ancestors / Parents -->
                             <div class="couple-wrapper has-children">
                                 @include('member.includes.treeNode', ['type' => 'Father', 'dataDB' => $orgData['father']])
                                 @include('member.includes.treeNode', ['type' => 'Mother', 'dataDB' => $orgData['mother']])
@@ -82,7 +96,7 @@
                                             @include('member.includes.treeNode', ['type' => 'sibling', 'dataDB' => $sibling])
                                         
                                             @php
-                                                $siblingId = isset($sibling['id']) ? $sibling['id'] : null;
+                                                $siblingId = $sibling['id'] ?? null;
                                             @endphp
 
                                             @if ($siblingId && isset($orgData['sibling_children']))
@@ -106,6 +120,7 @@
                 </div>
             </div>
 
+            <!-- Floating Zoom Controls -->
             <div class="zoom-controls">
                 <button class="zoom-btn" id="zoomIn" title="Zoom In"><i class="bi bi-plus-lg"></i></button>
                 <button class="zoom-btn" id="zoomOut" title="Zoom Out"><i class="bi bi-dash-lg"></i></button>
@@ -113,6 +128,7 @@
             </div>
         </div>
 
+        <!-- Legend -->
         <div class="family-legend">
             <div class="legend-item">
                 <div class="legend-color legend-male"></div>
@@ -126,9 +142,13 @@
                 <div class="legend-color legend-spouse"></div>
                 <span>Spouse / Partner</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-color legend-divorced"></div>
+                <span>Divorced / Past Union</span>
+            </div>
         </div>
 
-        <!-- Person Detail Modal -->
+        <!-- Person Detail Modal / Drawer -->
         <div class="person-modal" id="personModal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -136,13 +156,16 @@
                     <button class="modal-close" id="closeModal"><i class="bi bi-x-lg"></i></button>
                 </div>
                 <div class="modal-body" id="modalBody">
-                    <!-- Content populated by JS -->
+                    <!-- Populated dynamically via JS -->
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
+    window.__FAMILY_CODE__ = '{{ $data['famCode'] ?? '' }}';
+</script>
+
 @endsection
-
-

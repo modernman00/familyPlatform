@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import { id, showError, qSel, msgException, log } from '@shared';
 import { deleteNotification } from '../global.js';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar';
@@ -51,14 +52,18 @@ document.onclick = async (e) => {
 
       const url = `/allMembers/removeProfile/${userId}/${reqId}`;
 
-      alert(url);
-
       // include a console to confirm if they truly want to delete the profile
-      if (
-        confirm(
-          'You will no longer see the profile and associated posts. Are you sure you want to delete the profile?',
-        )
-      ) {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'You will no longer see the profile and associated posts. Are you sure you want to delete the profile?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      });
+
+      if (result.isConfirmed) {
         const notificationHTML = qSel(`.member_profile_${userId}`);
 
         const response = await axios.delete(url);

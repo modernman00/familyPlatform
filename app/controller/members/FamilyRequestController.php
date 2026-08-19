@@ -239,7 +239,7 @@ final class FamilyRequestController extends BaseController
           $cleanDataNotification = [
             'sender_id' => $approver,
             'receiver_id' => $requester,
-            'sender_name' => cleanSession($req['approverName']),
+            'sender_name' => cleanSession((string)($req['approverName'] ?? '')),
             'notification_name' => "Request approval",
             'notification_date' => date("Y-m-d H:i:s"),
             'receiver' => 'everyone filtered',

@@ -1,4 +1,5 @@
 import { id } from "@shared";
+import Swal from "sweetalert2";
 const btnFamCode = id("btnFamCode");
 
 btnFamCode.addEventListener("click", function() {
@@ -15,7 +16,13 @@ btnFamCode.addEventListener("click", function() {
             btnFamCode.disabled = true;
             btnFamCode.innerText = "Generated";
         } else {
-            alert("Please enter a surname first");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Surname',
+                text: 'Please enter a surname first.',
+                timer: 3000,
+                showConfirmButton: false
+            });
         }
     } catch (error) {
         console.error("Family Code Generation Error:", error);
@@ -67,7 +74,13 @@ copyIcon.addEventListener('click', async function(e) {
             copyIcon.innerHTML = "copy";
             const targetInput = id('famCode');
             if (targetInput) targetInput.value = "";
-            alert('Please generate the family code first')
+            Swal.fire({
+                icon: 'warning',
+                title: 'Generate Code First',
+                text: 'Please generate the family code first.',
+                timer: 3000,
+                showConfirmButton: false
+            });
         }
 
 

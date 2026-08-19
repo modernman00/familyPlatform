@@ -1,9 +1,14 @@
-import {  setupPasswordChange} from '@modernman00/shared-js-lib';
-
+import { setupPasswordChange } from '@modernman00/shared-js-lib';
 
 setupPasswordChange({
-    formId: 'changePW',
-  route: 'changePW',
-  redirect: 'login'
+  formId: 'changePW',
+  buttonId: 'button',
+  passwordId: 'password',
+  confirmId: 'confirm_password',
+  showToggleId: 'showPassword',
+  helpId: 'non_existent_help',
+  route: '/changePW',
+  redirect: 'login',
+  optionalFields: ['token', 'showPassword', 'confirm_password']
 });
 

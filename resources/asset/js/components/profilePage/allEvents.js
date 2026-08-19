@@ -1,127 +1,105 @@
 "use strict";
 import { id, log, msgException, deleteNotification } from "../global"
 import axios from "axios"
-
-
+import Swal from 'sweetalert2';
+import { getSelectedPostFiles, clearSelectedPostFiles } from "../fileUploadPreview";
 
 try {
-
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
-    // CLICK EVENT get the comment and like button from the document
-    document.addEventListener('click', async (e) => {  //document.onclick = async (e) => {
+    document.addEventListener('click', async (e) => {
+        const elementId = e.target.id;
 
-        const elementId = e.target.id
-        const postId = e.target.name
+        // SUBMIT THE NEW POST (from modal)
+        if (elementId && elementId.includes("submitPost")) {
+            e.preventDefault();
+            const formExtra = id('formPostMessageModal');
+            if (!formExtra) return;
 
-
-
-        // Handle Like Button Click
-        if (elementId.includes("likeButton")) {
-
-            // replace button with Counter to get the span id 
-            const likeCounterId = elementId.replace('Button', 'Counter')
-
-            // trim removes leading and trailing spaces
-            let likeCounterVal = id(likeCounterId).innerHTML.trim().replace(/\n/g, ''); // 
-
-            const encodedLikeCounterVal = encodeURIComponent(likeCounterVal);
-
-            await axios.put(`/profileCard/postLikes?postNo=${postId}&count=${encodedLikeCounterVal}&likeCounterId=${likeCounterId}`)
-
-            // update all members of similar famcode on their UIs using Pusher
-
-            await axios.get("/getNewLikesPusher");
-
-
-
-            // Make the comment form to appear onclick. 
-        } else if (elementId.includes("initComment")) {
-            const commentFormId = elementId.replace('init', 'form')
-            id(commentFormId).style.display = "block"
-
-            // Handle Comment Submission
-        } else if (elementId.includes("submitComment")) {
-
-            e.preventDefault()
-
-            //idForm == formComment511
-            const idForm = elementId.replace("submit", "form")
-            // make the comment form disappear
-            id(idForm).style.display = "none"
-            // extract the form entries
-            const form = id(idForm)
-            let formEntries = new FormData(form)
-
-            // if the comment form input is empty. Get the input id and check 
-            const inputComment = idForm.replace("form", "input")
-            const idInputComment = id(inputComment);
-
-            if (idInputComment.value == null || idInputComment.value == "") {
-                alert("Please enter a comment before submitting")
-            } else {
-
-                await axios.post('/postCommentProfile', formEntries, options)
-
-                // update all members of similar famcode on their UIs using Pusher
-
-                await axios.get("/getNewCommentPusher");
-
-
-
-            }
-            // SUBMIT THE POST
-        } else if (elementId.includes("submitPost")) {
-
-            e.preventDefault()
-            const formExtra = id('formPostMessageModal')
-            const formData = new FormData(formExtra)
-            // get the requesterFamCode from the localStorage 
+            const formData = new FormData(formExtra);
             const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
-            // Append the new form entry to the FormData object
             formData.append('postFamCode', requesterFamCodeValue);
 
-            try {
-                // 1. Send the POST request to submit the form data
-                const response = await axios.post("/member/profilePage/post", formData, options);
+            // Explicitly ensure all accumulated image files are appended directly to formData
+            const selectedFiles = getSelectedPostFiles();
+            const fileInput = document.getElementById('imageUpload');
+            const filesToAppend = (selectedFiles && selectedFiles.length > 0)
+                ? selectedFiles
+                : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
 
-                // 2. Notify members of similar famcode about the post by email
-                // 3. Update all members of similar famcode on their UIs using Pusher
-                await Promise.all([
-                    axios.get("/post/getNewPostAndEmail?newCommentNo=" + response.data.message),
-                    axios.get("/getNewPostPusher")
-                ]);
-
-                // Hide the modal and reset the form
-                id('id01').style.display = 'none';
-                id("formPostMessageModal").reset();
-            } catch (error) {
-                console.error("An error occurred:", error);
-                // Optionally, display an error message to the user
-                alert("There was an error processing your request. Please try again.");
+            if (filesToAppend.length > 0) {
+                formData.delete('post_img[]');
+                formData.delete('post_img');
+                filesToAppend.forEach((file) => {
+                    formData.append('post_img[]', file, file.name);
+                });
             }
 
-        }     // add/delete to/from the notificatn bar 
-        else if (elementId && elementId.includes('deleteNotification')) {
-            deleteNotification(elementId)
-        } // take you to the request card for approval or denial
-        else if (e.target.classList.contains('linkRequestCard')) {
-            // ONCE THE NOTIFICATION BAR IS CLICKED, IT SHOULD TAKE YOU TO BE FRIEND REQUEST CARD
+            // Change button to spinner
+            const submitBtn = id(elementId);
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Posting...';
+            submitBtn.disabled = true;
 
+            try {
+                const response = await axios.post("/member/profilePage/post", formData, options);
+
+                // Defensive check on response data
+                if (response?.data?.status === 'success' || response?.status === 200) {
+                    const newPostData = (response?.data?.message && typeof response.data.message === 'object')
+                        ? response.data.message
+                        : null;
+                    window.dispatchEvent(new CustomEvent('post-created', { detail: newPostData }));
+
+                    const closeBtn = document.querySelector('#postModal .btn-close');
+                    if (closeBtn) closeBtn.click();
+                    formExtra.reset();
+                    clearSelectedPostFiles();
+                    const closePreview = document.getElementById('closeImagePreview');
+                    if (closePreview) closePreview.click();
+                    
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Post published successfully',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    throw new Error(response?.data?.message || 'Failed to publish post');
+                }
+            } catch (error) {
+                console.error("An error occurred:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error?.response?.data?.message || error.message || 'There was an error processing your request. Please try again.',
+                });
+            } finally {
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        } 
+        // add/delete to/from the notificatn bar 
+        else if (elementId && elementId.includes('deleteNotification')) {
+            deleteNotification(elementId);
+        } 
+        // take you to the request card for approval or denial
+        else if (e.target.classList.contains('linkRequestCard')) {
             const friendRequestSection = id(`${e.target.getAttribute('data-id')}_linkRequestCard`);
             if (friendRequestSection) {
                 friendRequestSection.scrollIntoView({ behavior: "smooth" });
             }
         }
-
-
-    })
+    });
 } catch (e) {
-    showError(e)
+    showError(e);
 }
+
 
 
 

@@ -1,44 +1,178 @@
 @extends('layouts.landing_layout')
-@section('title', 'forgot_password')
+@section('title', 'Change Password')
+
 @section('content')
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8">
-            <div class="auth-card">
-                <div class="text-center mb-5">
-                    <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 64px;" class="mb-4">
-                    <h1 class="auth-title h2">Change Password</h1>
-                    <p class="auth-subtitle">Please, enter the new password</p>
-                </div>
+    <style nonce="{{ $nonce }}">
+        body {
+            background-color: #F4F5FB !important;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
+        /* Override the outer Bootstrap container from forms.base */
+        .styleForm {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        
+        .logo-container {
+            display: none !important;
+        }
 
-    <hr class="my-2">
-    <form action="" id="changePW" class="styleform_form changePW">
-        <div class="form-group">
-            <br>
-            <div class='row'>
+        .noDisplay {
+            display: none !important;
+        }
 
-                @php
+        .stitch-auth-container {
+            max-width: 440px;
+            margin: 4rem auto 5rem;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+            text-align: center;
+        }
 
-                    $formArray = [
-                        'changePW_notification' => 'showError',
-                        'password' => 'password',
-                        'confirm_password' => 'password',
-                        'token' => 'token',
-                           'submit' => 'button',    
-                           'showPassword' => 'showPassword'                    
-                    ];
+        .stitch-icon-badge {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            border-radius: 16px; /* Rounded square */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #ffffff;
+            background-color: #8B5CF6;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); /* Purple glow */
+        }
 
-                     $form = new Src\BuildFormBulma($formArray);
-                    $form->genForm();
+        .stitch-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #1A1A24;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
 
-                 @endphp
+        .stitch-subtitle {
+            font-size: 0.95rem;
+            color: #6B7280;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
 
-                <br>
+        /* Form Styles Overrides */
+        .styleform_form {
+            text-align: left;
+        }
 
+        .styleform_form .form-label {
+            font-weight: 600;
+            color: #1A1A24;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
 
-    </form>
+        .styleform_form .form-control {
+            border-radius: 8px;
+            border: 1px solid #D1D5DB;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            box-shadow: none;
+            margin-bottom: 0.25rem;
+        }
+        
+        .styleform_form .form-control::placeholder {
+            color: #6B7280;
+        }
+
+        .styleform_form .form-control:focus {
+            border-color: #8B5CF6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+            outline: none;
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: #6B7280;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .stitch-submit {
+            background-color: #8B5CF6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 1.25rem;
+            display: inline-block;
+        }
+
+        .stitch-submit:hover {
+            background-color: #7C3AED;
+        }
+
+        .stitch-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #1A1A24;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .stitch-checkbox {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid #D1D5DB;
+            accent-color: #8B5CF6;
+            cursor: pointer;
+        }
+
+        /* Clean form styling */
+        .styleform_form .form-check {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+    </style>
+
+    <div class="stitch-auth-container">
+        <div class="text-center mb-4">
+            <img src="{{ getenv('APP_LOGO') }}" alt="logo" style="height: 64px;" class="mb-2">
+        </div>
+        <div class="stitch-icon-badge">
+            <i class="bi bi-key-fill"></i>
+        </div>
+
+        <h1 class="stitch-title">Set a new password</h1>
+        <p class="stitch-subtitle">Choose a strong password you haven't used before.</p>
+
+        <form action="" id="changePW" class="styleform_form changePW">
+            @php
+                $formArray = [
+                    'changePW_notification' => 'showError',
+                    'password' => 'password',
+                    'showPassword' => 'showPassword',
+                    'token' => 'token',
+                ];
+
+                $form = new Src\BuildFormBStrap($formArray);
+                $form->genForm();
+            @endphp
+
+            <button type="button" class="stitch-submit w-100 mt-3" id="button">
+                Submit
+            </button>
+        </form>
+    </div>
 
 
 @endsection

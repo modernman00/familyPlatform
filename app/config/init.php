@@ -24,20 +24,26 @@ $cookieExpire = isset($_ENV['COOKIE_EXPIRE']) ? (int)$_ENV['COOKIE_EXPIRE'] : 72
 ini_set('session.gc_maxlifetime', (string)$sessionExpire); // Dynamic expiration
 session_set_cookie_params($sessionExpire);
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    $isProd = ($_ENV['APP_ENV'] ?? 'production') === 'production';
-    $isHttps = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
-        (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+$isProd = ($_ENV['APP_ENV'] ?? 'production') === 'production';
+$isHttps = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
+    (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start([
         'cookie_httponly' => true, // prevents XSS attacks from accessing the session cookie
-        'cookie_secure' => $isProd && $isHttps, // only send cookie over HTTPS in production
+        'cookie_secure' => $isHttps, // send cookie securely if HTTPS is active
         'cookie_samesite' => 'Lax', // prevents CSRF attacks
         'use_strict_mode' => true, // prevents session fixation attacks
     ]);
 }
 
-if (!isset($_SESSION['token'])) {
+// Prevent browser caching to ensure latest state is always fetched
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+
+if (!isset($_SESSION['token']) || !is_string($_SESSION['token']) || !preg_match('/^[0-9a-f]{64}$/D', $_SESSION['token'])) {
     $token = bin2hex(random_bytes(32));
     $_SESSION['token'] = $token;
 }
@@ -48,7 +54,7 @@ if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['toke
         'expires' => time() + $cookieExpire, 
         'path' => '/',
         'samesite' => 'Lax',
-        'secure' => ($_ENV['APP_ENV'] ?? 'production') === 'production',
+        'secure' => $isHttps, // send cookie securely if HTTPS is active
         'httponly' => false,
     ]);
     // Manually populate $_COOKIE so it's available for the rest of this request

@@ -122,7 +122,7 @@ final class NotificationController extends Select
                 msgException(300, 'Invalid subscription data');
             }
 
-            $userId = cleanSession($inputData['id']);
+            $userId = cleanSession((string)$inputData['id']);
             $endpoint = $inputData['endpoint'];
             $p256dhKey = $inputData['keys']['p256dh'];
             $authKey = $inputData['keys']['auth'];

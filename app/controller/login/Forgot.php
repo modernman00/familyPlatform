@@ -18,13 +18,15 @@ final class Forgot
   {
     try {
       $verify = $_GET['verify'] ?? null;
-         if (!$verify) {
-                redirect('/login');
-            }
+      if (!$verify) {
+          redirect('/login');
+      }
 
-           unset($_SESSION['auth']['2FA_token_ts']);
-            unset($_SESSION['auth']['identifyCust']);
-      view('login/forgot');
+      unset($_SESSION['auth']['2FA_token_ts']);
+      unset($_SESSION['auth']['identifyCust']);
+      
+      $_SESSION['auth']['showLogin'] = true;
+      PasswordRecoveryService::show('login/forgot');
     } catch (\Throwable $th) {
       Utility::showError($th);
     }
@@ -33,7 +35,6 @@ final class Forgot
   public function verify(): void
   {
     try {
-
       PasswordRecoveryService::process(isCaptchaV3:true);
     } catch (\Throwable $th) {
       Utility::showError($th);

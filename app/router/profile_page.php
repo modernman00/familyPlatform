@@ -3,6 +3,7 @@
 // profile page member
 $router->map('GET', '/member/ProfilePage', 'App\controller\members\ProfilePage@index', 'opening page member');
 $router->map('GET', '/profilePage', 'App\controller\members\ProfilePage@index', 'opening page member alias');
+$router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\SettingController@post', 'edit_profile_post');
 
 
 

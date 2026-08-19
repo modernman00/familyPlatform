@@ -96,10 +96,9 @@ export const isChecked = (name, fn) => {
     const noId = `${name}No`
     const checked = () => {
         if (id(yesId).checked) {
-            alert('check')
             fn()
         } else if (id(noId).checked) {
-            alert('check No')
+            
         }
     }
     id(yesId).addEventListener('click', checked)

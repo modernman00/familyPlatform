@@ -12,13 +12,13 @@ use Src\functionality\{
 use Src\Utility;
 
 
-final class PassChange extends BaseController
+final class PassChange
 {
 
     public function show(): void
     {
         try {
-            view2('login/passChange');
+            PasswordResetFunctionality::show('login/passChange');
         } catch (\Throwable $th) {
             Utility::showError($th);
         }

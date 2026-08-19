@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 
         // Create Event Functionality
         const createEventBtn = document.getElementById('createEventBtn');
@@ -10,7 +11,11 @@
             const eventDescription = document.getElementById('eventDescription').value;
             
             if (!eventTitle || !eventDate || !eventTime || !eventLocation) {
-                alert('Please fill in all required fields: Title, Date, Time, and Location');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Incomplete',
+                    text: 'Please fill in all required fields: Title, Date, Time, and Location'
+                });
                 return;
             }
             
@@ -57,7 +62,13 @@
             bootstrap.Modal.getInstance(document.getElementById('createEventModal')).hide();
             
             // Show success message
-            alert('Event created successfully!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Event created successfully!',
+                timer: 2000,
+                showConfirmButton: false
+            });
             
             // Add event listeners to the new RSVP buttons
             const newRsvpButtons = newEventCard.querySelectorAll('.rsvp-buttons .btn');
@@ -107,14 +118,24 @@
             bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
             
             // Show success message
-            alert('Profile updated successfully!');
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Profile updated successfully!',
+                timer: 2000,
+                showConfirmButton: false
+            });
         });
 
         // Notification Button
         const notificationBtn = document.getElementById('notificationBtn');
         
         notificationBtn.addEventListener('click', () => {
-            alert('You have 3 new notifications');
+            Swal.fire({
+                icon: 'info',
+                title: 'Notifications',
+                text: 'You have 3 new notifications'
+            });
             // Reset notification badge
             document.querySelector('.notification-badge').style.display = 'none';
         });

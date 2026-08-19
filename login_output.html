@@ -1,0 +1,418 @@
+
+
+<style>
+ /* CSS for the new Stitch design */
+ body {
+ background-color: #F4F5FB !important;
+ font-family: 'Inter', system-ui, -apple-system, sans-serif;
+ }
+
+ /* Override the outer Bootstrap container from forms.base */
+ .styleForm {
+ background: transparent !important;
+ box-shadow: none !important;
+ padding: 0 !important;
+ }
+ 
+ .logo-container {
+ display: none !important;
+ }
+
+ .noDisplay {
+ display: none !important;
+ }
+
+ .stitch-auth-container {
+ max-width: 440px;
+ margin: 3rem auto 5rem;
+ background: #ffffff;
+ border-radius: 20px;
+ padding: 3rem 2.5rem;
+ box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+ text-align: center;
+ }
+
+ .stitch-title {
+ font-size: 1.75rem;
+ font-weight: 800;
+ color: #1A1A24;
+ margin-bottom: 0.5rem;
+ letter-spacing: -0.5px;
+ }
+
+ .stitch-subtitle {
+ font-size: 0.95rem;
+ color: #6B7280;
+ margin-bottom: 2rem;
+ }
+
+ .stitch-divider {
+ display: flex;
+ align-items: center;
+ margin: 2rem 0;
+ color: #6B7280;
+ font-size: 0.85rem;
+ }
+
+ .stitch-divider::before,
+ .stitch-divider::after {
+ content: "";
+ flex: 1;
+ border-bottom: 1px solid #E5E7EB;
+ }
+
+ .stitch-divider span {
+ padding: 0 12px;
+ }
+
+ /* Form Styles Overrides */
+ .styleform_form {
+ text-align: left;
+ }
+
+ .styleform_form .form-label {
+ font-weight: 600;
+ color: #374151;
+ font-size: 0.85rem;
+ margin-bottom: 0.5rem;
+ }
+
+ .styleform_form .form-control {
+ border-radius: 8px;
+ border: 1px solid #D1D5DB;
+ padding: 0.75rem 1rem;
+ font-size: 0.95rem;
+ box-shadow: none;
+ margin-bottom: 1.5rem;
+ }
+ 
+ .styleform_form .form-control::placeholder {
+ color: #9CA3AF;
+ }
+
+ .styleform_form .form-control:focus {
+ border-color: #8B5CF6;
+ box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+ }
+
+ .stitch-options {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin: 0.5rem 0 2rem;
+ font-size: 0.9rem;
+ }
+
+ .stitch-checkbox-group {
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
+ color: #6B7280;
+ font-weight: 500;
+ cursor: pointer;
+ }
+
+ .stitch-checkbox {
+ width: 16px;
+ height: 16px;
+ border-radius: 4px;
+ border: 1px solid #D1D5DB;
+ accent-color: #8B5CF6;
+ cursor: pointer;
+ }
+
+ .stitch-link {
+ color: #8B5CF6;
+ text-decoration: none;
+ font-weight: 600;
+ }
+
+ .stitch-link:hover {
+ text-decoration: underline;
+ }
+
+ .stitch-submit {
+ width: 100%;
+ background-color: #8B5CF6;
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 12px;
+ font-size: 1rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: background 0.2s;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ gap: 0.5rem;
+ }
+
+ .stitch-submit:hover {
+ background-color: #7C3AED;
+ }
+
+ .stitch-footer {
+ margin-top: 2rem;
+ font-size: 0.95rem;
+ color: #6B7280;
+ }
+
+ /* Hide the original BuildFormBStrap submit button and showPassword checkbox */
+ .styleform_form #btn-login {
+ display: none !important;
+ }
+ 
+ .styleform_form .form-check:has(#showPassword) {
+ display: none !important;
+ }
+</style>
+
+<div class="stitch-auth-container">
+ <div class="text-center mb-4">
+ <img src="/public/img/favicon/favicon-32x32.png" alt="logo" style="height: 64px;" class="mb-2">
+ </div>
+ <h1 class="stitch-title">Sign in to your account</h1>
+ <p class="stitch-subtitle">Welcome back! Please enter your details.</p>
+
+ <!-- Email Form -->
+ <form id="login" method="post" class="styleform_form">
+ <div id='setLoader' tabindex='-1' class='loader noDisplay'></div>
+    <div class='alert alert-danger noDisplay' id='login_notification'><p id='error'></p></div>
+     <div class="mb-3" id='email_div'>
+        <label for="email" class="form-label">Email address</label>
+        <input type="email" class="form-control email" data-original="" autocomplete="username" placeholder="" name="email" id="email" value="">
+         <small id="email_help" class="form-text text-muted"></small>
+    <small id="email_error" class="form-text text-danger"></small>
+    </div>
+
+<div class="mb-3" id='password_div'>
+    <label for="password" class="form-label">Password</label>
+    <input type="password" class="form-control password" data-original="" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" value="">
+    <small id="password_help" class="form-text text-muted">Please enter a strong password.</small>
+    <small id="password_error" class="form-text text-danger"></small>
+</div>
+  
+             <input type="hidden" class="input" id="token" name="token" value="YPCdH%2Fe3LPrinjIo%2Bp11INe9ohAQkUMRkOh4reGGdxc%3D">
+     
+   <label class="checkbox">
+    <input type="checkbox" id="showPassword">
+        Show Password
+    </label><br>
+ <div class="stitch-options">
+ <label class="stitch-checkbox-group">
+ <input type="checkbox" class="stitch-checkbox" id="remember_me" name="rememberMe" value="true">
+ Remember me
+ </label>
+ <a href="/login/forgot?verify=1" class="stitch-link">Forgot password?</a>
+ </div>
+
+ <div id="setLoader" class="loader noDisplay" style="margin: 0 auto; display: none;"></div>
+
+ <button type="button" class="stitch-submit" id="button">
+ Sign In <i class="bi bi-arrow-right"></i>
+ </button>
+ </form>
+
+ <div class="stitch-footer">
+ Don't have an account? <a href="/register" class="stitch-link">Sign up</a>
+ </div>
+
+</div>
+
+<script>
+ document.addEventListener("DOMContentLoaded", function() {
+ // Find the generic Bootstrap inputs generated by BuildFormBStrap and adjust their placeholders
+ var emailInput = document.getElementById('email');
+ if (emailInput) {
+ emailInput.placeholder = 'you@example.com';
+ }
+ 
+ var passInput = document.getElementById('password');
+ if (passInput) {
+ passInput.placeholder = '••••••••';
+ }
+ 
+ // Remove margin bottom from form-group if it exists to respect our CSS
+ document.querySelectorAll('.mb-3').forEach(function(el) {
+ el.classList.remove('mb-3');
+ });
+ });
+</script>
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+ <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+ <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
+ <meta name="robots" content="index, follow">
+ <meta name="author" content="Olawale Olaogun">
+ <meta name="language" content="English">
+ <title>Login | OUR FAMILY NETWORK</title>
+
+ <!-- OpenGraph meta tags -->
+ <meta property="og:title" content="Login - Family Platform">
+ <meta property="og:description" content="The Ultimate Social Platform for Your Family.">
+ <meta property="og:type" content="website">
+ <meta property="og:image" content="/public/img/favicon/favicon-32x32.png"> 
+ <meta property="og:url" content="https://olaogun.test/"> 
+ <meta property="og:site_name" content="OUR FAMILY NETWORK">
+ 
+ <!-- Favicons -->
+ <link rel="icon" type="image/png" sizes="32x32" href="/public/img/favicon/favicon-32x32.png">
+ 
+ <!-- PWA Manifest -->
+ <link rel="manifest" href="/PWA_Manifest.json">
+ <meta name="theme-color" content="#0a66c2">
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="Family Connect">
+ 
+ <!-- CSS -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+ <link href="/public/css/landing.css" rel="stylesheet">
+ <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+ 
+<script nonce="" src="https://www.google.com/recaptcha/enterprise.js?render=6LcN4acpAAAAANXyV3yu_T3iImFR_By18t1cTNmd"></script>
+<script nonce="">window.RECAPTCHA_SITE_KEY = "6LcN4acpAAAAANXyV3yu_T3iImFR_By18t1cTNmd";</script>
+
+ <style>
+ /* Reset some Bulma conflicts with Bootstrap */
+ .navbar { background-color: transparent; }
+ .container { max-width: 1320px !important; }
+ .button { height: auto; }
+ .input { height: auto; padding: 0.75rem 1rem; border-radius: 8px; }
+ .section { padding: 3rem 1.5rem; }
+ 
+ /* Auth Page specific overrides */
+ .auth-card {
+ background: white;
+ border-radius: 12px;
+ padding: 3rem;
+ box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+ border: 1px solid var(--border-color);
+ margin-bottom: 4rem;
+ }
+ 
+ .auth-title {
+ color: var(--brand-secondary);
+ font-weight: 800;
+ margin-bottom: 0.5rem;
+ }
+ 
+ .auth-subtitle {
+ color: var(--text-muted);
+ margin-bottom: 2.5rem;
+ }
+
+ /* Style Bulma form elements to match the theme */
+ .label { color: var(--text-main); font-weight: 600; margin-bottom: 0.5rem; }
+ .input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 0.25rem rgba(10, 102, 194, 0.1); }
+ .button.is-success, .button.is-primary { background-color: var(--brand-primary) !important; border-radius: 24px; font-weight: 600; transition: all 0.2s ease; }
+ .button.is-success:hover, .button.is-primary:hover { background-color: var(--brand-secondary) !important; transform: translateY(-1px); }
+ </style>
+ 
+ </head>
+
+<body data-page-id="login">
+ 
+ <nav class="navbar navbar-expand-lg public-navbar fixed-top">
+ <div class="container">
+ <a class="navbar-brand d-flex align-items-center" href="/">
+ <img src="/public/img/favicon/favicon-32x32.png" alt="Logo" class="me-2">
+ <span class="fw-bold" style="color: var(--brand-primary); font-family: 'Inter', sans-serif;">Family Platform</span>
+ </a>
+ <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+ <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+ <ul class="navbar-nav align-items-center">
+ <li class="nav-item">
+ <a class="nav-link " href="/">Home</a>
+ </li>
+ <li class="nav-item">
+ <a class="nav-link " href="/aboutus">About Us</a>
+ </li>
+ <li class="nav-item ms-lg-3 mt-3 mt-lg-0 loginNav signup_login">
+ <a class="btn btn-brand-outline w-100" href="/login">Log In</a>
+ </li>
+ <li class="nav-item ms-lg-2 mt-2 mt-lg-0 registerNav signup_login">
+ <a class="btn btn-brand w-100" href="/register">Join Now</a>
+ </li>
+ </ul>
+ </div>
+ </div>
+</nav>
+
+ <div class="content-wrapper" style="padding-top: 80px;">
+  </div>
+
+ <footer class="public-footer">
+ <div class="container">
+ <div class="row">
+ <div class="col-lg-4 mb-4 mb-lg-0">
+ <a class="navbar-brand d-flex align-items-center mb-3" href="/">
+ <img src="/public/img/favicon/favicon-32x32.png" alt="Logo" style="height: 30px;" class="me-2">
+ <span class="fw-bold fs-5" style="color: var(--text-main);">Family Platform</span>
+ </a>
+ <p class="text-muted pe-lg-5">The ultimate social media site for families to connect, strengthen bonds, and share memories safely.</p>
+ </div>
+ <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+ <h4 class="footer-heading">Platform</h4>
+ <a href="/register" class="footer-link">Register</a>
+ <a href="/login" class="footer-link">Log In</a>
+ <a href="/aboutus" class="footer-link">About Us</a>
+ </div>
+ <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
+ <h4 class="footer-heading">Legal</h4>
+ <a href="/privacy" class="footer-link">Privacy Policy</a>
+ <a href="/terms" class="footer-link">Terms of Use</a>
+ </div>
+ <div class="col-lg-2 col-md-4">
+ <h4 class="footer-heading">Support</h4>
+ <a href="/contact" class="footer-link">Contact Us</a>
+ <a href="/help" class="footer-link">Help Center</a>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2023-2026 Family Platform. Developed by Olawale Olaogun. All rights reserved.</p>
+ </div>
+ </div>
+</footer>
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ 
+ <!-- App JS -->
+ <script type="text/javascript" src="/public/js/manifest.js?v=1.0.2"></script>
+ <script type="text/javascript" src="/public/js/vendor.js?v=1.0.2"></script>
+ <script type="text/javascript" src="/public/js/index.js?v=1.0.2"></script>
+ 
+ 
+ <script>
+ if ('serviceWorker' in navigator) {
+ window.addEventListener('load', () => {
+ navigator.serviceWorker.register('/service-worker.js')
+ .then((registration) => {
+ console.log('Service Worker registered:', registration);
+ })
+ .catch((error) => {
+ console.error('Service Worker registration failed:', error);
+ });
+ });
+ }
+ </script>
+ <script nonce="">
+ window.RECAPTCHA_SITE_KEY = "6LcN4acpAAAAANXyV3yu_T3iImFR_By18t1cTNmd";
+ </script>
+</body>
+</html>

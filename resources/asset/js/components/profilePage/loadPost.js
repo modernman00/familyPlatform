@@ -29,15 +29,14 @@ try {
             try {
 
                 const pullData = await axios.get(`/post/getAllPostCommentByFamCode`);
+                // PostMessage::index() returns { message: { message: [...posts], pagination: {...} } },
+                // with each post's comments nested under post.comments — there is no separate
+                // top-level "post"/"comment" split, so flatten comments out of each post here.
+                const posts = Array.isArray(pullData?.data?.message?.message) ? pullData.data.message.message : [];
+                this.post = posts;
+                this.comment = posts.flatMap(p => Array.isArray(p.comments) ? p.comments : []);
 
-                // Assign fetched data to state properties
-                this.post = pullData.data.message.post;
-                this.comment = pullData.data.message.comment;
-
-                this.comment = this.comment.flat(); // Flatten the array of arrays into a single array of comment objects
-
-                if (this.post.length > 0) {
-
+                if (Array.isArray(this.post) && this.post.length > 0) {
                     // Render posts and comments on the page after data is loaded
                     this.post.forEach(data => allPost(data, this.comment));
                 } else {

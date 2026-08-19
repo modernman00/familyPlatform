@@ -71,6 +71,74 @@
     .input:focus { border-color: var(--brand-primary); box-shadow: 0 0 0 0.25rem rgba(10, 102, 194, 0.1); }
     .button.is-success, .button.is-primary { background-color: var(--brand-primary) !important; border-radius: 24px; font-weight: 600; transition: all 0.2s ease; }
     .button.is-success:hover, .button.is-primary:hover { background-color: var(--brand-secondary) !important; transform: translateY(-1px); }
+
+     .noDisplay {
+        display: none;
+    }
+
+
+        .loader {
+            border: 16px solid #11e11b79;
+            border-radius: 50%;
+            border-top: 16px solid #2092ddf3;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        /* Safari */
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+
+        @keyframes spinner-grow {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .spinner-grow {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            vertical-align: -0.125em;
+            background-color: currentColor;
+            border-radius: 50%;
+            opacity: 0;
+            animation: 0.75s linear infinite spinner-grow;
+        }
+
+        .spinner-grow-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spinner-border,
+            .spinner-grow {
+                animation-duration: 1.5s;
+            }
+        }
   </style>
   
   @yield('extra_css')

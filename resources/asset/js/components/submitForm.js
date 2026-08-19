@@ -1,5 +1,6 @@
 "use strict";
 import FormHelper from './FormHelper';
+import Swal from 'sweetalert2';
 import { id, log, showError } from '../global';
 import { dataToCheckRegister } from '../data/dataToCheck';
 
@@ -27,7 +28,7 @@ process()
 
 id('submitEventModal').addEventListener('click', () => {
 	try {
-		alert('inside the submitForm.js')
+
 
 		if (id('email')) {
 			formData.emailVal() // sanitise email
@@ -40,7 +41,13 @@ id('submitEventModal').addEventListener('click', () => {
 			//console.log('submitted')
 		} else {
 			log(formData.error)
-			alert('The form cannot be submitted. Please check the errors')
+			Swal.fire({
+				icon: 'error',
+				title: 'Validation Error',
+				text: 'The form cannot be submitted. Please check the errors.',
+				timer: 3000,
+				showConfirmButton: false
+			});
 
 			process()
 

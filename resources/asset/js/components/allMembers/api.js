@@ -44,7 +44,14 @@ export const renderMembers = (members = []) => {
 
     const famCodeData = await getApiData(url);
 
-    const familyMembers = famCodeData?.message ?? [];
+    let familyMembers = [];
+    if (Array.isArray(famCodeData)) {
+      familyMembers = famCodeData;
+    } else if (Array.isArray(famCodeData?.message)) {
+      familyMembers = famCodeData.message;
+    } else if (Array.isArray(famCodeData?.data)) {
+      familyMembers = famCodeData.data;
+    }
 
     // Pre-render: show only the user's network
     renderMembers(familyMembers);

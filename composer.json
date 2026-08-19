@@ -35,7 +35,7 @@
     "altorouter/altorouter": "^2.0",
     "pusher/pusher-php-server": "^7.0",
     "ryangjchandler/blade-capture-directive": "^1.1",
-    "modernman00/shared-lib": "^1.7",
+    "modernman00/shared-lib": "^1.9",
     "minishlink/web-push": "^9.0"
   },
   "require-dev": {

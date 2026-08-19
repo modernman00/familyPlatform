@@ -1,7 +1,9 @@
 'use strict';
-import { qSel, showError } from './components/global';
+import Alpine from 'alpinejs';
+import { qSel, showError } from '@modernman00/shared-js-lib';
 
-import { log } from '@shared'; // to make the bulma navbar menu visible on mobile
+window.Alpine = Alpine;
+let routePromise = Promise.resolve();
 
 /**
  * Tests if the current URL matches the given route.
@@ -38,9 +40,9 @@ try {
 // Get all "navbar-burger" elements
 
 if (window.location.pathname === '/register') {
-  qSel('.registerNav').style.display = 'none'; // navbar mgt
+  if (qSel('.registerNav')) qSel('.registerNav').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'register' */
     /* webpackPrefetch: true */
     './components/register/'
@@ -48,9 +50,10 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
     .catch((err) => showError(err));
 } else if (window.location.pathname === '/allMembers') {
-  qSel('.allMemberNav').style.display = 'none'; //allMemberNav
+  if (qSel('.allMemberNav')) qSel('.allMemberNav').style.display = 'none';
+  if (qSel('.allMembersNav')) qSel('.allMembersNav').style.display = 'none';
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'all_members' */
     /* webpackPrefetch: true */
     './components/allMembers/'
@@ -60,9 +63,9 @@ if (window.location.pathname === '/register') {
 } else if (
   window.location.pathname === '/login' 
 ) {
-  qSel('.loginNav').style.display = 'none'; // navbar mgt
+  if (qSel('.loginNav')) qSel('.loginNav').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'login' */
     /* webpackPrefetch: true */
     './components/acctMgt/login'
@@ -72,9 +75,9 @@ if (window.location.pathname === '/register') {
 } else if (
   window.location.pathname === '/lasu'
 ) {
-  qSel('.loginNav').style.display = 'none'; // navbar mgt
+  if (qSel('.loginNav')) qSel('.loginNav').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'adminLogin' */
     /* webpackPrefetch: true */
     './components/acctMgt/adminLogin'
@@ -82,9 +85,9 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
     .catch((err) => showError(err));
 } else if (window.location.pathname === '/login/forgot') {
-  qSel('.signup_login').style.display = 'none'; // navbar mgt
+  if (qSel('.signup_login')) qSel('.signup_login').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'forgotPwd' */
     /* webpackPrefetch: true */
     './components/forgotPwd/'
@@ -92,30 +95,36 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
     .catch((err) => showError(err));
 } else if (window.location.pathname === '/login/code') {
-  qSel('.signup_login').style.display = 'none'; // navbar mgt
+  if (qSel('.signup_login')) qSel('.signup_login').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'code' */
     /* webpackPrefetch: true */
     './components/acctMgt/code'
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
-} else if (window.location.pathname === '/member/ProfilePage') {
-  qSel('.profilePageNav').style.display = 'none'; // navbar mgt
+} else if (
+  window.location.pathname.toLowerCase().startsWith('/member/profilepage') ||
+  window.location.pathname.toLowerCase().startsWith('/profilepage') ||
+  checkURL('member/ProfilePage') ||
+  checkURL('member/profilePage') ||
+  checkURL('profilePage')
+) {
+  if (qSel('.profilePageNav')) qSel('.profilePageNav').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'profilePage' */
     /* webpackPrefetch: true */
     './components/profilePage/'
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
-} else if (window.location.pathname === '/login/changePW') {
-  qSel('.login').style.display = 'none'; // navbar mgt
-  qSel('.signUp').style.display = 'none'; // navbar mgt
+} else if (window.location.pathname === '/login/changePW' || window.location.pathname === '/changePW') {
+  if (qSel('.login')) qSel('.login').style.display = 'none'; // navbar mgt
+  if (qSel('.signUp')) qSel('.signUp').style.display = 'none'; // navbar mgt
   // qSel('#loader').style.display ="none" // loader
-  import(
+  routePromise = import(
     /* webpackChunkName: 'changePW' */
     /* webpackPrefetch: true */
     './components/changePW/'
@@ -124,7 +133,7 @@ if (window.location.pathname === '/register') {
     .catch((err) => showError(err));
 } else if (window.location.pathname === '/profilepage/img') {
   // qSel('.login').style.display ="none" // navbar mgt
-  import(
+  routePromise = import(
     /* webpackChunkName: 'img' */
     /* webpackPrefetch: true */
     './components/profilePage/imgViewer'
@@ -132,7 +141,7 @@ if (window.location.pathname === '/register') {
     .then((module) => module.default)
     .catch((err) => showError(err));
 } else if (window.location.pathname === '/createFamilyCode') {
-  import(
+  routePromise = import(
     /* webpackChunkName: 'familyCode' */
     /* webpackPrefetch: true */
     './components/register/familyCode'
@@ -143,17 +152,17 @@ if (window.location.pathname === '/register') {
   qSel('.login').style.display = 'none'; // navbar mgt
   qSel('.signUp').style.display = 'none'; // navbar mgt
 } else if (checkURL('accountSetting')) {
-  import(
+  routePromise = import(
     /* webpackChunkName: 'accountSetting' */
     /* webpackPrefetch: true */
     './components/accountSetting'
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
-} else if (window.location.pathname === '/organogram') {
-  qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
+} else if (checkURL('organogram') || window.location.pathname.startsWith('/organogram')) {
+  if (qSel('.familyTreeNav')) qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
 
-  import(
+  routePromise = import(
     /* webpackChunkName: 'organogram' */
     /* webpackPrefetch: true */
     './components/familyTree/index.js'
@@ -173,3 +182,8 @@ if (window.location.pathname === '/register') {
   // .then((module) => module.default)
   //     .catch((err) => showError(err))
 }
+
+
+routePromise.finally(() => {
+  Alpine.start();
+});

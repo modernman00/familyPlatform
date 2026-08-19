@@ -19,7 +19,7 @@
             <div class="hero-background"></div>
             <div class="hero-content">
                 <div class="profile-avatar-wrapper">
-                    <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
+                    <img src="/public/img/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
                     <div class="avatar-ring"></div>
                 </div>
                 <div class="profile-main-info">
@@ -27,7 +27,7 @@
                     <div class="profile-meta">
                         <div class="meta-item">
                             <i class="bi bi-geo-alt-fill"></i>
-                            <span>Lives in {{ $data['country'] }}</span>
+                            <span>Lives in {{ $data['country'] ?? 'Not Specified' }}</span>
                         </div>
                         <div class="meta-item">
                             <span class="family-code-badge">{{ $data['famCode'] }}</span>
@@ -44,24 +44,24 @@
                 <div class="info-card">
                     <h3><i class="bi bi-info-circle-fill me-2"></i>Basic Information</h3>
                     <div class="detail-item">
-                        <div class="detail-icon"><i class="{{ $data['gender'] == 'Female' ? 'bi bi-gender-female' : 'bi bi-gender-male' }}"></i></div>
+                        <div class="detail-icon"><i class="{{ ($data['gender'] ?? '') == 'Female' ? 'bi bi-gender-female' : 'bi bi-gender-male' }}"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Gender</div>
-                            <div class="detail-value">{{$data['gender']}}</div>
+                            <div class="detail-value">{{ $data['gender'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-calendar-event"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Date of Birth</div>
-                            <div class="detail-value">{{ $data['day'] }} / {{ $data['month'] }}</div>
+                            <div class="detail-value">{{ $data['day'] ?? '' }} / {{ $data['month'] ?? '' }} {{ $data['year'] ?? '' }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Relationship Status</div>
-                            <div class="detail-value">{{$data['maritalStatus']}}</div>
+                            <div class="detail-value">{{ $data['maritalStatus'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                 </div>
@@ -73,21 +73,21 @@
                         <div class="detail-icon"><i class="bi bi-person"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Father</div>
-                            <div class="detail-value">{{ $data['father']['fullName'] }}</div>
+                            <div class="detail-value">{{ !empty($data['father_name']) ? $data['father_name'] : ($data['father']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-person"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Mother</div>
-                            <div class="detail-value">{{ $data['mother']['fullName'] }}</div>
+                            <div class="detail-value">{{ !empty($data['mother_name']) ? $data['mother_name'] : ($data['mother']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-person-heart"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Spouse/Partner</div>
-                            <div class="detail-value">{{ $data['spouse']['fullName'] }}</div>
+                            <div class="detail-value">{{ !empty($data['spouse_name']) ? $data['spouse_name'] : ($data['spouse']['fullName'] ?? 'Not Provided') }}</div>
                         </div>
                     </div>
                 </div>
@@ -97,13 +97,13 @@
                     <h3><i class="bi bi-telephone-fill me-2"></i>Contact Information</h3>
                     <div class="contact-info">
                         <div class="contact-item">
-                            <i class="bi bi-phone"></i> {{ $data['mobile'] }}
+                            <i class="bi bi-phone"></i> {{ $data['mobile'] ?? 'Not Provided' }}
                         </div>
                         <div class="contact-item">
-                            <i class="bi bi-envelope"></i> {{ $data['email'] }}
+                            <i class="bi bi-envelope"></i> {{ $data['email'] ?? 'Not Provided' }}
                         </div>
                         <div class="contact-item">
-                            <i class="bi bi-house"></i> {{ $data['country'] }}
+                            <i class="bi bi-house"></i> {{ $data['country'] ?? 'Not Provided' }}
                         </div>
                     </div>
                 </div>
@@ -115,8 +115,8 @@
                 <div class="info-card">
                     <h3><i class="bi bi-diagram-3-fill me-2"></i>Immediate Family</h3>
                     <div class="family-members">
-                        @foreach ($relativesWithImgs as $relative)
-                        <a href="{{ route('allMembers/seeProfile/'.$relative['id']) }}">    
+                        @foreach ($relativesWithImgs ?? [] as $relative)
+                        <a href="/allMembers/setProfile/{{ $relative['id'] }}">    
                             <div class="family-member">
                                 <img src="{{ $relative['img'] }}" alt="Father" class="member-avatar">
                                 <div class="member-name">{{ $relative['fullName'] }}</div>
@@ -157,21 +157,21 @@
                         <div class="detail-icon"><i class="bi bi-briefcase"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Occupation</div>
-                            <div class="detail-value">{{$data['occupation']}}</div>
+                            <div class="detail-value">{{ $data['occupation'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-book"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Education</div>
-                            <div class="detail-value">{{$data['education']}}</div>
+                            <div class="detail-value">{{ $data['education'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="bi bi-star"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Interests</div>
-                            <div class="detail-value">{{$data['interests']}}</div>
+                            <div class="detail-value">{{ $data['interests'] ?? 'Not Specified' }}</div>
                         </div>
                     </div>
                 </div>

@@ -20,7 +20,7 @@
 
   <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json">
 
-  <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}&project={{ $_ENV['RECAPTCHA_PROJECT_ID'] }}" async defer></script>
   @stack('styles')
 
 
@@ -48,10 +48,12 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
   </script>
-  <script nonce="{{ $nonce }}" src="{{ route('public/js/index.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="{{ route('public/js/manifest.js') }}"></script>
-  <script nonce="{{ $nonce }}" src="{{ route('public/js/vendor.js') }}"></script>
-
+  <script nonce="{{ $nonce }}" src="/public/js/index.js"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/manifest.js"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/vendor.js"></script>
+ <script>
+    window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";
+</script>
 
   <script>
     if ('serviceWorker' in navigator) {

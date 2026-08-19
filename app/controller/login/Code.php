@@ -12,6 +12,9 @@ final class Code
     public function show(): void
     {
         try {
+            if (empty($_SESSION['token'])) {
+                $_SESSION['token'] = bin2hex(random_bytes(32));
+            }
             PwdRecoveryCodeFunctionality::show('login/code');
         } catch (\Throwable $th) {
             Utility::showError($th);

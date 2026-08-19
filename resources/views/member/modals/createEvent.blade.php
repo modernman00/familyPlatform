@@ -1,15 +1,7 @@
    <!-- Create Event Modal -->
    @php
-       $token = urlencode(base64_encode(random_bytes(32)));
-       $_SESSION['token'] = $token;
-           setcookie('XSRF-TOKEN', $token, [
-            'expires' => time() + 900,
-            'path' => '/',
-            'samesite' => 'Lax',
-            'secure' => ($_ENV['APP_ENV'] ?? 'production') === 'production',
-            'httponly' => false,
-        ]);
-        $_SESSION['CREATE_EVENT_ID'] = $data['id'];
+       $token = $_SESSION['token'] ?? '';
+       $_SESSION['CREATE_EVENT_ID'] = $data['id'];
    @endphp
 
 
@@ -69,7 +61,7 @@
 
                        <div class="mb-4">
                            <label for="eventDescription" class="form-label small fw-bold px-1" style="color: var(--text-muted);">Description</label>
-                           <textarea class="form-control px-3" id="eventDescription" rows="3" 
+                           <textarea class="form-control px-3" id="eventDescription" name="eventDescription" rows="3" 
                                placeholder="Describe your event..." style="border-radius: 15px; background-color: var(--bg-color);"></textarea>
                            <small id="eventDescription_error" class="text-danger ps-2"></small>
                        </div>
@@ -86,11 +78,7 @@
                            <small id="eventFrequency_error" class="text-danger ps-2"></small>
                        </div>
 
-                       <input type="hidden" name='token' value={{ $token }}>
-
-                       <div class="d-flex justify-content-center mb-2">
-                           <div class="g-recaptcha" data-sitekey="{{ $_ENV['RECAPTCHA_SITE_KEY'] }}" data-theme="light"></div>
-                       </div>
+                       <input type="hidden" name="token" value="{{ $token }}">
                    </form>
                </div>
 

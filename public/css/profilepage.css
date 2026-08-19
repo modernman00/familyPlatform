@@ -841,3 +841,22 @@ body {
 .btn-composer-action.gif-btn:hover {
   border-color: var(--primary-color);
 }
+
+/* Facebook Layout Redesign overrides */
+body, h1, h2, h3, h4, h5, h6, p, span, button, input {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.hover-bg-light {
+  transition: background-color 0.15s ease;
+  border-radius: 4px;
+}
+
+.hover-bg-light:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-color) !important;
+}
+
+.comments-section .rounded-3 {
+  border-radius: 18px !important;
+}

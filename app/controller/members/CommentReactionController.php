@@ -1,15 +1,121 @@
 <?php
+declare(strict_types=1);
+
 namespace App\controller\members;
 
 use PDO;
 
 use Src\Exceptions\NotFoundException;
 use Src\Exceptions\ForbiddenException;
-use App\classes\{Db, PushNotificationClass, Pusher};
+use Src\Db;
+use App\classes\{PushNotificationClass, Pusher};
 use Src\{SelectFn, SubmitForm, UpdateFn, InnerJoin, CheckToken};
 
 final class CommentReactionController
 {
+
+  /**
+   * Adds or toggles a reaction on a comment.
+   *
+   * Validates the comment_no and reaction_type, checks the comment belongs
+   * to the user's family, then upserts into comment_reactions (toggles if
+   * the same reaction is submitted twice). Returns the updated reaction counts.
+   *
+   * @return void
+   */
+  public static function addReaction(): void
+  {
+    try {
+      $commentNo = (int) (\cleanSession((string) ($_POST['comment_no'] ?? '')));
+      $reactionType = \cleanSession((string) ($_POST['reaction'] ?? ''));
+      $userId = \cleanSession((string) ($_SESSION['id'] ?? ''));
+      $famCode = \cleanSession((string) ($_SESSION['famCode'] ?? ''));
+
+      // ── Input guards ───────────────────────────────────────────────────
+      if (!$commentNo || !$userId || !$famCode) {
+        http_response_code(400);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Missing required parameters.']);
+        return;
+      }
+
+      $allowed = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+      if (!\in_array($reactionType, $allowed, true)) {
+        http_response_code(400);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Invalid reaction type.']);
+        return;
+      }
+
+      $pdo = Db::connect2();
+
+      if (!$pdo instanceof PDO) {
+        throw new \RuntimeException('Database connection failed.');
+      }
+
+      // ── Verify the comment belongs to this user's family ───────────────
+      $stmt = $pdo->prepare(
+        "SELECT cr.comment_no FROM comment cr
+         INNER JOIN post p ON cr.post_no = p.post_no
+         WHERE cr.comment_no = :commentNo AND p.postFamCode = :famCode
+         LIMIT 1"
+      );
+      $stmt->execute(['commentNo' => $commentNo, 'famCode' => $famCode]);
+
+      if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'message' => 'Comment not found in your family.']);
+        return;
+      }
+
+      // ── Toggle: if same reaction exists, remove it (un-react) ──────────
+      $existing = $pdo->prepare(
+        "SELECT id, label FROM comment_reactions
+         WHERE comment_no = :commentNo AND id = :userId"
+      );
+      $existing->execute(['commentNo' => $commentNo, 'userId' => $userId]);
+      $row = $existing->fetch(PDO::FETCH_ASSOC);
+
+      if ($row) {
+        if ($row['label'] === $reactionType) {
+          // Same emoji → toggle off
+          $pdo->prepare("DELETE FROM comment_reactions WHERE id = :id AND comment_no = :commentNo")
+              ->execute(['id' => $userId, 'commentNo' => $commentNo]);
+        } else {
+          // Different emoji → update
+          $pdo->prepare(
+            "UPDATE comment_reactions SET reaction = :reaction, label = :label, reacted_at = NOW()
+             WHERE id = :id AND comment_no = :commentNo"
+          )->execute([
+            'reaction'  => $reactionType,
+            'label'     => $reactionType,
+            'id'        => $userId,
+            'commentNo' => $commentNo,
+          ]);
+        }
+      } else {
+        // New reaction → insert
+        $pdo->prepare(
+          "INSERT INTO comment_reactions (comment_no, id, reaction, label, reacted_at)
+           VALUES (:commentNo, :userId, :reaction, :label, NOW())"
+        )->execute([
+          'commentNo' => $commentNo,
+          'userId'    => $userId,
+          'reaction'  => $reactionType,
+          'label'     => $reactionType,
+        ]);
+      }
+
+      // ── Return refreshed counts to the client ──────────────────────────
+      $counts = self::fetchReactions($commentNo, false);
+      \msgSuccess(200, ['status' => 'success', 'counts' => $counts]);
+
+    } catch (\Throwable $e) {
+      \showError($e);
+    }
+  }
+
 
   /**
    * Count the total number of reactions for a given comment
@@ -30,7 +136,7 @@ final class CommentReactionController
         table: 'comment_reactions',
         column: 'label',
         identifier: 'comment_no',
-        value: $commentNo
+        value: (string)$commentNo
       );
 
       //   $countReaction returns (
@@ -72,7 +178,7 @@ final class CommentReactionController
       $existing = SelectFn::selectAllRowsById(
         table: 'reaction_counts',
         identifier: 'comment_no',
-        identifierAnswer: $commentNo
+        identifierAnswer: (string)$commentNo
       );
 
       if ($existing) {
@@ -104,11 +210,10 @@ final class CommentReactionController
     try {
       // Now fetch who reacted (limit for tooltip)
       $response = InnerJoin::joinParamSelect(
-        firstTable: 'comment_reactions',
         para: 'id',
         paraWhere: 'comment_no',
         bind: $commentNo,
-        table: ['personal'],
+        table: ['comment_reactions', 'personal'],
         selectFields: 'personal.firstName, personal.lastName, comment_reactions.reaction, comment_reactions.label',
         limit: 5
       );

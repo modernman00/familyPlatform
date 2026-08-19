@@ -12,8 +12,8 @@ try{
     const showEvent = () => id('id_event_modal').style.display = 'block'
 
 //EVENT ACTION
-    id('createEvent').addEventListener('click', showEvent)
-    id('postMsg').addEventListener('click', showModal)
+    id('createEvent')?.addEventListener('click', showEvent)
+    id('postMsg')?.addEventListener('click', showModal)
 
 
 // handle post message

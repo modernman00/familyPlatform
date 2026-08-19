@@ -55,7 +55,8 @@ final class RouteDispatch
             'App\controller\General',
             'App\controller\login\Login',
             'App\controller\login\Code',
-            'App\controller\login\Forgot'
+            'App\controller\login\Forgot',
+            'App\controller\login\PassChange'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {
@@ -75,6 +76,12 @@ final class RouteDispatch
                 }
                 $id = checkInput($VerifyJWT['id']);
                 $_SESSION['id'] = $id;
+
+                if (empty($_SESSION['famCode'])) {
+                    $stmt = \Src\Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ?");
+                    $stmt->execute([$id]);
+                    $_SESSION['famCode'] = (string) $stmt->fetchColumn();
+                }
             }
         }
         // -----------------------------------------------

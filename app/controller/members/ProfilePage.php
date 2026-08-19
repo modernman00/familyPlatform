@@ -96,7 +96,7 @@ final class ProfilePage extends ProcessImg
 
         // centralise session handling
         $_SESSION['id'] = $id;
-        unset($_SESSION['loginType'], $_SESSION['identifyCust'], $_SESSION['token']);
+        unset($_SESSION['loginType'], $_SESSION['identifyCust']);
 
         return $id;
     }
@@ -205,7 +205,14 @@ final class ProfilePage extends ProcessImg
             // $getPost['profileImg'] = Post::getProfilePicsById($getPost['id']);
             // Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
-            // Notification of new post by email and service worker is done with PostMessage::getPostno function as it is called by the javascipt when the post is appended. 
+            $postMessage = trim($_POST['postMessage'] ?? '');
+            $hasImage = isset($_FILES['post_img']['name'][0]) && !empty($_FILES['post_img']['name'][0]);
+            $hasPoll = !empty($_POST['poll_question']);
+
+            if (empty($postMessage) && !$hasImage && !$hasPoll) {
+                throw new \Exception("Please add some text, an image, or a poll to your post.");
+            }
+
             $id = checkInput(data: $_SESSION['id']);
             $newInput = [
                 'id' => $id,
@@ -221,9 +228,12 @@ final class ProfilePage extends ProcessImg
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
-                generalFileTable: 'images'
+                generalFileTable: 'images',
+                removeKeys: ['poll_question', 'poll_options', 'token'],
+                optionalFields: ['postMessage', 'poll_question', 'poll_options']
             );
 
+    
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
 
@@ -243,7 +253,31 @@ final class ProfilePage extends ProcessImg
                     \App\model\PollData::createPoll((int)$result, $pollQuestion, $pollOptions);
                 }
 
-                msgSuccess(200, $result);
+                // Trigger background notifications server-side. The post is already
+                // saved at this point, so a notification failure (e.g. email/SMTP)
+                // must never turn a successful post into a failed response.
+                try {
+                    \App\controller\members\PostMessage::getNewPostAndEmail($result);
+                    \App\controller\members\PostMessage::getNewPostPusher();
+                } catch (\Throwable $th) {
+                    error_log((string) $th);
+                }
+
+                // Return the full post row (not just its id) so the composer can prepend it
+                // to the feed immediately instead of waiting on a full posts re-fetch.
+                $newPost = Post::postByNo($result);
+                
+                if (is_array($newPost)) {
+                    // Filter out internal database timestamps to prevent data leakage
+                    $newPost = array_diff_key($newPost, array_flip([
+                        'likes_updated_at', 
+                        // 'date_created', // Keep this so frontend doesn't break
+                        'date_updated', 
+                        'date_deleted'
+                    ]));
+                }
+                
+                msgSuccess(200, $newPost ?: $result);
             }
 
         } catch (\Throwable $th) {
@@ -277,6 +311,9 @@ final class ProfilePage extends ProcessImg
             );
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_COMMENT"] = $result;
+
+                // Trigger background notifications server-side
+                \App\controller\members\PostMessage::getNewCommentPusher();
 
                 msgSuccess(200, $result);
             }
@@ -340,21 +377,22 @@ final class ProfilePage extends ProcessImg
      */
     public function showPics(): void
     {
-        $path = checkInput(data: $_GET['path']);
+        try {
+            $path = isset($_GET['path']) ? checkInput(data: $_GET['path']) : 'photos';
+            $dir = isset($_GET['dir']) ? checkInput(data: $_GET['dir']) : 'public/img';
+            $imgName = $_GET['pics'] ?? '';
+            $postId = isset($_GET['pID']) ? checkInput(data: $_GET['pID']) : '';
 
-        $imagePath = ProcessImg::showPostImg(picsSource: $path);
+            $imagePath = "/$dir/$path/$imgName";
+            $comment2Img = !empty($postId) ? Post::commentLink2Img(imgPath: $postId) : [];
 
-        $postId = checkInput(data: $_GET['pID']);
-
-        $comment2Img = Post::commentLink2Img(imgPath: $postId);
-
-        // $comment2Post = Post::commentLink2Post($postId);
-
-        view('showImage', [
-            'imagePath' => $imagePath,
-            //'allData' => $this->allPostData,
-            'comment' => $comment2Img
-        ]);
+            view('showImage', [
+                'imagePath' => $imagePath,
+                'comment' => $comment2Img
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
     }
 
     /**

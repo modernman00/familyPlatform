@@ -37,7 +37,7 @@ final class SettingController extends BaseController
         // Sanitise the data and get the cleaned data
 
         try {
-            $_POST['id'] = cleanSession($_SESSION['id']);
+            $_POST['id'] = cleanSession((string)$_SESSION['id']);
 
             // Handle the new tabs (Password, Preferences, Privacy)
             if (isset($_POST['action'])) {
@@ -50,22 +50,22 @@ final class SettingController extends BaseController
                     $confirmPassword = $_POST['confirm_password'] ?? '';
 
                     if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-                        msgError(400, "All password fields are required.");
+                        msgException(400, "All password fields are required.");
                         return;
                     }
                     if ($newPassword !== $confirmPassword) {
-                        msgError(400, "New passwords do not match.");
+                        msgException(400, "New passwords do not match.");
                         return;
                     }
                     if (strlen($newPassword) < 6) {
-                        msgError(400, "Password must be at least 6 characters.");
+                        msgException(400, "Password must be at least 6 characters.");
                         return;
                     }
 
                     // Get current password hash
                     $user = \App\model\SingleCustomerData::getCustById($_POST['id'], 'login');
                     if (empty($user) || !password_verify($currentPassword, $user[0]['password'])) {
-                        msgError(400, "Current password is incorrect.");
+                        msgException(400, "Current password is incorrect.");
                         return;
                     }
 
@@ -105,34 +105,43 @@ final class SettingController extends BaseController
             }
 
             // Original Profile Form Update logic
-            $allowed = ['mobile', 'email', 'country', 'occupation']; // add yours
-            $updates = [];
-
-            foreach ($allowed as $field) {
+            $allowedContact = ['mobile', 'email', 'country', 'occupation'];
+            $updatesContact = [];
+            foreach ($allowedContact as $field) {
                 if (isset($_POST[$field])) {
                     $val = trim((string) $_POST[$field]);
-                    $updates[$field] = $val;
+                    $updatesContact[$field] = $val;
                 }
             }
-            // if $update is not empty update the database
-            if (!empty($updates)) {
-                $updates['id'] = $_POST['id'];
-                $data = LoginUtility::getSanitisedInputData($updates);
-                UpdateFn::updateMultiple('contact', $data, 'id');
+            if (!empty($updatesContact)) {
+                $updatesContact['id'] = $_POST['id'];
+                $cleanContact = LoginUtility::getSanitisedInputData($updatesContact);
+                UpdateFn::updateMultiple('contact', $cleanContact, 'id');
             }
 
-            if (isset($_POST['occupation'])) {
-                $data = [
-                    'occupation' => checkInput($_POST['occupation']),
-                    'id' => $_POST['id']
-                ];
-                UpdateFn::updateMultiple('contact', $data, 'id');
+            // Personal table updates (firstName, lastName, marital_status)
+            $allowedPersonal = ['firstName', 'lastName', 'marital_status'];
+            $updatesPersonal = [];
+            foreach ($allowedPersonal as $field) {
+                if (isset($_POST[$field])) {
+                    $val = trim((string) $_POST[$field]);
+                    $updatesPersonal[$field] = $val;
+                }
+            }
+            if (!empty($updatesPersonal)) {
+                $updatesPersonal['id'] = $_POST['id'];
+                $cleanPersonal = LoginUtility::getSanitisedInputData($updatesPersonal);
+                UpdateFn::updateMultiple('personal', $cleanPersonal, 'id');
+
+                // Update session name if changed
+                if (isset($cleanPersonal['firstName'])) $_SESSION['fName'] = $cleanPersonal['firstName'];
+                if (isset($cleanPersonal['lastName'])) $_SESSION['lName'] = $cleanPersonal['lastName'];
             }
 
             // SUBMIT THE SPOUSAL INFORMATION
 
             // CHECK IF THE SELECT BOX IS SET TO Yes
-            if ($_POST['maritalStatus'] === 'Yes - Add Husband' || $_POST['maritalStatus'] === 'Yes - Add Wife') {
+            if (($_POST['maritalStatus'] ?? null) === 'Yes - Add Husband' || ($_POST['maritalStatus'] ?? null) === 'Yes - Add Wife') {
 
                 // --- Spouse fields (only if present) ---
                 $spouseAllowed = ['spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name'];

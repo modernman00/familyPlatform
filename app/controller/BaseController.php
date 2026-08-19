@@ -52,7 +52,7 @@ class BaseController
         return self::formatPerson($memberData);
     }
 
-    private static function fetchRelationsData(string $id, string $table, string $who): ?array
+    public static function fetchRelationsData(string $id, string $table, string $who): ?array
 {
     $data = [];
     $seen = [];
@@ -180,10 +180,11 @@ class BaseController
             'day' => $data['day'] ?? null,
             'month' => $data['month'] ?? null,
             'year' => $data['year'] ?? null,
+            'father_name' => $data['father_name'] ?? null,
+            'mother_name' => $data['mother_name'] ?? null,
+            'spouse_name' => $data['spouse_name'] ?? null,
             'profilePics' => $data['img'] ?? null,
             'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex",
-
-
         ];
     }
 

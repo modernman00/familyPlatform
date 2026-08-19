@@ -1,4 +1,5 @@
-import axios from "axios"
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export const id = (id) => document.getElementById(id)
 export const idValue = (id) => id(id).value
@@ -39,13 +40,35 @@ export const manipulateAttribute = (idName, removeOrSet, attributeType, nameValu
 export const date2String = (date) => new Date().toDateString(date)
 
 export const showError = (e) => {
-  
     log(e.message, " ERROR MESSAGE") // "null has no properties"
-    log(e.name, " ERROR NAME") // "TypeError"
-    log(e.fileName,  " ERROR FILENAME") // "Scratchpad/1"
-    log(e.lineNumber, " ERROR LINENUMBER") // 2
+    if (e.name) log(e.name, " ERROR NAME") // "TypeError"
+    if (e.fileName) log(e.fileName,  " ERROR FILENAME") // "Scratchpad/1"
+    if (e.lineNumber) log(e.lineNumber, " ERROR LINENUMBER") // 2
+    if (e.stack) log(e.stack)
 
-    log(e.stack)
+    // Extract message if it's an Axios error
+    let userMessage = "An unexpected error occurred.";
+    if (e.response && e.response.data && e.response.data.message) {
+        userMessage = e.response.data.message;
+    } else if (e.message) {
+        userMessage = e.message;
+    }
+
+    // Try to show it in an error div if it exists, otherwise alert
+    const errEl = id('error');
+    if (errEl) {
+        errEl.innerHTML = userMessage;
+        errEl.style.display = 'block';
+        errEl.style.color = 'red';
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: userMessage,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    }
 }
 
 export const msgException = (errorMessage) => {

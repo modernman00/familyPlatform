@@ -269,7 +269,7 @@ export default class FormHelper {
     isChecked(yesId, noId, hiddenInput) {
         const checked = () => {
             if (this.id(yesId).checked) {
-                alert('check')
+
                 this.id(hiddenInput).innerHTML = 'checked';
             } else if (this.id(noId).checked) {
                 this.id(hiddenInput).innerHTML = 'checked';

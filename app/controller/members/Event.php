@@ -3,19 +3,13 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\classes\{
-    AllFunctionalities,
-    Insert,
-    Select,
-    PushNotificationClass,
-    Pusher
-};
+use App\classes\{ AllFunctionalities, Insert, Select, PushNotificationClass, Pusher };
 use App\model\{EmailData, AllMembersData};
-
+use Src\CheckToken;
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
+use Src\SelectFn;
 use Src\SubmitForm;
-use Src\CheckToken;
 
 final class Event extends AllMembersData
 {
@@ -37,7 +31,7 @@ final class Event extends AllMembersData
                 table: 'events',
                 minMaxData: [
                     'data' => ['eventName',  'eventDescription'],
-                    'min'  => [5,  10],
+                    'min'  => [5,  5],
                     'max'  => [100, 500]
                 ],
                 removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
@@ -62,7 +56,7 @@ final class Event extends AllMembersData
 
     private static function getSenderName(): array|string|null
     {
-        return checkInput($_SESSION['fullName']);
+        return checkInput($_SESSION['fName'] . ' ' . $_SESSION['lName']);
     }
 
     // Filter members based on the event famCode
@@ -156,13 +150,15 @@ final class Event extends AllMembersData
         try {
 
             $notificationNo = checkInput(data: $_GET['notificationNo']);
-            $query = Select::formAndMatchQuery(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
-            $result = Select::selectFn2(query: $query, bind: [$notificationNo]);
+            // $query = SelectFn::sel(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
+            // $result = SelectFn::selectFn2(query: $query, bind: [$notificationNo]);
+
+            $allNotification = SelectFn::selectAllRowsById('notification', 'no', $notificationNo);
 
             Pusher::broadcast(
                 theChannel: 'notification-channel',
                 theEvent: 'new-notification',
-                theData: $result[0]
+                theData: $allNotification
             );
         } catch (\Throwable $th) {
             showError(th: $th);

@@ -9,7 +9,7 @@ export const commentHTML = (data, postId) => {
 
   const { profileImg, fullName, date_created, img, comment, comment_no, id } = data
   const imgURL = profileImg || img
-  const image = (imgURL) ? `/resources/images/profile/${imgURL}` : `/public/avatar/avatarF.png`
+  const image = (imgURL) ? `/public/img/profile/${imgURL}` : `/public/img/profile/avatarM.png`
   let counts = data?.reactions?.counts ?? {};
   let total = data?.reactions?.counts?.totalReactions ?? 0;
 

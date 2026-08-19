@@ -29,11 +29,10 @@ final class PostMessage
      */
     public static function index()
     {
-
         try {
             $VerifyJWT = SignIn::verify('users');
-            $id = \cleanSession($VerifyJWT['id']);
-            $famCodes = $_SESSION['famCodes'] ?? [\cleanSession($VerifyJWT['famCode'])];
+            $id = \cleanSession((string)$VerifyJWT['id']);
+            $famCodes = $_SESSION['famCodes'] ?? [\cleanSession((string)($_SESSION['famCode'] ?? ''))];
 
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
@@ -183,14 +182,20 @@ final class PostMessage
 
     public static function getNewPostPusher()
     {
-        $id = \cleanSession($_SESSION['id']);
+        $id = \cleanSession((string)$_SESSION['id']);
         $famCode = checkInput($_SESSION['famCode']);
         $newPost = self::fetchNewMsg(
             fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],
             params: [$famCode, $id]
         );
 
-        Pusher::broadcast('posts-channel', 'new-post', $newPost);
+        if (!empty($newPost)) {
+            Pusher::broadcast('posts-channel', 'new-post', $newPost);
+            
+            foreach ($newPost as $post) {
+                Post::updatePostByStatusAsPublished($post['post_no']);
+            }
+        }
     }
 
     /**
@@ -207,23 +212,30 @@ final class PostMessage
     {
         $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
 
-        Pusher::broadcast('comments-channel', 'new-comment', $newComment);
-        // send push notification to all members with the same family code 
-        $data = Post::postByNo($newComment[0]['post_no']);
-        $famCode = checkInput($data['postFamCode']);
-        $id = \checkInput($data['id']);
+        if (!empty($newComment)) {
+            Pusher::broadcast('comments-channel', 'new-comment', $newComment);
+            
+            foreach ($newComment as $comment) {
+                Post::updateCommentByStatusAsPublished($comment['comment_no']);
+            }
 
-        $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
+            // send push notification to all members with the same family code 
+            $data = Post::postByNo($newComment[0]['post_no']);
+            $famCode = checkInput($data['postFamCode']);
+            $id = \checkInput($data['id']);
 
-        $url = self::buildPostUrl($newComment[0]['post_no']);
+            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
 
-        self::notifyMembersByPushNotification(
-            results: $results,
-            postId: $newComment[0]['id'],
-            postOriginName: $newComment[0]['fullName'],
-            url: $url,
-            notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
-        );
+            $url = self::buildPostUrl($newComment[0]['post_no']);
+
+            self::notifyMembersByPushNotification(
+                results: $results,
+                postId: $newComment[0]['id'],
+                postOriginName: $newComment[0]['fullName'],
+                url: $url,
+                notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
+            );
+        }
     }
 
 
@@ -268,7 +280,7 @@ final class PostMessage
      */
     public static function updateCommentByStatusAsPublished($commentNo)
     {
-        $commentNo = cleanSession($commentNo);
+        $commentNo = cleanSession((string)$commentNo);
 
         return Post::updateCommentByStatusAsPublished($commentNo);
     }
@@ -277,22 +289,32 @@ final class PostMessage
      * Sends an email to all members with the same family code as the post.
      * The email is a notification that a new post has been published.
      * 
-     * @param int $postNo The post number of the new post
+     * @param string|int|null $postNoOverride The post number (optional, for backend calls)
      * @return void
      * @throws \Throwable
      */
-    public static function getNewPostAndEmail()
+    public static function getNewPostAndEmail($postNoOverride = null)
     {
         try {
 
-            $postNo = cleanSession($_GET['newPostNo']);
+            $rawPostNo = $postNoOverride ?? $_GET['newPostNo'] ?? $_GET['newCommentNo'] ?? '';
+            $postNo = cleanSession((string) $rawPostNo);
+            
+            if (empty($postNo)) {
+                if ($postNoOverride === null) {
+                    msgSuccess(200, "Skipped");
+                }
+                return;
+            }
+
             $data = Post::postByNo($postNo);
+            
             if ($data) {
                 $postOriginName = $data['fullName'];
-                // $id = checkInput($data['id']);
+                $id = checkInput($data['id']);
                 $famCode = checkInput($data['postFamCode']);
 
-                $results = AllMembersData::AllMembersEmailByFamCode($famCode);
+                $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
                 $url = self::buildPostUrl($postNo);
 
                 // Send notifications to members by email
@@ -311,9 +333,20 @@ final class PostMessage
                     notificationMsg: "$postOriginName posted a new update"
                 );
             }
-            msgSuccess(200, "Success");
+            if ($postNoOverride === null) {
+                msgSuccess(200, "Success");
+            }
         } catch (\Throwable $th) {
-            showError($th);
+            // When called as a background step from ProfilePage->post() (i.e. with
+            // $postNoOverride set), the post itself already saved successfully — a
+            // notification failure here (e.g. email/SMTP) must never turn that into
+            // a failed response for the user, so just log it instead of calling
+            // showError(), which would emit its own HTTP status/body.
+            if ($postNoOverride === null) {
+                showError($th);
+            } else {
+                error_log((string) $th);
+            }
         }
     }
 

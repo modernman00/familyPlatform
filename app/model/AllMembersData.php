@@ -33,23 +33,38 @@ class AllMembersData extends InnerJoin
     /**
      * @param array|null|string $id
      */
-    public function getAllMembers(array|string|null $id): array
+    public function getAllMembers(int|string $id): array
     {
         try {
-            $query = "SELECT p.id, p.firstName, p.lastName, p.famCode, p.created_at, ofm.fatherName, ofm.motherName, ofm.spouseName, pp.img, c.email, c.country, c.mobile,  rm.requester_id, rm.approver_id,  rm.status, rm.requesterCode
+            $query = "SELECT DISTINCT p.id, p.firstName, p.lastName, p.famCode, p.created_at, 
+                       ofm.father_name AS fatherName, ofm.mother_name AS motherName, ofm.spouse_name AS spouseName, 
+                       pp.img, c.email, c.country, c.mobile, 
+                       CASE 
+                           WHEN p.famCode = user_p.famCode THEN 'family'
+                           WHEN rm.requester_id = :id5 AND rm.approver_id = p.id AND LOWER(rm.status) IN ('approved', 'accepted') THEN 'approved_you'
+                           WHEN rm.approver_id = :id6 AND rm.requester_id = p.id AND LOWER(rm.status) IN ('approved', 'accepted') THEN 'you_approved'
+                           ELSE 'other'
+                       END AS relationType,
+                       rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
                 FROM personal AS p
-                  INNER JOIN otherFamily AS ofm ON p.id = ofm.id
-                  INNER JOIN profilePics AS pp ON p.id = pp.id
-                  INNER JOIN contact AS c ON p.id = c.id
-                   LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = :id
-                  ) AS rm ON p.id = rm.approver_id";
+                  INNER JOIN personal AS user_p ON user_p.id = :id1
+                   LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
+                   LEFT JOIN profilePics AS pp ON p.id = pp.id
+                   LEFT JOIN contact AS c ON p.id = c.id
+                   LEFT JOIN requestMgt AS rm ON ((p.id = rm.approver_id AND rm.requester_id = :id2) 
+                                               OR (p.id = rm.requester_id AND rm.approver_id = :id3))
+                WHERE p.id != :id4 
+                  AND (p.famCode = user_p.famCode OR LOWER(rm.status) IN ('approved', 'accepted'))";
 
             $result = self::connect2()->prepare($query);
-            $result->bindValue(':id', $id, PDO::PARAM_STR);
-            $result->execute();
+            $result->execute([
+                ':id1' => $id,
+                ':id2' => $id,
+                ':id3' => $id,
+                ':id4' => $id,
+                ':id5' => $id,
+                ':id6' => $id,
+            ]);
 
             return $result->fetchAll();
         } catch (PDOException $e) {
@@ -274,15 +289,35 @@ class AllMembersData extends InnerJoin
      *
      * @return array An array containing the email, family code, first name, last name, and ID of each member.
      */
-    public static function AllMembersEmailByFamCode($famCode, array|string|null $id): array
+    public static function AllMembersEmailByFamCode($famCode, array|string|null $id = null): array
     {
         try {
             $query = "SELECT a.email, p.famCode, p.firstName, p.lastName, a.id 
                       FROM account a
                       INNER JOIN personal p ON a.id = p.id                    
                       WHERE (p.famCode = :famCode)";
+            
+            $params = ['famCode' => $famCode];
+
+            if ($id !== null) {
+                if (is_array($id) && !empty($id)) {
+                    $idKeys = [];
+                    foreach (array_values($id) as $i => $val) {
+                        $key = "excl_id_$i";
+                        $idKeys[] = ":$key";
+                        $params[$key] = $val;
+                    }
+                    if (!empty($idKeys)) {
+                        $query .= " AND a.id NOT IN (" . implode(', ', $idKeys) . ")";
+                    }
+                } elseif (is_scalar($id)) {
+                    $query .= " AND a.id != :id";
+                    $params['id'] = $id;
+                }
+            }
+
             $result = parent::connect2()->prepare($query);
-            $result->execute(['famCode' => $famCode, 'id' => $id]);
+            $result->execute($params);
             return $result->fetchAll();
         } catch (PDOException $e) {
             showError($e);
@@ -321,14 +356,9 @@ class AllMembersData extends InnerJoin
 
     public function getAllMembersById(array|string|null $id): array|bool
     {
-
-        $table = ['personal', 'otherFamily', 'profilePics', 'post',  'contact'];
-
-        $firstTable = array_shift($table);
-
-        $memberData = $this->joinParam($firstTable, 'id', 'id', $table, $id);
-
-        return $memberData ??= throw new Exception(self::ERR_MSG, 1);
+        $table = ['personal', 'otherFamily', 'profilePics', 'contact'];
+        $singleCust = new SingleCustomerData();
+        return $singleCust->getCustomerData((string) $id, $table);
     }
 
     // show information of events within 7 days , 1 days and on the current date
@@ -493,4 +523,152 @@ class AllMembersData extends InnerJoin
             return ['famCode' => []];
         }
     }
+
+    public function searchMembers(
+        int $requesterId,
+        string $famCode,
+        string $term,
+        int $limit = 30,
+        int $offset = 0
+    ): array {
+        // if search term is empty, just return empty and let controller / frontend
+        // fall back to processApiData()
+        if ($term === '') {
+            return [];
+        }
+
+        try {
+            $like = "%$term%";
+
+            $sql = "
+            SELECT DISTINCT 
+                p.id,
+                p.firstName,
+                p.lastName,
+                p.famCode,
+                p.created_at,
+                ofm.father_name AS fatherName,
+                ofm.mother_name AS motherName,
+                ofm.spouse_name AS spouseName,
+                pp.img,
+                c.email,
+                c.country,
+                c.mobile,
+                CASE 
+                    WHEN p.famCode = :famCode_case THEN 'family'
+                    WHEN rm.requester_id = :req_case_approved_you
+                         AND rm.approver_id = p.id
+                         AND rm.status = 'approved'
+                         THEN 'approved_you'
+                    WHEN rm.approver_id = :req_case_you_approved
+                         AND rm.requester_id = p.id
+                         AND rm.status = 'approved'
+                         THEN 'you_approved'
+                    ELSE 'other'
+                END AS relationType,
+                rm.requester_id,
+                rm.approver_id,
+                rm.status,
+                rm.requesterCode
+            FROM personal AS p
+            LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
+            LEFT JOIN profilePics AS pp   ON p.id = pp.id
+            LEFT JOIN contact AS c        ON p.id = c.id
+            LEFT JOIN requestMgt AS rm
+                ON (
+                    (rm.requester_id = :req_join_outgoing AND rm.approver_id = p.id)
+                    OR
+                    (rm.approver_id = :req_join_incoming AND rm.requester_id = p.id)
+                )
+            WHERE
+                p.id != :req_where_not_me
+                AND (
+                    p.firstName LIKE :search_firstName
+                    OR p.lastName LIKE :search_lastName
+                    OR c.email LIKE :search_email
+                    OR c.mobile LIKE :search_mobile
+                    OR p.famCode LIKE :search_famCode
+                    OR c.country LIKE :search_country
+                )
+            ORDER BY
+                CASE 
+                    WHEN p.famCode = :famCode_order_family THEN 1
+                    WHEN rm.requester_id = :req_order_outgoing
+                         AND rm.approver_id = p.id
+                         AND rm.status = 'approved'
+                         THEN 2
+                    WHEN rm.approver_id = :req_order_incoming
+                         AND rm.requester_id = p.id
+                         AND rm.status = 'approved'
+                         THEN 3
+                    ELSE 4
+                END,
+                p.firstName
+            LIMIT :limit_rows
+            OFFSET :offset_rows
+        ";
+
+            $stmt = self::connect2()->prepare($sql);
+
+            // --- famCode placeholders ---
+            $stmt->bindValue(':famCode_case', $famCode, PDO::PARAM_STR);
+            $stmt->bindValue(':famCode_order_family', $famCode, PDO::PARAM_STR);
+
+            // --- requesterId placeholders used in CASE (relationType) ---
+            $stmt->bindValue(':req_case_approved_you', $requesterId, PDO::PARAM_INT);
+            $stmt->bindValue(':req_case_you_approved', $requesterId, PDO::PARAM_INT);
+
+            // --- requesterId placeholders used in JOIN ---
+            $stmt->bindValue(':req_join_outgoing', $requesterId, PDO::PARAM_INT);
+            $stmt->bindValue(':req_join_incoming', $requesterId, PDO::PARAM_INT);
+
+            // --- requesterId placeholder used in WHERE p.id != ---
+            $stmt->bindValue(':req_where_not_me', $requesterId, PDO::PARAM_INT);
+
+            // --- requesterId placeholders used in ORDER BY ---
+            $stmt->bindValue(':req_order_outgoing', $requesterId, PDO::PARAM_INT);
+            $stmt->bindValue(':req_order_incoming', $requesterId, PDO::PARAM_INT);
+
+            // --- search term placeholders (all the same LIKE value) ---
+            $stmt->bindValue(':search_firstName', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_lastName', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_email', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_mobile', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_famCode', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_country', $like, PDO::PARAM_STR);
+
+            // --- pagination ---
+            $stmt->bindValue(':limit_rows', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset_rows', $offset, PDO::PARAM_INT);
+
+            $stmt->execute();
+
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Remove duplicate users by ID
+            $result2 = $this->uniqueById($result);
+
+            return $result2;
+        } catch (PDOException $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+    private function uniqueById(array $rows): array
+    {
+        $unique = [];
+
+        foreach ($rows as $row) {
+            $id = $row['id'];
+
+            // Keep the first occurrence of each ID
+            if (!isset($unique[$id])) {
+                $unique[$id] = $row;
+            }
+        }
+
+        return array_values($unique);
+    }
 }
+

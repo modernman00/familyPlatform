@@ -5,6 +5,7 @@ import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { eventHtml } from './eventHTML'
 import axios from "axios";
 import Pusher from 'pusher-js';
+import Swal from 'sweetalert2';
 
 
 const formInput = document.querySelectorAll('.eventModalForm');
@@ -12,9 +13,20 @@ const formInputArr = Array.from(formInput);
 const formData = new FormHelper(formInputArr);
 
 
-const displayNone = () => id('id_event_modal').style.display = 'none'
+const displayNone = () => {
+    const modal = id('id_event_modal') || id('createEventModal');
+    if (modal) {
+        modal.style.display = 'none';
+        if (window.jQuery && window.jQuery(modal).modal) {
+            window.jQuery(modal).modal('hide');
+        }
+    }
+};
 
-id('cancelModal').addEventListener('click', displayNone)
+const cancelBtn = id('cancelModal');
+if (cancelBtn) {
+    cancelBtn.addEventListener('click', displayNone);
+}
 
 /**
  * Filters events by family code (famCode) to ensure only relevant events are shown
@@ -40,11 +52,21 @@ const options = {
 const process = async (e) => {
     try {
         e.preventDefault();
-        id('error').innerHTML = ""
+        const errEl = id('error');
+        if (errEl) errEl.innerHTML = "";
+
+        const formInput = document.querySelectorAll('.eventModalForm');
+        const formInputArr = Array.from(formInput);
+        const formData = new FormHelper(formInputArr);
         formData.massValidate();
 
-        if (formData.error.length > 0) {
-            alert('The form cannot be submitted. Please check the errors');
+        if (formData.error && formData.error.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'The form cannot be submitted. Please check the errors',
+                confirmButtonColor: '#3085d6'
+            });
             formData.clearError();
             return;
         }
@@ -60,25 +82,25 @@ const process = async (e) => {
         ]);
 
         // Extract and get notificationNo from the responses
-
-        const { message: notificationNo } = notificationResponse.data;
+        const { message: notificationNo } = notificationResponse.data || {};
 
         // update all members of similar famcode on their UIs using Pusher
-
-        axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
-
+        if (notificationNo) {
+            axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
+        }
 
         // close the modal
         displayNone();
 
-
     } catch (error) {
-        showError(error)
+        showError(error);
     }
+};
 
+const submitBtn = id('submitEventModal');
+if (submitBtn) {
+    submitBtn.addEventListener('click', process);
 }
-
-id('submitEventModal').addEventListener('click', process)
 
 
 

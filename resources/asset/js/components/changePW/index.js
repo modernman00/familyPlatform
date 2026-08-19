@@ -1,10 +1,7 @@
-"use strict";
-import {  setupPasswordChange} from '@modernman00/shared-js-lib';
-
-matchInput('password', 'confirm_password', 'changePasswordErr')
+import { setupPasswordChange } from '@modernman00/shared-js-lib';
 
 setupPasswordChange({
-    formId: 'changePW',
+  formId: 'changePW',
   route: '/login/changePW',
   redirect: '/login'
 });

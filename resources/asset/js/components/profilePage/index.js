@@ -2,9 +2,13 @@
 
 localStorage.removeItem('redirect')
 
-// Dark Mode logic has been moved to main index.js to prevent double-firing
+import { profileFeed } from "./feedComponent";
+window.profileFeed = profileFeed;
 
-import "./loadPost"
+import { profileSidebar, upcomingEvents } from "./sidebarComponents";
+window.profileSidebar = profileSidebar;
+window.upcomingEvents = upcomingEvents;
+
 import "./modal"
 import "./img"
 import "./rsvpBtn"
@@ -12,7 +16,7 @@ import "./allEvents"
 import "./registerPushNotification"
 import "./periodicSync"
 import "./createEvent"
-import "./friendRequestCard"
+// import "./friendRequestCard"  // Disabled in favor of Alpine.js profileSidebar component
 import "./editProfile"
 import "./postEmojiImgProcess"
 // import "./commentEmojiTest"

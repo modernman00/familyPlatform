@@ -15,8 +15,6 @@ const toSentenceCase = (str) => {
 
 export const renderHtml = (el) => {
 
-  log(el)
-
   try {
     if (!el) {
       // Handle the case where 'el' is falsy, such as when data is not available.

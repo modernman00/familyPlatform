@@ -1,6 +1,7 @@
 import { id, log } from '../global'
 import axios from 'axios'
 import axiosRetry from 'axios-retry';
+import Swal from 'sweetalert2';
 // import Cookies from 'js-cookie'
 
 axiosRetry(axios, { retries: 3 });
@@ -265,11 +266,16 @@ export const getCookie = (cname) => {
 export const checkCookie = () => {
     var user = getCookie("username");
     if (user != "") {
-        alert("Welcome again " + user);
+        Swal.fire("Welcome again " + user);
     } else {
-        user = prompt("Please enter your name:", "");
-        if (user != "" && user != null) {
-            setCookie("username", user, 365);
-        }
+        Swal.fire({
+            title: 'Please enter your name:',
+            input: 'text',
+            showCancelButton: true
+        }).then((result) => {
+            if (result.value) {
+                setCookie("username", result.value, 365);
+            }
+        });
     }
 }

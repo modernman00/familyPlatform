@@ -48,6 +48,7 @@ $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 
 
 // change password
 $router->map('GET', '/login/changePW', 'App\controller\login\PassChange@show', 'ChangePW_PASSWORD');
-
 $router->map('POST', '/login/changePW', 'App\controller\login\PassChange@verify', 'ChangePW_VERIFY');
+$router->map('GET', '/changePW', 'App\controller\login\PassChange@show', 'ChangePW_PASSWORD_ALIAS');
+$router->map('POST', '/changePW', 'App\controller\login\PassChange@verify', 'ChangePW_VERIFY_ALIAS');
 

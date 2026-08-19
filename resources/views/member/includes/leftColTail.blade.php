@@ -28,7 +28,7 @@
                         Edit Profile
                     </button>
                     <button
-                        class="bg-secondary hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-lg shadow-red-500/20"  onclick="window.location.href='{{ route('images') }}'">
+                        class="bg-secondary hover:bg-red-700 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-lg shadow-red-500/20"  onclick="window.location.href='/profilepage/img'">
                         Pictures
                     </button>
                 </div>

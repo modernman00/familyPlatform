@@ -68,7 +68,7 @@ class LoginAnomalyService
      *
      * @param int $userId
      */
-    public static function record(int $userId): void
+    public static function record(int|string $userId): void
     {
         try {
             $ip          = self::getClientIp();
