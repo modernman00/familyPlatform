@@ -14,9 +14,13 @@ foreach(($eventData ?? []) as $event) {
 
     $enrichedEvents[] = [
         'no' => $event['no'],
+        'id' => $event['id'],
         'eventName' => $event['eventName'],
         'eventDate' => dateFormat($event['eventDate']),
+        'eventDateRaw' => $event['eventDate'],
         'eventType' => $event['eventType'],
+        'eventDescription' => $event['eventDescription'] ?? '',
+        'eventFrequency' => $event['eventFrequency'] ?? '',
         'dateDifference' => $dateDifference
     ];
 }
@@ -61,6 +65,17 @@ foreach(($eventData ?? []) as $event) {
                                         <i class="bi bi-geo-alt me-2"></i>
                                         <span x-text="event.eventType"></span>
                                     </div>
+
+                                    <template x-if="isOwnEvent(event)">
+                                        <div class="d-flex gap-1 mt-1">
+                                            <button type="button" class="btn btn-sm btn-link text-muted p-0" style="font-size: 0.78rem;" title="Edit event" @click="editEvent(event)">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-link text-muted p-0 ms-2" style="font-size: 0.78rem;" title="Delete event" @click="deleteEvent(event.no)">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </template>
 
                                     <input type="hidden" :name="'event_no'" :id="'event' + event.no" :value="event.no">
                                 </div>

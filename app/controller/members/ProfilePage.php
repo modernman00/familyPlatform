@@ -228,9 +228,8 @@ final class ProfilePage extends ProcessImg
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
-                generalFileTable: 'images',
-                removeKeys: ['poll_question', 'poll_options', 'token'],
-                optionalFields: ['postMessage', 'poll_question', 'poll_options']
+                removeKeys: ['poll_question', 'poll_options', 'token', 'post_no'],
+                optionalFields: ['postMessage', 'poll_question', 'poll_options', 'post_no']
             );
 
     
@@ -390,6 +389,82 @@ final class ProfilePage extends ProcessImg
                 'imagePath' => $imagePath,
                 'comment' => $comment2Img
             ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Photo Gallery of images posted by the member / author.
+     */
+    public function gallery(): void
+    {
+        try {
+            $VerifyJWT = SignIn::verify('users');
+            $id = (string)cleanSession((string)($VerifyJWT['id'] ?? $_SESSION['id'] ?? ''));
+
+            // Allow viewing a specific member's gallery if ?id=... is provided, default to current user
+            $targetId = isset($_GET['id']) ? (string)cleanSession((string)$_GET['id']) : $id;
+
+            // Get pagination params
+            $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+            $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 24;
+            $offset = ($page - 1) * $limit;
+
+            // Fetch all images posted by the author from post table and images table
+            $allImages = Post::getAllImagesByAuthor($targetId);
+            $total = count($allImages);
+            $totalPages = max(1, (int)ceil($total / $limit));
+            $paginatedImages = array_slice($allImages, $offset, $limit);
+
+            $singleCust = new SingleCustomerData();
+            $memberInfo = $singleCust->getCustomerData($targetId, ['personal', 'profilePics']);
+
+            \App\controller\BaseController::viewWithCsp('member/images', [
+                'data' => $paginatedImages,
+                'total' => $total,
+                'page' => $page,
+                'totalPages' => $totalPages,
+                'member' => $memberInfo,
+                'isOwner' => ($targetId === $id),
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Update member profile picture from an existing gallery image.
+     */
+    public function setProfilePicFromImage(): void
+    {
+        try {
+            $VerifyJWT = SignIn::verify('users');
+            $id = (string)cleanSession((string)($VerifyJWT['id'] ?? $_SESSION['id'] ?? ''));
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+
+            if (empty($input['imageName'])) {
+                throw new Exception("Image name not provided");
+            }
+
+            $imageName = (string)checkInput((string)$input['imageName']);
+
+            $updateProfilePic = new \Src\Update('profilePics');
+            $result = $updateProfilePic->updateTable(
+                column: 'img',
+                columnAnswer: $imageName,
+                identifier: 'id',
+                identifierAnswer: $id
+            );
+
+            if ($result) {
+                $_SESSION['img'] = $imageName;
+                msgSuccess(200, "Profile picture updated successfully");
+            } else {
+                throw new Exception("Failed to update profile picture in database");
+            }
         } catch (\Throwable $th) {
             showError($th);
         }

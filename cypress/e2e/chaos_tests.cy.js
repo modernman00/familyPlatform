@@ -58,9 +58,9 @@ describe('Chaos & Resiliency Testing', () => {
         cy.get('body').should('not.contain', 'Exception');
         cy.get('body').should('not.contain', 'Stack trace');
 
-        // API errors here render into the modal's own #error notification div, not SweetAlert2
-        // (SweetAlert2 is reserved for client-side validation failures on this form).
-        cy.get('#error').should('be.visible').and('contain.text', 'Internal Server Error');
+        // API errors now show via SweetAlert2 directly (createEvent.js was changed to stop
+        // writing into the modal's own #error <p>, since failures there were going unnoticed).
+        cy.get('.swal2-popup').should('be.visible').and('contain.text', 'Internal Server Error');
     });
 
     it('gracefully handles 504 Gateway Timeout on Post Comment', () => {

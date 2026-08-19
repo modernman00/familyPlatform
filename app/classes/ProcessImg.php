@@ -51,7 +51,7 @@ class ProcessImg extends AllFunctionalities
             UpdateFn::makeUpdateFn('profilePics',[
                 'img'=> $sanitizedFileName, 
                 'id'=> $_SESSION['id']], 
-                'id', null
+                'id', 'AND'
             );
 
             // Update the profile_table

@@ -118,8 +118,9 @@ class AllMembersData extends InnerJoin
                       FROM requestMgt
                       WHERE requester_id IS NOT NULL AND requester_id = ?
                   ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
+            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id)
             AND post.post_status = 'published'
+            AND post.date_deleted IS NULL
             ORDER BY post.date_created DESC
             LIMIT ? OFFSET ?";
             
@@ -258,8 +259,9 @@ class AllMembersData extends InnerJoin
                       FROM requestMgt
                       WHERE requester_id IS NOT NULL AND requester_id = ?
                   ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
-            AND post.post_status = 'published'";
+            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id)
+            AND post.post_status = 'published'
+            AND post.date_deleted IS NULL";
             
             $params = [$id];
             $params = array_merge($params, $famCodes);
@@ -416,10 +418,11 @@ class AllMembersData extends InnerJoin
     public static function getEventDataByFamCode(array|string|null $famCode): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
-        FROM events 
-        INNER JOIN personal ON events.id = personal.id 
+            $query = "SELECT events.no, events.id, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
+        FROM events
+        INNER JOIN personal ON events.id = personal.id
         WHERE (personal.famCode = :famCode)
+        AND events.deleted_at IS NULL
         AND (
             events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
             OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
@@ -445,6 +448,7 @@ class AllMembersData extends InnerJoin
               FROM comment
               INNER JOIN profilePics ON comment.id = profilePics.id
             WHERE (comment.post_no = :postNo)
+            AND comment.date_deleted IS NULL
             ORDER BY comment.date_created DESC";
             $result = parent::connect2()->prepare($query);
             $result->execute(['postNo' => $postNo]);

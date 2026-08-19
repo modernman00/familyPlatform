@@ -1,0 +1,9 @@
+apps:
+  familyplatform:
+    build: "npm run prod && composer install --no-dev"
+    migrate: "php vendor/bin/phinx migrate -e production"
+    healthcheck: "curl -fsS ${APP_URL}"
+    env:
+      - APP_URL
+      - DB_HOST
+      - DB_NAME

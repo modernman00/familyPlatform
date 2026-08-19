@@ -30,8 +30,23 @@ $router->map(
 
   // GET NEW POST
 $router->map(
-  method: 'GET', 
-  route: '/post/getAllPost/update', 
-  target: 'App\controller\members\PostMessage@update', 
+  method: 'GET',
+  route: '/post/getAllPost/update',
+  target: 'App\controller\members\PostMessage@update',
   name: 'all_posts_update'
+);
+
+// EDIT / DELETE A POST (author only)
+$router->map(
+  method: 'PUT',
+  route: '/post/[i:postNo]',
+  target: 'App\controller\members\PostMessage@updatePost',
+  name: 'update_post'
+);
+
+$router->map(
+  method: 'DELETE',
+  route: '/post/[i:postNo]',
+  target: 'App\controller\members\PostMessage@deletePost',
+  name: 'delete_post'
 );

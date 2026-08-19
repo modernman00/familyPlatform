@@ -39,6 +39,8 @@
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
                         rows="4" style="background-color: var(--bg-color); border-radius: 15px; font-size: 1.1rem; padding: 15px; resize: none;"></textarea>
 
+                    <small id="editPostNotice" class="d-none text-muted d-block mb-2 px-1">Editing text only — images and polls can't be changed here.</small>
+
                     <div id="imagePreviewContainer" class="mb-3 d-none position-relative">
                         <div id="imagePreviewList" class="d-flex flex-wrap gap-2"></div>
                         <button type="button" id="closeImagePreview"
@@ -97,6 +99,7 @@
                         </div>
 
                         <input type="hidden" name="token" value="{{ $token }}">
+                        <input type="hidden" name="post_no" id="editPostNo" value="">
 
                         <button type="button" id="submitPost" name="submit" class="btn text-white fw-semibold px-4 py-2 submitPost" 
                             style="background-color: var(--primary-color); border-radius: 20px; font-size: 0.9rem;">

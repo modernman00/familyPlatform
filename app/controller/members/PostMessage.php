@@ -11,7 +11,8 @@ use App\model\{
 };
 
 use Src\functionality\SendEmailFunctionality as SendMail;
-use Src\DeleteFn;
+use Src\{CheckToken, Update};
+use Src\Exceptions\ForbiddenException;
 use Src\Utility;
 use Src\functionality\SignIn;
 
@@ -243,6 +244,8 @@ final class PostMessage
     public static function deleteComment($commentNo): void
     {
         try {
+            CheckToken::tokenCheck();
+
             $userId = $_SESSION['id'];
             $commentNo = Utility::checkInput($commentNo);
 
@@ -253,17 +256,138 @@ final class PostMessage
             // select the id of the post author
             $postAuthorId = Post::postByNo($commentPostNo)['id'];
 
-            // // trigger pusher to update the comment count
-            // delete if user is admin or the author of the comment or the author of the post
+            // delete if the author of the comment or the author of the post
             if ($userId === $commentAuthorId || $userId === $postAuthorId) {
 
-                DeleteFn::deleteOneRow("comment", "comment_no", $commentNo);
+                (new Update('comment'))->updateTable(
+                    column: 'date_deleted',
+                    columnAnswer: date('Y-m-d H:i:s'),
+                    identifier: 'comment_no',
+                    identifierAnswer: $commentNo
+                );
 
-                // trigger pusher to update all the UI elements for the deleted comment 
+                // trigger pusher to update all the UI elements for the deleted comment
                 Pusher::broadcast('comments-channel', 'delete-comment', ['commentNo' => $commentNo, 'postNo' => $commentPostNo]);
 
                 msgSuccess(200, "comment deleted successfully");
+            } else {
+                throw new ForbiddenException('You can only delete your own comments.');
             }
+        } catch (\Throwable $th) {
+            \showError($th);
+        }
+    }
+
+    /**
+     * Edits the text of a comment. Same ownership rule as deleteComment:
+     * the comment's author, or the author of the post it's on.
+     */
+    public static function updateComment($commentNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = $_SESSION['id'];
+            $commentNo = Utility::checkInput($commentNo);
+
+            $commentAuthorId = Post::commentByNo($commentNo)['id'];
+            $commentPostNo = Post::commentByNo($commentNo)['post_no'];
+            $postAuthorId = Post::postByNo($commentPostNo)['id'];
+
+            if ($userId !== $commentAuthorId && $userId !== $postAuthorId) {
+                throw new ForbiddenException('You can only edit your own comments.');
+            }
+
+            // PHP only populates $_POST for the literal POST verb — PUT bodies
+            // have to be read manually, so the frontend sends JSON for edits.
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+            $cleanComment = checkInput($input['comment'] ?? null);
+
+            (new Update('comment'))->updateTable(
+                column: 'comment',
+                columnAnswer: $cleanComment,
+                identifier: 'comment_no',
+                identifierAnswer: $commentNo
+            );
+
+            Pusher::broadcast('comments-channel', 'update-comment', [
+                'commentNo' => $commentNo,
+                'postNo' => $commentPostNo,
+                'comment' => $cleanComment,
+            ]);
+
+            msgSuccess(200, "comment updated successfully");
+        } catch (\Throwable $th) {
+            \showError($th);
+        }
+    }
+
+    /**
+     * Soft-deletes a post. Author-only.
+     */
+    public static function deletePost($postNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = $_SESSION['id'];
+            $postNo = Utility::checkInput($postNo);
+            $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
+
+            if ($userId !== $postAuthorId) {
+                throw new ForbiddenException('You can only delete your own posts.');
+            }
+
+            (new Update('post'))->updateTable(
+                column: 'date_deleted',
+                columnAnswer: date('Y-m-d H:i:s'),
+                identifier: 'post_no',
+                identifierAnswer: $postNo
+            );
+
+            Pusher::broadcast('posts-channel', 'delete-post', ['postNo' => $postNo]);
+
+            msgSuccess(200, "post deleted successfully");
+        } catch (\Throwable $th) {
+            \showError($th);
+        }
+    }
+
+    /**
+     * Edits a post's text. Text only — images/poll are unchanged.
+     * Author-only.
+     */
+    public static function updatePost($postNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = $_SESSION['id'];
+            $postNo = Utility::checkInput($postNo);
+            $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
+
+            if ($userId !== $postAuthorId) {
+                throw new ForbiddenException('You can only edit your own posts.');
+            }
+
+            // PHP only populates $_POST for the literal POST verb — PUT bodies
+            // have to be read manually, so the frontend sends JSON for edits.
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+            $cleanMessage = checkInput($input['postMessage'] ?? null);
+
+            (new Update('post'))->updateTable(
+                column: 'postMessage',
+                columnAnswer: $cleanMessage,
+                identifier: 'post_no',
+                identifierAnswer: $postNo
+            );
+
+            Pusher::broadcast('posts-channel', 'update-post', [
+                'postNo' => $postNo,
+                'postMessage' => $cleanMessage,
+            ]);
+
+            msgSuccess(200, "post updated successfully");
         } catch (\Throwable $th) {
             \showError($th);
         }

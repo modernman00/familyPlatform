@@ -1,4 +1,13 @@
 <!-- Middle Column - Feed -->
+<style>
+  .highlighted-post {
+    animation: postHighlightPulse 2.5s ease-out;
+  }
+  @keyframes postHighlightPulse {
+    0% { box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.6); }
+    100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0); }
+  }
+</style>
 <div class="feed-column">
   <!-- Post Composer -->
   <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
@@ -72,7 +81,7 @@
     <!-- Posts Loop -->
     <div id="postIt" class="postIt">
       <template x-for="post in posts" :key="post.post_no">
-        <div class="card border-0 shadow-sm mb-4 p-3" :class="'post' + post.post_no" style="border-radius: 8px; background-color: var(--card-bg);">
+        <div class="card border-0 shadow-sm mb-4 p-3" :id="'post' + post.post_no" :class="'post' + post.post_no" style="border-radius: 8px; background-color: var(--card-bg);">
           <!-- Post Author Header -->
           <div class="d-flex align-items-center mb-3">
             <a :href="'/profilepage/img?dir=img&pics=' + ((post.images && post.images[0]) ? post.images[0] : '') + '&pID=' + post.post_no + '&path=profile&id=' + post.id">
@@ -89,6 +98,16 @@
                     </template>
                   </div>
                 </div>
+                <template x-if="isOwnPost(post)">
+                  <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-sm btn-link text-muted p-1" title="Edit post" @click="editPost(post)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-link text-muted p-1" title="Delete post" @click="deletePost(post.post_no)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </template>
               </div>
             </div>
           </div>
@@ -264,10 +283,22 @@
                   <img :src="c.profileImg" alt="Avatar" class="rounded-circle" width="32" height="32" style="object-fit: cover; margin-top: 2px;">
                   <div class="flex-grow-1">
                     <!-- Comment Bubble -->
-                    <div class="px-3 py-2 rounded-3" style="background-color: #f0f2f5; display: inline-block; max-width: 90%;">
-                      <div class="fw-semibold text-dark" style="font-size: 0.8125rem; line-height: 1.2;" x-text="c.fullName"></div>
-                      <div class="mt-1" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35;" x-text="c.comment"></div>
-                    </div>
+                    <template x-if="editingCommentNo !== c.comment_no">
+                      <div class="px-3 py-2 rounded-3" style="background-color: #f0f2f5; display: inline-block; max-width: 90%;">
+                        <div class="fw-semibold text-dark" style="font-size: 0.8125rem; line-height: 1.2;" x-text="c.fullName"></div>
+                        <div class="mt-1" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35;" x-text="c.comment"></div>
+                      </div>
+                    </template>
+
+                    <!-- Inline Comment Edit -->
+                    <template x-if="editingCommentNo === c.comment_no">
+                      <form @submit.prevent="saveCommentEdit(c.comment_no)" class="d-flex gap-2 align-items-center" style="max-width: 90%;">
+                        <input type="text" class="form-control form-control-sm rounded-pill" x-model="editCommentText" required
+                               style="font-size: 0.875rem; background-color: #f0f2f5; border: none; padding: 6px 14px;">
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3" style="font-size: 0.78rem; flex-shrink:0;">Save</button>
+                        <button type="button" class="btn btn-link btn-sm text-muted" style="font-size: 0.78rem; flex-shrink:0;" @click="cancelEditComment()">Cancel</button>
+                      </form>
+                    </template>
 
                     <!-- Top Reactions Preview -->
                     <div x-show="getTopCommentReactions(c.reactions).length > 0" class="d-flex align-items-center gap-1 mt-1 ps-1">
@@ -321,6 +352,13 @@
                           <span x-text="c.userReaction ? c.userReaction.charAt(0).toUpperCase() + c.userReaction.slice(1) : 'Like'"></span>
                         </button>
                       </div>
+
+                      <template x-if="canEditComment(c)">
+                        <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="startEditComment(c)">Edit</button>
+                      </template>
+                      <template x-if="canModerateComment(post, c)">
+                        <button type="button" class="text-muted" style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0;" @click="deleteComment(post.post_no, c.comment_no)">Delete</button>
+                      </template>
                     </div>
                   </div>
                 </div>

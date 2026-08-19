@@ -14,8 +14,8 @@
     $img = $dataDB['img'] ?? null;
     if (empty($img)) {
         $img = ($gender === 'Male')
-            ? '/resources/images/profile/avatarM.png'
-            : '/resources/images/profile/avatarF.png';
+            ? '/public/img/profile/avatarM.png'
+            : '/public/img/profile/avatarF.png';
     }
 
     // 4) Relationship label safety

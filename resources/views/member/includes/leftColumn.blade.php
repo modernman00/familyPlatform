@@ -37,7 +37,7 @@
                     <i class="bi bi-calendar-plus me-2"></i> Create Event
                 </button>
 
-                <button type="button" id="directToImages" class="btn fw-semibold" style="background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 10px;" onclick="window.location.href='/profilepage/img'">
+                <button type="button" id="directToImages" class="btn fw-semibold" style="background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 20px; padding: 10px;" onclick="window.location.href='/profilepage/gallery'">
                     <i class="bi bi-images me-2"></i> Photo Gallery
                 </button>
             </div>

@@ -18,8 +18,13 @@
                </div>
 
                <div class="modal-body px-4 pt-4">
+                   {{-- Deliberately OUTSIDE the form: FormHelper's massValidate() iterates
+                        every named control inside #eventModalForm and treats an empty one
+                        as a validation error, which a hidden "not editing" field would be. --}}
+                   <input type="hidden" id="editEventNo" value="">
+                   <small id="editEventNotice" class="d-none text-muted d-block mb-2 px-1">Editing this event.</small>
                    <form id="eventModalForm" class="eventModalForm">
-                       
+
                        <div id="loader" class="text-center mb-3"></div>
                        <div id="eventModalForm_notification">
                            <p id="error" class="text-danger small"></p>

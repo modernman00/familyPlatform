@@ -4,9 +4,8 @@ describe('Social Feed Interactions', () => {
 
     beforeEach(() => {
         loginFully();
-        // Wait for Alpine's feed component to finish mounting (it registers the listeners
-        // that make new posts/comments appear instantly) before interacting with the page.
-        cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
+        // Wait for Alpine's feed component to finish mounting
+        cy.get('#openPostModalTrigger', { timeout: 10000 }).should('be.visible');
     });
 
     it('can create a new post successfully', () => {
@@ -47,6 +46,16 @@ describe('Social Feed Interactions', () => {
     });
 
     it('can like a post', () => {
+        cy.get('body').then(($body) => {
+            if ($body.find('button:contains("Like")').length === 0) {
+                // Create a quick post first if none exists
+                cy.get('#openPostModalTrigger').click();
+                cy.get('textarea#postMessage').invoke('val', 'Post to like').trigger('input').trigger('change');
+                cy.get('#submitPost').click();
+                cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
+            }
+        });
+
         // The "Like" text sits in an inner <span>, so restrict .contains() to the <button>
         // itself. Liking a post is reactToPost() under the hood, which toggles fw-semibold
         // (and an inline color) on the button, not a text-primary class.
@@ -59,6 +68,15 @@ describe('Social Feed Interactions', () => {
     it('can add a comment to a post', () => {
         const commentContent = `Cypress Automated Comment ${Date.now()}`;
 
+        cy.get('body').then(($body) => {
+            if ($body.find('button:contains("Comment")').length === 0) {
+                cy.get('#openPostModalTrigger').click();
+                cy.get('textarea#postMessage').invoke('val', 'Post to comment on').trigger('input').trigger('change');
+                cy.get('#submitPost').click();
+                cy.contains('button', 'Comment', { timeout: 10000 }).should('exist');
+            }
+        });
+
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
         cy.contains('button', 'Comment').first().click({ force: true });
         cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').type(`${commentContent}{enter}`);
@@ -68,6 +86,15 @@ describe('Social Feed Interactions', () => {
     });
 
     it('denies empty comments', () => {
+        cy.get('body').then(($body) => {
+            if ($body.find('button:contains("Comment")').length === 0) {
+                cy.get('#openPostModalTrigger').click();
+                cy.get('textarea#postMessage').invoke('val', 'Post for empty comment test').trigger('input').trigger('change');
+                cy.get('#submitPost').click();
+                cy.contains('button', 'Comment', { timeout: 10000 }).should('exist');
+            }
+        });
+
         cy.contains('button', 'Comment').first().click({ force: true });
         cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').as('commentInput');
 

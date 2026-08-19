@@ -6,10 +6,12 @@ namespace App\controller\members;
 use App\classes\{ AllFunctionalities, Insert, Select, PushNotificationClass, Pusher };
 use App\model\{EmailData, AllMembersData};
 use Src\CheckToken;
+use Src\Exceptions\ForbiddenException;
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
 use Src\SelectFn;
 use Src\SubmitForm;
+use Src\UpdateFn;
 
 final class Event extends AllMembersData
 {
@@ -329,6 +331,88 @@ final class Event extends AllMembersData
             code: 201,
             msg: $filteredEventDataByFamCode
         );
+    }
+
+    /**
+     * Soft-deletes an event. Author-only.
+     * DELETE /member/profilePage/event/{eventNo}
+     */
+    public static function deleteEvent($eventNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $eventNo = checkInput($eventNo);
+            $userId = checkInput($_SESSION['id']);
+
+            // Not date-window scoped (unlike getEventDataByNo, which is for the
+            // "upcoming events" widget) — we need the row regardless of date.
+            $event = SelectFn::selectOneRow('events', 'no', $eventNo);
+
+            if (!$event || $userId !== $event['id']) {
+                throw new ForbiddenException('You can only delete your own events.');
+            }
+
+            AllFunctionalities::update2('events', 'deleted_at', date('Y-m-d H:i:s'), 'no', $eventNo);
+
+            Pusher::broadcast('events-channel', 'delete-event', ['no' => $eventNo]);
+
+            msgSuccess(200, "event deleted successfully");
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Edits an event's fields. Author-only.
+     * PUT /member/profilePage/event/{eventNo}
+     */
+    public static function updateEvent($eventNo): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $eventNo = checkInput($eventNo);
+            $userId = checkInput($_SESSION['id']);
+
+            $event = SelectFn::selectOneRow('events', 'no', $eventNo);
+
+            if (!$event || $userId !== $event['id']) {
+                throw new ForbiddenException('You can only edit your own events.');
+            }
+
+            // PHP only populates $_POST for the literal POST verb — PUT bodies
+            // have to be read manually, so the frontend sends JSON for edits.
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $data = [
+                'eventName' => checkInput($input['eventName'] ?? null),
+                'eventDate' => checkInput($input['eventDate'] ?? null),
+                'eventType' => checkInput($input['eventType'] ?? null),
+                'eventDescription' => checkInput($input['eventDescription'] ?? null),
+                'eventFrequency' => checkInput($input['eventFrequency'] ?? null),
+            ];
+
+            UpdateFn::updateMultiple('events', array_merge($data, ['no' => $eventNo]), 'no');
+
+            // Mirror rightColumn.blade.php's @php enrichment so the broadcast
+            // carries the same shape the sidebar already renders.
+            $dateDiff = dateDifferenceInt(date('Y-m-d'), $data['eventDate']);
+            $getDateDiff = number2word($dateDiff);
+            $dateDifference = $getDateDiff === 'Zero' ? 'Today' : ($getDateDiff === 'One' ? 'Tomorrow' : "in $getDateDiff Days");
+
+            Pusher::broadcast('events-channel', 'update-event', [
+                'no' => $eventNo,
+                'eventName' => $data['eventName'],
+                'eventDate' => dateFormat($data['eventDate']),
+                'eventType' => $data['eventType'],
+                'dateDifference' => $dateDifference,
+            ]);
+
+            msgSuccess(200, "event updated successfully");
+        } catch (\Throwable $th) {
+            showError($th);
+        }
     }
 
     /**

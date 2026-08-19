@@ -20,6 +20,12 @@ export function profileFeed() {
         activeCommentReactionBars: {},
         commentEmojiOpen: {},
         pusher: null,
+        editingCommentNo: null,
+        editCommentText: '',
+        csrfOptions: {
+            xsrfCookieName: 'XSRF-TOKEN',
+            xsrfHeaderName: 'X-XSRF-TOKEN',
+        },
 
         // Emoji map shared across post + comment reactions
         emojiMap: {
@@ -42,6 +48,23 @@ export function profileFeed() {
             this.initPusher();
             this.initEventListeners();
             await this.fetchPosts();
+            this.scrollToHashPost();
+        },
+
+        // Jump to (and briefly highlight) the post referenced by a #postNNN link
+        // (e.g. from an email/push notification). Posts render asynchronously, so the
+        // browser's own hash-scroll-on-load never finds the element in time.
+        scrollToHashPost() {
+            const hash = window.location.hash;
+            if (!hash || !hash.startsWith('#post')) return;
+
+            this.$nextTick(() => {
+                const target = document.getElementById(hash.slice(1));
+                if (!target) return;
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                target.classList.add('highlighted-post');
+                setTimeout(() => target.classList.remove('highlighted-post'), 2500);
+            });
         },
 
         async fetchPosts() {
@@ -66,7 +89,7 @@ export function profileFeed() {
 
         normalizePost(p) {
             let profImg = '/public/avatar/avatarF.png';
-            const rawImg = p?.profileImg || p?.img;
+            const rawImg = p?.img || p?.profileImg;
             if (rawImg) {
                 profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/public/img/profile/${rawImg}`;
             }
@@ -90,13 +113,13 @@ export function profileFeed() {
         },
 
         normalizeComment(c) {
-            const img = c?.profileImg || c?.img;
+            const img = c?.img || c?.profileImg;
             return {
                 comment_no: c?.comment_no,
                 post_no: c?.post_no,
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
-                profileImg: img ? `/public/img/profile/${img}` : '/public/img/profile/avatarM.png',
+                profileImg: img ? `/public/img/profile/${img}` : '/public/avatar/avatarM.png',
                 comment: c?.comment || '',
                 date_created: c?.date_created || '',
                 comment_time: c?.comment_time || c?.date_created || '',
@@ -140,21 +163,12 @@ export function profileFeed() {
                 });
 
                 if (response?.data?.status === 'success' || response?.status === 200) {
-                    const post = this.posts.find(p => p.post_no === postNo);
-                    if (post) {
-                        const newComment = {
-                            comment_no: Date.now(),
-                            post_no: postNo,
-                            id: this.currentUserId,
-                            fullName: 'You',
-                            profileImg: '/public/avatar/avatarF.png',
-                            comment: commentText,
-                            date_created: new Date().toISOString(),
-                            reactions: {},
-                            totalReactions: 0
-                        };
-                        post.comments.push(newComment);
-                    }
+                    // Don't append an optimistic local copy here: the Pusher
+                    // 'new-comment' handler (initPusher, below) already adds the
+                    // real broadcast comment in real time. Since that one carries
+                    // the real comment_no (this one only has a fake Date.now()
+                    // placeholder), the dedup check never matches and both stayed
+                    // on screen — one labeled "You", one with the real name.
                     this.commentInputs[postNo] = '';
                 }
             } catch (err) {
@@ -163,6 +177,133 @@ export function profileFeed() {
                     icon: 'error',
                     title: 'Submission Failed',
                     text: err?.response?.data?.message || 'Failed to submit comment.',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        },
+
+        // ── Post edit/delete (author only) ──────────────────────────────────
+
+        isOwnPost(post) {
+            return String(post?.id) === String(this.currentUserId);
+        },
+
+        // Opens the existing "Create Post" modal in edit mode: prefills the text,
+        // stamps a hidden post_no the modal's own submit handler (allEvents.js)
+        // checks to decide between POST (create) and PUT (update).
+        editPost(post) {
+            const postNoInput = document.getElementById('editPostNo');
+            const textarea = document.getElementById('postMessage');
+            const notice = document.getElementById('editPostNotice');
+            if (!postNoInput || !textarea) return;
+
+            postNoInput.value = post.post_no;
+            textarea.value = post.postMessage || '';
+            if (notice) notice.classList.remove('d-none');
+
+            const modalTitle = document.getElementById('postModalLabel');
+            if (modalTitle) modalTitle.textContent = 'Edit Post';
+
+            const modalEl = document.getElementById('postModal');
+            const instance = window.bootstrap?.Modal?.getOrCreateInstance(modalEl);
+            instance?.show();
+        },
+
+        async deletePost(postNo) {
+            const result = await Swal.fire({
+                title: 'Delete this post?',
+                text: 'This cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                await axios.delete(`/post/${postNo}`, this.csrfOptions);
+                this.posts = this.posts.filter(p => String(p.post_no) !== String(postNo));
+            } catch (err) {
+                console.error('Failed to delete post:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Delete Failed',
+                    text: err?.response?.data?.message || 'Failed to delete post.',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        },
+
+        // ── Comment edit/delete (comment author or post author) ─────────────
+
+        canEditComment(comment) {
+            return String(comment?.id) === String(this.currentUserId);
+        },
+
+        canModerateComment(post, comment) {
+            return this.canEditComment(comment) || String(post?.id) === String(this.currentUserId);
+        },
+
+        startEditComment(comment) {
+            this.editingCommentNo = comment.comment_no;
+            this.editCommentText = comment.comment;
+        },
+
+        cancelEditComment() {
+            this.editingCommentNo = null;
+            this.editCommentText = '';
+        },
+
+        async saveCommentEdit(commentNo) {
+            const text = (this.editCommentText || '').trim();
+            if (!text) return;
+
+            try {
+                await axios.put(`/comment/${commentNo}`, { comment: text }, this.csrfOptions);
+                for (const post of this.posts) {
+                    const comment = post.comments.find(c => String(c.comment_no) === String(commentNo));
+                    if (comment) {
+                        comment.comment = text;
+                        break;
+                    }
+                }
+                this.cancelEditComment();
+            } catch (err) {
+                console.error('Failed to update comment:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: err?.response?.data?.message || 'Failed to update comment.',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        },
+
+        async deleteComment(postNo, commentNo) {
+            const result = await Swal.fire({
+                title: 'Delete this comment?',
+                text: 'This cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                await axios.delete(`/comment/${commentNo}`, this.csrfOptions);
+                const post = this.posts.find(p => String(p.post_no) === String(postNo));
+                if (post) {
+                    post.comments = post.comments.filter(c => String(c.comment_no) !== String(commentNo));
+                }
+            } catch (err) {
+                console.error('Failed to delete comment:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Delete Failed',
+                    text: err?.response?.data?.message || 'Failed to delete comment.',
                     confirmButtonColor: '#3085d6'
                 });
             }
@@ -366,6 +507,14 @@ export function profileFeed() {
                     this.fetchPosts();
                 }
             });
+
+            // Dispatched by allEvents.js after a successful post edit (the acting
+            // user's own tab — other tabs get it via the update-post Pusher bind).
+            window.addEventListener('post-updated', (event) => {
+                const { postNo, postMessage } = event?.detail || {};
+                const post = this.posts.find(p => String(p.post_no) === String(postNo));
+                if (post) post.postMessage = postMessage;
+            });
         },
 
         openLightbox(images, index) {
@@ -406,7 +555,7 @@ export function profileFeed() {
                 postsChannel.bind('new-post', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
-                            if (!this.posts.some(p => p.post_no === item?.post_no)) {
+                            if (!this.posts.some(p => String(p.post_no) === String(item?.post_no))) {
                                 this.posts.unshift(this.normalizePost(item));
                             }
                         });
@@ -417,19 +566,42 @@ export function profileFeed() {
                 commentsChannel.bind('new-comment', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
-                            const post = this.posts.find(p => p.post_no === item?.post_no);
-                            if (post && !post.comments.some(c => c.comment_no === item?.comment_no)) {
+                            const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
+                            if (post && !post.comments.some(c => String(c.comment_no) === String(item?.comment_no))) {
                                 post.comments.push(this.normalizeComment(item));
                             }
                         });
                     }
                 });
 
+                // Edit/delete broadcasts (PostMessage::deletePost/updatePost/
+                // updateComment/deleteComment) send a single flat object, not an
+                // array like new-post/new-comment do.
+                postsChannel.bind('delete-post', (data) => {
+                    this.posts = this.posts.filter(p => String(p.post_no) !== String(data?.postNo));
+                });
+                postsChannel.bind('update-post', (data) => {
+                    const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
+                    if (post) post.postMessage = data?.postMessage ?? post.postMessage;
+                });
+
+                commentsChannel.bind('delete-comment', (data) => {
+                    const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
+                    if (post) {
+                        post.comments = post.comments.filter(c => String(c.comment_no) !== String(data?.commentNo));
+                    }
+                });
+                commentsChannel.bind('update-comment', (data) => {
+                    const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
+                    const comment = post?.comments.find(c => String(c.comment_no) === String(data?.commentNo));
+                    if (comment) comment.comment = data?.comment ?? comment.comment;
+                });
+
                 const likesChannel = this.pusher.subscribe('likes-channel');
                 likesChannel.bind('like-event', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
-                            const post = this.posts.find(p => p.post_no === item?.post_no);
+                            const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
                             if (post && item?.likeCounter !== undefined) {
                                 post.post_likes = parseInt(item.likeCounter, 10);
                             }

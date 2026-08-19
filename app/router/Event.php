@@ -14,6 +14,11 @@ $router->map('GET', '/member/getEventData', 'App\controller\members\Event@getEve
 
 $router->map('GET', '/member/getEventByNo', 'App\controller\members\Event@getEventByNo', 'getEvent_by_no');
 
+// EDIT / DELETE AN EVENT (author only)
+$router->map('PUT', '/member/profilePage/event/[i:eventNo]', 'App\controller\members\Event@updateEvent', 'update_event');
+
+$router->map('DELETE', '/member/profilePage/event/[i:eventNo]', 'App\controller\members\Event@deleteEvent', 'delete_event');
+
 
 
 

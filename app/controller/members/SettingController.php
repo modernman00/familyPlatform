@@ -2,7 +2,8 @@
 namespace App\controller\members;
 
 use App\controller\BaseController;
-use Src\{Utility, LoginUtility, UpdateFn, UpdateData };
+use Src\{Utility, LoginUtility, UpdateFn, UpdateData};
+use Src\functionality\middleware\FileUploadProcess;
 
 
 
@@ -102,6 +103,24 @@ final class SettingController extends BaseController
                     msgSuccess(200, "Privacy settings successfully updated.");
                     return;
                 }
+            }
+
+            // Handle Profile Image Upload
+            if (isset($_FILES['img']) && $_FILES['img']['error'] === UPLOAD_ERR_OK) {
+                // The filename will be checked and sanitized within FileUploadProcess::process
+                $uploadResult = FileUploadProcess::process([], 'profile', 'img', 'public/img/profile/', 'images');
+                
+                $fileName = checkInputImage($_FILES['img']['name']);
+                $sanitizedFileName = $uploadResult['sanitisedData']['profile']['img'] ?? $fileName;
+
+                UpdateFn::makeUpdateFn('profilePics',[
+                    'img'=> $sanitizedFileName, 
+                    'id'=> $_SESSION['id']], 
+                    'id', 'AND'
+                );
+                
+                // Keep session updated for immediate UI reflection if needed
+                $_SESSION['profilePics'] = $sanitizedFileName;
             }
 
             // Original Profile Form Update logic

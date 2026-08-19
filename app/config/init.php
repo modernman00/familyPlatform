@@ -50,9 +50,16 @@ if (!isset($_SESSION['token']) || !is_string($_SESSION['token']) || !preg_match(
 
 if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['token']) {
     $token = $_SESSION['token'];
+    // Must match the `domain` attribute viewBuilderWithCSP() (shared-lib helpers.php) uses when
+    // it re-sets this same cookie during view rendering - setcookie() calls that differ only in
+    // whether `domain` is present create two *separate* same-named cookies (RFC 6265 treats a
+    // host-only cookie and a Domain-scoped one as distinct), so the browser ends up holding both
+    // and axios's XSRF auto-header can pick the stale one, silently failing CSRF checks.
+    $csrfCookieDomain = parse_url($_ENV['APP_URL'] ?? '', PHP_URL_HOST) ?: '';
     setcookie('XSRF-TOKEN', $token, [
-        'expires' => time() + $cookieExpire, 
+        'expires' => time() + $cookieExpire,
         'path' => '/',
+        'domain' => $csrfCookieDomain,
         'samesite' => 'Lax',
         'secure' => $isHttps, // send cookie securely if HTTPS is active
         'httponly' => false,

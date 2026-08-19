@@ -15,15 +15,30 @@ final class ServeImgController {
             exit;
         }
 
-        // Define the path to the image directory
-        $imageDir = __DIR__ . '/../../public/img/profile/';
+        // Search candidate directories for the image
+        $searchPaths = [
+            __DIR__ . '/../../public/img/profile/',
+            __DIR__ . '/../../resources/images/profile/',
+            __DIR__ . '/../../public/avatar/',
+            __DIR__ . '/../../resources/images/',
+            __DIR__ . '/../../public/img/post/',
+            __DIR__ . '/../../resources/images/post/',
+            __DIR__ . '/../../public/img/photos/',
+        ];
 
-        // Create the full path to the image file
-        $filePath = $imageDir . basename($filename);
+        $filePath = null;
+        $safeName = basename($filename);
+        foreach ($searchPaths as $dir) {
+            $candidate = $dir . $safeName;
+            if (file_exists($candidate) && is_file($candidate)) {
+                $filePath = $candidate;
+                break;
+            }
+        }
 
-        if (!file_exists($filePath)) {
+        if (!$filePath) {
             // Check for default avatars in public/avatar as fallback
-            $fallbackPath = __DIR__ . '/../../public/avatar/' . basename($filename);
+            $fallbackPath = __DIR__ . '/../../public/avatar/avatarM.png';
             if (file_exists($fallbackPath)) {
                 $filePath = $fallbackPath;
             } else {
@@ -34,13 +49,20 @@ final class ServeImgController {
         }
 
         // Get the file's MIME type
+        $mimeType = 'image/jpeg';
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $filePath);
-        finfo_close($finfo);
+        if ($finfo !== false) {
+            $detected = finfo_file($finfo, $filePath);
+            if (is_string($detected)) {
+                $mimeType = $detected;
+            }
+            finfo_close($finfo);
+        }
 
         // Set the appropriate headers
         header('Content-Type: ' . $mimeType);
-        header('Content-Length: ' . filesize($filePath));
+        header('Content-Length: ' . (string)filesize($filePath));
+        header('Cache-Control: public, max-age=86400');
 
         // Read the file and output its contents
         readfile($filePath);
@@ -61,13 +83,26 @@ final class ServeImgController {
             exit;
         }
 
-        // Define the path to the image directory
-        $imageDir = __DIR__ . '/../../public/img/post/';
+        // Search candidate directories for post images
+        $searchPaths = [
+            __DIR__ . '/../../public/img/post/',
+            __DIR__ . '/../../resources/images/post/',
+            __DIR__ . '/../../resources/images/',
+            __DIR__ . '/../../public/img/photos/',
+            __DIR__ . '/../../public/img/profile/',
+        ];
 
-        // Create the full path to the image file
-        $filePath = $imageDir . basename($filename);
+        $filePath = null;
+        $safeName = basename($filename);
+        foreach ($searchPaths as $dir) {
+            $candidate = $dir . $safeName;
+            if (file_exists($candidate) && is_file($candidate)) {
+                $filePath = $candidate;
+                break;
+            }
+        }
 
-        if (!file_exists($filePath)) {
+        if (!$filePath) {
             // If the file does not exist, return a 404 Not Found response
             http_response_code(404);
             echo 'File not found.';
@@ -75,13 +110,20 @@ final class ServeImgController {
         }
 
         // Get the file's MIME type
+        $mimeType = 'image/jpeg';
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $filePath);
-        finfo_close($finfo);
+        if ($finfo !== false) {
+            $detected = finfo_file($finfo, $filePath);
+            if (is_string($detected)) {
+                $mimeType = $detected;
+            }
+            finfo_close($finfo);
+        }
 
         // Set the appropriate headers
         header('Content-Type: ' . $mimeType);
-        header('Content-Length: ' . filesize($filePath));
+        header('Content-Length: ' . (string)filesize($filePath));
+        header('Cache-Control: public, max-age=86400');
 
         // Read the file and output its contents
         readfile($filePath);

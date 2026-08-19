@@ -6,8 +6,6 @@ parameters:
   level: 8
   paths:
     - app
-    
-
   excludePaths:
     - vendor
     - bootstrap
@@ -16,5 +14,8 @@ parameters:
     - app/Classes/websocket/NotificationWebSocketHandler.php (?)
     - app/classes/Chat.php (?)
     - app/classes/websocket/NotificationWebSocketHandler.php (?)
+  # Disable parallel processing to avoid worker errors
+  parallel:
+    maximumNumberOfProcesses: 1
 
 #./vendor/bin/phpstan analyze .

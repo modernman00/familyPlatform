@@ -176,5 +176,72 @@ final class Post extends Select
         return $stmt->fetchAll();
     }
 
+    /**
+     * Retrieves all images posted by a specific author across both post and images tables.
+     *
+     * @param string $authorId
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getAllImagesByAuthor(string $authorId): array
+    {
+        $allImages = [];
+
+        // 1. Fetch images from published posts
+        $query = "SELECT post_no, id, fullName, postMessage, post_img0, post_img1, post_img2, post_img3, post_img4, post_img5, date_created, post_likes 
+                  FROM post 
+                  WHERE id = ? AND post_status = 'published' 
+                  ORDER BY date_created DESC";
+        $stmt = parent::connect2()->prepare($query);
+        $stmt->execute([$authorId]);
+        $posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($posts as $post) {
+            for ($i = 0; $i <= 5; $i++) {
+                $col = 'post_img' . $i;
+                if (!empty($post[$col])) {
+                    $imgName = trim((string)$post[$col]);
+                    if (!empty($imgName)) {
+                        $allImages[] = [
+                            'id' => $post['id'],
+                            'img' => $imgName,
+                            'caption' => (string)($post['postMessage'] ?? ''),
+                            'likes' => (int)($post['post_likes'] ?? 0),
+                            'where_from' => 'post',
+                            'created_at' => (string)($post['date_created'] ?? ''),
+                            'post_no' => $post['post_no'],
+                        ];
+                    }
+                }
+            }
+        }
+
+        // 2. Fetch images from images table
+        $query2 = "SELECT no, id, img, where_from, caption, likes, created_at 
+                   FROM images 
+                   WHERE id = ? AND img IS NOT NULL AND img != '' 
+                   ORDER BY created_at DESC";
+        $stmt2 = parent::connect2()->prepare($query2);
+        $stmt2->execute([$authorId]);
+        $images = $stmt2->fetchAll(\PDO::FETCH_ASSOC);
+
+        $existingImgNames = array_column($allImages, 'img');
+        foreach ($images as $imgRow) {
+            $imgName = trim((string)$imgRow['img']);
+            if (!empty($imgName) && !in_array($imgName, $existingImgNames, true)) {
+                $allImages[] = [
+                    'id' => $imgRow['id'],
+                    'img' => $imgName,
+                    'caption' => (string)($imgRow['caption'] ?? ''),
+                    'likes' => (int)($imgRow['likes'] ?? 0),
+                    'where_from' => (string)($imgRow['where_from'] ?? 'gallery'),
+                    'created_at' => (string)($imgRow['created_at'] ?? ''),
+                    'post_no' => null,
+                ];
+                $existingImgNames[] = $imgName;
+            }
+        }
+
+        return $allImages;
+    }
 
 }

@@ -10,6 +10,21 @@ try {
         xsrfHeaderName: 'X-XSRF-TOKEN',
     }
 
+    // Reset the modal out of "edit" mode however it closes (submit, cancel,
+    // backdrop click, ESC) — editPost() in feedComponent.js is what puts it
+    // into edit mode by setting these same three things.
+    const postModalEl = document.getElementById('postModal');
+    if (postModalEl) {
+        postModalEl.addEventListener('hidden.bs.modal', () => {
+            const editPostNo = document.getElementById('editPostNo');
+            const notice = document.getElementById('editPostNotice');
+            const title = document.getElementById('postModalLabel');
+            if (editPostNo) editPostNo.value = '';
+            if (notice) notice.classList.add('d-none');
+            if (title) title.textContent = 'Create Post';
+        });
+    }
+
     document.addEventListener('click', async (e) => {
         const elementId = e.target.id;
 
@@ -19,36 +34,69 @@ try {
             const formExtra = id('formPostMessageModal');
             if (!formExtra) return;
 
-            const formData = new FormData(formExtra);
-            const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
-            formData.append('postFamCode', requesterFamCodeValue);
+            // editPost() in feedComponent.js stamps this when reopening the modal
+            // to edit an existing post instead of creating a new one.
+            const editPostNo = document.getElementById('editPostNo')?.value;
+            const isEditing = !!editPostNo;
 
-            // Explicitly ensure all accumulated image files are appended directly to formData
-            const selectedFiles = getSelectedPostFiles();
-            const fileInput = document.getElementById('imageUpload');
-            const filesToAppend = (selectedFiles && selectedFiles.length > 0)
-                ? selectedFiles
-                : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
+            let formData;
+            if (!isEditing) {
+                formData = new FormData(formExtra);
+                const requesterFamCodeValue = localStorage.getItem('requesterFamCode');
+                formData.append('postFamCode', requesterFamCodeValue);
 
-            if (filesToAppend.length > 0) {
-                formData.delete('post_img[]');
-                formData.delete('post_img');
-                filesToAppend.forEach((file) => {
-                    formData.append('post_img[]', file, file.name);
-                });
+                // Explicitly ensure all accumulated image files are appended directly to formData
+                const selectedFiles = getSelectedPostFiles();
+                const fileInput = document.getElementById('imageUpload');
+                const filesToAppend = (selectedFiles && selectedFiles.length > 0)
+                    ? selectedFiles
+                    : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
+
+                if (filesToAppend.length > 0) {
+                    formData.delete('post_img[]');
+                    formData.delete('post_img');
+                    filesToAppend.forEach((file) => {
+                        formData.append('post_img[]', file, file.name);
+                    });
+                }
             }
 
             // Change button to spinner
             const submitBtn = id(elementId);
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Posting...';
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isEditing ? 'Saving...' : 'Posting...'}`;
             submitBtn.disabled = true;
 
             try {
-                const response = await axios.post("/member/profilePage/post", formData, options);
+                // Editing is text-only, so it goes as JSON to a PUT endpoint rather
+                // than the multipart POST the create flow uses (images/poll aren't
+                // part of the edit payload — see PostMessage::updatePost).
+                const response = isEditing
+                    ? await axios.put(`/post/${editPostNo}`, { postMessage: id('postMessage').value }, options)
+                    : await axios.post("/member/profilePage/post", formData, options);
 
                 // Defensive check on response data
                 if (response?.data?.status === 'success' || response?.status === 200) {
+                    if (isEditing) {
+                        window.dispatchEvent(new CustomEvent('post-updated', {
+                            detail: { postNo: editPostNo, postMessage: id('postMessage').value }
+                        }));
+
+                        const closeBtn = document.querySelector('#postModal .btn-close');
+                        if (closeBtn) closeBtn.click();
+                        formExtra.reset();
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Post updated successfully',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+
+                        return;
+                    }
                     const newPostData = (response?.data?.message && typeof response.data.message === 'object')
                         ? response.data.message
                         : null;
