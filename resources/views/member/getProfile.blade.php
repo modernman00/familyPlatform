@@ -19,7 +19,7 @@
             <div class="hero-background"></div>
             <div class="hero-content">
                 <div class="profile-avatar-wrapper">
-                    <img src="/public/img/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
+                    <img src="/resources/images/profile/{{ $data['profilePics'] ?? 'avatarM.png' }}" alt="{{ $data['fullName'] }}" class="profile-avatar">
                     <div class="avatar-ring"></div>
                 </div>
                 <div class="profile-main-info">

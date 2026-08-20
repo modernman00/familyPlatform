@@ -16,7 +16,7 @@ const familyBadge = (famCode) => {
 
 export const nameImgTiming = (data) => {
 
-    const img = (data?.profileImg) ? `/public/img/profile/${data.profileImg}` : "/public/avatar/avatarF.png"
+    const img = (data?.profileImg) ? `/resources/images/profile/${data.profileImg}` : "/public/avatar/avatarF.png"
     const pId = data?.post_no || '';
     const uId = data?.id || '';
     const imgParam = data?.img || '';

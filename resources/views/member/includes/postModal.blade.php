@@ -8,7 +8,7 @@
 
       @isset($data['img'])
 
-      <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">
+      <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar" class="w3-circle w3-margin-top profileImg">
       @else
       <img src="/public/avatar/avatarF.png" alt="Avatar" style="width:30%" class="w3-circle w3-margin-top">
 

@@ -124,7 +124,7 @@ input[type="file"] {
 
         @isset($data['img'])
 
-        <img src="/public/img/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
+        <img src="/resources/images/profile/{{ $data['img'] }}" class="w3-circle profileImg" alt="Avatar">
       
 
         @else

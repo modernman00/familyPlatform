@@ -36,9 +36,6 @@ class LoginAnomalyService
             $fingerprint = self::fingerprint($ip, $userAgent);
 
             $db = Db::connect2();
-            if ($db === null) {
-                throw new \RuntimeException('Database connection unavailable during anomaly check.');
-            }
             $stmt = $db->prepare(
                 "SELECT COUNT(*) FROM login_events WHERE user_id = ? AND fingerprint = ?"
             );

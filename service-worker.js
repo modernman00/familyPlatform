@@ -1,4 +1,4 @@
-const Version = "2.0"; // Updated for PWA-compatible security features
+const Version = "2.3"; // Fix: Add self.skipWaiting() to force activation
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
   "/",
@@ -16,9 +16,10 @@ const CacheFiles = [
 ];
 
 
-// On install, cache the static resources
+// On install, cache the static resources and force activation
 self.addEventListener("install", (event) => {
   console.log("[Service Worker] Install");
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CacheName);
@@ -122,16 +123,26 @@ function staleWhileRevalidateStrategy(request) {
 // Helper: Check if URL is an authenticated page
 function isAuthenticatedPage(url) {
   const authenticatedPaths = [
-    '/member/ProfilePage',
-    '/profilePage',
-    '/allMembers',
+    '/member/profilepage',
+    '/profilepage',
+    '/allmembers',
     '/organogram',
-    '/accountSetting',
+    '/accountsetting',
     '/member/',
-    '/admin/'
+    '/admin/',
+    // API endpoints fetched by Alpine.js — must be Network-First
+    '/post/',
+    '/getfriendrequestbyid',
+    '/postcommentprofile',
+    '/profilecard/',
+    '/api/reactions/',
+    '/api/poll/',
+    // Protected image routes — served via ServeImgController behind JWT
+    '/resources/images/'
   ];
 
-  return authenticatedPaths.some(path => url.pathname.startsWith(path));
+  const lowerPath = url.pathname.toLowerCase();
+  return authenticatedPaths.some(path => lowerPath.startsWith(path.toLowerCase()));
 }
 
 // Listen for messages from the client (e.g., to clear auth cache on logout)

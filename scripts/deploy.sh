@@ -1,161 +1,121 @@
 #!/bin/bash
 
-# ===============================================================================
-# DEPLOYMENT SCRIPT (Refactored – Declarative per‑app pipelines)
+# ==============================================================================
+# DEPLOYMENT SCRIPT (Local -> Shared Hosting via Rsync)
 # Architect: James
-# ===============================================================================
+# ==============================================================================
+# This script builds the application locally and syncs the compiled output
+# to the Namecheap shared server, avoiding server-side memory exhaustion.
+# ==============================================================================
 
-set -e
+set -e # Exit immediately if a command exits with a non-zero status.
 
-# ---------------------------------------------------------------------------
-# Helper functions
-# ---------------------------------------------------------------------------
-log_success() { echo -e "\e[32m✔ $1\e[0m"; }
-log_error()   { echo -e "\e[31m✖ $1\e[0m"; }
-log_info()    { echo -e "\e[34mℹ $1\e[0m"; }
+# --- Configuration ---
+# TODO: Update these variables with actual Namecheap SSH details
+SSH_USER="bestiias"
+SSH_HOST="premium145.web-hosting.com"
+SSH_PORT="21098" # Default Namecheap SSH port is often 21098
+REMOTE_DIR="/home/bestiias/familyplatform"
+# ---------------------
 
-# Parse command‑line flags
-DRY_RUN=false
-FORCE=false
-CI_MODE=false
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --dry-run) DRY_RUN=true; shift ;;
-    --force)   FORCE=true;  shift ;;
-    --ci)      CI_MODE=true; shift ;;
-    *) echo "Unknown option: $1"; exit 1 ;;
-  esac
-done
+# Captured now so the audit log records the commit actually being synced,
+# not one created later by the GitHub-sync step below.
+DEPLOY_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+DEPLOY_USER=$(whoami)
 
-# ---------------------------------------------------------------------------
-# Load manifest
-# ---------------------------------------------------------------------------
-if ! command -v yq >/dev/null 2>&1; then
-  log_error "yq not found – please install yq to parse deployments.yml"
-  exit 1
+echo "🚀 Starting Deployment Pipeline..."
+
+echo "📦 1/3: Installing & optimizing PHP dependencies (Local)..."
+composer install --no-dev --optimize-autoloader
+
+echo "🎨 2/3: Compiling frontend assets (Local)..."
+if [ -f "package.json" ]; then
+    npm install
+    if grep -q '"prod":' package.json; then
+        npm run prod
+    elif grep -q '"build":' package.json; then
+        npm run build
+    else
+        echo "⏭️  No prod or build script found, skipping JS compilation."
+    fi
+else
+    echo "⏭️  No package.json found, skipping JS compilation."
 fi
 
-MANIFEST="$(pwd)/deployments.yml"
-if [[ ! -f "$MANIFEST" ]]; then
-  log_error "Manifest file deployments.yml not found at $MANIFEST"
-  exit 1
+echo "🧪 Running automated tests (if any)..."
+TEST_SCRIPT=""
+if [ -f "scripts/run_tests.sh" ]; then
+    TEST_SCRIPT="scripts/run_tests.sh"
+elif [ -f "run_tests.sh" ]; then
+    TEST_SCRIPT="run_tests.sh"
+elif [ -f "run_all_tests.sh" ]; then
+    TEST_SCRIPT="run_all_tests.sh"
 fi
 
-# ---------------------------------------------------------------------------
-# Load .env so the required-vars check below sees APP_URL/DB_HOST/etc.
-# Reads the file directly (no process substitution / subshell sourcing,
-# which isn't reliable in every execution environment) and normalizes
-# "KEY = value" to "KEY=value", since this .env mixes both styles and
-# bash assignment doesn't allow spaces around "=". Lines whose key isn't
-# a valid identifier (e.g. "401URL=...") are skipped.
-# ---------------------------------------------------------------------------
-if [[ -f "$(pwd)/.env" ]]; then
-  set -a
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    [[ "$line" =~ ^[[:space:]]*(#.*)?$ ]] && continue
-    if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*=[[:space:]]*(.*)$ ]]; then
-      export "${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
+if [ -n "$TEST_SCRIPT" ]; then
+    # We temporarily disable set -e so the test failure doesn't kill the script immediately
+    set +e
+    bash "$TEST_SCRIPT"
+    TEST_RESULT=$?
+    set -e
+    
+    if [ $TEST_RESULT -ne 0 ]; then
+        echo -e "\n⚠️  WARNING: Some tests failed."
+        read -p "Do you want to force the deployment anyway? (y/n): " force_deploy < /dev/tty
+        if [[ "$force_deploy" != "y" ]]; then
+            echo "🛑 Deployment aborted."
+            exit 1
+        fi
     fi
-  done < "$(pwd)/.env"
-  set +a
+else
+    echo "⏭️  No test script found, skipping."
 fi
 
-# Gather git information once
-GIT_SHA=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-DEPLOYER=$(whoami)
+echo "🔄 3/3: Syncing files to Namecheap ($SSH_HOST)..."
 
-# Prepare final JSON report
-REPORT_FILE="deploy_report.json"
-REPORT="{\"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"git_sha\": \"$GIT_SHA\", \"deployer\": \"$DEPLOYER\", \"apps\": []}"
+rsync -avz --delete \
+    -e "ssh -p $SSH_PORT" \
+    --exclude='.*' \
+    --exclude='node_modules' \
+    --exclude='tests' \
+    --exclude='scripts' \
+    --exclude='scratch' \
+    --exclude='*.pem' \
+    --exclude='*.sql' \
+    --exclude='*.sqlite' \
+    --exclude='*.key' \
+    --exclude='*.crt' \
+    --exclude='*.cert' \
+    --exclude='*.md' \
+    --exclude='*.sh' \
+    --exclude='playwright-report' \
+    --exclude='test-results' \
+    --exclude='*test*.php' \
+    --exclude='debug.txt' \
+    --exclude='*output.txt' \
+    --exclude='phpstan.neon' \
+    --exclude='phpstan-baseline.neon' \
+    ./ ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}
 
-# ---------------------------------------------------------------------------
-# Iterate over apps defined in the manifest
-# ---------------------------------------------------------------------------
-APP_COUNT=$(yq eval '.apps | length' "$MANIFEST")
-log_info "Found $APP_COUNT apps in deployments.yml"
+echo "✅ Deployment Complete! The live server is updated."
 
-INDEX=0
-while [[ $INDEX -lt $APP_COUNT ]]; do
-  APP_NAME=$(yq eval ".apps | keys | .[$INDEX]" "$MANIFEST")
-  log_info "Processing app: $APP_NAME"
+echo "📝 Recording deployment audit log (ISO 27001 A.12.4)..."
+php scripts/audit_deploy.php "$DEPLOY_COMMIT" "$DEPLOY_USER" || echo "⚠️  Audit log failed to record (non-fatal)."
 
-  # Extract fields
-  BUILD_CMD=$(yq eval ".apps.$APP_NAME.build" "$MANIFEST")
-  MIGRATE_CMD=$(yq eval ".apps.$APP_NAME.migrate" "$MANIFEST")
-  HEALTH_CMD=$(yq eval ".apps.$APP_NAME.healthcheck" "$MANIFEST")
-  ENV_VARS=$(yq eval ".apps.$APP_NAME.env[]" "$MANIFEST" | tr '\n' ' ')
-
-  # Validate required env vars
-  MISSING=""
-  for VAR in $ENV_VARS; do
-    if [[ -z "${!VAR}" ]]; then
-      MISSING+="$VAR "
-    fi
-  done
-  if [[ -n "$MISSING" ]]; then
-    log_error "Missing required env vars for $APP_NAME: $MISSING"
-    php -r "require 'app/classes/DeployAudit.php'; App\\Classes\\DeployAudit::record('$DEPLOYER','$GIT_SHA','$APP_NAME','failed');"
-    REPORT=$(echo "$REPORT" | jq ".apps += [{\"name\": \"$APP_NAME\", \"status\": \"failed\"}]")
-    if [[ "$FORCE" != true ]]; then
-      log_error "Aborting deployment because of missing env vars. Use --force to continue."
-      echo "$REPORT" > "$REPORT_FILE"
-      exit 1
-    fi
-    ((INDEX++))
-    continue
-  fi
-
-  # Execute steps (dry‑run skips actual execution)
-  for STEP in build migrate healthcheck; do
-    CMD_VAR=$(printf "%s_CMD" "$STEP")
-    CMD=$(eval echo \$$CMD_VAR)
-    log_info "[$APP_NAME] $STEP"
-    if [[ "$DRY_RUN" = true ]]; then
-      log_info "(dry‑run) $CMD"
-      continue
-    fi
-    eval $CMD
-    if [[ $? -ne 0 ]]; then
-      log_error "[$APP_NAME] $STEP failed"
-      php -r "require 'app/classes/DeployAudit.php'; App\\Classes\\DeployAudit::record('$DEPLOYER','$GIT_SHA','$APP_NAME','failed');"
-      REPORT=$(echo "$REPORT" | jq ".apps += [{\"name\": \"$APP_NAME\", \"status\": \"failed\"}]")
-      if [[ "$FORCE" != true ]]; then
-        log_error "Aborting deployment. Use --force to continue."
-        echo "$REPORT" > "$REPORT_FILE"
-        exit 1
-      else
-        break
-      fi
-    fi
-  done
-
-  # If we reach here, the app succeeded
-  php -r "require 'app/classes/DeployAudit.php'; App\\Classes\\DeployAudit::record('$DEPLOYER','$GIT_SHA','$APP_NAME','success');"
-  REPORT=$(echo "$REPORT" | jq ".apps += [{\"name\": \"$APP_NAME\", \"status\": \"success\"}]")
-  log_success "[$APP_NAME] deployment completed"
-
-  ((INDEX++))
-  unset STATUS
- done
-
-# Write final JSON report
-echo "$REPORT" > "$REPORT_FILE"
-log_info "Deployment report written to $REPORT_FILE"
-
-# ---------------------------------------------------------------------------
-# Optional GitHub sync (only if not in CI mode)
-# ---------------------------------------------------------------------------
-if [[ "$CI_MODE" = false ]]; then
-  read -p "Do you want to securely commit and push your safe files to GitHub? (y/n): " push_github </dev/tty
-  if [[ "$push_github" == "y" ]]; then
-    read -p "Enter a commit message: " commit_msg </dev/tty
+echo "=================================================="
+echo "🐙 4/4: GitHub Sync"
+echo "=================================================="
+read -p "Do you want to securely commit and push your safe files to GitHub? (y/n): " push_github < /dev/tty
+if [[ "$push_github" == "y" ]]; then
+    read -p "Enter a commit message: " commit_msg < /dev/tty
+    
+    echo "Staging safe files (unsafe files blocked by .gitignore)..."
     git add .
     git commit -m "$commit_msg"
+    
+    echo "Pushing to GitHub..."
     git push origin HEAD
-    log_success "✅ Successfully synced to GitHub!"
-  else
-    log_info "⏭️ Skipping GitHub push."
-  fi
+    echo "✅ Successfully synced to GitHub!"
+else
+    echo "⏭️  Skipping GitHub push."
 fi
-
-log_success "✅ Overall deployment complete"

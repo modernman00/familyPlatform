@@ -1,10 +1,8 @@
 <?php
 
-// Serve profile images that aren't physically in public/img/profile/ (fallback)
+// Serve profile images behind JWT authentication via /resources/images/ paths.
 // [*:imgName] matches dots and spaces. The controller sanitises with basename().
-$router->map('GET', '/public/img/profile/[*:imgName]', 'App\controller\ServeImgController@ProfileDir', 'serve_profile_img');
-$router->map('GET', '/resources/images/profile/[*:imgName]', 'App\controller\ServeImgController@ProfileDir', 'serve_profile_img_legacy');
+$router->map('GET', '/resources/images/profile/[*:imgName]', 'App\controller\ServeImgController@ProfileDir', 'serve_profile_img');
 
-// Serve post images that aren't physically in public/img/post/ (fallback)
-$router->map('GET', '/public/img/post/[*:imgName]', 'App\controller\ServeImgController@PostDir', 'serve_post_img');
-$router->map('GET', '/resources/images/post/[*:imgName]', 'App\controller\ServeImgController@PostDir', 'serve_post_img_legacy');
+// Serve post images behind JWT authentication
+$router->map('GET', '/resources/images/post/[*:imgName]', 'App\controller\ServeImgController@PostDir', 'serve_post_img');

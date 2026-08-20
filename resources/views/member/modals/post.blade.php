@@ -16,13 +16,13 @@
     
                 <div class="d-flex align-items-center mb-4">
                     @if(isset($data['img']))
-                        <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar"
+                        <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar"
                             class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
                     @elseif(isset($data['profilePics']))
-                        <img src="/public/img/profile/{{ $data['profilePics'] }}" alt="Avatar"
+                        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Avatar"
                             class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
                     @else
-                        <img src="/public/img/profile/avatarM.png" alt="Avatar" width="48" height="48"
+                        <img src="/resources/images/profile/avatarM.png" alt="Avatar" width="48" height="48"
                             class="rounded-circle me-3 shadow-sm">
                     @endif
                     <div>

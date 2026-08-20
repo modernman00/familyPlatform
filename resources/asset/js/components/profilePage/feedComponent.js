@@ -91,7 +91,7 @@ export function profileFeed() {
             let profImg = '/public/avatar/avatarF.png';
             const rawImg = p?.img || p?.profileImg;
             if (rawImg) {
-                profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/public/img/profile/${rawImg}`;
+                profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`;
             }
             return {
                 post_no: p?.post_no,
@@ -119,7 +119,7 @@ export function profileFeed() {
                 post_no: c?.post_no,
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
-                profileImg: img ? `/public/img/profile/${img}` : '/public/avatar/avatarM.png',
+                profileImg: img ? `/resources/images/profile/${img}` : '/public/avatar/avatarM.png',
                 comment: c?.comment || '',
                 date_created: c?.date_created || '',
                 comment_time: c?.comment_time || c?.date_created || '',

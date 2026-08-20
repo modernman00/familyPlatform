@@ -6,11 +6,11 @@
                 style="height: 120px; background: linear-gradient(135deg, var(--primary-color) 0%, #1e6040 100%); border-radius: 16px 16px 0 0;"></div>
             <div class="avatar-container position-absolute w-100" style="top: 60px;">
                 @isset($data['img'])
-                    <img src="/public/img/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
+                    <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
                 @elseif(isset($data['profilePics']))
-                    <img src="/public/img/profile/{{ $data['profilePics'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
+                    <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
                 @else
-                    <img src="/public/img/profile/avatarM.png" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
+                    <img src="/resources/images/profile/avatarM.png" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
                 @endisset
             </div>
         </div>
@@ -83,7 +83,7 @@
                 <div class="d-flex flex-column gap-3">
                     <template x-for="req in friendRequests" :key="req.id">
                         <div class="d-flex flex-column align-items-center text-center p-3 border rounded-3" style="background-color: var(--hover-color); border-color: var(--border-color);">
-                            <img :src="'/public/img/profile/' + req.img" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                            <img :src="'/resources/images/profile/' + req.img" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 60px; height: 60px; object-fit: cover;">
                             <span class="fw-semibold mb-2" x-text="req.firstName + ' ' + req.lastName"></span>
                             
                             <div class="d-flex gap-2 w-100">

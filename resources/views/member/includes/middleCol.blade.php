@@ -2,7 +2,7 @@
             class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-sm border border-border-light dark:border-border-dark flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
             @isset($data['profilePics'])
-            <img src="/public/img/profile/{{ $data['profilePics'] }}" alt="profile" class="w-full h-full object-cover " width="40"
+            <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="profile" class="w-full h-full object-cover " width="40"
               height="40">
           @else
             <img src="/public/avatar/avatarF.png" alt="profile" width="40" height="40" class="w-full h-full object-cover">

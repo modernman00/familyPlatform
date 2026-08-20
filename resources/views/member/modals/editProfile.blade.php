@@ -163,13 +163,13 @@
                         <div class="text-center mb-4">
                             <div class="profile-preview-container">
                                 @if(isset($data['img']))
-    <img src="{{ url('public/img/profile/' . $data['img']) }}" alt="Profile"
+    <img src="{{ url('resources/images/profile/' . $data['img']) }}" alt="Profile"
         class="profile-preview-img" id="profilePreview">
 @elseif(isset($data['profilePics']))
-    <img src="{{ url('public/img/profile/' . $data['profilePics']) }}" alt="Profile"
+    <img src="{{ url('resources/images/profile/' . $data['profilePics']) }}" alt="Profile"
         class="profile-preview-img" id="profilePreview">
 @else
-    <img src="{{ url('public/img/profile/avatarM.png') }}" alt="Profile"
+    <img src="{{ url('resources/images/profile/avatarM.png') }}" alt="Profile"
         class="profile-preview-img" id="profilePreview">
 @endif
                                 <label for="img" class="camera-btn" title="Change Profile Picture">

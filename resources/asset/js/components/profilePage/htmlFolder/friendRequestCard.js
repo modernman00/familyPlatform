@@ -5,7 +5,7 @@ const approverId = encodeURIComponent(localStorage.getItem('requesterId'))
 
 export const friendRequestCard = (data) => {
 
-  const imageUrl = `/public/img/profile/${encodeURIComponent(data.img ?? data.requesterProfileImg)}`;
+  const imageUrl = `/resources/images/profile/${encodeURIComponent(data.img ?? data.requesterProfileImg)}`;
   const firstName = encodeURIComponent(data.firstName ?? data.requesterFirstName);
   const lastName = encodeURIComponent(data.lastName ?? data.requesterLastName);
   const requestId = encodeURIComponent(data.id ?? data.requesterId);

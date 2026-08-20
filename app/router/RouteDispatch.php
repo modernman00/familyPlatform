@@ -56,8 +56,7 @@ final class RouteDispatch
             'App\controller\login\Login',
             'App\controller\login\Code',
             'App\controller\login\Forgot',
-            'App\controller\login\PassChange',
-            'App\controller\ServeImgController'
+            'App\controller\login\PassChange'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {

@@ -13,9 +13,9 @@
   <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
     <div class="card-body d-flex align-items-center p-4">
       @if(isset($data['img']))
-        <img src="/public/img/profile/{{ $data['img'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
+        <img src="/resources/images/profile/{{ $data['img'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
       @elseif(isset($data['profilePics']))
-        <img src="/public/img/profile/{{ $data['profilePics'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
+        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
       @else
         <div class="rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; background-color: var(--primary-color); color: white; font-size: 1.2rem;">
             {{ substr($data['firstName'] ?? 'F', 0, 1) }}{{ substr($data['lastName'] ?? 'O', 0, 1) }}
@@ -123,7 +123,7 @@
               <template x-for="(img, idx) in post.images" :key="idx">
                 <div :class="post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')">
                   <a href="#" @click.prevent="openLightbox(post.images, idx)" style="display:block; overflow:hidden; border-radius:10px;">
-                    <img :src="'/public/img/post/' + img" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
+                    <img :src="'/resources/images/post/' + img" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
                   </a>
                 </div>
               </template>
@@ -381,7 +381,7 @@
 
         <!-- Main Image Container -->
         <div style="position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" @click.self="closeLightbox()">
-            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/public/img/post/' + lightboxImages[lightboxIndex] : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.src='/public/img/post/default.png'; this.style.opacity='0.5';">
+            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + lightboxImages[lightboxIndex] : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.src='/resources/images/post/default.png'; this.style.opacity='0.5';">
         </div>
         
         <!-- Next Button -->

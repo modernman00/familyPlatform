@@ -94,7 +94,7 @@ final class AllMembersController extends AllMembersData
                     foreach ($relations as $rel) {
                         if (!empty($rel['fullName'])) {
                             $rel['relationship'] = $rel['relationship'] ?? $role['defaultRel'];
-                            $rel['img'] = !empty($rel['profilePics']) ? "/public/img/profile/{$rel['profilePics']}" : ($rel['img'] ?? '/public/img/profile/avatarM.png');
+                            $rel['img'] = !empty($rel['profilePics']) ? "/resources/images/profile/{$rel['profilePics']}" : ($rel['img'] ?? '/resources/images/profile/avatarM.png');
                             $relativesWithImgs[] = $rel;
                         }
                     }

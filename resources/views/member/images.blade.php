@@ -132,7 +132,7 @@
                             data-date="{{ !empty($image['created_at']) ? date('M j, Y', strtotime($image['created_at'])) : '' }}"
                             class="gallery-image" 
                             onclick="openLightboxByIndex({{ $index }})"
-                            onerror="this.onerror=null; this.src='/public/img/post/{{ $image['img'] }}';"
+                            onerror="this.onerror=null; this.src='/resources/images/post/{{ $image['img'] }}';"
                             loading="lazy"
                         >
 
@@ -212,7 +212,7 @@
             lightboxImg.src = '/resources/images/post/' + item.img;
             lightboxImg.onerror = function() {
                 this.onerror = null;
-                this.src = '/public/img/post/' + item.img;
+                this.src = '/resources/images/post/' + item.img;
             };
 
             let captionText = item.caption || '';
