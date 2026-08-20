@@ -30,9 +30,6 @@ class AllMembersData extends InnerJoin
     //     return $memberData;
     // }
 
-    /**
-     * @param array|null|string $id
-     */
     public function getAllMembers(int|string $id): array
     {
         try {
@@ -309,9 +306,7 @@ class AllMembersData extends InnerJoin
                         $idKeys[] = ":$key";
                         $params[$key] = $val;
                     }
-                    if (!empty($idKeys)) {
-                        $query .= " AND a.id NOT IN (" . implode(', ', $idKeys) . ")";
-                    }
+                    $query .= " AND a.id NOT IN (" . implode(', ', $idKeys) . ")";
                 } elseif (is_scalar($id)) {
                     $query .= " AND a.id != :id";
                     $params['id'] = $id;
@@ -334,6 +329,9 @@ class AllMembersData extends InnerJoin
                       FROM account a
                       INNER JOIN personal p ON a.id = p.id";
             $statement = parent::connect2()->query($query);
+            if ($statement === false) {
+                return [];
+            }
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             showError($e);
@@ -360,7 +358,8 @@ class AllMembersData extends InnerJoin
     {
         $table = ['personal', 'otherFamily', 'profilePics', 'contact'];
         $singleCust = new SingleCustomerData();
-        return $singleCust->getCustomerData((string) $id, $table);
+        $idString = is_string($id) ? $id : '';
+        return $singleCust->getCustomerData($idString, $table);
     }
 
     // show information of events within 7 days , 1 days and on the current date
@@ -528,6 +527,9 @@ class AllMembersData extends InnerJoin
         }
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function searchMembers(
         int $requesterId,
         string $famCode,
@@ -659,6 +661,10 @@ class AllMembersData extends InnerJoin
         }
     }
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
     private function uniqueById(array $rows): array
     {
         $unique = [];

@@ -11,7 +11,7 @@ final class NotificationController extends Select
     // get all the notifications and show on the profile page
     // TODO - Only show notification that are not already clicked on and associated with family member and code 
     /**
-     * @return array|int|null|string
+     * @return array|null
      */
     public static function index()
     {
@@ -26,6 +26,7 @@ final class NotificationController extends Select
         } catch (\Exception $e) {
             // Handle errors or log them
             showError($e);
+            return null;
         }
     }
 
@@ -37,7 +38,7 @@ final class NotificationController extends Select
      * creation date in ascending order. Upon successful retrieval, it returns the data and
      * sends a success message. In case of an exception, it handles the error appropriately.
      *
-     * @return array|int|null|string
+     * @return array|null
      */
     public static function notificationById($id, $famCode)
     {
@@ -63,6 +64,7 @@ final class NotificationController extends Select
         } catch (\Exception $e) {
             // Handle errors or log them
             showError($e);
+            return null;
         }
     }
 
@@ -75,7 +77,7 @@ final class NotificationController extends Select
         try {
             $no = checkInput($no) ?? null;
 
-            if ($no === null) {
+            if (!is_string($no)) {
                 throw new NotFoundException('Notification No not found');
             }
 
@@ -112,7 +114,8 @@ final class NotificationController extends Select
     {
         try {
 
-            $inputData = json_decode(file_get_contents("php://input"), true);
+            $rawInput = file_get_contents("php://input");
+            $inputData = json_decode($rawInput !== false ? $rawInput : '', true);
             // Validate the input data
             if (!isset(
                 $inputData['endpoint'],

@@ -110,6 +110,7 @@ final class PostLikeController extends Db
     public function setHeader()
     {
         $token = checkInput($_GET['token']);
+        $token = is_string($token) ? $token : '';
         setCookie(name: 'tokenJWT', value: $token, expires_or_options: time() + 3600, path: "/", domain: '', secure: true, httponly: true);
         msgSuccess(200, "message set");
     }

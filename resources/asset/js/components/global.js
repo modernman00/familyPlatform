@@ -85,17 +85,30 @@ export const msgException = (errorMessage) => {
  * @param {*} timer - timer for the message to disappear- default is 5 secs
  */
 export const showNotification = (elementId, addClass, message, timer = 5000) => {
-    // display the success information for 10sec
-    id(`${elementId}`).style.display = "block" // unblock the notification
-    id(`${elementId}`).classList.add(addClass) // add the success class
-    id(`${elementId}`).innerHTML = message // error element
-    id('loader').classList.remove('loader') // remove loader
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: timer,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
 
-    setTimeout(() => {
-        id(`${elementId}`).style.backgroundColor = ""
-        id(`${elementId}`).style.color = ""
-        id(`${elementId}`).innerHTML = ""
-    }, timer)
+    let iconType = 'info';
+    if (addClass.includes('success')) iconType = 'success';
+    if (addClass.includes('danger') || addClass.includes('error')) iconType = 'error';
+    if (addClass.includes('warning')) iconType = 'warning';
+
+    Toast.fire({
+        icon: iconType,
+        title: message
+    });
+
+    const loader = id('loader');
+    if (loader) loader.classList.remove('loader');
 }
 
     // Function to check for elements and render if they exist

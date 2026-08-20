@@ -292,7 +292,7 @@
             button.addEventListener('click', function() {
                 const card = this.closest('.friend-request-card');
                 const name = card.querySelector('.friend-request-name').textContent;
-                alert(`You are now friends with ${name}`);
+                Swal.fire('Success', `You are now friends with ${name}`, 'success');
                 card.style.opacity = '0.5';
                 this.textContent = 'Confirmed';
                 this.disabled = true;

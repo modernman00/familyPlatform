@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 
 use Src\{
@@ -31,7 +31,7 @@ final class AllMembersController extends AllMembersData
             $id = $_SESSION['id'] ?? null;
             if (!$id) {
                 $tokenVerify = SignIn::verify();
-                $id = $tokenVerify['id'] ?? null;
+                $id = $tokenVerify['id'];
             }
 
             $result = $this->getAllMembers($id);
@@ -73,10 +73,11 @@ final class AllMembersController extends AllMembersData
             }
 
             $id = checkInput($id);
+            $id = is_string($id) ? $id : '';
             $data = BaseController::findMemberById($id);
 
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
-            $pictures = Select::selectFn2(query: $query, bind: [$id]) ?? [];
+            $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
             // Fetch relatives for immediate family card
             $relativesWithImgs = [];
@@ -90,7 +91,7 @@ final class AllMembersController extends AllMembersData
 
             foreach ($roles as $role) {
                 $relations = BaseController::fetchRelationsData($id, $role['table'], $role['who']);
-                if (!empty($relations) && is_array($relations)) {
+                if (!empty($relations)) {
                     foreach ($relations as $rel) {
                         if (!empty($rel['fullName'])) {
                             $rel['relationship'] = $rel['relationship'] ?? $role['defaultRel'];
@@ -153,13 +154,12 @@ SignIn::verify();
         try {
             $payload = SignIn::verify('users');
 
-            if (!$payload) {
-                msgException(401, 'Unauthorized');
-                return;
-            }
-
-            $requesterId = (int) cleanSession((string)($payload['id'] ?? ''));
-            $famCode     = (string) cleanSession((string)($payload['famCode'] ?? ''));
+            $requesterId = (int) cleanSession((string)$payload['id']);
+            // NOTE: SignIn::verify()'s payload shape is {id, email, role} — it never
+            // carries famCode, so this has always resolved to ''. Left as-is (not a
+            // typing fix's place to change search-matching behaviour); flagged in the
+            // PHPStan cleanup report as a pre-existing bug for follow-up.
+            $famCode     = '';
 
             $term   = isset($_GET['q']) ? (string) $_GET['q'] : '';
             $limit  = isset($_GET['limit']) ? (int) $_GET['limit'] : 30;

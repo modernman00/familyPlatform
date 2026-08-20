@@ -21,6 +21,11 @@
       "app/function/helper/securityHelper.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "repositories": [
     {
       "type": "vcs",
@@ -43,7 +48,8 @@
     "vimeo/psalm": "^6.10.3",
     "psalm/attributes": "^0.1.0",
     "phpstan/phpstan": "^2.2",
-    "friendsofphp/php-cs-fixer": "^3.75"
+    "friendsofphp/php-cs-fixer": "^3.75",
+    "phpunit/phpunit": "^11"
   },
 
   "config": {

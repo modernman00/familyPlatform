@@ -91,10 +91,6 @@ final class Organogram extends SingleCustomerData
         try {
             $nodeIdInt = (int) $nodeId;
             $db = Db::connect2();
-            if (!$db instanceof \PDO) {
-                msgException(500, 'Database unavailable');
-                return;
-            }
 
             $stmt = $db->prepare("SELECT * FROM family_nodes WHERE id = ?");
             $stmt->execute([$nodeIdInt]);
@@ -184,17 +180,6 @@ final class Organogram extends SingleCustomerData
     private function buildSixGenGraphData(string $familyCode, string $rootUserId): array
     {
         $db = Db::connect2();
-        if (!$db instanceof \PDO) {
-            return [
-                'family_code' => $familyCode,
-                'root_node_id' => 0,
-                'nodes' => [],
-                'unions' => [],
-                'children' => [],
-                'total_generations' => 6,
-                'total_members' => 0
-            ];
-        }
 
         // 1. Fetch all nodes for this family
         $stmt = $db->prepare("SELECT * FROM family_nodes WHERE family_code = ? ORDER BY generation_level ASC, id ASC");
@@ -307,7 +292,6 @@ final class Organogram extends SingleCustomerData
         if (empty($familyCode)) return;
 
         $db = Db::connect2();
-        if (!$db instanceof \PDO) return;
 
         // Check if root user node already exists
         $checkStmt = $db->prepare("SELECT id FROM family_nodes WHERE family_code = ? AND user_id = ?");

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller\admin;
 
-use App\Controller\BaseController;
+use App\controller\BaseController;
 use Src\Utility;
 
 final class Dashboard extends BaseController
@@ -12,7 +12,7 @@ final class Dashboard extends BaseController
     {
         parent::__construct();
         $verifyJWT = \Src\functionality\SignIn::verify();
-        if (is_null($verifyJWT) || empty($verifyJWT['id'])) {
+        if (empty($verifyJWT['id'])) {
             throw new \Src\Exceptions\UnauthorisedException("Unauthorized access to administrative dashboard.");
         }
     }

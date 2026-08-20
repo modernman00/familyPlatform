@@ -49,10 +49,6 @@ final class CommentReactionController
 
       $pdo = Db::connect2();
 
-      if (!$pdo instanceof PDO) {
-        throw new \RuntimeException('Database connection failed.');
-      }
-
       // ── Verify the comment belongs to this user's family ───────────────
       $stmt = $pdo->prepare(
         "SELECT cr.comment_no FROM comment cr
@@ -122,11 +118,9 @@ final class CommentReactionController
    *
    * @param int $commentNo The comment number to count reactions for
    *
-   * @return int[]|null An associative array with the count of each reaction type and the comment number
+   * @return array<string, int>|null An associative array with the count of each reaction type and the comment number
    *
    * @throws \Throwable If an error occurs while executing the query
-   *
-   * @psalm-return array{totalReactions: int<min, max>,...}|null
    */
   private static function countReactions($commentNo)
   {
@@ -166,7 +160,7 @@ final class CommentReactionController
         'totalReactions' => 0
       ];
 
-      foreach ($countReaction as $count) {
+      foreach ($countReaction ?? [] as $count) {
         // change $count['label'] to smaller case
         $label = strtolower($count['label']);
         $countReactionArray[$label] = (int)$count['total'];
@@ -196,6 +190,7 @@ final class CommentReactionController
       return $countReactionArray;
     } catch (\Throwable $e) {
       \showError($e);
+      return null;
     }
   }
 

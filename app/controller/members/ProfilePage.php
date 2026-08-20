@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 use Src\functionality\middleware\FileUploadProcess;
 
 use App\model\{
@@ -265,17 +265,15 @@ final class ProfilePage extends ProcessImg
                 // Return the full post row (not just its id) so the composer can prepend it
                 // to the feed immediately instead of waiting on a full posts re-fetch.
                 $newPost = Post::postByNo($result);
-                
-                if (is_array($newPost)) {
-                    // Filter out internal database timestamps to prevent data leakage
-                    $newPost = array_diff_key($newPost, array_flip([
-                        'likes_updated_at', 
-                        // 'date_created', // Keep this so frontend doesn't break
-                        'date_updated', 
-                        'date_deleted'
-                    ]));
-                }
-                
+
+                // Filter out internal database timestamps to prevent data leakage
+                $newPost = array_diff_key($newPost, array_flip([
+                    'likes_updated_at',
+                    // 'date_created', // Keep this so frontend doesn't break
+                    'date_updated',
+                    'date_deleted'
+                ]));
+
                 msgSuccess(200, $newPost ?: $result);
             }
 
@@ -378,7 +376,9 @@ final class ProfilePage extends ProcessImg
     {
         try {
             $path = isset($_GET['path']) ? checkInput(data: $_GET['path']) : 'photos';
+            $path = is_string($path) ? $path : 'photos';
             $dir = isset($_GET['dir']) ? checkInput(data: $_GET['dir']) : 'public/img';
+            $dir = is_string($dir) ? $dir : 'public/img';
             $imgName = $_GET['pics'] ?? '';
             $postId = isset($_GET['pID']) ? checkInput(data: $_GET['pID']) : '';
 
@@ -401,7 +401,7 @@ final class ProfilePage extends ProcessImg
     {
         try {
             $VerifyJWT = SignIn::verify('users');
-            $id = (string)cleanSession((string)($VerifyJWT['id'] ?? $_SESSION['id'] ?? ''));
+            $id = (string)cleanSession((string)$VerifyJWT['id']);
 
             // Allow viewing a specific member's gallery if ?id=... is provided, default to current user
             $targetId = isset($_GET['id']) ? (string)cleanSession((string)$_GET['id']) : $id;
@@ -440,7 +440,7 @@ final class ProfilePage extends ProcessImg
     {
         try {
             $VerifyJWT = SignIn::verify('users');
-            $id = (string)cleanSession((string)($VerifyJWT['id'] ?? $_SESSION['id'] ?? ''));
+            $id = (string)cleanSession((string)$VerifyJWT['id']);
 
             $rawInput = (string)file_get_contents('php://input');
             $input = json_decode($rawInput, true);
@@ -449,7 +449,8 @@ final class ProfilePage extends ProcessImg
                 throw new Exception("Image name not provided");
             }
 
-            $imageName = (string)checkInput((string)$input['imageName']);
+            $imageName = checkInput((string)$input['imageName']);
+            $imageName = is_string($imageName) ? $imageName : '';
 
             $updateProfilePic = new \Src\Update('profilePics');
             $result = $updateProfilePic->updateTable(
@@ -481,6 +482,7 @@ final class ProfilePage extends ProcessImg
     public function setHeader()
     {
         $token = checkInput($_GET['token']);
+        $token = is_string($token) ? $token : '';
         setCookie(name: 'tokenJWT', value: $token, expires_or_options: time() + 3600, path: "/", domain: '', secure: true, httponly: true);
         msgSuccess(200, "message set");
     }

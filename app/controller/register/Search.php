@@ -1,7 +1,7 @@
 <?php
 namespace App\controller\register;
 
-use App\Controller\Base;
+use App\controller\Base;
 use Src\Select;
 
 final class Search extends Base
@@ -10,9 +10,12 @@ final class Search extends Base
     {
         try {
             
-            $hint =  checkInput($_REQUEST['hint']);  
+            $hint =  checkInput($_REQUEST['hint']);
+            $hint = is_string($hint) ? $hint : '';
             $attribute = checkInput($_GET['attribute']);
+            $attribute = is_string($attribute) ? $attribute : '';
             $subject = checkInput($_GET['subject']);
+            $subject = is_string($subject) ? $subject : '';
             $d = 3;
             $ans = $d + 4;
             echo $ans;
@@ -33,10 +36,7 @@ final class Search extends Base
         }
     }
 
-    /**
-     * @param array|null|string $subject
-     */
-    private function checkBox(array|string|null $subject): string
+    private function checkBox(string $subject): string
     {
         return "<div class='form-check form-check-inline'>
             <input class='form-check-input' type='radio' id='{$subject}Yes' name = '{$subject}Checkbox' value=Yes'>

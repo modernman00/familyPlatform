@@ -26,7 +26,7 @@ class LoginAnomalyService
      * Returns an array with anomaly details if new, null if familiar.
      *
      * @param int $userId
-     * @return array|null ['ip' => string, 'user_agent' => string, 'is_new' => true]
+     * @return array{ip: string, user_agent: string, is_new: true}|null
      */
     public static function check(int|string $userId): ?array
     {
@@ -73,9 +73,6 @@ class LoginAnomalyService
             $fingerprint = self::fingerprint($ip, $userAgent);
 
             $db = Db::connect2();
-            if ($db === null) {
-                throw new \RuntimeException('Database connection unavailable during anomaly record.');
-            }
 
             // Insert the new event
             $stmt = $db->prepare(

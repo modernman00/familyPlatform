@@ -51,12 +51,12 @@ const LoginSubmission = (e) => {
             postFormData("/lasu", "loginNow", "/admin/reviewApps")
 
         } else {
-            alert('The form cannot be submitted. Please check the errors')
+            Swal.fire('Error', 'The form cannot be submitted. Please check the errors', 'error')
 
         }
         // } 
         // else {
-        // 	alert('To continue, you need to agree to the our privacy policy')
+        // 	Swal.fire('Info', 'To continue, you need to agree to the our privacy policy', 'info')
         // }
     } catch (err) {
         showError(err)

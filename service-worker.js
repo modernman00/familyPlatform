@@ -1,4 +1,4 @@
-const Version = "2.3"; // Fix: Add self.skipWaiting() to force activation
+const Version = "2.4"; // Fix: bust stale cache so fixed /public/js/index.js (Swal global) reaches clients
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
   "/",

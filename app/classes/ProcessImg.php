@@ -72,7 +72,9 @@ class ProcessImg extends AllFunctionalities
         //$imgName = checkInput($_GET['pics']);
          $imgName = $_GET['pics'];
         $imgDir = checkInput($_GET['dir']);
+        $imgDir = is_string($imgDir) ? $imgDir : '';
         $postSource = checkInput($picsSource);
+        $postSource = is_string($postSource) ? $postSource : '';
         return "/$imgDir/$postSource/$imgName";
       
     }

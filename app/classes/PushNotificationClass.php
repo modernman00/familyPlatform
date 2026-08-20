@@ -24,14 +24,16 @@ class PushNotificationClass extends VapidClass
 
       $webPush = new WebPush(auth: $auth);
 
+      $payload = json_encode(value: [
+        'title' => 'New Notification',
+        'body' => $message,
+        'url' => $url,  // Change the URL to where the user should be redirected
+        'icon' => getenv(name: 'APP_LOGO')
+      ]);
+
       $webPush->sendOneNotification(
         subscription: $subscription,
-        payload: json_encode(value: [
-          'title' => 'New Notification',
-          'body' => $message,
-          'url' => $url,  // Change the URL to where the user should be redirected
-          'icon' => getenv(name: 'APP_LOGO')  
-        ])
+        payload: $payload !== false ? $payload : null
       );
 
       // Send notifications

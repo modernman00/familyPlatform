@@ -174,9 +174,7 @@ final class Testphp extends Select
 
         //         echo "it is well" . srand() . BR;
 
-        //         echo "<script>alert(it worked)</script>" . BR;
-
-
+        //         echo "<script>Swal.fire('Success', 'it worked', 'success')</script>" . BR;
         //      //echo phpinfo();
         //     // var_dump(php_ini_loaded_file(), php_ini_scanned_files());
 

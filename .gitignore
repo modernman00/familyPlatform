@@ -57,10 +57,8 @@ bootstrap/log/
 vendor/
 node_modules/
 # Testing & Scratch
-tests/
 scratch/
-*test*.php
-phpunit.xml
+/test_*.php
 playwright-report/
 test-results/
 cypress/videos/

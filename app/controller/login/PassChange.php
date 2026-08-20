@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\controller\login;
 
-use App\controller\BaseController;
 use Src\functionality\{
 
     PasswordResetFunctionality,

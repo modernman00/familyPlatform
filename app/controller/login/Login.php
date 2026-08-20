@@ -6,7 +6,7 @@ namespace App\controller\login;
 use App\model\AllMembersData as AllMembersDataModel;
 use Exception;
 
-use App\Controller\BaseController;
+use App\controller\BaseController;
 use Src\functionality\LoginFunctionality;
 use Src\functionality\LogoutFunctionality;
 

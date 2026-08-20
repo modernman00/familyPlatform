@@ -17,7 +17,7 @@ class AlterTable extends AllFunctionalities
 
     public function addNewColArr($lastData)
     {
-        for ($x = 0; $x < count($this->dataArray); $x++) {
+        for ($x = 0; $x < count($this->dataArray ?? []); $x++) {
             $newColumn = $this->dataArray[$x];
             $query =  "ALTER TABLE $this->table ADD $newColumn TEXT NULL AFTER $lastData";
             $lastData = $newColumn;

@@ -12,7 +12,7 @@ use Src\Update;
 final class Post extends Select
 {
 
-    static function commentLink2Post($postNo): array|int|string
+    static function commentLink2Post($postNo): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "post_no");
         return parent::selectFn2(query: $query, bind: [$postNo]);
@@ -21,31 +21,31 @@ final class Post extends Select
     /**
      * @param array|null|string $imgPath
      */
-    public static function commentLink2Img(array|string|null $imgPath): array|int|string
+    public static function commentLink2Img(array|string|null $imgPath): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "picture");
         return parent::selectFn2(query: $query, bind: [$imgPath]);
     }
 
-    public static function commentByNo(int|string $commentNo): array|int|string
+    public static function commentByNo(int|string $commentNo): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'comment', identifier1: "comment_no");
         $result = parent::selectFn2(query: $query, bind: [$commentNo]);
-        return $result[0];
+        return $result[0] ?? [];
     }
 
 
-    public static function postByNo(int|string $postNo): array|int|string
+    public static function postByNo(int|string $postNo): array
     {
         return SelectFn::selectOneRow('post', 'post_no', (string) $postNo) ?? [];
     }
 
-    static function postLink2Id(string $id): array|int|string
+    static function postLink2Id(string $id): array
     {
         return SelectFn::selectOneRow('post', 'id', (string) $id) ?? [];
     }
 
-    static function getAllPost(): array|int|string
+    static function getAllPost(): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'post', orderBy: "ORDER BY post_no DESC");
         return parent::selectFn2(query: $query);
@@ -95,25 +95,25 @@ final class Post extends Select
      * @param [type] $custNo this is the id
      *  get the
      */
-    public static function getAllPostPics(string $custNo): array|int|string
+    public static function getAllPostPics(string $custNo): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'post', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$custNo]);
     }
 
-    public static function getProfilePics($id): array|int|string
+    public static function getProfilePics($id): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ONE", table: 'profilePics', identifier1: "id");
         return parent::selectFn2(query: $query, bind: [$id]);
     }
 
-    static function getAllComments(): array|int|string
+    static function getAllComments(): array
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_ALL", table: 'comment');
         return parent::selectFn2(query: $query);
     }
 
-    static function getUnpublishedPost(): array|int|string
+    static function getUnpublishedPost(): array
     {
         $query = parent::formAndMatchQuery(
             selection: "SELECT_ONE", 
@@ -127,7 +127,7 @@ final class Post extends Select
 
     
 
-    static function getUnpublishedComment(): array|int|string
+    static function getUnpublishedComment(): array
     {
         $query = "SELECT * FROM comment WHERE comment_status = ? ORDER BY comment_no DESC";
         return parent::selectFn2(query: $query, bind: ["new"]);
@@ -149,6 +149,11 @@ final class Post extends Select
      */
     static function updateCommentByStatusAsPublished(int|string|null $commentNo): bool
     {
+        if ($commentNo === null) {
+            msgException(406, 'comment number not well formed');
+            return false;
+        }
+
         $newUpdate = new Update('comment');
         $result =  $newUpdate->updateTable(column: 'comment_status', columnAnswer: "published", identifier: 'comment_no', identifierAnswer: $commentNo);
         if (!$result) {

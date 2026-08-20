@@ -59,7 +59,7 @@ window.LoginSubmission = (token) => {
       postFormData(loginURL, 'loginNow', redirect, 'bulma');
     } else {
       // Display an alert for form errors
-      alert('The form cannot be submitted. Please check the errors');
+      Swal.fire('Error', 'The form cannot be submitted. Please check the errors', 'error');
     }
   } catch (err) {
     // Handle any unexpected errors

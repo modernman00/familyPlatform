@@ -26,7 +26,7 @@ class AllFunctionalities extends Db
 
     /**
      * @psalm-param 'events'|'post' $table
-     * @psalm-param 'eventDate'|'post_likes' $column
+     * @psalm-param 'eventDate'|'post_likes'|'deleted_at' $column
      * @psalm-param 'no'|'post_no' $identifier
      */
     public static function update2(string $table, string $column, $column_ans, string $identifier, string $identifier_ans)
@@ -85,8 +85,9 @@ class AllFunctionalities extends Db
     ";
         $stmt = parent::connect2()->prepare($query);
 
-        if(!$stmt){
+        if ($stmt === false) {
             msgException(502, "Could not connect");
+            return;
         }
 
         $stmt->bindParam(':likesValue', $likesValue, PDO::PARAM_INT);

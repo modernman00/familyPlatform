@@ -24,7 +24,8 @@ class Request
         if(count($_GET) > 0) $result['get'] = $_GET;
         if(count($_POST) > 0) $result['post'] = $_POST;
         $result['file'] = $_FILES;
-        return json_decode((json_encode($result, $is_array)));
+        $encoded = json_encode($result, $is_array);
+        return json_decode($encoded !== false ? $encoded : '');
     }
 
     public static function get($key) {

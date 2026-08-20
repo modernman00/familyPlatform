@@ -16,7 +16,7 @@ class ErrorHandler
 	{
 		try {
 
-			$this->env = getenv('APP_ENV');
+			$this->env = getenv('APP_ENV') ?: '';
 
 			$this->logFile =  __DIR__ . '/../../bootstrap/log/' .  date('Ymd') . '.log';
 			$this->logFile = str_replace('//', '/', $this->logFile);

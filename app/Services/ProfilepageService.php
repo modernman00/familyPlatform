@@ -10,14 +10,17 @@ use Src\Exceptions\NotFoundException;
 
 final class ProfilepageService
 {
-    public function getProfileData($userId): array
+    /**
+     * @return array<string, mixed>
+     */
+    public function getProfileData(string $userId): array
     {
         $setData = new SingleCustomerData();
 
         $tables = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
         $memberData = $setData->getCustomerData($userId, $tables);
 
-        if (!$memberData) {
+        if (!$memberData || !is_array($memberData)) {
             throw new NotFoundException("User not found");
         }
 

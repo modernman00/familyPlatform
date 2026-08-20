@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\controller\admin;
 
 use App\model\ReviewAppsData;
-use App\Controller\BaseController;
+use App\controller\BaseController;
 use Src\Update;
 use Src\functionality\SendEmailFunctionality;
 use Src\DeleteFn;
@@ -17,7 +17,7 @@ final class ReviewApps extends ReviewAppsData
     public function __construct()
     {
         $verifyJWT = \Src\functionality\SignIn::verify();
-        if (is_null($verifyJWT) || empty($verifyJWT['id'])) {
+        if (empty($verifyJWT['id'])) {
             throw new \Src\Exceptions\UnauthorisedException("Unauthorized access to administrative area.");
         }
         
@@ -35,10 +35,13 @@ final class ReviewApps extends ReviewAppsData
     // once the $GET IS clicked, use this to get the customers data and set customers id as well
     private function getCustomerData() : array
     {
-        $this->id = checkInput($_GET['id']);
+        $id = checkInput($_GET['id']);
+        $this->id = is_string($id) ? $id : '';
         $data = $this->getWithId($this->id);
         $data2 = null;
-        foreach ($data as $data2);
+        if (is_array($data)) {
+            foreach ($data as $data2);
+        }
 
         // // Set the customer Id
         // $custNo = $data2['last_name'];

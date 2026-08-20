@@ -30,9 +30,10 @@ class SingleCustomerData extends InnerJoin
 			// 1. Fetch the base data from the first table (usually 'personal')
 			$firstTable = array_shift($table);
 			$firstTable = \Src\Utility::checkInput($firstTable);
+			$firstTable = is_string($firstTable) ? $firstTable : '';
 			$baseDataRows = \Src\SelectFn::selectAllRowsById($firstTable, 'id', $custId);
 
-			if (!is_array($baseDataRows) || empty($baseDataRows)) {
+			if (empty($baseDataRows)) {
 				\msgException(401, 'result not found');
 				return false;
 			}
@@ -42,9 +43,10 @@ class SingleCustomerData extends InnerJoin
 			// 2. Fetch from remaining tables and array_merge if data exists
 			foreach ($table as $tab) {
 				$tab = \Src\Utility::checkInput($tab);
+				$tab = is_string($tab) ? $tab : '';
 				$rowData = \Src\SelectFn::selectAllRowsById($tab, 'id', $custId);
-				
-				if (is_array($rowData) && !empty($rowData)) {
+
+				if (!empty($rowData)) {
 					// We take the first row (since getCustomerData is for a single flat profile state)
 					$mergedData = array_merge($mergedData, $rowData[0]);
 				}
@@ -65,12 +67,9 @@ class SingleCustomerData extends InnerJoin
 	}
 
 
-	public static function getCustById(int|string|null $custId, string $table): array|string|int
+	public static function getCustById(int|string|null $custId, string $table): array
 	{
 		$result = Select::formAndMatchQuery(selection: "SELECT_ONE", table: $table, identifier1: "id");
-		if ($result === null) {
-			return [];
-		}
 		return Select::selectFn2(query: $result, bind: [$custId]);
 	}
 }

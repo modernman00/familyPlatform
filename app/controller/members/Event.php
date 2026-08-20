@@ -7,6 +7,7 @@ use App\classes\{ AllFunctionalities, Insert, Select, PushNotificationClass, Pus
 use App\model\{EmailData, AllMembersData};
 use Src\CheckToken;
 use Src\Exceptions\ForbiddenException;
+use Src\Exceptions\ValidationException;
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
 use Src\SelectFn;
@@ -15,6 +16,18 @@ use Src\UpdateFn;
 
 final class Event extends AllMembersData
 {
+    /**
+     * Narrows a checkInput()-style result (which may come back as array|string|null)
+     * down to the plain string identifier the model/db layer requires.
+     */
+    private static function asString(mixed $value): string
+    {
+        if (is_string($value)) {
+            return $value;
+        }
+
+        throw new ValidationException('Invalid value supplied.');
+    }
     /**
      * @throws \Throwable
      */
@@ -151,7 +164,7 @@ final class Event extends AllMembersData
     {
         try {
 
-            $notificationNo = checkInput(data: $_GET['notificationNo']);
+            $notificationNo = self::asString(checkInput(data: $_GET['notificationNo']));
             // $query = SelectFn::sel(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
             // $result = SelectFn::selectFn2(query: $query, bind: [$notificationNo]);
 
@@ -265,9 +278,7 @@ final class Event extends AllMembersData
     /**
      * this function extends the event date on the due date
      *
-     * @param (mixed|string)[] $data
-     *
-     * @psalm-param array{emailHTMLContent: string,...} $data
+     * @param array<string, mixed> $data
      */
     private static function extendEventByFrequency(array $data)
     {
@@ -278,7 +289,7 @@ final class Event extends AllMembersData
 
             $eventDate = checkInput($data['eventDate']);
 
-            if ($data['eventFrequency'] != "One-off") {
+            if ($data['eventFrequency'] != "One-off" && is_string($no)) {
 
 
                 return match ($data['eventFrequency']) {
@@ -337,12 +348,12 @@ final class Event extends AllMembersData
      * Soft-deletes an event. Author-only.
      * DELETE /member/profilePage/event/{eventNo}
      */
-    public static function deleteEvent($eventNo): void
+    public static function deleteEvent(int|string $eventNo): void
     {
         try {
             CheckToken::tokenCheck();
 
-            $eventNo = checkInput($eventNo);
+            $eventNo = self::asString(checkInput($eventNo));
             $userId = checkInput($_SESSION['id']);
 
             // Not date-window scoped (unlike getEventDataByNo, which is for the
@@ -367,12 +378,12 @@ final class Event extends AllMembersData
      * Edits an event's fields. Author-only.
      * PUT /member/profilePage/event/{eventNo}
      */
-    public static function updateEvent($eventNo): void
+    public static function updateEvent(int|string $eventNo): void
     {
         try {
             CheckToken::tokenCheck();
 
-            $eventNo = checkInput($eventNo);
+            $eventNo = self::asString(checkInput($eventNo));
             $userId = checkInput($_SESSION['id']);
 
             $event = SelectFn::selectOneRow('events', 'no', $eventNo);
@@ -383,7 +394,8 @@ final class Event extends AllMembersData
 
             // PHP only populates $_POST for the literal POST verb — PUT bodies
             // have to be read manually, so the frontend sends JSON for edits.
-            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
 
             $data = [
                 'eventName' => checkInput($input['eventName'] ?? null),
@@ -397,7 +409,8 @@ final class Event extends AllMembersData
 
             // Mirror rightColumn.blade.php's @php enrichment so the broadcast
             // carries the same shape the sidebar already renders.
-            $dateDiff = dateDifferenceInt(date('Y-m-d'), $data['eventDate']);
+            $eventDateForDiff = is_string($data['eventDate']) ? $data['eventDate'] : '';
+            $dateDiff = dateDifferenceInt(date('Y-m-d'), $eventDateForDiff);
             $getDateDiff = number2word($dateDiff);
             $dateDifference = $getDateDiff === 'Zero' ? 'Today' : ($getDateDiff === 'One' ? 'Tomorrow' : "in $getDateDiff Days");
 

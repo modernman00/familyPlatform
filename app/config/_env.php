@@ -12,7 +12,8 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 // use Tracy\Debugger;
 
 
-define('BASE_PATH', realpath(__DIR__ . '/../../'));
+$basePath = realpath(__DIR__ . '/../../');
+define('BASE_PATH', $basePath !== false ? $basePath : __DIR__ . '/../../');
 $dotEnv = Dotenv::createUnsafeImmutable(BASE_PATH);
 $dotEnv->load();
 

@@ -43,7 +43,7 @@ class Sanitise extends AllFunctionalities
     {
         foreach ($this->formData as $key => $value) {
             if (empty($value) && ($value == "" || $value == 'select')) {
-                $cleanNameKey = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $key));
+                $cleanNameKey = strtoupper(preg_replace('/[^0-9A-Za-z@.]/', ' ', $key) ?? '');
                 $this->error[] = "The $cleanNameKey question is required";
             }
         }

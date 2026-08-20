@@ -9,11 +9,11 @@ class Pusher  {
     public static function pusher(): PusherNotification
     {
         $pusher = new PusherNotification(
-            getenv('MIX_PUSHER_APP_KEY'),
-            getenv('MIX_PUSHER_APP_SECRET'),
-            getenv('MIX_PUSHER_APP_ID'),
+            getenv('MIX_PUSHER_APP_KEY') ?: '',
+            getenv('MIX_PUSHER_APP_SECRET') ?: '',
+            getenv('MIX_PUSHER_APP_ID') ?: '',
             [
-                'cluster' => getenv('MIX_PUSHER_APP_CLUSTER'),
+                'cluster' => getenv('MIX_PUSHER_APP_CLUSTER') ?: '',
                 'useTLS' => true,
             ]
         );

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Controller\members;
+namespace App\controller\members;
 
 use App\model\ReactionData;
 use App\model\PollData;

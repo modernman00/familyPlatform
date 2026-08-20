@@ -1,9 +1,44 @@
 'use strict';
+import axios from 'axios';
 import Alpine from 'alpinejs';
 import { qSel, showError } from '@modernman00/shared-js-lib';
+import Swal from 'sweetalert2';
 
+window.Swal = Swal;
 window.Alpine = Alpine;
 let routePromise = Promise.resolve();
+
+// The server occasionally finds the session's CSRF token missing (e.g. session
+// data expired/evicted between page load and this request) and responds 401
+// with "We are not familiar with the nature of your activities.". That same
+// response always carries a fresh Set-Cookie: XSRF-TOKEN, which the browser
+// applies immediately — so a single automatic retry of the exact same request
+// picks up the new cookie and succeeds transparently instead of surfacing a
+// dead-end error the user has to work around by reloading the page.
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const config = error.config;
+    const message = error.response?.data?.message;
+    const isStaleCsrfToken = error.response?.status === 401
+      && typeof message === 'string'
+      && message.includes('not familiar with the nature of your activities')
+      && config && !config._csrfRetried;
+
+    if (isStaleCsrfToken) {
+      config._csrfRetried = true;
+      if (config.headers) {
+        delete config.headers['X-XSRF-TOKEN'];
+        delete config.headers['x-xsrf-token'];
+        delete config.headers['X-CSRF-TOKEN'];
+        delete config.headers['x-csrf-token'];
+      }
+      return axios(config);
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 /**
  * Tests if the current URL matches the given route.

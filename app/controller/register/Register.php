@@ -146,9 +146,6 @@ final class Register extends Db
             $getTableData = RegisterTableData::createRegisterTable($cleanData);
 
             $dbConnection = self::connect2();
-            if (!$dbConnection) {
-                throw new Exception("Database connection failed.");
-            }
             $dbConnection->beginTransaction();
 
             try {
@@ -221,7 +218,8 @@ final class Register extends Db
             $year++;
         }
 
-        $birthday = date("Y-m-d", strtotime("$year-$month-$day"));
+        $birthdayTimestamp = strtotime("$year-$month-$day");
+        $birthday = date("Y-m-d", $birthdayTimestamp !== false ? $birthdayTimestamp : null);
         return [
             'id' => $id,
             'eventName' => "$name Birthday",
@@ -246,9 +244,10 @@ final class Register extends Db
     {
 
         $sanitiseName = ($postData["$name"]) ? checkInput($postData["$name"]) : throw new Exception("Provide Info");
+        $sanitiseName = is_string($sanitiseName) ? $sanitiseName : '';
 
-        $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName);
-        
+        $idName = preg_replace('/[^A-Za-z ]/', '', $sanitiseName) ?? '';
+
         do {
             $id = random_int(1000, 900000);
             $id .= strtoupper($idName);
@@ -256,7 +255,7 @@ final class Register extends Db
             //check if the reference number exist
             $query = Select::formAndMatchQuery(selection: 'SELECT_COUNT_ONE', table: $table, identifier1: 'id');
             $idCheck = Select::selectFn2($query, [$id]);
-        } while (is_array($idCheck) && count($idCheck) > 0);
+        } while (count($idCheck) > 0);
 
         $postData['id'] = $id;
         return $postData;
@@ -287,10 +286,6 @@ final class Register extends Db
             }
 
             $dbConnection = self::connect2();
-            if (!$dbConnection) {
-                echo json_encode(['status' => 'error', 'message' => 'Database connection failed']);
-                return;
-            }
 
             $exists = false;
             

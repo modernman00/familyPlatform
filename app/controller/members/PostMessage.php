@@ -13,11 +13,24 @@ use App\model\{
 use Src\functionality\SendEmailFunctionality as SendMail;
 use Src\{CheckToken, Update};
 use Src\Exceptions\ForbiddenException;
+use Src\Exceptions\ValidationException;
 use Src\Utility;
 use Src\functionality\SignIn;
 
 final class PostMessage
 {
+    /**
+     * Narrows a checkInput()-style result (which may come back as array|string|null)
+     * down to the int|string identifier the model layer requires.
+     */
+    private static function asIdentifier(mixed $value): int|string
+    {
+        if (is_int($value) || is_string($value)) {
+            return $value;
+        }
+
+        throw new ValidationException('Invalid identifier supplied.');
+    }
 
     /**
      * Index
@@ -33,6 +46,10 @@ final class PostMessage
         try {
             $VerifyJWT = SignIn::verify('users');
             $id = \cleanSession((string)$VerifyJWT['id']);
+            if ($id === null) {
+                throw new ForbiddenException('Unable to verify user identity.');
+            }
+            $id = (string) $id;
             $famCodes = $_SESSION['famCodes'] ?? [\cleanSession((string)($_SESSION['famCode'] ?? ''))];
 
             // Get pagination parameters
@@ -220,9 +237,10 @@ final class PostMessage
                 Post::updateCommentByStatusAsPublished($comment['comment_no']);
             }
 
-            // send push notification to all members with the same family code 
+            // send push notification to all members with the same family code
             $data = Post::postByNo($newComment[0]['post_no']);
             $famCode = checkInput($data['postFamCode']);
+            $famCode = is_string($famCode) ? $famCode : '';
             $id = \checkInput($data['id']);
 
             $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
@@ -241,17 +259,17 @@ final class PostMessage
 
 
     // delete comment
-    public static function deleteComment($commentNo): void
+    public static function deleteComment(int|string $commentNo): void
     {
         try {
             CheckToken::tokenCheck();
 
             $userId = $_SESSION['id'];
-            $commentNo = Utility::checkInput($commentNo);
+            $commentNo = self::asIdentifier(Utility::checkInput($commentNo));
 
             // select the id of the comment author
             $commentAuthorId = Post::commentByNo($commentNo)['id'];
-            $commentPostNo = Post::commentByNo($commentNo)['post_no'];
+            $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
 
             // select the id of the post author
             $postAuthorId = Post::postByNo($commentPostNo)['id'];
@@ -282,16 +300,16 @@ final class PostMessage
      * Edits the text of a comment. Same ownership rule as deleteComment:
      * the comment's author, or the author of the post it's on.
      */
-    public static function updateComment($commentNo): void
+    public static function updateComment(int|string $commentNo): void
     {
         try {
             CheckToken::tokenCheck();
 
             $userId = $_SESSION['id'];
-            $commentNo = Utility::checkInput($commentNo);
+            $commentNo = self::asIdentifier(Utility::checkInput($commentNo));
 
             $commentAuthorId = Post::commentByNo($commentNo)['id'];
-            $commentPostNo = Post::commentByNo($commentNo)['post_no'];
+            $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
             $postAuthorId = Post::postByNo($commentPostNo)['id'];
 
             if ($userId !== $commentAuthorId && $userId !== $postAuthorId) {
@@ -300,8 +318,9 @@ final class PostMessage
 
             // PHP only populates $_POST for the literal POST verb — PUT bodies
             // have to be read manually, so the frontend sends JSON for edits.
-            $input = json_decode(file_get_contents('php://input'), true) ?? [];
-            $cleanComment = checkInput($input['comment'] ?? null);
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
+            $cleanComment = checkInput($input['comment'] ?? null) ?? '';
 
             (new Update('comment'))->updateTable(
                 column: 'comment',
@@ -325,13 +344,13 @@ final class PostMessage
     /**
      * Soft-deletes a post. Author-only.
      */
-    public static function deletePost($postNo): void
+    public static function deletePost(int|string $postNo): void
     {
         try {
             CheckToken::tokenCheck();
 
             $userId = $_SESSION['id'];
-            $postNo = Utility::checkInput($postNo);
+            $postNo = self::asIdentifier(Utility::checkInput($postNo));
             $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
 
             if ($userId !== $postAuthorId) {
@@ -357,13 +376,13 @@ final class PostMessage
      * Edits a post's text. Text only — images/poll are unchanged.
      * Author-only.
      */
-    public static function updatePost($postNo): void
+    public static function updatePost(int|string $postNo): void
     {
         try {
             CheckToken::tokenCheck();
 
             $userId = $_SESSION['id'];
-            $postNo = Utility::checkInput($postNo);
+            $postNo = self::asIdentifier(Utility::checkInput($postNo));
             $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
 
             if ($userId !== $postAuthorId) {
@@ -372,8 +391,9 @@ final class PostMessage
 
             // PHP only populates $_POST for the literal POST verb — PUT bodies
             // have to be read manually, so the frontend sends JSON for edits.
-            $input = json_decode(file_get_contents('php://input'), true) ?? [];
-            $cleanMessage = checkInput($input['postMessage'] ?? null);
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
+            $cleanMessage = checkInput($input['postMessage'] ?? null) ?? '';
 
             (new Update('post'))->updateTable(
                 column: 'postMessage',
@@ -437,6 +457,7 @@ final class PostMessage
                 $postOriginName = $data['fullName'];
                 $id = checkInput($data['id']);
                 $famCode = checkInput($data['postFamCode']);
+                $famCode = is_string($famCode) ? $famCode : '';
 
                 $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
                 $url = self::buildPostUrl($postNo);

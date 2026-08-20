@@ -36,11 +36,12 @@ class BaseController
     public static function membersData(): array
     {
         $id = checkInput($_SESSION['id']);
+        $id = is_string($id) ? $id : '';
         $setData = new SingleCustomerData;
         $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work'];
 
         $memberData = $setData->getCustomerData($id, $table);
-        if (!$memberData || empty($memberData['famCode']) || empty($memberData['firstName']) || empty($memberData['lastName'])) {
+        if (!$memberData || !is_array($memberData) || empty($memberData['famCode']) || empty($memberData['firstName']) || empty($memberData['lastName'])) {
             throw new NotFoundException('Unauthorized: No Data Found');
         }
 
@@ -141,8 +142,9 @@ class BaseController
         $setData = new SingleCustomerData;
         $table = ['personal', 'contact', 'otherFamily', 'post', 'profilePics', 'work'];
 
-        $memberData = $setData->getCustomerData($id, $table);
-        if (!$memberData || empty($memberData['famCode']) || empty($memberData['firstName']) || empty($memberData['lastName'])) {
+        $idString = is_string($id) ? $id : '';
+        $memberData = $setData->getCustomerData($idString, $table);
+        if (!$memberData || !is_array($memberData) || empty($memberData['famCode']) || empty($memberData['firstName']) || empty($memberData['lastName'])) {
             throw new NotFoundException('Unauthorized: No Data Found');
         }
 

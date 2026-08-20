@@ -37,7 +37,8 @@ final class FamilyRequestController extends BaseController
       CheckToken::tokenCheck();
       // printArr jS DATA 
 
-      $dataFromJs = json_decode(file_get_contents("php://input"), true);
+      $rawInput = file_get_contents("php://input");
+      $dataFromJs = json_decode($rawInput !== false ? $rawInput : '', true);
 
       if (!$dataFromJs) {
         msgException(301, "Invalid request data.");
@@ -140,7 +141,7 @@ final class FamilyRequestController extends BaseController
         SubmitForm::submitFormDynamicLastId(table: 'notification', field: $notificationData, lastIdCol: 'no');
 
 
-        $url = "{$_ENV["MIX_APP_URLS"]}member/request?req=$theRequesterID&appr=$theApproverID&dec=50&reqCode=$theApproverCode&src=email";
+        $url = "{$_ENV["MIX_APP_URL2"]}member/request?req=$theRequesterID&appr=$theApproverID&dec=50&reqCode=$theApproverCode&src=email";
 
 
         $notificationData['approverDetails'] = $dataFromJs['approver'];
@@ -293,6 +294,7 @@ final class FamilyRequestController extends BaseController
     try {
 
       $id = checkInput($_GET['id']);
+      $id = is_string($id) ? $id : '';
       $details = new SingleCustomerData;
       $result = $details->getCustomerData($id, ['personal', 'contact']);
       if ($result) {

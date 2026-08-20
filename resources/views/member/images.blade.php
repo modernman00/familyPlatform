@@ -261,7 +261,15 @@
                 const imageName = this.getAttribute('data-img');
                 if (!imageName) return;
 
-                if (!confirm('Would you like to set this photo as your profile avatar?')) {
+                const confirmation = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Would you like to set this photo as your profile avatar?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'OK'
+                });
+
+                if (!confirmation.isConfirmed) {
                     return;
                 }
 
@@ -277,14 +285,14 @@
                     const data = await response.json();
                     
                     if (data && (data.status === 200 || data.status === 'success' || data.message)) {
-                        alert('Profile picture updated successfully!');
+                        Swal.fire('Success', 'Profile picture updated successfully!', 'success');
                         window.location.reload();
                     } else {
-                        alert('Could not update profile picture: ' + (data.message || 'Error'));
+                        Swal.fire('Error', 'Could not update profile picture: ' + (data.message || 'Error'), 'error');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while updating your profile picture.');
+                    Swal.fire('Error', 'An error occurred while updating your profile picture.', 'error');
                 }
             });
         });
