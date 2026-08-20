@@ -29,18 +29,6 @@ $router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');
 $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS');
 
 
-// example of new parameter based url
-$router->map(
-  method: 'GET', 
-  route: '/member/test/[a:req]/[a:res]', 
-  target: 'App\controller\members\FamilyRequestController@test', 
-  name: 'testing new route method'
-);
 
-// example of new parameter based url
-$router->map(
-  method: 'GET', 
-  route: '/member/testURL', 
-  target: 'App\controller\members\FamilyRequest@testURL', 
-  name: 'testing new route method2'
-);
+// Temporary Cache Clearing Route
+$router->map('GET', '/clearcache', 'App\controller\ClearCache@clear', 'clear-cache');
