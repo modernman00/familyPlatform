@@ -1,4 +1,4 @@
-const Version = "2.4"; // Fix: bust stale cache so fixed /public/js/index.js (Swal global) reaches clients
+const Version = "2.5"; // Network-first default
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
   "/",
@@ -46,7 +46,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Fetch event - smart caching strategy based on page type
+// Fetch event - use network-first strategy for everything
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -56,14 +56,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Determine caching strategy based on URL
-  if (isAuthenticatedPage(url)) {
-    // Network-first for authenticated pages (security priority)
-    event.respondWith(networkFirstStrategy(request));
-  } else {
-    // Stale-while-revalidate for other content (performance priority)
-    event.respondWith(staleWhileRevalidateStrategy(request));
-  }
+  // Network-first strategy for all pages to ensure fresh content
+  event.respondWith(networkFirstStrategy(request));
 });
 
 // Network-first strategy for authenticated pages

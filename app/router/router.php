@@ -31,4 +31,4 @@ $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS'
 
 
 // Temporary Cache Clearing Route
-$router->map('GET', '/clearcache', 'App\controller\ClearCache@clear', 'clear-cache');
+$router->map('GET|POST', '/clearcache/?', 'App\controller\ClearCache@clear', 'clear-cache');
