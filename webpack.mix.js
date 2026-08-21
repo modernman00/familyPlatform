@@ -115,6 +115,19 @@ mix.babelConfig({
 
 if (mix.inProduction()) {
   mix.version();
+  
+  // Automate Service Worker versioning per deployment
+  mix.then(() => {
+    const fs = require('fs');
+    const swPath = path.join(__dirname, 'service-worker.js');
+    if (fs.existsSync(swPath)) {
+      let swContent = fs.readFileSync(swPath, 'utf8');
+      const newVersion = Date.now().toString();
+      swContent = swContent.replace(/const Version = ".*";/, `const Version = "${newVersion}";`);
+      fs.writeFileSync(swPath, swContent);
+      console.log(`\n[Service Worker] Bumped version to ${newVersion}`);
+    }
+  });
 }
 
 mix.override((config) => {

@@ -47,9 +47,20 @@ RewriteRule ^ index.php [L]
   ExpiresByType image/png "access plus 1 year"
   ExpiresByType text/css "access plus 1 month"
   ExpiresByType application/pdf "access plus 1 month"
-  ExpiresByType text/x-javascript "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
   ExpiresByType application/x-shockwave-flash "access plus 1 month"
   ExpiresByType image/x-icon "access plus 1 year"
-  ExpiresDefault "access plus 2 days"
+  # Removed ExpiresDefault "access plus 2 days" as it causes aggressive caching of dynamic PHP routes
 </IfModule>
+
+# Ensure Service Worker is NEVER cached by the browser or proxies
+<FilesMatch "^service-worker\.js$">
+    FileETag None
+    <IfModule mod_headers.c>
+        Header unset ETag
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </IfModule>
+</FilesMatch>
 
