@@ -8,3 +8,5 @@ $router->map('GET', '/organogram', 'App\controller\members\Organogram@index', 'A
 // JSON API Endpoints for 6-Gen Interactive Graph & Slide-Out Dossier
 $router->map('GET', '/member/organogram/data/[a:id]', 'App\controller\members\Organogram@getGraphData', 'MEMBER_ORGANOGRAM_DATA');
 $router->map('GET', '/member/organogram/node/[i:id]', 'App\controller\members\Organogram@getNodeDetails', 'MEMBER_ORGANOGRAM_NODE_DETAILS');
+$router->map('POST', '/member/organogram/editor/partner', 'App\controller\members\OrganogramEditorController@addPartner', 'MEMBER_ORGANOGRAM_ADD_PARTNER');
+$router->map('POST', '/member/organogram/editor/child', 'App\controller\members\OrganogramEditorController@addChild', 'MEMBER_ORGANOGRAM_ADD_CHILD');

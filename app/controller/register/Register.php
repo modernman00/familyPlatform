@@ -24,6 +24,17 @@ final class Register extends Db
             if (isset($_POST['submit'])) {
                 $registerPostData = $_POST;
                 view('registration/register', ['registerPostData' => $registerPostData]);
+            } elseif (isset($_SESSION['oauth_pending'])) {
+                $oauth = $_SESSION['oauth_pending'];
+                $randomPass = bin2hex(random_bytes(8)) . 'A1!'; // Meets complexity
+                $registerPostData = [
+                    'firstName' => $oauth['firstName'],
+                    'lastName' => $oauth['lastName'],
+                    'email' => $oauth['email'],
+                    'password' => $randomPass,
+                    'confirm_password' => $randomPass
+                ];
+                view('registration/register', ['registerPostData' => $registerPostData]);
             } else {
                 $registerPostData = [];
                 $env = getenv('APP_ENV');
@@ -32,25 +43,8 @@ final class Register extends Db
                         'firstName' => 'John',
                         'lastName' => 'Doe',
                         'famCode' => 'DOE123',
-                        'maritalStatus' => 'Married',
-                        'gender' => 'Male',
-                        'maidenName' => 'Smith',
-                        'spouse_name' => 'Jane Doe',
-                        'spouse_email' => 'jane@example.com',
-                        'spouse_mobile' => '447809650811',
-                        'mother_name' => 'Mary Smith',
-                        'mother_email' => 'mary@example.com',
-                        'mother_mobile' => '447809650812',
-                        'father_name' => 'Bob Doe',
-                        'father_email' => 'bob@example.com',
-                        'father_mobile' => '447809650813',
-                        'children' => '2',
-                        'sibling' => '1',
-                        'country' => 'United Kingdom',
                         'email' => 'john.doe@example.com',
                         'mobile' => '447809650814',
-                        'employmentStatus' => 'Full-time-employment',
-                        'occupation' => 'Software Engineer',
                         'password' => 'Password123!',
                         'confirm_password' => 'Password123!',
                     ];
@@ -112,10 +106,7 @@ final class Register extends Db
             // hash the password and confirm_password fields
             $cleanData = hashPasswordsInArray($cleanData);
 
-            // create the event entry for birthday 
-            $birthdayEvent = $this->createBirthdayEntry($cleanData['day'], $cleanData['month'], $cleanData['firstName'], $cleanData['id']);
-
-            $cleanData = [...$cleanData, ...$birthdayEvent];
+            $cleanData['ai_consent'] = !empty($input['ai_consent']) ? 1 : 0;
 
             // Determine initial family status
             if (isset($input['invite_token']) && !empty($input['invite_token'])) {
@@ -145,6 +136,17 @@ final class Register extends Db
 
             $getTableData = RegisterTableData::createRegisterTable($cleanData);
 
+            if (isset($_SESSION['oauth_pending'])) {
+                $provider = $_SESSION['oauth_pending']['provider'];
+                $providerId = $_SESSION['oauth_pending']['providerId'];
+                if ($provider === 'google') {
+                    $getTableData['account']['google_id'] = $providerId;
+                } else if ($provider === 'facebook') {
+                    $getTableData['account']['facebook_id'] = $providerId;
+                }
+                // Optional: make password null, but we prefilled a secure random one so it's fine.
+            }
+
             $dbConnection = self::connect2();
             $dbConnection->beginTransaction();
 
@@ -155,27 +157,23 @@ final class Register extends Db
                     }
                 }
 
-                //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
-
-                $kidsCount = (int) $cleanData['children'];
-                $siblingsCount = (int) $cleanData['sibling'];
-
-                if ($kidsCount > 0) {
-                    processKidSibling('children', $kidsCount, $cleanData);
-                }
-
-                if ($siblingsCount > 0) {
-                    processKidSibling('sibling', $siblingsCount, $cleanData);
-                }
-
                 $dbConnection->commit();
 
                 SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
 
-
-                $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
-
-                msgSuccess(200, $successMsg);
+                if (isset($_SESSION['oauth_pending'])) {
+                    unset($_SESSION['oauth_pending']);
+                    
+                    sessSet('manager_id', $cleanData['id']);
+                    sessSet('famCode', $cleanData['famCode']);
+                    
+                    \Src\JwtHandler::jwtEncodeDataAndSetCookies(['id' => $cleanData['id'], 'role' => 'member'], $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token');
+                    
+                    msgSuccess(200, "OAuth registration complete. Redirecting to profile...", "/member/profile");
+                } else {
+                    $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
+                    msgSuccess(200, $successMsg);
+                }
 
             } catch (\Throwable $th) {
                 if ($dbConnection->inTransaction()) {
@@ -192,45 +190,20 @@ final class Register extends Db
     /**
      * @return (int|string)[][]
      *
-     * @psalm-return array{min: array{0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 7}, max: array{0: 15, 1: 15, 2: 35, 3: 35, 4: 20, 5: 16, 6: 30, 7: 15, 8: 30}, data: array{0: 'firstName', 1: 'lastName', 2: 'fatherName', 3: 'motherName', 4: 'country', 5: 'mobile', 6: 'email', 7: 'occupation', 8: 'password'}}
+     * @psalm-return array{min: array{0: 2, 1: 2, 2: 2, 3: 7, 4: 7, 5: 7}, max: array{0: 35, 1: 35, 2: 30, 3: 16, 4: 50, 5: 50}, data: array{0: 'firstName', 1: 'lastName', 2: 'country', 3: 'mobile', 4: 'email', 5: 'password'}}
      */
     private function dataToCheck(): array
     {
         return [
-            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
-            'max' => [35, 35, 35, 35, 35, 16, 30, 50, 50],
+            'min' => [2, 2, 2, 7, 7, 7],
+            'max' => [35, 35, 30, 16, 50, 50],
             'data' => [
-                'firstName', 'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password'
             ]
         ];
     }
 
-    private function createBirthdayEntry($day, $month, $name, $id): array
-    {
 
-        // check if the $month is greater than current month and if yes, increase year by one year
-
-        $currentMonth = date('M');
-
-        $year = date('Y');
-        if ($currentMonth < $month) {
-            // If the current month is greater than $month, extend $year by one year
-            $year++;
-        }
-
-        $birthdayTimestamp = strtotime("$year-$month-$day");
-        $birthday = date("Y-m-d", $birthdayTimestamp !== false ? $birthdayTimestamp : null);
-        return [
-            'id' => $id,
-            'eventName' => "$name Birthday",
-            'eventDate' => $birthday,
-            'eventType' => 'Birthday',
-            'eventDescription' => "$name is adding another year",
-            'eventFrequency' => 'Annually',
-            'eventGroup' => 'Global'
-
-        ];
-    }
 
     /**
      * Summary of setId

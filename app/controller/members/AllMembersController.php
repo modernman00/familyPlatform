@@ -64,7 +64,7 @@ final class AllMembersController extends AllMembersData
     //     die();
     // }
     // /allMembers/setProfile?id
-    public function getProfile($id): void
+    public function getProfile(mixed $id): void
     {
         try {
             $sessId = $_SESSION['id'] ?? null;
@@ -109,7 +109,7 @@ final class AllMembersController extends AllMembersData
     }
 
     // /allMembers/removeProfile?removeProfile
-    public function removeProfile($apr, $req): bool
+    public function removeProfile(mixed $apr, mixed $req): bool
     {
         try {
             //  verify token

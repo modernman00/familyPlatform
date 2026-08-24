@@ -124,7 +124,7 @@ final class SettingController extends BaseController
             }
 
             // Original Profile Form Update logic
-            $allowedContact = ['mobile', 'email', 'country', 'occupation'];
+            $allowedContact = ['mobile', 'email', 'country'];
             $updatesContact = [];
             foreach ($allowedContact as $field) {
                 if (isset($_POST[$field])) {
@@ -136,6 +136,21 @@ final class SettingController extends BaseController
                 $updatesContact['id'] = $_POST['id'];
                 $cleanContact = LoginUtility::getSanitisedInputData($updatesContact);
                 UpdateFn::updateMultiple('contact', $cleanContact, 'id');
+            }
+
+            // Work Information Update logic
+            $allowedWork = ['occupation', 'employmentStatus'];
+            $updatesWork = [];
+            foreach ($allowedWork as $field) {
+                if (isset($_POST[$field])) {
+                    $val = trim((string) $_POST[$field]);
+                    $updatesWork[$field] = $val;
+                }
+            }
+            if (!empty($updatesWork)) {
+                $updatesWork['id'] = $_POST['id'];
+                $cleanWork = LoginUtility::getSanitisedInputData($updatesWork);
+                UpdateFn::updateMultiple('work', $cleanWork, 'id');
             }
 
             // Personal table updates (firstName, lastName, marital_status)
@@ -158,10 +173,8 @@ final class SettingController extends BaseController
             }
 
             // SUBMIT THE SPOUSAL INFORMATION
-
             // CHECK IF THE SELECT BOX IS SET TO Yes
             if (($_POST['maritalStatus'] ?? null) === 'Yes - Add Husband' || ($_POST['maritalStatus'] ?? null) === 'Yes - Add Wife') {
-
                 // --- Spouse fields (only if present) ---
                 $spouseAllowed = ['spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name'];
                 $spouse = [];
@@ -172,10 +185,23 @@ final class SettingController extends BaseController
                 if (!empty($spouse)) {
                     $spouse['id'] = $_POST['id'];
                     $cleanSpouseData = LoginUtility::getSanitisedInputData($spouse);
-
                    UpdateFn::updateMultiple('otherFamily', $cleanSpouseData, 'id');
                 }
             }
+
+            // SUBMIT PARENTS INFORMATION
+            $parentsAllowed = ['father_name', 'father_email', 'father_mobile', 'mother_name', 'mother_email', 'mother_mobile', 'mother_maiden'];
+            $parents = [];
+            foreach ($parentsAllowed as $f) {
+                if (isset($_POST[$f]))
+                    $parents[$f] = trim((string) $_POST[$f]);
+            }
+            if (!empty($parents)) {
+                $parents['id'] = $_POST['id'];
+                $cleanParentsData = LoginUtility::getSanitisedInputData($parents);
+                UpdateFn::updateMultiple('otherFamily', $cleanParentsData, 'id');
+            }
+            
             //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
 
             if (isset($_POST['children']) || isset($_POST['sibling'])) {

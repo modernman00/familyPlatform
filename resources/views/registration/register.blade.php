@@ -88,6 +88,50 @@
     .modal-close:hover {
         background: rgba(0,0,0,0.5);
     }
+    
+    .stitch-social-btn {
+        width: 100%;
+        background-color: #fff;
+        color: #374151;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+    .stitch-social-btn:hover {
+        background-color: #F9FAFB;
+    }
+    .stitch-social-btn.facebook {
+        color: #1877F2;
+    }
+    .stitch-social-btn.google {
+        color: #DB4437;
+    }
+    .stitch-divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+        color: #6B7280;
+        font-size: 0.85rem;
+    }
+    .stitch-divider::before,
+    .stitch-divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    .stitch-divider span {
+        padding: 0 12px;
+    }
 </style>
 @endsection
 
@@ -103,6 +147,23 @@
                 </div>
 
                 @include('partials.loader', ['notificationId'=> 'register'])
+
+                @if (!isset($_SESSION['oauth_pending']))
+                <a href="/auth/google" class="stitch-social-btn google">
+                    <i class="bi bi-google"></i> Continue with Google
+                </a>
+                <a href="/auth/facebook" class="stitch-social-btn facebook">
+                    <i class="bi bi-facebook"></i> Continue with Facebook
+                </a>
+
+                <div class="stitch-divider">
+                    <span>OR REGISTER WITH EMAIL</span>
+                </div>
+                @else
+                <div class="alert alert-info text-center fw-bold" style="background-color: #EBF5FF; color: #1E3A8A; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px; margin-bottom: 24px;">
+                    <i class="bi bi-info-circle-fill me-2"></i> Almost done! Please provide your Family Code and Mobile Number to complete registration.
+                </div>
+                @endif
 
                 <form class="register" id="register" enctype="multipart/form-data" autocomplete="off">
                     @php
@@ -125,140 +186,34 @@
                                     '<i class="fas fa-barcode"></i>'
                                 ]
                             ],
-                            'date_of_birth' => 'birthday',
-                            'married_gender' => [
-                                'mixed',
-                                'label' => ['Marital status', 'gender', 'maiden name'],
-                                'attribute' => ['maritalStatus', 'gender', 'maidenName'],
-                                'placeholder' => ['marital status', "gender",'maiden name'],
-                                'inputType' => ['select','select', 'text'],
-                                'value' => [
-                                    isset($registerPostData['maritalStatus']) ? $registerPostData['maritalStatus'] : '',
-                                    isset($registerPostData['gender']) ? $registerPostData['gender'] : '',
-                                    isset($registerPostData['maidenName']) ? $registerPostData['maidenName'] : ''
-                                ],
-                                'options' => [
-                                    ['select', 'Married', 'Single', 'Divorced', 'Seperated', 'Widowed'],
-                                    ['select', 'Male', 'Female'],
-                                ],
-                                'icon' => [
-                                    '<i class="far fa-kiss-wink-heart"></i>',
-                                    '<i class="fas fa-user-friends"></i>',
-                                    '<i class="fas fa-user-friends"></i>',
-                                ]
-                            ],
-                            'spouse' => [
-                                'mixed',
-                                'label' => ["Spouse's name", "Spouse's Email","Spouse's mobile"],
-                                'attribute' => ['spouse_name', 'spouse_email', 'spouse_mobile'],
-                                'placeholder' => ['Toyin', "toyin@gmail.com",'23480364168089'],
-                                'inputType' => ['text','email', 'text'],
-                                'value' => [
-                                    isset($registerPostData['spouse_name']) ? $registerPostData['spouse_name'] : '',
-                                    isset($registerPostData['spouse_email']) ? $registerPostData['spouse_email'] : '',
-                                    isset($registerPostData['spouse_mobile']) ? $registerPostData['spouse_mobile'] : ''
-                                ],
-                                'icon' => [
-                                    '<i class="fas fa-user"></i>',
-                                    '<i class="fas fa-envelope-square"></i>',
-                                    '<i class="fas fa-user"></i>'
-                                ]
-                            ],
-                            'Parent' => 'title',
-                            'mother' => [
-                                'mixed',
-                                'label' => ["mother's name", "mother's email", "mother's mobile"],
-                                'attribute' => ['mother_name', 'mother_email','mother_mobile'],
-                                'placeholder' => ['Toyin Olaogun', "mother@yahoo.com", '23480364168089'],
-                                'inputType' => ['text', 'email', 'text'],
-                                'value' => [
-                                    isset($registerPostData['mother_name']) ? $registerPostData['mother_name'] : '',
-                                    isset($registerPostData['mother_email']) ? $registerPostData['mother_email'] : '',
-                                    isset($registerPostData['mother_mobile']) ? $registerPostData['mother_mobile'] : ''
-                                ],
-                                'icon' => [
-                                    '<i class="fas fa-user"></i>',
-                                    '<i class="fas fa-envelope-square"></i>',
-                                    '<i class="fas fa-mobile-alt"></i>',
-                                ]
-                            ],
-                            'father' => [
-                                'mixed',
-                                'label' => ["Father's name", "Father's email", "Father's mobile"],
-                                'attribute' => ['father_name','father_email', 'father_mobile' ],
-                                'placeholder' => ['Yommy Olaogun',"yomi@email.com", '447809789098'],
-                                'inputType' => ['text', 'text', 'text'],
-                                'value' => [
-                                    isset($registerPostData['father_name']) ? $registerPostData['father_name'] : '',
-                                    isset($registerPostData['father_email']) ? $registerPostData['father_email'] : '',
-                                    isset($registerPostData['father_mobile']) ? $registerPostData['father_mobile'] : ''
-                                ],
-                                'icon' => [
-                                    '<i class="fas fa-user"></i>',
-                                    '<i class="fas fa-envelope-square"></i>',
-                                    '<i class="fas fa-mobile-alt"></i>'
-                                ]
-                            ],
-                            'children and siblings' => 'title',
-                            'childrenAndSiblings' => [
-                                'select-many',
-                                'label' => ['Numbers of children', 'Number of Siblings'],
-                                'attribute' => ['children', 'sibling'],
-                                'value' => [
-                                    isset($registerPostData['children']) ? $registerPostData['children'] : '',
-                                    isset($registerPostData['sibling']) ? $registerPostData['sibling'] : ''
-                                ],
-                                'options' => [
-                                    ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                                    ['select', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                                ],
-                                'icon' => [
-                                    '<i class="fas fa-child"></i>',
-                                    '<i class="fas fa-user-friends"></i>'
-                                ]
-                            ],
                             'Contact Information' => 'title',
-                            'country_email_mobile' => [
+                            'email_mobile' => [
                                 'mixed',
-                                'label' => ["Country", "Email", 'Mobile'],
-                                'attribute' => ['country', 'email', 'mobile'],
-                                'placeholder' => ['Your first line of address', 'toyin@yahoo.com', 'include the area code - 234 or 1 or 44'],
-                                'inputType' => ['select', 'text', 'text'],
+                                'label' => ["Email", "Country", 'Mobile'],
+                                'attribute' => ['email', 'country', 'mobile'],
+                                'placeholder' => ['toyin@yahoo.com', 'e.g. UK', 'include the area code - 234 or 1 or 44'],
+                                'inputType' => ['email', 'select', 'text'],
                                 'value' => [
-                                    isset($registerPostData['country']) ? $registerPostData['country'] : '',
                                     isset($registerPostData['email']) ? $registerPostData['email'] : '',
+                                    isset($registerPostData['country']) ? $registerPostData['country'] : '',
                                     isset($registerPostData['mobile']) ? $registerPostData['mobile'] : ''
                                 ],
                                 'options' => [
-                                    ['select', "United Kingdom", "United States", "Nigeria", "Canada", "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Cape Verde", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo (Brazzaville)", "Congo (Kinshasa)", "Costa Rica", "Côte d'Ivoire", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "North Korea", "South Korea", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"]
+                                    [],
+                                    ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo (Brazzaville)', 'Congo (Kinshasa)', 'Costa Rica', 'Côte d\'Ivoire', 'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'East Timor', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'North Korea', 'South Korea', 'Kosovo', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macedonia', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Swaziland', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania', 'Thailand', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'],
+                                    []
                                 ],
                                 'icon' => [
-                                    '<i class="fas fa-user"></i>',
                                     '<i class="fas fa-envelope-square"></i>',
+                                    '<i class="fas fa-globe"></i>',
                                     '<i class="fas fa-mobile-alt"></i>',
                                 ]
-                            ],
-                            'work_information' => 'title',
-                            'work' => [
-                                'mixed',
-                                'label' => ['employment status', 'Occupation'],
-                                'attribute' => ['employmentStatus', 'occupation'],
-                                'placeholder' => ['null', 'Accountant, Housewife, Student, Business man etc'],
-                                'inputType' => ['select', 'text'],
-                                'value' => [
-                                    isset($registerPostData['employmentStatus']) ? $registerPostData['employmentStatus'] : '',
-                                    isset($registerPostData['occupation']) ? $registerPostData['occupation'] : ''
-                                ],
-                                "options" => [
-                                    ['select', 'Self-employed', 'Unemployed', 'Full-time-employment', 'Student']
-                                ],
-                                'icon' => [
-                                    '<i class="fas fa-info-circle"></i>',
-                                    '<i class="fas fa-user-md"></i>',
-                                ]
-                            ],
-                            'create an account' => 'title',
-                            'account' => [
+                            ]
+                        ];
+
+                        if (!isset($_SESSION['oauth_pending'])) {
+                            $formArray['create an account'] = 'title';
+                            $formArray['account'] = [
                                 'mixed',
                                 'label' => ['Password', 'Confirm password'],
                                 'attribute' => ['password', 'confirm_password'],
@@ -272,14 +227,36 @@
                                     '<i class="fas fa-user-secret"></i>',
                                     '<i class="fas fa-user-secret"></i>',
                                 ]
-                            ],
-                            'checkbox' => 'By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>',
-                            'Submit form'=> 'button',
-                        ];
+                            ];
+                        } else {
+                            echo '<input type="hidden" name="password" value="' . htmlspecialchars($registerPostData['password'] ?? '') . '">';
+                            echo '<input type="hidden" name="confirm_password" value="' . htmlspecialchars($registerPostData['confirm_password'] ?? '') . '">';
+                        }
 
                         $form = new \Src\BuildFormBulma($formArray);
                         $form->genForm();
                     @endphp
+                    
+                    <div class="field mt-4">
+                        <label class="checkbox">
+                            <input type="checkbox" name="checkbox" id="checkbox" required>
+                            By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>
+                        </label>
+                    </div>
+
+                    <div class="field mt-3 mb-4 p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label class="checkbox fw-bold text-dark">
+                            <input type="checkbox" name="ai_consent" id="ai_consent" value="1">
+                            🤖 AI Processing Consent (GDPR)
+                        </label>
+                        <p class="text-muted small mt-1 mb-0" style="margin-left: 24px;">
+                            I consent to having my public family network activity processed by secure AI services to generate family biographies and insights. I understand I can revoke this at any time in my settings.
+                        </p>
+                    </div>
+
+                    <div class="field mt-5">
+                        <button type="submit" id="btnSubmit" class="button is-primary is-fullwidth">Submit form</button>
+                    </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
                 </form>
 

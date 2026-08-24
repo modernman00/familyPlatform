@@ -24,7 +24,7 @@ export const showPersonDetails = async (personData) => {
     familyCode = '', 
     isDeceased = false, 
     bio = '' 
-  } = personData;
+  } = personData || {};
 
   const targetModal = id('personModal');
   const targetModalBody = id('modalBody');

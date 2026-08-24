@@ -338,18 +338,67 @@
 
                 <!-- Legacy Form Data section to prevent data loss -->
                 <div class="legacy-settings-header">
+                  <div class="section-title" style="font-size: 1.1rem;">Work Information</div>
+                  <div class="section-subtitle mb-0">Update your professional details.</div>
+                </div>
+
+                <div class="row g-4 mb-4 mt-1">
+                  <div class="col-md-6">
+                    <label class="form-label">Employment Status</label>
+                    <select class="form-select" id="employmentStatus" name="employmentStatus">
+                      <option disabled {{ empty($accountData['employmentStatus']) ? 'selected' : '' }}>Select status...</option>
+                      <option value="Employed" {{ ($accountData['employmentStatus'] ?? '') === 'Employed' ? 'selected' : '' }}>Employed</option>
+                      <option value="Self-Employed" {{ ($accountData['employmentStatus'] ?? '') === 'Self-Employed' ? 'selected' : '' }}>Self-Employed</option>
+                      <option value="Unemployed" {{ ($accountData['employmentStatus'] ?? '') === 'Unemployed' ? 'selected' : '' }}>Unemployed</option>
+                      <option value="Student" {{ ($accountData['employmentStatus'] ?? '') === 'Student' ? 'selected' : '' }}>Student</option>
+                      <option value="Retired" {{ ($accountData['employmentStatus'] ?? '') === 'Retired' ? 'selected' : '' }}>Retired</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Occupation</label>
+                    <input type="text" class="form-control" id="occupation" name="occupation" value="{{ $accountData['occupation'] ?? '' }}">
+                  </div>
+                </div>
+
+                <div class="legacy-settings-header">
                   <div class="section-title" style="font-size: 1.1rem;">Family & Regional Settings</div>
                   <div class="section-subtitle mb-0">Configure your family tree connections.</div>
                 </div>
 
                 <div class="row g-4 mb-4 mt-1">
-                  <div class="col-md-6">
+                  <div class="col-md-12">
                     <label class="form-label">Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="{{ $accountData['country'] }}">
+                    <input type="text" class="form-control" id="country" name="country" value="{{ $accountData['country'] ?? '' }}">
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Occupation</label>
-                    <input type="text" class="form-control" id="occupation" name="occupation" value="{{ $accountData['occupation'] }}">
+                </div>
+
+                <div class="row g-4 mb-4">
+                  <div class="col-md-4">
+                    <label class="form-label">Father's Name</label>
+                    <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $accountData['father_name'] ?? '' }}" placeholder="Enter father's full name">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Father's Email</label>
+                    <input type="email" class="form-control" id="father_email" name="father_email" value="{{ $accountData['father_email'] ?? '' }}">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Father's Mobile</label>
+                    <input type="text" class="form-control" id="father_mobile" name="father_mobile" value="{{ $accountData['father_mobile'] ?? '' }}">
+                  </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                  <div class="col-md-4">
+                    <label class="form-label">Mother's Name</label>
+                    <input type="text" class="form-control" id="mother_name" name="mother_name" value="{{ $accountData['mother_name'] ?? '' }}" placeholder="Enter mother's full name">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Mother's Maiden Name</label>
+                    <input type="text" class="form-control" id="mother_maiden" name="mother_maiden" value="{{ $accountData['mother_maiden'] ?? '' }}">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Mother's Email</label>
+                    <input type="email" class="form-control" id="mother_email" name="mother_email" value="{{ $accountData['mother_email'] ?? '' }}">
                   </div>
                 </div>
 

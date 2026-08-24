@@ -1,9 +1,13 @@
 <?php
 
 $router->map('GET', '/login', 'App\controller\login\Login@show', 'login');
-
-
 $router->map('POST', '/login', 'App\controller\login\Login@login', 'Customer Login');
+
+// OAuth Routes
+$router->map('GET', '/auth/google', 'App\controller\login\OAuthController@googleRedirect', 'googleAuth');
+$router->map('GET', '/auth/google/callback', 'App\controller\login\OAuthController@googleCallback', 'googleCallback');
+$router->map('GET', '/auth/facebook', 'App\controller\login\OAuthController@facebookRedirect', 'facebookAuth');
+$router->map('GET', '/auth/facebook/callback', 'App\controller\login\OAuthController@facebookCallback', 'facebookCallback');
 
 // WebAuthn Routes
 $router->map('POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');

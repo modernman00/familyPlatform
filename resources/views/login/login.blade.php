@@ -170,6 +170,34 @@
     .styleform_form .form-check:has(#showPassword) {
         display: none !important;
     }
+
+    .stitch-social-btn {
+        width: 100%;
+        background-color: #fff;
+        color: #374151;
+        border: 1px solid #D1D5DB;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+    .stitch-social-btn:hover {
+        background-color: #F9FAFB;
+    }
+    .stitch-social-btn.facebook {
+        color: #1877F2;
+    }
+    .stitch-social-btn.google {
+        color: #DB4437;
+    }
 </style>
 
 <div class="stitch-auth-container">
@@ -206,6 +234,17 @@
             Sign In <i class="bi bi-arrow-right"></i>
         </button>
     </form>
+
+    <div class="stitch-divider">
+        <span>OR</span>
+    </div>
+
+    <a href="/auth/google" class="stitch-social-btn google">
+        <i class="bi bi-google"></i> Continue with Google
+    </a>
+    <a href="/auth/facebook" class="stitch-social-btn facebook">
+        <i class="bi bi-facebook"></i> Continue with Facebook
+    </a>
 
     <div class="stitch-footer">
         Don't have an account? <a href="/register" class="stitch-link">Sign up</a>

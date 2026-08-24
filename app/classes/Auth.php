@@ -21,8 +21,10 @@ class Auth extends JwtHandler
         try {
             if (array_key_exists('waleToken', $_COOKIE) && !empty(trim($this->headers))) {
                     $data = $this->jwtDecodeData($this->headers);
-                    if (isset($data['auth']) && isset($data['data']->id)) {
-                        $fetchData =  $this->fetchUser($data['data']->id);
+                    $isAuth = is_array($data) ? ($data['auth'] ?? null) : ($data->auth ?? null);
+                    $userId = is_array($data) ? ($data['data']->id ?? null) : ($data->data->id ?? null);
+                    if (isset($isAuth) && isset($userId)) {
+                        $fetchData =  $this->fetchUser($userId);
                     } else {
                         msgException(401, "Could not use token to locate users");
                     }

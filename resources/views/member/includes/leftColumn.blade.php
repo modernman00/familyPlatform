@@ -45,6 +45,29 @@
         </div>
     </div>
 
+    <!-- AI Biography Card -->
+    <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px; background-color: var(--card-bg);" x-data="aiBiography('{{ $data['id'] }}')">
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
+            <h5 class="mb-0 fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">
+                <i class="bi bi-robot" style="color: var(--primary-color);"></i> AI Biography
+            </h5>
+        </div>
+        <div class="card-body px-4 pb-4">
+            <template x-if="isLoading">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <p class="small text-muted mt-2 mb-0">Generating insights...</p>
+                </div>
+            </template>
+            <template x-if="!isLoading && biography">
+                <p class="text-muted small" style="line-height: 1.6;" x-text="biography"></p>
+            </template>
+            <template x-if="!isLoading && !biography && message">
+                <p class="text-muted small fst-italic" x-text="message"></p>
+            </template>
+        </div>
+    </div>
+
     <!-- Friend Requests Card -->
     <div class="card border-0 shadow-sm mt-4" style="border-radius: 16px; background-color: var(--card-bg);">
         
