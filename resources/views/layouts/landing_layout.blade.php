@@ -12,6 +12,7 @@
 
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="@yield('title') - Family Platform">
+  @yield('meta_tags')
   <meta property="og:description" content="The Ultimate Social Platform for Your Family.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="{{ getenv('IMG_CONTRACT') }}"> 

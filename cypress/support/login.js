@@ -1,7 +1,7 @@
 // Logs in fully, including the mandatory 2FA step. The 2FA code is read directly
 // from the local dev DB's code_mgt table (via the cypress.config.js task) rather
 // than an inbox, since there's no test-only bypass for the emailed code.
-export function loginFully(email = 'waleolaogunrac@gmail.com', password = 'National2') {
+export function loginFully(email = 'cypress_test@myfamilyplatform.com', password = 'National2') {
     // Clear the brute-force limits via the test-only endpoint before logging in
     cy.request({
         url: '/tests/clear-rate-limit',

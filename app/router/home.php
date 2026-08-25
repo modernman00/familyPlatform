@@ -20,7 +20,7 @@ $router->map('GET', '/tests/clear-rate-limit', function() {
         http_response_code(403);
         die('Forbidden');
     }
-    $db = \App\classes\Db::connect2();
+    $db = \Src\Db::connect2();
     $db->exec("TRUNCATE rate_limiter");
     header('Content-Type: application/json');
     echo json_encode(['status' => 'success', 'message' => 'Rate limit cleared']);

@@ -80,7 +80,7 @@
                 'bind' => ['new']
                 ];
                 $callback = "selectCountFn2";
-                $result = \App\classes\Select::combineSelect($array, $callback, "ONE_IDENTIFIER");
+                $result = \Src\Select::combineSelect($array, $callback, "ONE_IDENTIFIER");
 
 
                 @endphp

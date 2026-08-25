@@ -23,6 +23,7 @@ include_once __DIR__ . "/setting.php";
 include_once __DIR__ . "/images.php";
 include_once __DIR__ . "/approvalRoute.php";
 include_once __DIR__ . "/engagementRoute.php";
+include_once __DIR__ . "/blog.php";
 $router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');
 
 
@@ -32,3 +33,4 @@ $router->map('GET', '/getEmails', 'App\controller\Index@getEmails', 'GET_EMAILS'
 
 // Temporary Cache Clearing Route
 $router->map('GET|POST', '/clearcache/?', 'App\controller\ClearCache@clear', 'clear-cache');
+include_once __DIR__ . "/cron.php";

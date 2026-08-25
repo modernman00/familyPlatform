@@ -12,3 +12,7 @@ $router->map('GET', '/admin/reviewApps/decline', 'App\controller\admin\ReviewApp
 $router->map('GET', '/admin/reviewApps/cancel', 'App\controller\admin\ReviewApps@cancel', 'NEW APPLICATION CANCEL');
 
 $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard');
+
+// BLOG MANAGEMENT
+$router->map('GET', '/admin/blog/create', 'App\controller\admin\AdminBlogController@create', 'admin_blog_create');
+$router->map('POST', '/admin/blog/store', 'App\controller\admin\AdminBlogController@store', 'admin_blog_store');

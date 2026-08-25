@@ -58,7 +58,8 @@ final class RouteDispatch
             'App\controller\login\Forgot',
             'App\controller\login\PassChange',
             'App\controller\ClearCache',
-            'App\controller\login\OAuthController'
+            'App\controller\login\OAuthController',
+            'App\controller\BlogController'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {
