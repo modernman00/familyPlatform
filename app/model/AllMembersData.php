@@ -63,7 +63,8 @@ class AllMembersData extends InnerJoin
                 ':id6' => $id,
             ]);
 
-            return $result->fetchAll();
+            $rows = $result->fetchAll(PDO::FETCH_ASSOC);
+            return $this->uniqueById($rows);
         } catch (PDOException $e) {
             showError($e);
             return [];
