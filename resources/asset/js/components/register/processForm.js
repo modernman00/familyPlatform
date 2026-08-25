@@ -44,7 +44,7 @@ if (formEl) {
 registerHandler({
     formId:'register',
     route:'/register',
-    redirect: 'register/nextStep',
+    redirect: '/login',
     recaptchaAction: 'SUBMIT',
     optionalFields: ['ai_consent', 'surname']
 })

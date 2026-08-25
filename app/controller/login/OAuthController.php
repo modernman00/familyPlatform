@@ -148,6 +148,6 @@ class OAuthController
         // Create JWT cookie
         \Src\JwtHandler::jwtEncodeDataAndSetCookies(['id' => $userId, 'role' => 'member'], $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token');
 
-        redirect('member/profile');
+        redirect('/profilePage');
     }
 }

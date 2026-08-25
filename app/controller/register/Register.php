@@ -70,16 +70,16 @@ final class Register extends Db
         }
     }
 
-    public function nextStep(): void
-    {
-        try {
-            $_SESSION['register'] = false;
-            view('registration/nextStep');
-        } catch (\Throwable $e) {
+    // public function nextStep(): void
+    // {
+    //     try {
+    //         $_SESSION['register'] = false;
+    //         view('registration/nextStep');
+    //     } catch (\Throwable $e) {
 
-            showError($e);
-        }
-    }
+    //         showError($e);
+    //     }
+    // }
 
     /**
      * 
@@ -109,12 +109,7 @@ final class Register extends Db
             $cleanData['ai_consent'] = !empty($input['ai_consent']) ? 1 : 0;
 
             // Determine initial family status
-            if (isset($input['invite_token']) && !empty($input['invite_token'])) {
-                // Future check: validate the invite token against DB
-                $cleanData['familyStatus'] = 'approved';
-            } else {
-                $cleanData['familyStatus'] = 'approved';
-            }
+            $cleanData['familyStatus'] = 'approved';
 
             // create sessions and some variables
            sessSet('id',$cleanData['id']);
@@ -195,10 +190,10 @@ final class Register extends Db
     private function dataToCheck(): array
     {
         return [
-            'min' => [2, 2, 2, 7, 7, 7],
-            'max' => [35, 35, 30, 16, 50, 50],
+            'min' => [2, 2, 2, 7, 7, 7, 4],
+            'max' => [35, 35, 30, 16, 50, 50, 20],
             'data' => [
-                'firstName', 'lastName', 'country', 'mobile', 'email', 'password'
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
             ]
         ];
     }

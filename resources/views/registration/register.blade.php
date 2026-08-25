@@ -271,7 +271,7 @@
                     </div>
 
                     <div class="field mt-5">
-                        <button type="button" name="button" id="button" class="button is-primary is-fullwidth">Submit form</button>
+                        <button type="submit" name="submit" id="btnSubmit" class="button is-primary is-fullwidth">Submit form</button>
                     </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
 
