@@ -18,4 +18,6 @@ $dotEnv = Dotenv::createUnsafeImmutable(BASE_PATH);
 $dotEnv->load();
 
 $logger = LoggerFactory::createWithMailer();
-\Monolog\ErrorHandler::register($logger);
+$handler = new \Monolog\ErrorHandler($logger);
+$handler->registerExceptionHandler();
+$handler->registerFatalHandler();
