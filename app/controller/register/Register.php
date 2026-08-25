@@ -162,7 +162,7 @@ final class Register extends Db
                     sessSet('manager_id', $cleanData['id']);
                     sessSet('famCode', $cleanData['famCode']);
                     
-                    \Src\JwtHandler::jwtEncodeDataAndSetCookies(['id' => $cleanData['id'], 'role' => 'member'], $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token');
+                    \Src\JwtHandler::jwtEncodeDataAndSetCookies(['id' => $cleanData['id'], 'role' => 'users'], $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token');
                     
                     msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
                 } else {
