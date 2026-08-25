@@ -188,7 +188,7 @@ final class ProfilePage extends ProcessImg
             $hasPoll = !empty($_POST['poll_question']);
 
             if (empty($postMessage) && !$hasImage && !$hasPoll) {
-                throw new \Exception("Please add some text, an image, or a poll to your post.");
+                throw new \Src\Exceptions\ValidationException("Please add some text, an image, or a poll to your post.");
             }
 
             $id = checkInput(data: $_SESSION['id']);
