@@ -206,7 +206,8 @@ final class ProfilePage extends ProcessImg
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
-                removeKeys: ['poll_question', 'poll_options', 'token', 'post_no']
+                removeKeys: ['poll_question', 'poll_options', 'token', 'post_no'],
+                optionalFields: ['poll_question', 'poll_options', 'postMessage']
             );
 
     

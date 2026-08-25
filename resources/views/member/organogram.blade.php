@@ -45,7 +45,7 @@
                         <p class="mb-0 text-muted" style="font-size: 0.9rem;">Your tree looks a bit empty. Add your parents and siblings to start building your lineage.</p>
                     </div>
                 </div>
-                <a href="/accountSetting" class="btn btn-primary btn-sm px-3 py-2 fw-bold" style="border-radius: 8px; white-space: nowrap;">Add Family Members</a>
+                <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary btn-sm px-3 py-2 fw-bold" style="border-radius: 8px; white-space: nowrap;">Add Family Members</button>
             </div>
         @endif
 
@@ -65,81 +65,8 @@
                 </ul>
             </div>
 
-            <!-- Dynamic Graph Canvas / Wrapper -->
-            <div class="tree-wrapper" id="treeWrapper">
-                <div class="tree" id="familyTree">
-                    <ul>
-                        <li>
-                            <!-- Generation: Ancestors / Parents -->
-                            <div class="couple-wrapper has-children">
-                                @include('member.includes.treeNode', ['type' => 'Father', 'dataDB' => $orgData['father']])
-                                @include('member.includes.treeNode', ['type' => 'Mother', 'dataDB' => $orgData['mother']])
-                            </div>
-
-                            <ul>
-                                <li>
-                                    @php
-                                        $hasChildren = isset($orgData['children']) && count($orgData['children']) > 0;
-                                    @endphp
-                                    <div class="couple-wrapper {{ $hasChildren ? 'has-children' : '' }}">
-                                        @include('member.includes.treeNode', ['type' => 'Me', 'dataDB' => $data])
-
-                                        @if(!empty($orgData['spouse']['fullName']) || !empty($orgData['spouse']['name']))
-                                            @include('member.includes.treeNode', [
-                                                'type' => 'spouse',
-                                                'dataDB' => $orgData['spouse']
-                                            ])
-                                        @endif
-                                    </div>
-
-                                    @if (isset($orgData['children']) && is_array($orgData['children']) && count($orgData['children']) > 0)
-                                    <ul>
-                                        <li>
-                                            @foreach ($orgData['children'] as $child)
-                                                @include('member.includes.treeNode', ['type' => 'child', 'dataDB' => $child])
-                                            @endforeach
-                                        </li>
-                                    </ul>
-                                    @endif
-                                </li>
-
-                                @isset($orgData['siblings'])
-                                    @foreach ($orgData['siblings'] as $sibling)
-                                    <li>
-                                        @isset($sibling['fullName'])
-                                            @include('member.includes.treeNode', ['type' => 'sibling', 'dataDB' => $sibling])
-                                        
-                                            @php
-                                                $siblingId = $sibling['id'] ?? null;
-                                            @endphp
-
-                                            @if ($siblingId && isset($orgData['sibling_children']))
-                                                @foreach ($orgData['sibling_children'] as $child)
-                                                    @if (isset($child['father_id']) && $child['father_id'] === $siblingId)
-                                                    <ul>
-                                                        <li>
-                                                            @include('member.includes.treeNode', ['type' => $child['relationship'], 'dataDB' => $child])
-                                                        </li>
-                                                    </ul>
-                                                    @endif
-                                                @endforeach
-                                            @endif
-                                        @endisset
-                                    </li>
-                                    @endforeach
-                                @endisset
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Floating Zoom Controls -->
-            <div class="zoom-controls">
-                <button class="zoom-btn" id="zoomIn" title="Zoom In"><i class="bi bi-plus-lg"></i></button>
-                <button class="zoom-btn" id="zoomOut" title="Zoom Out"><i class="bi bi-dash-lg"></i></button>
-                <button class="zoom-btn" id="resetZoom" title="Reset View"><i class="bi bi-arrow-counterclockwise"></i></button>
-            </div>
+            <!-- Dynamic Graph Canvas / Wrapper (Replaced by FamilyTreeJS) -->
+            <div id="tree" style="width: 100%; height: 75vh; border-radius: 12px; background: rgba(255,255,255,0.8); box-shadow: 0 8px 32px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.4);"></div>
         </div>
 
         <!-- Legend -->
@@ -215,6 +142,26 @@
                                         </div>
                                     </div>
                                 </button>
+                                
+                                <button type="button" class="btn btn-outline-info text-start p-3" onclick="selectRelativeType('sibling')" style="border-radius: 12px;">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-people-fill fs-3 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold fs-5">Sibling</div>
+                                            <div class="text-muted small">Brother or sister (requires selecting their parents).</div>
+                                        </div>
+                                    </div>
+                                </button>
+                                
+                                <button type="button" class="btn btn-outline-secondary text-start p-3" onclick="selectRelativeType('parents')" style="border-radius: 12px;">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-hearts fs-3 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold fs-5">Parents</div>
+                                            <div class="text-muted small">Father and/or Mother.</div>
+                                        </div>
+                                    </div>
+                                </button>
                             </div>
                         </div>
 
@@ -248,6 +195,17 @@
                                         <option value="Female">Female</option>
                                         <option value="Male">Male</option>
                                     </select>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Email (Optional)</label>
+                                        <input type="email" name="email" class="form-control" placeholder="Email for auto-link">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Mobile (Optional)</label>
+                                        <input type="text" name="mobile" class="form-control" placeholder="Phone number">
+                                    </div>
                                 </div>
                                 
                                 <div class="row mb-3">
@@ -303,13 +261,85 @@
                                     </select>
                                 </div>
 
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Email (Optional)</label>
+                                        <input type="email" name="email" class="form-control" placeholder="Email for auto-link">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Mobile (Optional)</label>
+                                        <input type="text" name="mobile" class="form-control" placeholder="Phone number">
+                                    </div>
+                                </div>
+
                                 <div class="d-flex justify-content-between mt-4">
                                     <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
                                     <button type="submit" class="btn btn-success fw-bold" id="submitChildBtn">Save Child</button>
                                 </div>
                             </form>
                         </div>
-                        
+
+                        <!-- Step 2: Parents Form -->
+                        <div id="step2-parents" class="d-none">
+                            <form id="addParentsForm">
+                                <input type="hidden" name="base_node_id" id="parentsBaseNodeId">
+                                
+                                <div class="alert alert-info small py-2">
+                                    Provide details for one or both parents. Leave blank if unknown.
+                                </div>
+                                
+                                <!-- Father Section -->
+                                <h6 class="fw-bold text-primary mt-3 border-bottom pb-2">Father's Details</h6>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">First Name</label>
+                                        <input type="text" name="father_first_name" class="form-control form-control-sm" placeholder="John">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Last Name</label>
+                                        <input type="text" name="father_last_name" class="form-control form-control-sm" placeholder="Doe">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Email (Optional)</label>
+                                        <input type="email" name="father_email" class="form-control form-control-sm" placeholder="Email">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Mobile (Optional)</label>
+                                        <input type="text" name="father_mobile" class="form-control form-control-sm" placeholder="Mobile">
+                                    </div>
+                                </div>
+
+                                <!-- Mother Section -->
+                                <h6 class="fw-bold text-primary mt-4 border-bottom pb-2">Mother's Details</h6>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">First Name</label>
+                                        <input type="text" name="mother_first_name" class="form-control form-control-sm" placeholder="Jane">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Last Name</label>
+                                        <input type="text" name="mother_last_name" class="form-control form-control-sm" placeholder="Doe">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Email (Optional)</label>
+                                        <input type="email" name="mother_email" class="form-control form-control-sm" placeholder="Email">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold small">Mobile (Optional)</label>
+                                        <input type="text" name="mother_mobile" class="form-control form-control-sm" placeholder="Mobile">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-light fw-bold" onclick="backToStep1()">Back</button>
+                                    <button type="submit" class="btn btn-secondary fw-bold" id="submitParentsBtn">Save Parents</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -317,6 +347,7 @@
     </div>
 </div>
 
+<script src="https://balkan.app/js/FamilyTree.js"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__FAMILY_CODE__ = '{{ $data['famCode'] ?? '' }}';
@@ -341,19 +372,116 @@
         return legacyId; // Fallback
     }
 
+    // Initialize FamilyTreeJS
+    document.addEventListener("DOMContentLoaded", function () {
+        let familyTreeNodes = [];
+
+        if (graphData && graphData.nodes) {
+            // Build a lookup for children to find parents
+            const childToParents = {};
+            if (graphData.children) {
+                graphData.children.forEach(child => {
+                    const unionId = child.union_id;
+                    const union = graphData.unions.find(u => u.id === unionId);
+                    if (union) {
+                        const p1 = graphData.nodes.find(n => n.id === union.partner_1_id);
+                        const p2 = graphData.nodes.find(n => n.id === union.partner_2_id);
+                        
+                        let fid = null, mid = null;
+                        if (p1 && p1.gender === 'Male') fid = p1.id;
+                        if (p1 && p1.gender === 'Female') mid = p1.id;
+                        
+                        if (p2 && p2.gender === 'Male') fid = p2.id;
+                        if (p2 && p2.gender === 'Female') mid = p2.id;
+                        
+                        childToParents[child.child_id] = { fid, mid };
+                    }
+                });
+            }
+
+            // Map Unions to pids (partners)
+            const nodeToPids = {};
+            if (graphData.unions) {
+                graphData.unions.forEach(u => {
+                    if (!nodeToPids[u.partner_1_id]) nodeToPids[u.partner_1_id] = [];
+                    if (!nodeToPids[u.partner_2_id]) nodeToPids[u.partner_2_id] = [];
+                    nodeToPids[u.partner_1_id].push(u.partner_2_id);
+                    nodeToPids[u.partner_2_id].push(u.partner_1_id);
+                });
+            }
+
+            graphData.nodes.forEach(node => {
+                const parents = childToParents[node.id] || {};
+                familyTreeNodes.push({
+                    id: node.id,
+                    pids: nodeToPids[node.id] || [],
+                    fid: parents.fid || undefined,
+                    mid: parents.mid || undefined,
+                    name: node.full_name,
+                    gender: (node.gender || 'Male').toLowerCase(),
+                    img: node.avatar_url || (node.gender === 'Male' ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png'),
+                    title: node.bio || 'Family Member',
+                    legacyId: node.user_id 
+                });
+            });
+        }
+
+        if (familyTreeNodes.length > 0) {
+            FamilyTree.templates.tommy.node = '<rect x="0" y="0" height="{h}" width="{w}" stroke-width="1" fill="#ffffff" stroke="#e0e0e0" rx="7" ry="7"></rect>';
+            FamilyTree.templates.tommy.field_0 = '<text style="font-size: 16px; font-weight: bold;" fill="#333333" x="125" y="60" text-anchor="middle">{val}</text>';
+            FamilyTree.templates.tommy.field_1 = '<text style="font-size: 12px;" fill="#666666" x="125" y="80" text-anchor="middle">{val}</text>';
+            FamilyTree.templates.tommy.img_0 = '<clipPath id="ulaImg"><circle cx="125" cy="30" r="24"></circle></clipPath><image preserveAspectRatio="xMidYMid slice" clip-path="url(#ulaImg)" xlink:href="{val}" x="101" y="6" width="48" height="48"></image>';
+
+            var family = new FamilyTree(document.getElementById("tree"), {
+                template: "tommy",
+                mode: "light",
+                enableSearch: false,
+                mouseScrool: FamilyTree.action.zoom,
+                nodeBinding: {
+                    field_0: "name",
+                    field_1: "title",
+                    img_0: "img"
+                },
+                nodes: familyTreeNodes
+            });
+            
+            // Intercept clicks to trigger the custom Bootstrap modal flow
+            family.on('click', function (sender, args) {
+                const nodeData = familyTreeNodes.find(n => String(n.id) === String(args.node.id));
+                if (nodeData) {
+                    currentBaseNodeName = nodeData.name;
+                    currentBaseNodeId = nodeData.id;
+                    
+                    if (typeof window.showPersonDetails === 'function') {
+                        const rawNode = graphData.nodes.find(n => String(n.id) === String(args.node.id));
+                        
+                        window.showPersonDetails({
+                            fullName: nodeData.name,
+                            img: nodeData.img,
+                            relation: nodeData.title,
+                            personId: nodeData.legacyId,
+                            familyCode: window.__FAMILY_CODE__,
+                            email: rawNode ? rawNode.email : '',
+                            maritalStatus: rawNode ? rawNode.marital_status : '',
+                            occupation: rawNode ? rawNode.occupation : '',
+                            country: rawNode ? rawNode.country_of_residence : '',
+                            isDeceased: rawNode ? rawNode.is_deceased : false,
+                            isRegistered: !!nodeData.legacyId
+                        });
+                    }
+                }
+                return false; 
+            });
+        } else {
+            document.getElementById('tree').innerHTML = '<div class="alert alert-info m-4">No family tree data available yet. Add relatives to begin.</div>';
+        }
+    });
+
     // Modal Logic
     let currentBaseNodeId = null;
     let currentBaseNodeName = '';
 
     document.getElementById('openAddRelativeModalBtn')?.addEventListener('click', function() {
-        const nameElem = document.querySelector('#personModal .person-name');
-        currentBaseNodeName = nameElem ? nameElem.textContent : 'Relative';
-        
-        const activeNode = document.querySelector('.tree-node.active-clicked') || document.querySelector('.tree-node:hover');
-        let legacyId = activeNode ? (activeNode.dataset.personid || window.__ROOT_USER_ID__) : window.__ROOT_USER_ID__;
-
-        currentBaseNodeId = getGraphNodeId(legacyId, currentBaseNodeName);
-
         document.getElementById('addRelativeBaseName').textContent = currentBaseNodeName;
         document.getElementById('partnerBaseNodeId').value = currentBaseNodeId;
         document.getElementById('childBaseNodeId').value = currentBaseNodeId;
@@ -369,6 +497,24 @@
         var myModal = new bootstrap.Modal(document.getElementById('addRelativeModal'));
         myModal.show();
     });
+
+    function openAddRelativeModalFromBanner() {
+        currentBaseNodeName = 'Yourself';
+        currentBaseNodeId = getGraphNodeId(window.__ROOT_USER_ID__, currentBaseNodeName);
+        
+        document.getElementById('addRelativeBaseName').textContent = currentBaseNodeName;
+        document.getElementById('partnerBaseNodeId').value = currentBaseNodeId;
+        document.getElementById('childBaseNodeId').value = currentBaseNodeId;
+
+        // Reset wizard
+        document.getElementById('step1').classList.remove('d-none');
+        document.getElementById('step2-partner').classList.add('d-none');
+        document.getElementById('step2-child').classList.add('d-none');
+        document.getElementById('addRelativeError').classList.add('d-none');
+
+        var myModal = new bootstrap.Modal(document.getElementById('addRelativeModal'));
+        myModal.show();
+    }
 
 
     // To track active node clicks since showModal is compiled
@@ -388,14 +534,19 @@
             document.getElementById('step2-partner').classList.remove('d-none');
         } else if (type === 'child') {
             document.getElementById('step2-child').classList.remove('d-none');
-            // We need to fetch unions for this node to populate the select box
             fetchUnionsForNode(currentBaseNodeId);
+        } else if (type === 'sibling') {
+            document.getElementById('step2-child').classList.remove('d-none'); // Reuses the child form structurally
+            fetchParentUnionsForNode(currentBaseNodeId);
+        } else if (type === 'parents') {
+            document.getElementById('step2-parents').classList.remove('d-none');
         }
     }
 
     function backToStep1() {
         document.getElementById('step2-partner').classList.add('d-none');
         document.getElementById('step2-child').classList.add('d-none');
+        document.getElementById('step2-parents').classList.add('d-none');
         document.getElementById('step1').classList.remove('d-none');
     }
 
@@ -413,12 +564,11 @@
         const select = document.getElementById('childUnionSelect');
         select.innerHTML = '<option value="">Loading unions...</option>';
         
-        // We'll use the getNodeDetails API
         fetch(`/member/organogram/node/${nodeId}`)
             .then(res => res.json())
             .then(data => {
-                if (data.status === 200 && data.data && data.data.unions) {
-                    const unions = data.data.unions;
+                if (data.status === 'success' && data.message && data.message.unions) {
+                    const unions = data.message.unions;
                     if (unions.length === 0) {
                         select.innerHTML = '<option value="">No partners found. Add a partner first.</option>';
                         document.getElementById('submitChildBtn').disabled = true;
@@ -437,6 +587,33 @@
             });
     }
 
+    function fetchParentUnionsForNode(nodeId) {
+        const select = document.getElementById('childUnionSelect');
+        select.innerHTML = '<option value="">Loading parent unions...</option>';
+        
+        fetch(`/member/organogram/node/${nodeId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.message && data.message.parent_unions) {
+                    const parentUnions = data.message.parent_unions;
+                    if (parentUnions.length === 0) {
+                        select.innerHTML = '<option value="">No parents found. Please add parents first.</option>';
+                        document.getElementById('submitChildBtn').disabled = true;
+                    } else {
+                        select.innerHTML = parentUnions.map(u => `<option value="${u.union_id}">${u.label}</option>`).join('');
+                        document.getElementById('submitChildBtn').disabled = false;
+                    }
+                } else {
+                    select.innerHTML = '<option value="">Failed to load parent unions.</option>';
+                    document.getElementById('submitChildBtn').disabled = true;
+                }
+            })
+            .catch(err => {
+                select.innerHTML = '<option value="">Error loading parent unions.</option>';
+                document.getElementById('submitChildBtn').disabled = true;
+            });
+    }
+
     // Form Submissions
     document.getElementById('addPartnerForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -446,6 +623,11 @@
     document.getElementById('addChildForm').addEventListener('submit', function(e) {
         e.preventDefault();
         submitForm(this, '/member/organogram/editor/child', 'submitChildBtn', 'Saving...');
+    });
+    
+    document.getElementById('addParentsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitForm(this, '/member/organogram/editor/parents', 'submitParentsBtn', 'Saving...');
     });
 
     function submitForm(form, url, btnId, loadingText) {

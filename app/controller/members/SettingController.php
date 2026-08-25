@@ -2,7 +2,7 @@
 namespace App\controller\members;
 
 use App\controller\BaseController;
-use Src\{Utility, LoginUtility, UpdateFn, UpdateData};
+use Src\{Utility, LoginUtility, UpdateFn, UpdateData, Db};
 use Src\functionality\middleware\FileUploadProcess;
 
 
@@ -170,75 +170,184 @@ final class SettingController extends BaseController
                 // Update session name if changed
                 if (isset($cleanPersonal['firstName'])) $_SESSION['fName'] = $cleanPersonal['firstName'];
                 if (isset($cleanPersonal['lastName'])) $_SESSION['lName'] = $cleanPersonal['lastName'];
-            }
 
-            // SUBMIT THE SPOUSAL INFORMATION
-            // CHECK IF THE SELECT BOX IS SET TO Yes
-            if (($_POST['maritalStatus'] ?? null) === 'Yes - Add Husband' || ($_POST['maritalStatus'] ?? null) === 'Yes - Add Wife') {
-                // --- Spouse fields (only if present) ---
-                $spouseAllowed = ['spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name'];
-                $spouse = [];
-                foreach ($spouseAllowed as $f) {
-                    if (isset($_POST[$f]))
-                        $spouse[$f] = trim((string) $_POST[$f]);
-                }
-                if (!empty($spouse)) {
-                    $spouse['id'] = $_POST['id'];
-                    $cleanSpouseData = LoginUtility::getSanitisedInputData($spouse);
-                   UpdateFn::updateMultiple('otherFamily', $cleanSpouseData, 'id');
+                // Sync Name changes to the Graph (family_nodes)
+                if (isset($cleanPersonal['firstName']) || isset($cleanPersonal['lastName'])) {
+                    $db = Db::connect2();
+                    $stmt = $db->prepare("UPDATE family_nodes SET first_name = COALESCE(?, first_name), last_name = COALESCE(?, last_name) WHERE user_id = ?");
+                    $stmt->execute([
+                        $cleanPersonal['firstName'] ?? null, 
+                        $cleanPersonal['lastName'] ?? null, 
+                        $_POST['id']
+                    ]);
                 }
             }
 
-            // SUBMIT PARENTS INFORMATION
-            $parentsAllowed = ['father_name', 'father_email', 'father_mobile', 'mother_name', 'mother_email', 'mother_mobile', 'mother_maiden'];
-            $parents = [];
-            foreach ($parentsAllowed as $f) {
-                if (isset($_POST[$f]))
-                    $parents[$f] = trim((string) $_POST[$f]);
-            }
-            if (!empty($parents)) {
-                $parents['id'] = $_POST['id'];
-                $cleanParentsData = LoginUtility::getSanitisedInputData($parents);
-                UpdateFn::updateMultiple('otherFamily', $cleanParentsData, 'id');
-            }
-            
-            //SUBMIT BOTH THE KIDS AND SIBLING INFORMATION
+            // ---------------------------------------------------------
+            // NEW GRAPH SYNCHRONIZATION FOR RELATIVES
+            // ---------------------------------------------------------
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            if (!empty($familyCode)) {
+                $db = Db::connect2();
+                $db->beginTransaction();
 
-            if (isset($_POST['children']) || isset($_POST['sibling'])) {
+                try {
+                    // 1. Get Base Node
+                    $stmt = $db->prepare("SELECT id, generation_level, gender FROM family_nodes WHERE user_id = ? AND family_code = ?");
+                    $stmt->execute([$_POST['id'], $familyCode]);
+                    $baseNode = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-                $kidsCount = (int) $_POST['children'];
-                $siblingsCount = (int) $_POST['sibling'];
-                unsetPostData($_POST, ['email', 'mobile', 'country', 'occupation', 'spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name', 'children', 'sibling', 'maritalStatus', 'button']);
-                
+                    if ($baseNode) {
+                        $baseNodeId = (int)$baseNode['id'];
+                        $genLevel = (int)$baseNode['generation_level'];
+                        $userGender = $baseNode['gender'] ?? 'Male';
 
-                if ($kidsCount > 0) {
+                        // 2. Spouse
+                        if (($_POST['maritalStatus'] ?? null) === 'Yes - Add Husband' || ($_POST['maritalStatus'] ?? null) === 'Yes - Add Wife') {
+                            $spouseName = trim((string)($_POST['spouse_name'] ?? ''));
+                            if (!empty($spouseName)) {
+                                $spouseGender = ($_POST['maritalStatus'] === 'Yes - Add Husband') ? 'Male' : 'Female';
+                                $sAvatar = ($spouseGender === 'Male') ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png';
+                                $sEmail = trim((string)($_POST['spouse_email'] ?? ''));
+                                $sMobile = trim((string)($_POST['spouse_mobile'] ?? ''));
+                                
+                                $insNode = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, email, mobile) VALUES (?, ?, ?, ?, ?, 'Partner/Spouse', ?, ?)");
+                                $insNode->execute([$familyCode, $spouseName, $spouseGender, $genLevel, $sAvatar, $sEmail, $sMobile]);
+                                $partnerId = (int)$db->lastInsertId();
 
-                    $childrenData= [];
-                    foreach ($_POST as $key => $value) {
-                        if (str_contains($key, 'children')) {
-                            $childrenData[$key] = $value;
+                                $insUnion = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                                $insUnion->execute([$familyCode, $baseNodeId, $partnerId]);
+                            }
+                        }
+
+                        // 3. Parents
+                        $fatherName = trim((string)($_POST['father_name'] ?? ''));
+                        $motherName = trim((string)($_POST['mother_name'] ?? ''));
+                        
+                        if (!empty($fatherName) || !empty($motherName)) {
+                            $checkParent = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ?");
+                            $checkParent->execute([$baseNodeId]);
+                            if (!$checkParent->fetch()) {
+                                $fName = !empty($fatherName) ? $fatherName : 'Unknown Father';
+                                $mName = !empty($motherName) ? $motherName : 'Unknown Mother';
+                                
+                                $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Father')");
+                                $insF->execute([$familyCode, $fName, $genLevel - 1]);
+                                $fId = (int)$db->lastInsertId();
+
+                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother')");
+                                $insM->execute([$familyCode, $mName, $genLevel - 1]);
+                                $mId = (int)$db->lastInsertId();
+
+                                $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                                $insU->execute([$familyCode, $fId, $mId]);
+                                $parentUnionId = (int)$db->lastInsertId();
+
+                                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                                $insLink->execute([$parentUnionId, $baseNodeId]);
+                            }
+                        }
+
+                        // 4. Children
+                        $kidsCount = (int)($_POST['children'] ?? 0);
+                        if ($kidsCount > 0) {
+                            for ($i = 1; $i <= $kidsCount; $i++) {
+                                $cName = trim((string)($_POST["children_name$i"] ?? ''));
+                                if (empty($cName)) continue;
+                                
+                                $cOption = $_POST["children_option$i"] ?? '';
+                                $cEmail = trim((string)($_POST["children_email$i"] ?? ''));
+
+                                $unionIdToLink = null;
+                                if ($cOption === 'With Spouse') {
+                                    $findUnion = $db->prepare("SELECT id FROM family_unions WHERE family_code = ? AND (partner_1_id = ? OR partner_2_id = ?) AND union_type = 'married' LIMIT 1");
+                                    $findUnion->execute([$familyCode, $baseNodeId, $baseNodeId]);
+                                    $u = $findUnion->fetch();
+                                    if ($u) {
+                                        $unionIdToLink = (int)$u['id'];
+                                    } else {
+                                        $spGender = ($userGender === 'Male') ? 'Female' : 'Male';
+                                        $spAvatar = ($spGender === 'Male') ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png';
+                                        
+                                        $insSp = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Unknown Spouse', ?, ?, ?, 'Unknown Spouse')");
+                                        $insSp->execute([$familyCode, $spGender, $genLevel, $spAvatar]);
+                                        $spId = (int)$db->lastInsertId();
+
+                                        $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                                        $insU->execute([$familyCode, $baseNodeId, $spId]);
+                                        $unionIdToLink = (int)$db->lastInsertId();
+                                    }
+                                } else {
+                                    $spGender = ($userGender === 'Male') ? 'Female' : 'Male';
+                                    $spAvatar = ($spGender === 'Male') ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png';
+                                    
+                                    $insSp = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Unknown Partner', ?, ?, ?, 'Unknown Partner')");
+                                    $insSp->execute([$familyCode, $spGender, $genLevel, $spAvatar]);
+                                    $spId = (int)$db->lastInsertId();
+
+                                    $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'other', 1)");
+                                    $insU->execute([$familyCode, $baseNodeId, $spId]);
+                                    $unionIdToLink = (int)$db->lastInsertId();
+                                }
+
+                                $cAvatar = '/resources/images/profile/avatarM.png';
+                                $insChild = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, 'Male', ?, ?, 'Child', ?)");
+                                $insChild->execute([$familyCode, $cName, $genLevel + 1, $cAvatar, $cEmail]);
+                                $childNodeId = (int)$db->lastInsertId();
+
+                                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                                $insLink->execute([$unionIdToLink, $childNodeId]);
+                            }
+                        }
+
+                        // 5. Siblings
+                        $siblingsCount = (int)($_POST['sibling'] ?? 0);
+                        if ($siblingsCount > 0) {
+                            $checkParent = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ? LIMIT 1");
+                            $checkParent->execute([$baseNodeId]);
+                            $pUnionRow = $checkParent->fetch();
+                            $pUnionId = $pUnionRow ? (int)$pUnionRow['union_id'] : null;
+
+                            if (!$pUnionId) {
+                                $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Unknown Father', 'Male', ?, '/resources/images/profile/avatarM.png', 'Father')");
+                                $insF->execute([$familyCode, $genLevel - 1]);
+                                $fId = (int)$db->lastInsertId();
+
+                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Unknown Mother', 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother')");
+                                $insM->execute([$familyCode, $genLevel - 1]);
+                                $mId = (int)$db->lastInsertId();
+
+                                $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
+                                $insU->execute([$familyCode, $fId, $mId]);
+                                $pUnionId = (int)$db->lastInsertId();
+
+                                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                                $insLink->execute([$pUnionId, $baseNodeId]);
+                            }
+
+                            for ($i = 1; $i <= $siblingsCount; $i++) {
+                                $sName = trim((string)($_POST["sibling_name$i"] ?? ''));
+                                if (empty($sName)) continue;
+                                $sEmail = trim((string)($_POST["sibling_email$i"] ?? ''));
+                                
+                                $insSib = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Sibling', ?)");
+                                $insSib->execute([$familyCode, $sName, $genLevel, $sEmail]);
+                                $sibNodeId = (int)$db->lastInsertId();
+
+                                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
+                                $insLink->execute([$pUnionId, $sibNodeId]);
+                            }
                         }
                     }
-                    $childrenData['id'] = $_POST['id'];
 
-                    $cleanChildrenData = LoginUtility::getSanitisedInputData($childrenData);
-
-                    processKidSibling('children', $kidsCount, $cleanChildrenData);
-                }
-
-                if ($siblingsCount > 0) {
-                    $siblingsData= [];
-                    foreach ($_POST as $key => $value) {
-                        if (str_contains($key, 'sibling')) {
-                            $siblingsData[$key] = $value;
-                        }
-                    }
-                    $siblingsData['id'] = $_POST['id'];
-
-                    $cleanSiblingData = LoginUtility::getSanitisedInputData($siblingsData);
-                    processKidSibling('sibling', $siblingsCount, $cleanSiblingData);
+                    $db->commit();
+                } catch (\Exception $e) {
+                    $db->rollBack();
+                    throw $e;
                 }
             }
+
+            unsetPostData($_POST, ['email', 'mobile', 'country', 'occupation', 'spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name', 'children', 'sibling', 'maritalStatus', 'button']);
 
             msgSuccess(200, "New Update was successfully submitted");
         } catch (\Throwable $th) {

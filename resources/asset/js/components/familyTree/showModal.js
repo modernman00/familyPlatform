@@ -150,3 +150,4 @@ const initModalClosers = () => {
 };
 
 initModalClosers();
+window.showPersonDetails = showPersonDetails;

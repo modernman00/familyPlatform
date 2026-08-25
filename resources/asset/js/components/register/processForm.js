@@ -19,10 +19,13 @@ const formData = new FormHelper(formInputArr);
             dataToCheckRegister.maxLength.max
         );
         // check if password matches real time
-        formData.matchInput(
-            dataToCheckRegister.password.pwd,
-            dataToCheckRegister.password.pwd2,
-        );
+        const pwdEl = document.getElementById(dataToCheckRegister.password.pwd);
+        if (pwdEl) {
+            formData.matchInput(
+                dataToCheckRegister.password.pwd,
+                dataToCheckRegister.password.pwd2,
+            );
+        }
 
         // formData.duplicate('firstName_id', 'alias_id')
 
@@ -37,7 +40,7 @@ const formData = new FormHelper(formInputArr);
 registerHandler({
     formId:'register',
     route:'/register',
-    buttonId: 'button',
+    buttonId: 'btnSubmit',
     redirect: 'register/nextStep',
     recaptchaAction: 'SUBMIT',
     optionalFields: []

@@ -113,7 +113,7 @@ final class Register extends Db
                 // Future check: validate the invite token against DB
                 $cleanData['familyStatus'] = 'approved';
             } else {
-                $cleanData['familyStatus'] = 'pending';
+                $cleanData['familyStatus'] = 'approved';
             }
 
             // create sessions and some variables
@@ -169,10 +169,10 @@ final class Register extends Db
                     
                     \Src\JwtHandler::jwtEncodeDataAndSetCookies(['id' => $cleanData['id'], 'role' => 'member'], $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token');
                     
-                    msgSuccess(200, "OAuth registration complete. Redirecting to profile...", "/member/profile");
+                    msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
                 } else {
-                    $successMsg = "Hello $firstName - Your application has been successfully submitted. Our team will review and email you a decision within the next 24 hours.";
-                    msgSuccess(200, $successMsg);
+                    $successMsg = "Hello $firstName - Your registration is complete! Please log in to verify your email and access your account.";
+                    msgSuccess(200, $successMsg, "/login");
                 }
 
             } catch (\Throwable $th) {

@@ -95,7 +95,7 @@
     }
 
     .styleform_form .form-control:focus {
-        border-color: #8B5CF6;
+        border-color: #0a66c2;
         box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
     }
 
@@ -121,12 +121,12 @@
         height: 16px;
         border-radius: 4px;
         border: 1px solid #D1D5DB;
-        accent-color: #8B5CF6;
+        accent-color: #0a66c2;
         cursor: pointer;
     }
 
     .stitch-link {
-        color: #8B5CF6;
+        color: #0a66c2;
         text-decoration: none;
         font-weight: 600;
     }
@@ -137,7 +137,7 @@
 
     .stitch-submit {
         width: 100%;
-        background-color: #8B5CF6;
+        background-color: #0a66c2;
         color: white;
         border: none;
         border-radius: 8px;
@@ -153,7 +153,7 @@
     }
 
     .stitch-submit:hover {
-        background-color: #7C3AED;
+        background-color: #004182;
     }
 
     .stitch-footer {

@@ -18,12 +18,12 @@
 </p>
 
 <p style="margin-bottom: 20px;">
-    We are thrilled to let you know that we've securely received your application! Our admin team is currently reviewing your details, and you can expect an update from us within the next <strong>24 hours</strong>.
+    We are thrilled to welcome you to the FamilyPlatform! Your registration has been successfully processed and your account is now active.
 </p>
 
 <div style="background-color: #f1f5f9; border-left: 4px solid #0a66c2; padding: 15px 20px; border-radius: 4px; margin-bottom: 20px;">
     <p style="margin: 0; color: #334155; font-size: 15px;">
-        <strong>Next Steps:</strong> Once your application is approved, you will be able to log in securely and access the full family social network.
+        <strong>Next Steps:</strong> Please return to the login page and sign in with your email and password. For your security, a verification code will be sent to your email to confirm your identity during your first login.
     </p>
 </div>
 

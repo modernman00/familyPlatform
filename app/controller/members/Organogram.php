@@ -86,20 +86,28 @@ final class Organogram extends SingleCustomerData
      * API: Get complete details for a single node (Slide-out Heritage Dossier)
      * @param int|string $nodeId
      */
-    public function getNodeDetails(int|string $nodeId): void
+    public function getNodeDetails(int|string $id): void
     {
         try {
-            $nodeIdInt = (int) $nodeId;
             $db = Db::connect2();
 
-            $stmt = $db->prepare("SELECT * FROM family_nodes WHERE id = ?");
-            $stmt->execute([$nodeIdInt]);
+            if (is_numeric($id)) {
+                $stmt = $db->prepare("SELECT * FROM family_nodes WHERE id = ?");
+                $stmt->execute([(int)$id]);
+            } else {
+                $familyCode = $_SESSION['famCode'] ?? '';
+                $stmt = $db->prepare("SELECT * FROM family_nodes WHERE user_id = ? AND family_code = ?");
+                $stmt->execute([$id, $familyCode]);
+            }
+            
             $node = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$node) {
                 msgException(404, 'Node not found');
                 return;
             }
+
+            $nodeIdInt = (int) $node['id'];
 
             // Fetch Unions (including past divorces & current spouse)
             $unionStmt = $db->prepare("
@@ -161,10 +169,35 @@ final class Organogram extends SingleCustomerData
             $parentStmt->execute([$nodeIdInt]);
             $parents = $parentStmt->fetchAll(\PDO::FETCH_ASSOC);
 
+            // Fetch Parent Unions (Unions where this node is a child)
+            $parentUnionStmt = $db->prepare("
+                SELECT u.*, 
+                    p1.first_name AS p1_first, p1.last_name AS p1_last, p1.avatar_url AS p1_avatar,
+                    p2.first_name AS p2_first, p2.last_name AS p2_last, p2.avatar_url AS p2_avatar
+                FROM family_node_children fnc
+                JOIN family_unions u ON u.id = fnc.union_id
+                JOIN family_nodes p1 ON p1.id = u.partner_1_id
+                JOIN family_nodes p2 ON p2.id = u.partner_2_id
+                WHERE fnc.child_id = ?
+            ");
+            $parentUnionStmt->execute([$nodeIdInt]);
+            $parentUnionsRaw = $parentUnionStmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            $formattedParentUnions = [];
+            foreach ($parentUnionsRaw as $pu) {
+                $p1Name = trim($pu['p1_first'] . ' ' . $pu['p1_last']);
+                $p2Name = trim($pu['p2_first'] . ' ' . $pu['p2_last']);
+                $formattedParentUnions[] = [
+                    'union_id' => (int)$pu['id'],
+                    'label' => ($p1Name ?: 'Unknown') . ' & ' . ($p2Name ?: 'Unknown')
+                ];
+            }
+
             $response = [
                 'node' => $node,
                 'unions' => $formattedUnions,
                 'parents' => $parents,
+                'parent_unions' => $formattedParentUnions
             ];
 
             msgSuccess(200, $response);
@@ -182,7 +215,19 @@ final class Organogram extends SingleCustomerData
         $db = Db::connect2();
 
         // 1. Fetch all nodes for this family
-        $stmt = $db->prepare("SELECT * FROM family_nodes WHERE family_code = ? ORDER BY generation_level ASC, id ASC");
+        $stmt = $db->prepare("
+            SELECT fn.*, 
+                   CASE 
+                       WHEN pp.img IS NOT NULL AND pp.img != '' AND pp.img NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', pp.img)
+                       WHEN pp.img IS NOT NULL AND pp.img != '' THEN pp.img
+                       WHEN fn.avatar_url IS NOT NULL AND fn.avatar_url != '' AND fn.avatar_url NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', fn.avatar_url)
+                       ELSE fn.avatar_url
+                   END AS avatar_url 
+            FROM family_nodes fn 
+            LEFT JOIN profilePics pp ON fn.user_id = pp.id 
+            WHERE fn.family_code = ? 
+            ORDER BY fn.generation_level ASC, fn.id ASC
+        ");
         $stmt->execute([$familyCode]);
         $nodes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
@@ -240,7 +285,7 @@ final class Organogram extends SingleCustomerData
                 'location' => $node['location'] ?? null,
                 'email' => $node['email'] ?? null,
                 'mobile' => $node['mobile'] ?? null,
-                'avatar' => $avatar,
+                'avatar_url' => $avatar,
                 'generation_level' => (int) ($node['generation_level'] ?? 0),
                 'voice_capsule_url' => $node['voice_capsule_url'] ?? null,
                 'is_root' => ($rootNode && (int)$node['id'] === (int)$rootNode['id'])
@@ -300,6 +345,45 @@ final class Organogram extends SingleCustomerData
 
         if ($existingRootId) {
             return; // Already initialized
+        }
+
+        // AUTO-CLAIM ALGORITHM
+        // Try to find if a relative already manually created a node for this user
+        $firstName = trim((string)($memberData['firstName'] ?? ''));
+        $lastName = trim((string)($memberData['lastName'] ?? ''));
+        $email = trim((string)($memberData['email'] ?? ''));
+        $mobile = trim((string)($memberData['mobile'] ?? ''));
+
+        $claimQuery = "SELECT id FROM family_nodes WHERE family_code = ? AND user_id IS NULL AND (";
+        $claimConditions = [];
+        $claimParams = [$familyCode];
+
+        if (!empty($email)) {
+            $claimConditions[] = "email = ?";
+            $claimParams[] = $email;
+        }
+        if (!empty($mobile)) {
+            $claimConditions[] = "mobile = ?";
+            $claimParams[] = $mobile;
+        }
+        if (!empty($firstName) && !empty($lastName)) {
+            $claimConditions[] = "(first_name = ? AND last_name = ?)";
+            $claimParams[] = $firstName;
+            $claimParams[] = $lastName;
+        }
+
+        if (!empty($claimConditions)) {
+            $claimQuery .= implode(' OR ', $claimConditions) . ") LIMIT 1";
+            $claimStmt = $db->prepare($claimQuery);
+            $claimStmt->execute($claimParams);
+            $claimedNodeId = $claimStmt->fetchColumn();
+
+            if ($claimedNodeId) {
+                // Link the user to the existing node seamlessly!
+                $updateClaim = $db->prepare("UPDATE family_nodes SET user_id = ? WHERE id = ?");
+                $updateClaim->execute([$userId, $claimedNodeId]);
+                return; // Stop execution to prevent spawning duplicate parents/grandparents
+            }
         }
 
         // 1. Insert Root User Node (Generation 0)
