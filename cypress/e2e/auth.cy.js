@@ -1,8 +1,16 @@
 describe('Authentication Flow', () => {
+    beforeEach(() => {
+        // Clear rate limits before running auth tests
+        cy.request({
+            url: '/tests/clear-rate-limit',
+            failOnStatusCode: false
+        });
+    });
+
     it('successfully logs in with valid credentials', () => {
         cy.visit('/login');
         cy.get('form#login').should('be.visible');
-        cy.get('input[name="email"]').type('cypress_test@myfamilyplatform.com');
+        cy.get('input[name="email"]').type('waleolaogunrac@gmail.com');
         cy.get('input[name="password"]').type('National2');
         cy.get('button#button').click();
         

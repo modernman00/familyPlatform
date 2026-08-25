@@ -31,17 +31,20 @@ const formData = new FormHelper(formInputArr);
 
     } catch (error) {
         console.log(error)
-
     }
 })();
 
-
+const formEl = document.getElementById('register');
+if (formEl) {
+    formEl.addEventListener('submit', (e) => {
+        e.preventDefault();
+    });
+}
 
 registerHandler({
     formId:'register',
     route:'/register',
-    buttonId: 'btnSubmit',
     redirect: 'register/nextStep',
     recaptchaAction: 'SUBMIT',
-    optionalFields: []
+    optionalFields: ['ai_consent', 'surname']
 })
