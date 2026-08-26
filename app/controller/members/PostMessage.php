@@ -208,10 +208,14 @@ final class PostMessage
         );
 
         if (!empty($newPost)) {
-            Pusher::broadcast('posts-channel', 'new-post', $newPost);
-            
             foreach ($newPost as $post) {
                 Post::updatePostByStatusAsPublished($post['post_no']);
+            }
+            
+            try {
+                Pusher::broadcast('posts-channel', 'new-post', $newPost);
+            } catch (\Throwable $th) {
+                error_log("Pusher post broadcast failed: " . $th->getMessage());
             }
         }
     }
@@ -231,10 +235,14 @@ final class PostMessage
         $newComment = self::fetchNewMsg(fetchFunction: [Post::class, 'getUnpublishedComment']);
 
         if (!empty($newComment)) {
-            Pusher::broadcast('comments-channel', 'new-comment', $newComment);
-            
             foreach ($newComment as $comment) {
                 Post::updateCommentByStatusAsPublished($comment['comment_no']);
+            }
+
+            try {
+                Pusher::broadcast('comments-channel', 'new-comment', $newComment);
+            } catch (\Throwable $th) {
+                error_log("Pusher comment broadcast failed: " . $th->getMessage());
             }
 
             // send push notification to all members with the same family code
