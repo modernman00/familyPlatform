@@ -53,13 +53,8 @@ final class ProfilePage extends ProcessImg
 
     public function __construct()
     {
-        try {
-            $this->id = $this->authenticate();
-            $this->profileService = new ProfilepageService();
-
-        } catch (Exception $e) {
-            showError($e);
-        }
+        $this->id = $this->authenticate();
+        $this->profileService = new ProfilepageService();
     }
 
     private function authenticate(): mixed
