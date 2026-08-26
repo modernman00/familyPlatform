@@ -23,7 +23,7 @@ use Src\functionality\{
     SubmitPostData
 };
 
-use App\Services\ProfilepageService;
+use App\services\ProfilepageService;
 
 use App\classes\{ProcessImg, Insert};
 // use App\classes\VerifyToken;

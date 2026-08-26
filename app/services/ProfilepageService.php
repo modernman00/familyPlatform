@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\services;
 
 use App\model\SingleCustomerData;
 use App\model\Post;

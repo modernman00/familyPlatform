@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller;
 
-use App\Services\SocialMediaAgentService;
+use App\services\SocialMediaAgentService;
 
 class CronController
 {

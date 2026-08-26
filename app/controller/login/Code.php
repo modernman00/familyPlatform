@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller\login;
 
-use App\Services\LoginAnomalyService;
+use App\services\LoginAnomalyService;
 use Src\{ Utility };
 use Src\functionality\PwdRecoveryCodeFunctionality;
 

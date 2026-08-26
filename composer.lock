@@ -2303,16 +2303,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v1.9.16",
+            "version": "v1.9.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "cf6f54068700f29d0fe3324fe3fdf3dc4469c830"
+                "reference": "c973ff662b0cdced0aefbac5cc499fd704323786"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/cf6f54068700f29d0fe3324fe3fdf3dc4469c830",
-                "reference": "cf6f54068700f29d0fe3324fe3fdf3dc4469c830",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/c973ff662b0cdced0aefbac5cc499fd704323786",
+                "reference": "c973ff662b0cdced0aefbac5cc499fd704323786",
                 "shasum": ""
             },
             "require": {
@@ -2366,10 +2366,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.9.16",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.9.17",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2026-08-25T23:44:36+00:00"
+            "time": "2026-08-26T01:19:34+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -12917,16 +12917,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3",
         "ext-gd": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "8.4.3"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
