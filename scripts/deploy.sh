@@ -61,7 +61,7 @@ if [ -n "$TEST_SCRIPT" ]; then
     
     if [ $TEST_RESULT -ne 0 ]; then
         echo -e "\n⚠️  WARNING: Some tests failed."
-        read -p "Do you want to force the deployment anyway? (y/n): " force_deploy < /dev/tty
+        read -p "Do you want to force the deployment anyway? (y/n): " force_deploy
         if [[ "$force_deploy" != "y" ]]; then
             echo "🛑 Deployment aborted."
             exit 1
@@ -105,9 +105,9 @@ php scripts/audit_deploy.php "$DEPLOY_COMMIT" "$DEPLOY_USER" || echo "⚠️  Au
 echo "=================================================="
 echo "🐙 4/4: GitHub Sync"
 echo "=================================================="
-read -p "Do you want to securely commit and push your safe files to GitHub? (y/n): " push_github < /dev/tty
+read -p "Do you want to securely commit and push your safe files to GitHub? (y/n): " push_github
 if [[ "$push_github" == "y" ]]; then
-    read -p "Enter a commit message: " commit_msg < /dev/tty
+    read -p "Enter a commit message: " commit_msg
     
     echo "Staging safe files (unsafe files blocked by .gitignore)..."
     git add .
