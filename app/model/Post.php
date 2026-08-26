@@ -64,19 +64,30 @@ final class Post extends Select
 
     public static function getAllPostProfilePics(): array
     {
-        return InnerJoin::joinAll2(para: 'id', table: ['profilePics', 'post'], orderBy: 'post.post_no');
+        $query = "SELECT post.*, profilePics.img 
+                  FROM post 
+                  LEFT JOIN profilePics ON post.id = profilePics.id 
+                  ORDER BY post.post_no DESC";
+        return parent::selectFn2($query);
     }
 
     public function getAllPostProfilePics2(): array
     {
-        $inner = new InnerJoin;
-        return $inner->joinAll(para: 'id', table: ['profilePics', 'post'], orderBy: 'post.date_created');
+        $query = "SELECT post.*, profilePics.img 
+                  FROM post 
+                  LEFT JOIN profilePics ON post.id = profilePics.id 
+                  ORDER BY post.date_created ASC";
+        return parent::selectFn2($query);
     }
 
 
     public static function getAllCommentProfilePics(): array
     {
-        return InnerJoin::joinAll2(para: 'id', table: ['profilePics', 'comment'], orderBy: 'comment.date_created');
+        $query = "SELECT comment.*, profilePics.img 
+                  FROM comment 
+                  LEFT JOIN profilePics ON comment.id = profilePics.id 
+                  ORDER BY comment.date_created ASC";
+        return parent::selectFn2($query);
     }
 
     /**
