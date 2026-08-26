@@ -111,6 +111,26 @@ final class RouteDispatch
             session_destroy();
             redirect('login');
         }
+    } catch (\Src\Exceptions\ValidationException $e) {
+        $isApi = false;
+        if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            $isApi = true;
+        } elseif (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $isApi = true;
+        } elseif (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
+            $isApi = true;
+        } elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            $isApi = true;
+        }
+
+        http_response_code(400);
+        if ($isApi) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage(), 'code' => 400, 'status' => 'error'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } else {
+            // For traditional forms, we could flash the error and redirect back. For now, show an error view.
+            view('errors.404', ['message' => $e->getMessage()]);
+        }
     } catch (HttpException $e) {          // your custom layer
         showError($e);
     } catch (NotFoundException $e) {      // 404 you throw above
