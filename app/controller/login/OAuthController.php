@@ -117,7 +117,7 @@ class OAuthController
             $update->execute([$providerId, $userId]);
 
             // Log them in
-            $this->loginUser((int)$userId);
+            $this->loginUser((string)$userId);
         } else {
             // New user, store in session and redirect to register
             $_SESSION['oauth_pending'] = [
@@ -132,7 +132,7 @@ class OAuthController
         }
     }
 
-    private function loginUser(int $userId): void
+    private function loginUser(string $userId): void
     {
         $db = Db::connect2();
         // Fetch family code

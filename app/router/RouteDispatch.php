@@ -110,12 +110,7 @@ final class RouteDispatch
         } else {
             error_log('UNAUTHORISED REDIRECT: ' . $e->getMessage());
             session_destroy();
-            try {
-                $columns = \Src\Db::connect2()->query("SHOW COLUMNS FROM " . ($_ENV['DB_TABLE_LOGIN'] ?? 'account'))->fetchAll(\PDO::FETCH_ASSOC);
-                die('TAT DEBUG SCHEMA: ' . json_encode($columns));
-            } catch (\Exception $ex) {
-                die('TAT DEBUG - Auth Failed: ' . $e->getMessage());
-            }
+            redirect('login');
         }
     } catch (\Src\Exceptions\ValidationException $e) {
         $isApi = false;
