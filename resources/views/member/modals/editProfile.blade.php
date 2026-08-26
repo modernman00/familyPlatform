@@ -1,3 +1,5 @@
+@php $data = $data ?? []; @endphp
+
     @php
         $token = $_SESSION['token'] ?? '';
         $_SESSION['EDIT_PROFILE_ID'] = $_SESSION['id'];
@@ -190,14 +192,14 @@
                             <div class="col-md-6">
                                 <label for="firstName" class="form-label">First Name</label>
                                 <input type="text" class="form-control" id="firstName" name="firstName" 
-                                    value="{{ $data['firstName'] }}">
+                                    value="{{ $data['firstName'] ?? '' }}">
                                 <small id="firstName_error" class="text-danger ps-2 small"></small>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="lastName" class="form-label">Last Name</label>
                                 <input type="text" class="form-control" id="lastName" name="lastName" 
-                                    value="{{ $data['lastName'] }}">
+                                    value="{{ $data['lastName'] ?? '' }}">
                                 <small id="lastName_error" class="text-danger ps-2 small"></small>
                             </div>
 
@@ -205,7 +207,7 @@
                                 <label for="marital_status" class="form-label">Relationship Status</label>
                                 <select class="form-select" id="marital_status" name="marital_status">
                                     @foreach (['Single', 'Dating', 'Married', 'Divorced', 'Widowed'] as $option)
-                                        <option value="{{ $option }}" {{ $data['marital_status'] === $option ? 'selected' : '' }}>{{ $option }}</option>
+                                        <option value="{{ $option }}" {{ ($data['marital_status'] ?? '') === $option ? 'selected' : '' }}>{{ $option }}</option>
                                     @endforeach
                                 </select>
                                 <small id="marital_status_error" class="text-danger ps-2 small"></small>
@@ -221,21 +223,21 @@
                             <div class="col-md-6">
                                 <label for="country" class="form-label">Country</label>
                                 <input type="text" class="form-control" id="country" name="country" 
-                                    value="{{ $data['country'] }}">
+                                    value="{{ $data['country'] ?? '' }}">
                                 <small id="country_error" class="text-danger ps-2 small"></small>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="mobile" class="form-label">Mobile</label>
                                 <input type="text" class="form-control" id="mobile" name="mobile" 
-                                    value="{{ $data['mobile'] }}">
+                                    value="{{ $data['mobile'] ?? '' }}">
                                 <small id="mobile_error" class="text-danger ps-2 small"></small>
                             </div>
 
                             <div class="col-12">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email" name="email" 
-                                    value="{{ $data['email'] }}">
+                                    value="{{ $data['email'] ?? '' }}">
                                 <small id="email_error" class="text-danger ps-2 small"></small>
                             </div>
                         </div>

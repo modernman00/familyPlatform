@@ -1,7 +1,8 @@
 <?php
 namespace App\controller;
 
-use Src\{Select, Insert};
+use Src\Select;
+use App\classes\Insert;
 use Src\Exceptions\NotFoundException;
 use Src\Update;
 
