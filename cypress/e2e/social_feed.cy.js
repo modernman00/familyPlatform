@@ -78,8 +78,12 @@ describe('Social Feed Interactions', () => {
         });
 
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
-        cy.contains('button', 'Comment').first().click({ force: true });
-        cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').type(`${commentContent}{enter}`);
+        cy.get('body').then(($body) => {
+            if (!$body.find('input.form-control.rounded-pill[placeholder*="Write a comment"]').first().is(':visible')) {
+                cy.contains('button', 'Comment').first().click({ force: true });
+            }
+        });
+        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first().should('be.visible').type(`${commentContent}{enter}`);
 
         // On success the new comment is pushed straight into Alpine state, so it renders immediately
         cy.get('body').should('contain.text', commentContent);
@@ -95,7 +99,11 @@ describe('Social Feed Interactions', () => {
             }
         });
 
-        cy.contains('button', 'Comment').first().click({ force: true });
+        cy.get('body').then(($body) => {
+            if (!$body.find('input[placeholder="Write a comment..."]').first().is(':visible')) {
+                cy.contains('button', 'Comment').first().click({ force: true });
+            }
+        });
         cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').as('commentInput');
 
         // The input is HTML5-required and the submit handler no-ops on empty text, so there's
