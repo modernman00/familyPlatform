@@ -202,7 +202,7 @@ final class ProfilePage extends ProcessImg
                 newInput: $newInput,
                 isCaptcha: false,
                 removeKeys: ['poll_question', 'poll_options', 'token', 'post_no'],
-                optionalFields: ['poll_question', 'poll_options', 'postMessage']
+                optionalFields: ['poll_question', 'poll_options', 'postMessage', 'post_no']
             );
 
     
