@@ -23,7 +23,7 @@ class VerifyPassword extends AllFunctionalities
     public function __construct(
         private string $inputPass,
         private string $dbPass,
-        private int $id,
+        private string $id,
         private string $table
     ) {}
 
