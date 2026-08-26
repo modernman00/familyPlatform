@@ -110,7 +110,7 @@ class AllMembersData extends InnerJoin
             
             $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
               FROM post
-              INNER JOIN profilePics pp ON post.id = pp.id
+              LEFT JOIN profilePics pp ON post.id = pp.id
               LEFT JOIN (
                       SELECT requester_id, approver_id, status, requesterCode
                       FROM requestMgt
@@ -187,7 +187,7 @@ class AllMembersData extends InnerJoin
             // Use range scan instead of DATE() function for index optimization
             $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
               FROM post
-              INNER JOIN profilePics pp ON post.id = pp.id
+              LEFT JOIN profilePics pp ON post.id = pp.id
               LEFT JOIN (
                       SELECT requester_id, approver_id, status, requesterCode
                       FROM requestMgt

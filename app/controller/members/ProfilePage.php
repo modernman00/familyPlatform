@@ -76,9 +76,6 @@ final class ProfilePage extends ProcessImg
     public function index(): void
     {
         try {
-            if (!isset($_SESSION['loggedIn'])) {
-                redirect("/login");
-            }
 
             $data = $this->profileService->getProfileData($this->id);
 
@@ -225,12 +222,16 @@ final class ProfilePage extends ProcessImg
                     \App\model\PollData::createPoll((int)$result, $pollQuestion, $pollOptions);
                 }
 
+                // Explicitly update the status to published first.
+                // Do not rely on background tasks or secondary queries to handle critical state transitions.
+                Post::updatePostByStatusAsPublished($result);
+
                 // Trigger background notifications server-side. The post is already
                 // saved at this point, so a notification failure (e.g. email/SMTP)
                 // must never turn a successful post into a failed response.
                 try {
                     \App\controller\members\PostMessage::getNewPostAndEmail($result);
-                    \App\controller\members\PostMessage::getNewPostPusher();
+                    \App\controller\members\PostMessage::getNewPostPusher($result);
                 } catch (\Throwable $th) {
                     error_log((string) $th);
                 }

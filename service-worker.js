@@ -1,4 +1,4 @@
-const Version = "1787765091718"; // Network-first default
+const Version = "1787776896064"; // Network-first default
 const CacheName = `cache-${Version}`;
 const CacheFiles = [
   "/",
