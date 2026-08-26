@@ -91,6 +91,26 @@ final class RouteDispatch
 
         call_user_func_array([new $controller, $method], $this->match['params']);
 
+    } catch (UnauthorisedException $e) {
+        http_response_code(401);
+        $isApi = false;
+        if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+            $isApi = true;
+        } elseif (isset($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
+            $isApi = true;
+        } elseif (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
+            $isApi = true;
+        } elseif (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            $isApi = true;
+        }
+
+        if ($isApi) {
+            header('Content-Type: application/json');
+            echo json_encode(['message' => $e->getMessage(), 'code' => 401, 'status' => 'error'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        } else {
+            session_destroy();
+            redirect('login');
+        }
     } catch (HttpException $e) {          // your custom layer
         showError($e);
     } catch (NotFoundException $e) {      // 404 you throw above
