@@ -108,8 +108,9 @@ final class RouteDispatch
             header('Content-Type: application/json');
             echo json_encode(['message' => $e->getMessage(), 'code' => 401, 'status' => 'error'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         } else {
+            error_log('UNAUTHORISED REDIRECT: ' . $e->getMessage());
             session_destroy();
-            redirect('login');
+            die('TAT DEBUG - Auth Failed: ' . $e->getMessage());
         }
     } catch (\Src\Exceptions\ValidationException $e) {
         $isApi = false;
