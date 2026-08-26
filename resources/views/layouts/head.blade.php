@@ -15,6 +15,7 @@
   <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
   <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
   <meta name="theme-color" content="#563d7c">
+  <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
   <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
 

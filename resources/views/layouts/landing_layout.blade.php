@@ -9,6 +9,7 @@
   <meta name="author" content="Olawale Olaogun">
   <meta name="language" content="English">
   <title>@yield('title') | OUR FAMILY NETWORK</title>
+  <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
   <!-- OpenGraph meta tags -->
   <meta property="og:title" content="@yield('title') - Family Platform">

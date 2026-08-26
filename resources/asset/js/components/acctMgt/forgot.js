@@ -1,4 +1,4 @@
-import {  forgotSubmitHandler } from '@modernman00/shared-js-lib';
+import { forgotSubmitHandler } from '@modernman00/shared-js-lib';
 
 sessionStorage.setItem('fromForgot', 'true');
 

@@ -41,6 +41,8 @@ describe('Chaos & Resiliency Testing', () => {
 
         // Open the modal - the live trigger is a data-bs-target, not a #createEventBtn
         cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
+        cy.get('#createEventModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
 
         // Fill the required fields (live form: eventName/eventDate/eventType/eventDescription/eventFrequency)
         cy.get('#eventName').type('Test Event', { force: true });
@@ -94,6 +96,7 @@ describe('Chaos & Resiliency Testing', () => {
 
         cy.get('[data-bs-target="#editProfileModal"]').first().click({ force: true });
         cy.get('#editProfileModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
         cy.get('#editProfileBtnModal').click({ force: true });
         cy.wait('@editProfileError');
 

@@ -8,7 +8,7 @@ $router->map('POST', '/member/profilePage/editProfile', 'App\controller\members\
 
 
 // GET ALL COMMENT 
-$router->map('GET', '/api/member/biography', 'App\controller\members\ProfilePage@getAIBiography', 'api_member_biography');
+
 // $router->map('GET', '/member/pp/comment', 'App\controller\members\PostMessage@getComment', 'all_comment');
 
 //commentByNo

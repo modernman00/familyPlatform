@@ -10,6 +10,7 @@ describe('Events and Profiles', () => {
         cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
 
         cy.get('#createEventModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
 
         // Fill event details - the live form is eventName/eventDate/eventType/eventDescription/eventFrequency
         // (there is no eventTitle/eventTime/eventLocation field in the current markup)
@@ -28,6 +29,8 @@ describe('Events and Profiles', () => {
 
     it('prevents event creation with missing fields', () => {
         cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
+        cy.get('#createEventModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
 
         // Only fill the name, omit the rest - client-side validation requires every field
         cy.get('#eventName').type('Incomplete Event');
@@ -44,7 +47,7 @@ describe('Events and Profiles', () => {
         cy.get('[data-bs-target="#editProfileModal"]').first().click({ force: true });
 
         cy.get('#editProfileModal').should('be.visible');
-
+        cy.wait(500); // wait for modal animation to complete
         cy.get('#firstName').clear().type('CypressEdited');
 
         cy.get('#editProfileBtnModal').click();

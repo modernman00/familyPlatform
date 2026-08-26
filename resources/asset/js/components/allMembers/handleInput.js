@@ -1,6 +1,5 @@
 // resources/js/allMembers/handleInput.js
-import { id, msgException, showNotification } from "../global";
-import { checkBox } from "@shared";
+import { id, msgException, showNotification, checkBox } from "@modernman00/shared-js-lib";
 import axios from "axios";
 
 /**

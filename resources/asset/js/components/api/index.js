@@ -1,5 +1,5 @@
 import axios from "axios";
-import { showError } from "../global";
+import { showError } from "@modernman00/shared-js-lib";
 
 
 const config = {

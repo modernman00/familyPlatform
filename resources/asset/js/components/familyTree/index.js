@@ -1,4 +1,4 @@
-import { id } from '@shared';
+import { id } from "@modernman00/shared-js-lib";
 import { initTree, centerOnElement, fitToScreen } from './events';
 import { showPersonDetails } from './showModal';
 

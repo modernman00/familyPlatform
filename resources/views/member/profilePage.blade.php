@@ -81,32 +81,6 @@
         //     }
         // }
 
-        // Alpine Component for AI Biography
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('aiBiography', (userId) => ({
-                biography: null,
-                message: null,
-                isLoading: true,
-                
-                init() {
-                    fetch(`/api/member/biography?id=${userId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            this.isLoading = false;
-                            if (data.status === 'success') {
-                                this.biography = data.message.biography;
-                                this.message = data.message.message; // usually fallback message
-                            } else {
-                                this.message = 'Unable to load biography.';
-                            }
-                        })
-                        .catch(err => {
-                            this.isLoading = false;
-                            this.message = 'Failed to connect to AI service.';
-                        });
-                }
-            }));
-        });
     </script>
 
 

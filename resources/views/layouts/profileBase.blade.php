@@ -12,6 +12,7 @@
   <script src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
 
   <title>@yield('title')</title>
+  <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
   <link rel="stylesheet" href="/public/noscript.css" />
   </noscript>

@@ -1,6 +1,5 @@
 import { format, render } from "timeago.js"
-import { toSentenceCase, id } from "@shared"
-import { log } from "../global";
+import { toSentenceCase, id, log } from "@modernman00/shared-js-lib"
 import { renderTopReactions } from './showEmojiOnComment.js'
 
 const reqId = localStorage.getItem('requesterId');

@@ -1,6 +1,5 @@
 "use strict";
-import { id, showError } from "../global";
-import { removeDiv, createAndAppendElement } from '../helper/general'
+import { id, showError, removeDiv, createAndAppendElement } from "@modernman00/shared-js-lib";
 import { renderHtmlFamilyBootstrap } from './renderFamilyBootstrap'
 import { checkEmailObj } from "../../data/checkEmailObj";
 import { makeCheckEmailObj } from "../../data/checkEmailFactory";

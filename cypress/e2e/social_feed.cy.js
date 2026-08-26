@@ -15,6 +15,8 @@ describe('Social Feed Interactions', () => {
         // this particular textarea intermittently drops characters in this app under Cypress,
         // which isn't what this test is trying to verify.
         cy.get('#openPostModalTrigger').click();
+        cy.get('#postModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
         cy.get('textarea#postMessage').should('be.visible')
             .invoke('val', postContent)
             .trigger('input')
@@ -37,6 +39,8 @@ describe('Social Feed Interactions', () => {
     it('denies submitting an empty post', () => {
         // Leave textarea empty
         cy.get('#openPostModalTrigger').click();
+        cy.get('#postModal').should('be.visible');
+        cy.wait(500); // wait for modal animation
         cy.get('textarea#postMessage').clear();
         cy.get('#submitPost').click();
 
@@ -93,6 +97,8 @@ describe('Social Feed Interactions', () => {
         cy.get('body').then(($body) => {
             if ($body.find('button:contains("Comment")').length === 0) {
                 cy.get('#openPostModalTrigger').click();
+                cy.get('#postModal').should('be.visible');
+                cy.wait(500); // wait for modal animation
                 cy.get('textarea#postMessage').invoke('val', 'Post for empty comment test').trigger('input').trigger('change');
                 cy.get('#submitPost').click();
                 cy.contains('button', 'Comment', { timeout: 10000 }).should('exist');

@@ -1,4 +1,4 @@
-import { id } from '@shared';
+import { id } from "@modernman00/shared-js-lib";
 
 const zoomInBtn = id('zoomIn');
 const zoomOutBtn = id('zoomOut');

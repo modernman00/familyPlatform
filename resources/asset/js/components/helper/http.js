@@ -1,7 +1,7 @@
-import { id, log } from '../global'
 import axios from 'axios'
 import axiosRetry from 'axios-retry';
 import Swal from 'sweetalert2';
+import { id, log } from '@modernman00/shared-js-lib';
 // import Cookies from 'js-cookie'
 
 axiosRetry(axios, { retries: 3 });
@@ -49,6 +49,14 @@ export const postFormData = async (url, formId, redirect = null, css = null) => 
         xsrfCookieName: 'XSRF-TOKEN',
         xsrfHeaderName: 'X-XSRF-TOKEN',
         withCredentials: true, // Ensure cookies (e.g., XSRF token) are sent
+    }
+
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+
+    if (csrfToken) {
+        options.headers = options.headers || {};
+        options.headers['X-XSRF-TOKEN'] = csrfToken;
     }
 
     // AXIOS POST FUNCTIONALITY
@@ -170,6 +178,10 @@ export const getApiData = async (URL, token = null) => {
             },
         }
 
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+        if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
+
         const fetch = await axios.get(URL, config)
         return fetch.data
 
@@ -194,6 +206,10 @@ export const getMultipleApiData = async (url1, url2, token = null) => {
                 'Authorization': 'Bearer ' + token
             },
         }
+
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+        if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
 
         const fetch = await axios.all([
             axios.get(url1, config),
@@ -224,6 +240,10 @@ export const postMultipleApiData = async (url1, url2, formData, token = null) =>
                 'Authorization': 'Bearer ' + token
             },
         }
+        
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+        if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
         const fetch = await axios.all([
             axios.post(url1, formData, config),
             axios.post(url2, formData, config)

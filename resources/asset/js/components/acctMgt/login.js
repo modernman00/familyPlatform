@@ -1,4 +1,4 @@
-import { createAdminLoginHandler} from '@modernman00/shared-js-lib';
+import { createAdminLoginHandler } from "@modernman00/shared-js-lib";
 
 // Get the login URL from sessionStorage
 const loginURL = sessionStorage.getItem('loginURL1');

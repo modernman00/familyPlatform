@@ -1,4 +1,4 @@
-import { id } from "../global"
+import { id } from "@modernman00/shared-js-lib";
 
 // use this in conjunction with the file 
 export const showImageFileUploadFn = (uploadBtn, inputId, fileName ) => {

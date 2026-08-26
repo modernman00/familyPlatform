@@ -1,7 +1,8 @@
 "use strict";
-import { id, log, msgException, deleteNotification } from "../global"
 import axios from "axios"
 import Swal from 'sweetalert2';
+import { id, log, msgException } from "@modernman00/shared-js-lib"
+import { deleteNotification } from "../global.js"
 import { getSelectedPostFiles, clearSelectedPostFiles } from "../fileUploadPreview";
 
 try {

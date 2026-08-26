@@ -1,4 +1,4 @@
-import { id } from '@shared';
+import { id } from "@modernman00/shared-js-lib";
 
 const personModal = id('personModal');
 const modalBody = id('modalBody');
