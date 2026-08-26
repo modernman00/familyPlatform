@@ -93,6 +93,7 @@ describe('Chaos & Resiliency Testing', () => {
         loginFully();
 
         cy.get('[data-bs-target="#editProfileModal"]').first().click({ force: true });
+        cy.get('#editProfileModal').should('be.visible');
         cy.get('#editProfileBtnModal').click({ force: true });
         cy.wait('@editProfileError');
 
