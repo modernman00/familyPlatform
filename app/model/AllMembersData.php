@@ -172,12 +172,13 @@ class AllMembersData extends InnerJoin
                         }
                     }
                 }
+                unset($post);
             }
 
             return $posts;
         } catch (PDOException $e) {
             showError($e);
-            return [];
+            throw $e; // Throw exception to expose schema mismatches to the API response
         }
     }
 
@@ -224,34 +225,10 @@ class AllMembersData extends InnerJoin
             }
             
             $result->execute();
-            $posts = $result->fetchAll(PDO::FETCH_ASSOC);
-
-            // Fetch attached polls and reactions
-            if (!empty($posts)) {
-                $postIds = array_column($posts, 'post_no');
-                
-                $polls = PollData::getPollsForPosts($postIds, $id);
-                $reactions = ReactionData::getReactionsForPosts($postIds);
-                $userReactions = ReactionData::getUserReactionsForPosts($id, $postIds);
-
-                foreach ($posts as &$post) {
-                    $pNo = $post['post_no'];
-                    $post['poll'] = $polls[$pNo] ?? null;
-                    $post['reactions'] = array_filter($reactions, function($r) use ($pNo) { return $r['post_no'] == $pNo; });
-                    $post['user_reaction'] = null;
-                    foreach ($userReactions as $ur) {
-                        if ($ur['post_no'] == $pNo) {
-                            $post['user_reaction'] = $ur['reaction_type'];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return $posts;
+            return $result->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             showError($e);
-            return [];
+            throw $e;
         }
     }
 
@@ -295,7 +272,7 @@ class AllMembersData extends InnerJoin
             return (int) $result->fetchColumn();
         } catch (PDOException $e) {
             showError($e);
-            return 0;
+            throw $e;
         }
     }
 
