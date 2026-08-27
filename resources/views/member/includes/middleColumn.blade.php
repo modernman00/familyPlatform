@@ -381,7 +381,7 @@
 
         <!-- Main Image Container -->
         <div style="position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" @click.self="closeLightbox()">
-            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + lightboxImages[lightboxIndex] : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.src='/resources/images/post/default.png'; this.style.opacity='0.5';">
+            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + lightboxImages[lightboxIndex] : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.style.display='none';">
         </div>
         
         <!-- Next Button -->
