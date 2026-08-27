@@ -103,11 +103,10 @@ class AllMembersData extends InnerJoin
     public static function getVisiblePosts(string $id, array $famCodes, int $limit, int $offset): array
     {
         try {
-            if (empty($famCodes)) {
-                return [];
-            }
-            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            $hasFamCodes = !empty($famCodes);
+            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
             
+            // Allow users to see their own posts even if they don't have a valid famCode
             $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
               FROM post
               LEFT JOIN profilePics pp ON post.id = pp.id
@@ -116,14 +115,23 @@ class AllMembersData extends InnerJoin
                       FROM requestMgt
                       WHERE requester_id IS NOT NULL AND requester_id = ?
                   ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id)
+            WHERE (";
+            
+            if ($hasFamCodes) {
+                $query .= "post.postFamCode IN ($inQuery) OR ";
+            }
+            
+            $query .= "post.id = rm.approver_id OR post.id = ?)
             AND post.post_status = 'published'
             AND post.date_deleted IS NULL
             ORDER BY post.date_created DESC
             LIMIT ? OFFSET ?";
             
             $params = [$id];
-            $params = array_merge($params, $famCodes);
+            if ($hasFamCodes) {
+                $params = array_merge($params, $famCodes);
+            }
+            $params[] = $id; // Bind the user's ID to fetch their own posts
             $params[] = $limit;
             $params[] = $offset;
 
@@ -179,9 +187,8 @@ class AllMembersData extends InnerJoin
     public static function getMemories(string $id, array $famCodes): array
     {
         try {
-            if (empty($famCodes)) return [];
-            
-            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            $hasFamCodes = !empty($famCodes);
+            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
             
             // Query for posts created exactly 1 year ago (matching month and day)
             // Use range scan instead of DATE() function for index optimization
@@ -193,14 +200,23 @@ class AllMembersData extends InnerJoin
                       FROM requestMgt
                       WHERE requester_id IS NOT NULL AND requester_id = ?
                   ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id) 
+            WHERE (";
+            
+            if ($hasFamCodes) {
+                $query .= "post.postFamCode IN ($inQuery) OR ";
+            }
+            
+            $query .= "post.id = rm.approver_id OR post.id = ?) 
             AND post.post_status = 'published'
             AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
             AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
             ORDER BY post.date_created DESC";
             
             $params = [$id];
-            $params = array_merge($params, $famCodes);
+            if ($hasFamCodes) {
+                $params = array_merge($params, $famCodes);
+            }
+            $params[] = $id; // Bind the user's ID to fetch their own posts
 
             $result = parent::connect2()->prepare($query);
             foreach ($params as $key => $val) {
@@ -245,10 +261,8 @@ class AllMembersData extends InnerJoin
     public static function countVisiblePosts(string $id, array $famCodes): int
     {
         try {
-            if (empty($famCodes)) {
-                return 0;
-            }
-            $inQuery = implode(',', array_fill(0, count($famCodes), '?'));
+            $hasFamCodes = !empty($famCodes);
+            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
             
             $query = "SELECT COUNT(*) as total
               FROM post
@@ -257,12 +271,21 @@ class AllMembersData extends InnerJoin
                       FROM requestMgt
                       WHERE requester_id IS NOT NULL AND requester_id = ?
                   ) AS rm ON post.id = rm.approver_id
-            WHERE (post.postFamCode IN ($inQuery) OR post.id = rm.approver_id)
+            WHERE (";
+            
+            if ($hasFamCodes) {
+                $query .= "post.postFamCode IN ($inQuery) OR ";
+            }
+            
+            $query .= "post.id = rm.approver_id OR post.id = ?)
             AND post.post_status = 'published'
             AND post.date_deleted IS NULL";
             
             $params = [$id];
-            $params = array_merge($params, $famCodes);
+            if ($hasFamCodes) {
+                $params = array_merge($params, $famCodes);
+            }
+            $params[] = $id; // Bind the user's ID to fetch their own posts
 
             $result = parent::connect2()->prepare($query);
             foreach ($params as $key => $val) {
