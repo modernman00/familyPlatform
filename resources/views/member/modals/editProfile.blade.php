@@ -184,13 +184,37 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
+        #editProfileModal .modal-body {
+            /* modal-dialog-scrollable makes this the scroll container */
+            padding: 1.5rem;
+        }
+        #editProfileModal .edit-profile-status:empty,
+        #editProfileModal .edit-profile-status > div:empty {
+            margin: 0;
+        }
+        #editProfileFormModal_notification {
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        #editProfileFormModal_notification.alert-danger,
+        #editProfileFormModal_notification.bg-danger {
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+        }
+        #editProfileFormModal_notification.alert-success,
+        #editProfileFormModal_notification.bg-success {
+            background-color: #22c55e !important;
+            color: #ffffff !important;
+        }
     </style>
 
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
-                
+
                 <div class="modal-header">
                     <h5 class="modal-title" id="editProfileModalLabel">
                         <button type="button" class="back-btn" data-bs-dismiss="modal" aria-label="Close">
@@ -201,10 +225,16 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="editProfileFormModal" class="editProfileFormModal" enctype="multipart/form-data">
-                        
+
+                    {{-- Status area lives outside the form and stays pinned to the top of the
+                         scroll area so a save result (spinner / success / error) is always in
+                         view, no matter how far the form is scrolled. --}}
+                    <div id="editProfileStatus" class="edit-profile-status">
                         <div id="setLoader" class="text-center mb-2"></div>
                         <div id="editProfileFormModal_notification"></div>
+                    </div>
+
+                    <form id="editProfileFormModal" class="editProfileFormModal" enctype="multipart/form-data">
 
                         <!-- Profile Pic Section -->
                         <div class="text-center mb-4">

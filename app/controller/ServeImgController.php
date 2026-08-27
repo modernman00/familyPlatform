@@ -103,9 +103,17 @@ final class ServeImgController {
         }
 
         if (!$filePath) {
-            // If the file does not exist, return a 404 Not Found response
-            http_response_code(404);
-            echo 'File not found.';
+            // Legacy posts reference images that were never migrated to disk (renamed
+            // uploads, deleted files). Serving a transparent 1x1 PNG with 200 keeps the
+            // browser console clean and lets the frontend's onerror handler hide the slot,
+            // instead of spamming 404s on every feed render.
+            $transparentPng = base64_decode(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+            );
+            header('Content-Type: image/png');
+            header('Content-Length: ' . (string) strlen($transparentPng));
+            header('Cache-Control: public, max-age=300');
+            echo $transparentPng;
             exit;
         }
 

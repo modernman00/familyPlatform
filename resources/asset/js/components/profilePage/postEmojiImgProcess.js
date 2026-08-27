@@ -42,31 +42,58 @@ const addOptionBtn = document.getElementById('addPollOptionBtn');
 const optionsContainer = document.getElementById('pollOptionsContainer');
 const removePollBtn = document.getElementById('removePollBtn');
 
+const MAX_POLL_OPTIONS = 6;
+
+const closePoll = () => {
+    if (!pollContainer) return;
+    pollContainer.classList.add('d-none');
+    if (addPollBtn) addPollBtn.classList.remove('poll-active');
+    // Reset to two blank options
+    pollContainer.querySelectorAll('input').forEach(input => (input.value = ''));
+    if (optionsContainer) {
+        const extras = optionsContainer.querySelectorAll('.poll-builder__option');
+        extras.forEach((el, i) => { if (i > 1) el.remove(); });
+    }
+};
+
 if (addPollBtn && pollContainer) {
     addPollBtn.addEventListener('click', () => {
-        pollContainer.classList.remove('d-none');
+        const isHidden = pollContainer.classList.contains('d-none');
+        if (isHidden) {
+            pollContainer.classList.remove('d-none');
+            addPollBtn.classList.add('poll-active');
+            const questionInput = pollContainer.querySelector('input[name="poll_question"]');
+            if (questionInput) setTimeout(() => questionInput.focus(), 60);
+        } else {
+            closePoll();
+        }
     });
 
     if (removePollBtn) {
-        removePollBtn.addEventListener('click', () => {
-            pollContainer.classList.add('d-none');
-            // Reset inputs
-            const inputs = pollContainer.querySelectorAll('input');
-            inputs.forEach(input => input.value = '');
-        });
+        removePollBtn.addEventListener('click', closePoll);
     }
 
     if (addOptionBtn && optionsContainer) {
         addOptionBtn.addEventListener('click', () => {
-            const optionCount = optionsContainer.querySelectorAll('input').length + 1;
+            const current = optionsContainer.querySelectorAll('.poll-builder__option').length;
+            if (current >= MAX_POLL_OPTIONS) return;
+
             const input = document.createElement('input');
             input.type = 'text';
             input.name = 'poll_options[]';
-            input.className = 'form-control mb-2';
-            input.placeholder = `Option ${optionCount}`;
-            input.style.borderRadius = '10px';
+            input.className = 'poll-builder__option';
+            input.placeholder = `Option ${current + 1}`;
+            input.maxLength = 80;
             optionsContainer.appendChild(input);
+            input.focus();
+
+            if (current + 1 >= MAX_POLL_OPTIONS) {
+                addOptionBtn.style.display = 'none';
+            }
         });
     }
 }
+
+// Expose so the submit handler can reset the builder after a successful post
+window.__resetPollBuilder = closePoll;
 

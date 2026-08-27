@@ -35,6 +35,9 @@
 
                 <form id='formPostMessageModal' enctype='multipart/form-data' class="formPostMessageModal">
 
+                    <input type="hidden" name="token" value="{{ $token }}">
+                    <input type="hidden" name="post_no" id="editPostNo" value="">
+
                     <textarea class="form-control mb-3 border-0" data-emoji-target
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
                         rows="4" style="background-color: var(--bg-color); border-radius: 15px; font-size: 1.1rem; padding: 15px; resize: none;"></textarea>
@@ -53,6 +56,30 @@
 
                     <span id="postModalImgFileNames" class="invalid-feedback d-block mb-2 text-muted small px-2"></span>
 
+                    <!-- Poll Creation UI (Hidden by Default) -->
+                    <div id="pollCreationContainer" class="poll-builder d-none">
+                        <div class="poll-builder__header">
+                            <span class="poll-builder__icon"><i class="bi bi-bar-chart-fill"></i></span>
+                            <span class="poll-builder__title">Create a poll</span>
+                            <button type="button" id="removePollBtn" class="poll-builder__close" aria-label="Remove poll">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="poll-builder__field">
+                            <input type="text" name="poll_question" class="poll-builder__question" placeholder="Ask a question…" maxlength="150">
+                        </div>
+
+                        <div id="pollOptionsContainer" class="poll-builder__options">
+                            <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 1" maxlength="80">
+                            <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 2" maxlength="80">
+                        </div>
+
+                        <button type="button" id="addPollOptionBtn" class="poll-builder__add">
+                            <i class="bi bi-plus-lg"></i> Add option
+                        </button>
+                    </div>
+
                     <div class="composer-action-bar">
                         <div class="d-flex gap-1">
                             <button type="button" class="btn-composer-action" id="emojiPost" title="Add emoji">
@@ -68,27 +95,11 @@
                             <button type="button" class="btn-composer-action" title="Stickers">
                                 <i class="bi bi-tag"></i>
                             </button>
-                            <button type="button" class="btn-composer-action text-primary fw-bold" id="addPollBtn" title="Create Poll">
-                                <i class="bi bi-bar-chart-fill"></i> Poll
+                            <button type="button" class="btn-composer-action fw-bold" id="addPollBtn" title="Create Poll">
+                                <i class="bi bi-bar-chart-fill"></i>
                             </button>
                         </div>
 
-                        <!-- Poll Creation UI (Hidden by Default) -->
-                        <div id="pollCreationContainer" class="w-100 mt-3 d-none bg-light p-3 rounded border">
-                            <h6 class="fw-bold mb-2 text-primary">Create a Poll</h6>
-                            <input type="text" name="poll_question" class="form-control mb-2 border-primary" placeholder="Ask a question..." style="border-radius: 10px;">
-                            <div id="pollOptionsContainer">
-                                <input type="text" name="poll_options[]" class="form-control mb-2" placeholder="Option 1" style="border-radius: 10px;">
-                                <input type="text" name="poll_options[]" class="form-control mb-2" placeholder="Option 2" style="border-radius: 10px;">
-                            </div>
-                            <button type="button" id="addPollOptionBtn" class="btn btn-sm btn-outline-primary rounded-pill mt-1">
-                                <i class="bi bi-plus-circle"></i> Add Option
-                            </button>
-                            <button type="button" id="removePollBtn" class="btn btn-sm btn-outline-danger rounded-pill mt-1 ms-2">
-                                Cancel Poll
-                            </button>
-                        </div>
-                        
                         <div id="emojiPickerContainer"
                             class="d-none position-absolute modern-emoji-picker"
                             style="z-index: 1000; bottom: 55px; left: 24px;">
@@ -98,10 +109,7 @@
                             <div id="emojiListPost" class="mt-2" role="listbox"></div>
                         </div>
 
-                        <input type="hidden" name="token" value="{{ $token }}">
-                        <input type="hidden" name="post_no" id="editPostNo" value="">
-
-                        <button type="button" id="submitPost" name="submit" class="btn text-white fw-semibold px-4 py-2 submitPost" 
+                        <button type="button" id="submitPost" name="submit" class="btn text-white fw-semibold px-4 py-2 submitPost"
                             style="background-color: var(--primary-color); border-radius: 20px; font-size: 0.9rem;">
                             Post
                         </button>

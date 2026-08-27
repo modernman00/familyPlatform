@@ -124,15 +124,15 @@
             <section class="photo-grid" id="photoGrid">
                 @foreach ($data as $index => $image)
                     <div class="grid-item" data-index="{{ $index }}">
-                        <img 
-                            src="/resources/images/post/{{ $image['img'] }}" 
+                        <img
+                            src="/resources/images/post/{{ rawurlencode($image['img']) }}"
                             alt="{{ $image['caption'] ?? $image['img'] }}"
                             data-img="{{ $image['img'] }}"
                             data-caption="{{ $image['caption'] ?? '' }}"
                             data-date="{{ !empty($image['created_at']) ? date('M j, Y', strtotime($image['created_at'])) : '' }}"
-                            class="gallery-image" 
+                            class="gallery-image"
                             onclick="openLightboxByIndex({{ $index }})"
-                            onerror="this.onerror=null; this.src='/resources/images/post/{{ $image['img'] }}';"
+                            onerror="this.onerror=null; this.closest('.grid-item').style.display='none';"
                             loading="lazy"
                         >
 
@@ -209,10 +209,11 @@
             const item = galleryImages[index];
             
             lightbox.style.display = "block";
-            lightboxImg.src = '/resources/images/post/' + item.img;
+            lightboxImg.style.display = '';
+            lightboxImg.src = '/resources/images/post/' + encodeURIComponent(item.img);
             lightboxImg.onerror = function() {
                 this.onerror = null;
-                this.src = '/resources/images/post/' + item.img;
+                this.style.display = 'none';
             };
 
             let captionText = item.caption || '';

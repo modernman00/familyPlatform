@@ -2303,16 +2303,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v1.9.17",
+            "version": "v1.9.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "c973ff662b0cdced0aefbac5cc499fd704323786"
+                "reference": "cd7facb6b19e2065c7ec9a6686ec9b74e8a11b3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/c973ff662b0cdced0aefbac5cc499fd704323786",
-                "reference": "c973ff662b0cdced0aefbac5cc499fd704323786",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/cd7facb6b19e2065c7ec9a6686ec9b74e8a11b3a",
+                "reference": "cd7facb6b19e2065c7ec9a6686ec9b74e8a11b3a",
                 "shasum": ""
             },
             "require": {
@@ -2337,7 +2337,7 @@
                 "mockery/mockery": "^1.6",
                 "php-mock/php-mock": "^2.6",
                 "php-mock/php-mock-phpunit": "^2.13",
-                "phpstan/phpstan": "^1.10",
+                "phpstan/phpstan": "^1.12",
                 "phpunit/phpunit": "^10.0"
             },
             "type": "library",
@@ -2366,10 +2366,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v1.9.17",
+                "source": "https://github.com/modernman00/shared-lib/tree/v1.9.20",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2026-08-26T01:19:34+00:00"
+            "time": "2026-08-27T21:56:52+00:00"
         },
         {
             "name": "monolog/monolog",

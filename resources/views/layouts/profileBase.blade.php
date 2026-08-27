@@ -21,7 +21,10 @@
 
   <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json">
 
-<script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}&project={{ $_ENV['RECAPTCHA_PROJECT_ID'] }}" async defer></script>
+  {{-- reCAPTCHA is only used on the auth forms (login/register/forgot/code). Loading
+       enterprise.js with ?render= here made it run an assessment on every member page,
+       which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
+       /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
   @stack('styles')
 
 
@@ -40,6 +43,9 @@
 
     {{-- </div> --}}
 
+  {{-- Rendered before the app scripts so the profile-page chunk (which may execute
+       from prefetch cache before the parser gets here) always finds this markup. --}}
+  @includeIf('member.modals.editProfile')
 
   <!-- Dark Mode Toggle -->
   <div class="dark-mode-toggle" id="darkModeToggle">
@@ -52,9 +58,6 @@
   <script nonce="{{ $nonce }}" src="/public/js/index.js"></script>
   <script nonce="{{ $nonce }}" src="/public/js/manifest.js"></script>
   <script nonce="{{ $nonce }}" src="/public/js/vendor.js"></script>
- <script>
-    window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";
-</script>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -69,10 +72,6 @@
       });
     }
   </script>
-
-
-
-    @includeIf('member.modals.editProfile')
 </body>
 
 </html>

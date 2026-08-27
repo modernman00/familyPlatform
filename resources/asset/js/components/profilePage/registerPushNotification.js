@@ -33,25 +33,33 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
 
 function checkSubscription(swReg) {
     swReg.pushManager.getSubscription().then((subscription) => {
-        if (subscription === null) {
-            // Request permission for notifications
-            requestPermission(swReg);
-        } else {
-            console.log('User  is already subscribed:', subscription);
-
+        if (subscription !== null) {
             postSubscriptionToServer(subscription);
+            return;
+        }
+
+        // Only auto-subscribe when the user has already granted permission.
+        // Calling Notification.requestPermission() on page load (no user gesture)
+        // is rejected by modern browsers and just produces console noise; the
+        // prompt is instead driven by an explicit "enable notifications" action.
+        if (Notification.permission === 'granted') {
+            subscribeUser(swReg);
         }
     });
 }
 
-function requestPermission(swReg) {
-    // This call must be made in response to a user action
-    Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-            subscribeUser (swReg);
-        } else {
-            console.log('Push notifications permission denied.');
-        }
+// Exposed so a UI control (e.g. a settings toggle) can request permission
+// from within a real user gesture.
+export function enablePushNotifications() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        return Promise.resolve(false);
+    }
+    return Notification.requestPermission().then((permission) => {
+        if (permission !== 'granted') return false;
+        return navigator.serviceWorker.ready.then((swReg) => {
+            subscribeUser(swReg);
+            return true;
+        });
     });
 }
 

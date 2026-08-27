@@ -49,21 +49,29 @@ describe('Social Feed Interactions', () => {
         cy.get('.swal2-html-container').should('contain', 'add some text');
     });
 
+    // Always start from a freshly created post so .first() targets a known,
+    // unliked/uncommented row - reusing whatever happens to be at the top of the
+    // feed made these toggle-based assertions depend on earlier runs' state.
+    const createFreshPost = (text) => {
+        cy.get('#openPostModalTrigger').click();
+        cy.get('#postModal').should('be.visible');
+        cy.wait(400); // modal animation
+        cy.get('textarea#postMessage').should('be.visible')
+            .invoke('val', text).trigger('input').trigger('change');
+        cy.get('#submitPost').click();
+        cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
+        cy.get('#postModal').should('not.be.visible');
+        cy.get('.modal-backdrop').should('not.exist');
+        cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
+    };
+
     it('can like a post', () => {
-        cy.get('body').then(($body) => {
-            if ($body.find('button:contains("Like")').length === 0) {
-                // Create a quick post first if none exists
-                cy.get('#openPostModalTrigger').click();
-                cy.get('textarea#postMessage').invoke('val', 'Post to like').trigger('input').trigger('change');
-                cy.get('#submitPost').click();
-                cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
-            }
-        });
+        createFreshPost(`Cypress Like Target ${Date.now()}`);
 
         // The "Like" text sits in an inner <span>, so restrict .contains() to the <button>
         // itself. Liking a post is reactToPost() under the hood, which toggles fw-semibold
         // (and an inline color) on the button, not a text-primary class.
-        cy.contains('button', 'Like').first().click({ force: true });
+        cy.contains('button', 'Like').first().click();
 
         // Wait for class toggle (this tests Alpine reactivity)
         cy.contains('button', 'Like').first().should('have.class', 'fw-semibold');
@@ -72,44 +80,21 @@ describe('Social Feed Interactions', () => {
     it('can add a comment to a post', () => {
         const commentContent = `Cypress Automated Comment ${Date.now()}`;
 
-        cy.get('body').then(($body) => {
-            if ($body.find('button:contains("Comment")').length === 0) {
-                cy.get('#openPostModalTrigger').click();
-                cy.get('textarea#postMessage').invoke('val', 'Post to comment on').trigger('input').trigger('change');
-                cy.get('#submitPost').click();
-                cy.contains('button', 'Comment', { timeout: 10000 }).should('exist');
-            }
-        });
+        createFreshPost(`Cypress Comment Target ${Date.now()}`);
 
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
-        cy.get('body').then(($body) => {
-            if (!$body.find('input.form-control.rounded-pill[placeholder*="Write a comment"]').first().is(':visible')) {
-                cy.contains('button', 'Comment').first().click({ force: true });
-            }
-        });
-        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first().should('be.visible').type(`${commentContent}{enter}`);
+        cy.contains('button', 'Comment').first().click();
+        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first()
+            .should('be.visible').type(`${commentContent}{enter}`);
 
         // On success the new comment is pushed straight into Alpine state, so it renders immediately
         cy.get('body').should('contain.text', commentContent);
     });
 
     it('denies empty comments', () => {
-        cy.get('body').then(($body) => {
-            if ($body.find('button:contains("Comment")').length === 0) {
-                cy.get('#openPostModalTrigger').click();
-                cy.get('#postModal').should('be.visible');
-                cy.wait(500); // wait for modal animation
-                cy.get('textarea#postMessage').invoke('val', 'Post for empty comment test').trigger('input').trigger('change');
-                cy.get('#submitPost').click();
-                cy.contains('button', 'Comment', { timeout: 10000 }).should('exist');
-            }
-        });
+        createFreshPost(`Cypress Empty Comment Target ${Date.now()}`);
 
-        cy.get('body').then(($body) => {
-            if (!$body.find('input[placeholder="Write a comment..."]').first().is(':visible')) {
-                cy.contains('button', 'Comment').first().click({ force: true });
-            }
-        });
+        cy.contains('button', 'Comment').first().click();
         cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').as('commentInput');
 
         // The input is HTML5-required and the submit handler no-ops on empty text, so there's

@@ -37,17 +37,49 @@ class EngagementController
     public function vote(): void
     {
         try {
-            $optionId = (int) $_POST['option_id'];
+            // Accept both multipart/form-data and a raw JSON body
+            $input = $_POST;
+            if (empty($input)) {
+                $raw = file_get_contents('php://input');
+                if ($raw !== false && $raw !== '') {
+                    $decoded = json_decode($raw, true);
+                    if (is_array($decoded)) {
+                        $input = $decoded;
+                    }
+                }
+            }
+
+            $optionId = (int) ($input['option_id'] ?? 0);
+            $postNo = (int) ($input['post_no'] ?? 0);
             $userId = $_SESSION['id'] ?? null;
-            
+
             if (!$userId) {
+                http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
                 return;
             }
-            
+
+            if ($optionId <= 0) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid option ID']);
+                return;
+            }
+
+            // Cast the vote
             PollData::castVote($optionId, $userId);
-            echo json_encode(['status' => 'success']);
+
+            // Return updated poll data if post_no is provided, so the frontend can refresh it
+            $pollData = null;
+            if ($postNo > 0) {
+                $polls = PollData::getPollsForPosts([$postNo], $userId);
+                $pollData = $polls[$postNo] ?? null;
+            }
+
+            http_response_code(200);
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'success', 'poll' => $pollData]);
         } catch (\Throwable $th) {
+            http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
         }
     }

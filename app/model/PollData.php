@@ -9,11 +9,11 @@ class PollData extends Db {
     
     public static function createPoll(int $postNo, string $question, array $options): bool {
         $db = self::connect2();
-        
+
         try {
             $db->beginTransaction();
-            
-            $stmt = $db->prepare("INSERT INTO post_polls (post_no, question) VALUES (?, ?)");
+
+            $stmt = $db->prepare("INSERT INTO post_polls (post_no, question, is_active) VALUES (?, ?, 1)");
             $stmt->execute([$postNo, $question]);
             
             $pollId = $db->lastInsertId();

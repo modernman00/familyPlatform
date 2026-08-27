@@ -123,7 +123,7 @@
               <template x-for="(img, idx) in post.images" :key="idx">
                 <div :class="post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')">
                   <a href="#" @click.prevent="openLightbox(post.images, idx)" style="display:block; overflow:hidden; border-radius:10px;">
-                    <img :src="'/resources/images/post/' + img" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
+                    <img :src="'/resources/images/post/' + encodeURIComponent(img)" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';" onerror="this.onerror=null; this.closest('a').style.display='none';">
                   </a>
                 </div>
               </template>
@@ -389,7 +389,7 @@
 
         <!-- Main Image Container -->
         <div style="position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" @click.self="closeLightbox()">
-            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + lightboxImages[lightboxIndex] : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.style.display='none';">
+            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + encodeURIComponent(lightboxImages[lightboxIndex]) : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop onerror="this.onerror=null; this.style.display='none';">
         </div>
         
         <!-- Next Button -->

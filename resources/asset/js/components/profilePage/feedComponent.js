@@ -496,7 +496,7 @@ export function profileFeed() {
 
         // ── React to a post with an emoji (post-level reactions) ────────────
         async reactToPost(postNo, reactionType) {
-            const post = this.posts.find(p => p.post_no === postNo);
+            const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post) return;
 
             const previousReaction = post.user_reaction;
@@ -525,19 +525,56 @@ export function profileFeed() {
 
 
         async votePoll(postNo, optionId) {
-            const post = this.posts.find(p => p.post_no === postNo);
-            if (!post?.poll) return;
+            const post = this.posts.find(p => String(p.post_no) === String(postNo));
+            if (!post?.poll || !Array.isArray(post.poll.options)) return;
 
+            // Snapshot for rollback
+            const snapshot = JSON.parse(JSON.stringify(post.poll));
+
+            // ── Optimistic update ──────────────────────────────────────────
+            const voted = Array.isArray(post.poll.user_voted_option_id)
+                ? [...post.poll.user_voted_option_id]
+                : [];
+            const already = voted.some(v => String(v) === String(optionId));
+
+            post.poll.options = post.poll.options.map(opt => {
+                if (String(opt.option_id) === String(optionId)) {
+                    const count = Number(opt.vote_count || 0) + (already ? -1 : 1);
+                    return { ...opt, vote_count: Math.max(0, count) };
+                }
+                return { ...opt };
+            });
+
+            post.poll.user_voted_option_id = already
+                ? voted.filter(v => String(v) !== String(optionId))
+                : [...voted, optionId];
+
+            const total = post.poll.options.reduce((sum, o) => sum + Number(o.vote_count || 0), 0);
+            post.poll.total_votes = total;
+            post.poll.options = post.poll.options.map(o => ({
+                ...o,
+                percentage: total > 0 ? Math.round((Number(o.vote_count || 0) / total) * 100) : 0,
+            }));
+
+            // ── Persist ────────────────────────────────────────────────────
             try {
-                const response = await axios.post('/api/poll/vote', {
-                    post_no: postNo,
-                    option_id: optionId
+                const formData = new FormData();
+                formData.append('post_no', postNo);
+                formData.append('option_id', optionId);
+
+                const response = await axios.post('/api/poll/vote', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
                 });
+
+                // Prefer authoritative server state when returned
                 if (response?.data?.poll) {
                     post.poll = response.data.poll;
+                } else if (response?.data?.status !== 'success') {
+                    throw new Error(response?.data?.message || 'Vote was not recorded');
                 }
             } catch (err) {
                 console.error('Failed to vote on poll:', err);
+                post.poll = snapshot; // rollback
             }
         },
 

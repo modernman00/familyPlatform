@@ -5,6 +5,41 @@ import { id, log, msgException } from "@modernman00/shared-js-lib"
 import { deleteNotification } from "../global.js"
 import { getSelectedPostFiles, clearSelectedPostFiles } from "../fileUploadPreview";
 
+/**
+ * Reliably close the "Create Post" modal. Clicking [data-bs-dismiss] can miss if
+ * Bootstrap never instantiated the modal (e.g. opened programmatically), which
+ * left the backdrop covering the feed and broke follow-up interactions.
+ */
+function stripModalChrome() {
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+}
+
+function closePostModal() {
+    const modalEl = document.getElementById('postModal');
+    if (!modalEl) return;
+
+    // Let Bootstrap run its own teardown (fires hidden.bs.modal, restores focus…).
+    const Bs = window.bootstrap?.Modal;
+    if (Bs) {
+        try { Bs.getOrCreateInstance(modalEl).hide(); } catch (_) { /* noop */ }
+    }
+
+    // …but don't wait on the fade-out animation: hide the modal and clear the
+    // backdrop synchronously so the feed underneath is immediately interactive.
+    modalEl.classList.remove('show');
+    modalEl.style.display = 'none';
+    modalEl.setAttribute('aria-hidden', 'true');
+    modalEl.removeAttribute('aria-modal');
+    modalEl.removeAttribute('role');
+    stripModalChrome();
+
+    // A late Bootstrap transition callback can re-add body chrome; sweep once more.
+    setTimeout(stripModalChrome, 350);
+}
+
 try {
     const options = {
         xsrfCookieName: 'XSRF-TOKEN',
@@ -39,6 +74,35 @@ try {
             // to edit an existing post instead of creating a new one.
             const editPostNo = document.getElementById('editPostNo')?.value;
             const isEditing = !!editPostNo;
+
+            // Validate poll if it's being created
+            const pollContainer = document.getElementById('pollCreationContainer');
+            if (pollContainer && !pollContainer.classList.contains('d-none')) {
+                const pollQuestion = formExtra.querySelector('input[name="poll_question"]')?.value?.trim();
+                const pollOptions = Array.from(formExtra.querySelectorAll('input[name="poll_options[]"]'))
+                    .map(input => input.value.trim())
+                    .filter(val => val.length > 0);
+
+                if (!pollQuestion) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Poll Incomplete',
+                        text: 'Please enter a poll question.',
+                        confirmButtonColor: '#4ade80'
+                    });
+                    return;
+                }
+
+                if (pollOptions.length < 2) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Poll Incomplete',
+                        text: 'Please provide at least 2 poll options.',
+                        confirmButtonColor: '#4ade80'
+                    });
+                    return;
+                }
+            }
 
             let formData;
             if (!isEditing) {
@@ -83,8 +147,7 @@ try {
                             detail: { postNo: editPostNo, postMessage: id('postMessage').value }
                         }));
 
-                        const closeBtn = document.querySelector('#postModal .btn-close');
-                        if (closeBtn) closeBtn.click();
+                        closePostModal();
                         formExtra.reset();
 
                         Swal.fire({
@@ -101,14 +164,23 @@ try {
                     const newPostData = (response?.data?.message && typeof response.data.message === 'object')
                         ? response.data.message
                         : null;
+
+                    // Close the modal first so the feed underneath is immediately
+                    // interactive, then hand the new post to the Alpine feed.
+                    closePostModal();
                     window.dispatchEvent(new CustomEvent('post-created', { detail: newPostData }));
 
-                    const closeBtn = document.querySelector('#postModal .btn-close');
-                    if (closeBtn) closeBtn.click();
                     formExtra.reset();
                     clearSelectedPostFiles();
                     const closePreview = document.getElementById('closeImagePreview');
                     if (closePreview) closePreview.click();
+
+                    // Reset the poll builder after a successful submission
+                    if (typeof window.__resetPollBuilder === 'function') {
+                        window.__resetPollBuilder();
+                    }
+                    const addOptBtn = document.getElementById('addPollOptionBtn');
+                    if (addOptBtn) addOptBtn.style.display = '';
                     
                     Swal.fire({
                         toast: true,
