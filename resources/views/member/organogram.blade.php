@@ -413,27 +413,84 @@
                 });
             }
 
+            // Break a full name onto (at most) two balanced lines so it fits the card
+            function splitNameLines(full) {
+                full = (full || '').trim().replace(/\s+/g, ' ');
+                if (full.length <= 15 || full.indexOf(' ') === -1) return [full, ''];
+                const parts = full.split(' ');
+                let bestIdx = 1, bestDiff = Infinity;
+                for (let i = 1; i < parts.length; i++) {
+                    const a = parts.slice(0, i).join(' ').length;
+                    const b = parts.slice(i).join(' ').length;
+                    const diff = Math.abs(a - b);
+                    if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+                }
+                return [parts.slice(0, bestIdx).join(' '), parts.slice(bestIdx).join(' ')];
+            }
+
             graphData.nodes.forEach(node => {
                 const parents = childToParents[node.id] || {};
+                const nameLines = splitNameLines(node.full_name);
                 familyTreeNodes.push({
                     id: node.id,
                     pids: nodeToPids[node.id] || [],
                     fid: parents.fid || undefined,
                     mid: parents.mid || undefined,
                     name: node.full_name,
+                    nameL1: nameLines[0],
+                    nameL2: nameLines[1],
                     gender: (node.gender || 'Male').toLowerCase(),
                     img: node.avatar_url || (node.gender === 'Male' ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png'),
                     title: node.bio || 'Family Member',
-                    legacyId: node.user_id 
+                    legacyId: node.user_id
                 });
             });
         }
 
         if (familyTreeNodes.length > 0) {
-            FamilyTree.templates.tommy.node = '<rect x="0" y="0" height="{h}" width="{w}" stroke-width="1" fill="#ffffff" stroke="#e0e0e0" rx="7" ry="7"></rect>';
-            FamilyTree.templates.tommy.field_0 = '<text style="font-size: 16px; font-weight: bold;" fill="#333333" x="125" y="60" text-anchor="middle">{val}</text>';
-            FamilyTree.templates.tommy.field_1 = '<text style="font-size: 12px;" fill="#666666" x="125" y="80" text-anchor="middle">{val}</text>';
-            FamilyTree.templates.tommy.img_0 = '<clipPath id="ulaImg"><circle cx="125" cy="30" r="24"></circle></clipPath><image preserveAspectRatio="xMidYMid slice" clip-path="url(#ulaImg)" xlink:href="{val}" x="101" y="6" width="48" height="48"></image>';
+            /* --------------------------------------------------------------
+             * Custom node design: large circular portrait sitting on top of
+             * a rounded, gender-coloured card (role label + name).
+             * ------------------------------------------------------------ */
+            const NODE_W = 230;
+            const NODE_H = 232;
+            const CX = NODE_W / 2;
+
+            function styleFamilyNode(templateName, cardFill) {
+                // Clone so late overrides don't leak between male/female/base templates
+                FamilyTree.templates[templateName] = Object.assign({}, FamilyTree.templates[templateName]);
+                const t = FamilyTree.templates[templateName];
+
+                t.size = [NODE_W, NODE_H];
+
+                t.defs = '<filter id="ftNodeShadow" x="-40%" y="-40%" width="180%" height="180%">'
+                    + '<feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0f172a" flood-opacity="0.22"></feDropShadow>'
+                    + '</filter>';
+
+                // Rounded card body (portrait overlaps its top edge)
+                t.node = '<rect x="6" y="64" width="' + (NODE_W - 12) + '" height="' + (NODE_H - 72) + '" '
+                    + 'rx="22" ry="22" stroke-width="0" fill="' + cardFill + '" filter="url(#ftNodeShadow)"></rect>';
+
+                // Role / relationship label (uppercase, above the name)
+                t.field_2 = '<text style="font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;" '
+                    + 'fill="rgba(255,255,255,0.82)" x="' + CX + '" y="150" text-anchor="middle">{val}</text>';
+
+                // Name — up to two balanced lines
+                t.field_0 = '<text data-width="' + (NODE_W - 24) + '" style="font-size:15px;font-weight:700;" '
+                    + 'fill="#ffffff" x="' + CX + '" y="176" text-anchor="middle">{val}</text>';
+                t.field_1 = '<text data-width="' + (NODE_W - 24) + '" style="font-size:15px;font-weight:700;" '
+                    + 'fill="#ffffff" x="' + CX + '" y="197" text-anchor="middle">{val}</text>';
+
+                // Large circular portrait with white ring
+                t.img_0 = '<circle cx="' + CX + '" cy="60" r="58" fill="#ffffff"></circle>'
+                    + '<clipPath id="ftNodeImg"><circle cx="' + CX + '" cy="60" r="52"></circle></clipPath>'
+                    + '<image preserveAspectRatio="xMidYMid slice" clip-path="url(#ftNodeImg)" xlink:href="{val}" '
+                    + 'x="' + (CX - 52) + '" y="8" width="104" height="104"></image>';
+            }
+
+            styleFamilyNode('tommy', '#64748b');
+            styleFamilyNode('tommy_male', '#2563eb');
+            styleFamilyNode('tommy_female', '#e8630c');
 
             var family = new FamilyTree(document.getElementById("tree"), {
                 template: "tommy",
@@ -441,8 +498,9 @@
                 enableSearch: false,
                 mouseScrool: FamilyTree.action.zoom,
                 nodeBinding: {
-                    field_0: "name",
-                    field_1: "title",
+                    field_0: "nameL1",
+                    field_1: "nameL2",
+                    field_2: "title",
                     img_0: "img"
                 },
                 nodes: familyTreeNodes

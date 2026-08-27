@@ -144,23 +144,11 @@ class LoginAnomalyService
      */
     private static function getClientIp(): string
     {
-        $headers = [
-            'HTTP_CF_CONNECTING_IP',   // Cloudflare
-            'HTTP_X_FORWARDED_FOR',    // Load balancer / proxy
-            'HTTP_X_REAL_IP',          // Nginx proxy
-            'REMOTE_ADDR',             // Direct connection (fallback)
-        ];
-
-        foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                // X-Forwarded-For can be a comma-separated list — take the first
-                $ip = trim(explode(',', $_SERVER[$header])[0]);
-                if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                    return $ip;
-                }
-            }
+        // Enforce strict REMOTE_ADDR to prevent X-Forwarded-For IP spoofing
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            return $ip;
         }
-
         return '0.0.0.0';
     }
 }

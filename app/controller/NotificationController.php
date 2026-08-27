@@ -83,9 +83,11 @@ final class NotificationController extends Select
             }
 
 
-            $updateTable = new Update('notification');
-
-            $updateTable->updateTable('notification_status', 'deleted', 'no', $no);
+            $userId = $_SESSION['id'] ?? null;
+            if (!$userId) throw new NotFoundException('Unauthorized');
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare("UPDATE notification SET notification_status = 'deleted' WHERE no = ? AND receiver_id = ?");
+            $stmt->execute([$no, $userId]);
 
 
             // Call msgSuccess after returning the result

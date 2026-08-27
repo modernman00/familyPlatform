@@ -34,7 +34,11 @@ class AIService
             return $post;
         }, $publicPosts);
 
-        $prompt = "Write a warm, family-oriented, 2-3 paragraph biography for {$firstName} {$lastName} based on the following public family posts: \n\n" . implode("\n", $sanitizedPosts) . "\n\nDo not include any sensitive information. If there are no posts, simply write a welcoming intro for them into the family network.";
+        // Prevent Prompt Injection
+        $firstName = htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8');
+        $lastName = htmlspecialchars($lastName, ENT_QUOTES, 'UTF-8');
+        $safePosts = htmlspecialchars(implode("\n", $sanitizedPosts), ENT_QUOTES, 'UTF-8');
+        $prompt = "Write a warm, family-oriented, 2-3 paragraph biography for {$firstName} {$lastName} based on the following public family posts: \n\n" . $safePosts . "\n\nDo not include any sensitive information. If there are no posts, simply write a welcoming intro for them into the family network.";
 
         $data = [
             "model" => "deepseek-chat",
@@ -83,7 +87,7 @@ class AIService
         
         // Defensive parsing (Never Trust the Data)
         if (isset($responseData['choices'][0]['message']['content'])) {
-            return trim($responseData['choices'][0]['message']['content']);
+            return purify_html(trim($responseData['choices'][0]['message']['content']));
         }
 
         return "Unable to generate biography at this time.";
