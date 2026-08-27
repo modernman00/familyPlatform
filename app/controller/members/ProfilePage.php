@@ -92,7 +92,8 @@ final class ProfilePage extends ProcessImg
                 'post2Id' => $data['post2Id'],
                 'pics2Id' => $data['pics'],
                 'eventData' => $data['events'],
-                'requestData' => $data['friendRequests']
+                'requestData' => $data['friendRequests'],
+                'totalFamilyMembers' => $data['totalFamilyMembers']
             ]);
 
         } catch (\Throwable $th) {

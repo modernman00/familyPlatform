@@ -89,7 +89,7 @@ foreach(($eventData ?? []) as $event) {
 
     <!-- Family Members Metric Card -->
     <div class="card border-0 text-white text-center shadow-sm" style="background-color: var(--primary-color); border-radius: 16px; padding: 30px 20px;">
-        <h1 class="display-4 fw-bold mb-0 text-white">47</h1>
+        <h1 class="display-4 fw-bold mb-0 text-white">{{ $totalFamilyMembers ?? 0 }}</h1>
         <p class="mb-3" style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">Family Members</p>
         <button class="btn btn-light rounded-pill fw-semibold mx-auto" style="color: var(--primary-color); padding: 8px 24px; background-color: rgba(255,255,255,0.9); border: none;" onclick="window.location.href='/allMembers'">
             View Tree

@@ -35,6 +35,7 @@ final class ProfilepageService
             'events' => DataAll::getEventDataByFamCode($famCode),
             'post2Id' => Post::postLink2Id($userId),
             'pics' => Post::getAllPostPics($userId),
+            'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),
         ];
     }
 }

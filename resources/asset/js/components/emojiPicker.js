@@ -93,7 +93,7 @@ const renderEmojiButton = (char, label, emojiContainer, emojiTarget, pickerList)
   btn.textContent = char;
   btn.setAttribute('aria-label', label);
 
-  btn.addEventListener('click', (e) => {
+  const insertEmoji = (e) => {
     e.preventDefault();
     if (emojiTarget) {
       const start = emojiTarget.selectionStart;
@@ -120,7 +120,19 @@ const renderEmojiButton = (char, label, emojiContainer, emojiTarget, pickerList)
         }
       }
     }
-  });
+  };
+
+  // Prevent input focus loss on desktop browsers
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
+
+  // Prevent focus loss and handle tap on mobile devices
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    insertEmoji(e);
+  }, { passive: false });
+
+  // Normal click handling (fallback for desktop/mouse)
+  btn.addEventListener('click', insertEmoji);
 
   emojiContainer.appendChild(btn);
 }

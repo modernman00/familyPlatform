@@ -454,41 +454,6 @@ final class Organogram extends SingleCustomerData
         ");
         $insChild->execute([$parentUnionId, $rootNodeId]);
 
-        // 3. Grandparents (Generation -2) — Paternal & Maternal
-        $insGP = $db->prepare("
-            INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, is_deceased, avatar_url)
-            VALUES (?, ?, ?, ?, ?, 1, ?)
-        ");
-
-        // Paternal Grandparents
-        $insGP->execute([$familyCode, 'Grandfather (Paternal)', (string)($memberData['lastName'] ?? ''), 'Male', -2, '/resources/images/profile/avatarM.png']);
-        $patGFId = (int) $db->lastInsertId();
-        $insGP->execute([$familyCode, 'Grandmother (Paternal)', '', 'Female', -2, '/resources/images/profile/avatarF.png']);
-        $patGMId = (int) $db->lastInsertId();
-
-        $insUnion->execute([$familyCode, $patGFId, $patGMId]);
-        $patUnionId = (int) $db->lastInsertId();
-        $insChild->execute([$patUnionId, $fatherId]);
-
-        // Maternal Grandparents
-        $insGP->execute([$familyCode, 'Grandfather (Maternal)', '', 'Male', -2, '/resources/images/profile/avatarM.png']);
-        $matGFId = (int) $db->lastInsertId();
-        $insGP->execute([$familyCode, 'Grandmother (Maternal)', '', 'Female', -2, '/resources/images/profile/avatarF.png']);
-        $matGMId = (int) $db->lastInsertId();
-
-        $insUnion->execute([$familyCode, $matGFId, $matGMId]);
-        $matUnionId = (int) $db->lastInsertId();
-        $insChild->execute([$matUnionId, $motherId]);
-
-        // Great-Grandparents (Generation -3)
-        $insGP->execute([$familyCode, 'Great-Grandfather (Paternal Line)', (string)($memberData['lastName'] ?? ''), 'Male', -3, '/resources/images/profile/avatarM.png']);
-        $ggfId = (int) $db->lastInsertId();
-        $insGP->execute([$familyCode, 'Great-Grandmother (Paternal Line)', '', 'Female', -3, '/resources/images/profile/avatarF.png']);
-        $ggmId = (int) $db->lastInsertId();
-        $insUnion->execute([$familyCode, $ggfId, $ggmId]);
-        $ggUnionId = (int) $db->lastInsertId();
-        $insChild->execute([$ggUnionId, $patGFId]);
-
         // 4. Spouse & Multiple Partners
         $spouseName = (string)($memberData['spouse_name'] ?? '');
         $currentUnionId = null;
