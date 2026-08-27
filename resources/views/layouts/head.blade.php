@@ -23,7 +23,7 @@
 
   
 
-  <link rel="stylesheet" type="text/css" href="/public/css/profilepage.css">
+  <link rel="stylesheet" type="text/css" href="/public/css/profilepage.css?v={{ time() }}">
   <link rel="stylesheet" type="text/css"
     href="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.css" />
 

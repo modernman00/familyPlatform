@@ -15,7 +15,7 @@
 <div style="background-color: #f8fafc; border-radius: 8px; padding: 25px; margin-bottom: 25px; text-align: center; border: 1px solid #e2e8f0;">
     <h2 style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0 0 10px;">{{ $data['eventName'] }}</h2>
     
-    <p style="font-size: 16px; color: #0a66c2; font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
+    <p style="font-size: 16px; color: var(--brand-primary); font-weight: 600; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
         {{ date('F d, Y', strtotime($data['eventDate'])) }}
     </p>
 
@@ -27,6 +27,6 @@
 </div>
 
 <div style="text-align: center;">
-    <a href="{{ getenv('MIX_APP_URL2') }}profilePage" style="background-color: #0a66c2; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
+    <a href="{{ getenv('MIX_APP_URL2') }}profilePage" style="background-color: var(--brand-primary); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">View Event Details</a>
 </div>
 @endsection

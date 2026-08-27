@@ -6,7 +6,7 @@
     "background_color": "#ffffff",
     "categories": ["social", "family"],
     "display": "standalone",
-    "theme_color": "#0a66c2",
+    "theme_color": "#00bfa5",
     "orientation": "any",
     "icons": [
 

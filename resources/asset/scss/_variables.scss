@@ -1,0 +1,10 @@
+:root {
+  --brand-primary: #00bfa5;               /* teal‑green */
+  --brand-primary-light: #33c9b2;         /* 20 % lighter */
+  --brand-primary-dark: #00897b;          /* 20 % darker */
+}
+
+[data-theme="dark"] {
+  --brand-primary: #33c9b2;   /* lighter shade for contrast */
+  --brand-primary-dark: #00bfa5;
+}

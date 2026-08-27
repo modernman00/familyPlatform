@@ -175,7 +175,8 @@
             <!-- Like Button with floating emoji reaction bar -->
             <div class="position-relative flex-grow-1"
                  @mouseenter="togglePostReactionBar(post.post_no, true)"
-                 @mouseleave="togglePostReactionBar(post.post_no, false)">
+                 @mouseleave="togglePostReactionBar(post.post_no, false)"
+                 @click.outside="activeReactionBars[post.post_no] = false">
 
               <!-- Floating Reaction Bar -->
               <div x-show="activeReactionBars[post.post_no]"
@@ -206,7 +207,10 @@
                       :class="post.user_reaction ? 'fw-semibold' : 'text-muted'"
                       :style="post.user_reaction ? 'color: #1877f2; font-size:0.9rem;' : 'font-size:0.9rem;'"
                       type="button"
-                      @click="reactToPost(post.post_no, post.user_reaction || 'like')">
+                      @click="onPostLikeClick(post.post_no, post.user_reaction || 'like')"
+                      @touchstart.passive="startPostLongPress(post.post_no)"
+                      @touchend="cancelPostLongPress()"
+                      @touchmove="cancelPostLongPress()">
                 <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.icon || '👍') : '👍'" style="font-size:1.1rem;"></span>
                 <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.label || 'Like') : 'Like'" class="ms-1"></span>
               </button>
@@ -319,7 +323,8 @@
                       <!-- Comment Like/React button -->
                       <div class="position-relative"
                            @mouseenter="toggleCommentReactionBar(c.comment_no, true)"
-                           @mouseleave="toggleCommentReactionBar(c.comment_no, false)">
+                           @mouseleave="toggleCommentReactionBar(c.comment_no, false)"
+                           @click.outside="activeCommentReactionBars[c.comment_no] = false">
 
                         <!-- Floating Comment Reaction Bar -->
                         <div x-show="activeCommentReactionBars[c.comment_no]"
@@ -345,7 +350,10 @@
 
                         <!-- Like text button -->
                         <button type="button"
-                                @click="reactToComment(post.post_no, c.comment_no, c.userReaction || 'like')"
+                                @click="onCommentLikeClick(post.post_no, c.comment_no, c.userReaction || 'like')"
+                                @touchstart.passive="startCommentLongPress(c.comment_no)"
+                                @touchend="cancelCommentLongPress()"
+                                @touchmove="cancelCommentLongPress()"
                                 :class="c.userReaction ? 'text-primary fw-semibold' : 'text-muted'"
                                 style="background:none; border:none; font-size:0.78rem; cursor:pointer; padding:0; line-height:1;">
                           <span x-show="c.userReaction" x-text="commentEmojiMap[c.userReaction] || ''"></span>

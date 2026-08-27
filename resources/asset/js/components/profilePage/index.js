@@ -20,7 +20,6 @@ import "./createEvent"
 import "./editProfile"
 import "./postEmojiImgProcess"
 // import "./commentEmojiTest"
-import "./longPress" // long press for reaction options
 
 
 

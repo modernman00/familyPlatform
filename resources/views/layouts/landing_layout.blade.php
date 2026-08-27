@@ -25,7 +25,7 @@
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/PWA_Manifest.json">
-  <meta name="theme-color" content="#0a66c2">
+  <meta name="theme-color" content="var(--brand-primary)">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Family Connect">

@@ -37,7 +37,7 @@
                     
                     <!-- Header -->
                     <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #0a66c2 0%, #004182 100%); padding: 40px 20px;">
+                        <td align="center" style="background: linear-gradient(135deg, var(--brand-primary) 0%, #004182 100%); padding: 40px 20px;">
                             <img src="{{ $_ENV['APP_LOGO'] ?? '' }}" alt="Family Platform Logo" style="display: block; height: 50px; width: auto; filter: brightness(0) invert(1);" />
                         </td>
                     </tr>
@@ -54,7 +54,7 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
                                     <td align="center" style="padding-bottom: 30px;">
-                                        <div style="height: 3px; width: 40px; background-color: #0a66c2; border-radius: 2px;"></div>
+                                        <div style="height: 3px; width: 40px; background-color: var(--brand-primary); border-radius: 2px;"></div>
                                     </td>
                                 </tr>
                             </table>
@@ -71,7 +71,7 @@
                         <td style="padding: 0 40px 40px 40px;">
                             <p style="margin: 30px 0 0 0; font-size: 16px; line-height: 1.6; color: #475569; font-weight: 500;">
                                 Warm regards,<br/>
-                                <span style="color: #0a66c2; font-weight: 600;">The Membership Team</span>
+                                <span style="color: var(--brand-primary); font-weight: 600;">The Membership Team</span>
                             </p>
                         </td>
                     </tr>

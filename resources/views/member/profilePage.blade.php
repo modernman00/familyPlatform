@@ -2,7 +2,7 @@
 @section('title', 'PROFILE_PAGE')
 @section('data-page-id', 'profilePage')
 @push('styles')
-    <link rel="stylesheet" href="/public/css/profilepage.css">
+    <link rel="stylesheet" href="/public/css/profilepage.css?v={{ time() }}">
 @endpush
 @section('content')
 

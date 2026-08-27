@@ -44,7 +44,7 @@
             justify-content: center;
             font-size: 1.5rem;
             color: #ffffff;
-            background-color: #0a66c2;
+            background-color: var(--brand-primary);
             box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); /* Purple glow */
         }
 
@@ -89,7 +89,7 @@
         }
 
         .styleform_form .form-control:focus {
-            border-color: #0a66c2;
+            border-color: var(--brand-primary);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
             outline: none;
         }
@@ -102,7 +102,7 @@
         }
 
         .stitch-submit {
-            background-color: #0a66c2;
+            background-color: var(--brand-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -133,7 +133,7 @@
             height: 16px;
             border-radius: 4px;
             border: 1px solid #D1D5DB;
-            accent-color: #0a66c2;
+            accent-color: var(--brand-primary);
             cursor: pointer;
         }
 

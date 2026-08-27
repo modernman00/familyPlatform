@@ -87,13 +87,13 @@
         }
 
         .styleform_form .form-control:focus {
-            border-color: #0a66c2;
+            border-color: var(--brand-primary);
             box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
         }
 
         .stitch-submit {
             width: 100%;
-            background-color: #0a66c2;
+            background-color: var(--brand-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -120,7 +120,7 @@
         }
 
         .stitch-link {
-            color: #0a66c2;
+            color: var(--brand-primary);
             text-decoration: none;
             font-weight: 600;
         }

@@ -369,6 +369,52 @@ export function profileFeed() {
             }
         },
 
+        // ── Touch support: long-press reveals the reaction bar on mobile,
+        // since hover/mouseenter never fires on touch devices ────────────
+        startPostLongPress(postNo) {
+            this._postLongPressFired = false;
+            clearTimeout(this._postLongPressTimer);
+            this._postLongPressTimer = setTimeout(() => {
+                this._postLongPressFired = true;
+                this.activeReactionBars[postNo] = true;
+            }, 450);
+        },
+
+        cancelPostLongPress() {
+            clearTimeout(this._postLongPressTimer);
+        },
+
+        // Plain tap likes the post; a long-press that already opened the
+        // bar suppresses the tap so it doesn't also toggle the like.
+        onPostLikeClick(postNo, reactionType) {
+            if (this._postLongPressFired) {
+                this._postLongPressFired = false;
+                return;
+            }
+            this.reactToPost(postNo, reactionType);
+        },
+
+        startCommentLongPress(commentNo) {
+            this._commentLongPressFired = false;
+            clearTimeout(this._commentLongPressTimer);
+            this._commentLongPressTimer = setTimeout(() => {
+                this._commentLongPressFired = true;
+                this.activeCommentReactionBars[commentNo] = true;
+            }, 450);
+        },
+
+        cancelCommentLongPress() {
+            clearTimeout(this._commentLongPressTimer);
+        },
+
+        onCommentLikeClick(postNo, commentNo, reactionType) {
+            if (this._commentLongPressFired) {
+                this._commentLongPressFired = false;
+                return;
+            }
+            this.reactToComment(postNo, commentNo, reactionType);
+        },
+
         // ── Comment emoji picker for text input ─────────────────────────────
         toggleCommentEmoji(postNo) {
             this.commentEmojiOpen[postNo] = !this.commentEmojiOpen[postNo];

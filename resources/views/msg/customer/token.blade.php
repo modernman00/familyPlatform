@@ -13,7 +13,7 @@
         </div>
         
         <div style="text-align: center;">
-            <a href="{{ getenv('MIX_APP_URL2') }}login" style="background-color: #0a66c2; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Login Page</a>
+            <a href="{{ getenv('MIX_APP_URL2') }}login" style="background-color: var(--brand-primary); color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Login Page</a>
         </div>
     @else 
         <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 20px; border-radius: 4px;">
