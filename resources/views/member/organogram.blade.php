@@ -2,7 +2,7 @@
 @section('title', 'Family Tree & Organogram')
 @section('data-page-id', 'organogram')
 @push('styles')
-    <link rel="stylesheet" href="/public/css/organogram.css">
+    <link rel="stylesheet" href="/public/css/organogram.css?v={{ time() }}">
 @endpush
 @section('content')
 
@@ -21,8 +21,11 @@
                     </p>
                 </div>
 
-                <!-- Search & Quick Find -->
-                <div class="header-actions">
+                <!-- Actions (Search & Config) -->
+                <div class="header-actions d-flex align-items-center gap-3">
+                    <a href="/accountSetting#family-settings" class="btn btn-primary fw-bold" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.2rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+                        <i class="bi bi-gear-fill me-2"></i>Configure Family Tree
+                    </a>
                     <div class="search-box-wrapper">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" id="memberSearchInput" class="member-search-input" placeholder="Find relative in tree..." autocomplete="off">

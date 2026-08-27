@@ -1,6 +1,6 @@
     <!-- Navigation Bar -->
 
-    <link rel="stylesheet" href="/public/css/navbar.css">
+    <link rel="stylesheet" href="/public/css/navbar.css?v={{ time() }}">
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold text-primary" href="#">

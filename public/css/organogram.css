@@ -767,3 +767,80 @@ body {
     .detail-grid { grid-template-columns: 1fr; }
     .instructions { display: none; }
 }
+
+/* Dark Mode Support */
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e4e6eb;
+    --text-muted: #94a3b8;
+    --primary-color: #4ade80;
+    --primary-dark: #166534;
+    --primary-light: rgba(74, 222, 128, 0.1);
+    --gold-accent: #4ade80;
+    --gold-light: rgba(74, 222, 128, 0.15);
+    --gold-glow: rgba(74, 222, 128, 0.35);
+    --glass-bg: rgba(30, 30, 30, 0.88);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(74, 222, 128, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(74, 222, 128, 0.07) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(30, 30, 30, 0.6) 0px, transparent 50%);
+}
+
+body.dark-mode .tree-node {
+    background: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .tree-node.male {
+    background: linear-gradient(180deg, #1e1e1e 0%, rgba(37, 99, 235, 0.15) 100%);
+}
+
+body.dark-mode .tree-node.female {
+    background: linear-gradient(180deg, #1e1e1e 0%, rgba(219, 39, 119, 0.15) 100%);
+}
+
+body.dark-mode .tree-node.spouse {
+    background: linear-gradient(180deg, #1e1e1e 0%, rgba(217, 119, 6, 0.15) 100%);
+}
+
+body.dark-mode .profile-image-container {
+    border-color: #1e1e1e;
+}
+
+body.dark-mode .member-search-input {
+    background: #1e1e1e;
+    color: #e4e6eb;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .search-dropdown {
+    background: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .zoom-btn {
+    background: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .instructions {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .instructions-toggle {
+    background: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .modal-content {
+    background: #1e1e1e;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .detail-item {
+    background: #121212;
+    border-color: rgba(255, 255, 255, 0.05);
+}

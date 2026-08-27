@@ -11,7 +11,7 @@
 }
 
 .dark-mode {
-  --primary-color: #357a55;
+  --primary-color: #4ade80;
   --secondary-color: #2c2c2c;
   --bg-color: #121212;
   --card-bg: #1e1e1e;
@@ -259,6 +259,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.notification-badge:empty {
+  display: none !important;
 }
 
 .image-preview {

@@ -43,6 +43,10 @@
   animation: pulse 1.5s infinite;
 }
 
+.notification-badge:empty {
+  display: none !important;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);

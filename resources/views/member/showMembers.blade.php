@@ -2,7 +2,7 @@
 @section('title', 'All Members')
 @section('data-page-id', 'allMembers')
 @push('styles')
-    <link rel="stylesheet" href="/public/css/showMembers.css">
+    <link rel="stylesheet" href="/public/css/showMembers.css?v={{ time() }}">
 @endpush
 @section('content')
 

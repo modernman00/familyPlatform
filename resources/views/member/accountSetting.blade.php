@@ -360,7 +360,7 @@
                   </div>
                 </div>
 
-                <div class="legacy-settings-header">
+                <div class="legacy-settings-header" id="family-settings">
                   <div class="section-title" style="font-size: 1.1rem;">Family & Regional Settings</div>
                   <div class="section-subtitle mb-0">Configure your family tree connections.</div>
                 </div>

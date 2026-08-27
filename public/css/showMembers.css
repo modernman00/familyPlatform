@@ -304,3 +304,57 @@ h1, h2, h3, h4, .member-name {
     .members-grid { grid-template-columns: 1fr; }
     .member-card { max-width: 400px; margin: 0 auto; }
 }
+
+/* Dark Mode Support */
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e4e6eb;
+    --text-muted: #94a3b8;
+    --primary-color: #4ade80;
+    --primary-hover: #22c55e;
+    --primary-light: rgba(74, 222, 128, 0.1);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(74, 222, 128, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(245, 238, 220, 0.05) 0px, transparent 50%);
+}
+
+body.dark-mode .members-header {
+    background: rgba(18, 18, 18, 0.7);
+}
+
+body.dark-mode .filter-section {
+    background: rgba(30, 30, 30, 0.9);
+}
+
+body.dark-mode .filter-section .input-group {
+    background: #121212;
+}
+
+body.dark-mode .member-card {
+    background: #1e1e1e;
+}
+
+body.dark-mode .card-cover {
+    background: linear-gradient(135deg, #166534 0%, #4ade80 100%);
+}
+
+body.dark-mode .avatar-wrapper img {
+    border-color: #1e1e1e;
+    background: #1e1e1e;
+}
+
+body.dark-mode .member-details {
+    background: #121212;
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .btn-profile {
+    color: #121212;
+}
+
+body.dark-mode .btn-remove {
+    background: #121212;
+}

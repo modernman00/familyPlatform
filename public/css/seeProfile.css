@@ -293,11 +293,14 @@ h1, h2, h3, h4 {
 
 /* Dark Mode Support */
 body.dark-mode {
-    --glass-bg: rgba(15, 23, 42, 0.8);
+    --glass-bg: rgba(18, 18, 18, 0.8);
     --glass-border: rgba(255, 255, 255, 0.1);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    background-color: #0f172a;
+    background-color: #121212;
+    --accent-color: #4ade80;
+    --primary-gradient: linear-gradient(135deg, #166534 0%, #4ade80 100%);
+    --secondary-gradient: linear-gradient(135deg, #14532d 0%, #22c55e 100%);
 }
 
 body.dark-mode .info-card {
