@@ -23,6 +23,6 @@
 </p>
 
 <div style="text-align: center;">
-    <a href="{{ getenv('APP_URL') }}login" style="background-color: var(--brand-primary); color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
+    <a href="{{ getenv('APP_URL') }}login" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
 </div>
 @endsection

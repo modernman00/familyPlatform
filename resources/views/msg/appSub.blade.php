@@ -21,7 +21,7 @@
     We are thrilled to welcome you to the FamilyPlatform! Your registration has been successfully processed and your account is now active.
 </p>
 
-<div style="background-color: #f1f5f9; border-left: 4px solid var(--brand-primary); padding: 15px 20px; border-radius: 4px; margin-bottom: 20px;">
+<div style="background-color: #f1f5f9; border-left: 4px solid #00bfa5; padding: 15px 20px; border-radius: 4px; margin-bottom: 20px;">
     <p style="margin: 0; color: #334155; font-size: 15px;">
         <strong>Next Steps:</strong> Please return to the login page and sign in with your email and password. For your security, a verification code will be sent to your email to confirm your identity during your first login.
     </p>
