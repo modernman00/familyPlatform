@@ -406,7 +406,7 @@ final class Organogram extends SingleCustomerData
             $memberData['email'] ?? null,
             $memberData['mobile'] ?? null,
             $rootAvatar,
-            "Family Platform Root Member"
+            "Primary Member"
         ]);
         $rootNodeId = (int) $db->lastInsertId();
 

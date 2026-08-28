@@ -22,13 +22,13 @@
                 </div>
 
                 <!-- Actions (Search & Config) -->
-                <div class="header-actions d-flex align-items-center gap-3">
-                    <a href="/accountSetting#family-settings" class="btn btn-primary fw-bold" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.2rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+                <div class="header-actions d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-3">
+                    <a href="/accountSetting#family-settings" class="btn btn-primary fw-bold w-100 w-md-auto text-center" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.2rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
                         <i class="bi bi-gear-fill me-2"></i>Configure Family Tree
                     </a>
-                    <div class="search-box-wrapper">
+                    <div class="search-box-wrapper w-100">
                         <i class="bi bi-search search-icon"></i>
-                        <input type="text" id="memberSearchInput" class="member-search-input" placeholder="Find relative in tree..." autocomplete="off">
+                        <input type="text" id="memberSearchInput" class="member-search-input w-100" placeholder="Find relative in tree..." autocomplete="off">
                         <div id="searchDropdown" class="search-dropdown"></div>
                     </div>
                 </div>
@@ -40,15 +40,15 @@
     <div class="organogram-container">
 
         @if(empty($orgData['father']['fullName']) && empty($orgData['mother']['fullName']) && empty($orgData['father']['name']) && empty($orgData['mother']['name']))
-            <div class="alert alert-info shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between mx-3 mt-3" style="background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); z-index: 10; position: relative;">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-diagram-3-fill fs-3 me-3 text-primary"></i>
+            <div class="alert alert-info shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); z-index: 10; position: relative;">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3">
+                    <i class="bi bi-diagram-3-fill fs-3 text-primary"></i>
                     <div>
                         <h6 class="mb-1 fw-bold text-dark">Build your family tree!</h6>
                         <p class="mb-0 text-muted" style="font-size: 0.9rem;">Your tree looks a bit empty. Add your parents and siblings to start building your lineage.</p>
                     </div>
                 </div>
-                <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary btn-sm px-3 py-2 fw-bold" style="border-radius: 8px; white-space: nowrap;">Add Family Members</button>
+                <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary btn-sm px-3 py-2 fw-bold w-100 w-md-auto" style="border-radius: 8px; white-space: nowrap;">Add Family Members</button>
             </div>
         @endif
 

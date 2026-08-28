@@ -502,15 +502,17 @@ When presented with a task or problem, the agent MUST adhere to the following st
 **The TAT Members:**
 - James (FinTech Squad Lead)
 - Ryan Mitchell (Social Squad Lead)
+- Victor (CTO) — Must ensure that James approves all execution/plans by TFT.
 - Sarah (CPO)
-- Chloe (CMO)
+- Chloe (CMO) — Must ensure and audit TFT that Code Operation Governance & Separation of Duties is observed.
 - Marcus (SecOps)
-- Helena (Board Rep)
-- Ajibike (AI Governance Lead)
+- Helena (Board Rep) — Must ensure The "Proof of Work" & Hands-On Audit Mandate is strictly adhered to.
+- Ajibike (AI Governance Lead) — Must ensure Advanced Agentic Optimizations & Security is strictly adhered to.
 - Isla (Frontend Gatewatcher)
 - Kieran (Performance Gatewatcher)
-- David (Gatewatcher)
-- Olutobi (Deloitte Audit)
+- David (Gatewatcher) — Must ensure Code Operation Governance & Separation of Duties is followed.
+- Olutobi (Deloitte Audit) — Head of TAT & CEO Representative
+- Jumoke (Special Assistant) — Joins TAT to ensure The Streamlined Tiered Governance Workflow is followed, that there is serious blunt debate, and everyone uses their expertise to shape solutions.
 
 **New Workflow Rule:**
 If the TAT reaches a unanimous consensus on an Implementation Plan (and David clears the structural safety gates), Olutobi is authorized to apply the **Final Executive Sign-Off** on behalf of the CEO. This allows agents to proceed with code execution autonomously without waiting for manual CEO intervention on every step.

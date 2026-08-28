@@ -299,6 +299,10 @@ body {
     position: static;
     max-height: none;
   }
+  
+  .profile-column { order: 1; }
+  .sidebar-column { order: 2; }
+  .feed-column { order: 3; }
 
   .navbar-brand {
     font-size: 1.2rem;

@@ -16,7 +16,7 @@
         }
         #editProfileModal .modal-header {
             border-bottom: none;
-            padding: 1.5rem 1.5rem 0.5rem;
+            padding: 1rem 1rem 0.25rem;
             background-color: transparent;
         }
         #editProfileModal .modal-title {
@@ -41,15 +41,15 @@
             font-size: 1.5rem;
         }
         #editProfileModal .modal-body {
-            padding: 1.5rem;
+            padding: 1rem;
             background-color: transparent;
         }
         #editProfileModal .form-container-box {
             background-color: #1a1a1a;
             border: 1px solid #333;
-            border-radius: 24px;
-            padding: 1.5rem;
-            margin-top: 1rem;
+            border-radius: 20px;
+            padding: 1rem;
+            margin-top: 0.5rem;
         }
         #editProfileModal .form-label {
             color: #a1a1aa;
@@ -57,7 +57,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         #editProfileModal .form-control, 
         #editProfileModal .form-select {
@@ -65,8 +65,8 @@
             border: 1px solid transparent;
             color: #ffffff;
             border-radius: 12px;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.95rem;
             transition: all 0.25s;
         }
         #editProfileModal .form-control:focus, 
@@ -87,9 +87,9 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             border-bottom: 1px solid #333;
-            padding-bottom: 1rem;
-            margin-bottom: 1.2rem;
-            margin-top: 1.5rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1rem;
             display: flex;
             align-items: center;
             gap: 8px;

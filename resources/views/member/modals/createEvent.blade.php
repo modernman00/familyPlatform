@@ -14,7 +14,7 @@
     }
     #createEventModal .modal-header {
         border-bottom: none;
-        padding: 1.5rem 1.5rem 0.5rem;
+        padding: 1rem 1rem 0.25rem;
         background-color: transparent;
     }
     #createEventModal .modal-title {
@@ -39,14 +39,14 @@
         font-size: 1.5rem;
     }
     #createEventModal .modal-body {
-        padding: 1.5rem;
+        padding: 1rem;
         background-color: transparent;
     }
     #createEventModal .form-container-box {
         background-color: #1a1a1a;
         border: 1px solid #333;
-        border-radius: 24px;
-        padding: 1.5rem;
+        border-radius: 20px;
+        padding: 1rem;
     }
     #createEventModal .form-label {
         color: #a1a1aa;
@@ -54,7 +54,7 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
     }
     #createEventModal .form-control, 
     #createEventModal .form-select {
@@ -62,8 +62,8 @@
         border: 1px solid transparent;
         color: #ffffff;
         border-radius: 12px;
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
         transition: all 0.25s;
     }
     #createEventModal .form-control:focus, 

@@ -77,12 +77,12 @@ async function handleSave(btn) {
             icon: 'success',
             title: 'Profile updated successfully',
             showConfirmButton: false,
-            timer: 2500,
+            timer: 1500,
             timerProgressBar: true,
         });
 
         // Reload so the rest of the page picks up the new values.
-        setTimeout(() => window.location.assign('/profilePage'), 2500);
+        setTimeout(() => window.location.assign('/profilePage'), 800);
     } catch (error) {
         console.error('Edit Profile Submit Error:', error);
 
