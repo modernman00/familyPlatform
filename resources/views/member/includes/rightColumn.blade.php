@@ -30,17 +30,28 @@ foreach(($eventData ?? []) as $event) {
 <div class="sidebar-column" x-data="upcomingEvents({{ json_encode($enrichedEvents) }})">
     <!-- Events -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; background-color: var(--card-bg);">
-        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4" id="eventHeader">
-            <h5 class="mb-0 fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">Upcoming Events</h5>
-            <a href="#" class="text-decoration-none" style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.8rem;"></i></a>
+        <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start pt-4 pb-2 px-4" id="eventHeader">
+            <div>
+                <h5 class="mb-0 fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">Upcoming Events</h5>
+                <p class="text-muted small mb-0" style="font-size: 0.8rem;">Gatherings, birthdays, and special moments.</p>
+            </div>
+            <a href="#" class="text-decoration-none mt-1" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
         </div>
 
         <div class="card-body eventList px-4" id="eventList">
             <!-- Empty state fallback -->
             <template x-if="events.length === 0">
-                <div class="text-center py-4">
-                    <i class="bi bi-calendar-x text-muted fs-3"></i>
-                    <p class="text-muted small mt-2 mb-0">No upcoming events scheduled</p>
+                <div class="text-center py-4 px-2">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-light p-3" style="width: 54px; height: 54px;">
+                        <i class="bi bi-calendar-x text-muted fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1" style="color: var(--text-color); font-size: 0.95rem;">No Upcoming Events</h6>
+                    <p class="text-muted small mb-3" style="font-size: 0.82rem; line-height: 1.45;">
+                        Looks like the calendar is clear. Why not plan the next family gathering or dinner?
+                    </p>
+                    <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#createEventModal" style="background-color: var(--primary-color); border: none; font-size: 0.82rem;">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Create Event
+                    </button>
                 </div>
             </template>
 

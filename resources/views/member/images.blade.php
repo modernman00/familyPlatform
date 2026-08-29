@@ -75,6 +75,33 @@
         }
         .lightbox-nav.prev { left: 30px; }
         .lightbox-nav.next { right: 30px; }
+        .meta-footer {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: auto;
+        }
+        .gallery-action-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+        }
+        .gallery-action-group .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 6px 8px;
+            border-radius: 10px;
+            height: 36px;
+            transition: all 0.2s ease;
+        }
+        .gallery-action-group .btn i {
+            font-size: 0.85rem;
+        }
     </style>
 @endpush
 
@@ -113,10 +140,10 @@
                 <div class="mb-3">
                     <i class="bi bi-camera" style="font-size: 4rem; color: var(--primary-color); opacity: 0.6;"></i>
                 </div>
-                <h4 class="fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">No Photos Yet</h4>
-                <p class="text-muted mb-4">Photos attached to social feed posts will automatically appear in this gallery.</p>
-                <a href="/profilePage" class="btn text-white px-4 py-2" style="background-color: var(--primary-color); border-radius: 20px;">
-                    <i class="bi bi-pencil-square me-1"></i> Create a Post
+                <h4 class="fw-bold mb-2">No photos in this gallery yet</h4>
+                <p class="mb-4">Photos attached to your published family posts will automatically appear here.</p>
+                <a href="/profilePage" class="btn btn-primary px-4 py-2" style="border-radius: 20px; background: var(--primary-color); border: none;">
+                    <i class="bi bi-pencil-square me-2"></i>Create a Post
                 </a>
             </div>
         @else
@@ -144,17 +171,46 @@
                             @endif
 
                             <div class="meta-footer pt-2 border-top">
-                                @if(!empty($isOwner))
-                                    <button class="setProfilePicBtn btn btn-sm" data-img="{{ $image['img'] }}" title="Set as Profile Picture">
-                                        <i class="bi bi-person-bounding-box"></i> Set as Avatar
-                                    </button>
-                                @else
-                                    <span class="badge bg-light text-dark"><i class="bi bi-camera"></i> Photo</span>
-                                @endif
+                                <!-- Top Row: Date & Status Badge -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    @if(!empty($image['created_at']))
+                                        <span class="timestamp text-muted small">
+                                            <i class="bi bi-calendar3 me-1"></i>{{ date('M j, Y', strtotime($image['created_at'])) }}
+                                        </span>
+                                    @else
+                                        <span></span>
+                                    @endif
 
-                                @if(!empty($image['created_at']))
-                                    <div class="timestamp text-muted">
-                                        <i class="bi bi-calendar3 me-1"></i>{{ date('M j, Y', strtotime($image['created_at'])) }}
+                                    @if(!empty($isOwner))
+                                        <span class="statusBadge badge {{ !empty($image['is_public']) ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle' }}" style="font-size: 0.7rem;">
+                                            <i class="bi {{ !empty($image['is_public']) ? 'bi-eye-fill' : 'bi-lock-fill' }} me-1"></i><span class="status-badge-text">{{ !empty($image['is_public']) ? 'Public' : 'Private' }}</span>
+                                        </span>
+                                    @else
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;">
+                                            <i class="bi bi-eye-fill me-1"></i> Public
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <!-- Action Buttons Row -->
+                                @if(!empty($isOwner))
+                                    <div class="gallery-action-group">
+                                        <button type="button"
+                                                class="toggleVisibilityBtn btn btn-sm {{ !empty($image['is_public']) ? 'btn-outline-success' : 'btn-outline-secondary' }}" 
+                                                data-img="{{ $image['img'] }}" 
+                                                data-public="{{ !empty($image['is_public']) ? '1' : '0' }}"
+                                                title="{{ !empty($image['is_public']) ? 'Currently Public on your profile. Click to make Private' : 'Currently Private. Click to make Public' }}">
+                                            <i class="bi {{ !empty($image['is_public']) ? 'bi-eye-fill' : 'bi-lock-fill' }} me-1"></i>
+                                            <span class="vis-label">{{ !empty($image['is_public']) ? 'Make Private' : 'Make Public' }}</span>
+                                        </button>
+
+                                        <button type="button" 
+                                                class="setProfilePicBtn btn btn-sm btn-outline-primary" 
+                                                data-img="{{ $image['img'] }}" 
+                                                title="Set as Profile Picture">
+                                            <i class="bi bi-person-bounding-box me-1"></i>
+                                            <span>Set Profile Pic</span>
+                                        </button>
                                     </div>
                                 @endif
                             </div>
@@ -254,6 +310,68 @@
             }
         });
 
+        // Toggle Public/Private visibility handler
+        document.querySelectorAll('.toggleVisibilityBtn').forEach(button => {
+            button.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const imageName = this.getAttribute('data-img');
+                const isCurrentlyPublic = this.getAttribute('data-public') === '1';
+                const nextPublic = isCurrentlyPublic ? 0 : 1;
+
+                this.disabled = true;
+                try {
+                    const response = await fetch('/profilepage/gallery/toggle-visibility', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ imageName: imageName, is_public: nextPublic })
+                    });
+                    const resData = await response.json();
+                    if (resData && resData.success) {
+                        this.setAttribute('data-public', String(nextPublic));
+                        const labelSpan = this.querySelector('.vis-label');
+                        const icon = this.querySelector('i');
+                        const gridItem = this.closest('.grid-item');
+                        const statusBadge = gridItem ? gridItem.querySelector('.statusBadge') : null;
+
+                        if (nextPublic === 1) {
+                            this.className = 'toggleVisibilityBtn btn btn-sm btn-outline-success';
+                            if (labelSpan) labelSpan.textContent = 'Make Private';
+                            if (icon) icon.className = 'bi bi-eye-fill me-1';
+                            this.title = 'Currently Public on your profile. Click to make Private';
+                            if (statusBadge) {
+                                statusBadge.className = 'statusBadge badge bg-success-subtle text-success border border-success-subtle';
+                                statusBadge.innerHTML = '<i class="bi bi-eye-fill me-1"></i><span class="status-badge-text">Public</span>';
+                            }
+                        } else {
+                            this.className = 'toggleVisibilityBtn btn btn-sm btn-outline-secondary';
+                            if (labelSpan) labelSpan.textContent = 'Make Public';
+                            if (icon) icon.className = 'bi bi-lock-fill me-1';
+                            this.title = 'Currently Private. Click to make Public';
+                            if (statusBadge) {
+                                statusBadge.className = 'statusBadge badge bg-secondary-subtle text-secondary border border-secondary-subtle';
+                                statusBadge.innerHTML = '<i class="bi bi-lock-fill me-1"></i><span class="status-badge-text">Private</span>';
+                            }
+                        }
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: nextPublic === 1 ? 'Photo is now Public' : 'Photo is now Private',
+                                text: nextPublic === 1 ? 'This photo is now visible to family members on your profile.' : 'This photo is now private and hidden from your profile.',
+                                timer: 1800,
+                                showConfirmButton: false
+                            });
+                        }
+                    } else {
+                        if (window.Swal) Swal.fire('Error', resData?.error || 'Could not update visibility', 'error');
+                    }
+                } catch (err) {
+                    console.error('Visibility toggle error:', err);
+                } finally {
+                    this.disabled = false;
+                }
+            });
+        });
+
         // Set as Profile Picture handler
         document.querySelectorAll('.setProfilePicBtn').forEach(button => {
             button.addEventListener('click', async function(e) {
@@ -263,11 +381,12 @@
                 if (!imageName) return;
 
                 const confirmation = await Swal.fire({
-                    title: 'Are you sure?',
+                    title: 'Set as Profile Picture?',
                     text: 'Would you like to set this photo as your profile avatar?',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'Yes, Set Profile Pic',
+                    confirmButtonColor: '#1e6040'
                 });
 
                 if (!confirmation.isConfirmed) {

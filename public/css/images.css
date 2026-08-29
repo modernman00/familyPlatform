@@ -110,9 +110,29 @@ body {
 
 .meta-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  width: 100%;
   margin-top: auto;
+}
+
+.gallery-action-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.gallery-action-group .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 10px;
+  height: 36px;
+  transition: all 0.2s ease;
 }
 
 .likeBtn {
@@ -136,26 +156,6 @@ body {
 
 .likeBtn:hover {
   background: var(--border-color);
-}
-
-.setProfilePicBtn {
-  background: var(--hover-color);
-  border: none;
-  cursor: pointer;
-  color: var(--text-color);
-  font-size: 0.9rem;
-  padding: 6px 14px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-  font-weight: 600;
-}
-
-.setProfilePicBtn:hover {
-  background: var(--primary-color);
-  color: #fff;
 }
 
 .timestamp {

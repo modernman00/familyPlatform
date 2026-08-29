@@ -26,9 +26,10 @@ class CloudflareStreamService
      * Request a Direct Creator Upload URL from Cloudflare Stream
      *
      * @param int $maxDurationSeconds Maximum allowed video length (default 30s)
+     * @param int $expirySeconds Expiration in seconds from now (0 = permanent / never expire)
      * @return array{success: bool, uploadUrl?: string, videoId?: string, streamUrl?: string, error?: string}
      */
-    public function createDirectUploadUrl(int $maxDurationSeconds = 30): array
+    public function createDirectUploadUrl(int $maxDurationSeconds = 30, int $expirySeconds = 0): array
     {
         if (!$this->isConfigured()) {
             return [
@@ -40,12 +41,18 @@ class CloudflareStreamService
         $maxDurationSeconds = max(1, min($maxDurationSeconds, 30));
         $endpoint = "https://api.cloudflare.com/client/v4/accounts/{$this->accountId}/stream/direct_upload";
 
-        $payload = json_encode([
+        $payloadData = [
             'maxDurationSeconds' => $maxDurationSeconds,
-            'expiry' => date('c', time() + 3600), // 1 hour upload expiry
             'requireSignedURLs' => false,
             'allowedOrigins' => ['*'],
-        ]);
+        ];
+
+        // If expirySeconds > 0, set expiration date. If 0 (permanent), omit expiry.
+        if ($expirySeconds > 0) {
+            $payloadData['expiry'] = date('c', time() + $expirySeconds);
+        }
+
+        $payload = json_encode($payloadData);
 
         $ch = curl_init($endpoint);
         if ($ch === false) {

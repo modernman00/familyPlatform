@@ -447,6 +447,49 @@ final class ProfilePage extends ProcessImg
     }
 
     /**
+     * Toggle public/private visibility of a gallery image.
+     */
+    public function toggleImageVisibility(): void
+    {
+        try {
+            $VerifyJWT = SignIn::verify('users');
+            $id = (string)cleanSession((string)$VerifyJWT['id']);
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+
+            if (empty($input['imageName'])) {
+                throw new \Exception("Image name not provided");
+            }
+
+            $imageName = checkInput((string)$input['imageName']);
+            $imageName = is_string($imageName) ? $imageName : '';
+            $isPublic = !empty($input['is_public']) ? 1 : 0;
+
+            $success = Post::setImageVisibility($id, $imageName, $isPublic);
+
+            if ($success) {
+                http_response_code(200);
+                echo json_encode([
+                    'status' => 200,
+                    'success' => true,
+                    'message' => $isPublic ? 'Photo is now visible on your public profile' : 'Photo is now private',
+                    'is_public' => $isPublic
+                ]);
+            } else {
+                throw new \Exception("Failed to update photo visibility");
+            }
+        } catch (\Throwable $th) {
+            http_response_code(400);
+            echo json_encode([
+                'status' => 400,
+                'success' => false,
+                'error' => $th->getMessage()
+            ]);
+        }
+    }
+
+    /**
      * Sets an HTTP cookie for JWT token.
      * 
      * Retrieves the token from the GET request and sets a secure, HTTP-only cookie with a one-hour expiry.

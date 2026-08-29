@@ -197,10 +197,46 @@ final class Post extends Select
      *
      * @param string $authorId
      * @return array<int, array<string, mixed>>
+     * @param string $authorId Member ID
+     * @param bool $publicOnly When true, returns only images marked as public
+     * @return array<int, array{id: string, img: string, caption: string, likes: int, where_from: string, created_at: string, post_no: int|null, is_public: int}>
      */
-    public static function getAllImagesByAuthor(string $authorId): array
+    public static function getAllImagesByAuthor(string $authorId, bool $publicOnly = false): array
     {
         $allImages = [];
+        $baseDir = dirname(__DIR__, 2);
+        $searchDirs = [
+            $baseDir . '/resources/images/post/',
+            $baseDir . '/resources/images/',
+            $baseDir . '/resources/images/profile/',
+        ];
+
+        $checkFileExists = static function (string $filename) use ($searchDirs): bool {
+            if (empty($filename)) return false;
+            $safeName = basename(rawurldecode($filename));
+            foreach ($searchDirs as $dir) {
+                if (file_exists($dir . $safeName) && is_file($dir . $safeName)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Preload visibility map from images table
+        $visibilityMap = [];
+        try {
+            $queryVis = "SELECT img, is_public FROM images WHERE id = ?";
+            $stmtVis = parent::connect2()->prepare($queryVis);
+            $stmtVis->execute([$authorId]);
+            foreach ($stmtVis->fetchAll(\PDO::FETCH_ASSOC) as $vRow) {
+                $vImg = trim((string)$vRow['img']);
+                if (!empty($vImg)) {
+                    $visibilityMap[$vImg] = (int)($vRow['is_public'] ?? 0);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[Post::getAllImagesByAuthor] Visibility preload error: ' . $e->getMessage());
+        }
 
         // 1. Fetch images from published posts
         $query = "SELECT post_no, id, fullName, postMessage, post_img0, post_img1, post_img2, post_img3, post_img4, post_img5, date_created, post_likes 
@@ -216,15 +252,20 @@ final class Post extends Select
                 $col = 'post_img' . $i;
                 if (!empty($post[$col])) {
                     $imgName = trim((string)$post[$col]);
-                    if (!empty($imgName)) {
+                    if (!empty($imgName) && $checkFileExists($imgName)) {
+                        $isPublic = (int)($visibilityMap[$imgName] ?? 0);
+                        if ($publicOnly && $isPublic !== 1) {
+                            continue;
+                        }
                         $allImages[] = [
-                            'id' => $post['id'],
+                            'id' => (string)$post['id'],
                             'img' => $imgName,
                             'caption' => (string)($post['postMessage'] ?? ''),
                             'likes' => (int)($post['post_likes'] ?? 0),
                             'where_from' => 'post',
                             'created_at' => (string)($post['date_created'] ?? ''),
-                            'post_no' => $post['post_no'],
+                            'post_no' => (int)$post['post_no'],
+                            'is_public' => $isPublic,
                         ];
                     }
                 }
@@ -232,7 +273,7 @@ final class Post extends Select
         }
 
         // 2. Fetch images from images table
-        $query2 = "SELECT no, id, img, where_from, caption, likes, created_at 
+        $query2 = "SELECT no, id, img, where_from, caption, likes, is_public, created_at 
                    FROM images 
                    WHERE id = ? AND img IS NOT NULL AND img != '' 
                    ORDER BY created_at DESC";
@@ -243,21 +284,55 @@ final class Post extends Select
         $existingImgNames = array_column($allImages, 'img');
         foreach ($images as $imgRow) {
             $imgName = trim((string)$imgRow['img']);
-            if (!empty($imgName) && !in_array($imgName, $existingImgNames, true)) {
+            if (!empty($imgName) && !in_array($imgName, $existingImgNames, true) && $checkFileExists($imgName)) {
+                $isPublic = (int)($imgRow['is_public'] ?? ($visibilityMap[$imgName] ?? 0));
+                if ($publicOnly && $isPublic !== 1) {
+                    continue;
+                }
                 $allImages[] = [
-                    'id' => $imgRow['id'],
+                    'id' => (string)$imgRow['id'],
                     'img' => $imgName,
                     'caption' => (string)($imgRow['caption'] ?? ''),
                     'likes' => (int)($imgRow['likes'] ?? 0),
                     'where_from' => (string)($imgRow['where_from'] ?? 'gallery'),
                     'created_at' => (string)($imgRow['created_at'] ?? ''),
                     'post_no' => null,
+                    'is_public' => $isPublic,
                 ];
                 $existingImgNames[] = $imgName;
             }
         }
 
         return $allImages;
+    }
+
+    /**
+     * Toggle or set an image's public/private visibility status.
+     *
+     * @param string $authorId
+     * @param string $imageName
+     * @param int $isPublic (1 for public, 0 for private)
+     * @return bool
+     */
+    public static function setImageVisibility(string $authorId, string $imageName, int $isPublic): bool
+    {
+        $db = parent::connect2();
+        $safeImg = trim($imageName);
+        $isPublic = $isPublic ? 1 : 0;
+
+        // Check if image already exists in images table for this user
+        $checkStmt = $db->prepare("SELECT no FROM images WHERE id = ? AND img = ?");
+        $checkStmt->execute([$authorId, $safeImg]);
+        $existing = $checkStmt->fetch(\PDO::FETCH_ASSOC);
+
+        if ($existing && !empty($existing['no'])) {
+            $upd = $db->prepare("UPDATE images SET is_public = ? WHERE id = ? AND img = ?");
+            return $upd->execute([$isPublic, $authorId, $safeImg]);
+        }
+
+        // Insert new record in images table
+        $ins = $db->prepare("INSERT INTO images (id, img, where_from, is_public, created_at) VALUES (?, ?, 'gallery', ?, CURRENT_TIMESTAMP)");
+        return $ins->execute([$authorId, $safeImg, $isPublic]);
     }
 
 }

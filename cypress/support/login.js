@@ -29,10 +29,10 @@ export function loginFully(email = 'cypress_test@myfamilyplatform.com', password
 
         cy.visit('/login');
         cy.get('form#login').should('be.visible');
-        cy.get('button#button[data-ready="true"]', { timeout: 10000 }).should('exist');
+        cy.get('button#button[data-ready="true"]', { timeout: 10000 }).should('be.visible');
         cy.get('input[name="email"]').should('be.visible').invoke('val', email).trigger('input').trigger('change');
         cy.get('input[name="password"]').should('be.visible').invoke('val', password).trigger('input').trigger('change');
-        cy.get('button#button').should('be.visible').click();
+        cy.get('button#button[data-ready="true"]').click();
 
         cy.wait('@loginPost', { timeout: 15000 });
         cy.visit('/login/code');

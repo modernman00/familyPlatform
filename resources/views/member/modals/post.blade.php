@@ -75,7 +75,12 @@
                     <!-- Video Embed & Cloudflare Stream Direct Upload UI (Hidden by Default) -->
                     <div id="videoEmbedContainer" class="video-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold small text-primary"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold small text-primary"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
+                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock-history me-1"></i> Max 30s
+                                </span>
+                            </div>
                             <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
                         </div>
                         <div class="d-flex gap-2 align-items-center mb-2">
@@ -87,6 +92,29 @@
                         </div>
                         <div class="input-group input-group-sm mb-1">
                             <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
+                        </div>
+
+                        <!-- 30-Second Rule Notification Banner -->
+                        <div class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle-fill text-primary"></i>
+                            <span class="text-secondary"><strong>Family Clip Rule:</strong> Direct video uploads are limited to a maximum of <strong>30 seconds</strong>.</span>
+                        </div>
+
+                        <!-- Dynamic Video Retention Expiration Control -->
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-light-subtle">
+                            <div class="d-flex align-items-center gap-1">
+                                <i class="bi bi-hourglass-split text-primary"></i>
+                                <span class="small fw-semibold text-secondary" style="font-size: 0.78rem;">Keep Video For:</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <select id="videoExpirySelect" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; width: auto; font-weight: 500;">
+                                    <option value="86400">⏳ 24 Hours (Free)</option>
+                                    <option value="604800">📅 7 Days (Free)</option>
+                                    <option value="2592000" selected>🗓️ 30 Days (Free Default)</option>
+                                    <option value="31536000" data-premium="true">👑 1 Year (Premium Only)</option>
+                                    <option value="0" data-premium="true">👑 Permanent / Never (Premium Only)</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div id="videoUploadProgressWrapper" class="d-none mt-2">

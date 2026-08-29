@@ -102,7 +102,16 @@ final class AllMembersController extends AllMembersData
                 }
             }
 
-            view('member/getProfile', compact('data', 'pictures', 'relativesWithImgs'));
+            // Fetch total published posts count
+            $db = \Src\Db::connect();
+            $postCountStmt = $db->prepare("SELECT COUNT(*) FROM post WHERE id = ? AND post_status = 'published'");
+            $postCountStmt->execute([$id]);
+            $postCount = (int)$postCountStmt->fetchColumn();
+
+            // Fetch public photos only
+            $publicPhotos = \App\model\Post::getAllImagesByAuthor($id, true);
+
+            \App\controller\BaseController::viewWithCsp('member/getProfile', compact('data', 'pictures', 'relativesWithImgs', 'postCount', 'publicPhotos'));
         } catch (Exception $e) {
             showError($e);
         }

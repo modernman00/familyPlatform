@@ -22,6 +22,7 @@ $router->map('POST', '/photos/postImages', 'App\controller\members\ProfilePage@p
 $router->map('GET', '/profilepage/gallery', 'App\controller\members\ProfilePage@gallery', 'MEMBERS_IMG_GALLERY');
 $router->map('GET', '/profilepage/img', 'App\controller\members\ProfilePage@gallery', 'MEMBERS_IMG_POST_SHOW');
 $router->map('POST', '/setProfilePicFromImage', 'App\controller\members\ProfilePage@setProfilePicFromImage', 'SET_PROFILE_PIC_FROM_IMG');
+$router->map('POST', '/profilepage/gallery/toggle-visibility', 'App\controller\members\ProfilePage@toggleImageVisibility', 'TOGGLE_IMAGE_VISIBILITY');
 
 // $router->map('POST', '/member/createEvent', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 

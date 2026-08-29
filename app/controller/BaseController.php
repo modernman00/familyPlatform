@@ -192,7 +192,7 @@ class BaseController
             'mother_maiden' => $data['mother_maiden'] ?? null,
             'spouse_name' => $data['spouse_name'] ?? null,
             'profilePics' => $data['img'] ?? null,
-            'img' => $data['img'] ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex",
+            'img' => !empty($data['img']) ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex",
         ];
     }
 
