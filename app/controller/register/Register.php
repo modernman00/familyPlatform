@@ -37,8 +37,20 @@ final class Register extends Db
                 view('registration/register', ['registerPostData' => $registerPostData]);
             } else {
                 $registerPostData = [];
+                if (!empty($_GET['famCode'])) {
+                    $registerPostData['famCode'] = checkInput((string)$_GET['famCode']);
+                }
+                if (!empty($_GET['name'])) {
+                    $rawName = trim((string)$_GET['name']);
+                    $parts = explode(' ', $rawName, 2);
+                    $registerPostData['firstName'] = checkInput($parts[0]);
+                    if (!empty($parts[1])) {
+                        $registerPostData['lastName'] = checkInput($parts[1]);
+                    }
+                }
+
                 $env = getenv('APP_ENV');
-                if ($env === 'development' || $env === 'local') {
+                if (($env === 'development' || $env === 'local') && empty($registerPostData)) {
                     $registerPostData = [
                         'firstName' => 'John',
                         'lastName' => 'Doe',

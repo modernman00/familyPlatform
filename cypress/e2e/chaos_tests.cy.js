@@ -14,12 +14,10 @@ describe('Chaos & Resiliency Testing', () => {
         // Intercept the login endpoint and force a timeout (simulating a dead database or slow network)
         cy.intercept('POST', '/login', { forceNetworkError: true }).as('loginTimeout');
         
-        // Fill out the form. The button is type="button" and submission is handled by
-        // a JS click handler (not a native form submit), and the password must satisfy
-        // the client-side strength check (upper + lower + digit) or the request never fires.
-        cy.get('input[name="email"]').type('test@example.com');
-        cy.get('input[name="password"]').type('Secretpassword123');
-        cy.get('button#button').click();
+        cy.get('button#button[data-ready="true"]', { timeout: 10000 }).should('exist');
+        cy.get('input[name="email"]').should('be.visible').invoke('val', 'test@example.com').trigger('input').trigger('change');
+        cy.get('input[name="password"]').should('be.visible').invoke('val', 'Secretpassword123').trigger('input').trigger('change');
+        cy.get('button#button').should('be.visible').click();
         
         cy.wait('@loginTimeout', { timeout: 10000 }).then(() => {
              // Assuming sweetalert or native fallback shows an error and not white screen

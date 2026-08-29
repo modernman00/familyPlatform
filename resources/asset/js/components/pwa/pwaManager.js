@@ -147,7 +147,7 @@ class PWAManager {
     banner.innerHTML = `
       <div class="pwa-banner-card">
         <div class="pwa-banner-header">
-          <img src="/public/img/favicon/android-chrome-192x192.png" alt="FamilyPlatform" class="pwa-banner-logo" onerror="this.src='/resources/images/avatarM.png'">
+          <img src="/public/img/favicon/android-chrome-192x192.png" alt="FamilyPlatform" class="pwa-banner-logo" style="width: 46px; height: 46px; border-radius: 12px; object-fit: cover;" onerror="this.src='/resources/images/avatarM.png'">
           <div class="pwa-banner-text">
             <h6>Install FamilyPlatform</h6>
             <p>Get instant alerts, fast family updates & offline access.</p>

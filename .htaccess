@@ -28,7 +28,7 @@ RewriteRule ^ index.php [L]
 
 
 <IfModule mod_headers.c>
-  Header set X-Frame-Options "deny"
+  Header set X-Frame-Options "SAMEORIGIN"
   Header set X-XSS-Protection "1; mode=block"
   Header set Strict-Transport-Security "max-age=31536000"
   Header set X-Content-Type-Options "nosniff"

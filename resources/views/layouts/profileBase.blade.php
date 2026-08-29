@@ -29,11 +29,8 @@
        enterprise.js with ?render= here made it run an assessment on every member page,
        which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
+  <link rel="stylesheet" href="/public/css/main.css?v={{ time() }}">
   @stack('styles')
-
-
-
-
 </head>
 
 <body data-page-id="@yield('data-page-id')" data-spy="scroll">

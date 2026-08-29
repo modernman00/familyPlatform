@@ -2,6 +2,7 @@ import axios from 'axios';
 import Pusher from 'pusher-js';
 import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
+import { extractVideoFromText, cleanPostMessage } from './videoParser';
 
 export function profileFeed() {
     return {
@@ -102,6 +103,8 @@ export function profileFeed() {
                 date_created: p?.date_created || new Date().toISOString(),
                 post_time: p?.post_time || p?.date_created || new Date().toISOString(),
                 postMessage: p?.postMessage || '',
+                displayMessage: cleanPostMessage(p?.postMessage || '', extractVideoFromText(p?.postMessage)),
+                video: extractVideoFromText(p?.postMessage),
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
                 poll: p?.poll || null,

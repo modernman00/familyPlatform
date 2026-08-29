@@ -31,7 +31,8 @@ module.exports = defineConfig({
         },
       });
     },
-    baseUrl: 'http://olaogun.test', // Virtual host
+    baseUrl: 'https://olaogun.test', // Virtual host
+    chromeWebSecurity: false,
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     supportFile: false,
     video: false,

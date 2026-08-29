@@ -72,6 +72,36 @@
                         </button>
                     </div>
 
+                    <!-- Video Embed & Cloudflare Stream Direct Upload UI (Hidden by Default) -->
+                    <div id="videoEmbedContainer" class="video-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-primary"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
+                            <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center mb-2">
+                            <label for="videoDirectFileInput" class="btn btn-sm btn-outline-primary mb-0 d-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 5px 12px;">
+                                <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Max 30s)
+                            </label>
+                            <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" hidden>
+                            <span class="text-muted small">or paste video link below</span>
+                        </div>
+                        <div class="input-group input-group-sm mb-1">
+                            <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
+                        </div>
+                        
+                        <div id="videoUploadProgressWrapper" class="d-none mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small id="videoUploadStatus" class="text-primary fw-semibold" style="font-size: 0.75rem;">Uploading directly to Cloudflare...</small>
+                                <small id="videoUploadPercent" class="text-muted fw-bold" style="font-size: 0.75rem;">0%</small>
+                            </div>
+                            <div class="progress" style="height: 6px; border-radius: 4px;">
+                                <div id="videoProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
+                    </div>
+
                     <div class="composer-action-bar">
                         <div class="d-flex gap-1">
                             <button type="button" class="btn-composer-action" id="emojiPost" title="Add emoji">
@@ -82,6 +112,10 @@
                                 <i class="bi bi-camera"></i>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple hidden>
+
+                            <button type="button" class="btn-composer-action fw-bold" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)">
+                                <i class="bi bi-play-btn-fill"></i>
+                            </button>
 
                             <button type="button" class="btn-composer-action gif-btn" title="Add GIF">GIF</button>
                             <button type="button" class="btn-composer-action" title="Stickers">

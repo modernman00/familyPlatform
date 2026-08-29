@@ -70,6 +70,10 @@ if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['toke
 
 
 \Src\SecurityHandler::applyGlobalHeaders();
+if (($_ENV['APP_ENV'] ?? '') === 'local') {
+    header_remove('X-Frame-Options');
+    header('X-Frame-Options: SAMEORIGIN', true);
+}
 
 // The shared-lib's CSP::apply() (invoked later, during view rendering) sets a
 // Content-Security-Policy that omits domains our own integrations need
@@ -81,6 +85,10 @@ if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['toke
 // runs after CSP::apply() has already set its nonce, and we preserve it.
 if (php_sapi_name() !== 'cli') {
     header_register_callback(function () {
+        if (($_ENV['APP_ENV'] ?? '') === 'local') {
+            header_remove('X-Frame-Options');
+            header('X-Frame-Options: SAMEORIGIN', true);
+        }
         foreach (headers_list() as $header) {
             if (stripos($header, 'Content-Security-Policy:') === 0) {
                 $value = trim(substr($header, strlen('Content-Security-Policy:')));

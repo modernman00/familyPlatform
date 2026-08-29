@@ -36,8 +36,10 @@
   <link href="/public/css/landing.css" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   
+@if(($_ENV['APP_ENV'] ?? '') !== 'local')
 <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/enterprise.js?render={{ $_ENV['RECAPTCHA_SITE_KEY'] }}"></script>
 <script nonce="{{ $nonce }}">window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";</script>
+@endif
 
   <style>
     /* Reset some Bulma conflicts with Bootstrap */
@@ -178,8 +180,10 @@
       });
     }
   </script>
+@if(($_ENV['APP_ENV'] ?? '') !== 'local')
    <script nonce="{{ $nonce }}">
         window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";
     </script>
+@endif
 </body>
 </html>

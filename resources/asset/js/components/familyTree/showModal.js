@@ -31,8 +31,9 @@ export const showPersonDetails = async (personData) => {
 
   if (!targetModal || !targetModalBody) return;
 
+  const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(fullName)}`;
   const inviteMessage = encodeURIComponent(
-    `Hey! I just started building our family tree on FamilyPlatform. Our family code is ${familyCode}. Click here to join and explore our family lineage! ${window.location.origin}/register`
+    `Hey ${fullName}! I just added you to our family tree on FamilyPlatform. Click here to join and explore our family lineage: ${inviteLink}`
   );
 
   const claimSpotHtml = !isRegistered ? `

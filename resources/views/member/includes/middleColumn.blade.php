@@ -105,9 +105,11 @@
           </div>
 
           <!-- Post Text -->
-          <div class="post-content px-1 mb-3">
-            <p class="mb-0" style="white-space: pre-line; font-size: 0.9375rem; color: #1c1e21; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-text="post.postMessage"></p>
-          </div>
+          <template x-if="post.displayMessage || (!post.video && post.postMessage)">
+            <div class="post-content px-1 mb-3">
+              <p class="mb-0" style="white-space: pre-line; font-size: 0.9375rem; color: var(--text-main); line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-text="post.displayMessage || post.postMessage"></p>
+            </div>
+          </template>
 
           <!-- Post Images -->
           <template x-if="post.images && post.images.length > 0">
@@ -119,6 +121,30 @@
                   </a>
                 </div>
               </template>
+            </div>
+          </template>
+
+          <!-- Embedded Video (YouTube, Vimeo, Cloud Stream) -->
+          <template x-if="post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare')">
+            <div class="video-embed-container mb-3 px-1">
+              <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle" style="border-radius: 12px; max-height: 380px;">
+                <iframe :src="post.video.embedUrl" 
+                        title="Video Player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen 
+                        loading="lazy"
+                        style="width: 100%; height: 100%; border: none;"></iframe>
+              </div>
+            </div>
+          </template>
+
+          <!-- Direct Video Stream -->
+          <template x-if="post.video && post.video.type === 'direct'">
+            <div class="video-embed-container mb-3 px-1">
+              <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm border border-light-subtle" style="border-radius: 12px; max-height: 380px;">
+                <video :src="post.video.embedUrl" controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000;"></video>
+              </div>
             </div>
           </template>
 

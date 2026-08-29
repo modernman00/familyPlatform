@@ -431,3 +431,104 @@ a:hover {
         background: rgba(0, 0, 0, 0.05);
     }
 }
+
+/* ==========================================================================
+   Dark Mode & Floating Night/Day Toggle
+   ========================================================================== */
+
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    font-size: 1.25rem;
+    transition: transform 0.2s ease, background 0.3s ease, box-shadow 0.2s ease;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+}
+
+body.dark-mode {
+    --bg-light: #0f172a;
+    --bg-white: #1e293b;
+    --card-bg: #1e293b;
+    --bg-color: #0f172a;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+
+    .dark-mode-toggle {
+        background: #f59e0b;
+        color: #1e293b;
+        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    }
+
+    .navbar {
+        background-color: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .card, .post-composer, .personal, .post, .commentBox, .friend-request-card {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .form-control, .inputComment, textarea, input[type="text"], input[type="url"], input[type="search"] {
+        background-color: #0f172a !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .modal-content {
+        background-color: #1e293b !important;
+        color: #f1f5f9 !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    .pwa-banner-card {
+        background: rgba(30, 41, 59, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+
+        .pwa-banner-text h6 {
+            color: #f8fafc !important;
+        }
+
+        .pwa-banner-text p {
+            color: #94a3b8 !important;
+        }
+
+        .pwa-btn-close {
+            color: #94a3b8 !important;
+
+            &:hover {
+                color: #f8fafc !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+            }
+        }
+    }
+}

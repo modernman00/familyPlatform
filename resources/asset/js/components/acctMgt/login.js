@@ -1,17 +1,15 @@
 import { createAdminLoginHandler } from "@modernman00/shared-js-lib";
 
-// Get the login URL from sessionStorage
-const loginURL = sessionStorage.getItem('loginURL1');
-
-// Determine the redirect URL based on loginURL
-const redirect = loginURL === '/lasu' ? '/admin/reviewApps' : '/login/code';
-    localStorage.setItem('redirect', '/login/code');
+const redirect = '/login/code';
+localStorage.setItem('redirect', redirect);
 
 createAdminLoginHandler({
   formId: 'login',
-  route: 'login',
+  route: '/login',
   redirect: redirect,
   recaptchaAction: 'LOGIN',
   optionalFields: ['rememberMe']
 });
+
+document.getElementById('button')?.setAttribute('data-ready', 'true');
 

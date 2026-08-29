@@ -50,3 +50,11 @@ $router->map(
   target: 'App\controller\members\PostMessage@deletePost',
   name: 'delete_post'
 );
+
+$router->map(
+  method: 'POST',
+  route: '/api/video/direct-upload',
+  target: 'App\controller\members\StreamController@getDirectUploadUrl',
+  name: 'direct_video_upload'
+);
+

@@ -27,3 +27,5 @@ createCodeSubmitHandler({
   recaptchaAction: 'LOGIN_CODE'
 
 });
+
+document.getElementById('button')?.setAttribute('data-ready', 'true');
