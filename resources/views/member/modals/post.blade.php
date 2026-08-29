@@ -15,16 +15,8 @@
             <div class="modal-body px-4 pt-3">
     
                 <div class="d-flex align-items-center mb-4">
-                    @if(isset($data['img']))
-                        <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar"
+                        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
                             class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
-                    @elseif(isset($data['profilePics']))
-                        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Avatar"
-                            class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
-                    @else
-                        <img src="/resources/images/profile/avatarM.png" alt="Avatar" width="48" height="48"
-                            class="rounded-circle me-3 shadow-sm">
-                    @endif
                     <div>
                         <h6 class="mb-0 fw-bold" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
                         <small class="text-muted"><i class="bi bi-people-fill"></i> Family Members</small>

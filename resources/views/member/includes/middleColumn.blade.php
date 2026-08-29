@@ -12,15 +12,7 @@
   <!-- Post Composer -->
   <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
     <div class="card-body d-flex align-items-center p-4">
-      @if(isset($data['img']))
-        <img src="/resources/images/profile/{{ $data['img'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
-      @elseif(isset($data['profilePics']))
-        <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
-      @else
-        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; background-color: var(--primary-color); color: white; font-size: 1.2rem;">
-            {{ substr($data['firstName'] ?? 'F', 0, 1) }}{{ substr($data['lastName'] ?? 'O', 0, 1) }}
-        </div>
-      @endif
+      <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
 
       <div class="flex-grow-1 rounded-pill px-4 py-3" style="background-color: var(--hover-color); cursor: pointer; transition: background-color 0.2s;">
         <span style="color: var(--text-muted); font-size: 0.95rem;">Share a moment with your family...</span>
@@ -123,7 +115,7 @@
               <template x-for="(img, idx) in post.images" :key="idx">
                 <div :class="post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')">
                   <a href="#" @click.prevent="openLightbox(post.images, idx)" style="display:block; overflow:hidden; border-radius:10px;">
-                    <img :src="'/resources/images/post/' + encodeURIComponent(img)" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';" onerror="this.onerror=null; this.closest('a').style.display='none';">
+                    <img :src="'/resources/images/post/' + encodeURIComponent(img)" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
                   </a>
                 </div>
               </template>

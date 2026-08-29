@@ -239,13 +239,7 @@
                         <!-- Profile Pic Section -->
                         <div class="text-center mb-4">
                             <div class="profile-preview-container">
-                                @if(isset($data['img']))
-                                    <img src="{{ url('resources/images/profile/' . $data['img']) }}" alt="Profile" class="profile-preview-img" id="profilePreview">
-                                @elseif(isset($data['profilePics']))
-                                    <img src="{{ url('resources/images/profile/' . $data['profilePics']) }}" alt="Profile" class="profile-preview-img" id="profilePreview">
-                                @else
-                                    <img src="{{ url('resources/images/profile/avatarM.png') }}" alt="Profile" class="profile-preview-img" id="profilePreview">
-                                @endif
+                                <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Profile" class="profile-preview-img" id="profilePreview">
                                 <label for="img" class="camera-btn" title="Change Profile Picture">
                                     <i class="bi bi-camera"></i>
                                 </label>

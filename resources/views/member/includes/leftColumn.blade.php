@@ -5,13 +5,7 @@
             <div class="cover-photo"
                 style="height: 120px; background: linear-gradient(135deg, var(--primary-color) 0%, #1e6040 100%); border-radius: 16px 16px 0 0;"></div>
             <div class="avatar-container position-absolute w-100" style="top: 60px;">
-                @isset($data['img'])
-                    <img src="/resources/images/profile/{{ $data['img'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
-                @elseif(isset($data['profilePics']))
-                    <img src="/resources/images/profile/{{ $data['profilePics'] }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
-                @else
-                    <img src="/resources/images/profile/avatarM.png" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
-                @endisset
+                <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar" class="avatar profileImg shadow-sm" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--card-bg); object-fit: cover; background: var(--card-bg);">
             </div>
         </div>
 
