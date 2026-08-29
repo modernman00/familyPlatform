@@ -128,10 +128,15 @@ final class NotificationController extends Select
                 msgException(300, 'Invalid subscription data');
             }
 
-            $userId = cleanSession((string)$inputData['id']);
-            $endpoint = $inputData['endpoint'];
-            $p256dhKey = $inputData['keys']['p256dh'];
-            $authKey = $inputData['keys']['auth'];
+            $userId = !empty($inputData['id']) ? cleanSession((string)$inputData['id']) : (isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '');
+            if (empty($userId)) {
+                msgException(300, 'User authentication required for push subscription');
+                return;
+            }
+
+            $endpoint = (string)$inputData['endpoint'];
+            $p256dhKey = (string)$inputData['keys']['p256dh'];
+            $authKey = (string)$inputData['keys']['auth'];
             // Prepare the data to insert
             $data = [
                 'id' => $userId,

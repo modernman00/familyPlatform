@@ -3,23 +3,27 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>{{ $_ENV['APP_NAME'] }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
+  <!-- PWA & Mobile Web App Capabilities -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
+  <link rel="apple-touch-icon" href="/public/img/favicon/apple-touch-icon.png" sizes="180x180">
+  <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
   <script src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
 
   <title>@yield('title')</title>
-  <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
-  <link rel="stylesheet" href="/public/noscript.css" />
-  </noscript>
-
-  <link rel="icon" type="image/png" sizes="32x32" href={{ $_ENV['APP_LOGO'] }}>
-
-  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json">
+  <link rel="manifest" href="/manifest.json">
 
   {{-- reCAPTCHA is only used on the auth forms (login/register/forgot/code). Loading
        enterprise.js with ?render= here made it run an assessment on every member page,

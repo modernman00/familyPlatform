@@ -44,7 +44,7 @@ class ProcessImg extends AllFunctionalities
 
 
 
-            $uploadResult = FileUploadProcess::process([], 'profile', 'profileImageFile', 'public/img/profile/', 'images');
+            $uploadResult = FileUploadProcess::process([], 'profile', 'profileImageFile', 'resources/images/profile/', 'images');
             
             $sanitizedFileName = $uploadResult['sanitisedData']['profile']['profileImageFile'] ?? $fileName;
 

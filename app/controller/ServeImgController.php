@@ -15,19 +15,14 @@ final class ServeImgController {
             exit;
         }
 
-        // Search candidate directories for the image
+        // Search candidate directories under resources/images for the profile image
         $searchPaths = [
-            __DIR__ . '/../../public/img/profile/',
             __DIR__ . '/../../resources/images/profile/',
-            __DIR__ . '/../../public/avatar/',
             __DIR__ . '/../../resources/images/',
-            __DIR__ . '/../../public/img/post/',
-            __DIR__ . '/../../resources/images/post/',
-            __DIR__ . '/../../public/img/photos/',
         ];
 
         $filePath = null;
-        $safeName = basename($filename);
+        $safeName = basename(rawurldecode($filename));
         foreach ($searchPaths as $dir) {
             $candidate = $dir . $safeName;
             if (file_exists($candidate) && is_file($candidate)) {
@@ -37,8 +32,8 @@ final class ServeImgController {
         }
 
         if (!$filePath) {
-            // Check for default avatars in public/avatar as fallback
-            $fallbackPath = __DIR__ . '/../../public/avatar/avatarM.png';
+            // Check for default avatar in resources/images/profile as fallback
+            $fallbackPath = __DIR__ . '/../../resources/images/profile/avatarM.png';
             if (file_exists($fallbackPath)) {
                 $filePath = $fallbackPath;
             } else {
@@ -83,17 +78,15 @@ final class ServeImgController {
             exit;
         }
 
-        // Search candidate directories for post images
+        // Search candidate directories under resources/images for post images
         $searchPaths = [
-            __DIR__ . '/../../public/img/post/',
             __DIR__ . '/../../resources/images/post/',
             __DIR__ . '/../../resources/images/',
-            __DIR__ . '/../../public/img/photos/',
-            __DIR__ . '/../../public/img/profile/',
+            __DIR__ . '/../../resources/images/profile/',
         ];
 
         $filePath = null;
-        $safeName = basename($filename);
+        $safeName = basename(rawurldecode($filename));
         foreach ($searchPaths as $dir) {
             $candidate = $dir . $safeName;
             if (file_exists($candidate) && is_file($candidate)) {
@@ -103,17 +96,9 @@ final class ServeImgController {
         }
 
         if (!$filePath) {
-            // Legacy posts reference images that were never migrated to disk (renamed
-            // uploads, deleted files). Serving a transparent 1x1 PNG with 200 keeps the
-            // browser console clean and lets the frontend's onerror handler hide the slot,
-            // instead of spamming 404s on every feed render.
-            $transparentPng = base64_decode(
-                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
-            );
-            header('Content-Type: image/png');
-            header('Content-Length: ' . (string) strlen($transparentPng));
-            header('Cache-Control: public, max-age=300');
-            echo $transparentPng;
+            http_response_code(404);
+            header('Content-Type: text/plain');
+            echo 'File not found.';
             exit;
         }
 

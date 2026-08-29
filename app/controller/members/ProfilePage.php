@@ -195,7 +195,7 @@ final class ProfilePage extends ProcessImg
            $result =  SubmitPostData::submitToOneTablenImage(
                 table: 'post',
                 fileName: 'post_img',
-                imgPath: "public/img/post/",
+                imgPath: "resources/images/post/",
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
@@ -339,7 +339,7 @@ final class ProfilePage extends ProcessImg
         // }
 
 
-        FileUploadProcess::process([], 'profile_upload_img', 'photo', 'public/img/photos/', 'images');
+        FileUploadProcess::process([], 'profile_upload_img', 'photo', 'resources/images/post/', 'images');
         redirect(self::REDIRECT);
     }
 

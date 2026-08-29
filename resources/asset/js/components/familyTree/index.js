@@ -51,7 +51,7 @@ document.addEventListener('click', (e) => {
   showPersonDetails(nodeData);
 });
 
-// 2. Search Box & Instant Spotlight
+// 2. Search Box & Instant Spotlight (Supports Balkan FamilyTree and DOM nodes)
 memberSearchInput?.addEventListener('input', (e) => {
   const query = e.target.value.trim().toLowerCase();
   if (!searchDropdown) return;
@@ -62,30 +62,64 @@ memberSearchInput?.addEventListener('input', (e) => {
     return;
   }
 
-  const allNodes = Array.from(document.querySelectorAll('.tree-node'));
-  const matches = allNodes.filter((n) => {
-    const text = n.textContent.toLowerCase();
-    return text.includes(query);
-  });
+  let matches = [];
+
+  // 1. Search Balkan FamilyTree node data
+  if (Array.isArray(window.familyTreeNodes) && window.familyTreeNodes.length > 0) {
+    matches = window.familyTreeNodes.filter((n) => {
+      const name = (n.name || '').toLowerCase();
+      const title = (n.title || '').toLowerCase();
+      return name.includes(query) || title.includes(query);
+    }).map((n) => ({
+      id: n.id,
+      name: n.name || 'Relative',
+      role: n.title || 'Family Member',
+      img: n.img || '/resources/images/profile/avatarM.png',
+      nodeType: 'balkan'
+    }));
+  } else if (window.graphData?.nodes && Array.isArray(window.graphData.nodes)) {
+    matches = window.graphData.nodes.filter((n) => {
+      const name = (n.full_name || `${n.first_name || ''} ${n.last_name || ''}`).toLowerCase();
+      const bio = (n.bio || '').toLowerCase();
+      return name.includes(query) || bio.includes(query);
+    }).map((n) => ({
+      id: n.id,
+      name: n.full_name || `${n.first_name || ''} ${n.last_name || ''}`.trim() || 'Relative',
+      role: n.bio || 'Family Member',
+      img: n.avatar_url || '/resources/images/profile/avatarM.png',
+      nodeType: 'balkan'
+    }));
+  }
+
+  // 2. Fallback to DOM elements
+  if (matches.length === 0) {
+    const allNodes = Array.from(document.querySelectorAll('.tree-node, [data-n-id]'));
+    matches = allNodes.filter((n) => {
+      const text = n.textContent.toLowerCase();
+      return text.includes(query);
+    }).map((n) => {
+      const name = n.querySelector('.node-name')?.textContent?.trim() || n.dataset.name || 'Relative';
+      const role = n.querySelector('.node-title')?.textContent?.trim() || n.dataset.role || '';
+      const img = n.querySelector('.profile-image')?.src || n.dataset.img || '/resources/images/profile/avatarM.png';
+      const id = n.dataset.nId || n.dataset.id || '';
+      return { id, name, role, img, nodeType: 'dom' };
+    });
+  }
 
   if (matches.length === 0) {
-    searchDropdown.innerHTML = '<div style="padding: 12px 16px; color: var(--text-muted); font-size: 0.85rem;">No relatives found</div>';
+    searchDropdown.innerHTML = '<div style="padding: 12px 16px; color: #64748b; font-size: 0.85rem;">No relatives found</div>';
     searchDropdown.style.display = 'block';
     return;
   }
 
   let resultsHtml = '';
-  matches.slice(0, 6).forEach((n) => {
-    const name = n.querySelector('.node-name')?.textContent?.trim() || 'Relative';
-    const role = n.querySelector('.node-title')?.textContent?.trim() || '';
-    const img = n.querySelector('.profile-image')?.src || '/resources/images/profile/avatarM.png';
-
+  matches.slice(0, 6).forEach((item) => {
     resultsHtml += `
-      <div class="search-result-item" data-name="${name}">
-        <img src="${img}" alt="${name}">
+      <div class="search-result-item" data-id="${item.id}" data-name="${item.name}">
+        <img src="${item.img}" alt="${item.name}">
         <div class="search-result-info">
-          <div class="search-result-name">${name}</div>
-          <div class="search-result-meta">${role}</div>
+          <div class="search-result-name">${item.name}</div>
+          <div class="search-result-meta">${item.role}</div>
         </div>
       </div>
     `;
@@ -100,16 +134,30 @@ searchDropdown?.addEventListener('click', (e) => {
   const item = e.target.closest('.search-result-item');
   if (!item) return;
 
+  const targetId = item.dataset.id;
   const targetName = item.dataset.name;
   searchDropdown.style.display = 'none';
   if (memberSearchInput) memberSearchInput.value = targetName;
 
-  const targetElem = Array.from(document.querySelectorAll('.tree-node')).find((el) => {
-    return el.textContent.includes(targetName);
-  });
+  // If Balkan FamilyTree instance exists, zoom & center directly
+  if (window.family && targetId) {
+    try {
+      window.family.center(targetId);
+      if (typeof window.family.highlight === 'function') {
+        window.family.highlight(targetId);
+      }
+    } catch (err) {
+      console.log('[FamilyTree Search] Balkan center:', err);
+    }
+  }
+
+  // Also add pulse highlight effect to the SVG node
+  const targetElem = document.querySelector(`[data-n-id="${targetId}"]`) ||
+                     Array.from(document.querySelectorAll('.tree-node, [data-n-id]')).find((el) => el.textContent.includes(targetName));
 
   if (targetElem) {
-    centerOnElement(targetElem);
+    targetElem.classList.add('highlighted');
+    setTimeout(() => targetElem.classList.remove('highlighted'), 3500);
   }
 });
 

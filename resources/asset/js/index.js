@@ -3,9 +3,11 @@ import axios from 'axios';
 import Alpine from 'alpinejs';
 import { qSel, showError } from '@modernman00/shared-js-lib';
 import Swal from 'sweetalert2';
+import PWAManager from './components/pwa/pwaManager';
 
 window.Swal = Swal;
 window.Alpine = Alpine;
+window.pwaManager = new PWAManager();
 let routePromise = Promise.resolve();
 
 // The server occasionally finds the session's CSRF token missing (e.g. session

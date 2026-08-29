@@ -506,6 +506,10 @@
                 nodes: familyTreeNodes
             });
             
+            window.family = family;
+            window.familyTreeNodes = familyTreeNodes;
+            window.graphData = graphData;
+
             // Intercept clicks to trigger the custom Bootstrap modal flow
             family.on('click', function (sender, args) {
                 const nodeData = familyTreeNodes.find(n => String(n.id) === String(args.node.id));

@@ -108,7 +108,7 @@ final class SettingController extends BaseController
             // Handle Profile Image Upload
             if (isset($_FILES['img']) && $_FILES['img']['error'] === UPLOAD_ERR_OK) {
                 // The filename will be checked and sanitized within FileUploadProcess::process
-                $uploadResult = FileUploadProcess::process([], 'profile', 'img', 'public/img/profile/', 'images');
+                $uploadResult = FileUploadProcess::process([], 'profile', 'img', 'resources/images/profile/', 'images');
                 
                 $fileName = checkInputImage($_FILES['img']['name']);
                 $sanitizedFileName = $uploadResult['sanitisedData']['profile']['img'] ?? $fileName;

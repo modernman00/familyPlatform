@@ -2,22 +2,25 @@
 
   <title>@yield('title')</title>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue-grey.css">
   <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Open+Sans'>
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
-    <!-- Favicons -->
-  <link rel="apple-touch-icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="180x180">
-  <link rel="icon" href="{{ getenv("IMG_CONTRACT") }}" sizes="32x32" type="image/png">
-  <link rel="mask-icon" href="{{ getenv("IMG_CONTRACT") }}" color="#563d7c">
-  <meta name="msapplication-config" content="{{ getenv("IMG_CONTRACT") }}">
-  <meta name="theme-color" content="#563d7c">
+  <!-- PWA & Mobile Web App Capabilities -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
+  <link rel="apple-touch-icon" href="/public/img/favicon/apple-touch-icon.png" sizes="180x180">
+  <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
+  <meta name="theme-color" content="#2563eb">
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
-  <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
+  <link rel="manifest" href="/manifest.json">
 
       <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
 

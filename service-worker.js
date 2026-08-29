@@ -1,301 +1,320 @@
-const Version = "1788001329287"; // Network-first default
-const CacheName = `cache-${Version}`;
-const CacheFiles = [
-  "/",
-  "/index",
-  "/login",
-  "/register",
-  "/public/style.css",
-  "/public/index.js",
-  "/public/img/favicon/android-chrome-192x192.png",
-  "/public/img/favicon/android-chrome-512x512.png",
-  "/public/img/favicon/apple-touch-icon.png",
-  "/public/img/favicon/favicon.ico",
-  "/public/img/celebrate.jpeg",
-  "/public/img/favicon/favicon-32x32.png"
+/**
+ * FamilyPlatform Advanced Service Worker
+ * World-Class PWA Engine:
+ * - Versioned Cache Management (Static, Dynamic, Images)
+ * - Strict Network-Only Gate for Sensitive / FinTech / Auth Endpoints
+ * - Stale-While-Revalidate for CSS/JS/Fonts
+ * - Cache-First with LRU Expiration for Images
+ * - Network-First with Offline Fallback (/offline.html) for HTML Pages
+ * - Background Push Notification & Deep Link Handler
+ * - Background Sync Integration
+ * - Secure Cache Purge on Logout
+ */
+
+'use strict';
+
+const SW_VERSION = 'v2.0.0';
+const STATIC_CACHE = `fp-static-${SW_VERSION}`;
+const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
+const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
+const MAX_IMAGE_CACHE_ENTRIES = 60;
+
+// Core App Shell Files for Immediate Offline Availability
+const PRECACHE_ASSETS = [
+  '/offline.html',
+  '/manifest.json',
+  '/public/css/main.css',
+  '/public/js/manifest.js',
+  '/public/js/vendor.js',
+  '/public/js/index.js',
+  '/public/img/favicon/android-chrome-192x192.png',
+  '/public/img/favicon/android-chrome-512x512.png',
+  '/public/img/favicon/apple-touch-icon.png',
+  '/public/img/favicon/favicon-32x32.png',
+  '/public/img/favicon/favicon-16x16.png',
+  '/public/img/favicon/favicon.ico',
+  '/resources/images/avatarM.png',
+  '/resources/images/avatarF.png'
 ];
 
-
-// On install, cache the static resources and force activation
-self.addEventListener("install", (event) => {
-  console.log("[Service Worker] Install");
-  self.skipWaiting(); // Force the waiting service worker to become the active service worker
+/**
+ * 1. Install Event: Precache App Shell & Skip Waiting
+ */
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    (async () => {
-      const cache = await caches.open(CacheName);
-      console.log("[Service Worker] Caching all: app shell and content");
-      await cache.addAll(CacheFiles);
-    })(),
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log('[SW] Precaching Core App Shell');
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn('[SW] Precache partial warning:', err);
+      });
+    })
   );
 });
 
-// Delete old caches on activate
-self.addEventListener("activate", (event) => {
+/**
+ * 2. Activate Event: Claim Clients & Prune Outdated Caches
+ */
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    (async () => {
-      const names = await caches.keys();
-      await Promise.all(
-        names.map((name) => {
-          if (name !== CacheName) {
-            return caches.delete(name);
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (![STATIC_CACHE, DYNAMIC_CACHE, IMAGE_CACHE].includes(key)) {
+            console.log(`[SW] Pruning Old Cache: ${key}`);
+            return caches.delete(key);
           }
-        }),
+        })
       );
-      await clients.claim();
-    })(),
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event - use network-first strategy for everything
+/**
+ * Helper: Limit Cache Size (LRU Eviction)
+ */
+async function limitCacheSize(cacheName, maxEntries) {
+  try {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxEntries) {
+      await cache.delete(keys[0]);
+      limitCacheSize(cacheName, maxEntries);
+    }
+  } catch (err) {
+    console.warn('[SW] Cache limit error:', err);
+  }
+}
+
+/**
+ * 3. Fetch Event Routing Matrix
+ */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Non-GET requests (POST, PUT, DELETE) are strictly Network-Only
   if (request.method !== 'GET') {
     return;
   }
 
-  // Network-first strategy for all pages to ensure fresh content
-  event.respondWith(networkFirstStrategy(request));
+  // A. Strict Network-Only Gate for FinTech, Auth, Admin & CSRF
+  const isSensitiveEndpoint =
+    url.pathname.startsWith('/api/wallet') ||
+    url.pathname.startsWith('/api/transaction') ||
+    url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/login') ||
+    url.pathname.startsWith('/register') ||
+    url.pathname.startsWith('/auth') ||
+    url.pathname.startsWith('/webauthn') ||
+    url.pathname.startsWith('/signout') ||
+    url.pathname.includes('/tests/clear-rate-limit');
+
+  if (isSensitiveEndpoint) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // B. Images & Avatars -> Cache-First Strategy
+  const isImage =
+    request.destination === 'image' ||
+    url.pathname.startsWith('/resources/images') ||
+    url.pathname.startsWith('/public/img') ||
+    /\.(png|jpg|jpeg|svg|webp|gif|ico)$/i.test(url.pathname);
+
+  if (isImage) {
+    event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE, MAX_IMAGE_CACHE_ENTRIES));
+    return;
+  }
+
+  // C. Static CSS, JS & Web Fonts -> Stale-While-Revalidate Strategy
+  const isStaticAsset =
+    request.destination === 'style' ||
+    request.destination === 'script' ||
+    request.destination === 'font' ||
+    url.hostname.includes('fonts.googleapis.com') ||
+    url.hostname.includes('fonts.gstatic.com') ||
+    url.hostname.includes('kit.fontawesome.com') ||
+    url.hostname.includes('cdn.jsdelivr.net') ||
+    /\.(css|js|woff2?|ttf|eot)$/i.test(url.pathname);
+
+  if (isStaticAsset) {
+    event.respondWith(staleWhileRevalidateStrategy(request, STATIC_CACHE));
+    return;
+  }
+
+  // D. HTML Document Pages & Feeds -> Network-First with Offline Fallback
+  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(networkFirstWithFallback(request));
+    return;
+  }
+
+  // Default: Network-First
+  event.respondWith(
+    fetch(request).catch(() => caches.match(request))
+  );
 });
 
-// Network-first strategy for authenticated pages
-async function networkFirstStrategy(request) {
-  try {
-    // Always try network first for authenticated pages
-    const networkResponse = await fetch(request);
+/**
+ * Strategy: Cache-First with Expiration
+ */
+async function cacheFirstStrategy(request, cacheName, maxEntries = 60) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
 
-    // Only cache successful responses
+  try {
+    const networkResponse = await fetch(request);
     if (networkResponse && networkResponse.status === 200) {
-      const cache = await caches.open(CacheName);
+      const cache = await caches.open(cacheName);
+      cache.put(request, networkResponse.clone());
+      limitCacheSize(cacheName, maxEntries);
+    }
+    return networkResponse;
+  } catch (err) {
+    // If image fails and not in cache, fallback to default avatar for avatar requests
+    if (request.url.includes('avatar') || request.url.includes('profile')) {
+      const fallback = await caches.match('/resources/images/avatarM.png');
+      if (fallback) return fallback;
+    }
+    return new Response('', { status: 404, statusText: 'Not Found' });
+  }
+}
+
+/**
+ * Strategy: Stale-While-Revalidate
+ */
+async function staleWhileRevalidateStrategy(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cachedResponse = await cache.match(request);
+
+  const fetchPromise = fetch(request)
+    .then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200) {
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    })
+    .catch(() => cachedResponse);
+
+  return cachedResponse || fetchPromise;
+}
+
+/**
+ * Strategy: Network-First with /offline.html Fallback
+ */
+async function networkFirstWithFallback(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200) {
+      const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
     }
-
     return networkResponse;
-  } catch (error) {
-    // Network failed, try cache as fallback
-    console.log('[SW] Network failed for authenticated page, trying cache:', error);
+  } catch (err) {
     const cachedResponse = await caches.match(request);
-
     if (cachedResponse) {
       return cachedResponse;
     }
-
-    // If no cache, return offline page
-    return new Response(
-      '<h1>Offline</h1><p>You are currently offline. Please check your connection.</p>',
-      {
-        headers: { 'Content-Type': 'text/html' }
-      }
-    );
-  }
-}
-
-// Stale-while-revalidate strategy for non-authenticated content
-function staleWhileRevalidateStrategy(request) {
-  return caches.match(request).then((cachedResponse) => {
-    const fetchPromise = fetch(request).then((networkResponse) => {
-      if (networkResponse && networkResponse.status === 200) {
-        const responseToCache = networkResponse.clone();
-        caches.open(CacheName).then((cache) => {
-          cache.put(request, responseToCache);
-        });
-      }
-      return networkResponse;
-    }).catch((error) => {
-      console.error('Fetch failed; returning cached page instead:', error);
-      return caches.match('/index'); // Optional: Serve a fallback page if the network fails
+    const offlinePage = await caches.match('/offline.html');
+    return offlinePage || new Response('<h1>Offline</h1><p>Please check your connection.</p>', {
+      headers: { 'Content-Type': 'text/html' }
     });
-
-    return cachedResponse || fetchPromise;
-  }).catch((error) => {
-    console.error('Error matching cache or fetching:', error);
-  });
+  }
 }
 
-// Helper: Check if URL is an authenticated page
-function isAuthenticatedPage(url) {
-  const authenticatedPaths = [
-    '/member/profilepage',
-    '/profilepage',
-    '/allmembers',
-    '/organogram',
-    '/accountsetting',
-    '/member/',
-    '/admin/',
-    // API endpoints fetched by Alpine.js — must be Network-First
-    '/post/',
-    '/getfriendrequestbyid',
-    '/postcommentprofile',
-    '/profilecard/',
-    '/api/reactions/',
-    '/api/poll/',
-    // Protected image routes — served via ServeImgController behind JWT
-    '/resources/images/'
-  ];
+/**
+ * 4. Web Push Notification Listener
+ */
+self.addEventListener('push', (event) => {
+  let data = {
+    title: 'FamilyPlatform Update',
+    body: 'You have a new family message or update.',
+    icon: '/public/img/favicon/android-chrome-192x192.png',
+    badge: '/public/img/favicon/favicon-32x32.png',
+    url: '/profilePage',
+    tag: 'family-notification'
+  };
 
-  const lowerPath = url.pathname.toLowerCase();
-  return authenticatedPaths.some(path => lowerPath.startsWith(path.toLowerCase()));
-}
-
-// Listen for messages from the client (e.g., to clear auth cache on logout)
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      data = { ...data, ...payload };
+    } catch (e) {
+      data.body = event.data.text();
+    }
   }
 
-  if (event.data && event.data.type === 'CLEAR_AUTH_CACHE') {
-    // Clear cached authenticated pages on logout
+  const options = {
+    body: data.body,
+    icon: data.icon,
+    badge: data.badge,
+    tag: data.tag,
+    data: { url: data.url },
+    vibrate: [100, 50, 100],
+    actions: data.actions || [
+      { action: 'open', title: 'Open' },
+      { action: 'close', title: 'Dismiss' }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, options)
+  );
+});
+
+/**
+ * 5. Notification Click & Deep Link Router
+ */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'close') return;
+
+  const targetUrl = event.notification.data?.url || '/profilePage';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(targetUrl) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+/**
+ * 6. Background Sync API Handler
+ */
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-family-posts' || event.tag === 'sync-offline-queue') {
+    console.log('[SW] Background sync triggered:', event.tag);
     event.waitUntil(
-      caches.open(CacheName).then((cache) => {
-        return cache.keys().then((requests) => {
-          return Promise.all(
-            requests
-              .filter((request) => {
-                const url = new URL(request.url);
-                return isAuthenticatedPage(url);
-              })
-              .map((request) => {
-                console.log('[SW] Clearing auth cache for:', request.url);
-                return cache.delete(request);
-              })
-          );
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({ type: 'DRAIN_OFFLINE_QUEUE' });
         });
       })
     );
   }
 });
 
-// Utility function to show notification
-function showNotification({ title, body, url }) {
-  const options = {
-    body,
-    icon: '/public/img/favicon/android-chrome-192x192.png',
-    badge: '/public/img/favicon/android-chrome-192x192.png',
-    data: { url },
-    requireInteraction: true, // Keeps notification visible until user interacts
-    actions: [
-      { action: "open", title: "View" }
-    ]
-  };
-  self.registration.showNotification(title, options);
-}
-
-// Push event - handle notifications
-self.addEventListener('push', function (event) {
-  let data = {};
-
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch (e) {
-    console.error("Push event error:", e);
+/**
+ * 7. Message Listener (Skip Waiting & Security Logout Purge)
+ */
+self.addEventListener('message', (event) => {
+  if (event.data?.action === 'skipWaiting') {
+    self.skipWaiting();
   }
 
-  const notificationData = {
-    body: data.body || 'You have a new notification',
-    title: data.title || 'New Notification',
-    url: data.url || '/',
-  };
-
-  event.waitUntil(showNotification(notificationData));
-});
-
-// Notification click event - open the link when clicked
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url === event.notification.data.url && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(event.notification.data.url);
-      }
-    })
-  );
-});
-
-// Handle notification close event (optional)
-self.addEventListener('notificationclose', (event) => {
-  console.log('Notification closed', event.notification);
-});
-
-// Periodic sync event - sync content
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'content-sync') {
-    console.log('Periodic Sync triggered:', event.tag);
-    event.waitUntil(syncContent());
+  // Marcus's SecOps Logout Cache Purge
+  if (event.data?.action === 'clearUserCache') {
+    console.log('[SW] Purging dynamic user caches upon logout');
+    caches.delete(DYNAMIC_CACHE);
   }
 });
-
-// Sync content function
-async function syncContent() {
-  try {
-    console.log('Performing periodic content sync...');
-    const battery = await navigator.getBattery();
-    const isCharging = battery.charging;
-    const batteryLevel = battery.level;
-    console.log(`Battery charging: ${isCharging}, level: ${batteryLevel}`);
-
-    // Adjust sync frequency for low battery
-    if (!isCharging && batteryLevel < 0.2) {
-      console.warn('Battery is low, deferring sync.');
-      return;
-    }
-
-    // Fetch new data from the server
-    const yourId = localStorage.getItem('requesterId');
-    const famCode = localStorage.getItem('requesterFamCode');
-    const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
-
-    const response = await fetch(notificationURL);
-    if (!response.ok) throw new Error("Network response was not ok");
-
-    const data = await response.json();
-    console.log('Fetched new content:', data);
-
-    // Notify user of successful sync
-    self.registration.showNotification('Sync Successful', {
-      body: 'Your content has been updated!',
-      icon: '/public/img/favicon/android-chrome-192x192.png'
-    });
-
-    if (data.length === 0) {
-      console.log('No new notifications to display.');
-      return;
-    }
-
-    data.forEach((notification) => {
-      // Check the type of notification and display accordingly
-      if (notification.type === 'Friend Request') {
-        showNotification({
-          title: 'Friend Request!',
-          body: notification.notification_name,
-          url: `${process.env.MIX_APP_URL}/member/ProfilePage`,
-        });
-      } else {
-        showNotification({
-          title: notification.notification_name,
-          body: notification.notification_body,
-          url: `${process.env.MIX_APP_URL}/member/ProfilePage`
-        });
-      }
-    });
-
-    // Update cache or IndexedDB with the new data
-    // Implement your caching logic here
-
-  } catch (error) {
-    console.error('Error during periodic content sync:', error);
-
-    // Send a push notification for failure
-    self.registration.showNotification('Sync Failed', {
-      body: 'We could not update your content. Please check your connection.',
-      icon: '/public/img/favicon/android-chrome-192x192.png'
-    });
-  }
-}
