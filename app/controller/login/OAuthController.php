@@ -106,18 +106,19 @@ class OAuthController
         $db = Db::connect2();
         
         // Check if user exists
-        $stmt = $db->prepare("SELECT id FROM account WHERE email = ?");
+        $stmt = $db->prepare("SELECT id, email, token_version FROM account WHERE email = ?");
         $stmt->execute([$email]);
-        $userId = $stmt->fetchColumn();
+        $userRow = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($userId) {
+        if ($userRow && !empty($userRow['id'])) {
+            $userId = (string) $userRow['id'];
             // Update provider ID
             $column = $provider === 'google' ? 'google_id' : 'facebook_id';
             $update = $db->prepare("UPDATE account SET {$column} = ? WHERE id = ?");
             $update->execute([$providerId, $userId]);
 
             // Log them in
-            $this->loginUser((string)$userId);
+            $this->loginUser($userId, $userRow);
         } else {
             // New user, store in session and redirect to register
             $_SESSION['oauth_pending'] = [
@@ -128,25 +129,33 @@ class OAuthController
                 'providerId' => $providerId
             ];
             
-            redirect('register?oauth=1');
+            redirect('/register?oauth=1');
         }
     }
 
-    private function loginUser(string $userId): void
+    private function loginUser(string $userId, array $userRow = []): void
     {
         $db = Db::connect2();
         // Fetch family code
         $stmt = $db->prepare("SELECT famCode FROM personal WHERE id = ?");
         $stmt->execute([$userId]);
-        $famCode = $stmt->fetchColumn();
+        $famCode = (string) $stmt->fetchColumn();
 
         $_SESSION['id'] = $userId;
         $_SESSION['manager_id'] = $userId;
         $_SESSION['famCode'] = $famCode;
         $_SESSION['loggedIn'] = true;
 
-        // Create JWT cookie
-        \Src\JwtHandler::issueLoginCookie(['id' => $userId, 'role' => 'users']);
+        $tokenVersion = (int) ($userRow['token_version'] ?? 1);
+        $email = $userRow['email'] ?? '';
+
+        // Create JWT cookie with exact user payload expected by RoleMiddleware
+        \Src\JwtHandler::issueLoginCookie([
+            'id' => $userId,
+            'email' => $email,
+            'role' => 'users',
+            'token_version' => $tokenVersion
+        ]);
 
         redirect('/profilePage');
     }

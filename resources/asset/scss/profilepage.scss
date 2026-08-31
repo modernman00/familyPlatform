@@ -274,10 +274,99 @@
     }
 }
 
-/* Poll button active state in the action bar */
-.btn-composer-action.poll-active {
-    background-color: var(--primary-color);
-    color: #fff;
+/* Action Bar Refinements */
+.composer-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    border-radius: 50px;
+}
+
+.btn-composer-action {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 1.25rem;
+
+    &:hover {
+        background-color: var(--hover-color);
+        transform: scale(1.12) translateY(-1px);
+    }
+
+    &.action-emoji {
+        color: #f59e0b;
+        &:hover {
+            background-color: rgba(245, 158, 11, 0.14);
+            color: #d97706;
+        }
+    }
+
+    &.action-photo {
+        color: #22c55e;
+        &:hover {
+            background-color: rgba(34, 197, 94, 0.14);
+            color: #16a34a;
+        }
+    }
+
+    &.action-video {
+        color: #ef4444;
+        &:hover {
+            background-color: rgba(239, 68, 68, 0.14);
+            color: #dc2626;
+        }
+    }
+
+    &.action-gif,
+    &.gif-btn {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+        color: #06b6d4;
+        border: 1.8px solid #06b6d4;
+        width: 34px;
+        height: 34px;
+        margin: 2px;
+        border-radius: 50%;
+
+        &:hover {
+            background-color: rgba(6, 182, 212, 0.14);
+            border-color: #0891b2;
+            color: #0891b2;
+        }
+    }
+
+    &.action-tag {
+        color: #3b82f6;
+        &:hover {
+            background-color: rgba(59, 130, 246, 0.14);
+            color: #2563eb;
+        }
+    }
+
+    &.action-poll {
+        color: #f97316;
+        &:hover {
+            background-color: rgba(249, 115, 22, 0.14);
+            color: #ea580c;
+        }
+    }
+
+    &.poll-active {
+        background-color: #f97316 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
+    }
 }
 
 .dark-mode {

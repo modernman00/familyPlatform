@@ -13,7 +13,7 @@
           <p class="hero-subtitle">The ultimate private social network designed exclusively for your family. Strengthen bonds, preserve memories, and explore your family tree in a secure, ad-free environment.</p>
           <div class="d-flex gap-3 flex-column flex-sm-row">
             <a href="/register" class="btn btn-brand btn-lg">Create Family Network</a>
-            <a href="/aboutus" class="btn btn-brand-outline btn-lg">Learn How It Works</a>
+            <a href="/login" class="btn btn-brand-outline btn-lg">Log In</a>
           </div>
         </div>
         <div class="col-lg-6 text-center">

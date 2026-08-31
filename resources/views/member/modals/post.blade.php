@@ -131,25 +131,25 @@
                     </div>
 
                     <div class="composer-action-bar">
-                        <div class="d-flex gap-1">
-                            <button type="button" class="btn-composer-action" id="emojiPost" title="Add emoji">
-                                <i class="bi bi-emoji-smile"></i>
+                        <div class="d-flex gap-1 align-items-center">
+                            <button type="button" class="btn-composer-action action-emoji" id="emojiPost" title="Add emoji" aria-label="Add emoji">
+                                <i class="bi bi-emoji-smile-fill"></i>
                             </button>
 
-                            <label for="imageUpload" class="btn-composer-action mb-0" title="Attach image" style="cursor: pointer;">
-                                <i class="bi bi-camera"></i>
+                            <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach image" style="cursor: pointer;" aria-label="Attach image">
+                                <i class="bi bi-camera-fill"></i>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple hidden>
 
-                            <button type="button" class="btn-composer-action fw-bold" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)">
+                            <button type="button" class="btn-composer-action action-video fw-bold" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)" aria-label="Add video">
                                 <i class="bi bi-play-btn-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action gif-btn" title="Add GIF">GIF</button>
-                            <button type="button" class="btn-composer-action" title="Stickers">
-                                <i class="bi bi-tag"></i>
+                            <button type="button" class="btn-composer-action action-gif gif-btn" title="Add GIF" aria-label="Add GIF">GIF</button>
+                            <button type="button" class="btn-composer-action action-tag" title="Tags & Stickers" aria-label="Tags and stickers">
+                                <i class="bi bi-tag-fill"></i>
                             </button>
-                            <button type="button" class="btn-composer-action fw-bold" id="addPollBtn" title="Create Poll">
+                            <button type="button" class="btn-composer-action action-poll fw-bold" id="addPollBtn" title="Create Poll" aria-label="Create poll">
                                 <i class="bi bi-bar-chart-fill"></i>
                             </button>
                         </div>
