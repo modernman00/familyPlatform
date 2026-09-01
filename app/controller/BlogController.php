@@ -30,7 +30,7 @@ final class BlogController
     public function show(string $slug): void
     {
         try {
-            $blog = BlogData::getBlogBySlug($slug);
+            $blog = BlogData::getPublishedBlogBySlug($slug);
 
             if (!$blog) {
                 // If blog is not found or not published, show 404

@@ -166,6 +166,16 @@ class BaseController
         $sex = $data['gender'] === 'Male' ? 'avatarM.png' : 'avatarF.png';
 
 
+        $fatherFullName = trim((string)($data['father_name'] ?? ''));
+        $fatherParts = !empty($fatherFullName) ? explode(' ', $fatherFullName, 2) : ['', ''];
+        $fatherFirstName = $data['father_first_name'] ?? $fatherParts[0];
+        $fatherLastName = $data['father_last_name'] ?? ($fatherParts[1] ?? '');
+
+        $motherFullName = trim((string)($data['mother_name'] ?? ''));
+        $motherParts = !empty($motherFullName) ? explode(' ', $motherFullName, 2) : ['', ''];
+        $motherFirstName = $data['mother_first_name'] ?? $motherParts[0];
+        $motherLastName = $data['mother_last_name'] ?? ($motherParts[1] ?? '');
+
         return [
             'id' => $data['id'] ?? '',
             'firstName' => $data['firstName'] ?? '',
@@ -183,10 +193,14 @@ class BaseController
             'month' => $data['month'] ?? null,
             'year' => $data['year'] ?? null,
             'employmentStatus' => $data['employmentStatus'] ?? null,
-            'father_name' => $data['father_name'] ?? null,
+            'father_first_name' => $fatherFirstName,
+            'father_last_name' => $fatherLastName,
+            'father_name' => $fatherFullName,
             'father_email' => $data['father_email'] ?? null,
             'father_mobile' => $data['father_mobile'] ?? null,
-            'mother_name' => $data['mother_name'] ?? null,
+            'mother_first_name' => $motherFirstName,
+            'mother_last_name' => $motherLastName,
+            'mother_name' => $motherFullName,
             'mother_email' => $data['mother_email'] ?? null,
             'mother_mobile' => $data['mother_mobile'] ?? null,
             'mother_maiden' => $data['mother_maiden'] ?? null,

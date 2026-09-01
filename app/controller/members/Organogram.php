@@ -84,7 +84,7 @@ final class Organogram extends SingleCustomerData
 
     /**
      * API: Get complete details for a single node (Slide-out Heritage Dossier)
-     * @param int|string $nodeId
+     * @param int|string $id
      */
     public function getNodeDetails(int|string $id): void
     {
@@ -347,112 +347,33 @@ final class Organogram extends SingleCustomerData
             return; // Already initialized
         }
 
-        // AUTO-CLAIM ALGORITHM
-        // Try to find if a relative already manually created a node for this user
-        $firstName = trim((string)($memberData['firstName'] ?? ''));
-        $lastName = trim((string)($memberData['lastName'] ?? ''));
-        $email = trim((string)($memberData['email'] ?? ''));
-        $mobile = trim((string)($memberData['mobile'] ?? ''));
-
-        $claimQuery = "SELECT id FROM family_nodes WHERE family_code = ? AND user_id IS NULL AND (";
-        $claimConditions = [];
-        $claimParams = [$familyCode];
-
-        if (!empty($email)) {
-            $claimConditions[] = "email = ?";
-            $claimParams[] = $email;
-        }
-        if (!empty($mobile)) {
-            $claimConditions[] = "mobile = ?";
-            $claimParams[] = $mobile;
-        }
-        if (!empty($firstName) && !empty($lastName)) {
-            $claimConditions[] = "(first_name = ? AND last_name = ?)";
-            $claimParams[] = $firstName;
-            $claimParams[] = $lastName;
+        // AUTO-CLAIM & NODE INITIALIZATION VIA UNIFIED SERVICE
+        $rootNodeId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberData);
+        if ($rootNodeId <= 0) {
+            return;
         }
 
-        if (!empty($claimConditions)) {
-            $claimQuery .= implode(' OR ', $claimConditions) . ") LIMIT 1";
-            $claimStmt = $db->prepare($claimQuery);
-            $claimStmt->execute($claimParams);
-            $claimedNodeId = $claimStmt->fetchColumn();
-
-            if ($claimedNodeId) {
-                // Link the user to the existing node seamlessly!
-                $updateClaim = $db->prepare("UPDATE family_nodes SET user_id = ? WHERE id = ?");
-                $updateClaim->execute([$userId, $claimedNodeId]);
-                return; // Stop execution to prevent spawning duplicate parents/grandparents
-            }
+        // If the node was claimed from an existing parent/sibling placeholder, stop further legacy duplication
+        $claimedCheck = $db->prepare("SELECT COUNT(*) FROM family_node_children WHERE child_id = ?");
+        $claimedCheck->execute([$rootNodeId]);
+        if ((int)$claimedCheck->fetchColumn() > 0) {
+            return;
         }
 
-        // 1. Insert Root User Node (Generation 0)
-        $sex = (($memberData['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
-        $rootAvatar = (string)($memberData['img'] ?? "/resources/images/profile/{$sex}");
+        // Fetch parent union if exists for linking legacy siblings/children
+        $findPUnion = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ? LIMIT 1");
+        $findPUnion->execute([$rootNodeId]);
+        $parentUnionId = (int)$findPUnion->fetchColumn();
 
-        $insRoot = $db->prepare("
-            INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, birth_year, occupation, location, email, mobile, avatar_url, generation_level, bio)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
-        ");
-        $insRoot->execute([
-            $familyCode,
-            $userId,
-            (string)($memberData['firstName'] ?? 'Self'),
-            (string)($memberData['lastName'] ?? ''),
-            (string)($memberData['gender'] ?? 'Male'),
-            !empty($memberData['year']) ? (int)$memberData['year'] : null,
-            $memberData['occupation'] ?? null,
-            $memberData['country'] ?? null,
-            $memberData['email'] ?? null,
-            $memberData['mobile'] ?? null,
-            $rootAvatar,
-            "Primary Member"
-        ]);
-        $rootNodeId = (int) $db->lastInsertId();
-
-        // 2. Fetch and insert Parents (Generation -1)
-        $fatherName = (string)($memberData['father_name'] ?? 'Father');
-        $motherName = (string)($memberData['mother_name'] ?? 'Mother');
-
-        $insParent = $db->prepare("
-            INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio)
-            VALUES (?, ?, ?, ?, -1, ?, ?)
-        ");
-
-        $insParent->execute([
-            $familyCode,
-            $fatherName,
-            (string)($memberData['lastName'] ?? ''),
-            'Male',
-            '/resources/images/profile/avatarM.png',
-            'Father'
-        ]);
-        $fatherId = (int) $db->lastInsertId();
-
-        $insParent->execute([
-            $familyCode,
-            $motherName,
-            (string)($memberData['lastName'] ?? ''),
-            'Female',
-            '/resources/images/profile/avatarF.png',
-            'Mother'
-        ]);
-        $motherId = (int) $db->lastInsertId();
-
-        // Create Parent Union
+        // Reusable inserts for the union + child links built below.
         $insUnion = $db->prepare("
             INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
             VALUES (?, ?, ?, 'married', 1)
         ");
-        $insUnion->execute([$familyCode, $fatherId, $motherId]);
-        $parentUnionId = (int) $db->lastInsertId();
-
-        // Link Root User as Child of Parents Union
         $insChild = $db->prepare("
             INSERT INTO family_node_children (union_id, child_id, relationship_type)
             VALUES (?, ?, 'biological')
         ");
-        $insChild->execute([$parentUnionId, $rootNodeId]);
 
         // 4. Spouse & Multiple Partners
         $spouseName = (string)($memberData['spouse_name'] ?? '');
@@ -640,5 +561,51 @@ final class Organogram extends SingleCustomerData
         ];
 
         return $map[$role][$gender] ?? null;
+    }
+
+    public function claimNode(): void
+    {
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($userId) || empty($famCode)) {
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input') ?: '';
+            $input = json_decode($rawInput, true) ?: $_POST;
+            $nodeId = (int)($input['node_id'] ?? 0);
+
+            if ($nodeId <= 0) {
+                echo json_encode(['status' => 'error', 'message' => 'Invalid node ID']);
+                return;
+            }
+
+            $claimed = \App\services\FamilyClaimService::claimNodeById($nodeId, $userId, $famCode);
+            if ($claimed) {
+                unset($_SESSION['dismissed_claim_node_' . $nodeId]);
+                echo json_encode(['status' => 'success', 'message' => 'Tree node successfully claimed!']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'This node is already claimed or invalid.']);
+            }
+        } catch (\Throwable $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function dismissClaimNode(): void
+    {
+        try {
+            $rawInput = file_get_contents('php://input') ?: '';
+            $input = json_decode($rawInput, true) ?: $_POST;
+            $nodeId = (int)($input['node_id'] ?? 0);
+            if ($nodeId > 0) {
+                $_SESSION['dismissed_claim_node_' . $nodeId] = true;
+            }
+            echo json_encode(['status' => 'success', 'message' => 'Prompt dismissed']);
+        } catch (\Throwable $e) {
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
     }
 }

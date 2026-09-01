@@ -24,7 +24,7 @@ class StreamController
 
         try {
             $verifyJWT = SignIn::verify();
-            if (!\is_array($verifyJWT) || empty($verifyJWT['id'])) {
+            if (empty($verifyJWT['id'])) {
                 http_response_code(401);
                 echo json_encode(['success' => false, 'error' => 'Authentication required']);
                 return;
@@ -35,7 +35,7 @@ class StreamController
             // Check if member has Premium status
             $isPremium = false;
             try {
-                $db = \Src\Db::connect();
+                $db = \Src\Db::connect2();
                 $stmt = $db->prepare("SELECT type, is_premium FROM account WHERE id = ?");
                 $stmt->execute([$userId]);
                 $acc = $stmt->fetch(\PDO::FETCH_ASSOC);

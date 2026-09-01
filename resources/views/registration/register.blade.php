@@ -204,7 +204,16 @@
                 </div>
                 @endif
 
+                @if(!empty($registerPostData['claim_node']))
+                <div class="alert alert-success text-center fw-semibold mb-4" style="background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 10px; padding: 14px;">
+                    <i class="bi bi-tree-fill me-2"></i> <strong>Family Invitation:</strong> You are registering to connect directly with family code <strong>{{ $registerPostData['famCode'] ?? '' }}</strong>!
+                </div>
+                @endif
+
                 <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off">
+                    @if(!empty($registerPostData['claim_node']))
+                    <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
+                    @endif
 
                     @include('partials.loader', ['notificationId'=> 'register'])
                     @php

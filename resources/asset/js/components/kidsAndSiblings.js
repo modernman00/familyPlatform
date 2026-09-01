@@ -40,7 +40,14 @@ export const processKidsSiblings = (emailData, firstName, famCode = null) => {
 
       const index = chooseEmail.indexOf(elementId);
       const nameId = chooseName[index];
-      const nameValue = id(nameId)?.value ?? "";
+      let nameValue = id(nameId)?.value ?? "";
+      if (!nameValue) {
+        const prefix = isKid ? "children" : "sibling";
+        const no = index + 1;
+        const fn = id(`${prefix}_first_name${no}`)?.value ?? "";
+        const ln = id(`${prefix}_last_name${no}`)?.value ?? "";
+        nameValue = `${fn} ${ln}`.trim();
+      }
 
       if (emailInput.length > 0 && emailInput.length < 7) {
         helpEl.style.display = "block";

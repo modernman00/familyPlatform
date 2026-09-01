@@ -33,7 +33,7 @@ export const renderHtmlFamilyBootstrap = (family, no) => {
       <div class="row g-3">
       
         <!-- Relationship Select -->
-        <div class="col-md-5">
+        <div class="col-md-4">
            <label class="form-label" for="${kids_sib}_option${no}">
                ${optionsHtmlText}
            </label>
@@ -42,17 +42,32 @@ export const renderHtmlFamilyBootstrap = (family, no) => {
            </select>
         </div>
 
-        <!-- Full Name Input -->
-        <div class="col-md-7">
-           <label class="form-label" for="${kids_sib}_name${no}">
-               Full Name
+        <!-- First Name Input -->
+        <div class="col-md-4">
+           <label class="form-label" for="${kids_sib}_first_name${no}">
+               First Name
            </label>
            <input 
               type="text" 
               class="form-control" 
-              placeholder="e.g. John Doe" 
-              name="${kids_sib}_name${no}" 
-              id="${kids_sib}_name${no}"
+              placeholder="e.g. John" 
+              name="${kids_sib}_first_name${no}" 
+              id="${kids_sib}_first_name${no}"
+              autocomplete="off"
+           >
+        </div>
+
+        <!-- Last Name Input -->
+        <div class="col-md-4">
+           <label class="form-label" for="${kids_sib}_last_name${no}">
+               Last Name
+           </label>
+           <input 
+              type="text" 
+              class="form-control" 
+              placeholder="e.g. Doe" 
+              name="${kids_sib}_last_name${no}" 
+              id="${kids_sib}_last_name${no}"
               autocomplete="off"
            >
         </div>

@@ -52,7 +52,7 @@ class CloudflareStreamService
             $payloadData['expiry'] = date('c', time() + $expirySeconds);
         }
 
-        $payload = json_encode($payloadData);
+        $payload = json_encode($payloadData) ?: '{}';
 
         $ch = curl_init($endpoint);
         if ($ch === false) {

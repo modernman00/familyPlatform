@@ -9,6 +9,72 @@
   }
 </style>
 <div class="feed-column">
+  @if(!empty($unclaimedMatch))
+  <div class="card mb-4 border-0 shadow-sm unclaimed-match-card" id="unclaimedMatchBanner" style="border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-left: 5px solid #2563eb !important;">
+    <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #dbeafe; color: #2563eb; font-size: 1.4rem;">
+          <i class="bi bi-diagram-3-fill"></i>
+        </div>
+        <div>
+          <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
+            👋 Welcome {{ htmlspecialchars($data['firstName'] ?? 'there') }}! Connect to your family tree?
+          </h6>
+          <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+            Your family member created a place for <strong>{{ htmlspecialchars($unclaimedMatch['full_name']) }}</strong> (<em>{{ htmlspecialchars($unclaimedMatch['role']) }}</em>) in the family tree. Is this you?
+          </p>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold" id="btnClaimNode" onclick="claimFamilyNode({{ (int)$unclaimedMatch['node_id'] }})">
+          <i class="bi bi-check2-circle me-1"></i> Yes, that's me!
+        </button>
+        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2" onclick="dismissFamilyNode({{ (int)$unclaimedMatch['node_id'] }})">
+          Not now
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    function claimFamilyNode(nodeId) {
+      const btn = document.getElementById('btnClaimNode');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Linking...'; }
+      fetch('/api/claim-family-node', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ node_id: nodeId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const banner = document.getElementById('unclaimedMatchBanner');
+          if (banner) {
+            banner.innerHTML = '<div class="card-body p-3 text-center text-success fw-bold"><i class="bi bi-check-circle-fill me-2"></i> Successfully connected to your family tree! Refreshing...</div>';
+            setTimeout(() => window.location.reload(), 1200);
+          }
+        } else {
+          alert(data.message || 'Unable to claim node.');
+          if (btn) { btn.disabled = false; btn.innerText = "Yes, that's me!"; }
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        if (btn) { btn.disabled = false; btn.innerText = "Yes, that's me!"; }
+      });
+    }
+
+    function dismissFamilyNode(nodeId) {
+      const banner = document.getElementById('unclaimedMatchBanner');
+      if (banner) banner.style.display = 'none';
+      fetch('/api/dismiss-claim-node', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ node_id: nodeId })
+      }).catch(console.error);
+    }
+  </script>
+  @endif
+
   <!-- Post Composer -->
   <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
     <div class="card-body d-flex align-items-center p-4">
@@ -397,7 +463,7 @@
     </div>
     
     <!-- Premium Alpine Lightbox Modal -->
-    <div x-show="lightboxOpen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 9999; backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center;" x-transition.opacity.duration.300ms @keydown.escape.window="closeLightbox()" @keydown.right.window="nextLightboxImage()" @keydown.left.window="prevLightboxImage()" @click.self="closeLightbox()">
+    <div x-cloak x-show="lightboxOpen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 9999; backdrop-filter: blur(15px); align-items: center; justify-content: center;" :style="lightboxOpen ? 'display: flex;' : 'display: none;'" x-transition.opacity.duration.300ms @keydown.escape.window="closeLightbox()" @keydown.right.window="nextLightboxImage()" @keydown.left.window="prevLightboxImage()" @click.self="closeLightbox()">
         
         <!-- Close Button -->
         <button @click="closeLightbox()" style="position: absolute; top: 20px; right: 30px; background: rgba(255,255,255,0.15); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 28px; font-weight: 300; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='scale(1)';">&times;</button>

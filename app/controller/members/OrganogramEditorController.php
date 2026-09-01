@@ -191,7 +191,7 @@ final class OrganogramEditorController extends BaseController
             showError($th);
         }
     }
-}
+
     /**
      * Add Parents to a node (Creates Father, Mother, Union, and links child)
      */
@@ -299,4 +299,5 @@ final class OrganogramEditorController extends BaseController
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
 }

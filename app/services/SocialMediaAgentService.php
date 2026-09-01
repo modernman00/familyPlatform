@@ -31,9 +31,17 @@ class SocialMediaAgentService
 
     /**
      * Helper method to execute cURL requests
+     *
+     * @param array<string, mixed> $data
+     * @param list<string> $headers
+     * @return array<string, mixed>
      */
     private function curlRequest(string $url, string $method = 'GET', array $data = [], array $headers = []): array
     {
+        if ($url === '') {
+            throw new \InvalidArgumentException('curlRequest() requires a non-empty URL.');
+        }
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -42,7 +50,7 @@ class SocialMediaAgentService
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
             if (!empty($headers) && in_array('Content-Type: application/json', $headers)) {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data) ?: '{}');
             } else {
                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
             }
@@ -68,8 +76,8 @@ class SocialMediaAgentService
      *
      * @param string $message The content of the post
      * @param string|null $imageUrl The URL of the cover image
-     * @param array $platforms Array of platforms to post to (e.g., ['facebook', 'linkedin', 'instagram'])
-     * @return array Result indicating success/failure per platform
+     * @param list<string> $platforms Array of platforms to post to (e.g., ['facebook', 'linkedin', 'instagram'])
+     * @return array<string, mixed> Result indicating success/failure per platform
      */
     public function publish(string $message, ?string $imageUrl, array $platforms): array
     {
@@ -117,6 +125,8 @@ class SocialMediaAgentService
 
     /**
      * Posts the content and optional image to the Facebook Page using Graph API.
+     *
+     * @return array<string, mixed>
      */
     private function postToFacebook(string $message, ?string $imageUrl): array
     {
@@ -144,6 +154,8 @@ class SocialMediaAgentService
 
     /**
      * Posts the content and image to Instagram using Graph API.
+     *
+     * @return array<string, mixed>
      */
     private function postToInstagram(string $message, string $imageUrl): array
     {
@@ -174,6 +186,8 @@ class SocialMediaAgentService
 
     /**
      * Posts the content to LinkedIn.
+     *
+     * @return array<string, mixed>
      */
     private function postToLinkedIn(string $message): array
     {

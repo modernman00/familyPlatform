@@ -99,8 +99,12 @@ class PushNotificationClass extends VapidClass
                     // If subscription has expired (410 Gone / 404 Not Found), delete from DB
                     if ($report->isSubscriptionExpired()) {
                         try {
-                            $del = new Delete('pushNotification');
-                            $del->deleteItem(['endpoint' => $endpoint]);
+                            $delQuery = Delete::formAndMatchQuery(
+                                selection: 'DELETE_ONE',
+                                table: 'pushNotification',
+                                identifier1: 'endpoint',
+                            );
+                            Delete::deleteFn($delQuery, [$endpoint]);
                         } catch (\Throwable $e) {
                             error_log("[PushNotification] Prune error: " . $e->getMessage());
                         }
@@ -128,7 +132,7 @@ class PushNotificationClass extends VapidClass
                 'SELECT * FROM pushNotification WHERE id = ?',
                 [$userId]
             );
-            if (!empty($rows) && is_array($rows)) {
+            if (!empty($rows)) {
                 return isset($rows[0]) && is_array($rows[0]) ? $rows : [$rows];
             }
             return [];

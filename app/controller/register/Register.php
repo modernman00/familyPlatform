@@ -37,10 +37,21 @@ final class Register extends Db
                 view('registration/register', ['registerPostData' => $registerPostData]);
             } else {
                 $registerPostData = [];
-                if (!empty($_GET['famCode'])) {
+                if (!empty($_GET['invite_token'])) {
+                    $tokenData = \App\services\FamilyClaimService::verifySignedInviteToken((string)$_GET['invite_token']);
+                    if ($tokenData) {
+                        $registerPostData['famCode'] = $tokenData['family_code'];
+                        $registerPostData['firstName'] = $tokenData['first_name'];
+                        $registerPostData['lastName'] = $tokenData['last_name'];
+                        $registerPostData['email'] = $tokenData['email'];
+                        $registerPostData['claim_node'] = $tokenData['node_id'];
+                    }
+                }
+
+                if (!empty($_GET['famCode']) && empty($registerPostData['famCode'])) {
                     $registerPostData['famCode'] = checkInput((string)$_GET['famCode']);
                 }
-                if (!empty($_GET['name'])) {
+                if (!empty($_GET['name']) && empty($registerPostData['firstName'])) {
                     $rawName = trim((string)$_GET['name']);
                     $parts = explode(' ', $rawName, 2);
                     $registerPostData['firstName'] = checkInput($parts[0]);
@@ -165,6 +176,19 @@ final class Register extends Db
                 }
 
                 $dbConnection->commit();
+
+                // Immediate Auto-Claim & Tree Node initialization
+                try {
+                    $claimNodeId = !empty($input['claim_node']) ? (int)$input['claim_node'] : null;
+                    \App\services\FamilyClaimService::claimOrInitializeNode(
+                        (string)$cleanData['famCode'],
+                        (string)$cleanData['id'],
+                        $cleanData,
+                        $claimNodeId
+                    );
+                } catch (\Throwable $e) {
+                    error_log("FamilyClaimService registration error: " . $e->getMessage());
+                }
 
                 SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
 

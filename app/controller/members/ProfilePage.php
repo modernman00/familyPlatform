@@ -93,7 +93,8 @@ final class ProfilePage extends ProcessImg
                 'pics2Id' => $data['pics'],
                 'eventData' => $data['events'],
                 'requestData' => $data['friendRequests'],
-                'totalFamilyMembers' => $data['totalFamilyMembers']
+                'totalFamilyMembers' => $data['totalFamilyMembers'],
+                'unclaimedMatch' => $data['unclaimedMatch'] ?? null
             ]);
 
         } catch (\Throwable $th) {
@@ -232,7 +233,7 @@ final class ProfilePage extends ProcessImg
                 // must never turn a successful post into a failed response.
                 try {
                     \App\controller\members\PostMessage::getNewPostAndEmail($result);
-                    \App\controller\members\PostMessage::getNewPostPusher($result);
+                    \App\controller\members\PostMessage::getNewPostPusher();
                 } catch (\Throwable $th) {
                     error_log((string) $th);
                 }

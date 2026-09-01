@@ -133,6 +133,7 @@ class OAuthController
         }
     }
 
+    /** @param array<string, mixed> $userRow */
     private function loginUser(string $userId, array $userRow = []): void
     {
         $db = Db::connect2();
@@ -156,6 +157,17 @@ class OAuthController
             'role' => 'users',
             'token_version' => $tokenVersion
         ]);
+
+        if (!empty($famCode)) {
+            try {
+                $pStmt = $db->prepare("SELECT firstName, lastName, email, mobile, gender, day, month, year FROM personal p LEFT JOIN contact c ON c.id = p.id WHERE p.id = ?");
+                $pStmt->execute([$userId]);
+                $pData = $pStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+                \App\services\FamilyClaimService::claimOrInitializeNode($famCode, $userId, $pData);
+            } catch (\Throwable $e) {
+                error_log("FamilyClaimService OAuth hook error: " . $e->getMessage());
+            }
+        }
 
         redirect('/profilePage');
     }

@@ -372,33 +372,47 @@
                   </div>
                 </div>
 
-                <div class="row g-4 mb-4">
-                  <div class="col-md-4">
-                    <label class="form-label">Father's Name</label>
-                    <input type="text" class="form-control" id="father_name" name="father_name" value="{{ $accountData['father_name'] ?? '' }}" placeholder="Enter father's full name">
+                <!-- Father's Details -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-3">
+                    <label class="form-label">Father's First Name</label>
+                    <input type="text" class="form-control" id="father_first_name" name="father_first_name" value="{{ $accountData['father_first_name'] ?? '' }}" placeholder="Enter first name">
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
+                    <label class="form-label">Father's Last Name</label>
+                    <input type="text" class="form-control" id="father_last_name" name="father_last_name" value="{{ $accountData['father_last_name'] ?? '' }}" placeholder="Enter last name">
+                  </div>
+                  <div class="col-md-3">
                     <label class="form-label">Father's Email</label>
-                    <input type="email" class="form-control" id="father_email" name="father_email" value="{{ $accountData['father_email'] ?? '' }}">
+                    <input type="email" class="form-control" id="father_email" name="father_email" value="{{ $accountData['father_email'] ?? '' }}" placeholder="father@example.com">
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-3">
                     <label class="form-label">Father's Mobile</label>
-                    <input type="text" class="form-control" id="father_mobile" name="father_mobile" value="{{ $accountData['father_mobile'] ?? '' }}">
+                    <input type="text" class="form-control" id="father_mobile" name="father_mobile" value="{{ $accountData['father_mobile'] ?? '' }}" placeholder="e.g. +44...">
                   </div>
                 </div>
 
-                <div class="row g-4 mb-4">
-                  <div class="col-md-4">
-                    <label class="form-label">Mother's Name</label>
-                    <input type="text" class="form-control" id="mother_name" name="mother_name" value="{{ $accountData['mother_name'] ?? '' }}" placeholder="Enter mother's full name">
+                <!-- Mother's Details -->
+                <div class="row g-3 mb-4">
+                  <div class="col-md-3">
+                    <label class="form-label">Mother's First Name</label>
+                    <input type="text" class="form-control" id="mother_first_name" name="mother_first_name" value="{{ $accountData['mother_first_name'] ?? '' }}" placeholder="Enter first name">
                   </div>
-                  <div class="col-md-4">
-                    <label class="form-label">Mother's Maiden Name</label>
-                    <input type="text" class="form-control" id="mother_maiden" name="mother_maiden" value="{{ $accountData['mother_maiden'] ?? '' }}">
+                  <div class="col-md-3">
+                    <label class="form-label">Mother's Last Name</label>
+                    <input type="text" class="form-control" id="mother_last_name" name="mother_last_name" value="{{ $accountData['mother_last_name'] ?? '' }}" placeholder="Enter last name">
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-2">
+                    <label class="form-label">Maiden Name</label>
+                    <input type="text" class="form-control" id="mother_maiden" name="mother_maiden" value="{{ $accountData['mother_maiden'] ?? '' }}" placeholder="Maiden name">
+                  </div>
+                  <div class="col-md-2">
                     <label class="form-label">Mother's Email</label>
-                    <input type="email" class="form-control" id="mother_email" name="mother_email" value="{{ $accountData['mother_email'] ?? '' }}">
+                    <input type="email" class="form-control" id="mother_email" name="mother_email" value="{{ $accountData['mother_email'] ?? '' }}" placeholder="mother@example.com">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Mother's Mobile</label>
+                    <input type="text" class="form-control" id="mother_mobile" name="mother_mobile" value="{{ $accountData['mother_mobile'] ?? '' }}" placeholder="e.g. +44...">
                   </div>
                 </div>
 

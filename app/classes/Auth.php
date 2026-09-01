@@ -21,8 +21,8 @@ class Auth extends JwtHandler
         try {
             if (array_key_exists('waleToken', $_COOKIE) && !empty(trim($this->headers))) {
                     $data = $this->jwtDecodeData($this->headers);
-                    $isAuth = is_array($data) ? ($data['auth'] ?? null) : ($data->auth ?? null);
-                    $userId = is_array($data) ? ($data['data']->id ?? null) : ($data->data->id ?? null);
+                    $isAuth = $data->auth ?? null;
+                    $userId = $data->data->id ?? null;
                     if (isset($isAuth) && isset($userId)) {
                         $fetchData =  $this->fetchUser($userId);
                     } else {

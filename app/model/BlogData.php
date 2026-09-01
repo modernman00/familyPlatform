@@ -11,6 +11,8 @@ final class BlogData extends Select
 {
     /**
      * Retrieve all published blogs
+     *
+     * @return array<int, mixed>
      */
     public static function getAllPublishedBlogs(): array
     {
@@ -24,6 +26,8 @@ final class BlogData extends Select
 
     /**
      * Retrieve a specific published blog by its slug
+     *
+     * @return array<string, mixed>
      */
     public static function getPublishedBlogBySlug(string $slug): array
     {
@@ -38,6 +42,8 @@ final class BlogData extends Select
 
     /**
      * Retrieve a specific blog by its ID (for admin editing)
+     *
+     * @return array<string, mixed>
      */
     public static function getBlogById(int|string $id): array
     {
@@ -46,6 +52,8 @@ final class BlogData extends Select
 
     /**
      * Retrieve all blogs (drafts and published) for the admin panel
+     *
+     * @return array<int, mixed>
      */
     public static function getAllBlogsForAdmin(): array
     {

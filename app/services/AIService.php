@@ -15,7 +15,7 @@ class AIService
      *
      * @param string $firstName
      * @param string $lastName
-     * @param array $publicPosts
+     * @param list<string|mixed> $publicPosts
      * @return string
      * @throws Exception
      */
@@ -57,7 +57,7 @@ class AIService
         $ch = curl_init(self::DEEPSEEK_API_URL);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data) ?: '{}');
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apiKey
@@ -87,7 +87,8 @@ class AIService
         
         // Defensive parsing (Never Trust the Data)
         if (isset($responseData['choices'][0]['message']['content'])) {
-            return purify_html(trim($responseData['choices'][0]['message']['content']));
+            // The biography is prose, not markup — strip any tags the model emits.
+            return trim(strip_tags((string) $responseData['choices'][0]['message']['content']));
         }
 
         return "Unable to generate biography at this time.";

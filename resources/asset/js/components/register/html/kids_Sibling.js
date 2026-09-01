@@ -35,10 +35,22 @@ export const renderHtmlFamily = (family, no) => {
         <p class="control is-expanded">
           <input
             type="text"
-            placeholder="Enter ${kids_sib}'s full name - ${no}"
-            name="${kids_sib}_name${no}"
+            placeholder="First name - ${no}"
+            name="${kids_sib}_first_name${no}"
             class="input is-normal"
-            id="${kids_sib}_name${no}"
+            id="${kids_sib}_first_name${no}"
+          >
+        </p>
+      </div>
+
+      <div class="field">
+        <p class="control is-expanded">
+          <input
+            type="text"
+            placeholder="Last name - ${no}"
+            name="${kids_sib}_last_name${no}"
+            class="input is-normal"
+            id="${kids_sib}_last_name${no}"
           >
         </p>
       </div>

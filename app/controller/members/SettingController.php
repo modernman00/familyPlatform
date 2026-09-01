@@ -183,6 +183,72 @@ final class SettingController extends BaseController
                 }
             }
 
+            // OtherFamily table updates (Father, Mother, Spouse, etc.)
+            $fatherFirstName = trim((string)($_POST['father_first_name'] ?? ''));
+            $fatherLastName  = trim((string)($_POST['father_last_name'] ?? ''));
+            $fatherFullName  = trim("$fatherFirstName $fatherLastName");
+            if (empty($fatherFullName) && isset($_POST['father_name'])) {
+                $fatherFullName = trim((string)$_POST['father_name']);
+            }
+
+            $motherFirstName = trim((string)($_POST['mother_first_name'] ?? ''));
+            $motherLastName  = trim((string)($_POST['mother_last_name'] ?? ''));
+            $motherFullName  = trim("$motherFirstName $motherLastName");
+            if (empty($motherFullName) && isset($_POST['mother_name'])) {
+                $motherFullName = trim((string)$_POST['mother_name']);
+            }
+
+            $updatesOtherFamily = [];
+            if (isset($_POST['father_first_name']) || isset($_POST['father_name'])) {
+                $updatesOtherFamily['father_name'] = $fatherFullName;
+            }
+            if (isset($_POST['father_email'])) {
+                $updatesOtherFamily['father_email'] = trim((string)$_POST['father_email']);
+            }
+            if (isset($_POST['father_mobile'])) {
+                $updatesOtherFamily['father_mobile'] = trim((string)$_POST['father_mobile']);
+            }
+            if (isset($_POST['mother_first_name']) || isset($_POST['mother_name'])) {
+                $updatesOtherFamily['mother_name'] = $motherFullName;
+            }
+            if (isset($_POST['mother_maiden'])) {
+                $updatesOtherFamily['mother_maiden'] = trim((string)$_POST['mother_maiden']);
+            }
+            if (isset($_POST['mother_email'])) {
+                $updatesOtherFamily['mother_email'] = trim((string)$_POST['mother_email']);
+            }
+            if (isset($_POST['mother_mobile'])) {
+                $updatesOtherFamily['mother_mobile'] = trim((string)$_POST['mother_mobile']);
+            }
+            if (isset($_POST['spouse_name'])) {
+                $updatesOtherFamily['spouse_name'] = trim((string)$_POST['spouse_name']);
+            }
+            if (isset($_POST['spouse_email'])) {
+                $updatesOtherFamily['spouse_email'] = trim((string)$_POST['spouse_email']);
+            }
+            if (isset($_POST['spouse_mobile'])) {
+                $updatesOtherFamily['spouse_mobile'] = trim((string)$_POST['spouse_mobile']);
+            }
+
+            if (!empty($updatesOtherFamily)) {
+                $updatesOtherFamily['id'] = $_POST['id'];
+                $cleanOtherFamily = LoginUtility::getSanitisedInputData($updatesOtherFamily);
+
+                $db = Db::connect2();
+                $chkOther = $db->prepare("SELECT id FROM otherFamily WHERE id = ?");
+                $chkOther->execute([$_POST['id']]);
+                if ($chkOther->fetch()) {
+                    UpdateFn::updateMultiple('otherFamily', $cleanOtherFamily, 'id');
+                } else {
+                    $cleanOtherFamily['otherFamCode'] = (string)($_SESSION['famCode'] ?? '');
+                    $cols = array_keys($cleanOtherFamily);
+                    $placeholders = array_fill(0, count($cols), '?');
+                    $sql = "INSERT INTO otherFamily (" . implode(', ', $cols) . ") VALUES (" . implode(', ', $placeholders) . ")";
+                    $insStmt = $db->prepare($sql);
+                    $insStmt->execute(array_values($cleanOtherFamily));
+                }
+            }
+
             // ---------------------------------------------------------
             // NEW GRAPH SYNCHRONIZATION FOR RELATIVES
             // ---------------------------------------------------------
@@ -220,23 +286,49 @@ final class SettingController extends BaseController
                             }
                         }
 
-                        // 3. Parents
-                        $fatherName = trim((string)($_POST['father_name'] ?? ''));
-                        $motherName = trim((string)($_POST['mother_name'] ?? ''));
-                        
-                        if (!empty($fatherName) || !empty($motherName)) {
+                        // 3. Parents Graph Node Sync (UPSERT)
+                        if (!empty($fatherFullName) || !empty($motherFullName)) {
                             $checkParent = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ?");
                             $checkParent->execute([$baseNodeId]);
-                            if (!$checkParent->fetch()) {
-                                $fName = !empty($fatherName) ? $fatherName : 'Unknown Father';
-                                $mName = !empty($motherName) ? $motherName : 'Unknown Mother';
-                                
-                                $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Father')");
-                                $insF->execute([$familyCode, $fName, $genLevel - 1]);
+                            $pUnionRow = $checkParent->fetch();
+
+                            $fFirst = !empty($fatherFirstName) ? $fatherFirstName : (!empty($fatherFullName) ? $fatherFullName : 'Unknown Father');
+                            $fLast  = !empty($fatherLastName) ? $fatherLastName : '';
+                            $fEmail = trim((string)($_POST['father_email'] ?? ''));
+                            $fMobile = trim((string)($_POST['father_mobile'] ?? ''));
+
+                            $mFirst = !empty($motherFirstName) ? $motherFirstName : (!empty($motherFullName) ? $motherFullName : 'Unknown Mother');
+                            $mLast  = !empty($motherLastName) ? $motherLastName : '';
+                            $mEmail = trim((string)($_POST['mother_email'] ?? ''));
+                            $mMobile = trim((string)($_POST['mother_mobile'] ?? ''));
+
+                            if ($pUnionRow && !empty($pUnionRow['union_id'])) {
+                                $existingUnionId = (int)$pUnionRow['union_id'];
+                                $stmtUnion = $db->prepare("SELECT partner_1_id, partner_2_id FROM family_unions WHERE id = ?");
+                                $stmtUnion->execute([$existingUnionId]);
+                                $unionNodes = $stmtUnion->fetch();
+
+                                if ($unionNodes) {
+                                    $p1Id = (int)$unionNodes['partner_1_id'];
+                                    $p2Id = (int)$unionNodes['partner_2_id'];
+
+                                    if ($p1Id > 0 && !empty($fatherFullName)) {
+                                        $updF = $db->prepare("UPDATE family_nodes SET first_name = ?, last_name = ?, email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile) WHERE id = ?");
+                                        $updF->execute([$fFirst, $fLast, $fEmail, $fMobile, $p1Id]);
+                                    }
+
+                                    if ($p2Id > 0 && !empty($motherFullName)) {
+                                        $updM = $db->prepare("UPDATE family_nodes SET first_name = ?, last_name = ?, email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile) WHERE id = ?");
+                                        $updM->execute([$mFirst, $mLast, $mEmail, $mMobile, $p2Id]);
+                                    }
+                                }
+                            } else {
+                                $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile) VALUES (?, ?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Father', ?, ?)");
+                                $insF->execute([$familyCode, $fFirst, $fLast, $genLevel - 1, $fEmail, $fMobile]);
                                 $fId = (int)$db->lastInsertId();
 
-                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother')");
-                                $insM->execute([$familyCode, $mName, $genLevel - 1]);
+                                $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile) VALUES (?, ?, ?, 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother', ?, ?)");
+                                $insM->execute([$familyCode, $mFirst, $mLast, $genLevel - 1, $mEmail, $mMobile]);
                                 $mId = (int)$db->lastInsertId();
 
                                 $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
@@ -252,8 +344,18 @@ final class SettingController extends BaseController
                         $kidsCount = (int)($_POST['children'] ?? 0);
                         if ($kidsCount > 0) {
                             for ($i = 1; $i <= $kidsCount; $i++) {
-                                $cName = trim((string)($_POST["children_name$i"] ?? ''));
-                                if (empty($cName)) continue;
+                                $cFirst = trim((string)($_POST["children_first_name$i"] ?? ''));
+                                $cLast  = trim((string)($_POST["children_last_name$i"] ?? ''));
+                                $cName  = trim("$cFirst $cLast");
+                                if (empty($cName) && isset($_POST["children_name$i"])) {
+                                    $cName = trim((string)$_POST["children_name$i"]);
+                                }
+                                if (empty($cFirst) && !empty($cName)) {
+                                    $cParts = explode(' ', $cName, 2);
+                                    $cFirst = $cParts[0];
+                                    $cLast  = $cParts[1] ?? '';
+                                }
+                                if (empty($cFirst) && empty($cName)) continue;
                                 
                                 $cOption = $_POST["children_option$i"] ?? '';
                                 $cEmail = trim((string)($_POST["children_email$i"] ?? ''));
@@ -291,8 +393,8 @@ final class SettingController extends BaseController
                                 }
 
                                 $cAvatar = '/resources/images/profile/avatarM.png';
-                                $insChild = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, 'Male', ?, ?, 'Child', ?)");
-                                $insChild->execute([$familyCode, $cName, $genLevel + 1, $cAvatar, $cEmail]);
+                                $insChild = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, ?, 'Male', ?, ?, 'Child', ?)");
+                                $insChild->execute([$familyCode, $cFirst, $cLast, $genLevel + 1, $cAvatar, $cEmail]);
                                 $childNodeId = (int)$db->lastInsertId();
 
                                 $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
@@ -326,12 +428,23 @@ final class SettingController extends BaseController
                             }
 
                             for ($i = 1; $i <= $siblingsCount; $i++) {
-                                $sName = trim((string)($_POST["sibling_name$i"] ?? ''));
-                                if (empty($sName)) continue;
+                                $sFirst = trim((string)($_POST["sibling_first_name$i"] ?? ''));
+                                $sLast  = trim((string)($_POST["sibling_last_name$i"] ?? ''));
+                                $sName  = trim("$sFirst $sLast");
+                                if (empty($sName) && isset($_POST["sibling_name$i"])) {
+                                    $sName = trim((string)$_POST["sibling_name$i"]);
+                                }
+                                if (empty($sFirst) && !empty($sName)) {
+                                    $sParts = explode(' ', $sName, 2);
+                                    $sFirst = $sParts[0];
+                                    $sLast  = $sParts[1] ?? '';
+                                }
+                                if (empty($sFirst) && empty($sName)) continue;
+
                                 $sEmail = trim((string)($_POST["sibling_email$i"] ?? ''));
                                 
-                                $insSib = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Sibling', ?)");
-                                $insSib->execute([$familyCode, $sName, $genLevel, $sEmail]);
+                                $insSib = $db->prepare("INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email) VALUES (?, ?, ?, 'Male', ?, '/resources/images/profile/avatarM.png', 'Sibling', ?)");
+                                $insSib->execute([$familyCode, $sFirst, $sLast, $genLevel, $sEmail]);
                                 $sibNodeId = (int)$db->lastInsertId();
 
                                 $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
@@ -347,7 +460,12 @@ final class SettingController extends BaseController
                 }
             }
 
-            unsetPostData($_POST, ['email', 'mobile', 'country', 'occupation', 'spouse_name', 'spouse_email', 'spouse_mobile', 'maiden_name', 'children', 'sibling', 'maritalStatus', 'button']);
+            unsetPostData($_POST, [
+                'email', 'mobile', 'country', 'occupation', 'employmentStatus',
+                'father_first_name', 'father_last_name', 'father_name', 'father_email', 'father_mobile',
+                'mother_first_name', 'mother_last_name', 'mother_name', 'mother_maiden', 'mother_email', 'mother_mobile',
+                'spouse_name', 'spouse_email', 'spouse_mobile', 'children', 'sibling', 'maritalStatus', 'button'
+            ]);
 
             msgSuccess(200, "New Update was successfully submitted");
         } catch (\Throwable $th) {

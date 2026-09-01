@@ -24,7 +24,8 @@ final class ProfilepageService
             throw new NotFoundException("User not found");
         }
 
-        $famCode = checkInput($memberData['famCode']);
+        $famCodeClean = checkInput($memberData['famCode']);
+        $famCode = is_string($famCodeClean) ? $famCodeClean : '';
 
         return [
             'memberData' => $memberData,
@@ -36,6 +37,7 @@ final class ProfilepageService
             'post2Id' => Post::postLink2Id($userId),
             'pics' => Post::getAllPostPics($userId),
             'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),
+            'unclaimedMatch' => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData),
         ];
     }
 }

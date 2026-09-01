@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\controller\admin;
 
+use App\classes\Insert;
 use App\controller\BaseController;
+use Src\CheckToken;
 use Src\Utility;
-use Src\Insert;
 use Src\FileUploader;
 use Src\Exceptions\ValidationException;
 
@@ -36,7 +37,7 @@ final class AdminBlogController extends BaseController
     {
         try {
             // CSRF check
-            Utility::csrfCheck('blog_create');
+            CheckToken::tokenCheck();
 
             $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $summary = filter_input(INPUT_POST, 'summary', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
@@ -73,8 +74,7 @@ final class AdminBlogController extends BaseController
                 'status' => $status
             ];
 
-            $insert = new Insert('blogs');
-            $result = $insert->insertIntoTable($insertData);
+            $result = Insert::submitFormDynamic('blogs', $insertData);
 
             if ($result) {
                 // Check if we need to queue for social media
@@ -89,15 +89,15 @@ final class AdminBlogController extends BaseController
                         $blogUrl = rtrim($appUrl, '/') . '/blog/' . $slug;
                         
                         // Calculate allowed words for the summary to keep the total message <= 90 words
-                        $titleWords = count(preg_split('/\s+/', $title));
-                        $footerWords = count(preg_split('/\s+/', "\n\nRead more here: " . $blogUrl));
+                        $titleWords = count(preg_split('/\s+/', $title) ?: []);
+                        $footerWords = count(preg_split('/\s+/', "\n\nRead more here: " . $blogUrl) ?: []);
                         
                         $allowedSummaryWords = 90 - $titleWords - $footerWords;
                         if ($allowedSummaryWords < 10) {
                             $allowedSummaryWords = 10; // Fallback just in case title is ridiculously long
                         }
                         
-                        $summaryWords = preg_split('/\s+/', trim($summary));
+                        $summaryWords = preg_split('/\s+/', trim((string) $summary)) ?: [];
                         if (count($summaryWords) > $allowedSummaryWords) {
                             $summary = implode(' ', array_slice($summaryWords, 0, $allowedSummaryWords)) . '...';
                         }
@@ -110,7 +110,7 @@ final class AdminBlogController extends BaseController
                         $queueData = [];
                         
                         if (file_exists($queueFile)) {
-                            $queueData = json_decode(file_get_contents($queueFile), true) ?? [];
+                            $queueData = json_decode(file_get_contents($queueFile) ?: '[]', true) ?? [];
                         }
                         
                         $queueData[] = [
@@ -129,12 +129,12 @@ final class AdminBlogController extends BaseController
                 }
 
                 // Send JSON response for JS handler
-                Utility::jsonResponse(200, "Blog published successfully!", ["slug" => $slug]);
+                Utility::msgSuccess(200, "Blog published successfully!", ["slug" => $slug]);
             } else {
                 throw new \Exception("Failed to save blog to database.");
             }
         } catch (\Throwable $th) {
-            Utility::jsonResponse(400, $th->getMessage());
+            Utility::msgException(400, $th->getMessage());
         }
     }
 }

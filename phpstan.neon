@@ -10,6 +10,10 @@ parameters:
     - vendor
     - bootstrap
     - app/router
+    # Dev-only DB table scaffolding that references App\Classes\Tables\* classes
+    # which no longer exist in the repo — the /createTable routes are already
+    # broken at runtime. Excluded until the scaffolding is removed or restored.
+    - app/controller/Create.php
     - app/Classes/Chat.php (?)
     - app/Classes/websocket/NotificationWebSocketHandler.php (?)
     - app/classes/Chat.php (?)
