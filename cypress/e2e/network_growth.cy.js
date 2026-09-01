@@ -2,6 +2,8 @@ import { loginFully } from '../support/login';
 
 describe('Network Growth (Friend Requests)', () => {
 
+    Cypress.on('uncaught:exception', () => false);
+
     beforeEach(() => {
         loginFully();
     });

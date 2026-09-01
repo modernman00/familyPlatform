@@ -21,6 +21,10 @@
 const DEFAULT_EMAIL = 'cypress_test@myfamilyplatform.com';
 const DEFAULT_PASSWORD = 'National2';
 
+// The browser's asset cache persists across tests within a spec file, so only the
+// first login of a run pays the cold-load cost that needs the priming reload.
+let assetCacheWarmed = false;
+
 // Runs the credential POST + 2FA-code POST. Retries the whole exchange if the
 // server bounces us (e.g. a transient 401 from a session-regeneration race)
 // rather than letting a single blip fail an unrelated spec.
@@ -94,20 +98,36 @@ export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD) {
         }
     );
 
-    cy.visit('/profilePage');
+    // The credential exchange above is pure `cy.request`, so the first `cy.visit`
+    // is the run's cold page load — the profilePage webpack chunk, the Bootstrap
+    // bundle and Alpine are all still being fetched and evaluated. Prime the
+    // browser cache once, then reload so every asset comes back synchronously and
+    // the interaction layer (Bootstrap's `data-bs-toggle` data-api included) is
+    // wired. Then wait for the Alpine feed to finish its initial fetch: until
+    // `isLoading` flips false the feed subtree is still re-rendering, and a modal
+    // opened (or a field typed into) mid-render gets torn straight back down —
+    // the churn behind the "#<modal> not visible" / "page updated while this
+    // command was executing" flake.
+    const waitForMemberAreaReady = () => {
+        cy.window({ timeout: 20000 }).should('have.property', 'bootstrap');
+        cy.window({ timeout: 20000 }).should('have.property', 'Alpine');
+        cy.window({ timeout: 20000 }).should('have.property', 'profileFeed');
+        cy.window().then((win) => {
+            cy.get('.feed-posts-container', { timeout: 20000 }).should(($el) => {
+                const data = win.Alpine && win.Alpine.$data($el[0]);
+                expect(data, 'Alpine feed data bound').to.be.an('object');
+                expect(data.isLoading, 'Alpine feed finished its initial fetch').to.eq(false);
+            });
+        });
+    };
 
-    // The credential exchange above is pure `cy.request`, so the `cy.visit` above
-    // is the run's first real page load: the profilePage webpack chunk and the
-    // Bootstrap bundle are still being fetched/evaluated, and until they are a
-    // click on a `data-bs-toggle="modal"` trigger silently no-ops. Wait for the
-    // chunk to publish its Alpine factories, then reload once — every asset is
-    // warm in the browser cache on the second load, so the whole interaction
-    // layer (Bootstrap data-api included) is wired by the time `cy.reload()`
-    // resolves. This is what the old navigate-through-/login flow gave us for
-    // free; making it explicit keeps the modal-opening specs deterministic.
-    cy.window({ timeout: 20000 }).should('have.property', 'Alpine');
-    cy.window({ timeout: 20000 }).should('have.property', 'profileFeed');
-    cy.reload();
-    cy.window({ timeout: 20000 }).should('have.property', 'bootstrap');
-    cy.window({ timeout: 20000 }).should('have.property', 'profileFeed');
+    cy.visit('/profilePage');
+    if (!assetCacheWarmed) {
+        // First page load of the run: assets are downloading for the first time and
+        // the interaction layer wires up unevenly. A reload with everything now in
+        // cache lands it deterministically.
+        cy.reload();
+        assetCacheWarmed = true;
+    }
+    waitForMemberAreaReady();
 }

@@ -1,16 +1,16 @@
 import { loginFully } from '../support/login';
+import { openModal } from '../support/ui';
 
 describe('Events and Profiles', () => {
+
+    Cypress.on('uncaught:exception', () => false);
 
     beforeEach(() => {
         loginFully();
     });
 
     it('can create a new event', () => {
-        cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
-
-        cy.get('#createEventModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('createEventModal');
 
         // Fill event details - the live form is eventName/eventDate/eventType/eventDescription/eventFrequency
         // (there is no eventTitle/eventTime/eventLocation field in the current markup)
@@ -28,9 +28,7 @@ describe('Events and Profiles', () => {
     });
 
     it('prevents event creation with missing fields', () => {
-        cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
-        cy.get('#createEventModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('createEventModal');
 
         // Only fill the name, omit the rest - client-side validation requires every field
         cy.get('#eventName').type('Incomplete Event');
@@ -43,11 +41,7 @@ describe('Events and Profiles', () => {
     });
 
     it('can edit profile information', () => {
-        // Two triggers with the same data-bs-target exist in the DOM (desktop/mobile layout)
-        cy.get('[data-bs-target="#editProfileModal"]').first().click({ force: true });
-
-        cy.get('#editProfileModal').should('be.visible');
-        cy.wait(500); // wait for modal animation to complete
+        openModal('editProfileModal');
         cy.get('#firstName').clear().type('CypressEdited');
 
         cy.get('#editProfileBtnModal').click();

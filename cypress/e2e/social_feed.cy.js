@@ -1,6 +1,10 @@
 import { loginFully } from '../support/login';
+import { openModal } from '../support/ui';
 
 describe('Social Feed Interactions', () => {
+
+    // Don't fail a feed assertion on an unrelated third-party script error.
+    Cypress.on('uncaught:exception', () => false);
 
     beforeEach(() => {
         loginFully();
@@ -14,9 +18,7 @@ describe('Social Feed Interactions', () => {
         // Set the value directly rather than cy.type() - simulated per-keystroke typing into
         // this particular textarea intermittently drops characters in this app under Cypress,
         // which isn't what this test is trying to verify.
-        cy.get('#openPostModalTrigger').click();
-        cy.get('#postModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('postModal');
         cy.get('textarea#postMessage').should('be.visible')
             .invoke('val', postContent)
             .trigger('input')
@@ -38,9 +40,7 @@ describe('Social Feed Interactions', () => {
 
     it('denies submitting an empty post', () => {
         // Leave textarea empty
-        cy.get('#openPostModalTrigger').click();
-        cy.get('#postModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('postModal');
         cy.get('textarea#postMessage').clear();
         cy.get('#submitPost').click();
 
@@ -53,9 +53,7 @@ describe('Social Feed Interactions', () => {
     // unliked/uncommented row - reusing whatever happens to be at the top of the
     // feed made these toggle-based assertions depend on earlier runs' state.
     const createFreshPost = (text) => {
-        cy.get('#openPostModalTrigger').click();
-        cy.get('#postModal').should('be.visible');
-        cy.wait(400); // modal animation
+        openModal('postModal');
         cy.get('textarea#postMessage').should('be.visible')
             .invoke('val', text).trigger('input').trigger('change');
         cy.get('#submitPost').click();

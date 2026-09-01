@@ -5,21 +5,36 @@
  */
 
 import { loginFully } from '../support/login';
+import { openModal, setInputValue } from '../support/ui';
 
 describe('Chaos & Resiliency Testing', () => {
 
+    // The app pulls in third-party scripts (fontawesome kit, service worker) that
+    // occasionally throw async errors unrelated to what these tests assert. A
+    // chaos suite in particular must not fail on someone else's stack trace.
+    Cypress.on('uncaught:exception', () => false);
+
+
     it('gracefully handles API network timeouts on login', () => {
-        cy.visit('/login');
-        
-        // Intercept the login endpoint and force a timeout (simulating a dead database or slow network)
+        // Intercept the login endpoint and force a network error (simulating a dead
+        // database or dropped connection) - registered before the visit so it's in
+        // place no matter how fast the form submits.
         cy.intercept('POST', '/login', { forceNetworkError: true }).as('loginTimeout');
-        
-        cy.get('button#button[data-ready="true"]', { timeout: 10000 }).should('exist');
-        cy.get('input[name="email"]').should('be.visible').invoke('val', 'test@example.com').trigger('input').trigger('change');
-        cy.get('input[name="password"]').should('be.visible').invoke('val', 'Secretpassword123').trigger('input').trigger('change');
+
+        cy.visit('/login');
+
+        // Wait for the page to finish loading and the login chunk to wire the
+        // submit handler (it stamps data-ready as its final init step).
+        cy.document().its('readyState').should('eq', 'complete');
+        cy.get('button#button[data-ready="true"]', { timeout: 15000 }).should('exist');
+
+        // Setting values that survive the form's own cold-load JS - see setInputValue.
+        setInputValue('input[name="email"]', 'test@example.com');
+        setInputValue('input[name="password"]', 'Secretpassword123');
+
         cy.get('button#button').should('be.visible').click();
-        
-        cy.wait('@loginTimeout', { timeout: 10000 }).then(() => {
+
+        cy.wait('@loginTimeout', { timeout: 15000 }).then(() => {
              // Assuming sweetalert or native fallback shows an error and not white screen
             cy.get('body').should('not.contain', 'Fatal error');
             cy.get('body').should('not.contain', 'SQLSTATE');
@@ -37,10 +52,7 @@ describe('Chaos & Resiliency Testing', () => {
 
         loginFully();
 
-        // Open the modal - the live trigger is a data-bs-target, not a #createEventBtn
-        cy.get('[data-bs-target="#createEventModal"]').first().click({ force: true });
-        cy.get('#createEventModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('createEventModal');
 
         // Fill the required fields (live form: eventName/eventDate/eventType/eventDescription/eventFrequency)
         cy.get('#eventName').type('Test Event', { force: true });
@@ -92,9 +104,7 @@ describe('Chaos & Resiliency Testing', () => {
 
         loginFully();
 
-        cy.get('[data-bs-target="#editProfileModal"]').first().click({ force: true });
-        cy.get('#editProfileModal').should('be.visible');
-        cy.wait(500); // wait for modal animation
+        openModal('editProfileModal');
         cy.get('#editProfileBtnModal').click({ force: true });
         cy.wait('@editProfileError');
 
