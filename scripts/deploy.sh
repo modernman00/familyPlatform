@@ -92,7 +92,10 @@ rsync -avz --delete \
     --exclude='test-results' \
     --exclude='*test*.php' \
     --exclude='debug.txt' \
-    --exclude='*output.txt' \
+    --exclude='resources/images' \
+    --exclude='public/img' \
+    --exclude='public/uploads' \
+    --exclude='storage' \
     --exclude='phpstan.neon' \
     --exclude='phpstan-baseline.neon' \
     ./ ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}
