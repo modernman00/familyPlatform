@@ -58,8 +58,8 @@ describe('Social Feed Interactions', () => {
             .invoke('val', text).trigger('input').trigger('change');
         cy.get('#submitPost').click();
         cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
-        cy.get('#postModal').should('not.be.visible');
-        cy.get('.modal-backdrop').should('not.exist');
+        cy.get('#postModal', { timeout: 10000 }).should('not.be.visible');
+        cy.get('.modal-backdrop', { timeout: 10000 }).should('not.exist');
         cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
     };
 

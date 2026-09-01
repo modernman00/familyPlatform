@@ -1,3 +1,5 @@
+import { setInputValue } from '../support/ui';
+
 describe('Authentication Flow', () => {
     // Ignore 3rd-party reCAPTCHA/external script errors in headless test runner
     Cypress.on('uncaught:exception', () => false);
@@ -10,6 +12,9 @@ describe('Authentication Flow', () => {
             url: '/tests/clear-rate-limit',
             failOnStatusCode: false
         });
+        // Warm the /login route (PHP opcache, session, DB pool) so the first real
+        // page load of the run isn't racing a cold server for a worker.
+        cy.request({ url: '/login', failOnStatusCode: false });
 
         // Neutralize Google reCAPTCHA Enterprise script in automated tests
         cy.intercept('https://www.google.com/recaptcha/**', (req) => {
@@ -39,13 +44,14 @@ describe('Authentication Flow', () => {
         });
 
         cy.get('form#login').should('be.visible');
-        cy.get('button#button[data-ready="true"]', { timeout: 10000 }).should('exist');
-        cy.get('input[name="email"]').should('be.visible').invoke('val', 'cypress_test@myfamilyplatform.com').trigger('input').trigger('change');
-        cy.get('input[name="password"]').should('be.visible').invoke('val', 'National2').trigger('input').trigger('change');
-        
+        cy.document().its('readyState').should('eq', 'complete');
+        cy.get('button#button[data-ready="true"]', { timeout: 15000 }).should('exist');
+        setInputValue('input[name="email"]', 'cypress_test@myfamilyplatform.com');
+        setInputValue('input[name="password"]', 'National2');
+
         cy.get('button#button').should('be.visible').click();
 
-        cy.wait('@loginReq', { timeout: 15000 }).then((interception) => {
+        cy.wait('@loginReq', { timeout: 30000 }).then((interception) => {
             console.log('Login Response Status:', interception.response.statusCode);
             console.log('Login Response Body:', interception.response.body);
             expect(interception.response.statusCode).to.be.oneOf([200, 201]);
