@@ -27,10 +27,6 @@ describe('Authentication Flow', () => {
 
         cy.visit('/login', {
             onBeforeLoad(win) {
-                cy.spy(win.console, 'error').as('spyConsoleError');
-                cy.spy(win.console, 'warn').as('spyConsoleWarn');
-                cy.spy(win.console, 'log').as('spyConsoleLog');
-
                 // Define grecaptcha as non-writable so external scripts cannot overwrite it
                 Object.defineProperty(win, 'grecaptcha', {
                     value: {
@@ -54,13 +50,24 @@ describe('Authentication Flow', () => {
         cy.get('button#button').should('be.visible').click();
 
         cy.wait('@loginReq', { timeout: 30000 }).then((interception) => {
-            console.log('Login Response Status:', interception.response.statusCode);
-            console.log('Login Response Body:', interception.response.body);
             expect(interception.response.statusCode).to.be.oneOf([200, 201]);
         });
 
+        // Ensure the notification confirmation renders and the session settles
+        cy.get('#login_notification', { timeout: 10000 })
+            .should('be.visible')
+            .and('contain.text', 'Verification code sent');
+
+        // Confirm session state and navigate to 2FA verification step
+        cy.request({
+            url: '/login/code',
+            failOnStatusCode: false,
+            followRedirect: false
+        }).its('status').should('eq', 200);
+
         cy.visit('/login/code');
         cy.location('pathname', { timeout: 10000 }).should('eq', '/login/code');
+        cy.get('form#code').should('be.visible');
     });
 });
 

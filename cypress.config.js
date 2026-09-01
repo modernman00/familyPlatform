@@ -29,6 +29,10 @@ module.exports = defineConfig({
             await connection.end();
           }
         },
+        log(message) {
+          console.log('[CYPRESS LOG]', message);
+          return null;
+        },
       });
     },
     baseUrl: 'https://olaogun.test', // Virtual host
