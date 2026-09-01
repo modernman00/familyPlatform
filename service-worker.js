@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.0.0';
+const SW_VERSION = 'v2.0.1';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;

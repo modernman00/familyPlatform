@@ -12,6 +12,11 @@ describe('Chaos & Resiliency Testing', () => {
     // The app pulls in third-party scripts (fontawesome kit, service worker) that
     // occasionally throw async errors unrelated to what these tests assert. A
     // chaos suite in particular must not fail on someone else's stack trace.
+    beforeEach(() => {
+        cy.request({ url: '/tests/clear-rate-limit', failOnStatusCode: false });
+        cy.request({ url: '/login', failOnStatusCode: false });
+    });
+
     Cypress.on('uncaught:exception', () => false);
 
 
@@ -20,8 +25,36 @@ describe('Chaos & Resiliency Testing', () => {
         // database or dropped connection) - registered before the visit so it's in
         // place no matter how fast the form submits.
         cy.intercept('POST', '/login', { forceNetworkError: true }).as('loginTimeout');
+        cy.intercept('https://www.google.com/recaptcha/**', {
+            statusCode: 200,
+            body: 'window.grecaptcha = { enterprise: { ready: (cb) => cb && cb(), execute: () => Promise.resolve("mock") } };',
+            headers: { 'content-type': 'application/javascript' }
+        });
+        cy.intercept('https://www.gstatic.com/recaptcha/**', {
+            statusCode: 200,
+            body: '',
+            headers: { 'content-type': 'application/javascript' }
+        });
+        cy.intercept('https://recaptchaenterprise.googleapis.com/**', {
+            statusCode: 200,
+            body: { tokenProperties: { valid: true } }
+        });
 
-        cy.visit('/login');
+        cy.visit('/login', {
+            onBeforeLoad(win) {
+                // Lock grecaptcha on window so external scripts cannot overwrite it
+                Object.defineProperty(win, 'grecaptcha', {
+                    value: {
+                        enterprise: {
+                            ready: (cb) => { if (typeof cb === 'function') cb(); },
+                            execute: () => Promise.resolve('mock-cypress-token'),
+                        },
+                    },
+                    writable: false,
+                    configurable: true,
+                });
+            }
+        });
 
         // Wait for the page to finish loading and the login chunk to wire the
         // submit handler (it stamps data-ready as its final init step).
@@ -44,27 +77,29 @@ describe('Chaos & Resiliency Testing', () => {
     });
 
     it('gracefully handles 500 Internal Server Error on Event Creation', () => {
-        // Intercept the event creation and force a 500 error
+        // Mock server failure
         cy.intercept('POST', '/member/profilePage/event', {
             statusCode: 500,
             body: { message: "Internal Server Error" }
-        }).as('eventError');
+        }).as('createEventError');
 
         loginFully();
 
+        // Open Create Event Modal
         openModal('createEventModal');
 
-        // Fill the required fields (live form: eventName/eventDate/eventType/eventDescription/eventFrequency)
-        cy.get('#eventName').type('Test Event', { force: true });
-        cy.get('#eventDate').type('2026-10-10', { force: true });
-        cy.get('#eventType').select('Party', { force: true });
-        cy.get('#eventDescription').type('Chaos test event', { force: true });
-        cy.get('#eventFrequency').select('One-off', { force: true });
+        // Fill Form
+        cy.get('#eventName').type('Crash Test Event');
+        cy.get('#eventDate').type('2026-10-10');
+        cy.get('#eventType').select('Party');
+        cy.get('#eventDescription').type('Chaos test event');
+        cy.get('#eventFrequency').select('One-off');
 
-        // Click submit
-        cy.get('#submitEventModal').click({ force: true });
+        // Submit and trigger failure
+        cy.get('#submitEventModal').click();
 
-        cy.wait('@eventError');
+        // Wait for mock error
+        cy.wait('@createEventError');
 
         // Assert that the UI gracefully degrades (does not crash or white screen)
         cy.get('body').should('not.contain', 'Exception');
@@ -84,9 +119,22 @@ describe('Chaos & Resiliency Testing', () => {
 
         loginFully();
 
+        // If no post exists in feed yet, create one so we have a post to comment on
+        cy.get('.feed-posts-container').then(($container) => {
+            if ($container.find('button:contains("Comment")').length === 0) {
+                openModal('postModal');
+                cy.get('textarea#postMessage').should('be.visible')
+                    .invoke('val', 'Chaos Test Seed Post')
+                    .trigger('input')
+                    .trigger('change');
+                cy.get('#submitPost').click();
+                cy.get('.swal2-popup', { timeout: 10000 }).should('be.visible');
+            }
+        });
+
         // The comment form is hidden per-post until the "Comment" toggle button is clicked
         cy.contains('button', 'Comment').first().click({ force: true });
-        cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').type('Test comment{enter}');
+        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"], input[placeholder="Write a comment..."]').first().should('be.visible').type('Test comment{enter}');
 
         cy.wait('@commentTimeout');
 

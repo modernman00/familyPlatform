@@ -16,7 +16,8 @@ $router->map('GET', '/contact', 'App\controller\Index@contact', 'Contact');
 // --- TEST AUTOMATION ROUTE ---
 // Clears rate limits to unblock Cypress tests.
 $router->map('GET', '/tests/clear-rate-limit', function() {
-    if (($_ENV['APP_ENV'] ?? '') !== 'local') {
+    $nonProdEnvs = ['local', 'development', 'testing'];
+    if (!in_array(($_ENV['APP_ENV'] ?? ''), $nonProdEnvs, true)) {
         http_response_code(403);
         die('Forbidden');
     }

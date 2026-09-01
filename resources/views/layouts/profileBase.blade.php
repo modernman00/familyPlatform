@@ -54,11 +54,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-  </script>
-  <script nonce="{{ $nonce }}" src="/public/js/index.js"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/manifest.js"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/vendor.js"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ time() }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ time() }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ time() }}"></script>
 
   <script>
     if ('serviceWorker' in navigator) {

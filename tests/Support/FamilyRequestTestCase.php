@@ -74,9 +74,12 @@ abstract class FamilyRequestTestCase extends TestCase
      */
     protected function seedMember(string $id, string $famCode, string $firstName, string $lastName, string $gender = 'Male'): void
     {
+        // `personal` has four NOT NULL columns with no DB default (day, month, year, kids).
+        // MySQL strict mode rejects INSERTs that omit them, so we supply neutral test values.
         $this->pdo->prepare(
-            'INSERT INTO personal (id, firstName, lastName, famCode, gender) VALUES (?, ?, ?, ?, ?)'
-        )->execute([$id, $firstName, $lastName, $famCode, $gender]);
+            'INSERT INTO personal (id, firstName, lastName, famCode, gender, day, month, year, kids)
+             VALUES (?, ?, ?, ?, ?, 1, ?, 2000, 0)'
+        )->execute([$id, $firstName, $lastName, $famCode, $gender, 'Jan']);
 
         $this->createdIds['personal'][] = $id;
         $this->createdIds['requestMgt'][] = $id;
@@ -101,7 +104,7 @@ abstract class FamilyRequestTestCase extends TestCase
     protected function requestMgtRow(string $approverId, string $requesterId): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM requestMgt WHERE approver_id = ? AND requester_id = ? ORDER BY no DESC LIMIT 1'
+            'SELECT * FROM requestMgt WHERE approver_id = ? AND requester_id = ? ORDER BY id DESC LIMIT 1'
         );
         $stmt->execute([$approverId, $requesterId]);
         $row = $stmt->fetch();

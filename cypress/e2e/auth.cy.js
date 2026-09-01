@@ -16,20 +16,10 @@ describe('Authentication Flow', () => {
         // page load of the run isn't racing a cold server for a worker.
         cy.request({ url: '/login', failOnStatusCode: false });
 
-        // Neutralize Google reCAPTCHA Enterprise script in automated tests
-        cy.intercept('https://www.google.com/recaptcha/**', (req) => {
-            req.reply({
-                statusCode: 200,
-                body: 'window.grecaptcha = { enterprise: { ready: function(cb){ if (typeof cb === "function") cb(); }, execute: function(){ return Promise.resolve("mock-recaptcha-token"); } } };',
-                headers: { 'content-type': 'application/javascript' }
-            });
-        });
-        cy.intercept('https://www.gstatic.com/recaptcha/**', (req) => {
-            req.reply({ statusCode: 200, body: '' });
-        });
-        cy.intercept('https://recaptchaenterprise.googleapis.com/**', (req) => {
-            req.reply({ statusCode: 200, body: { tokenProperties: { valid: true } } });
-        });
+        // Neutralize Google reCAPTCHA Enterprise network script
+        cy.intercept('https://www.google.com/recaptcha/**', { body: '' });
+        cy.intercept('https://www.gstatic.com/recaptcha/**', { body: '' });
+        cy.intercept('https://recaptchaenterprise.googleapis.com/**', { body: { tokenProperties: { valid: true } } });
     });
 
     it('successfully logs in with valid credentials', () => {
@@ -40,6 +30,18 @@ describe('Authentication Flow', () => {
                 cy.spy(win.console, 'error').as('spyConsoleError');
                 cy.spy(win.console, 'warn').as('spyConsoleWarn');
                 cy.spy(win.console, 'log').as('spyConsoleLog');
+
+                // Define grecaptcha as non-writable so external scripts cannot overwrite it
+                Object.defineProperty(win, 'grecaptcha', {
+                    value: {
+                        enterprise: {
+                            ready: (cb) => { if (typeof cb === 'function') cb(); },
+                            execute: () => Promise.resolve('mock-cypress-token'),
+                        },
+                    },
+                    writable: false,
+                    configurable: true,
+                });
             }
         });
 
@@ -61,3 +63,4 @@ describe('Authentication Flow', () => {
         cy.location('pathname', { timeout: 10000 }).should('eq', '/login/code');
     });
 });
+

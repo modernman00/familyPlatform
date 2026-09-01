@@ -34,7 +34,7 @@ class AllMembersData extends InnerJoin
     {
         try {
             $query = "SELECT DISTINCT p.id, p.firstName, p.lastName, p.famCode, p.created_at, 
-                       ofm.father_name AS fatherName, ofm.mother_name AS motherName, ofm.spouse_name AS spouseName, 
+                       ofm.fatherName AS fatherName, ofm.motherName AS motherName, ofm.spouseName AS spouseName, 
                        pp.img, c.email, c.country, c.mobile, 
                        CASE 
                            WHEN p.famCode = user_p.famCode THEN 'family'
@@ -554,9 +554,9 @@ class AllMembersData extends InnerJoin
                 p.lastName,
                 p.famCode,
                 p.created_at,
-                ofm.father_name AS fatherName,
-                ofm.mother_name AS motherName,
-                ofm.spouse_name AS spouseName,
+                ofm.fatherName AS fatherName,
+                ofm.motherName AS motherName,
+                ofm.spouseName AS spouseName,
                 pp.img,
                 c.email,
                 c.country,

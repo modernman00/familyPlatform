@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
-use App\classes\{PushNotificationClass, Pusher};
+use App\classes\{PushNotificationClass, Pusher, VideoParser};
 
 use App\model\{
     Post,
@@ -462,28 +462,48 @@ final class PostMessage
             $data = Post::postByNo($postNo);
             
             if ($data) {
-                $postOriginName = $data['fullName'];
-                $id = checkInput($data['id']);
+                $postOriginName = is_string($data['fullName'] ?? null) ? $data['fullName'] : '';
+                $rawId = checkInput($data['id']);
+                $id = is_string($rawId) ? $rawId : '';
                 $famCode = checkInput($data['postFamCode']);
                 $famCode = is_string($famCode) ? $famCode : '';
 
                 $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
                 $url = self::buildPostUrl($postNo);
+                $rawPostMessage = is_string($data['postMessage'] ?? null) ? (string) $data['postMessage'] : '';
+
+                // Extract video details (thumbnail, type, videoId) if present
+                $videoData = VideoParser::extractVideoFromText($rawPostMessage);
+                $cleanPostContent = VideoParser::cleanPostMessage($rawPostMessage, $videoData);
+
+                // Extract post image attachment if present
+                $postImage = null;
+                if (!empty($data['post_img']) && is_string($data['post_img'])) {
+                    $appUrl = rtrim((string) (getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: '')), '/');
+                    $postImage = $appUrl . '/resources/images/post/' . ltrim($data['post_img'], '/');
+                }
 
                 // Send notifications to members by email
                 self::notifyMembersByEmail(
                     results: $results,
-                    postId: $data['id'],
+                    postId: $id,
                     postOriginName: $postOriginName,
                     url: $url,
-                    postContent: $data['postMessage'] ?? ''
+                    postContent: $cleanPostContent,
+                    video: $videoData,
+                    postImage: $postImage
                 );
+
+                $pushMsg = !empty($videoData)
+                    ? "$postOriginName shared a video"
+                    : "$postOriginName posted a new update";
+
                 self::notifyMembersByPushNotification(
                     results: $results,
-                    postId: $data['id'],
+                    postId: $id,
                     postOriginName: $postOriginName,
                     url: $url,
-                    notificationMsg: "$postOriginName posted a new update"
+                    notificationMsg: $pushMsg
                 );
             }
             if ($postNoOverride === null) {
@@ -510,9 +530,21 @@ final class PostMessage
         return "$getUrl/profilePage?#post$postNo";
     }
 
-    // Helper function to notify members by email and push notifications
-    private static function notifyMembersByEmail(array $results, string $postId, string $postOriginName, string $url, string $postContent): void
-    {
+    /**
+     * Helper function to notify members by email.
+     *
+     * @param array<int, array<string, mixed>> $results
+     * @param array{type: string, videoId: string|null, thumbnailUrl: string|null, originalUrl: string}|null $video
+     */
+    private static function notifyMembersByEmail(
+        array $results,
+        string $postId,
+        string $postOriginName,
+        string $url,
+        string $postContent,
+        ?array $video = null,
+        ?string $postImage = null
+    ): void {
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
@@ -521,12 +553,14 @@ final class PostMessage
             $memberData['img'] = $getPostProfilePics;
 
             $data = [
-                'email' => $memberData['email'],
+                'email' => is_string($memberData['email'] ?? null) ? $memberData['email'] : '',
                 'authorName' => $postOriginName,
                 'url' => $url,
                 'img' => $getPostProfilePics,
-                'firstName' => $memberData['firstName'],
-                'postContent' => $postContent
+                'firstName' => is_string($memberData['firstName'] ?? null) ? $memberData['firstName'] : '',
+                'postContent' => $postContent,
+                'video' => $video,
+                'postImage' => $postImage,
             ];
 
             // Send email to all members

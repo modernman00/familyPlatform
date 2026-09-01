@@ -97,7 +97,7 @@ final class Post extends Select
     {
         $query = parent::formAndMatchQuery(selection: "SELECT_COL_ID", table: 'profilePics', column: 'img', identifier1: "id");
         $result =  parent::selectFn2(query: $query, bind: [$id]);
-        return $result[0]['img'];
+        return (string)($result[0]['img'] ?? '');
     }
 
     /**
