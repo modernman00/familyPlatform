@@ -23,8 +23,9 @@ describe('Events and Profiles', () => {
         cy.get('#submitEventModal').click();
 
         // The create-event handler doesn't show a success SweetAlert - it just closes the modal
-        // (the new event is broadcast to other clients via Pusher, not inserted locally).
-        cy.get('#createEventModal').should('not.be.visible');
+        // (the new event is broadcast to other clients via Pusher, not inserted locally). Give
+        // the round-trip room on a cold server before asserting the close.
+        cy.get('#createEventModal', { timeout: 15000 }).should('not.be.visible');
     });
 
     it('prevents event creation with missing fields', () => {
