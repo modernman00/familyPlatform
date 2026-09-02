@@ -1,0 +1,39 @@
+# Deploy allowlist — consumed by scripts/deploy.sh (rsync -f 'merge .rsync-filter').
+# Only paths matched by a '+' rule are sent to the live server. Everything else
+# stays local, so a new dev script or folder can never leak to prod again.
+# Rules are evaluated top-down, first match wins.
+
+# 1. Protect server-only runtime data from --delete / --delete-excluded.
+P /resources/images/
+P /public/img/
+P /public/uploads/
+P /storage/
+P /.env
+P /.env_production
+
+# 2. Skip user-uploaded media that lives inside otherwise-allowed dirs.
+- /resources/images/
+- /public/img/
+- /public/uploads/
+- /storage/
+
+# 3. The deployed application.
++ /app/***
++ /bootstrap/***
++ /cron/***
++ /public/***
++ /resources/***
++ /vendor/***
++ /index.php
++ /service-worker.js
++ /manifest.json
++ /offline.html
++ /robots.txt
++ /favicon.ico
++ /.htaccess
++ /composer.json
++ /composer.lock
+
+# 4. Anything not listed above is local-only (dev scripts, cypress/, migrations/,
+#    tests/, scripts/, *.md, cypress.config.js, migrate*.php, fix_schema.php, …).
+- *
