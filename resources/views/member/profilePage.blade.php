@@ -3,6 +3,7 @@
 @section('data-page-id', 'profilePage')
 @push('styles')
     <link rel="stylesheet" href="/public/css/profilepage.css?v={{ time() }}">
+    <link rel="stylesheet" href="/public/css/reels.css?v={{ time() }}">
 @endpush
 @section('content')
 
@@ -28,6 +29,7 @@
         @includeIf('member.modals.share')
         @includeIf('member.modals.createEvent')
         @includeIf('member.modals.shareModal2')
+        @includeIf('member.modals.createReelModal')
 
 
     </div>

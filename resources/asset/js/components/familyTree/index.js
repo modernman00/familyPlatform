@@ -1,9 +1,13 @@
 import { id } from "@modernman00/shared-js-lib";
 import { initTree, centerOnElement, fitToScreen } from './events';
 import { showPersonDetails } from './showModal';
+import { initOnboardingTour } from './onboardingTour';
 
 // Initialize zoom & pan engine
 initTree();
+
+// Initialize first-time onboarding app tour
+initOnboardingTour();
 
 const memberSearchInput = id('memberSearchInput');
 const searchDropdown = id('searchDropdown');
@@ -196,3 +200,33 @@ instructionsToggle?.addEventListener('click', () => {
 setTimeout(() => {
   fitToScreen();
 }, 200);
+
+// Auto-spotlight node if ?highlight=ID or ?node=ID is in URL
+setTimeout(() => {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightId = urlParams.get('highlight') || urlParams.get('node');
+    if (highlightId && window.family && typeof window.family.center === 'function') {
+      window.family.center(highlightId);
+      const nodeData = Array.isArray(window.familyTreeNodes) ? window.familyTreeNodes.find((n) => String(n.id) === String(highlightId)) : null;
+      if (nodeData && typeof showPersonDetails === 'function') {
+        const rawNode = window.graphData?.nodes?.find((n) => String(n.id) === String(highlightId));
+        showPersonDetails({
+          fullName: nodeData.name,
+          img: nodeData.img,
+          relation: nodeData.title,
+          personId: nodeData.legacyId,
+          familyCode: window.__FAMILY_CODE__ || '',
+          email: rawNode ? rawNode.email : '',
+          maritalStatus: rawNode ? rawNode.marital_status : '',
+          occupation: rawNode ? rawNode.occupation : '',
+          country: rawNode ? rawNode.country_of_residence : '',
+          isDeceased: rawNode ? rawNode.is_deceased : false,
+          isRegistered: !!nodeData.legacyId
+        });
+      }
+    }
+  } catch (e) {
+    console.error('Error auto-highlighting node:', e);
+  }
+}, 500);

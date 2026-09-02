@@ -49,13 +49,22 @@ export const processKidsSiblings = (emailData, firstName, famCode = null) => {
         nameValue = `${fn} ${ln}`.trim();
       }
 
+      if (!emailInput) {
+        helpEl.style.display = "none";
+        helpEl.innerHTML = "";
+        delete helpEl.dataset.email;
+        delete helpEl.dataset.name;
+        delete helpEl.dataset.familyCode;
+        return;
+      }
+
       if (emailInput.length > 0 && emailInput.length < 7) {
         helpEl.style.display = "block";
         helpEl.innerHTML = "Email may be too short";
         return;
       }
 
-      const exists = emailInput !== "" && emailSet.has(emailInput);
+      const exists = emailSet.has(emailInput);
 
       helpEl.style.display = "block";
       helpEl.dataset.email = emailInput;

@@ -435,7 +435,7 @@ final class Event extends AllMembersData
      *
      * @return void
      */
-    private static function checkEventDiffAndNotifyAll(array $data, array $email, array $id = null): void
+    private static function checkEventDiffAndNotifyAll(array $data, array $email, ?array $id = null): void
     {
 
         $diffEventAndTodayDate = dateDifference(
@@ -447,7 +447,8 @@ final class Event extends AllMembersData
         $eventHost = "{$data['firstName']} {$data['lastName']}";
         $eventDescription = $data['eventDescription'];
         $eventInformation = "Kindly be informed that this event is scheduled to be held on $eventDayFormatted. Please contact the $eventHost for more information. Event Description: $eventDescription";
-        $url = getenv('MIX_APP_URL2') . "/member/ProfilePage";
+        $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: (getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+        $url = $baseUrl . "/member/ProfilePage";
 
 
         switch ($diffEventAndTodayDate) {

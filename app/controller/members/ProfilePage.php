@@ -85,6 +85,9 @@ final class ProfilePage extends ProcessImg
             $_SESSION['famCode'] = $data['famCode'];
             $_SESSION['currentTime'] = time();
 
+            $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 10, 0);
+            $suggestedKin = \App\services\KinshipEngineService::getSuggestedKin($this->id, 5);
+
             view('member/profilePage', [
                 'data' => $data['memberData'],
                 'allData' => $data['posts'],
@@ -94,7 +97,9 @@ final class ProfilePage extends ProcessImg
                 'eventData' => $data['events'],
                 'requestData' => $data['friendRequests'],
                 'totalFamilyMembers' => $data['totalFamilyMembers'],
-                'unclaimedMatch' => $data['unclaimedMatch'] ?? null
+                'unclaimedMatch' => $data['unclaimedMatch'] ?? null,
+                'recentReels' => $recentReels,
+                'suggestedKin' => $suggestedKin
             ]);
 
         } catch (\Throwable $th) {

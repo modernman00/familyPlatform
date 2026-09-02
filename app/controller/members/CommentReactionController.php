@@ -79,9 +79,9 @@ final class CommentReactionController
           $pdo->prepare("DELETE FROM comment_reactions WHERE id = :id AND comment_no = :commentNo")
               ->execute(['id' => $userId, 'commentNo' => $commentNo]);
         } else {
-          // Different emoji → update
+          // Different emoji → update. `updated_at` auto-bumps ON UPDATE.
           $pdo->prepare(
-            "UPDATE comment_reactions SET reaction = :reaction, label = :label, reacted_at = NOW()
+            "UPDATE comment_reactions SET reaction = :reaction, label = :label
              WHERE id = :id AND comment_no = :commentNo"
           )->execute([
             'reaction'  => $reactionType,
@@ -91,10 +91,10 @@ final class CommentReactionController
           ]);
         }
       } else {
-        // New reaction → insert
+        // New reaction → insert. `created_at` defaults to CURRENT_TIMESTAMP.
         $pdo->prepare(
-          "INSERT INTO comment_reactions (comment_no, id, reaction, label, reacted_at)
-           VALUES (:commentNo, :userId, :reaction, :label, NOW())"
+          "INSERT INTO comment_reactions (comment_no, id, reaction, label)
+           VALUES (:commentNo, :userId, :reaction, :label)"
         )->execute([
           'commentNo' => $commentNo,
           'userId'    => $userId,
@@ -160,13 +160,25 @@ final class CommentReactionController
         'totalReactions' => 0
       ];
 
+      // Map a stored reaction label onto its reaction_counts column. The
+      // "like" reaction lives in the `likes` column (and `like` is a reserved
+      // word); anything unrecognised is ignored rather than fabricating a
+      // column name that breaks the INSERT/UPDATE.
+      $columnForLabel = [
+        'like' => 'likes', 'likes' => 'likes',
+        'love' => 'love', 'haha' => 'haha',
+        'wow' => 'wow', 'sad' => 'sad', 'angry' => 'angry',
+      ];
+
       foreach ($countReaction ?? [] as $count) {
-        // change $count['label'] to smaller case
-        $label = strtolower($count['label']);
-        $countReactionArray[$label] = (int)$count['total'];
-        $totalReactions += (int)$count['total'];
-        $countReactionArray['totalReactions'] = $totalReactions;
+        $column = $columnForLabel[strtolower((string) $count['label'])] ?? null;
+        if ($column === null) {
+          continue;
+        }
+        $countReactionArray[$column] = (int) $count['total'];
+        $totalReactions += (int) $count['total'];
       }
+      $countReactionArray['totalReactions'] = $totalReactions;
 
       // check if comment_no exist in reaction_count table and if yes, update and if no, insert
       $existing = SelectFn::selectAllRowsById(

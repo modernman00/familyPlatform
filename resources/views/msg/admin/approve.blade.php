@@ -22,7 +22,11 @@
     You can now log in to the network to complete your profile, upload your photos, and connect with your family.
 </p>
 
+@php
+    $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://familyplatform.test'), '/');
+@endphp
+
 <div style="text-align: center;">
-    <a href="{{ getenv('APP_URL') }}login" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
+    <a href="{{ $baseUrl }}/login" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Log in to Your Account</a>
 </div>
 @endsection

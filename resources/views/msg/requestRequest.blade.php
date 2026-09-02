@@ -20,7 +20,11 @@
     @endif
 </div>
 
+@php
+    $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+@endphp
+
 <div style="text-align: center;">
-    <a href="{{ getenv('MIX_APP_URL2') }}member/seeProfile/{{ $data['id'] ?? '' }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Profile</a>
+    <a href="{{ $baseUrl }}/member/seeProfile/{{ $data['id'] ?? '' }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">Go to Profile</a>
 </div>
 @endsection

@@ -5,83 +5,102 @@ import { loginSubmission, update } from '@modernman00/shared-js-lib'
 import { processKidsSiblings } from './kidsAndSiblings';
 import { fetchEmailData } from './api/index';
 
+// Register update handlers for all account & family forms
+const formsToRegister = [
+  { formId: 'profileForm', buttonId: 'profileBtn' },
+  { formId: 'accountSettingForm', buttonId: 'button' }, // backward compatibility
+  { formId: 'parentsForm', buttonId: 'parentsBtn' },
+  { formId: 'childrenForm', buttonId: 'childrenBtn' },
+  { formId: 'siblingsForm', buttonId: 'siblingsBtn' },
+  { formId: 'maritalForm', buttonId: 'maritalBtn' },
+  { formId: 'passwordForm', buttonId: 'passwordBtn' },
+  { formId: 'preferencesForm', buttonId: 'preferencesBtn' },
+  { formId: 'privacyForm', buttonId: 'privacyBtn' },
+];
 
-update({
-  formId: 'accountSettingForm',
-  route: '/accountSetting',
-  buttonId: 'button',
-  redirect: '/accountSetting'
-})
+formsToRegister.forEach(({ formId, buttonId }) => {
+  if (id(formId) && id(buttonId)) {
+    update({
+      formId,
+      route: '/accountSetting',
+      buttonId,
+      redirect: '/accountSetting'
+    });
+  }
+});
 
-update({
-  formId: 'passwordForm',
-  route: '/accountSetting',
-  buttonId: 'passwordBtn',
-  redirect: '/accountSetting'
-})
-
-update({
-  formId: 'preferencesForm',
-  route: '/accountSetting',
-  buttonId: 'preferencesBtn',
-  redirect: '/accountSetting'
-})
-
-update({
-  formId: 'privacyForm',
-  route: '/accountSetting',
-  buttonId: 'privacyBtn',
-  redirect: '/accountSetting'
-})
-
-
-// Hide spouse and maiden name elements by default
-hideElement('spouse');
-hideElement('maiden_name_div');
-
-// Function to show spouse information based on marital status
+// Function to show/hide spouse information based on marital status
 const showSpouse = () => {
-  // Get the value of the marital status dropdown
-  const maritalStatus = id('maritalStatus').value;
+  const maritalEl = id('maritalStatus');
+  if (!maritalEl) return;
+  const maritalStatus = maritalEl.value;
 
-  // Check marital status and show relevant elements
   if (maritalStatus === "Yes - Add Husband") {
-    // Display spouse section if adding husband
     showElement('spouse');
-
+    hideElement('maiden_name_div');
   } else if (maritalStatus === "Yes - Add Wife") {
-    // Display spouse section if adding wife
     showElement('maiden_name_div');
     showElement('spouse');
-
   } else {
-    // Hide spouse section if marital status is not "Yes"
     hideElement('spouse');
+    hideElement('maiden_name_div');
   }
 };
 
-// Add event listener to marital status dropdown to trigger showSpouse function
-id('maritalStatus').addEventListener('change', showSpouse);
+const maritalSelect = id('maritalStatus');
+if (maritalSelect) {
+  maritalSelect.addEventListener('change', showSpouse);
+  // Initial check on load
+  showSpouse();
+}
 
+// URL Hash navigation support for deep-linking (e.g., /accountSetting#family-settings or #parents)
+const handleHashNavigation = () => {
+  const hash = window.location.hash;
+  if (!hash) return;
 
-// GET ALL EMAILS 
-// Call the fetchData function to initiate the request
-// const emailData = []
-const fName = id('fName').textContent
-const famCode = localStorage.getItem('requesterFamCode')
+  const hashMap = {
+    '#profile': 'v-pills-profile-tab',
+    '#parents': 'v-pills-parents-tab',
+    '#family-settings': 'v-pills-parents-tab',
+    '#children': 'v-pills-children-tab',
+    '#siblings': 'v-pills-siblings-tab',
+    '#marital': 'v-pills-marital-tab',
+    '#marital-status': 'v-pills-marital-tab',
+    '#password': 'v-pills-password-tab',
+    '#preferences': 'v-pills-preferences-tab',
+    '#privacy': 'v-pills-privacy-tab',
+  };
+
+  const targetTabId = hashMap[hash.toLowerCase()];
+  if (targetTabId) {
+    const tabBtn = id(targetTabId);
+    if (tabBtn) {
+      if (typeof window !== 'undefined' && window.bootstrap?.Tab) {
+        const tab = new window.bootstrap.Tab(tabBtn);
+        tab.show();
+      } else {
+        tabBtn.click();
+      }
+    }
+  }
+};
+
+window.addEventListener('DOMContentLoaded', handleHashNavigation);
+window.addEventListener('hashchange', handleHashNavigation);
+
+// GET ALL EMAILS
+const fNameEl = id('fName');
+const fName = fNameEl ? (fNameEl.textContent || '').trim() : '';
+const famCode = localStorage.getItem('requesterFamCode');
 
 fetchEmailData()
   .then(data => {
-    // Do something with the fetched data
     const emailData = data;
-
-    // SEND EMAIL TO THE KIDS AND processKidsSibling
-    processKidsSiblings(emailData, fName, famCode)
+    processKidsSiblings(emailData, fName, famCode);
   })
   .catch(error => {
-    // Handle any errors that occurred during the request or processing
-    console.error('Error:', error);
+    console.error('Error fetching email data:', error);
   });
 
-// Call the getEmailData function somewhere in your code
 

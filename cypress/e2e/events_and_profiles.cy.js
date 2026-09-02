@@ -47,9 +47,12 @@ describe('Events and Profiles', () => {
 
         cy.get('#editProfileBtnModal').click();
 
-        // Success is shown via the form's own notification div, not SweetAlert2
+        // Success is shown via the form's own notification div, not SweetAlert2.
+        // This modal's form doesn't send an `action` field, so SettingController's
+        // $successMsg match falls through to its default arm: "Changes successfully
+        // saved." (not "submitted"/"updated", which are the other actions' wording).
         cy.get('#editProfileFormModal_notification', { timeout: 10000 })
-            .should('contain.text', 'successfully submitted');
+            .should('contain.text', 'successfully saved');
     });
 
 });

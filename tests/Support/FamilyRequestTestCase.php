@@ -104,7 +104,7 @@ abstract class FamilyRequestTestCase extends TestCase
     protected function requestMgtRow(string $approverId, string $requesterId): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM requestMgt WHERE approver_id = ? AND requester_id = ? ORDER BY id DESC LIMIT 1'
+            'SELECT * FROM requestMgt WHERE approver_id = ? AND requester_id = ? ORDER BY no DESC LIMIT 1'
         );
         $stmt->execute([$approverId, $requesterId]);
         $row = $stmt->fetch();

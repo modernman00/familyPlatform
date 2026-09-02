@@ -99,6 +99,16 @@ if (window.location.pathname === '/register') {
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
+} else if (window.location.pathname.toLowerCase().startsWith('/reels')) {
+  if (qSel('.reelsNav')) qSel('.reelsNav').style.display = 'none';
+
+  routePromise = import(
+    /* webpackChunkName: 'reels' */
+    /* webpackPrefetch: true */
+    './components/reels/reelsPlayer'
+  )
+    .then((module) => module.default)
+    .catch((err) => showError(err));
 } else if (
   window.location.pathname === '/login' 
 ) {

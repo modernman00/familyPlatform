@@ -36,7 +36,9 @@ final class OrganogramEditorTest extends OrganogramTestCase
         $response = $this->captureJsonOutput(fn () => $this->controller()->addPartner());
 
         $this->assertSame('success', $response['status'] ?? null);
-        $this->assertSame('Partner added successfully.', $response['message'] ?? null);
+        // The success payload nests { message, node } under `message`.
+        $this->assertSame('Partner added successfully.', $response['message']['message'] ?? null);
+        $this->assertSame('partner', $response['message']['node']['role'] ?? null);
 
         $partner = null;
         foreach ($this->familyNodes() as $node) {
@@ -134,7 +136,7 @@ final class OrganogramEditorTest extends OrganogramTestCase
         $response = $this->captureJsonOutput(fn () => $this->controller()->addChild());
 
         $this->assertSame('success', $response['status'] ?? null);
-        $this->assertSame('Child added successfully.', $response['message'] ?? null);
+        $this->assertSame('Child added successfully.', $response['message']['message'] ?? null);
 
         $child = null;
         foreach ($this->familyNodes() as $node) {
@@ -206,7 +208,7 @@ final class OrganogramEditorTest extends OrganogramTestCase
         $response = $this->captureJsonOutput(fn () => $this->controller()->addParents());
 
         $this->assertSame('success', $response['status'] ?? null);
-        $this->assertSame('Parents added successfully.', $response['message'] ?? null);
+        $this->assertSame('Parents added successfully.', $response['message']['message'] ?? null);
 
         $nodes = $this->familyNodes();
         $names = array_map(static fn ($n) => $n['first_name'] . ' ' . $n['last_name'], $nodes);

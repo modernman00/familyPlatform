@@ -1,191 +1,350 @@
-.notification-container {
-  display: flex;
-  justify-content: center;
-  margin: 40px 0;
+/* Google Stitch Navigation Bar & Brand System */
+:root {
+  --brand-primary: #4f46e5;
+  --brand-primary-hover: #4338ca;
+  --brand-primary-container: #eef2ff;
+  --brand-on-primary-container: #3730a3;
+  --brand-accent-gold: #f59e0b;
+  --brand-surface: #ffffff;
+  --brand-text-dark: #0f172a;
+  --brand-text-muted: #64748b;
+  --brand-border: #e2e8f0;
+  --stitch-radius-pill: 9999px;
+  --stitch-radius-md: 14px;
+  --stitch-radius-lg: 24px;
 }
 
-/* Fixed notification styles */
-.notification-wrapper {
-  position: relative;
-  display: inline-block;
+.brand-navbar-stitch {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--brand-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
+  padding: 0.65rem 0;
+  z-index: 1030;
 }
 
-.notification-btn {
-  position: relative;
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+/* Brand Typography & Logo */
+.brand-logo-icon-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.navbar-brand:hover .brand-logo-icon-wrapper {
+  transform: scale(1.06);
 }
 
-.notification-btn:hover {
-  background-color: #e9ecef;
-  transform: scale(1.05);
+.brand-text-container {
+  display: flex;
+  align-items: baseline;
+  letter-spacing: -0.02em;
+}
+.brand-name-family {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #1e1b4b;
+}
+.brand-name-platform {
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Navigation Links */
+.stitch-nav-link {
+  color: var(--brand-text-muted) !important;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.5rem 0.95rem !important;
+  border-radius: var(--stitch-radius-pill);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+}
+.stitch-nav-link:hover {
+  color: var(--brand-primary) !important;
+  background: var(--brand-primary-container);
+}
+.stitch-nav-link.active {
+  color: var(--brand-primary) !important;
+  background: var(--brand-primary-container);
+  font-weight: 700;
+}
+
+/* Action Controls */
+.notification-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible !important;
+}
+
+.btn-icon-stitch {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--brand-border);
+  background: #ffffff;
+  color: var(--brand-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible !important;
+  transition: all 0.2s ease;
+}
+.btn-icon-stitch:hover {
+  background: var(--brand-primary-container);
+  color: var(--brand-primary);
+  border-color: #c7d2fe;
+  transform: translateY(-1px);
 }
 
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #dc3545;
-  color: white;
-  border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 0.75rem;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  animation: pulse 1.5s infinite;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
+  pointer-events: none;
+  z-index: 1040;
+  line-height: 1;
+  white-space: nowrap;
 }
-
 .notification-badge:empty {
   display: none !important;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.1);
-  }
-
-  100% {
-    transform: scale(1);
-  }
+.btn-user-stitch {
+  background: var(--brand-primary);
+  color: #ffffff !important;
+  border: none;
+  border-radius: var(--stitch-radius-pill);
+  padding: 0.45rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  transition: all 0.2s ease;
+}
+.btn-user-stitch:hover,
+.btn-user-stitch:focus {
+  background: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
 }
 
+/* =========================================================
+   Google Stitch Notification Dropdown Panel
+   ========================================================= */
 .notification-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
   width: 350px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  margin-top: 10px;
+  background: #ffffff;
+  border-radius: var(--stitch-radius-lg);
+  border: 1px solid #edf2f7;
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  z-index: 1050;
+  margin-top: 12px;
   display: none;
   overflow: hidden;
 }
-
-/* =====  STANDARD MOBILE ≤ 576 px  ===== */
-@media (max-width: 576px) {
-  .notification-dropdown {
-    width: 92vw;
-    /* use the viewport, not a rigid 350 px */
-    max-width: 320px;
-    /* still cap it so it doesn’t stretch too wide */
-    margin-top: 6px;
-    /* slightly tighter gap under the bell */
-    border-radius: 6px;
-    /* mirror phone-ish rounding */
-    left: 40%;
-    /* center it under the bell */
-  }
-}
-
 .notification-dropdown.show {
   display: block;
-  animation: fadeIn 0.3s ease;
+  animation: stitchDropdownEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn {
+@keyframes stitchDropdownEnter {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px) scale(0.98);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-.notification-header {
-  padding: 15px;
-  border-bottom: 1px solid #dee2e6;
-  font-weight: 600;
-  background-color: #f8f9fa;
+/* Header with Soft Blue Bell Bubble */
+.notif-header-stitch {
+  padding: 16px 20px 14px 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notif-header-bubble {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #eef4ff;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.notification-content {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.notification-item {
-  padding: 12px 15px;
-  border-bottom: 1px solid #f1f1f1;
-  display: flex;
-  align-items: flex-start;
-  transition: background-color 0.2s;
-}
-
-.notification-item:hover {
-  background-color: #f8f9fa;
-}
-
-.notification-item.unread {
-  background-color: #e8f4ff;
-}
-
-.notification-icon {
-  margin-right: 12px;
-  font-size: 1.2rem;
-  color: #0d6efd;
+  justify-content: center;
+  font-size: 1.25rem;
   flex-shrink: 0;
 }
 
-.notification-text {
-  flex-grow: 1;
-  font-size: 0.9rem;
+.notif-header-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 9999px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+}
+.notif-header-badge:empty {
+  display: none !important;
 }
 
-.notification-time {
-  font-size: 0.75rem;
-  color: #6c757d;
-  margin-top: 4px;
+.notif-header-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.02em;
 }
 
-.notification-actions {
-  padding: 10px 15px;
-  text-align: center;
-  border-top: 1px solid #dee2e6;
-  background-color: #f8f9fa;
+/* Notification Items List */
+.notification-content {
+  max-height: 380px;
+  overflow-y: auto;
 }
 
-.code-sample {
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 30px;
-  overflow-x: auto;
+.notif-card-stitch {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: all 0.15s ease;
+  background: #ffffff;
+  position: relative;
+}
+.notif-card-stitch:hover {
+  background: #f8fafc;
+}
+.notif-card-stitch.unread {
+  background: #fbfcfe;
+}
+.notif-card-stitch:last-child {
+  border-bottom: none;
 }
 
-.problem-list {
-  background-color: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 15px;
-  margin: 20px 0;
+/* Left Emoji / Icon */
+.notif-emoji-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+  flex-shrink: 0;
 }
 
-.problem-list h4 {
-  color: #856404;
-  margin-top: 0;
+/* Text Content Details */
+.notif-details-link {
+  color: inherit;
+  overflow: hidden;
 }
 
-.navbar {
-  background-color: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid #dddfe2;
+.notif-item-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 3px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.notif-item-desc {
+  font-size: 0.84rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.notif-item-time {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 500;
+  display: block;
+}
+
+/* Ghost Dismiss Button */
+.notif-dismiss-btn {
+  border: none;
+  background: transparent;
+  color: #cbd5e1;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.notif-card-stitch:hover .notif-dismiss-btn {
+  opacity: 1;
+}
+.notif-dismiss-btn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Footer with Google Stitch Full-Width Button */
+.notif-footer-stitch {
+  padding: 14px 20px 18px 20px;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
+}
+
+.btn-mark-all-read-stitch {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+.btn-mark-all-read-stitch:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
 }

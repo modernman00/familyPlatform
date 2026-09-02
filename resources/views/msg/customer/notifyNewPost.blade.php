@@ -4,6 +4,10 @@
 @section('subject', 'See what your family is sharing')
 
 @section('content')
+@php
+    $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+    $postUrl = $data['url'] ?? ($baseUrl . '/member/profilePage');
+@endphp
 <p style="margin-bottom: 20px;">
     Hi <strong>{{ $data['firstName'] ?? 'there' }}</strong>,
 </p>
@@ -24,7 +28,7 @@
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 520px; margin: 0 auto; border-radius: 12px; overflow: hidden; background-color: #0f172a; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
         <tr>
             <td align="center" style="padding: 0; background-color: #000000; line-height: 0;">
-                <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" target="_blank" style="display: block; text-decoration: none;">
+                <a href="{{ $postUrl }}" target="_blank" style="display: block; text-decoration: none;">
                     <img src="{{ $data['video']['thumbnailUrl'] }}" alt="Video Preview" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border: 0;" />
                 </a>
             </td>
@@ -34,14 +38,14 @@
                 <table border="0" cellpadding="0" cellspacing="0" width="100%">
                     <tr>
                         <td width="36" valign="middle" style="padding-right: 12px;">
-                            <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" target="_blank" style="text-decoration: none; display: inline-block;">
+                            <a href="{{ $postUrl }}" target="_blank" style="text-decoration: none; display: inline-block;">
                                 <div style="width: 32px; height: 32px; background-color: #ef4444; border-radius: 50%; text-align: center; line-height: 32px;">
                                     <span style="color: #ffffff; font-size: 13px; font-family: Arial, sans-serif; margin-left: 2px;">&#9658;</span>
                                 </div>
                             </a>
                         </td>
                         <td valign="middle">
-                            <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" target="_blank" style="text-decoration: none; color: #ffffff; display: block;">
+                            <a href="{{ $postUrl }}" target="_blank" style="text-decoration: none; color: #ffffff; display: block;">
                                 <div style="font-size: 14px; font-weight: 600; line-height: 1.3; color: #ffffff;">
                                     {{ ($data['video']['type'] ?? '') === 'youtube' ? 'YouTube Video' : (($data['video']['type'] ?? '') === 'vimeo' ? 'Vimeo Video' : 'Watch Video') }}
                                 </div>
@@ -51,7 +55,7 @@
                             </a>
                         </td>
                         <td align="right" valign="middle">
-                            <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" target="_blank" style="display: inline-block; background-color: rgba(255,255,255,0.15); color: #ffffff; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; text-decoration: none; letter-spacing: 0.5px;">
+                            <a href="{{ $postUrl }}" target="_blank" style="display: inline-block; background-color: rgba(255,255,255,0.15); color: #ffffff; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; text-decoration: none; letter-spacing: 0.5px;">
                                 Watch
                             </a>
                         </td>
@@ -64,7 +68,7 @@
 @elseif(!empty($data['postImage']))
 <!-- Post Image Attachment Preview -->
 <div style="margin-bottom: 25px; text-align: center;">
-    <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" target="_blank" style="display: inline-block; text-decoration: none; max-width: 520px; width: 100%;">
+    <a href="{{ $postUrl }}" target="_blank" style="display: inline-block; text-decoration: none; max-width: 520px; width: 100%;">
         <img src="{{ $data['postImage'] }}" alt="Post Photo" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.06);" />
     </a>
 </div>
@@ -75,6 +79,6 @@
 @endif
 
 <div style="text-align: center; margin-top: 25px;">
-    <a href="{{ $data['url'] ?? (getenv('MIX_APP_URL2') . 'profilePage') }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; box-shadow: 0 2px 6px rgba(0, 191, 165, 0.3);">View Post</a>
+    <a href="{{ $postUrl }}" style="background-color: #00bfa5; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; box-shadow: 0 2px 6px rgba(0, 191, 165, 0.3);">View Post</a>
 </div>
 @endsection

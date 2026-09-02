@@ -1,0 +1,610 @@
+/* Google Stitch Family Reels Styling */
+:root {
+  --reel-bg: #000000;
+  --reel-overlay-bg: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, transparent 25%, transparent 60%, rgba(0, 0, 0, 0.85) 100%);
+  --reel-sidebar-icon-size: 46px;
+  --stitch-brand-indigo: #4f46e5;
+  --stitch-brand-gold: #f59e0b;
+}
+
+/* =========================================================
+   Horizontal Reels / Stories Tray (Facebook-Style Cards)
+   ========================================================= */
+.reels-tray-wrapper {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.reels-tray-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 4px 2px;
+}
+.reels-tray-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Facebook-Style Vertical Reels Card */
+.reel-fb-card {
+  width: 115px;
+  height: 190px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  background: #0f172a;
+}
+.reel-fb-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.25);
+  color: #ffffff;
+}
+
+/* Video Frame Snapshot Background */
+.reel-fb-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.4s ease;
+}
+.reel-fb-card:hover .reel-fb-thumb {
+  transform: scale(1.08);
+}
+
+/* Dark Gradient for Text Legibility */
+.reel-fb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.85) 100%);
+  pointer-events: none;
+}
+
+/* Creator Profile Bubble (Top-Left) */
+.reel-fb-avatar-bubble {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2.5px solid #4f46e5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  background: #ffffff;
+  overflow: hidden;
+}
+.reel-fb-avatar-bubble img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Card Caption / Creator Name (Bottom) */
+.reel-fb-footer {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 2;
+}
+.reel-fb-creator {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin-bottom: 2px;
+}
+.reel-fb-tag {
+  font-size: 0.65rem;
+  color: #fbbf24;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Create Reel Card (First Card in Tray) */
+.reel-fb-create-card {
+  width: 115px;
+  height: 190px;
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reel-fb-create-card:hover {
+  transform: translateY(-4px);
+}
+.reel-fb-create-top {
+  height: 65%;
+  width: 100%;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+.reel-fb-create-top img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.reel-fb-create-card:hover .reel-fb-create-top img {
+  transform: scale(1.08);
+}
+.reel-fb-create-bottom {
+  height: 35%;
+  width: 100%;
+  background: #ffffff;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+.reel-fb-create-plus {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+}
+.reel-fb-create-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-align: center;
+}
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* =========================================================
+   Immersive Full-Screen Reels Theater View (/reels)
+   ========================================================= */
+.reels-theater-container {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #090d16;
+  padding: 20px 10px;
+}
+
+.reels-viewport {
+  width: 100%;
+  max-width: 440px;
+  height: calc(100vh - 110px);
+  max-height: 820px;
+  background: #000000;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.reel-card-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+}
+
+.reel-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000000;
+}
+
+.reel-iframe-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000;
+}
+
+.reel-iframe-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: cover;
+  pointer-events: auto;
+}
+
+.reel-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--reel-overlay-bg);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Big Center Play / Pause Indicator */
+.reel-center-feedback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 25;
+}
+.reel-center-feedback.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Floating Action Stack (Right Sidebar) */
+.reel-action-stack {
+  position: absolute;
+  right: 16px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  z-index: 20;
+}
+
+.reel-action-btn {
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: var(--reel-sidebar-icon-size);
+  height: var(--reel-sidebar-icon-size);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+.reel-action-btn:hover {
+  transform: scale(1.12);
+  background: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+.reel-action-btn.liked {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+.reel-action-count {
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* Bottom Metadata Details */
+.reel-bottom-meta {
+  position: absolute;
+  left: 18px;
+  right: 74px;
+  bottom: 24px;
+  color: #ffffff;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.reel-author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.reel-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.reel-author-name {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.01em;
+}
+
+.reel-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.reel-caption-text {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 8px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.reel-music-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+/* Top Floating Controls */
+.reel-top-controls {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+}
+
+.reel-nav-pill-btn {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.reel-nav-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* =========================================================
+   Slide-out Reel Comments Drawer
+   ========================================================= */
+.reel-comments-drawer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68%;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(20px);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  z-index: 30;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.reel-comments-drawer.open {
+  transform: translateY(0);
+}
+
+.reel-comments-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+}
+
+.reel-comments-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.reel-comment-bubble {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.reel-comment-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.reel-comment-content {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 14px;
+  color: #ffffff;
+  flex-grow: 1;
+}
+
+.reel-comment-user {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #93c5fd;
+}
+
+.reel-comment-text {
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: #f1f5f9;
+  margin-top: 2px;
+}
+
+.reel-comment-time {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 4px;
+  display: block;
+}
+
+.reel-comment-input-bar {
+  padding: 12px 18px 16px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.98);
+}
+
+/* =========================================================
+   Mobile Optimization (@media <= 768px and <= 480px)
+   ========================================================= */
+@media (max-width: 768px) {
+  .reels-theater-container {
+    padding: 0;
+    min-height: 100vh;
+    background: #000000;
+  }
+
+  .reels-viewport {
+    max-width: 100vw;
+    width: 100vw;
+    height: calc(100vh - 58px);
+    max-height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .reel-top-controls {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+  }
+
+  .reel-action-stack {
+    right: 12px;
+    bottom: 60px;
+    gap: 12px;
+  }
+
+  .reel-action-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+  }
+
+  .reel-bottom-meta {
+    left: 12px;
+    right: 64px;
+    bottom: 18px;
+  }
+
+  .reel-caption-text {
+    font-size: 0.82rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .reel-comments-drawer {
+    height: 75%;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+
+  .reels-tray-wrapper {
+    padding: 12px 14px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+  }
+
+  .reel-fb-card,
+  .reel-fb-create-card {
+    width: 105px;
+    height: 172px;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .kinship-item-card {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
+  .kinship-item-card .btn-connect-kin {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

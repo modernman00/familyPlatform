@@ -131,6 +131,14 @@ abstract class SocialFeedTestCase extends TestCase
         return (int) $stmt->fetchColumn();
     }
 
+    protected function reactionLabel(int $commentNo, string $userId): ?string
+    {
+        $stmt = $this->pdo->prepare('SELECT label FROM comment_reactions WHERE comment_no = ? AND id = ?');
+        $stmt->execute([$commentNo, $userId]);
+        $label = $stmt->fetchColumn();
+        return $label === false ? null : (string) $label;
+    }
+
     /** Raw echoed output of $callback (tolerates non-JSON noise from real Pusher/SMTP calls). */
     protected function captureOutput(callable $callback): string
     {

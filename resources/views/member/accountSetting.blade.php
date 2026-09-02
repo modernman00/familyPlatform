@@ -270,9 +270,12 @@
       <!-- Sidebar Navigation -->
       <div class="col-lg-3 mb-4">
         <div class="sidebar-card">
-          <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <div class="px-3 pt-2 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.72rem; letter-spacing: 0.06em;">
+            Account & Security
+          </div>
+          <div class="nav flex-column nav-pills mb-3" id="v-pills-account-tab" role="tablist" aria-orientation="vertical">
             <button class="nav-link active" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="true">
-              <i class="bi bi-person-fill"></i> Profile
+              <i class="bi bi-person-fill"></i> Profile & Work
             </button>
             <button class="nav-link" id="v-pills-password-tab" data-bs-toggle="pill" data-bs-target="#v-pills-password" type="button" role="tab" aria-controls="v-pills-password" aria-selected="false">
               <i class="bi bi-lock-fill"></i> Password
@@ -284,6 +287,24 @@
               <i class="bi bi-shield-fill-check"></i> Privacy
             </button>
           </div>
+
+          <div class="px-3 pt-3 pb-1 text-uppercase text-muted fw-bold" style="font-size: 0.72rem; letter-spacing: 0.06em; border-top: 1px solid #f1f5f9;">
+            Family Connections
+          </div>
+          <div class="nav flex-column nav-pills" id="v-pills-family-tab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link" id="v-pills-parents-tab" data-bs-toggle="pill" data-bs-target="#v-pills-parents" type="button" role="tab" aria-controls="v-pills-parents" aria-selected="false">
+              <i class="bi bi-people-fill"></i> Parents
+            </button>
+            <button class="nav-link" id="v-pills-children-tab" data-bs-toggle="pill" data-bs-target="#v-pills-children" type="button" role="tab" aria-controls="v-pills-children" aria-selected="false">
+              <i class="bi bi-person-heart"></i> Children
+            </button>
+            <button class="nav-link" id="v-pills-siblings-tab" data-bs-toggle="pill" data-bs-target="#v-pills-siblings" type="button" role="tab" aria-controls="v-pills-siblings" aria-selected="false">
+              <i class="bi bi-person-lines-fill"></i> Siblings
+            </button>
+            <button class="nav-link" id="v-pills-marital-tab" data-bs-toggle="pill" data-bs-target="#v-pills-marital" type="button" role="tab" aria-controls="v-pills-marital" aria-selected="false">
+              <i class="bi bi-heart-fill"></i> Marital Status
+            </button>
+          </div>
         </div>
       </div>
 
@@ -292,10 +313,10 @@
         <div class="content-card">
           <div class="tab-content" id="v-pills-tabContent">
             
-            <!-- PROFILE TAB -->
+            <!-- PROFILE & WORK TAB -->
             <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-              <div class="section-title">Profile Information</div>
-              <div class="section-subtitle">Update your personal details here.</div>
+              <div class="section-title">Profile & Work Information</div>
+              <div class="section-subtitle">Update your personal contact and professional details.</div>
               <div class="section-divider"></div>
 
               <div id="setLoader" class="text-center my-4" style="display: none;">
@@ -304,15 +325,15 @@
                 </div>
               </div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="accountSettingForm_notification" style="display: none;">
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="profileForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
-                  <p id="accountSettingForm_notification_error" class="mb-0"></p>
+                  <p id="profileForm_notification_error" class="mb-0"></p>
                 </div>
               </div>
 
-              <!-- Important: Existing form ID is required by accountSetting.js -->
-              <form class="accountSettingForm" id="accountSettingForm" enctype="multipart/form-data">
+              <form class="accountSettingForm" id="profileForm" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="updateProfile">
                 
                 <div class="row g-4 mb-4">
                   <div class="col-md-6">
@@ -336,8 +357,14 @@
                   </div>
                 </div>
 
-                <!-- Legacy Form Data section to prevent data loss -->
-                <div class="legacy-settings-header">
+                <div class="row g-4 mb-4">
+                  <div class="col-md-12">
+                    <label class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ $accountData['country'] ?? '' }}" placeholder="Enter country of residence">
+                  </div>
+                </div>
+
+                <div class="legacy-settings-header mt-4 pt-3">
                   <div class="section-title" style="font-size: 1.1rem;">Work Information</div>
                   <div class="section-subtitle mb-0">Update your professional details.</div>
                 </div>
@@ -356,116 +383,217 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Occupation</label>
-                    <input type="text" class="form-control" id="occupation" name="occupation" value="{{ $accountData['occupation'] ?? '' }}">
+                    <input type="text" class="form-control" id="occupation" name="occupation" value="{{ $accountData['occupation'] ?? '' }}" placeholder="e.g. Software Engineer, Doctor">
                   </div>
                 </div>
 
-                <div class="legacy-settings-header" id="family-settings">
-                  <div class="section-title" style="font-size: 1.1rem;">Family & Regional Settings</div>
-                  <div class="section-subtitle mb-0">Configure your family tree connections.</div>
-                </div>
+                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                <span id="fName" class="d-none">{{ $_SESSION['fullName'] ?? '' }}</span>
+                
+                <button type="button" id="profileBtn" class="btn-save">Save Profile Details</button>
+              </form>
+            </div>
 
-                <div class="row g-4 mb-4 mt-1">
-                  <div class="col-md-12">
-                    <label class="form-label">Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="{{ $accountData['country'] ?? '' }}">
-                  </div>
-                </div>
+            <!-- PARENTS TAB -->
+            <div class="tab-pane fade" id="v-pills-parents" role="tabpanel" aria-labelledby="v-pills-parents-tab">
+              <div class="section-title" id="family-settings">Parents Information</div>
+              <div class="section-subtitle">Configure your father and mother details for your family tree connections.</div>
+              <div class="section-divider"></div>
 
-                <!-- Father's Details -->
-                <div class="row g-3 mb-4">
-                  <div class="col-md-3">
-                    <label class="form-label">Father's First Name</label>
-                    <input type="text" class="form-control" id="father_first_name" name="father_first_name" value="{{ $accountData['father_first_name'] ?? '' }}" placeholder="Enter first name">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Father's Last Name</label>
-                    <input type="text" class="form-control" id="father_last_name" name="father_last_name" value="{{ $accountData['father_last_name'] ?? '' }}" placeholder="Enter last name">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Father's Email</label>
-                    <input type="email" class="form-control" id="father_email" name="father_email" value="{{ $accountData['father_email'] ?? '' }}" placeholder="father@example.com">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Father's Mobile</label>
-                    <input type="text" class="form-control" id="father_mobile" name="father_mobile" value="{{ $accountData['father_mobile'] ?? '' }}" placeholder="e.g. +44...">
+              <div class="alert alert-primary shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between p-3 gap-2" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-stars fs-3 text-primary me-3"></i>
+                  <div>
+                    <div class="fw-bold text-dark">Dedicated Family Lineage Studio</div>
+                    <div class="small text-muted">Use our world-class interactive studio to manage generations, photos, and live tree connections.</div>
                   </div>
                 </div>
+                <a href="/familyStudio" class="btn btn-primary btn-sm px-3 py-2 fw-bold text-nowrap" style="border-radius: 8px;">
+                  Open Studio <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+              </div>
 
-                <!-- Mother's Details -->
-                <div class="row g-3 mb-4">
-                  <div class="col-md-3">
-                    <label class="form-label">Mother's First Name</label>
-                    <input type="text" class="form-control" id="mother_first_name" name="mother_first_name" value="{{ $accountData['mother_first_name'] ?? '' }}" placeholder="Enter first name">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label">Mother's Last Name</label>
-                    <input type="text" class="form-control" id="mother_last_name" name="mother_last_name" value="{{ $accountData['mother_last_name'] ?? '' }}" placeholder="Enter last name">
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label">Maiden Name</label>
-                    <input type="text" class="form-control" id="mother_maiden" name="mother_maiden" value="{{ $accountData['mother_maiden'] ?? '' }}" placeholder="Maiden name">
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label">Mother's Email</label>
-                    <input type="email" class="form-control" id="mother_email" name="mother_email" value="{{ $accountData['mother_email'] ?? '' }}" placeholder="mother@example.com">
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label">Mother's Mobile</label>
-                    <input type="text" class="form-control" id="mother_mobile" name="mother_mobile" value="{{ $accountData['mother_mobile'] ?? '' }}" placeholder="e.g. +44...">
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="parentsForm_notification" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                  <p id="parentsForm_notification_error" class="mb-0"></p>
+                </div>
+              </div>
+
+              <form id="parentsForm">
+                <input type="hidden" name="action" value="updateParents">
+                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+
+                <!-- Father's Card -->
+                <div class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                  <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
+                    <i class="bi bi-person-fill text-primary me-1"></i> Father's Details
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Father's First Name</label>
+                      <input type="text" class="form-control" id="father_first_name" name="father_first_name" value="{{ $accountData['father_first_name'] ?? '' }}" placeholder="Enter first name">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Father's Last Name</label>
+                      <input type="text" class="form-control" id="father_last_name" name="father_last_name" value="{{ $accountData['father_last_name'] ?? '' }}" placeholder="Enter last name">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Father's Email</label>
+                      <input type="email" class="form-control" id="father_email" name="father_email" value="{{ $accountData['father_email'] ?? '' }}" placeholder="father@example.com">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Father's Mobile</label>
+                      <input type="text" class="form-control" id="father_mobile" name="father_mobile" value="{{ $accountData['father_mobile'] ?? '' }}" placeholder="e.g. +44...">
+                    </div>
                   </div>
                 </div>
 
-                <div class="row g-4 mb-4">
-                  <div class="col-md-6">
-                    <label for="children" class="form-label">Add Children</label>
-                    <select class="form-select" id="children" name="children">
-                      <option value="0" selected>0 Children</option>
-                      @for ($i = 1; $i <= 10; $i++)
-                        <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'Child' : 'Children' }}</option>
-                      @endfor
-                    </select>
-                    <div id="children_help" class="form-text text-danger mt-2 fw-bold small"></div>
-                    <div id="children_div" class="mt-2"></div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <label for="sibling" class="form-label">Add Siblings</label>
-                    <select class="form-select" id="sibling" name="sibling">
-                      <option value="0" selected>0 Siblings</option>
-                      @for ($i = 1; $i <= 10; $i++)
-                        <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'Sibling' : 'Siblings' }}</option>
-                      @endfor
-                    </select>
-                    <div id="sibling_help" class="form-text text-danger mt-2 fw-bold small"></div>
-                    <div id="sibling_div" class="mt-2"></div>
+                <!-- Mother's Card -->
+                <div class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                  <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
+                    <i class="bi bi-person-fill text-danger me-1"></i> Mother's Details
+                  </h6>
+                  <div class="row g-3">
+                    <div class="col-md-4">
+                      <label class="form-label">Mother's First Name</label>
+                      <input type="text" class="form-control" id="mother_first_name" name="mother_first_name" value="{{ $accountData['mother_first_name'] ?? '' }}" placeholder="Enter first name">
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">Mother's Last Name</label>
+                      <input type="text" class="form-control" id="mother_last_name" name="mother_last_name" value="{{ $accountData['mother_last_name'] ?? '' }}" placeholder="Enter last name">
+                    </div>
+                    <div class="col-md-4">
+                      <label class="form-label">Maiden Name</label>
+                      <input type="text" class="form-control" id="mother_maiden" name="maiden_name" value="{{ $accountData['maiden_name'] ?? $accountData['mother_maiden'] ?? '' }}" placeholder="Maiden name">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Mother's Email</label>
+                      <input type="email" class="form-control" id="mother_email" name="mother_email" value="{{ $accountData['mother_email'] ?? '' }}" placeholder="mother@example.com">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Mother's Mobile</label>
+                      <input type="text" class="form-control" id="mother_mobile" name="mother_mobile" value="{{ $accountData['mother_mobile'] ?? '' }}" placeholder="e.g. +44...">
+                    </div>
                   </div>
                 </div>
+
+                <button type="button" id="parentsBtn" class="btn-save">Save Parents Details</button>
+              </form>
+            </div>
+
+            <!-- CHILDREN TAB -->
+            <div class="tab-pane fade" id="v-pills-children" role="tabpanel" aria-labelledby="v-pills-children-tab">
+              <div class="section-title">Children Information</div>
+              <div class="section-subtitle">Add and manage children connections in your family tree.</div>
+              <div class="section-divider"></div>
+
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="childrenForm_notification" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                  <p id="childrenForm_notification_error" class="mb-0"></p>
+                </div>
+              </div>
+
+              <form id="childrenForm">
+                <input type="hidden" name="action" value="updateChildren">
+                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
 
                 <div class="mb-4">
-                  <label for="maritalStatus" class="form-label">Marital Status</label>
+                  <label for="children" class="form-label fw-bold">Select Number of Children</label>
+                  <select class="form-select" id="children" name="children">
+                    <option value="0" selected>0 Children</option>
+                    @for ($i = 1; $i <= 10; $i++)
+                      <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'Child' : 'Children' }}</option>
+                    @endfor
+                  </select>
+                  <div id="children_help" class="form-text mt-2 fw-bold small"></div>
+                  <div id="children_div" class="mt-3"></div>
+                </div>
+
+                <button type="button" id="childrenBtn" class="btn-save">Save Children Details</button>
+              </form>
+            </div>
+
+            <!-- SIBLINGS TAB -->
+            <div class="tab-pane fade" id="v-pills-siblings" role="tabpanel" aria-labelledby="v-pills-siblings-tab">
+              <div class="section-title">Siblings Information</div>
+              <div class="section-subtitle">Add and manage your brothers and sisters in your family tree.</div>
+              <div class="section-divider"></div>
+
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="siblingsForm_notification" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                  <p id="siblingsForm_notification_error" class="mb-0"></p>
+                </div>
+              </div>
+
+              <form id="siblingsForm">
+                <input type="hidden" name="action" value="updateSiblings">
+                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+
+                <div class="mb-4">
+                  <label for="sibling" class="form-label fw-bold">Select Number of Siblings</label>
+                  <select class="form-select" id="sibling" name="sibling">
+                    <option value="0" selected>0 Siblings</option>
+                    @for ($i = 1; $i <= 10; $i++)
+                      <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'Sibling' : 'Siblings' }}</option>
+                    @endfor
+                  </select>
+                  <div id="sibling_help" class="form-text mt-2 fw-bold small"></div>
+                  <div id="sibling_div" class="mt-3"></div>
+                </div>
+
+                <button type="button" id="siblingsBtn" class="btn-save">Save Siblings Details</button>
+              </form>
+            </div>
+
+            <!-- MARITAL STATUS TAB -->
+            <div class="tab-pane fade" id="v-pills-marital" role="tabpanel" aria-labelledby="v-pills-marital-tab">
+              <div class="section-title">Marital Status & Spouse</div>
+              <div class="section-subtitle">Configure your relationship status and partner connections.</div>
+              <div class="section-divider"></div>
+
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="maritalForm_notification" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                  <p id="maritalForm_notification_error" class="mb-0"></p>
+                </div>
+              </div>
+
+              <form id="maritalForm">
+                <input type="hidden" name="action" value="updateMarital">
+                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+
+                <div class="mb-4">
+                  <label for="maritalStatus" class="form-label fw-bold">Marital Status</label>
                   <select class="form-select" id="maritalStatus" name="maritalStatus">
-                    <option disabled selected>Select status...</option>
-                    <option value="Yes - Add Husband">Yes - Add Husband</option>
-                    <option value="Yes - Add Wife">Yes - Add Wife</option>
+                    <option disabled {{ empty($accountData['maritalStatus']) ? 'selected' : '' }}>Select status...</option>
+                    <option value="Single" {{ ($accountData['maritalStatus'] ?? '') === 'Single' ? 'selected' : '' }}>Single</option>
+                    <option value="Yes - Add Husband" {{ ($accountData['maritalStatus'] ?? '') === 'Yes - Add Husband' ? 'selected' : '' }}>Yes - Add Husband</option>
+                    <option value="Yes - Add Wife" {{ ($accountData['maritalStatus'] ?? '') === 'Yes - Add Wife' ? 'selected' : '' }}>Yes - Add Wife</option>
+                    <option value="Divorced" {{ ($accountData['maritalStatus'] ?? '') === 'Divorced' ? 'selected' : '' }}>Divorced</option>
+                    <option value="Widowed" {{ ($accountData['maritalStatus'] ?? '') === 'Widowed' ? 'selected' : '' }}>Widowed</option>
                   </select>
                 </div>
 
                 <!-- Dynamic Spouse Section -->
                 <div id="spouse" style="display: none;" class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                  <h6 class="fw-bold mb-3 text-dark">Spouse Details</h6>
+                  <h6 class="fw-bold mb-3 text-dark text-uppercase" style="letter-spacing: 0.5px; font-size: 0.9rem;">
+                    <i class="bi bi-heart-fill text-danger me-1"></i> Spouse Details
+                  </h6>
                   <div class="row g-3">
                     <div class="col-md-6">
                       <label class="form-label">Spouse's Name</label>
-                      <input type="text" class="form-control" id="spouse_name" name="spouse_name" placeholder="Enter name">
+                      <input type="text" class="form-control" id="spouse_name" name="spouse_name" value="{{ $accountData['spouse_name'] ?? '' }}" placeholder="Enter full name">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Spouse's Email</label>
-                      <input type="email" class="form-control" id="spouse_email" name="spouse_email" placeholder="Enter email">
+                      <input type="email" class="form-control" id="spouse_email" name="spouse_email" value="{{ $accountData['spouse_email'] ?? '' }}" placeholder="Enter email">
                     </div>
                     <div class="col-md-6">
                       <label class="form-label">Spouse's Mobile</label>
-                      <input type="text" class="form-control" id="spouse_mobile" name="spouse_mobile" placeholder="Enter mobile number">
+                      <input type="text" class="form-control" id="spouse_mobile" name="spouse_mobile" value="{{ $accountData['spouse_mobile'] ?? '' }}" placeholder="Enter mobile number">
                     </div>
                     <div class="col-md-6" id="maiden_name_div" style="display: none;">
                       <label class="form-label">Maiden Name</label>
@@ -474,10 +602,7 @@
                   </div>
                 </div>
 
-                <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
-                <span id="fName" class="d-none">{{ $_SESSION['fullName'] }}</span>
-                
-                <button type="button" id="button" class="btn-save">Save Changes</button>
+                <button type="button" id="maritalBtn" class="btn-save">Save Marital Status</button>
               </form>
             </div>
 

@@ -24,6 +24,8 @@ import "./postEmojiImgProcess"
 
 
 import { initEngagementListeners, initMemories } from "./engagement"
+import "../reels/reelsPlayer"
+import "../kinship/kinshipRadar"
 
 document.addEventListener('DOMContentLoaded', () => {
     initEngagementListeners();

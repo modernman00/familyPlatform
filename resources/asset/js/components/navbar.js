@@ -1,300 +1,216 @@
 import { format, render } from "timeago.js"
-import { id, showError, qSel, msgException, log } from '@shared'
+import { id, showError, qSel } from '@shared'
 import { toSentenceCase } from "./helper/general"
-
-// const timeAgo = (x) => format(x)
 import axios from "axios"
-import { qSelAll } from "@modernman00/shared-js-lib";
-// import { html } from './profilePage/html';
-
 
 // Update notification badge
-function updateNotificationBadge(change) {
-    const badge = document.querySelector('.notification-badge');
-    let count = parseInt(badge.textContent);
-    count += change;
-    if (count <= 0) {
-        badge.style.display = 'none';
-    } else {
-        badge.textContent = count;
-        badge.style.display = 'flex';
+function updateNotificationBadge(count) {
+    const badge = id('notification_count');
+    const headerBadge = id('header_notif_count');
+    
+    const countNum = parseInt(count || '0');
+    const displayStr = countNum > 99 ? '99+' : (countNum > 0 ? countNum.toString() : '');
+
+    if (badge) {
+        if (countNum <= 0) {
+            badge.style.display = 'none';
+            badge.textContent = '';
+        } else {
+            badge.textContent = displayStr;
+            badge.style.display = 'flex';
+        }
+    }
+
+    if (headerBadge) {
+        if (countNum <= 0) {
+            headerBadge.style.display = 'none';
+            headerBadge.textContent = '';
+        } else {
+            headerBadge.textContent = displayStr;
+            headerBadge.style.display = 'flex';
+        }
     }
 }
 
-
-const postAgoNotification = (date) => {
-    return `
-  <div class="notification_timeago w3-left w3-opacity" datetime='${date}' title='${format(date)}'> ${format(date)}
-  </div>`
-}
-// this is the notification htnl 
+// Google Stitch Notification Item Template
 const notificationHTML = (data) => {
-
-    // Map notification types to icon classes
-    // Map type → { icon, colour }
-    const iconMap = {
-        friend_request: { icon: "fa-solid fa-user-plus", color: "text-primary" },       // Blue
-        like: { icon: "fa-solid fa-thumbs-up", color: "text-success" },                // Green
-        comment: { icon: "fa-solid fa-comment-dots", color: "text-info" },             // Cyan
-        Anniversary: { icon: "fa-solid fa-cake-candles", color: "text-warning" },      // Gold
-        Birthday: { icon: "fa-solid fa-cake-candles", color: "text-warning" },         // Gold
-        Wedding: { icon: "fa-solid fa-heart", color: "text-warning" },                 // Gold
-        new_post: { icon: "fa-solid fa-file-lines", color: "text-purple" },            // Custom purple
-        House_Warming: { icon: "fa-solid fa-house", color: "text-orange" },            // Orange
-        Reunion: { icon: "fa-solid fa-people-group", color: "text-pink" },             // Pink
-        Party: { icon: "fa-solid fa-champagne-glasses", color: "text-danger" },        // Red
-        Meeting: { icon: "fa-solid fa-handshake", color: "text-teal" },                // Teal
-        default: { icon: "fa-solid fa-bell", color: "text-secondary" }                 // Grey
+    // Determine friendly emoji / icon based on type and content
+    const getEmoji = (type, name = '', content = '') => {
+        const text = `${type} ${name} ${content}`.toLowerCase();
+        if (text.includes('birthday') || text.includes('cake')) return '🎂';
+        if (text.includes('anniversary') || text.includes('celebrate') || text.includes('cypress') || text.includes('party')) return '🥂';
+        if (text.includes('crash') || text.includes('chaos') || text.includes('alert') || text.includes('warning')) return '🧧';
+        if (text.includes('test') || text.includes('lab')) return '🧪';
+        if (text.includes('wedding') || text.includes('marriage')) return '💍';
+        if (text.includes('friend') || text.includes('request') || text.includes('connect')) return '👋';
+        if (text.includes('post') || text.includes('photo') || text.includes('memory')) return '📸';
+        if (text.includes('like') || text.includes('heart')) return '❤️';
+        if (text.includes('comment')) return '💬';
+        if (text.includes('house')) return '🏡';
+        if (text.includes('meeting') || text.includes('event')) return '📅';
+        return '🔔';
     };
 
-    const { icon, color } = iconMap[data.notification_type] || iconMap.default
+    const emoji = getEmoji(data.notification_type || '', data.notification_name || '', data.notification_content || '');
+    const isUnread = data.notification_status === 'new';
+    const { sender_id, notification_name, notification_content, created_at, no } = data;
+    const randomNumber = Math.floor(100 + Math.random() * 900);
+    const bannerId = `notificationBar${sender_id}${randomNumber}`;
 
-    const readOrUnread = (data.notification_status === 'new') ? 'unread' : 'read'
-    const { sender_id, notification_name, notification_content, created_at, no } = data
+    const formattedTitle = toSentenceCase(notification_name || 'Notification');
+    const timeAgoStr = created_at ? format(created_at) : 'Just now';
 
+    return `
+    <div id="${bannerId}" class="notif-card-stitch ${isUnread ? 'unread' : ''}">
+        <div class="notif-emoji-icon">
+            <span>${emoji}</span>
+        </div>
+        
+        <a href="#linkNotification${no}" class="notif-details-link flex-grow-1 text-decoration-none">
+            <h6 class="notif-item-title">${formattedTitle}</h6>
+            <p class="notif-item-desc">${notification_content || ''}</p>
+            <span class="notif-item-time">${timeAgoStr}</span>
+        </a>
 
-    // generate random numbers to make the notification unique
-
-    let randomNumber = Math.floor(100 + Math.random() * 900);
-
-    return `<a id = "notificationBar${sender_id}${randomNumber}" href="#linkNotification${no}"  class="list-group-item list-group-item-action d-flex align-items-start notification_real_time ${readOrUnread} notification-item linkRequestCard">
-
-    
-            <div class="notification-icon ${color}">
-                <i class="${icon}"></i></div>
-            <div class="notification-text">
-                <strong>${notification_name}</strong><br>
-                <small>${notification_content}</small>
-                <div class="notification-time"> ${postAgoNotification(created_at)} </div>
-            </div>
-            <button class="notification-delete btn btn-sm btn-outline-secondary btn-light" 
-                 " 
-                    data-no="${no}"
-                    data-is="${sender_id}"
-                    type="submit"
-                    id="deleteNotification${sender_id}${randomNumber}"
-                    aria-label="Delete notification">
-               <i class="fa-solid fa-trash"></i>
-            </button>
- 
-
-  </a>
-
-
-  `
-}
-
-
-
-// CLICK FUNCTION ON THE NOTIFICATION BAR THAT TAKES ONE TO THE FRIEND REQUEST CARD
+        <button class="notif-dismiss-btn" 
+                data-no="${no}"
+                data-is="${sender_id}"
+                type="button"
+                id="deleteNotification${sender_id}${randomNumber}"
+                title="Dismiss">
+            <i class="bi bi-x-lg" style="pointer-events: none;"></i>
+        </button>
+    </div>
+    `;
+};
 
 export const increaseNotificationCount = () => {
-    const currentNotificationCount = parseInt(
-        sessionStorage.getItem('notificationCount')) + 1
-
-    id('notification_count').innerHTML = currentNotificationCount
-}
+    const current = parseInt(sessionStorage.getItem('notificationCount') || '0') + 1;
+    sessionStorage.setItem('notificationCount', current);
+    updateNotificationBadge(current);
+};
 
 export const addToNotificationTab = (data) => {
-
-    return qSel('.notification_tab').insertAdjacentHTML('afterbegin', notificationHTML(data));
-
-}
-
+    const tab = qSel('.notification_tab');
+    if (tab) {
+        tab.insertAdjacentHTML('afterbegin', notificationHTML(data));
+    }
+};
 
 const yourId = localStorage.getItem('requesterId');
 const famCode = localStorage.getItem('requesterFamCode');
 const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
 
-
-// get all the notification and display them 
-// they are already filtered by famCode and id 
-// for the family request, connection is done by id
-// for events -birthday etc, the connection is the famCode 
-// so linked notification will be either where id matches or famcode matches
-
 if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
     axios.get(notificationURL)
         .then(res => {
-
-            // Extract the notifications from the response
             const data = res.data.message;
+            if (data && data.length > 0) {
+                sessionStorage.setItem('notificationCount', data.length);
+                updateNotificationBadge(data.length);
 
-            if (data) {
+                data.forEach(element => {
+                    addToNotificationTab(element);
+                });
 
+                const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
+                render(updateNotificationTiming);
+            } else {
+                sessionStorage.setItem('notificationCount', 0);
+                updateNotificationBadge(0);
 
-                if (data.length > 0) {
-
-                    // Display the count of notifications
-                    const countBadge = id('notification_count');
-                    if (countBadge) {
-                        countBadge.innerHTML = data.length;
-                        countBadge.style.display = 'flex';
-                    }
-
-                    // Store the notification count in session storage
-                    sessionStorage.setItem('notificationCount', data.length);
-
-                    // Display each notification
-                    data.forEach(element => {
-                        addToNotificationTab(element);
-                    });
-                    // Update the timing of notifications
-                    const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
-                    render(updateNotificationTiming);
-                } else {
-                    const countBadge = id('notification_count');
-                    if (countBadge) {
-                        countBadge.innerHTML = '0';
-                        countBadge.style.display = 'none';
-                    }
+                const tab = qSel('.notification_tab');
+                if (tab && !tab.children.length) {
+                    tab.innerHTML = `
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>
+                        <span class="small fw-medium">All caught up! No notifications</span>
+                    </div>`;
                 }
-
             }
-
-
         })
         .catch(error => {
-            // Handle any errors that occur during the process
             showError(error);
         });
 }
 
-
-// delete a notification 
-
-// delete notification 
-
-
-
-
-// document.addEventListener('click', async (e) => {
-//     const id = e.target.id;
-//        log(id)
-//     // if (!id.includes('deleteNotification')) return;
-
-//     // const deleteBtn = id(id);
-//     // const sender_id = deleteBtn.getAttribute('data-id');
-
-//     // const url = `/removeNotification/${yourId}/${famCode}/${sender_id}`
-//     // const response = axios.put(url)
-
-//     // if (response.data.message === "Notification marked as read") {
-
-//     //     // remove a html element with notificationBar after 2 mins 
-//     //     qSel(`#${deleteBtn.id}`).closest('.notification_real_time')?.remove();
-
-//     //     // reduce the notification count as you have deleted the notification
-
-//     //     const newValues = parseInt(sessionStorage.getItem('notificationCount') - 1)
-//     //     id('notification_count').innerHTML = newValues;
-//     // } else {
-//     //     msgException("Error removing notification" + " " + response.data.message);
-//     // }
-// })
-
-
+// Dropdown controls
 const notificationBtn = id('notificationBtn');
 const notificationDropdown = id('notificationDropdown');
 const markAllReadBtn = id('markAllRead');
-const notificationCount = id('notification_count');
 
-// Only add event listeners if notification elements exist on the page
 if (notificationBtn && notificationDropdown) {
-    // Toggle dropdown visibility
     notificationBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         notificationDropdown.classList.toggle('show');
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', function (e) {
         if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
             notificationDropdown.classList.remove('show');
         }
     });
 
-    // Prevent dropdown from closing when clicking inside it
     notificationDropdown.addEventListener('click', function (e) {
         e.stopPropagation();
     });
 }
 
-// Mark all as read functionality (only if button exists)
-if (markAllReadBtn && notificationCount) {
+if (markAllReadBtn) {
     markAllReadBtn.addEventListener('click', function () {
-        const unreadItems = document.querySelectorAll('.notification-item.unread');
+        const unreadItems = document.querySelectorAll('.notif-card-stitch.unread');
         unreadItems.forEach(item => {
             item.classList.remove('unread');
         });
 
-        // Update notification count
-        notificationCount.textContent = '0';
-        notificationCount.style.display = 'none';
+        sessionStorage.setItem('notificationCount', '0');
+        updateNotificationBadge(0);
     });
 }
 
-/* run once, after the dropdown HTML is in the page */
+// Dismiss listener delegation
 const initDeleteOnce = () => {
-    const tab = document.getElementById('notification_tab'); // static parent
+    const tab = document.getElementById('notification_tab');
     if (!tab) return;
 
     tab.addEventListener('click', e => {
         const btn = e.target.closest('button[id*="deleteNotification"]');
-        if (!btn) return;                   // not a delete button → ignore
+        if (!btn) return;
 
-        e.stopPropagation();                // keep dropdown open
+        e.stopPropagation();
         const bannerId = btn.id.replace('deleteNotification', 'notificationBar');
         const no = btn.getAttribute('data-no');
-
-
         const url = `/removeNotification/${no}`;
-
 
         axios.put(url)
             .then(response => {
                 if (response.data.message === 'Notification marked as read') {
-                    // remove a html element with notificationBar after 2 mins
-                    document.getElementById(bannerId)?.remove();
-
-                    // reduce the notification count as you have deleted the notification
-                    const currentCount = parseInt(sessionStorage.getItem('notificationCount')) - 1;
-                    const newValues = currentCount > 0 ? currentCount : 0;
-
-                    sessionStorage.setItem('notificationCount', newValues);
-
-                    const countBadge = id('notification_count');
-                    countBadge.innerHTML = newValues;
-
-                    if (newValues <= 0) {
-                        countBadge.style.display = 'none';
-                    } else {
-                        countBadge.style.display = 'flex';
+                    const item = document.getElementById(bannerId);
+                    if (item) {
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateX(10px)';
+                        setTimeout(() => {
+                            item.remove();
+                            if (!tab.querySelectorAll('.notif-card-stitch').length) {
+                                tab.innerHTML = `
+                                <div class="p-4 text-center text-muted">
+                                    <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>
+                                    <span class="small fw-medium">All caught up! No notifications</span>
+                                </div>`;
+                            }
+                        }, 200);
                     }
-                } else {
-                    msgException('Error removing notification' + ' ' + response.data.message);
-                }
-                // your counter routine
-            });
-    })
-}
 
-/* safe entry point */
+                    const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1') - 1;
+                    const newValues = currentCount > 0 ? currentCount : 0;
+                    sessionStorage.setItem('notificationCount', newValues);
+                    updateNotificationBadge(newValues);
+                }
+            })
+            .catch(showError);
+    });
+};
+
 document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', initDeleteOnce)
     : initDeleteOnce();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///member/notifications

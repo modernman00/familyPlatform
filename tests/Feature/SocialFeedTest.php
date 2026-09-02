@@ -108,21 +108,44 @@ final class SocialFeedTest extends SocialFeedTestCase
         $this->assertSame(0, $this->commentReactionCount($foreignComment));
     }
 
-    public function test_add_reaction_toggles_an_existing_reaction_off(): void
+    public function test_add_reaction_inserts_a_new_reaction_on_a_family_comment(): void
     {
         $postNo = $this->seedPost('ours');
         $commentNo = $this->seedComment($postNo, 'our comment');
 
-        // Pre-seed the reaction the way the "new reaction" branch would, but
-        // without its broken `reacted_at` column, so the toggle-off path has
-        // something to remove.
-        $this->pdo->prepare(
-            'INSERT INTO comment_reactions (comment_no, id, reaction, label) VALUES (?, ?, ?, ?)'
-        )->execute([$commentNo, $this->authorId, 'like', 'like']);
+        $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'love'];
+        $response = $this->captureLastJson(fn () => CommentReactionController::addReaction());
+
         $this->assertSame(1, $this->commentReactionCount($commentNo));
+        $this->assertSame('love', $this->reactionLabel($commentNo, $this->authorId));
+        $this->assertSame('success', $response['status'] ?? null);
+    }
+
+    public function test_add_reaction_replaces_an_existing_reaction_with_a_different_one(): void
+    {
+        $postNo = $this->seedPost('ours');
+        $commentNo = $this->seedComment($postNo, 'our comment');
 
         $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'like'];
         $this->captureOutput(fn () => CommentReactionController::addReaction());
+
+        $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'angry'];
+        $this->captureOutput(fn () => CommentReactionController::addReaction());
+
+        $this->assertSame(1, $this->commentReactionCount($commentNo), 'Still one row — the reaction was updated, not duplicated.');
+        $this->assertSame('angry', $this->reactionLabel($commentNo, $this->authorId));
+    }
+
+    public function test_add_reaction_toggles_the_same_reaction_off(): void
+    {
+        $postNo = $this->seedPost('ours');
+        $commentNo = $this->seedComment($postNo, 'our comment');
+
+        $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'like'];
+        $this->captureOutput(fn () => CommentReactionController::addReaction()); // react
+        $this->assertSame(1, $this->commentReactionCount($commentNo));
+
+        $this->captureOutput(fn () => CommentReactionController::addReaction()); // same emoji again → un-react
 
         $this->assertSame(0, $this->commentReactionCount($commentNo), 'Re-sending the same reaction removes it.');
     }

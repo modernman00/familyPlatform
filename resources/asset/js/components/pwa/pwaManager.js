@@ -71,9 +71,19 @@ class PWAManager {
           console.warn('[PWA] Service Worker registration failed:', err);
         });
 
-      // Handle controllerchange to auto-reload upon skipWaiting
+      // Handle controllerchange to auto-reload upon skipWaiting.
+      // controllerchange also fires the very first time a service worker
+      // ever activates for this origin (no prior controller) - reloading
+      // then would blow away whatever a first-time visitor is mid-doing
+      // (e.g. an in-flight login). Only reload when a controller already
+      // existed, i.e. this is an actual update taking over, not an install.
+      let hadController = !!navigator.serviceWorker.controller;
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController) {
+          hadController = true;
+          return;
+        }
         if (!refreshing) {
           refreshing = true;
           window.location.reload();

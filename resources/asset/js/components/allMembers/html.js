@@ -1,111 +1,119 @@
 import { format } from "timeago.js"
-import { id, showError, log } from "@shared"
+import { id, showError } from "@shared"
 
 const toSentenceCase = (str) => {
-  if (str || typeof str == 'string')
-    // {
-    //     throw new Error('Invalid sentence for toSentenceCase function')
-    // }
-    return str
-      .toLowerCase() // Convert the string to lowercase
-      .split(' ')    // Split the string into words
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each word
-      .join(' ');    // Join the words back into a string
-}
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 
 export const renderHtml = (el) => {
-
   try {
     if (!el) {
-      // Handle the case where 'el' is falsy, such as when data is not available.
-      throw new Error('there is no data')
+      throw new Error('there is no data');
     }
 
-    const theImg = `/resources/images/profile/${el.img}`;
+    const theImg = el.img ? `/resources/images/profile/${el.img}` : '/resources/images/profile/avatarM.png';
     const status = el.status?.toLowerCase() || null;
     let statusButtonHTML = 'Connect';
-    let tooltip = '';
-    tooltip =
-      status === 'rejected'
-        ? 'You can send another request'
-        : 'Send request';
-
+    let tooltip = (status === 'rejected') ? 'You can send another request' : 'Send connection request';
 
     if (status === 'request sent') {
-      statusButtonHTML = 'Request sent';
+      statusButtonHTML = 'Request Sent';
     }
-    const disableButton = status === 'request sent' ? 'disabled' : '';
+    const disableButton = (status === 'request sent') ? 'disabled' : '';
 
-    // Create the HTML content based on whether the user is in the same family or not. // Refined card design
+    // Determine Relation Category & Human-Friendly Status Chip
+    const relType = el.relationType || 'other';
+    let roleChipHtml = '';
+    let categoryKey = 'explore';
+
+    if (relType === 'family') {
+      categoryKey = 'family';
+      roleChipHtml = `<span class="role-chip role-chip-family"><i class="bi bi-house-heart-fill"></i> Same Family</span>`;
+    } else if (relType === 'approved_you' || relType === 'you_approved') {
+      categoryKey = 'connected';
+      roleChipHtml = `<span class="role-chip role-chip-connected"><i class="bi bi-check2-circle"></i> Connected Kin</span>`;
+    } else {
+      categoryKey = 'explore';
+      roleChipHtml = `<span class="role-chip role-chip-directory"><i class="bi bi-globe2"></i> Directory</span>`;
+    }
+
+    const firstName = toSentenceCase(el.firstName || '');
+    const lastName = toSentenceCase(el.lastName || '');
+    const fullName = `${firstName} ${lastName}`.trim();
+    const location = el.country ? toSentenceCase(el.country) : 'Location not set';
+    const famCode = el.famCode ? el.famCode.toUpperCase() : 'CODE';
+
     const html = `
-    <div class="member-card member_profile_${el.id}" id="${el.id}">
+    <div class="member-card member_profile_${el.id}" id="${el.id}" data-category="${categoryKey}" data-search="${fullName.toLowerCase()} ${el.email || ''}">
         <div class="card-cover"></div>
         
         <div class="avatar-wrapper">
-             <img src="${el.img ? theImg : 'https://via.placeholder.com/400x400?text=No+Image'}"  alt="Member-${el.firstName}" loading="lazy">
+             <img src="${theImg}" alt="${fullName}" loading="lazy">
+             <span class="avatar-online-dot"></span>
         </div>
 
         <div class="member-card-body">
-            <h4 class="member-name">${toSentenceCase(el.firstName)} ${toSentenceCase(el.lastName)}</h4>
+            ${roleChipHtml}
+            <h4 class="member-name text-truncate" title="${fullName}">${fullName}</h4>
             
-            <p class="member-location"><i class="bi bi-geo-alt"></i> ${el.country}</p>
+            <span class="member-location-chip">
+                <i class="bi bi-geo-alt-fill text-danger"></i> ${location}
+            </span>
             
             <div class="member-details">
                 <div class="member-detail">
                     <i class="bi bi-hash"></i> 
-                    <strong>${el.famCode}</strong>
+                    <span class="fw-bold">${famCode}</span>
                 </div>
                 <div class="member-detail">
                     <i class="bi bi-envelope"></i> 
-                    <span class="text-truncate">${el.email}</span>
+                    <span class="text-truncate">${el.email || 'Email not provided'}</span>
                 </div>
-                ${el.relationType !== 'other' ? `
-                <div class="member-detail">
-                    <i class="bi bi-link-45deg"></i> 
-                    <span>${el.relationType}</span>
-                </div>
+                ${relType !== 'other' ? `
                 <div class="member-detail">
                     <i class="bi bi-calendar-check"></i> 
-                    <span>Since ${format(el.created_at)}</span>
+                    <span>Connected ${format(el.created_at)}</span>
                 </div>
                 ` : ''}
             </div>
 
             <div class="member-interests">
-                ${el.relationType !== 'other' ? `
-                <button class="btn-profile" id="seeProfile${el.id}">
-                    <i class="bi bi-person"></i> View Profile
+                ${relType !== 'other' ? `
+                <button class="btn-stitch-primary" id="seeProfile${el.id}">
+                    <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile
                 </button>
                 <div class="d-flex gap-2">
-                    <button class="btn-remove" style="color: var(--primary-color); border-color: var(--accent-color);" id="familyTree${el.id}">
-                        <i class="bi bi-diagram-3"></i> Tree
+                    <button class="btn-stitch-tonal flex-grow-1" id="familyTree${el.id}" title="View in Family Tree">
+                        <i class="bi bi-diagram-3-fill" style="pointer-events: none;"></i> Tree
                     </button>
-                    <button class="btn-remove" id="removeProfile${el.id}">
-                        <i class="bi bi-person-x"></i> Remove
+                    <button class="btn-stitch-danger flex-grow-1" id="removeProfile${el.id}" title="Remove Connection">
+                        <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove
                     </button>
                 </div>
                 ` : `
-                <button class="btn-profile" 
+                <button class="btn-stitch-connect" 
                         data-user-id="addFamily${el.id}" 
                         id="addFamily${el.id}"
                         ${disableButton}>
-                    <i class="bi bi-person-plus"></i> ${statusButtonHTML}
+                    <i class="bi bi-person-plus-fill" style="pointer-events: none;"></i> ${statusButtonHTML}
                 </button>
-                <small class="text-muted" style="font-size: 0.75rem; font-weight: 500;">${tooltip}</small>
+                <small class="text-muted text-center" style="font-size: 0.75rem; font-weight: 500;">${tooltip}</small>
                 `}
             </div>
         </div>
     </div>
-`;
+    `;
 
-
-    id('allMembers').insertAdjacentHTML('beforeend', html);
-
+    const container = id('allMembers');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', html);
+    }
   } catch (error) {
-
     showError(error);
-
   }
-
-
 };

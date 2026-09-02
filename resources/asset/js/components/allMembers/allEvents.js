@@ -15,8 +15,10 @@ const reqId = localStorage.getItem('requesterId');
  */
 document.onclick = async (e) => {
   try {
-    // Get the target element's ID
-    const targetId = e.target.id;
+    // Get the target element's ID (defensively checking closest button or element with ID)
+    const btn = e.target.closest('button') || e.target.closest('[id]');
+    const targetId = btn ? btn.id : (e.target.id || '');
+    if (!targetId) return;
 
     // Check if the ID includes 'addFamily'
     if (targetId.includes('addFamily')) {

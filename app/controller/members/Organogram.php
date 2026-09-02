@@ -61,6 +61,111 @@ final class Organogram extends SingleCustomerData
     }
 
     /**
+     * Dedicated Family Lineage Studio Page
+     * Provides a world-class dedicated hub to manage generations, relatives, maiden names, and invites.
+     * @param string|array<string, mixed>|null $id
+     * @return void
+     */
+    public function familyStudio($id = null): void
+    {
+        try {
+            $rawId = is_string($id) ? checkInput($id) : ($_SESSION['id'] ?? '');
+            $idStr = is_string($rawId) ? $rawId : (string)($_SESSION['id'] ?? '');
+
+            if (empty($idStr)) {
+                throw new NotFoundException('Member ID required');
+            }
+
+            $data = BaseController::findMemberById($idStr);
+            $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+
+            // Ensure graph is initialized & synced
+            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+
+            // Backwards-compatible orgData
+            $spouse = $this->fetchRelationsData($idStr, 'otherFamily', 'spouse');
+            $father = $this->fetchRelationsData($idStr, 'otherFamily', 'father');
+            $mother = $this->fetchRelationsData($idStr, 'otherFamily', 'mother');
+            $siblings = $this->fetchRelationsData($idStr, 'sibling', 'sibling');
+            $children = $this->fetchRelationsData($idStr, 'children', 'children');
+
+            $nodes = $graphData['nodes'] ?? [];
+            $unions = $graphData['unions'] ?? [];
+
+            // Group nodes by generation level
+            $generations = [
+                'grandparents' => [], // level -2
+                'parents'      => [], // level -1
+                'household'    => [], // level 0 (self & partners & siblings)
+                'children'     => [], // level 1
+                'grandchildren'=> [], // level 2
+                'other'        => []
+            ];
+
+            $livingCount = 0;
+            $deceasedCount = 0;
+
+            foreach ($nodes as $node) {
+                $lvl = (int)($node['generation_level'] ?? 0);
+                if (!empty($node['is_deceased'])) {
+                    $deceasedCount++;
+                } else {
+                    $livingCount++;
+                }
+
+                if ($lvl === -2) {
+                    $generations['grandparents'][] = $node;
+                } elseif ($lvl === -1) {
+                    $generations['parents'][] = $node;
+                } elseif ($lvl === 0) {
+                    $generations['household'][] = $node;
+                } elseif ($lvl === 1) {
+                    $generations['children'][] = $node;
+                } elseif ($lvl === 2) {
+                    $generations['grandchildren'][] = $node;
+                } else {
+                    $generations['other'][] = $node;
+                }
+            }
+
+            $stats = [
+                'total_members'    => count($nodes),
+                'living_count'     => $livingCount,
+                'deceased_count'   => $deceasedCount,
+                'total_unions'     => count($unions),
+                'generations_count'=> count(array_filter($generations, fn($g) => count($g) > 0))
+            ];
+
+            $orgData = [
+                'spouse'   => $spouse[0] ?? null,
+                'father'   => $father[0] ?? null,
+                'mother'   => $mother[0] ?? null,
+                'siblings' => $siblings,
+                'children' => $children,
+                'graph'    => $graphData
+            ];
+
+            $rootNodeId = 0;
+            foreach ($nodes as $node) {
+                if (($node['user_id'] ?? null) === $idStr) {
+                    $rootNodeId = (int)$node['id'];
+                    break;
+                }
+            }
+            if ($rootNodeId === 0 && !empty($nodes)) {
+                $rootNodeId = (int)$nodes[0]['id'];
+            }
+
+            $graphJson = json_encode($graphData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
+
+            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId'));
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
      * API: Get JSON graph data for a specific root member (up to 6 generations)
      * @param string|array<string, mixed>|null $id
      */

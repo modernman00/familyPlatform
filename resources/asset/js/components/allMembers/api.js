@@ -1,16 +1,29 @@
 // resources/js/allMembers/api.js
 import { renderHtml } from "./html";
 import { createSearchHandler } from "./handleInput";
-import { getApiData, id, showError, log} from "@modernman00/shared-js-lib";
+import { getApiData, id, showError } from "@modernman00/shared-js-lib";
 
 const URL = process.env.MIX_APP_URL2;
 
-const allMembersContainer = id("allMembers"); // main container TO SHOW THE MEMBERS
-const memberCountBadge = id("memberCount"); // member count badge
-const searchInput = id("searchFamily"); // search input
+const allMembersContainer = id("allMembers");
+const memberCountBadge = id("memberCount");
+const memberCountDisplay = id("memberCountDisplay");
+const searchInput = id("searchFamily");
 
-const NO_MEMBER_HTML =
-  "There is no one in your network. It is either you didn't include the right family code or you didn't include your other family members during your registration.";
+const NO_MEMBER_HTML = `
+  <div class="col-12 text-center py-5 bg-white rounded-4 border w-100" style="grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);">
+      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;">
+          <i class="bi bi-people"></i>
+      </div>
+      <h5 class="fw-bold text-dark mb-1">No Members in View</h5>
+      <p class="text-muted small mb-3" style="max-width: 440px; margin: 0 auto;">
+          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.
+      </p>
+      <a href="/familyStudio" class="btn btn-primary btn-sm fw-bold px-4 py-2" style="border-radius: var(--stitch-radius-pill);">
+          <i class="bi bi-plus-circle-fill me-1"></i> Open Family Studio
+      </a>
+  </div>
+`;
 
 /**
  * Render a list of members into the main container.
@@ -21,26 +34,67 @@ const NO_MEMBER_HTML =
 export const renderMembers = (members = []) => {
   allMembersContainer.innerHTML = "";
 
-  // if no members, show no member html
   if (!members.length) {
     allMembersContainer.innerHTML = NO_MEMBER_HTML;
-    memberCountBadge.textContent = "0 Members";
+    if (memberCountBadge) memberCountBadge.textContent = "0";
+    if (memberCountDisplay) memberCountDisplay.textContent = "0";
     return;
   }
 
-  // render each member
+  // Render each member card
   members.forEach(renderHtml);
 
-  // update member count badge
-  memberCountBadge.textContent =
-    members.length === 1
-      ? "1 Member"
-      : `${members.length.toLocaleString()} Members`;
+  // Update member count badges
+  const countStr = members.length.toLocaleString();
+  if (memberCountBadge) memberCountBadge.textContent = countStr;
+  if (memberCountDisplay) memberCountDisplay.textContent = countStr;
 };
+
+// Client-side category pill filtering
+function setupFilterPills() {
+  const pillsContainer = id("memberFilterPills");
+  if (!pillsContainer) return;
+
+  pillsContainer.addEventListener("click", (e) => {
+    const btn = e.target.closest(".filter-pill-btn");
+    if (!btn) return;
+
+    pillsContainer.querySelectorAll(".filter-pill-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const filterVal = btn.getAttribute("data-filter");
+    const cards = allMembersContainer.querySelectorAll(".member-card");
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const cat = card.getAttribute("data-category");
+      if (filterVal === "all" || cat === filterVal) {
+        card.style.display = "";
+        visibleCount++;
+      } else {
+        card.style.display = "none";
+      }
+    });
+
+    if (visibleCount === 0 && cards.length > 0) {
+      // Show empty state placeholder if none match category filter
+      let emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
+      if (!emptyPlaceholder) {
+        allMembersContainer.insertAdjacentHTML(
+          "beforeend",
+          `<div class="empty-filter-placeholder col-12 text-center py-4 text-muted small" style="grid-column: 1 / -1;">No members in this category.</div>`
+        );
+      }
+    } else {
+      const emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
+      if (emptyPlaceholder) emptyPlaceholder.remove();
+    }
+  });
+}
 
 (async function bootstrapAllMembers() {
   try {
-    const url = `${URL}allMembers/processApiData`; // network (family + approved)
+    const url = `${URL}allMembers/processApiData`;
 
     const famCodeData = await getApiData(url);
 
@@ -53,12 +107,19 @@ export const renderMembers = (members = []) => {
       familyMembers = famCodeData.data;
     }
 
-    // Pre-render: show only the user's network
+    // Pre-render network members
     renderMembers(familyMembers);
 
-    // remove loader
+    // Remove loading spinner
     const loader = id("setLoader");
-    if (loader) loader.classList.remove("loader");
+    if (loader) {
+      loader.classList.remove("loader");
+      loader.classList.add("d-none");
+      loader.style.display = "none";
+    }
+
+    // Setup filter pills
+    setupFilterPills();
 
     // Wire up debounced search handler
     if (searchInput) {

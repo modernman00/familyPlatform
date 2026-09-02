@@ -24,6 +24,8 @@ include_once __DIR__ . "/images.php";
 include_once __DIR__ . "/approvalRoute.php";
 include_once __DIR__ . "/engagementRoute.php";
 include_once __DIR__ . "/blog.php";
+include_once __DIR__ . "/reelsRoute.php";
+include_once __DIR__ . "/kinshipRoute.php";
 $router->map('GET', '/checking', 'App\controller\Index@checking', 'checking');
 
 

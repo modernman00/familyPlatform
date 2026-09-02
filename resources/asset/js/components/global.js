@@ -1,6 +1,10 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
+if (typeof window !== "undefined") {
+    window.Swal = Swal;
+}
+
 export const id = (id) => document.getElementById(id)
 export const idValue = (id) => id(id).value
 export const idInnerHTML = (id) => id(id).innerHTML

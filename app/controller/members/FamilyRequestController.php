@@ -141,7 +141,8 @@ final class FamilyRequestController extends BaseController
         SubmitForm::submitFormDynamicLastId(table: 'notification', field: $notificationData, lastIdCol: 'no');
 
 
-        $url = "{$_ENV["MIX_APP_URL2"]}member/request?req=$theRequesterID&appr=$theApproverID&dec=50&reqCode=$theApproverCode&src=email";
+        $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+        $url = "{$baseUrl}/member/request?req=$theRequesterID&appr=$theApproverID&dec=50&reqCode=$theApproverCode&src=email";
 
 
         $notificationData['approverDetails'] = $dataFromJs['approver'];

@@ -75,6 +75,18 @@
   </script>
   @endif
 
+  <!-- Family Reels & Stories Tray -->
+  @includeIf('member.includes.reelsTray')
+
+  <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
+  <!-- Distinct id from the desktop copy below (rightColumn.blade.php) - both render the
+       same partial and would otherwise share id="kinshipRadarWidget", which left
+       getElementById('kinshipRadarWidget') in kinshipRadar.js always binding to this
+       (frequently hidden) copy instead of whichever one is actually visible. -->
+  <div class="d-lg-none">
+    @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
+  </div>
+
   <!-- Post Composer -->
   <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
     <div class="card-body d-flex align-items-center p-4">

@@ -12,7 +12,7 @@
         <div class="header-container">
             <div class="header-top-row">
                 <div>
-                    <h2 class="organogram-title fw-bold">
+                    <h2 class="organogram-title fw-bold" id="treeHeaderTitle">
                         <i class="bi bi-diagram-3"></i>
                         {{ $data['firstName'] ?? '' }} {{ $data['lastName'] ?? '' }}'s Family Tree
                     </h2>
@@ -23,10 +23,13 @@
 
                 <!-- Actions (Search & Config) -->
                 <div class="header-actions d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-3">
-                    <a href="/accountSetting#family-settings" class="btn btn-primary fw-bold w-100 w-md-auto text-center" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.2rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
-                        <i class="bi bi-gear-fill me-2"></i>Configure Family Tree
+                    <button type="button" onclick="if(window.startAppTour) window.startAppTour();" class="btn btn-outline-primary fw-bold text-center d-flex align-items-center justify-content-center" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.1rem; border: 1px solid #c7d2fe; background: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);" title="Take interactive app tour">
+                        <i class="bi bi-compass-fill me-2 text-primary"></i>Take Tour
+                    </button>
+                    <a href="/familyStudio" id="configureFamilyBtn" class="btn btn-primary fw-bold w-100 w-md-auto text-center" style="border-radius: 50px; white-space: nowrap; padding: 0.6rem 1.2rem; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+                        <i class="bi bi-stars me-2"></i>Lineage Studio
                     </a>
-                    <div class="search-box-wrapper w-100">
+                    <div class="search-box-wrapper w-100" id="memberSearchWrapper">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" id="memberSearchInput" class="member-search-input w-100" placeholder="Find relative in tree..." autocomplete="off">
                         <div id="searchDropdown" class="search-dropdown"></div>
@@ -66,6 +69,11 @@
                     <li><i class="bi bi-arrows-move"></i> <strong>Drag</strong> anywhere to pan across the family tree</li>
                     <li><i class="bi bi-plus-circle"></i> Use the <strong>Zoom Buttons</strong> on the bottom right</li>
                 </ul>
+                <div class="mt-3 pt-2 border-top text-center">
+                    <button type="button" class="btn btn-sm btn-primary w-100 fw-bold" onclick="if(window.startAppTour) window.startAppTour();" style="border-radius: 8px;">
+                        <i class="bi bi-compass-fill me-2"></i>Interactive App Tour
+                    </button>
+                </div>
             </div>
 
             <!-- Dynamic Graph Canvas / Wrapper (Replaced by FamilyTreeJS) -->

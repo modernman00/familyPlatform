@@ -9,8 +9,9 @@ describe('Network Growth (Friend Requests)', () => {
     });
 
     it('displays incoming friend requests', () => {
-        // Assert there is a section for requests (e.g. sidebar or dedicated page)
-        cy.get('body').should('contain.text', 'Friend Request');
+        // Assert there is a section for requests (e.g. sidebar or dedicated page).
+        // Renamed from "Friend Requests" to "Kin Requests" in the kinship rebrand.
+        cy.get('body').should('contain.text', 'Kin Requests');
     });
 
     it('can see accept a friend request buttons if there are requests', () => {
