@@ -112,20 +112,22 @@ final class KinshipEngineService
             // Signal F: Mutual kin (users connected to someone the current user is connected to)
             $userKinIds = self::getApprovedKinIds($pdo, $userIdStr);
             if (!empty($userKinIds)) {
-                $kinPlaceholders = self::buildPlaceholders($userKinIds, 'kin');
-                $kinPhStr = implode(',', array_keys($kinPlaceholders));
+                $kinPh1 = self::buildPlaceholders($userKinIds, 'kin1');
+                $kinPh2 = self::buildPlaceholders($userKinIds, 'kin2');
+                $kinPhStr1 = implode(',', array_keys($kinPh1));
+                $kinPhStr2 = implode(',', array_keys($kinPh2));
                 $whereClauses[] = "(
                     p.id IN (
                         SELECT rm.approver_id FROM requestMgt rm
-                        WHERE rm.requester_id IN ({$kinPhStr})
+                        WHERE rm.requester_id IN ({$kinPhStr1})
                           AND LOWER(rm.status) IN ('approved','accepted')
                         UNION
                         SELECT rm2.requester_id FROM requestMgt rm2
-                        WHERE rm2.approver_id IN ({$kinPhStr})
+                        WHERE rm2.approver_id IN ({$kinPhStr2})
                           AND LOWER(rm2.status) IN ('approved','accepted')
                     )
                 )";
-                $params = array_merge($params, $kinPlaceholders, $kinPlaceholders);
+                $params = array_merge($params, $kinPh1, $kinPh2);
             }
 
             // If no signals exist (user has no lineage data at all), return empty
@@ -330,11 +332,15 @@ final class KinshipEngineService
             return [];
         }
 
-        $kinPh = self::buildPlaceholders($userKinIds, 'bk');
-        $candPh = self::buildPlaceholders($candidateIds, 'bc');
+        $kinPh1 = self::buildPlaceholders($userKinIds, 'bk1');
+        $candPh1 = self::buildPlaceholders($candidateIds, 'bc1');
+        $kinPh2 = self::buildPlaceholders($userKinIds, 'bk2');
+        $candPh2 = self::buildPlaceholders($candidateIds, 'bc2');
 
-        $kinPhStr = implode(',', array_keys($kinPh));
-        $candPhStr = implode(',', array_keys($candPh));
+        $kinPhStr1 = implode(',', array_keys($kinPh1));
+        $candPhStr1 = implode(',', array_keys($candPh1));
+        $kinPhStr2 = implode(',', array_keys($kinPh2));
+        $candPhStr2 = implode(',', array_keys($candPh2));
 
         // For each candidate, count how many of the user's kin they are also connected to
         $sql = "
@@ -342,20 +348,20 @@ final class KinshipEngineService
             FROM (
                 SELECT rm.requester_id AS candidate_id, rm.approver_id AS mutual_kin_id
                 FROM requestMgt rm
-                WHERE rm.requester_id IN ({$candPhStr})
-                  AND rm.approver_id IN ({$kinPhStr})
+                WHERE rm.requester_id IN ({$candPhStr1})
+                  AND rm.approver_id IN ({$kinPhStr1})
                   AND LOWER(rm.status) IN ('approved','accepted')
                 UNION ALL
                 SELECT rm2.approver_id AS candidate_id, rm2.requester_id AS mutual_kin_id
                 FROM requestMgt rm2
-                WHERE rm2.approver_id IN ({$candPhStr})
-                  AND rm2.requester_id IN ({$kinPhStr})
+                WHERE rm2.approver_id IN ({$candPhStr2})
+                  AND rm2.requester_id IN ({$kinPhStr2})
                   AND LOWER(rm2.status) IN ('approved','accepted')
             ) AS mutual_map
             GROUP BY candidate_id
         ";
 
-        $params = array_merge($candPh, $kinPh, $candPh, $kinPh);
+        $params = array_merge($candPh1, $kinPh1, $candPh2, $kinPh2);
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
 

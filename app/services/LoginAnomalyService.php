@@ -83,26 +83,7 @@ class LoginAnomalyService
                 $stmt->execute([$userId, $ip, $userAgent, $fingerprint]);
             } catch (\PDOException $e) {
                 // 42S02 = Base table or view not found
-                if ($e->getCode() === '42S02') {
-                    $db->exec(
-                        "CREATE TABLE IF NOT EXISTS login_events (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            user_id VARCHAR(255) NOT NULL,
-                            ip_address VARCHAR(45) NOT NULL,
-                            user_agent VARCHAR(500) NOT NULL,
-                            fingerprint VARCHAR(64) NOT NULL,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            INDEX (user_id),
-                            INDEX (fingerprint)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
-                    );
-                    // Retry insert
-                    $stmt = $db->prepare(
-                        "INSERT INTO login_events (user_id, ip_address, user_agent, fingerprint)
-                         VALUES (?, ?, ?, ?)"
-                    );
-                    $stmt->execute([$userId, $ip, $userAgent, $fingerprint]);
-                } elseif ($e->getCode() === '01000' || strpos($e->getMessage(), '1265') !== false || strpos($e->getMessage(), 'user_id') !== false) {
+                if ($e->getCode() === '01000' || strpos($e->getMessage(), '1265') !== false || strpos($e->getMessage(), 'user_id') !== false) {
                     // Auto-heal: Fix the column type if it was created as INT previously
                     $db->exec("ALTER TABLE login_events MODIFY user_id VARCHAR(255) NOT NULL");
                     

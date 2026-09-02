@@ -46,9 +46,9 @@
         </div>
     </div>
 
-    <!-- Friend Requests Card -->
+    <!-- Kin Requests Card -->
     <div class="card border-0 shadow-sm mt-4" style="border-radius: 20px; background-color: var(--card-bg);">
-        
+
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
             <template x-if="friendRequests.length > 1">
                 <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">
@@ -77,7 +77,7 @@
                     <div class="mb-2 d-inline-flex align-items-center justify-content-center rounded-circle bg-light p-3" style="width: 48px; height: 48px;">
                         <i class="bi bi-people text-muted fs-4"></i>
                     </div>
-                    <p class="text-muted small mt-1 mb-0">No pending kin requests</p>
+                    <p class="text-muted small mt-1 mb-0">No pending Friend requests</p>
                 </div>
             </template>
 

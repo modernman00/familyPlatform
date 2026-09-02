@@ -71,6 +71,18 @@ else
     echo "⏭️  No test script found, skipping."
 fi
 
+echo "🔁 Stamping service worker version..."
+SW_FILE="service-worker.js"
+SW_BUILD="g${DEPLOY_COMMIT:0:12}-$(date +%s)"
+if [ -f "$SW_FILE" ]; then
+    # Safety net: restore the file if the script dies before the explicit revert below.
+    trap 'git checkout -- "$SW_FILE" 2>/dev/null || true' EXIT
+    # Portable in-place edit (BSD/macOS + GNU sed): rewrite the whole SW_VERSION line.
+    sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}'; // deployed $(date -u +%Y-%m-%dT%H:%M:%SZ)|" "$SW_FILE"
+    rm -f "${SW_FILE}.bak"
+    grep -m1 'SW_VERSION' "$SW_FILE"
+fi
+
 echo "🔄 3/3: Syncing files to Namecheap ($SSH_HOST)..."
 
 rsync -avz --delete \
@@ -100,7 +112,11 @@ rsync -avz --delete \
     --exclude='phpstan-baseline.neon' \
     ./ ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}
 
-echo "✅ Deployment Complete! The live server is updated."
+# Restore the committed SW_VERSION line so the working tree / GitHub-sync stays clean.
+git checkout -- "$SW_FILE" 2>/dev/null || true
+trap - EXIT
+
+echo "✅ Deployment Complete! The live server is updated (SW: ${SW_BUILD})."
 
 echo "📝 Recording deployment audit log (ISO 27001 A.12.4)..."
 php scripts/audit_deploy.php "$DEPLOY_COMMIT" "$DEPLOY_USER" || echo "⚠️  Audit log failed to record (non-fatal)."
