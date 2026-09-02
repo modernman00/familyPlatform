@@ -6,8 +6,18 @@ import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
 
+import { profileFeed } from './components/profilePage/feedComponent';
+import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';
+
 window.Swal = Swal;
 window.Alpine = Alpine;
+Alpine.data('profileFeed', profileFeed);
+Alpine.data('profileSidebar', profileSidebar);
+Alpine.data('upcomingEvents', upcomingEvents);
+window.profileFeed = profileFeed;
+window.profileSidebar = profileSidebar;
+window.upcomingEvents = upcomingEvents;
+
 window.pwaManager = new PWAManager();
 initDarkMode();
 let routePromise = Promise.resolve();

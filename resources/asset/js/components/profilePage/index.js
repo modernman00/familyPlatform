@@ -3,9 +3,14 @@
 localStorage.removeItem('redirect')
 
 import { profileFeed } from "./feedComponent";
-window.profileFeed = profileFeed;
-
 import { profileSidebar, upcomingEvents } from "./sidebarComponents";
+
+if (window.Alpine && typeof window.Alpine.data === 'function') {
+    window.Alpine.data('profileFeed', profileFeed);
+    window.Alpine.data('profileSidebar', profileSidebar);
+    window.Alpine.data('upcomingEvents', upcomingEvents);
+}
+window.profileFeed = profileFeed;
 window.profileSidebar = profileSidebar;
 window.upcomingEvents = upcomingEvents;
 

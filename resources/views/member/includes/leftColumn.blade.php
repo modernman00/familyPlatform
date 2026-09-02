@@ -77,7 +77,7 @@
                     <div class="mb-2 d-inline-flex align-items-center justify-content-center rounded-circle bg-light p-3" style="width: 48px; height: 48px;">
                         <i class="bi bi-people text-muted fs-4"></i>
                     </div>
-                    <p class="text-muted small mt-1 mb-0">No pending Friend requests</p>
+                    <p class="text-muted small mt-1 mb-0">No pending Kin requests</p>
                 </div>
             </template>
 

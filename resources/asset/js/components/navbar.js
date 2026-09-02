@@ -114,7 +114,9 @@ if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
                 });
 
                 const updateNotificationTiming = document.querySelectorAll(".notification_timeago");
-                render(updateNotificationTiming);
+                if (updateNotificationTiming && updateNotificationTiming.length > 0) {
+                    render(updateNotificationTiming);
+                }
             } else {
                 sessionStorage.setItem('notificationCount', 0);
                 updateNotificationBadge(0);

@@ -28,7 +28,8 @@
         @forelse(($recentReels ?? []) as $reelItem)
             @php
                 $creatorAvatar = !empty($reelItem['profilePics']) ? (str_starts_with($reelItem['profilePics'], '/') ? $reelItem['profilePics'] : '/resources/images/profile/' . $reelItem['profilePics']) : '/resources/images/profile/avatarM.png';
-                $coverThumb = !empty($reelItem['thumbnail_url']) ? $reelItem['thumbnail_url'] : $creatorAvatar;
+                $rawThumb = !empty($reelItem['thumbnail_url']) ? (string)$reelItem['thumbnail_url'] : '';
+                $coverThumb = (!empty($rawThumb) && !str_contains($rawThumb, 'placeholder.com')) ? $rawThumb : $creatorAvatar;
                 $creatorName = ucwords(strtolower($reelItem['firstName'] ?? 'Family'));
                 $tag = !empty($reelItem['category']) ? $reelItem['category'] : 'Reel';
             @endphp
