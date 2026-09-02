@@ -1,2 +1,1 @@
 "use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[889],{3873:function(e,t,o){o.r(t);var r,a,i=o(893),n=sessionStorage.getItem("fromForgot");a=n?"/changePW":"/profilePage",n&&sessionStorage.removeItem("fromForgot"),(0,i.i)({formId:"code",route:"/login/code",buttonId:"button",redirect:a,theme:"bulma",lengthLimitArray:{id:["code"],max:[6]},recaptchaAction:"LOGIN_CODE"}),null===(r=document.getElementById("button"))||void 0===r||r.setAttribute("data-ready","true")}}]);
-//# sourceMappingURL=code.js.map

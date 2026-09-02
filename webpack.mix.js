@@ -15,7 +15,7 @@ mix
   .extract();
 
 const devtool = mix.inProduction()
-  ? 'source-map'
+  ? false
   : 'cheap-module-source-map';
 
 mix.webpackConfig((webpack, config) => {

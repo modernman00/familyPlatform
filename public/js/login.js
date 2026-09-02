@@ -1,2 +1,1 @@
 "use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[535],{4051:function(e,t,r){r.r(t);var o,i=r(893),l="/login/code";localStorage.setItem("redirect",l),(0,i.KN)({formId:"login",route:"/login",redirect:l,recaptchaAction:"LOGIN",optionalFields:["rememberMe"]}),null===(o=document.getElementById("button"))||void 0===o||o.setAttribute("data-ready","true")}}]);
-//# sourceMappingURL=login.js.map

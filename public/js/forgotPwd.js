@@ -1,2 +1,1 @@
 "use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[229],{2934:function(e,o,t){t.r(o);var r=t(893);localStorage.setItem("redirect","/login/changePW"),sessionStorage.setItem("fromForgot","true"),(0,r.Cc)({formId:"forgot",route:"/login/forgot",redirect:"/login/code",theme:"bootstrap",recaptchaAction:"FORGOT"})}}]);
-//# sourceMappingURL=forgotPwd.js.map

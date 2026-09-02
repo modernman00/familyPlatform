@@ -85,31 +85,37 @@ fi
 
 echo "🔄 3/3: Syncing files to Namecheap ($SSH_HOST)..."
 
-rsync -avz --delete \
+# ALLOWLIST: only these paths are the deployed application. Anything not listed
+# stays local — no need to remember to exclude every new dev script/folder.
+# --delete-excluded removes stale files already on the server (old debug scripts,
+# cypress/, etc). 'protect' filters stop it from wiping server-only runtime data.
+rsync -avz --delete --delete-excluded \
     -e "ssh -p $SSH_PORT" \
-    --exclude='.*' \
-    --exclude='node_modules' \
-    --exclude='tests' \
-    --exclude='scripts' \
-    --exclude='scratch' \
-    --exclude='*.pem' \
-    --exclude='*.sql' \
-    --exclude='*.sqlite' \
-    --exclude='*.key' \
-    --exclude='*.crt' \
-    --exclude='*.cert' \
-    --exclude='*.md' \
-    --exclude='*.sh' \
-    --exclude='playwright-report' \
-    --exclude='test-results' \
-    --exclude='*test*.php' \
-    --exclude='debug.txt' \
-    --exclude='resources/images' \
-    --exclude='public/img' \
-    --exclude='public/uploads' \
-    --exclude='storage' \
-    --exclude='phpstan.neon' \
-    --exclude='phpstan-baseline.neon' \
+    --filter='protect /resources/images' \
+    --filter='protect /public/img' \
+    --filter='protect /public/uploads' \
+    --filter='protect /storage' \
+    --filter='protect /.env' \
+    --filter='protect /.env_production' \
+    --filter='protect /.htaccess' \
+    --include='/app/***' \
+    --include='/bootstrap/***' \
+    --include='/cron/***' \
+    --include='/public/***' \
+    --include='/resources/***' \
+    --include='/vendor/***' \
+    --include='/index.php' \
+    --include='/service-worker.js' \
+    --include='/manifest.json' \
+    --include='/offline.html' \
+    --include='/robots.txt' \
+    --include='/favicon.ico' \
+    --include='/composer.json' \
+    --include='/composer.lock' \
+    --exclude='resources/images/**' \
+    --exclude='public/img/**' \
+    --exclude='public/uploads/**' \
+    --exclude='*' \
     ./ ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}
 
 # Restore the committed SW_VERSION line so the working tree / GitHub-sync stays clean.

@@ -1,2 +1,1 @@
 "use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[817],{2028:function(e,s,a){a.r(s);(0,a(893).KN)({formId:"lasu",buttonId:"button",emailId:"email",passwordId:"password",showToggleId:"showPassword",route:"lasu",redirect:"/admin/reviewApps",theme:"bulma",recaptchaAction:"ADMIN_LOGIN"})}}]);
-//# sourceMappingURL=adminLogin.js.map
