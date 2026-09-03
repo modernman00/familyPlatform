@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.0.1';
+const SW_VERSION = 'v2.0.2';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -111,7 +111,12 @@ self.addEventListener('fetch', (event) => {
     url.pathname.includes('/tests/clear-rate-limit');
 
   if (isSensitiveEndpoint) {
-    event.respondWith(fetch(request));
+    // Do NOT call event.respondWith here. For auth / register / wallet / admin
+    // we want the browser's native networking (redirects, cookies, OAuth hops,
+    // form POSTs). `event.respondWith(fetch(request))` added nothing but a
+    // failure mode: any transient fetch rejection — or a navigation redirect
+    // the SW can't replay — surfaced as "FetchEvent ... promise was rejected"
+    // / "TypeError: Failed to fetch" and the page silently did nothing.
     return;
   }
 
