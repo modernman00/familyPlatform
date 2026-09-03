@@ -703,6 +703,18 @@
         submitForm(this, '/member/organogram/editor/parents', 'submitParentsBtn', 'Saving...');
     });
 
+    function extractStudioErrorMessage(err) {
+        if (typeof err === 'string' && err.trim() !== '') return err;
+        if (err && typeof err === 'object') {
+            if (typeof err.message === 'string') return err.message;
+            if (typeof err.error === 'string') return err.error;
+            const values = Object.values(err);
+            if (values.length > 0 && typeof values[0] === 'string') return values[0];
+            try { return JSON.stringify(err); } catch (_) {}
+        }
+        return 'An error occurred. Please try again.';
+    }
+
     function submitForm(form, url, btnId, loadingText) {
         const btn = document.getElementById(btnId);
         const originalText = btn.innerHTML;
@@ -723,18 +735,19 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === 200) {
+            const isOk = (data.status === 200 || data.status === 'success' || data.statusCode === 200);
+            if (isOk) {
                 // Success - reload page to show new tree
                 window.location.reload();
             } else {
-                errorDiv.textContent = data.message || 'An error occurred.';
+                errorDiv.textContent = extractStudioErrorMessage(data.message || data.error || data);
                 errorDiv.classList.remove('d-none');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         })
         .catch(err => {
-            errorDiv.textContent = 'A network error occurred.';
+            errorDiv.textContent = 'A network error occurred. Please try again.';
             errorDiv.classList.remove('d-none');
             btn.innerHTML = originalText;
             btn.disabled = false;

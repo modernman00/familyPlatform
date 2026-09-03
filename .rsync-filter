@@ -1,28 +1,34 @@
-# Deploy allowlist — consumed by scripts/deploy.sh (rsync -f 'merge .rsync-filter').
-# Only paths matched by a '+' rule are sent to the live server. Everything else
-# stays local, so a new dev script or folder can never leak to prod again.
-# Rules are evaluated top-down, first match wins.
+# ==============================================================================
+# DEPLOYMENT ALLOWLIST & PROTECTED PATHS (.rsync-filter)
+# Evaluated Top-Down: First Match Wins
+# ==============================================================================
 
-# 1. Protect server-only runtime data from --delete / --delete-excluded.
-P /resources/images/
-P /public/img/
-P /public/uploads/
-P /storage/
+# 1. PROTECT (P) server-only runtime files from --delete / --delete-excluded
 P /.env
 P /.env_production
+P /storage/***
+P /public/uploads/***
+P /resources/images/profile/***
+P /bootstrap/log/***
+P /bootstrap/cache/***
 
-# 2. Skip user-uploaded media that lives inside otherwise-allowed dirs.
-- /resources/images/
-- /public/img/
-- /public/uploads/
-- /storage/
+# 2. EXCLUDE user uploads from local sync
+- /public/uploads/***
+- /resources/images/profile/***
+- /storage/***
 
-# 3. The deployed application.
+# 3. ALLOWLIST (+) Core Application Code & Compiled Assets
 + /app/***
 + /bootstrap/***
 + /cron/***
 + /public/***
-+ /resources/***
+# Include the resources/ dir itself so rsync descends into it; the '- *' rule
+# below would otherwise prune the whole tree and --delete-excluded would wipe
+# resources/views on the server (every Blade view -> "Template not found").
++ /resources/
++ /resources/views/***
++ /resources/asset/***
++ /resources/fonts/***
 + /vendor/***
 + /index.php
 + /service-worker.js
@@ -34,6 +40,5 @@ P /.env_production
 + /composer.json
 + /composer.lock
 
-# 4. Anything not listed above is local-only (dev scripts, cypress/, migrations/,
-#    tests/, scripts/, *.md, cypress.config.js, migrate*.php, fix_schema.php, …).
+# 4. EXCLUDE (-) Everything else (Dev scripts, tests, cypress, markdown, etc.)
 - *

@@ -1,1 +1,808 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[289],{2591:function(n,t,o){o.d(t,{d:function(){return u}});var a=o(3482),e=o(7658),i=function(n){return null!=n&&n.date_created&&null!=n&&n.post_time?'<div class="timeago postTimeCal w3-right w3-opacity" datetime=\''.concat((0,e.v_)(n.date_created),"' title='").concat((0,e.v_)((0,a.WU)(n.date_created)),"'> ").concat((t=n.post_time)?(0,a.WU)(t):"","</div>"):"";var t},c=function(n){var t,o,a=(0,e.v_)(null!=n&&n.profileImg?"/resources/images/profile/".concat(n.profileImg):"/public/avatar/avatarF.png"),c=(0,e.v_)((null==n?void 0:n.post_no)||""),r=(0,e.v_)((null==n?void 0:n.id)||""),l=encodeURIComponent((null==n?void 0:n.img)||"");return'<a href="/profilepage/img?dir=img&pics='.concat(l,"&pID=").concat(c,"&path=profile&id=").concat(r,'"> <img src="').concat(a,'" alt="img" class="w3-left w3-circle w3-margin-right postImg" style="width:60px">\n        </a>\n        ').concat(i(n),'\n        <div style="display: flex; align-items: center;">\n            ').concat((o=null==n?void 0:n.fullName,'<h6 id="fullName"><b>'.concat((0,e.v_)(o||"Unknown User"),"</b> </h6>"))," ").concat((t=null==n?void 0:n.postFamCode)?'<span class="w3-badge w3-small w3-blue w3-margin-left" style="font-weight: normal; padding: 2px 6px;">Family: '.concat((0,e.v_)(t),"</span>"):"","\n        </div>")},r=function(n){var t=Object.keys(n).filter(function(t){return t.startsWith("post_img")&&null!==n[t]}).map(function(t){return n[t]}),o=t.map(function(t,o){return function(n,t,o){var a=(0,e.v_)(n);return'\n    <a href="/profilepage/img?dir=img&pics='.concat(encodeURIComponent(n),"&pID=").concat((0,e.v_)(o),'&path=post">\n      <div class="w3-half">\n        <img src="/resources/images/post/').concat(a,'" style="width:100%" alt="images').concat((0,e.v_)(t),'" class="w3-margin-bottom w3-hover-sepia" id="postImage').concat((0,e.v_)(t),'">\n      </div>\n    </a>\n  ')}(t,o,n.post_no)}).join("");return'\n    <div class="w3-row-padding" style="margin:0 -16px">\n      '.concat(o,"\n      <br>\n    </div>\n  ")},l=o(893),s=o(6854),d=function(n){var t={likes:"👍",love:"❤️",haha:"😄",wow:"😮",sad:"😢",angry:"😠"},o=function(){var n=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{};return Object.entries(n).filter(function(n){var t=(0,s.Z)(n,2),o=t[0],a=t[1];return!["comment_no","total","totalReactions"].includes(o)&&a>0}).sort(function(n,t){var o=(0,s.Z)(n,2)[1];return(0,s.Z)(t,2)[1]-o}).slice(0,3)}(n);return o.map(function(n){var o,a=(0,s.Z)(n,2),e=a[0],i=a[1],c=null!==(o=t[e])&&void 0!==o?o:"";return"".concat(c," ").concat(i)}).join(" ")},m=localStorage.getItem("requesterId"),p=function(n,t){var o,i,c,r,s,p=n.profileImg,v=n.fullName,u=n.date_created,b=n.img,f=n.comment,g=n.comment_no,h=n.id,y=p||b,w=(0,e.v_)(y?"/resources/images/profile/".concat(y):"/resources/images/profile/avatarM.png"),_=(0,e.v_)((0,l.wR)(v)),x=(0,e.v_)(f),k=null!==(o=null==n||null===(i=n.reactions)||void 0===i?void 0:i.counts)&&void 0!==o?o:{},C=null!==(c=null==n||null===(r=n.reactions)||void 0===r||null===(s=r.counts)||void 0===s?void 0:s.totalReactions)&&void 0!==c?c:0;return'<div class="d-flex mb-3 commentDiv align-items-start" data-commentDiv-no="'.concat(g,'" id="commentDiv').concat(g,'" name="commentDiv">\n\n  <img src="').concat(w,'" alt="Avatar" class="rounded-circle me-2 commentImg" width="32" height="32">\n\n  <div class="flex-grow-1">\n    <div class="d-flex justify-content-between align-items-center">\n      <small><strong>').concat(_,'</strong></small>\n      <small class="text-muted commentTiming" datetime="').concat((0,e.v_)(u),'" title="').concat((0,e.v_)(u),'">\n        ').concat((0,a.WU)(u),'\n      </small>\n    </div>\n\n    <div class="comment-text mb-2 p-3 shadow-sm" style="background-color: var(--hover-color); border-radius: 18px; border-top-left-radius: 4px; display: inline-block;">\n      <span style="font-size: 0.95rem; color: var(--text-color);">').concat(x,'</span>\n    </div>\n\n      <div class="d-flex reaction-preview-section align-items-center mb-2 gap-2"> \n\n        <div class="reaction-preview" id="reaction-preview-').concat(g,'">\n        ').concat(d(k),'\n        </div>\n\n         <div class="reaction-summary" data-comment-no="').concat(g,'" role="tooltip" id="reaction-summary-').concat(g,'" style="display:none;">\n        </div>\n\n      </div>\n\n      <div class="comment-actions d-flex gap-3">         \n                <div class="reaction-bar"  id="reaction-bar-').concat(g,'">\n\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Like" id="reaction-option-like-').concat(g,'" data-reaction="like" data-label="likes"> 👍 </div>\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Love" id="reaction-option-love-').concat(g,'" data-reaction="love" data-label="love">❤️</div>\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Haha" id="reaction-option-haha-').concat(g,'" data-reaction="haha" data-label="haha">😄</div>\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Wow" id="reaction-option-wow-').concat(g,'" data-reaction="wow" data-label="wow">😮</div>\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Sad" id="reaction-option-sad-').concat(g,'" data-reaction="sad" data-label="sad">😢</div>\n                    <div class="reaction-option" data-option-no="').concat(g,'" aria-label="Angry" id="reaction-option-angry-').concat(g,'"\n                     data-reaction="angry" data-label="angry">😠</div>\n                </div>\n\n                <div class="reaction-button like-button-').concat(g,'" id="like-button-').concat(g,'" data-comment-no="').concat(g,'">\n                    <i class="bi bi-hand-thumbs-up reaction-icon" id="like-icon-').concat(g,'"></i>\n                    <span>Like</span>\n                     <div class="reaction-count" id="like-count-').concat(g,'">').concat(C,"</div>\n                   \n                </div>\n\n                ").concat(m==h||m==t?'<button class="btn btn-sm btn-icon text-danger" id="removeComment('.concat(g,')" title="Remove">\n                    <i class="bi bi-trash" id="removeCommentIcon').concat(g,'"></i>\n                    </button>'):"","        \n      </div>\n  </div>\n</div><hr>")},v=o(6170),u=function(n){var t,o,a=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,i=n.post_no,l=n.postMessage,d=(0,v.zD)(l),m=(0,v.Zn)(l,d);return'<div class="w3-container w3-card w3-white w3-round w3-margin post'.concat(i,'"><br>\n\n      ').concat(c(n),'\n\n    <hr class="w3-clear">\n\n    ').concat(m?'<p class="postFont"> '.concat((0,e.v_)(m)," </p>"):"","\n\n     ").concat(function(n){var t=(0,v.zD)(n);return t?"youtube"===t.type||"vimeo"===t.type||"cloudflare"===t.type?'\n      <div class="video-embed-container mb-3" style="border-radius: 12px; overflow: hidden; max-height: 420px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">\n        <div class="ratio ratio-16x9">\n          <iframe src="'.concat((0,e.v_)(t.embedUrl),'"\n                  title="Video Player"\n                  frameborder="0" \n                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" \n                  allowfullscreen \n                  loading="lazy"\n                  style="width: 100%; height: 100%; border: none; border-radius: 12px;"></iframe>\n        </div>\n      </div>\n    '):"direct"===t.type?'\n      <div class="video-embed-container mb-3" style="border-radius: 12px; overflow: hidden; max-height: 420px;">\n        <div class="ratio ratio-16x9">\n          <video src="'.concat((0,e.v_)(t.embedUrl),'" controls preload="metadata" style="width: 100%; height: 100%; object-fit: contain; background: #000; border-radius: 12px;"></video>\n        </div>\n      </div>\n    '):"":""}(l),"\n\n     ").concat(r(n),"\n     \n     ").concat(function(n){if(!n||!n.options||!Array.isArray(n.options))return"";var t=(0,e.v_)(n.question||""),o='<div class="poll-container mt-3 p-3 bg-light rounded border border-light-subtle">\n        <h6 class="fw-bold mb-3"><i class="fa fa-bar-chart me-2 text-primary"></i>'.concat(t,'</h6>\n        <div class="poll-options">');return n.options.forEach(function(t){var a=n.user_voted_option_id&&Array.isArray(n.user_voted_option_id)&&n.user_voted_option_id.includes(t.option_id),i=(null==t?void 0:t.percentage)||0,c=i+"%",r=a?"bg-primary":"bg-secondary",l=(0,e.v_)((null==t?void 0:t.option_text)||"");o+='\n            <div class="poll-option mb-2 position-relative">\n                <button class="poll-option-btn w-100 text-start btn btn-outline-'.concat(a?"primary":"secondary",' position-relative overflow-hidden" \n                        data-option-id="').concat((null==t?void 0:t.option_id)||"",'" style="z-index: 1;">\n                    <span class="position-relative" style="z-index: 2; mix-blend-mode: difference; color: white;">\n                        ').concat(l,'\n                    </span>\n                    <span class="float-end position-relative fw-bold" style="z-index: 2; mix-blend-mode: difference; color: white;">\n                        ').concat(i,'%\n                    </span>\n                    <div class="position-absolute top-0 start-0 h-100 ').concat(r,'" \n                         style="width: ').concat(c,'; opacity: 0.5; transition: width 0.5s ease; z-index: 0;"></div>\n                </button>\n            </div>\n        ')}),o+='</div>\n        <small class="text-muted mt-2 d-block">'.concat((null==n?void 0:n.total_votes)||0," votes</small>\n    </div>")}(null==n?void 0:n.poll),"\n     ").concat(function(n){var t=(null==n?void 0:n.reactions)||[],o=(null==n?void 0:n.user_reaction)||null,a=(null==n?void 0:n.post_no)||"";if(!a)return"";var e="",i=0,c={like:0,love:0,haha:0,shock:0,sad:0};t.forEach(function(n){n&&n.reaction_type&&n.count&&(c[n.reaction_type]=parseInt(n.count,10)||0,i+=c[n.reaction_type])}),i>0&&(e='<div class="reaction-summary mt-2 mb-2 px-2 py-1 bg-light rounded d-inline-block shadow-sm">\n            '.concat(c.like>0?"👍 ".concat(c.like):"","\n            ").concat(c.love>0?"❤️ ".concat(c.love):"","\n            ").concat(c.haha>0?"😂 ".concat(c.haha):"","\n            ").concat(c.shock>0?"😲 ".concat(c.shock):"","\n            ").concat(c.sad>0?"😢 ".concat(c.sad):"","\n        </div>"));for(var r='<div class="reaction-bar d-flex gap-2 mt-2 align-items-center">',l=0,d=Object.entries({like:"👍",love:"❤️",haha:"😂",shock:"😲",sad:"😢"});l<d.length;l++){var m=(0,s.Z)(d[l],2),p=m[0],v=m[1],u=o===p;r+='\n            <button class="btn btn-sm reaction-btn '.concat(u?"btn-primary":"btn-light text-dark",' rounded-pill shadow-sm" \n                    data-post-no="').concat(a,'" data-reaction="').concat(p,'"\n                    style="transition: transform 0.2s; ').concat(u?"transform: scale(1.1);":"",'">\n                ').concat(v,' <span class="d-none d-md-inline ms-1 text-capitalize" style="font-size: 0.8rem;">').concat(p,"</span>\n            </button>\n        ")}return r+="</div>",'<div class="engagement-section mt-3">\n        '.concat(e,"\n        ").concat(r,"\n    </div>")}(n),"\n\n    ").concat((t=n,'\n   <div class="reaction-buttons d-flex justify-content-around border-top border-bottom py-2 mb-2 mt-3 gap-2">\n    <button \n      class="btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center"\n      style="background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;"\n      type="button" \n      id="likeButton'.concat(t.post_no,'" \n      name="').concat(t.post_no,'">\n      <i class="bi bi-hand-thumbs-up me-2" style="font-size: 1.1rem; color: var(--text-muted);"></i> \n      Like \n      <span class="badge ms-2" style="background-color: var(--border-color); color: var(--text-color);">\n        <span class="likeCounter" id="likeCounter').concat(t.post_no,'">').concat(t.post_likes,'</span>\n      </span>\n    </button>\n\n    <button \n      class="btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center"\n      style="background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;"\n      type="button" \n      id="initComment').concat(t.post_no,'">\n        <i class="bi bi-chat me-2" style="font-size: 1.1rem; color: var(--text-muted);"></i> \n        Comment \n        <span class="badge ms-2" style="background-color: var(--border-color); color: var(--text-color);">\n          <span class="commentCounter" id="commentCounter').concat(t.post_no,'">').concat(o,"</span>\n        </span>\n    </button>\n   \n    </div>\n    ")),"\n\n    ").concat(function(n){var t=n.post_no;return' <p id="formComment'.concat(t,'_notification"></p>\n\n  <form \n    action="/postCommentProfile" \n    method="post" id="formComment').concat(t,'" \n    style="display:none" \n    enctype="multipart/form-data">\n\n    <input \n      name=\'post_no\' \n      type="hidden" \n      name="').concat(t,'" \n      value=').concat(t,' />\n\n    <input \n      class="w3-input w3-border w3-round-large inputComment" \n      type="text" \n      placeholder="Write a comment"\n      id="inputComment').concat(t,"\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(t,'" \n      class="w3-button w3-green submitComment">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>')}(n),"\n\n    <div id = 'showComment").concat(i,"'>\n\n      ").concat(function(n,t){return n?n.map(function(n){return p(n,t)}).join(""):'<div id="comment" name="commentDiv"></div>'}(a),"\n      \n    </div><br>\n  </div>")}},6585:function(n,t,o){o.r(t);o(2591),o(4687);var a=o(2729),e=o(8662);o(6455),o(893);(0,e.ZP)(a.Z,{retries:3})}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["img"],{
+
+/***/ "./resources/asset/js/components/helper/http.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/helper/http.js ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkCookie": function() { return /* binding */ checkCookie; },
+/* harmony export */   "getApiData": function() { return /* binding */ getApiData; },
+/* harmony export */   "getCookie": function() { return /* binding */ getCookie; },
+/* harmony export */   "getMultipleApiData": function() { return /* binding */ getMultipleApiData; },
+/* harmony export */   "postFormData": function() { return /* binding */ postFormData; },
+/* harmony export */   "postMultipleApiData": function() { return /* binding */ postMultipleApiData; },
+/* harmony export */   "setCookie": function() { return /* binding */ setCookie; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var axios_retry__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios-retry */ "./node_modules/axios-retry/lib/esm/index.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+
+
+
+
+
+// import Cookies from 'js-cookie'
+
+(0,axios_retry__WEBPACK_IMPORTED_MODULE_2__["default"])(axios__WEBPACK_IMPORTED_MODULE_5__["default"], {
+  retries: 3
+});
+
+/**
+ * 
+* Sends form data via POST request.
+ * @param {string} url - The URL to post the data to.
+ * @param {string} formId - The ID or class of the form.
+ * @param {string|null} redirect - The page to redirect to after successful submission.
+ * @param {string|null} css - The CSS framework to use for notification styling (e.g., 'W3css', 'bulma').
+ NOTICE:::Make sure you set the notification id as the formId_notification
+ */
+var postFormData = /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(url, formId) {
+    var redirect,
+      css,
+      notificationForm,
+      notificationId,
+      form,
+      formEntries,
+      options,
+      csrfTokenMeta,
+      csrfToken,
+      response,
+      _response$data,
+      successClass,
+      idSetFromHttp,
+      famCodeSetFromHttp,
+      dbHttpResult,
+      redirectDelay,
+      _error$response,
+      _error$response$data,
+      errorClass,
+      errorMessage,
+      _args = arguments,
+      _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          redirect = _args.length > 2 && _args[2] !== undefined ? _args[2] : null;
+          css = _args.length > 3 && _args[3] !== undefined ? _args[3] : null;
+          notificationForm = "".concat(formId, "_notification");
+          notificationId = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)(notificationForm);
+          if (notificationId) {
+            _context.next = 1;
+            break;
+          }
+          throw new Error('Notification element not found');
+        case 1:
+          // Cleanup previous notification styles
+          notificationId.style.display = 'none';
+          ['is-danger', 'is-success', 'w3-red', 'w3-green', 'bg-danger', 'bg-success'].forEach(function (cls) {
+            return notificationId.classList.remove(cls);
+          });
+
+          // extract the form entriesËËË
+          form = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)(formId);
+          if (form) {
+            _context.next = 2;
+            break;
+          }
+          throw new Error('Form element not found');
+        case 2:
+          formEntries = new FormData(form);
+          formEntries.delete('submit');
+          formEntries.delete('checkbox_id');
+          options = {
+            baseURL: '/',
+            // Adjust to your API base URL
+            xsrfCookieName: 'XSRF-TOKEN',
+            xsrfHeaderName: 'X-XSRF-TOKEN',
+            withCredentials: true // Ensure cookies (e.g., XSRF token) are sent
+          };
+          csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+          csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+          if (csrfToken) {
+            options.headers = options.headers || {};
+            options.headers['X-XSRF-TOKEN'] = csrfToken;
+          }
+
+          // AXIOS POST FUNCTIONALITY
+          _context.prev = 3;
+          _context.next = 4;
+          return axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(url, formEntries, options);
+        case 4:
+          response = _context.sent;
+          if (!(response.status < 200 || response.status >= 300)) {
+            _context.next = 5;
+            break;
+          }
+          throw new Error(((_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.message) || 'Request failed');
+        case 5:
+          successClass = getNotificationClassByCSS(css || 'bulma', 'green'); // check if response.data.message is an array
+          idSetFromHttp = null;
+          famCodeSetFromHttp = null;
+          dbHttpResult = null;
+          if (!(response.data && typeof response.data.message === 'object')) {
+            _context.next = 9;
+            break;
+          }
+          idSetFromHttp = response.data.message.id || null;
+          famCodeSetFromHttp = response.data.message.famCode || null;
+          dbHttpResult = response.data.message.outcome || null;
+          if (idSetFromHttp) {
+            _context.next = 6;
+            break;
+          }
+          throw new Error('idSetFromHttp is missing');
+        case 6:
+          if (dbHttpResult) {
+            _context.next = 7;
+            break;
+          }
+          throw new Error('dbHttpResult is missing');
+        case 7:
+          if (famCodeSetFromHttp) {
+            _context.next = 8;
+            break;
+          }
+          throw new Error('famCodeSetFromHttp is missing');
+        case 8:
+          _context.next = 10;
+          break;
+        case 9:
+          dbHttpResult = response.data.message;
+        case 10:
+          // Set sessionStorage items if not already set
+          if (!sessionStorage.getItem('idSetFromHttp')) sessionStorage.setItem('idSetFromHttp', idSetFromHttp);
+          if (!sessionStorage.getItem('famCodeSetFromHttp')) sessionStorage.setItem('famCodeSetFromHttp', famCodeSetFromHttp);
+          processFormDataAction(successClass, dbHttpResult, notificationId);
+          if (redirect) {
+            redirectDelay = 2000; // Configurable delay in ms
+            setTimeout(function () {
+              window.location.assign(redirect);
+            }, redirectDelay);
+          }
+          _context.next = 12;
+          break;
+        case 11:
+          _context.prev = 11;
+          _t = _context["catch"](3);
+          errorClass = getNotificationClassByCSS(css || 'bulma', 'red');
+          errorMessage = ((_error$response = _t.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : _error$response$data.error) || _t.request || 'An unknown error occurred';
+          processFormDataAction(errorClass, errorMessage, notificationId);
+        case 12:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[3, 11]]);
+  }));
+  return function postFormData(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+/**
+ * Process form data action.
+ * @param {string} cssClass - The CSS class for the notification.
+ * @param {string} message - The notification message.
+ */
+var processFormDataAction = function processFormDataAction(cssClass, message, formNotificationId) {
+  if (formNotificationId) {
+    formNotificationId.style.display = 'block';
+    formNotificationId.classList.add(cssClass);
+    var errorElement = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)('error');
+    if (errorElement) {
+      errorElement.scrollIntoView({
+        behavior: 'smooth'
+      });
+      errorElement.innerHTML = message;
+    }
+    var loader = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)('setLoader');
+    if (loader) loader.classList.remove('loader');
+  } else {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.log)('Notification element not found');
+  }
+};
+
+/**
+ * Get the notification class based on the CSS framework.
+ * @param {string|null} css - The CSS framework to use for notification styling.
+ * @param {string} status - The status of the notification ('green' or 'red').
+ * @returns {string} - The corresponding CSS class.
+ */
+var getNotificationClassByCSS = function getNotificationClassByCSS(css, status) {
+  switch (css) {
+    case 'W3css':
+      return status === 'green' ? 'w3-green' : 'w3-red';
+    case 'bulma':
+      return status === 'green' ? 'is-success' : 'is-danger';
+    case 'bootstrap':
+      return status === 'green' ? 'bg-success' : 'bg-danger';
+    default:
+      return status === 'green' ? 'bg-success' : 'bg-danger';
+  }
+};
+
+/**
+ * 
+ * @param { the url you want to get} URL 
+ * @returns 
+ // now we can use that data from the outside!
+axiosTest()
+    .then(data => {
+        response.json({ message: 'Request received!', data })
+    })
+    .catch(err => console.log(err))
+ */
+
+var getApiData = /*#__PURE__*/function () {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(URL) {
+    var token,
+      config,
+      csrfTokenMeta,
+      csrfToken,
+      fetch,
+      _args2 = arguments,
+      _t2;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          token = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : null;
+          _context2.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+          csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+          if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
+          _context2.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_5__["default"].get(URL, config);
+        case 2:
+          fetch = _context2.sent;
+          return _context2.abrupt("return", fetch.data);
+        case 3:
+          _context2.prev = 3;
+          _t2 = _context2["catch"](1);
+          return _context2.abrupt("return", _t2);
+        case 4:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[1, 3]]);
+  }));
+  return function getApiData(_x3) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+var getMultipleApiData = /*#__PURE__*/function () {
+  var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(url1, url2) {
+    var token,
+      config,
+      csrfTokenMeta,
+      csrfToken,
+      fetch,
+      _args3 = arguments,
+      _t3;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          token = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : null;
+          _context3.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+          csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+          if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
+          _context3.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_5__["default"].all([axios__WEBPACK_IMPORTED_MODULE_5__["default"].get(url1, config), axios__WEBPACK_IMPORTED_MODULE_5__["default"].get(url2, config)]);
+        case 2:
+          fetch = _context3.sent;
+          return _context3.abrupt("return", fetch);
+        case 3:
+          _context3.prev = 3;
+          _t3 = _context3["catch"](1);
+          return _context3.abrupt("return", _t3);
+        case 4:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[1, 3]]);
+  }));
+  return function getMultipleApiData(_x4, _x5) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+// build a function to post multiple api form data
+
+var postMultipleApiData = /*#__PURE__*/function () {
+  var _ref4 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee4(url1, url2, formData) {
+    var token,
+      config,
+      csrfTokenMeta,
+      csrfToken,
+      fetch,
+      _args4 = arguments,
+      _t4;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          token = _args4.length > 3 && _args4[3] !== undefined ? _args4[3] : null;
+          _context4.prev = 1;
+          config = {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ' + token
+            }
+          };
+          csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+          csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+          if (csrfToken) config.headers['X-XSRF-TOKEN'] = csrfToken;
+          _context4.next = 2;
+          return axios__WEBPACK_IMPORTED_MODULE_5__["default"].all([axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(url1, formData, config), axios__WEBPACK_IMPORTED_MODULE_5__["default"].post(url2, formData, config)]);
+        case 2:
+          fetch = _context4.sent;
+          return _context4.abrupt("return", fetch);
+        case 3:
+          _context4.prev = 3;
+          _t4 = _context4["catch"](1);
+          return _context4.abrupt("return", _t4);
+        case 4:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4, null, [[1, 3]]);
+  }));
+  return function postMultipleApiData(_x6, _x7, _x8) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+/**
+ * 
+ * @param { name} cname 
+ * @param {* value} cvalue 
+ * @param {* no of days 365} exdays 
+ */
+var setCookie = function setCookie(cname, cvalue, exdays) {
+  var d = new Date();
+  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+  var expires = "expires=" + d.toUTCString();
+  document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+};
+var getCookie = function getCookie(cname) {
+  var name = cname + "=";
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+};
+var checkCookie = function checkCookie() {
+  var user = getCookie("username");
+  if (user != "") {
+    sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire("Welcome again " + user);
+  } else {
+    sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire({
+      title: 'Please enter your name:',
+      input: 'text',
+      showCancelButton: true
+    }).then(function (result) {
+      if (result.value) {
+        setCookie("username", result.value, 365);
+      }
+    });
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/comment.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/comment.js ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "appendNewComment": function() { return /* binding */ appendNewComment; },
+/* harmony export */   "commentHTML": function() { return /* binding */ commentHTML; },
+/* harmony export */   "showComment": function() { return /* binding */ showComment; }
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./showEmojiOnComment.js */ "./resources/asset/js/components/profilePage/showEmojiOnComment.js");
+
+
+
+
+var reqId = localStorage.getItem('requesterId');
+var commentHTML = function commentHTML(data, postId) {
+  var _data$reactions$count, _data$reactions, _data$reactions$count2, _data$reactions2, _data$reactions2$coun;
+  var profileImg = data.profileImg,
+    fullName = data.fullName,
+    date_created = data.date_created,
+    img = data.img,
+    comment = data.comment,
+    comment_no = data.comment_no,
+    id = data.id;
+  var imgURL = profileImg || img;
+  // comment + fullName + image path are user-authored — escape for innerHTML (SEC-2).
+  var image = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(imgURL ? "/resources/images/profile/".concat(imgURL) : "/resources/images/profile/avatarM.png");
+  var nameSafe = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)((0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.toSentenceCase)(fullName));
+  var commentSafe = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(comment);
+  var counts = (_data$reactions$count = data === null || data === void 0 ? void 0 : (_data$reactions = data.reactions) === null || _data$reactions === void 0 ? void 0 : _data$reactions.counts) !== null && _data$reactions$count !== void 0 ? _data$reactions$count : {};
+  var total = (_data$reactions$count2 = data === null || data === void 0 ? void 0 : (_data$reactions2 = data.reactions) === null || _data$reactions2 === void 0 ? void 0 : (_data$reactions2$coun = _data$reactions2.counts) === null || _data$reactions2$coun === void 0 ? void 0 : _data$reactions2$coun.totalReactions) !== null && _data$reactions$count2 !== void 0 ? _data$reactions$count2 : 0;
+  return "<div class=\"d-flex mb-3 commentDiv align-items-start\" data-commentDiv-no=\"".concat(comment_no, "\" id=\"commentDiv").concat(comment_no, "\" name=\"commentDiv\">\n\n  <img src=\"").concat(image, "\" alt=\"Avatar\" class=\"rounded-circle me-2 commentImg\" width=\"32\" height=\"32\">\n\n  <div class=\"flex-grow-1\">\n    <div class=\"d-flex justify-content-between align-items-center\">\n      <small><strong>").concat(nameSafe, "</strong></small>\n      <small class=\"text-muted commentTiming\" datetime=\"").concat((0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(date_created), "\" title=\"").concat((0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(date_created), "\">\n        ").concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date_created), "\n      </small>\n    </div>\n\n    <div class=\"comment-text mb-2 p-3 shadow-sm\" style=\"background-color: var(--hover-color); border-radius: 18px; border-top-left-radius: 4px; display: inline-block;\">\n      <span style=\"font-size: 0.95rem; color: var(--text-color);\">").concat(commentSafe, "</span>\n    </div>\n\n      <div class=\"d-flex reaction-preview-section align-items-center mb-2 gap-2\"> \n\n        <div class=\"reaction-preview\" id=\"reaction-preview-").concat(comment_no, "\">\n        ").concat((0,_showEmojiOnComment_js__WEBPACK_IMPORTED_MODULE_3__.renderTopReactions)(counts, comment_no), "\n        </div>\n\n         <div class=\"reaction-summary\" data-comment-no=\"").concat(comment_no, "\" role=\"tooltip\" id=\"reaction-summary-").concat(comment_no, "\" style=\"display:none;\">\n        </div>\n\n      </div>\n\n      <div class=\"comment-actions d-flex gap-3\">         \n                <div class=\"reaction-bar\"  id=\"reaction-bar-").concat(comment_no, "\">\n\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Like\" id=\"reaction-option-like-").concat(comment_no, "\" data-reaction=\"like\" data-label=\"likes\"> \uD83D\uDC4D </div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Love\" id=\"reaction-option-love-").concat(comment_no, "\" data-reaction=\"love\" data-label=\"love\">\u2764\uFE0F</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Haha\" id=\"reaction-option-haha-").concat(comment_no, "\" data-reaction=\"haha\" data-label=\"haha\">\uD83D\uDE04</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Wow\" id=\"reaction-option-wow-").concat(comment_no, "\" data-reaction=\"wow\" data-label=\"wow\">\uD83D\uDE2E</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Sad\" id=\"reaction-option-sad-").concat(comment_no, "\" data-reaction=\"sad\" data-label=\"sad\">\uD83D\uDE22</div>\n                    <div class=\"reaction-option\" data-option-no=\"").concat(comment_no, "\" aria-label=\"Angry\" id=\"reaction-option-angry-").concat(comment_no, "\"\n                     data-reaction=\"angry\" data-label=\"angry\">\uD83D\uDE20</div>\n                </div>\n\n                <div class=\"reaction-button like-button-").concat(comment_no, "\" id=\"like-button-").concat(comment_no, "\" data-comment-no=\"").concat(comment_no, "\">\n                    <i class=\"bi bi-hand-thumbs-up reaction-icon\" id=\"like-icon-").concat(comment_no, "\"></i>\n                    <span>Like</span>\n                     <div class=\"reaction-count\" id=\"like-count-").concat(comment_no, "\">").concat(total, "</div>\n                   \n                </div>\n\n                ").concat(reqId == id || reqId == postId ? "<button class=\"btn btn-sm btn-icon text-danger\" id=\"removeComment(".concat(comment_no, ")\" title=\"Remove\">\n                    <i class=\"bi bi-trash\" id=\"removeCommentIcon").concat(comment_no, "\"></i>\n                    </button>") : '', "        \n      </div>\n  </div>\n</div><hr>");
+};
+
+// i need the postid to use to show the delete button 
+var showComment = function showComment(comment, postId) {
+  if (!comment) {
+    return "<div id=\"comment\" name=\"commentDiv\"></div>";
+  }
+  // only run if there is comment
+  // USED FOR ALL THE COMMENTS WHEN THE PAGE IS LOADING
+  var commentHTMLArray = comment.map(function (commentElement) {
+    return commentHTML(commentElement, postId);
+  });
+  return commentHTMLArray.join(''); // Join the array elements into a single string
+};
+var appendNewComment = function appendNewComment(commentData) {
+  // check if commentData is valid
+  if (!commentData) {
+    throw new Error('No comment update received');
+  }
+  var idDiv = "showComment".concat(commentData.post_no);
+  // check if the div has been created by the DOM 
+  var commentContainer = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.id)(idDiv);
+  if (!commentContainer) {
+    throw new Error('commetContainer div not found in the DOM');
+  }
+  var commentHtml = commentHTML(commentData);
+  commentContainer.insertAdjacentHTML('beforeend', commentHtml);
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/html.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/html.js ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "html": function() { return /* binding */ html; }
+/* harmony export */ });
+/* harmony import */ var _htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./htmlFolder/nameImageTiming */ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js");
+/* harmony import */ var _htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./htmlFolder/commentForm */ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js");
+/* harmony import */ var _htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./htmlFolder/likeCommentButton */ "./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js");
+/* harmony import */ var _htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./htmlFolder/showPostImages */ "./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js");
+/* harmony import */ var _comment__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./comment */ "./resources/asset/js/components/profilePage/comment.js");
+/* harmony import */ var _htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./htmlFolder/engagementHtml */ "./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js");
+/* harmony import */ var _videoParser__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./videoParser */ "./resources/asset/js/components/profilePage/videoParser.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+
+
+
+
+
+var renderVideoPlayer = function renderVideoPlayer(postMessage) {
+  var video = (0,_videoParser__WEBPACK_IMPORTED_MODULE_6__.extractVideoFromText)(postMessage);
+  if (!video) return '';
+  if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare') {
+    return "\n      <div class=\"video-embed-container mb-3\" style=\"border-radius: 12px; overflow: hidden; max-height: 420px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);\">\n        <div class=\"ratio ratio-16x9\">\n          <iframe src=\"".concat((0,_global__WEBPACK_IMPORTED_MODULE_7__.esc)(video.embedUrl), "\"\n                  title=\"Video Player\"\n                  frameborder=\"0\" \n                  allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" \n                  allowfullscreen \n                  loading=\"lazy\"\n                  style=\"width: 100%; height: 100%; border: none; border-radius: 12px;\"></iframe>\n        </div>\n      </div>\n    ");
+  } else if (video.type === 'direct') {
+    return "\n      <div class=\"video-embed-container mb-3\" style=\"border-radius: 12px; overflow: hidden; max-height: 420px;\">\n        <div class=\"ratio ratio-16x9\">\n          <video src=\"".concat((0,_global__WEBPACK_IMPORTED_MODULE_7__.esc)(video.embedUrl), "\" controls preload=\"metadata\" style=\"width: 100%; height: 100%; object-fit: contain; background: #000; border-radius: 12px;\"></video>\n        </div>\n      </div>\n    ");
+  }
+  return '';
+};
+var html = function html(el) {
+  var comment = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  var post_no = el.post_no,
+    postMessage = el.postMessage;
+  var video = (0,_videoParser__WEBPACK_IMPORTED_MODULE_6__.extractVideoFromText)(postMessage);
+  var displayMsg = (0,_videoParser__WEBPACK_IMPORTED_MODULE_6__.cleanPostMessage)(postMessage, video);
+  return "<div class=\"w3-container w3-card w3-white w3-round w3-margin post".concat(post_no, "\"><br>\n\n      ").concat((0,_htmlFolder_nameImageTiming__WEBPACK_IMPORTED_MODULE_0__.nameImgTiming)(el), "\n\n    <hr class=\"w3-clear\">\n\n    ").concat(displayMsg ? "<p class=\"postFont\"> ".concat((0,_global__WEBPACK_IMPORTED_MODULE_7__.esc)(displayMsg), " </p>") : '', "\n\n     ").concat(renderVideoPlayer(postMessage), "\n\n     ").concat((0,_htmlFolder_showPostImages__WEBPACK_IMPORTED_MODULE_3__.showPostImg)(el), "\n     \n     ").concat((0,_htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__.renderPoll)(el === null || el === void 0 ? void 0 : el.poll), "\n     ").concat((0,_htmlFolder_engagementHtml__WEBPACK_IMPORTED_MODULE_5__.renderReactions)(el), "\n\n    ").concat((0,_htmlFolder_likeCommentButton__WEBPACK_IMPORTED_MODULE_2__.likeCommentButton)(el), "\n\n    ").concat((0,_htmlFolder_commentForm__WEBPACK_IMPORTED_MODULE_1__.commentForm)(el), "\n\n    <div id = 'showComment").concat(post_no, "'>\n\n      ").concat((0,_comment__WEBPACK_IMPORTED_MODULE_4__.showComment)(comment), "\n      \n    </div><br>\n  </div>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/commentForm.js":
+/*!*****************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/commentForm.js ***!
+  \*****************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "commentForm": function() { return /* binding */ commentForm; }
+/* harmony export */ });
+var commentForm = function commentForm(data) {
+  var post_no = data.post_no;
+  return " <p id=\"formComment".concat(post_no, "_notification\"></p>\n\n  <form \n    action=\"/postCommentProfile\" \n    method=\"post\" id=\"formComment").concat(post_no, "\" \n    style=\"display:none\" \n    enctype=\"multipart/form-data\">\n\n    <input \n      name='post_no' \n      type=\"hidden\" \n      name=\"").concat(post_no, "\" \n      value=").concat(post_no, " />\n\n    <input \n      class=\"w3-input w3-border w3-round-large inputComment\" \n      type=\"text\" \n      placeholder=\"Write a comment\"\n      id=\"inputComment").concat(post_no, "\" \n      value = \"\" name='comment'>\n\n    <br>\n\n    <button \n      type='submit' \n      id=\"submitComment").concat(post_no, "\" \n      class=\"w3-button w3-green submitComment\">\n        Submit\n    </button>\n    \n    <br><br>\n  </form>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js":
+/*!********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/engagementHtml.js ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderPoll": function() { return /* binding */ renderPoll; },
+/* harmony export */   "renderReactions": function() { return /* binding */ renderReactions; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
+
+
+var renderPoll = function renderPoll(poll) {
+  if (!poll || !poll.options || !Array.isArray(poll.options)) return '';
+
+  // Poll question + option text are user-authored — escape for innerHTML (SEC-2).
+  var questionText = (0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)(poll.question || '');
+  var html = "<div class=\"poll-container mt-3 p-3 bg-light rounded border border-light-subtle\">\n        <h6 class=\"fw-bold mb-3\"><i class=\"fa fa-bar-chart me-2 text-primary\"></i>".concat(questionText, "</h6>\n        <div class=\"poll-options\">");
+  poll.options.forEach(function (opt) {
+    // Multi-select is supported on backend. user_voted_option_id is an array now
+    var isVoted = poll.user_voted_option_id && Array.isArray(poll.user_voted_option_id) && poll.user_voted_option_id.includes(opt.option_id);
+    var percentage = (opt === null || opt === void 0 ? void 0 : opt.percentage) || 0;
+    var barWidth = percentage + '%';
+    var bgClass = isVoted ? 'bg-primary' : 'bg-secondary';
+    var optionText = (0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)((opt === null || opt === void 0 ? void 0 : opt.option_text) || '');
+    html += "\n            <div class=\"poll-option mb-2 position-relative\">\n                <button class=\"poll-option-btn w-100 text-start btn btn-outline-".concat(isVoted ? 'primary' : 'secondary', " position-relative overflow-hidden\" \n                        data-option-id=\"").concat((opt === null || opt === void 0 ? void 0 : opt.option_id) || '', "\" style=\"z-index: 1;\">\n                    <span class=\"position-relative\" style=\"z-index: 2; mix-blend-mode: difference; color: white;\">\n                        ").concat(optionText, "\n                    </span>\n                    <span class=\"float-end position-relative fw-bold\" style=\"z-index: 2; mix-blend-mode: difference; color: white;\">\n                        ").concat(percentage, "%\n                    </span>\n                    <div class=\"position-absolute top-0 start-0 h-100 ").concat(bgClass, "\" \n                         style=\"width: ").concat(barWidth, "; opacity: 0.5; transition: width 0.5s ease; z-index: 0;\"></div>\n                </button>\n            </div>\n        ");
+  });
+  html += "</div>\n        <small class=\"text-muted mt-2 d-block\">".concat((poll === null || poll === void 0 ? void 0 : poll.total_votes) || 0, " votes</small>\n    </div>");
+  return html;
+};
+var renderReactions = function renderReactions(el) {
+  // Emojis: Like 👍, Love ❤️, Haha 😂, Shock 😲, Sad 😢
+  var emojis = {
+    'like': '👍',
+    'love': '❤️',
+    'haha': '😂',
+    'shock': '😲',
+    'sad': '😢'
+  };
+  var reactions = (el === null || el === void 0 ? void 0 : el.reactions) || [];
+  var userReaction = (el === null || el === void 0 ? void 0 : el.user_reaction) || null;
+  var postNo = (el === null || el === void 0 ? void 0 : el.post_no) || '';
+  if (!postNo) return '';
+  var summaryHtml = '';
+  var totalReactions = 0;
+  var counts = {
+    like: 0,
+    love: 0,
+    haha: 0,
+    shock: 0,
+    sad: 0
+  };
+  reactions.forEach(function (r) {
+    if (r && r.reaction_type && r.count) {
+      counts[r.reaction_type] = parseInt(r.count, 10) || 0;
+      totalReactions += counts[r.reaction_type];
+    }
+  });
+  if (totalReactions > 0) {
+    summaryHtml = "<div class=\"reaction-summary mt-2 mb-2 px-2 py-1 bg-light rounded d-inline-block shadow-sm\">\n            ".concat(counts.like > 0 ? "\uD83D\uDC4D ".concat(counts.like) : '', "\n            ").concat(counts.love > 0 ? "\u2764\uFE0F ".concat(counts.love) : '', "\n            ").concat(counts.haha > 0 ? "\uD83D\uDE02 ".concat(counts.haha) : '', "\n            ").concat(counts.shock > 0 ? "\uD83D\uDE32 ".concat(counts.shock) : '', "\n            ").concat(counts.sad > 0 ? "\uD83D\uDE22 ".concat(counts.sad) : '', "\n        </div>");
+  }
+  var barHtml = "<div class=\"reaction-bar d-flex gap-2 mt-2 align-items-center\">";
+  for (var _i = 0, _Object$entries = Object.entries(emojis); _i < _Object$entries.length; _i++) {
+    var _Object$entries$_i = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_Object$entries[_i], 2),
+      type = _Object$entries$_i[0],
+      emoji = _Object$entries$_i[1];
+    var isActive = userReaction === type;
+    barHtml += "\n            <button class=\"btn btn-sm reaction-btn ".concat(isActive ? 'btn-primary' : 'btn-light text-dark', " rounded-pill shadow-sm\" \n                    data-post-no=\"").concat(postNo, "\" data-reaction=\"").concat(type, "\"\n                    style=\"transition: transform 0.2s; ").concat(isActive ? 'transform: scale(1.1);' : '', "\">\n                ").concat(emoji, " <span class=\"d-none d-md-inline ms-1 text-capitalize\" style=\"font-size: 0.8rem;\">").concat(type, "</span>\n            </button>\n        ");
+  }
+  barHtml += "</div>";
+  return "<div class=\"engagement-section mt-3\">\n        ".concat(summaryHtml, "\n        ").concat(barHtml, "\n    </div>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js":
+/*!***********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/likeCommentButton.js ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "likeCommentButton": function() { return /* binding */ likeCommentButton; }
+/* harmony export */ });
+var likeCommentButton = function likeCommentButton(data, commentLength) {
+  return "\n   <div class=\"reaction-buttons d-flex justify-content-around border-top border-bottom py-2 mb-2 mt-3 gap-2\">\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"likeButton".concat(data.post_no, "\" \n      name=\"").concat(data.post_no, "\">\n      <i class=\"bi bi-hand-thumbs-up me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n      Like \n      <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n        <span class=\"likeCounter\" id=\"likeCounter").concat(data.post_no, "\">").concat(data.post_likes, "</span>\n      </span>\n    </button>\n\n    <button \n      class=\"btn flex-grow-1 fw-semibold rounded-pill d-flex align-items-center justify-content-center\"\n      style=\"background-color: var(--hover-color); color: var(--text-color); border: none; transition: all 0.2s;\"\n      type=\"button\" \n      id=\"initComment").concat(data.post_no, "\">\n        <i class=\"bi bi-chat me-2\" style=\"font-size: 1.1rem; color: var(--text-muted);\"></i> \n        Comment \n        <span class=\"badge ms-2\" style=\"background-color: var(--border-color); color: var(--text-color);\">\n          <span class=\"commentCounter\" id=\"commentCounter").concat(data.post_no, "\">").concat(commentLength, "</span>\n        </span>\n    </button>\n   \n    </div>\n    ");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js":
+/*!*********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/nameImageTiming.js ***!
+  \*********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "nameImgTiming": function() { return /* binding */ nameImgTiming; }
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
+
+
+var timeAgo = function timeAgo(x) {
+  return x ? (0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(x) : '';
+};
+var fullName = function fullName(name) {
+  return "<h6 id=\"fullName\"><b>".concat((0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)(name || 'Unknown User'), "</b> </h6>");
+};
+var postedAt = function postedAt(date) {
+  if (!(date !== null && date !== void 0 && date.date_created) || !(date !== null && date !== void 0 && date.post_time)) return '';
+  return "<div class=\"timeago postTimeCal w3-right w3-opacity\" datetime='".concat((0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)(date.date_created), "' title='").concat((0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(date.date_created)), "'> ").concat(timeAgo(date.post_time), "</div>");
+};
+var familyBadge = function familyBadge(famCode) {
+  return famCode ? "<span class=\"w3-badge w3-small w3-blue w3-margin-left\" style=\"font-weight: normal; padding: 2px 6px;\">Family: ".concat((0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)(famCode), "</span>") : '';
+};
+var nameImgTiming = function nameImgTiming(data) {
+  var img = (0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)(data !== null && data !== void 0 && data.profileImg ? "/resources/images/profile/".concat(data.profileImg) : "/public/avatar/avatarF.png");
+  var pId = (0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)((data === null || data === void 0 ? void 0 : data.post_no) || '');
+  var uId = (0,_global__WEBPACK_IMPORTED_MODULE_1__.esc)((data === null || data === void 0 ? void 0 : data.id) || '');
+  var imgParam = encodeURIComponent((data === null || data === void 0 ? void 0 : data.img) || '');
+  return "<a href=\"/profilepage/img?dir=img&pics=".concat(imgParam, "&pID=").concat(pId, "&path=profile&id=").concat(uId, "\"> <img src=\"").concat(img, "\" alt=\"img\" class=\"w3-left w3-circle w3-margin-right postImg\" style=\"width:60px\">\n        </a>\n        ").concat(postedAt(data), "\n        <div style=\"display: flex; align-items: center;\">\n            ").concat(fullName(data === null || data === void 0 ? void 0 : data.fullName), " ").concat(familyBadge(data === null || data === void 0 ? void 0 : data.postFamCode), "\n        </div>");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js":
+/*!********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/showPostImages.js ***!
+  \********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "showPostImg": function() { return /* binding */ showPostImg; }
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
+
+var showPostImg = function showPostImg(data) {
+  // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
+  var postImagesWithValues = Object.keys(data).filter(function (key) {
+    return key.startsWith('post_img') && data[key] !== null;
+  }).map(function (el) {
+    return data[el];
+  });
+  var picsImgHtml = function picsImgHtml(imgElement, i, postNo) {
+    var nameSafe = (0,_global__WEBPACK_IMPORTED_MODULE_0__.esc)(imgElement);
+    return "\n    <a href=\"/profilepage/img?dir=img&pics=".concat(encodeURIComponent(imgElement), "&pID=").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.esc)(postNo), "&path=post\">\n      <div class=\"w3-half\">\n        <img src=\"/resources/images/post/").concat(nameSafe, "\" style=\"width:100%\" alt=\"images").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.esc)(i), "\" class=\"w3-margin-bottom w3-hover-sepia\" id=\"postImage").concat((0,_global__WEBPACK_IMPORTED_MODULE_0__.esc)(i), "\">\n      </div>\n    </a>\n  ");
+  };
+  var imgElements = postImagesWithValues.map(function (pics, i) {
+    return picsImgHtml(pics, i, data.post_no);
+  }).join('');
+  return "\n    <div class=\"w3-row-padding\" style=\"margin:0 -16px\">\n      ".concat(imgElements, "\n      <br>\n    </div>\n  ");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/imgViewer.js":
+/*!****************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/imgViewer.js ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/profilePage/html.js");
+/* harmony import */ var _helper_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../helper/http */ "./resources/asset/js/components/helper/http.js");
+
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/showEmojiOnComment.js":
+/*!*************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/showEmojiOnComment.js ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderTopReactions": function() { return /* binding */ renderTopReactions; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/esm/slicedToArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+/**
+ * 🧠 Extracts the top 3 reaction types by count.
+ * Filters out metadata keys like 'comment_no' and 'total', then sorts descending.
+ *
+ * @param {Object} counts - Reaction summary object including totals and metadata
+ * @returns {Array} - Array of top 3 reactions like [ ['love', 5], ['wow', 3], ['likes', 2] ]
+ */
+var getTopReactions = function getTopReactions() {
+  var counts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  return Object.entries(counts).filter(function (_ref) {
+    var _ref2 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref, 2),
+      label = _ref2[0],
+      count = _ref2[1];
+    return !['comment_no', 'total', 'totalReactions'].includes(label) && count > 0;
+  }) // 🧼 Remove metadata and zero-count reactions
+  .sort(function (_ref3, _ref4) {
+    var _ref5 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref3, 2),
+      a = _ref5[1];
+    var _ref6 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref4, 2),
+      b = _ref6[1];
+    return b - a;
+  }) // 🔢 Sort descending by count
+  .slice(0, 3);
+}; // 🎯 Return top 3 reactions only
+
+/**
+ * 🧠 Renders the top 3 reactions into the preview section of a comment.
+ * Uses emoji map for visual clarity and teaches contributors how to safely update the DOM.
+ *
+ * @param {Object} counts - Reaction counts object from the server
+ * @param {string|number} commentNo - Unique identifier for the comment block
+ */
+var renderTopReactions = function renderTopReactions(counts) {
+  // 🧩 Map semantic labels to emoji characters
+  var emojiMap = {
+    likes: '👍',
+    love: '❤️',
+    haha: '😄',
+    wow: '😮',
+    sad: '😢',
+    angry: '😠'
+  };
+  var top = getTopReactions(counts); // 🧠 Get top 3 reactions
+
+  var html = top.map(function (_ref7) {
+    var _emojiMap$label;
+    var _ref8 = (0,_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__["default"])(_ref7, 2),
+      label = _ref8[0],
+      count = _ref8[1];
+    var emoji = (_emojiMap$label = emojiMap[label]) !== null && _emojiMap$label !== void 0 ? _emojiMap$label : ''; // 🧼 Fallback if label missing
+    return "".concat(emoji, " ").concat(count); // 🖼️ Render emoji + count
+  }).join(' '); // 🧵 Combine into single HTML string
+  return html;
+};
+
+/***/ })
+
+}]);
+//# sourceMappingURL=img.js.map

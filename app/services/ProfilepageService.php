@@ -26,12 +26,13 @@ final class ProfilepageService
 
         $famCodeClean = checkInput($memberData['famCode']);
         $famCode = is_string($famCodeClean) ? $famCodeClean : '';
+        $famCodes = $_SESSION['famCodes'] ?? ($famCode !== '' ? [$famCode] : []);
 
         return [
             'memberData' => $memberData,
             'famCode' => $famCode,
             'friendRequests' => DataAll::getFriendRequestData($userId, "Request sent"),
-            'posts' => Post::getAllPostProfilePics(),
+            'posts' => DataAll::getVisiblePosts($userId, (array)$famCodes, 50, 0),
             'comments' => Post::getAllCommentProfilePics(),
             'events' => DataAll::getEventDataByFamCode($famCode),
             'post2Id' => Post::postLink2Id($userId),

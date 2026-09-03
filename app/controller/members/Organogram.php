@@ -29,9 +29,10 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
-            // IDOR guard: a family tree is only viewable by members of that family.
-            if (!BaseController::sessionSharesFamily($familyCode)) {
-                throw new ForbiddenException('You can only view your own family tree.');
+            // IDOR guard: a family tree is viewable by members of that family or approved connections.
+            if (!BaseController::sessionSharesFamily($familyCode) && !BaseController::sessionCanViewMember($idStr, $familyCode)) {
+                redirect('/profilePage?id=' . urlencode($idStr) . '&restricted=1');
+                return;
             }
 
             // Ensure graph tables are initialized and synced with legacy records
@@ -189,8 +190,8 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
-            // IDOR guard: graph data is family-scoped.
-            if (!BaseController::sessionSharesFamily($familyCode)) {
+            // IDOR guard: graph data is family-scoped or connection-scoped.
+            if (!BaseController::sessionSharesFamily($familyCode) && !BaseController::sessionCanViewMember($idStr, $familyCode)) {
                 throw new ForbiddenException('You can only view your own family tree.');
             }
 

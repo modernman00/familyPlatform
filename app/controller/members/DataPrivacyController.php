@@ -101,9 +101,13 @@ final class DataPrivacyController
             );
 
             // Do not make the member wait for an operational notification email.
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
+            // Local PHP servers cannot flush and continue safely, so leave the
+            // notification to the durable log until a worker-backed mail queue
+            // is configured.
+            if (!function_exists('fastcgi_finish_request')) {
+                return;
             }
+            fastcgi_finish_request();
 
             $opsEmail = (string) ($_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: '');
             $opsEmail = str_contains($opsEmail, '${') ? '' : $opsEmail; // guard against an unresolved .env var

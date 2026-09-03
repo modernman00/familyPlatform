@@ -1224,7 +1224,8 @@
             btn.innerHTML = originalText;
             btn.disabled = false;
 
-            if (data.status === 200) {
+            const isOk = (data.status === 200 || data.status === 'success' || data.statusCode === 200);
+            if (isOk) {
                 // Real-Time In-Place DOM Hydration
                 const cardContainer = document.getElementById('relative-card-node-' + nodeId);
                 if (cardContainer) {
@@ -1393,6 +1394,18 @@
         submitStudioForm(this, '/member/organogram/editor/parents', 'studioSaveParentsBtn', 'Saving Parents...', 'parents');
     });
 
+    function extractStudioErrorMessage(err) {
+        if (typeof err === 'string' && err.trim() !== '') return err;
+        if (err && typeof err === 'object') {
+            if (typeof err.message === 'string') return err.message;
+            if (typeof err.error === 'string') return err.error;
+            const values = Object.values(err);
+            if (values.length > 0 && typeof values[0] === 'string') return values[0];
+            try { return JSON.stringify(err); } catch (_) {}
+        }
+        return 'An error occurred. Please try again.';
+    }
+
     function submitStudioForm(form, url, btnId, loadingText, relType) {
         const btn = document.getElementById(btnId);
         const originalText = btn.innerHTML;
@@ -1414,7 +1427,8 @@
             btn.innerHTML = originalText;
             btn.disabled = false;
 
-            if (data.status === 200) {
+            const isOk = (data.status === 200 || data.status === 'success' || data.statusCode === 200);
+            if (isOk) {
                 const msg = (data.message && typeof data.message === 'object') ? data.message : {};
                 
                 // Real-Time In-Place DOM Insertion for Added Relatives
@@ -1491,7 +1505,7 @@
                 }
             } else {
                 if (errorDiv) {
-                    errorDiv.textContent = data.message || 'An error occurred.';
+                    errorDiv.textContent = extractStudioErrorMessage(data.message || data.error || data);
                     errorDiv.classList.remove('d-none');
                 }
             }
@@ -1500,7 +1514,7 @@
             btn.innerHTML = originalText;
             btn.disabled = false;
             if (errorDiv) {
-                errorDiv.textContent = 'A network error occurred.';
+                errorDiv.textContent = 'A network error occurred. Please try again.';
                 errorDiv.classList.remove('d-none');
             }
         });

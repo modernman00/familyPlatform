@@ -10,20 +10,20 @@ export function initDarkMode() {
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const isDark = savedTheme === 'dark' || (savedTheme === null && prefersDark);
 
+  const themeBadge = document.getElementById('themeStatusBadge');
+
   const applyTheme = (dark) => {
     if (dark) {
       document.body.classList.add('dark-mode');
-      if (toggleBtn) {
-        toggleBtn.innerHTML = '<i class="bi bi-sun-fill"></i>';
-        toggleBtn.setAttribute('title', 'Switch to Light Mode');
-        toggleBtn.setAttribute('aria-label', 'Switch to Light Mode');
+      if (themeBadge) {
+        themeBadge.textContent = 'Dark';
+        themeBadge.className = 'badge bg-warning text-dark';
       }
     } else {
       document.body.classList.remove('dark-mode');
-      if (toggleBtn) {
-        toggleBtn.innerHTML = '<i class="bi bi-moon-fill"></i>';
-        toggleBtn.setAttribute('title', 'Switch to Dark Mode');
-        toggleBtn.setAttribute('aria-label', 'Switch to Dark Mode');
+      if (themeBadge) {
+        themeBadge.textContent = 'Light';
+        themeBadge.className = 'badge bg-secondary-subtle text-secondary';
       }
     }
   };

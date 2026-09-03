@@ -2,14 +2,35 @@
   "name": "Family Platform",
   "short_name": "FamilyPlatform",
   "description": "Connect, share memories, and build your family legacy with Family Platform.",
-  "start_url": "/profilePage",
+  "start_url": "/profilePage?source=pwa_homescreen",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "theme_color": "#2563eb",
   "background_color": "#ffffff",
-  "id": "com.familyplatform.app",
+  "id": "/?source=pwa",
   "categories": ["social", "lifestyle", "family"],
+  "screenshots": [
+    {
+      "src": "/public/img/hero-family.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "FamilyPlatform Live Feed & Moments"
+    },
+    {
+      "src": "/public/img/auth-bg.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "FamilyPlatform Heritage & Kinship"
+    }
+  ],
   "icons": [
     {
       "src": "/public/pwa/android/android-launchericon-48-48.png",

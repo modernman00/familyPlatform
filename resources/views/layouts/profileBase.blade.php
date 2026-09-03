@@ -19,6 +19,25 @@
   <meta name="theme-color" content="#2563eb">
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
+  <!-- iOS WebKit App-Store Splash Screen Matrix (Dr. Soren Lindqvist Gate Mandate) -->
+  <!-- iPhone 16 Pro Max, 15 Pro Max, 14 Pro Max -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
+  <!-- iPhone 16 Pro, 15 Pro, 14 Pro -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
+  <!-- iPhone 14, 13, 13 Pro, 12, 12 Pro -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)">
+  <!-- iPhone 13 mini, 12 mini, 11 Pro, XS, X -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)">
+  <!-- iPhone 11, XR -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)">
+  <!-- iPhone 8 Plus, 7 Plus, 6s Plus -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)">
+  <!-- iPhone SE (2nd/3rd gen), 8, 7, 6s -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)">
+  <!-- iPad Pro 12.9", 11", Air 10.9" -->
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
+  <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
+
   <script src="https://kit.fontawesome.com/e78379d4a3.js" crossorigin="anonymous"></script>
 
   <title>@yield('title')</title>
@@ -48,10 +67,8 @@
        from prefetch cache before the parser gets here) always finds this markup. --}}
   @includeIf('member.modals.editProfile')
 
-  <!-- Dark Mode Toggle -->
-  <div class="dark-mode-toggle" id="darkModeToggle">
-    <i class="bi bi-moon-fill"></i>
-  </div>
+  <!-- Mobile PWA Bottom Tab Navigation (Native App Parity) -->
+  @include('layouts.bottom_nav')
 
   @include('partials.cookie-banner')
 

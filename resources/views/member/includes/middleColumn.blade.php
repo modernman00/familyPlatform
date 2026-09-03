@@ -160,22 +160,31 @@
             <div class="flex-grow-1">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h6 class="mb-0 fw-semibold text-dark" style="font-size: 0.9375rem;" x-text="post.fullName"></h6>
+                  <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
                   <div class="d-flex align-items-center gap-2 mt-0.5">
-                    <small class="text-muted" style="font-size: 0.8125rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
+                    <small class="text-muted" style="font-size: 0.85rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
                     <template x-if="post.postFamCode">
-                      <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size: 0.7rem; font-weight: normal; padding: 2px 6px;" x-text="'Family: ' + post.postFamCode"></span>
+                      <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size: 0.78rem; font-weight: normal; padding: 2px 8px;" x-text="'Family: ' + post.postFamCode"></span>
                     </template>
                   </div>
                 </div>
                 <template x-if="isOwnPost(post)">
-                  <div class="d-flex gap-1">
-                    <button type="button" class="btn btn-sm btn-link text-muted p-1" title="Edit post" @click="editPost(post)">
-                      <i class="bi bi-pencil"></i>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-muted p-1 rounded-circle" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Post options">
+                      <i class="bi bi-three-dots" style="font-size: 1.25rem;"></i>
                     </button>
-                    <button type="button" class="btn btn-sm btn-link text-muted p-1" title="Delete post" @click="deletePost(post.post_no)">
-                      <i class="bi bi-trash"></i>
-                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" :aria-labelledby="'kebab' + post.post_no" style="border-radius: 12px; font-size: 0.9rem; min-width: 160px;">
+                      <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
+                          <i class="bi bi-pencil-square text-primary"></i> Edit Post
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" @click.prevent="deletePost(post.post_no)">
+                          <i class="bi bi-trash3"></i> Delete Post
+                        </a>
+                      </li>
+                    </ul>
                   </div>
                 </template>
               </div>
@@ -185,7 +194,7 @@
           <!-- Post Text -->
           <template x-if="post.displayMessage || (!post.video && post.postMessage)">
             <div class="post-content px-1 mb-3">
-              <p class="mb-0" style="white-space: pre-line; font-size: 0.9375rem; color: var(--text-main); line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-text="post.displayMessage || post.postMessage"></p>
+              <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-text="post.displayMessage || post.postMessage"></p>
             </div>
           </template>
 
@@ -193,9 +202,14 @@
           <template x-if="post.images && post.images.length > 0">
             <div class="row g-2 mb-3 px-1">
               <template x-for="(img, idx) in post.images" :key="idx">
-                <div :class="post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')">
+                <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
                   <a href="#" @click.prevent="openLightbox(post.images, idx)" style="display:block; overflow:hidden; border-radius:10px;">
-                    <img :src="'/resources/images/post/' + encodeURIComponent(img)" style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" alt="post image" onmouseover="this.style.transform='scale(1.02)';" onmouseout="this.style.transform='scale(1)';">
+                    <img :src="'/resources/images/post/' + encodeURIComponent(img)" 
+                         style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" 
+                         alt="" 
+                         onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';"
+                         onmouseover="this.style.transform='scale(1.02)';" 
+                         onmouseout="this.style.transform='scale(1)';">
                   </a>
                 </div>
               </template>
@@ -301,13 +315,13 @@
               <!-- Like / Active Reaction Button -->
               <button class="btn btn-link text-decoration-none w-100 py-2 d-flex align-items-center justify-content-center gap-1"
                       :class="post.user_reaction ? 'fw-semibold' : 'text-muted'"
-                      :style="post.user_reaction ? 'color: #1877f2; font-size:0.9rem;' : 'font-size:0.9rem;'"
+                      :style="post.user_reaction ? 'color: #1877f2; font-size:0.95rem; font-weight:600;' : 'font-size:0.95rem; font-weight:500;'"
                       type="button"
                       @click="onPostLikeClick(post.post_no, post.user_reaction || 'like')"
                       @touchstart.passive="startPostLongPress(post.post_no)"
                       @touchend="cancelPostLongPress()"
                       @touchmove="cancelPostLongPress()">
-                <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.icon || '👍') : '👍'" style="font-size:1.1rem;"></span>
+                <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.icon || '👍') : '👍'" style="font-size:1.15rem;"></span>
                 <span x-text="post.user_reaction ? (emojiMap[post.user_reaction]?.label || 'Like') : 'Like'" class="ms-1"></span>
               </button>
             </div>
@@ -317,7 +331,7 @@
 
             <!-- Comment Button -->
             <button class="btn btn-link text-decoration-none text-muted flex-grow-1 py-2 d-flex align-items-center justify-content-center gap-2"
-                    style="font-size: 0.9rem;"
+                    style="font-size: 0.95rem; font-weight: 500;"
                     type="button"
                     @click="toggleCommentForm(post.post_no)">
               <i class="bi bi-chat-bubble"></i>

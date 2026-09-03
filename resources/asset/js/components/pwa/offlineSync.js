@@ -11,8 +11,9 @@
 import Swal from 'sweetalert2';
 
 const DB_NAME = 'familyplatform_offline_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'offline_queue';
+const FEED_STORE_NAME = 'offline_feed';
 
 class OfflineSyncManager {
   constructor() {
@@ -33,6 +34,9 @@ class OfflineSyncManager {
         const db = e.target.result;
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains(FEED_STORE_NAME)) {
+          db.createObjectStore(FEED_STORE_NAME, { keyPath: 'key' });
         }
       };
 
@@ -258,6 +262,63 @@ class OfflineSyncManager {
       }
       tx.oncomplete = () => resolve(true);
     });
+  }
+
+  /**
+   * 5. Cache Feed Posts for Offline-First Viewing (Facebook Pattern)
+   */
+  cacheFeed(posts) {
+    if (!Array.isArray(posts) || posts.length === 0) return Promise.resolve(false);
+    return new Promise((resolve) => {
+      if (!this.db) {
+        return resolve(false);
+      }
+      try {
+        const tx = this.db.transaction(FEED_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(FEED_STORE_NAME);
+        store.put({
+          key: 'latest_feed',
+          posts: posts.slice(0, 60),
+          cachedAt: Date.now()
+        });
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      } catch (e) {
+        console.warn('[OfflineSync] Error writing to feed cache:', e);
+        resolve(false);
+      }
+    });
+  }
+
+  /**
+   * 6. Retrieve Cached Feed Posts
+   */
+  getCachedFeed() {
+    return new Promise((resolve) => {
+      if (!this.db) {
+        this.initDB().then(() => {
+          this.readCachedFeed(resolve);
+        }).catch(() => resolve([]));
+        return;
+      }
+      this.readCachedFeed(resolve);
+    });
+  }
+
+  readCachedFeed(resolve) {
+    try {
+      const tx = this.db.transaction(FEED_STORE_NAME, 'readonly');
+      const store = tx.objectStore(FEED_STORE_NAME);
+      const req = store.get('latest_feed');
+      req.onsuccess = () => {
+        const result = req.result;
+        resolve(result?.posts || []);
+      };
+      req.onerror = () => resolve([]);
+    } catch (e) {
+      console.warn('[OfflineSync] Error reading feed cache:', e);
+      resolve([]);
+    }
   }
 }
 

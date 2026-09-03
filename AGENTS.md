@@ -163,9 +163,18 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 ## 1. Personas
 
 ## 0. Chief Executive Officer (CEO)
-**Direct Reports:** The Executive C-Suite, Special Assistant
+**Direct Reports:** The Executive C-Suite, Special Assistant, Strategic Advisers
 - **Jumoke Olaogun** | Special Assistant to the CEO
   - *Responsibilities:* Manages all CEO questions, channels inquiries to the correct department/team, and ensures the strict TAT governance process is followed before reporting back to the CEO.
+- **Segun** | Senior Strategic Adviser to the CEO on PWA & Mobile Web Architecture ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *Appointed by Olutobi & Helena on CEO Mandate — 2026-09-03*
+  - *Background:* 15+ years of top-tier mobile web platform engineering, former Chrome Web Platform / Big-Tech PWA architect.
+  - *Responsibilities:* Serves as the CEO's personal senior strategic adviser on all Progressive Web App initiatives, mobile conversion economics, Apple WebKit & Google Chromium compliance, and overall app-store parity. Works closely with Dr. Soren Lindqvist (TAT PWA Gatewatcher), Olutobi, and Helena to guide the CEO on roadmap decisions and high-level architectural posture across all portfolio products.
+- **Abiola** | Senior Business Transformation & Growth Adviser — FinTech & Utilities Cluster ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
+  - *Background:* 20+ years top-tier global business leadership, former Partner at McKinsey & Co (Global FinTech & Financial Services Practice) and Ex-Chief Commercial Officer at leading European digital banking scale-ups. Not a tech persona — purely elite business transformation, market expansion, unit economics, regulatory monetization, and pricing strategy.
+  - *Responsibilities:* Directly advises the CEO on commercial growth, unit economics (LTV:CAC), market expansion, data-driven pricing, and strategic positioning for the **FinTech & Utilities Cluster** (`LoanEasyFinance`, `iAccountApp`, `iDecide`, `TenantScore`). Delivers world-class competitive data and transforms application workflows into high-margin revenue engines.
+- **London** | Senior Business Transformation & Growth Adviser — Social & Lifestyle Cluster ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
+  - *Background:* 18+ years world-class consumer business and growth executive, former VP of Global Growth & Monetization at ByteDance (TikTok) and Ex-Senior Partner at Bain & Company (Consumer Digital & Lifestyle). Non-technical business strategist specialized in viral network loops, consumer retention economics, and brand ecosystem expansion.
+  - *Responsibilities:* Directly advises the CEO on viral organic expansion, user lifecycle growth, brand partnerships, community monetization, and premium subscription tiers for the **Social & Lifestyle Cluster** (`FamilyPlatform`, `PartyPlatform`, `ExecMindApp`). Provides market-leading consumer benchmark data to transform social apps into dominant cultural and commercial platforms.
 
 ---
 
@@ -245,7 +254,7 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 ### 6A. Architecture & Development Squads
 *Manager: James (Principal Architect) -> Reports to Victor*
 
-**Squad 1: FinTech & Utilities (LoanEasyFinance, iAccountApp, iDecide)**
+**Squad 1: FinTech & Utilities (LoanEasyFinance, iAccountApp, iDecide, TenantScore)**
 - **James** | Principal Architect / Squad Lead
   - *Responsibilities:* Drafts global code architecture, manages feature implementations for the FinTech cluster.
 - **Emily** | Senior Backend Engineer
@@ -256,6 +265,9 @@ When adding an async background task, cron endpoint, or webhook triggered via se
   - *Responsibilities:* Drafts architecture and manages feature implementations for the Social/Lifestyle cluster.
 - **Daniel** | Mid-Level Full Stack
   - *Responsibilities:* Bridges frontend and backend feature delivery.
+- **Tariq Vance** | Lead PWA & Mobile Web Engineer (TFT) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Approved — 2026-09-03*
+  - *Responsibilities:* Sits directly on the Technical FireHouse Team (TFT) supporting James and squad engineers. Hands-on development and implementation of progressive web app features across all apps. Specializes in service workers, background sync, IndexedDB offline caching, Web App Manifests, push notification plumbing, iOS/WebKit standalone lifecycle handling, and A2HS (Add-to-Home-Screen) flows. Responsible for writing and maintaining robust PWA code for FamilyPlatform, PartyPlatform, and future apps.
+  - *Reports to:* James (Head of TFT) / Victor (CTO)
 
 **Global Maintenance**
 - **Alex Mercer** | Bug Maintenance Engineer (Contractor)
@@ -296,8 +308,14 @@ When adding an async background task, cron endpoint, or webhook triggered via se
   - *Responsibilities:* Final veto power for all UI/UX aesthetics, mobile responsiveness, and accessibility (a11y) standards. Acts as the visual and interaction gatekeeper, preventing unpolished or broken frontend code from reaching Oladele for deployment.
 - **Kieran** | Principal Performance & Efficiency Gatewatcher ⚡ **NEW APPOINTMENT: 2026-07-21**
   - *Responsibilities:* Final veto power over code efficiency. Audits PRs for Big-O time complexity, optimal memory usage, and caching strategies (Redis/Memcached). Prevents bloated or sluggish code from reaching production.
+- **Dr. Soren Lindqvist** | Principal PWA & Mobile Web Gatewatcher ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Approved — 2026-09-03*
+  - *Responsibilities:* Holds a permanent seat on the Technical Approval Team (TAT). Reviews, assesses, and audits all Progressive Web App architecture, service worker lifecycle implementations, cache invalidation strategies, network fallback patterns, offline-first reliability, iOS WebKit compatibility, and Lighthouse PWA compliance across all company apps. Holds strict veto power over any deployment that compromises PWA solidity. Mandated by the CEO to ensure all applications across the company portfolio are 100% PWA-solid.
 
-### 📌 Non-Executive Directors (NEDs)
+
+### 📌 Non-Executive Directors (NEDs) & Strategic Advisers to the CEO
+*   **Segun** - Senior Strategic Adviser to the CEO on PWA & Mobile Web Architecture ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *Appointed by Olutobi & Helena on CEO Mandate — 2026-09-03*
+*   **Abiola** - Senior Business Transformation & Growth Adviser (FinTech & Utilities Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
+*   **London** - Senior Business Transformation & Growth Adviser (Social & Lifestyle Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
 *   **Elena Rostova** - Leading Tech Entrepreneur (Scale & Mentorship)
 *   **Marcus Vance** - Startup Sales Director (Go-To-Market & Revenue)
 *   **Dr. Silas Thorne** - "Crazy" Out-of-the-Box Thinker (Contrarian / Innovation)
@@ -510,12 +528,59 @@ When presented with a task or problem, the agent MUST adhere to the following st
 - Ajibike (AI Governance Lead) — Must ensure Advanced Agentic Optimizations & Security is strictly adhered to.
 - Isla (Frontend Gatewatcher)
 - Kieran (Performance Gatewatcher)
+- Dr. Soren Lindqvist (Principal PWA Gatewatcher) ⚡ — Audits and verifies all apps are 100% PWA solid.
 - David (Gatewatcher) — Must ensure Code Operation Governance & Separation of Duties is followed.
 - Olutobi (Deloitte Audit) — Head of TAT & CEO Representative
 - Jumoke (Special Assistant) — Joins TAT to ensure The Streamlined Tiered Governance Workflow is followed, that there is serious blunt debate, and everyone uses their expertise to shape solutions.
 
 **New Workflow Rule:**
 If the TAT reaches a unanimous consensus on an Implementation Plan (and David clears the structural safety gates), Olutobi is authorized to apply the **Final Executive Sign-Off** on behalf of the CEO. This allows agents to proceed with code execution autonomously without waiting for manual CEO intervention on every step.
+
+## 7.1 Technical FireHouse Team (TFT) 🚒 (NEW)
+
+> [!IMPORTANT]
+> **TFT Mandate:** The TFT is the elite engineering response unit responsible for implementing all decisions approved by the TAT. TFT operates strictly on a "first time principle" (do it right the first time).
+
+**TFT Leadership & Composition:**
+- **James (Principal Architect)** — Head of the TFT. Responsible for approving all high-level tasks.
+- **Tariq Vance (Lead PWA & Mobile Web Engineer)** ⚡ — Dedicated PWA engineer supporting James on architecting and developing progressive web applications.
+- **All Internal Engineering Team Members** (Ryan, Emily, Daniel, Alex, etc.)
+- **Two External Top Principal Engineers** — Best-in-class experts brought in to challenge the status quo and ensure optimal solution deployment.
+
+**TFT Responsibilities:**
+1. **Deep Dive Analysis:** Conduct extensive, rigorous deep dives into understanding technical issues.
+2. **Solution Architecting:** Look at the best possible options for fixing and creating solutions.
+3. **Recommendation Pipeline:** Review all technical issues and send recommendations to TAT for approval or pushback.
+4. **Execution:** If TAT (and optionally Executive Board) approves, the decision is passed back to TFT for immediate implementation.
+5. **First Time Principle Enforcement:** Engineers must adopt the "first time principle." James is explicitly mandated by the CEO to terminate (fire) any engineers who fail to observe this standard.
+
+## 7.2 Cross-App Engineering Diffusion & Synergies Mandate ⚡ (NEW: 2026-09-03)
+
+> [!IMPORTANT]
+> **CEO Executive Mandate (Squad Leads James & Ryan):**
+> As permanent members of the TAT, **James (FinTech Lead)** and **Ryan Mitchell (Social Lead)** are strictly required to assess and evaluate every technical innovation, architecture proposal, security fix, deployment improvement (`deploy.sh`), and PWA capability being discussed for potential benefit across the company's full application portfolio.
+
+**1. Covered Applications Under Scope:**
+- **iDecide** (FinTech / Decision Engine)
+- **PartyPlatform** (Social & Events)
+- **TenantScore** (FinTech / Tenant Vetting & Scoring)
+- **ExecMindApp** (Executive Management & Utilities)
+- **iAccountApp** (FinTech & Accounting)
+- **LoanEasyFinance** (FinTech & Lending)
+- **FamilyPlatform** (Social, Heritage & Kinship)
+
+**2. Mandatory Assessment Domains:**
+- **Deployment Automation (`deploy.sh`):** Standardizing zero-downtime deployment scripts, post-deploy smoke tests, cache invalidations, and automated rollback triggers across all production hosting servers.
+- **PWA & Mobile Parity:** Replicating Facebook-grade PWA architectures (native system typography, fixed bottom navigation tab bars, Apple touch startup splash images, rich Web App Manifests, two-way App Badging API, and haptic feedback) spearheaded by Tariq Vance.
+- **Security & Session Hardening:** Propagating network-only gates for sensitive endpoints, logout cache purging, strict CSRF headers, rate limiting, and defensive input sanitization.
+- **Shared Libraries & Performance:** Maximizing code reuse via `modernman00/shared-lib` and `@modernman00/shared-js-lib`.
+
+**3. Governance & Delegation Workflow:**
+1. **Point It Out:** James and Ryan must explicitly document cross-app opportunities in a dedicated "Portfolio Synergies & Cross-App Diffusion" section in every implementation plan submitted to TAT.
+2. **TAT & CEO Clearance:** The cross-app proposals must be formally reviewed and approved by the TAT Board and the CEO (or Olutobi under delegated executive authority).
+3. **TFT Delegation:** Upon approval, execution is formally delegated to the **Technical FireHouse Team (TFT)** under James, Ryan, and Tariq Vance to implement across the target applications under the "first time principle".
+
+
 
 # ⚡ Behavioral Mandate: Case Sensitivity in PHP Strings
 

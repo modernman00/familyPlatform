@@ -11,6 +11,7 @@
 'use strict';
 
 import OfflineSyncManager from './offlineSync';
+import { triggerHaptic } from './haptics';
 
 class PWAManager {
   constructor() {
@@ -19,6 +20,7 @@ class PWAManager {
     this.isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     this.offlineSync = new OfflineSyncManager();
     window.offlineSync = this.offlineSync;
+    window.triggerHaptic = triggerHaptic;
     // Web Push lives in components/profilePage/registerPushNotification.js — one
     // module, imported by the profile-page bundle and driven by the Settings toggle.
     this.init();
@@ -30,6 +32,8 @@ class PWAManager {
     this.setupIOSPrompt();
     this.setupNetworkHUD();
     this.setupLogoutCachePurge();
+    this.setupBottomNav();
+    this.setupHaptics();
   }
 
   /**
@@ -295,6 +299,101 @@ class PWAManager {
         navigator.clearAppBadge().catch(() => {});
       }
     }
+  }
+
+  /**
+   * 6. Mobile Bottom Navigation Shell & Badge Sync
+   */
+  setupBottomNav() {
+    const nav = document.getElementById('pwaBottomNav');
+    if (!nav) return;
+
+    // Highlight active tab based on current path
+    const path = window.location.pathname.toLowerCase();
+    const tabs = nav.querySelectorAll('.pwa-tab-item');
+    tabs.forEach((tab) => {
+      const href = (tab.getAttribute('href') || '').toLowerCase();
+      const tabType = tab.dataset.tab;
+
+      if (tabType === 'feed' && (path === '/profilepage' || path === '/' || path === '')) {
+        tab.classList.add('active');
+      } else if (tabType === 'tree' && path.includes('/organogram')) {
+        tab.classList.add('active');
+      } else if (tabType === 'reels' && (path.includes('/reels') || path.includes('/familystudio'))) {
+        tab.classList.add('active');
+      } else if (tabType === 'members' && path.includes('/allmembers')) {
+        tab.classList.add('active');
+      } else if (href && href !== 'javascript:void(0)' && path === href) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+
+      tab.addEventListener('click', () => {
+        triggerHaptic('selection');
+      });
+    });
+
+    // Wire Alerts Tab click
+    const notifTab = document.getElementById('pwaNotifTab');
+    if (notifTab) {
+      notifTab.addEventListener('click', (e) => {
+        e.preventDefault();
+        triggerHaptic('selection');
+        const desktopNotifBtn = document.getElementById('notificationBtn');
+        if (desktopNotifBtn) {
+          desktopNotifBtn.click();
+        } else {
+          window.location.href = '/notifications';
+        }
+      });
+    }
+
+    // Two-way synchronization of notification badge count
+    const syncBadge = () => {
+      const desktopBadge = document.getElementById('notification_count');
+      const mobileBadge = document.getElementById('pwa_bottom_badge');
+      if (!desktopBadge || !mobileBadge) return;
+
+      const rawCount = desktopBadge.textContent.trim();
+      const count = parseInt(rawCount, 10);
+
+      if (!isNaN(count) && count > 0) {
+        mobileBadge.textContent = count > 99 ? '99+' : count;
+        mobileBadge.style.display = 'inline-flex';
+        PWAManager.setBadge(count);
+      } else {
+        mobileBadge.textContent = '';
+        mobileBadge.style.display = 'none';
+        PWAManager.setBadge(0);
+      }
+    };
+
+    // Initial sync
+    syncBadge();
+
+    // Observe changes to desktop badge
+    const desktopBadge = document.getElementById('notification_count');
+    if (desktopBadge) {
+      const observer = new MutationObserver(syncBadge);
+      observer.observe(desktopBadge, { childList: true, characterData: true, subtree: true });
+    }
+  }
+
+  /**
+   * 7. Native Haptics Delegation
+   */
+  setupHaptics() {
+    document.addEventListener('click', (e) => {
+      // Like / Reactions
+      if (e.target.closest('.likeBtn, .like-btn, .reaction-btn, [data-reaction], .btn-like')) {
+        triggerHaptic('impact');
+      }
+      // Interactive pill buttons
+      else if (e.target.closest('.btn-primary, .btn-user-stitch, .btn-icon-stitch')) {
+        triggerHaptic('selection');
+      }
+    }, { passive: true });
   }
 }
 

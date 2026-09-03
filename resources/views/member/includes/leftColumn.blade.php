@@ -24,22 +24,22 @@
             <p class="card-text mb-3" style="color: var(--text-muted); font-size: 0.85rem;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $data['country'] ?? 'Global' }}</p>
 
             <!-- Family Code Tonal Pill -->
-            <div class="family-code-pill mb-4" style="background-color: var(--secondary-color); border: 1px solid #c7d2fe; border-radius: 9999px; padding: 6px 18px; width: fit-content;">
-                <small class="d-inline text-uppercase fw-bold me-1" style="color: #4f46e5; font-size: 0.72rem; letter-spacing: 0.05em;">Family Code:</small>
-                <span class="fw-bold" style="color: #312e81; font-size: 0.85rem;"><i class="bi bi-hash"></i>{{ $data['famCode'] }}</span>
+            <div class="family-code-pill mb-3" style="background-color: var(--secondary-color); border: 1px solid #c7d2fe; border-radius: 9999px; padding: 6px 18px; width: fit-content;">
+                <small class="d-inline text-uppercase fw-bold me-1" style="color: #4f46e5; font-size: 0.82rem; letter-spacing: 0.05em;">Family Code:</small>
+                <span class="fw-bold" style="color: #312e81; font-size: 0.95rem;"><i class="bi bi-hash"></i>{{ $data['famCode'] }}</span>
             </div>
 
-            <div class="d-flex flex-column gap-2 px-2 w-100">
-                <button type="button" class="btn text-white fw-bold shadow-sm" style="background-color: var(--primary-color); border-radius: 12px; padding: 10px; font-size: 0.88rem;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                    <i class="bi bi-pencil-square me-2"></i> Edit Profile
+            <div class="d-flex flex-row flex-wrap flex-lg-column gap-2 px-2 w-100">
+                <button type="button" class="btn text-white fw-bold shadow-sm flex-fill" style="background-color: var(--primary-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="bi bi-pencil-square me-1"></i> Edit Profile
                 </button>
 
-                <button type="button" class="btn fw-semibold" style="border: 1px solid var(--border-color); color: var(--text-color); background: var(--hover-color); border-radius: 12px; padding: 10px; font-size: 0.88rem;" data-bs-toggle="modal" data-bs-target="#createEventModal">
-                    <i class="bi bi-calendar-plus me-2 text-primary"></i> Create Event
+                <button type="button" class="btn fw-semibold flex-fill" style="border: 1px solid var(--border-color); color: var(--text-color); background: var(--hover-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                    <i class="bi bi-calendar-plus me-1 text-primary"></i> Create Event
                 </button>
 
-                <button type="button" id="directToImages" class="btn fw-semibold" style="background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; font-size: 0.88rem;" onclick="window.location.href='/profilepage/gallery'">
-                    <i class="bi bi-images me-2 text-secondary"></i> Photo Gallery
+                <button type="button" id="directToImages" class="btn fw-semibold flex-fill" style="background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" onclick="window.location.href='/profilepage/gallery'">
+                    <i class="bi bi-images me-1 text-secondary"></i> Photo Gallery
                 </button>
             </div>
 

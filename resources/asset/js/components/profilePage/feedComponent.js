@@ -70,20 +70,41 @@ export function profileFeed(opts = {}) {
         },
 
         async fetchPosts() {
-            this.isLoading = true;
+            this.isLoading = this.posts.length === 0;
             this.errorMessage = '';
+
+            // 1. Instant offline cache hydration (Facebook standard)
+            if (window.offlineSync && typeof window.offlineSync.getCachedFeed === 'function') {
+                try {
+                    const cachedPosts = await window.offlineSync.getCachedFeed();
+                    if (Array.isArray(cachedPosts) && cachedPosts.length > 0 && this.posts.length === 0) {
+                        this.posts = cachedPosts.map(p => this.normalizePost(p));
+                        this.isLoading = false;
+                    }
+                } catch (cacheErr) {
+                    console.warn('[Feed] Offline cache read:', cacheErr);
+                }
+            }
+
+            // 2. Fetch fresh updates from server
             try {
                 const response = await axios.get('/post/getAllPostCommentByFamCode');
                 const rawPosts = response?.data?.message?.message;
                 
                 if (Array.isArray(rawPosts)) {
                     this.posts = rawPosts.map(p => this.normalizePost(p));
-                } else {
+                    // Update offline store in background
+                    if (window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
+                        window.offlineSync.cacheFeed(rawPosts).catch(() => {});
+                    }
+                } else if (this.posts.length === 0) {
                     this.posts = [];
                 }
             } catch (err) {
-                console.error('Failed to load posts:', err);
-                this.errorMessage = 'Unable to load family posts. Please refresh or try again later.';
+                console.error('Failed to load posts from network:', err);
+                if (this.posts.length === 0) {
+                    this.errorMessage = 'Unable to load family posts. Please check your network connection.';
+                }
             } finally {
                 this.isLoading = false;
             }
@@ -136,8 +157,9 @@ export function profileFeed(opts = {}) {
         extractImages(p) {
             if (!p || typeof p !== 'object') return [];
             return Object.keys(p)
-                .filter(k => k.startsWith('post_img') && p[k] !== null && p[k] !== '')
-                .map(k => p[k]);
+                .filter(k => k.startsWith('post_img') && p[k] !== null && p[k] !== '' && typeof p[k] === 'string')
+                .map(k => p[k].trim())
+                .filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image'));
         },
 
         formatDate(dateStr) {

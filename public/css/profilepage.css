@@ -305,8 +305,13 @@ body {
   }
   
   .profile-column { order: 1; }
-  .sidebar-column { order: 2; }
-  .feed-column { order: 3; }
+  .feed-column { order: 2; }
+  .sidebar-column { order: 3; }
+
+  .post-content p {
+    font-size: clamp(1rem, 3.8vw, 1.0625rem) !important;
+    line-height: 1.55 !important;
+  }
 
   .navbar-brand {
     font-size: 1.2rem;

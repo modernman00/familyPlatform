@@ -109,6 +109,12 @@
                                 <i class="bi bi-gear-fill me-2 text-secondary"></i> Settings
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item py-2 px-3 fw-medium d-flex align-items-center justify-content-between" href="javascript:void(0)" id="darkModeToggle" role="button">
+                                <span><i class="bi bi-moon-stars-fill me-2 text-warning"></i> Theme Mode</span>
+                                <span class="badge bg-secondary-subtle text-secondary" id="themeStatusBadge" style="font-size: 0.72rem;">Toggle</span>
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
                             <a class="dropdown-item py-2 px-3 fw-medium text-danger" href="/signout">
