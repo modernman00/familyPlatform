@@ -205,10 +205,21 @@ const countryCodes = {
 
 
 const injectCountryCode = () => {
-  id('country').addEventListener('change', (e) => {
-    const value = e.target.value;
-    id('mobile').value = countryCodes[value] || '';
+  const countryEl = id('country');
+  const mobileEl = id('mobile');
+  if (!countryEl || !mobileEl) return;
+
+  countryEl.addEventListener('change', (e) => {
+    mobileEl.value = countryCodes[e.target.value] || '';
   });
+
+  // Prefill from the country already selected on load (default option or the
+  // value carried over from the OAuth profile), unless a mobile number is
+  // already present so we never clobber what the user/provider supplied.
+  if (!mobileEl.value.trim()) {
+    const code = countryCodes[countryEl.value];
+    if (code) mobileEl.value = code;
+  }
 };
 
 injectCountryCode();

@@ -92,6 +92,19 @@ final class DataPrivacyController
             // the notification email below fails.
             error_log("[GDPR] Art.17 erasure request — account_id={$userId} email={$memberEmail} at " . gmdate('c'));
 
+            if (!headers_sent()) {
+                header('Content-Type: application/json; charset=utf-8');
+            }
+            Utility::msgSuccess(
+                200,
+                'We have received your deletion request. Our team will action it within 30 days and email you at ' . $memberEmail . ' when it is done.'
+            );
+
+            // Do not make the member wait for an operational notification email.
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+
             $opsEmail = (string) ($_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: '');
             $opsEmail = str_contains($opsEmail, '${') ? '' : $opsEmail; // guard against an unresolved .env var
             if ($opsEmail !== '') {
@@ -113,14 +126,6 @@ final class DataPrivacyController
                     error_log('[GDPR] deletion-request ops email failed: ' . $mailErr->getMessage());
                 }
             }
-
-            if (!headers_sent()) {
-                header('Content-Type: application/json; charset=utf-8');
-            }
-            Utility::msgSuccess(
-                200,
-                'We have received your deletion request. Our team will action it within 30 days and email you at ' . $memberEmail . ' when it is done.'
-            );
         } catch (\Throwable $th) {
             Utility::showError($th);
         }
