@@ -15,6 +15,7 @@ import axios from 'axios';
 import { getCsrfToken } from '../global';
 
 const VAPID_PUBLIC_KEY = process.env.MIX_VAPID_PUBLIC_KEY || '';
+const PUSH_PROMPT_DISMISSED_KEY = 'push_prompt_dismissed';
 
 const pushSupported = () =>
   'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -69,6 +70,56 @@ async function doSubscribe(swReg) {
   });
   await syncToServer(sub);
   return sub;
+}
+
+function showPushPrompt() {
+  if (!VAPID_PUBLIC_KEY || Notification.permission !== 'default') return;
+  if (localStorage.getItem(PUSH_PROMPT_DISMISSED_KEY)) return;
+  if (document.getElementById('push-permission-banner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'push-permission-banner';
+  banner.innerHTML = `
+    <div class="pwa-banner-card">
+      <div class="pwa-banner-header">
+        <div class="pwa-banner-text">
+          <h6>Stay connected with your family</h6>
+          <p>Allow notifications for new friend requests, events, and family updates.</p>
+        </div>
+        <button type="button" id="push-prompt-close" class="pwa-btn-close" aria-label="Dismiss">&times;</button>
+      </div>
+      <div class="pwa-banner-actions">
+        <button type="button" id="push-prompt-enable" class="pwa-btn pwa-btn-primary">Allow notifications</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(banner);
+  setTimeout(() => banner.classList.add('show'), 100);
+
+  const dismiss = () => {
+    localStorage.setItem(PUSH_PROMPT_DISMISSED_KEY, String(Date.now()));
+    banner.remove();
+  };
+
+  document.getElementById('push-prompt-close')?.addEventListener('click', dismiss);
+  document.getElementById('push-prompt-enable')?.addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = 'Enabling...';
+    const result = await enablePushNotifications();
+    if (result.ok) {
+      banner.remove();
+      return;
+    }
+    button.disabled = false;
+    button.textContent = 'Allow notifications';
+    if (result.reason === 'denied') dismiss();
+  });
+}
+
+if (pushSupported()) {
+  window.addEventListener('load', showPushPrompt, { once: true });
 }
 
 // ---- public API ----------------------------------------------------------

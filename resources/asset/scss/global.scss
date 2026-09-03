@@ -214,6 +214,10 @@ a:hover {
     }
 }
 
+#push-permission-banner {
+    @extend #pwa-install-banner;
+}
+
 /* 2. iOS Safari Add to Home Screen Overlay */
 #pwa-ios-overlay {
     position: fixed;
