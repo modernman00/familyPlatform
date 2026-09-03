@@ -213,7 +213,7 @@ final class PostMessage
             }
             
             try {
-                Pusher::broadcast('posts-channel', 'new-post', $newPost);
+                Pusher::broadcastToFamily(is_string($famCode) ? $famCode : '', 'new-post', $newPost);
             } catch (\Throwable $th) {
                 error_log("Pusher post broadcast failed: " . $th->getMessage());
             }
@@ -239,16 +239,19 @@ final class PostMessage
                 Post::updateCommentByStatusAsPublished($comment['comment_no']);
             }
 
+            // Authoritative family scope for the comment's post — drives both the
+            // private Pusher channel and the downstream push notification.
+            $data = Post::postByNo($newComment[0]['post_no']);
+            $famCode = checkInput($data['postFamCode'] ?? '');
+            $famCode = is_string($famCode) ? $famCode : '';
+
             try {
-                Pusher::broadcast('comments-channel', 'new-comment', $newComment);
+                Pusher::broadcastToFamily($famCode, 'new-comment', $newComment);
             } catch (\Throwable $th) {
                 error_log("Pusher comment broadcast failed: " . $th->getMessage());
             }
 
             // send push notification to all members with the same family code
-            $data = Post::postByNo($newComment[0]['post_no']);
-            $famCode = checkInput($data['postFamCode']);
-            $famCode = is_string($famCode) ? $famCode : '';
             $id = \checkInput($data['id']);
 
             $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
@@ -279,8 +282,9 @@ final class PostMessage
             $commentAuthorId = Post::commentByNo($commentNo)['id'];
             $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
 
-            // select the id of the post author
-            $postAuthorId = Post::postByNo($commentPostNo)['id'];
+            // select the post (author + family scope for the Pusher channel)
+            $post = Post::postByNo($commentPostNo);
+            $postAuthorId = $post['id'] ?? null;
 
             // delete if the author of the comment or the author of the post
             if ($userId === $commentAuthorId || $userId === $postAuthorId) {
@@ -293,7 +297,7 @@ final class PostMessage
                 );
 
                 // trigger pusher to update all the UI elements for the deleted comment
-                Pusher::broadcast('comments-channel', 'delete-comment', ['commentNo' => $commentNo, 'postNo' => $commentPostNo]);
+                Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'delete-comment', ['commentNo' => $commentNo, 'postNo' => $commentPostNo]);
 
                 msgSuccess(200, "comment deleted successfully");
             } else {
@@ -318,7 +322,8 @@ final class PostMessage
 
             $commentAuthorId = Post::commentByNo($commentNo)['id'];
             $commentPostNo = self::asIdentifier(Post::commentByNo($commentNo)['post_no']);
-            $postAuthorId = Post::postByNo($commentPostNo)['id'];
+            $post = Post::postByNo($commentPostNo);
+            $postAuthorId = $post['id'] ?? null;
 
             if ($userId !== $commentAuthorId && $userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only edit your own comments.');
@@ -337,7 +342,7 @@ final class PostMessage
                 identifierAnswer: $commentNo
             );
 
-            Pusher::broadcast('comments-channel', 'update-comment', [
+            Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'update-comment', [
                 'commentNo' => $commentNo,
                 'postNo' => $commentPostNo,
                 'comment' => $cleanComment,
@@ -359,7 +364,8 @@ final class PostMessage
 
             $userId = $_SESSION['id'];
             $postNo = self::asIdentifier(Utility::checkInput($postNo));
-            $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
+            $post = Post::postByNo($postNo);
+            $postAuthorId = $post['id'] ?? null;
 
             if ($userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only delete your own posts.');
@@ -372,7 +378,7 @@ final class PostMessage
                 identifierAnswer: $postNo
             );
 
-            Pusher::broadcast('posts-channel', 'delete-post', ['postNo' => $postNo]);
+            Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'delete-post', ['postNo' => $postNo]);
 
             msgSuccess(200, "post deleted successfully");
         } catch (\Throwable $th) {
@@ -391,7 +397,8 @@ final class PostMessage
 
             $userId = $_SESSION['id'];
             $postNo = self::asIdentifier(Utility::checkInput($postNo));
-            $postAuthorId = Post::postByNo($postNo)['id'] ?? null;
+            $post = Post::postByNo($postNo);
+            $postAuthorId = $post['id'] ?? null;
 
             if ($userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only edit your own posts.');
@@ -410,7 +417,7 @@ final class PostMessage
                 identifierAnswer: $postNo
             );
 
-            Pusher::broadcast('posts-channel', 'update-post', [
+            Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'update-post', [
                 'postNo' => $postNo,
                 'postMessage' => $cleanMessage,
             ]);

@@ -11,7 +11,6 @@
 'use strict';
 
 import OfflineSyncManager from './offlineSync';
-import PushManagerClient from './pushManager';
 
 class PWAManager {
   constructor() {
@@ -19,9 +18,9 @@ class PWAManager {
     this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     this.isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     this.offlineSync = new OfflineSyncManager();
-    this.push = new PushManagerClient();
     window.offlineSync = this.offlineSync;
-    window.pushManager = this.push;
+    // Web Push lives in components/profilePage/registerPushNotification.js — one
+    // module, imported by the profile-page bundle and driven by the Settings toggle.
     this.init();
   }
 

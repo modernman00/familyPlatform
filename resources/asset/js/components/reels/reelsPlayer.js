@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { format } from 'timeago.js';
+import { esc } from '../global';
 
 class FamilyReelsPlayer {
     constructor() {
@@ -200,10 +201,12 @@ class FamilyReelsPlayer {
         // Close comments drawer when switching
         if (this.isCommentsOpen) this.toggleComments(false);
 
-        const fullName = `${reel.firstName || 'Family'} ${reel.lastName || 'Member'}`.trim();
-        const avatarUrl = reel.profilePics ? (reel.profilePics.startsWith('/') ? reel.profilePics : `/resources/images/profile/${reel.profilePics}`) : '/resources/images/profile/avatarM.png';
+        // All reel.* string fields are user-authored — escape before innerHTML (SEC-2).
+        const fullName = esc(`${reel.firstName || 'Family'} ${reel.lastName || 'Member'}`.trim());
+        const rawAvatar = reel.profilePics ? (reel.profilePics.startsWith('/') ? reel.profilePics : `/resources/images/profile/${reel.profilePics}`) : '/resources/images/profile/avatarM.png';
+        const avatarUrl = esc(rawAvatar);
         const isLiked = reel.user_reaction === 'like' || !!reel.user_reaction;
-        const categoryLabel = reel.category ? `#${reel.category.toUpperCase()}` : '#FAMILY';
+        const categoryLabel = esc(reel.category ? `#${String(reel.category).toUpperCase()}` : '#FAMILY');
         const mediaHtml = this.getMediaEmbed(reel.video_url);
 
         this.viewport.innerHTML = `
@@ -279,11 +282,11 @@ class FamilyReelsPlayer {
                     </div>
                 </div>
 
-                <div class="reel-caption-text">${reel.caption || ''}</div>
+                <div class="reel-caption-text">${esc(reel.caption || '')}</div>
 
                 <div class="reel-music-tag">
                     <i class="bi bi-music-note-beamed text-warning"></i>
-                    <span>${reel.music_title || 'Original Family Audio'} • ${reel.created_at ? format(reel.created_at) : 'Recent'}</span>
+                    <span>${esc(reel.music_title || 'Original Family Audio')} • ${reel.created_at ? format(reel.created_at) : 'Recent'}</span>
                 </div>
             </div>
         </div>
@@ -435,10 +438,10 @@ class FamilyReelsPlayer {
 
             this.commentsList.innerHTML = comments.map(c => `
             <div class="reel-comment-bubble">
-                <img src="${c.profilePics ? `/resources/images/profile/${c.profilePics}` : '/resources/images/profile/avatarM.png'}" class="reel-comment-avatar" alt="User">
+                <img src="${esc(c.profilePics ? `/resources/images/profile/${c.profilePics}` : '/resources/images/profile/avatarM.png')}" class="reel-comment-avatar" alt="User">
                 <div class="reel-comment-content">
-                    <div class="reel-comment-user">${c.firstName || 'Family'} ${c.lastName || 'Member'}</div>
-                    <div class="reel-comment-text">${c.comment || ''}</div>
+                    <div class="reel-comment-user">${esc(`${c.firstName || 'Family'} ${c.lastName || 'Member'}`)}</div>
+                    <div class="reel-comment-text">${esc(c.comment || '')}</div>
                     <span class="reel-comment-time">${c.created_at ? format(c.created_at) : 'Just now'}</span>
                 </div>
             </div>

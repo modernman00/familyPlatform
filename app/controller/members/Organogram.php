@@ -7,6 +7,7 @@ use App\controller\BaseController;
 use App\model\SingleCustomerData;
 use Src\{Db, SelectFn};
 use Src\Exceptions\NotFoundException;
+use Src\Exceptions\ForbiddenException;
 
 final class Organogram extends SingleCustomerData
 {
@@ -27,6 +28,11 @@ final class Organogram extends SingleCustomerData
 
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+
+            // IDOR guard: a family tree is only viewable by members of that family.
+            if (!BaseController::sessionSharesFamily($familyCode)) {
+                throw new ForbiddenException('You can only view your own family tree.');
+            }
 
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
@@ -78,6 +84,11 @@ final class Organogram extends SingleCustomerData
 
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+
+            // IDOR guard: a family tree is only viewable by members of that family.
+            if (!BaseController::sessionSharesFamily($familyCode)) {
+                throw new ForbiddenException('You can only view your own family tree.');
+            }
 
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
@@ -178,6 +189,11 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
+            // IDOR guard: graph data is family-scoped.
+            if (!BaseController::sessionSharesFamily($familyCode)) {
+                throw new ForbiddenException('You can only view your own family tree.');
+            }
+
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
 
@@ -204,10 +220,18 @@ final class Organogram extends SingleCustomerData
                 $stmt = $db->prepare("SELECT * FROM family_nodes WHERE user_id = ? AND family_code = ?");
                 $stmt->execute([$id, $familyCode]);
             }
-            
+
             $node = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (!$node) {
+                msgException(404, 'Node not found');
+                return;
+            }
+
+            // IDOR guard: the numeric-id branch above is unscoped, so confirm the
+            // node's family is one the session belongs to before returning it
+            // (name, contact details, unions).
+            if (!BaseController::sessionSharesFamily((string) ($node['family_code'] ?? ''))) {
                 msgException(404, 'Node not found');
                 return;
             }

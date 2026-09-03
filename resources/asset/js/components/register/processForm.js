@@ -46,5 +46,5 @@ registerHandler({
     route:'/register',
     redirect: '/login',
     recaptchaAction: 'SUBMIT',
-    optionalFields: ['ai_consent', 'surname']
+    optionalFields: ['surname']
 })

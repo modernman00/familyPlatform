@@ -6,11 +6,13 @@ namespace App\controller\members;
 
 use Src\{
     Select,
-    Delete
+    Delete,
+    CheckToken
 };
 use App\model\AllMembersData;
 use App\controller\BaseController;
 use Exception;
+use Src\Exceptions\ForbiddenException;
 use Src\functionality\SignIn;
 
 final class AllMembersController extends AllMembersData
@@ -76,6 +78,13 @@ final class AllMembersController extends AllMembersData
             $id = is_string($id) ? $id : '';
             $data = BaseController::findMemberById($id);
 
+            // IDOR guard: only view a profile you'd see in the directory — a
+            // shared family or an approved connection. Otherwise a logged-in
+            // user could read any member's profile, relatives and DOB by id.
+            if (!BaseController::sessionCanViewMember($id, (string) ($data['famCode'] ?? ''))) {
+                throw new ForbiddenException('You can only view profiles within your family or approved connections.');
+            }
+
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
             $pictures = Select::selectFn2(query: $query, bind: [$id]);
 
@@ -121,13 +130,22 @@ final class AllMembersController extends AllMembersData
     public function removeProfile(mixed $apr, mixed $req): bool
     {
         try {
-            //  verify token
-            
-SignIn::verify();
+            CheckToken::tokenCheck();
+            $payload = SignIn::verify('users');
 
-            // Sanitize inputs 
-            $apr = checkInput($apr); 
-            $req = checkInput($req);
+            // Sanitize inputs
+            $aprClean = checkInput($apr);
+            $reqClean = checkInput($req);
+            $apr = is_string($aprClean) ? $aprClean : '';
+            $req = is_string($reqClean) ? $reqClean : '';
+
+            // IDOR + authz guard: the caller must be one of the two parties to
+            // the connection they're deleting. Without this any logged-in user
+            // could wipe arbitrary approver/requester rows by guessing ids.
+            $sessionId = (string) \cleanSession((string) $payload['id']);
+            if ($sessionId === '' || (!hash_equals($sessionId, $apr) && !hash_equals($sessionId, $req))) {
+                throw new ForbiddenException('You can only remove your own connections.');
+            }
 
             $query = Delete::formAndMatchQuery(
                 selection: "DELETE_AND",

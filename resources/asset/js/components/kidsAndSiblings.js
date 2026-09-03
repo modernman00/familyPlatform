@@ -1,13 +1,19 @@
 import { checkEmailObj } from "../data/checkEmailObj";
 import { id, showError } from "../components/global";
 import { checkBox } from "./helper/general";
+import { emailIsRegistered } from "./api/index";
 import axios from "axios";
 
-export const processKidsSiblings = (emailData, firstName, famCode = null) => {
-  // normalise email list once
-  const emailSet = new Set(
-    (emailData || []).filter(Boolean).map(e => String(e).toLowerCase().trim())
-  );
+export const processKidsSiblings = (firstName, famCode = null) => {
+  // Per-email existence check (scoped server lookup) with a tiny local cache so
+  // repeated keystrokes on the same address don't re-hit the endpoint.
+  const existsCache = new Map();
+  const checkExists = async (email) => {
+    if (existsCache.has(email)) return existsCache.get(email);
+    const result = await emailIsRegistered(email);
+    existsCache.set(email, result);
+    return result;
+  };
 
   const getFamCode = () => id("famCode_id")?.value ?? famCode ?? "";
 
@@ -18,7 +24,7 @@ export const processKidsSiblings = (emailData, firstName, famCode = null) => {
     t = setTimeout(() => fn(...args), wait);
   };
 
-  const onInput = debounce((e) => {
+  const onInput = debounce(async (e) => {
     try {
       const el = e.target;
       if (!el || el.tagName !== "INPUT" || el.type !== "email") return;
@@ -64,7 +70,7 @@ export const processKidsSiblings = (emailData, firstName, famCode = null) => {
         return;
       }
 
-      const exists = emailSet.has(emailInput);
+      const exists = await checkExists(emailInput);
 
       helpEl.style.display = "block";
       helpEl.dataset.email = emailInput;

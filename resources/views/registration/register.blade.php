@@ -215,7 +215,6 @@
                     <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
                     @endif
 
-                    @include('partials.loader', ['notificationId'=> 'register'])
                     @php
                     $formArray = [
                     'Personal Information' => 'title',
@@ -236,6 +235,7 @@
                     '<i class="fas fa-barcode"></i>'
                     ]
                     ],
+                    'Date_of_Birth' => 'birthday',
                     'Contact Information' => 'title',
                     'email_mobile' => [
                     'mixed',
@@ -293,16 +293,6 @@
                             By submitting this form, you agree to the handling of your information as outlined in our <a href="/privacy" class="text-decoration-none fw-bold" style="color: var(--brand-primary);">PRIVACY POLICY</a>
                         </label>
                         <div id="checkbox_error" class="help is-danger mt-1"></div>
-                    </div>
-
-                    <div class="field mt-3 mb-4 p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <label class="checkbox fw-bold text-dark">
-                            <input type="checkbox" name="ai_consent" id="ai_consent" value="1">
-                            🤖 AI Processing Consent (GDPR)
-                        </label>
-                        <p class="text-muted small mt-1 mb-0" style="margin-left: 24px;">
-                            I consent to having my public family network activity processed by secure AI services to generate family biographies and insights. I understand I can revoke this at any time in my settings.
-                        </p>
                     </div>
 
                     <div class="field mt-5">

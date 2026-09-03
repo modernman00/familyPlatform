@@ -68,27 +68,32 @@ final class PostLikeController extends Db
         try {
             // Fetch updated like counts from the database
             $updatedLikes = Post::fetchUpdatedLikes();
-  
-            $response = [];
+
+            // Group the broadcast by the post's family so each like-count update
+            // only reaches that family's private channel.
+            $byFamily = [];
 
             if (is_array($updatedLikes) && !empty($updatedLikes)) {
                 foreach ($updatedLikes as $postLikes) {
                     $postNo = $postLikes['post_no'];
+                    $famCode = (string) ($postLikes['postFamCode'] ?? $postLikes['famCode'] ?? '');
+                    if ($famCode === '') {
+                        continue;
+                    }
 
-                    // Data to broadcast
-                    $data = [
+                    $byFamily[$famCode][] = [
                         'origin' => getenv("APP_URL2") ?: 'default_value', // Set a default value if not set
                         'likeCounter' => $postLikes['post_likes'],
                         'likeHtmlId' => "likeCounter$postNo",
                     ];
-
-                    $response[] = $data;
                 }
 
-                try {
-                    Pusher::broadcast('likes-channel', 'like-event', $response);
-                } catch (\Exception $e) {
-                    showError($e); // Handle broadcasting error
+                foreach ($byFamily as $famCode => $response) {
+                    try {
+                        Pusher::broadcastToFamily((string) $famCode, 'like-event', $response);
+                    } catch (\Exception $e) {
+                        showError($e); // Handle broadcasting error
+                    }
                 }
             }
         } catch (\Throwable $th) {

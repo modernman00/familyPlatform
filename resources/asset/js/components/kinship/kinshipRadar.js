@@ -11,6 +11,15 @@ export function initKinshipRadar() {
     containers.forEach(bindKinshipRadarContainer);
 }
 
+function getCsrfToken() {
+    return (
+        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+        document.querySelector('meta[name="csrf_token"]')?.getAttribute('content') ||
+        (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/) || [])[1] ||
+        ''
+    );
+}
+
 function bindKinshipRadarContainer(container) {
     // 1. Handle Connect Button
     container.addEventListener('click', async (e) => {
@@ -23,8 +32,16 @@ function bindKinshipRadarContainer(container) {
             connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Connecting...';
 
             try {
+                const csrfToken = getCsrfToken();
                 const res = await axios.post('/members/familyRequestMgt', {
-                    approverId: targetUserId
+                    approverId: targetUserId,
+                    token: csrfToken
+                }, {
+                    headers: {
+                        'X-XSRF-TOKEN': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
 
                 if (res.data?.status === 'success' || res.status === 200) {

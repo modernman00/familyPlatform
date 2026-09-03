@@ -191,6 +191,30 @@ class FamilyClaimService
     }
 
     /**
+     * Secret used to HMAC-sign family invite tokens.
+     *
+     * Was `$_ENV['APP_KEY'] ?? 'familyPlatformSecurityTokenSecretKey2026'` — but
+     * APP_KEY is not set in this app, so every invite token was signed with a
+     * hard-coded string that anyone with the source could read and use to forge
+     * invites into any family. We now derive it from the app's real signing key
+     * (JWT_KEY, always present in a working deployment) with domain separation,
+     * and refuse to sign/verify at all if no real key is configured.
+     *
+     * Note: changing this invalidates any invite links already in the wild —
+     * they must be re-issued.
+     */
+    private static function inviteSigningSecret(): string
+    {
+        $base = (string) ($_ENV['APP_KEY'] ?? getenv('APP_KEY') ?: ($_ENV['JWT_KEY'] ?? getenv('JWT_KEY') ?: ''));
+
+        if (strlen($base) < 16) {
+            throw new \RuntimeException('Invite-token signing secret is not configured (set APP_KEY or JWT_KEY).');
+        }
+
+        return hash_hmac('sha256', 'family-invite-token:v1', $base);
+    }
+
+    /**
      * Generates a tamper-proof HMAC-SHA256 signed invite token.
      */
     public static function generateSignedInviteToken(
@@ -212,8 +236,7 @@ class FamilyClaimService
 
         $json = (string)json_encode($payload);
         $b64 = rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
-        $secret = (string)($_ENV['APP_KEY'] ?? 'familyPlatformSecurityTokenSecretKey2026');
-        $sig = hash_hmac('sha256', $b64, $secret);
+        $sig = hash_hmac('sha256', $b64, self::inviteSigningSecret());
 
         return $b64 . '.' . $sig;
     }
@@ -235,8 +258,13 @@ class FamilyClaimService
         }
 
         [$b64, $signature] = $parts;
-        $secret = (string)($_ENV['APP_KEY'] ?? 'familyPlatformSecurityTokenSecretKey2026');
-        $expectedSig = hash_hmac('sha256', $b64, $secret);
+
+        try {
+            $expectedSig = hash_hmac('sha256', $b64, self::inviteSigningSecret());
+        } catch (\RuntimeException $e) {
+            error_log('[invite-token] ' . $e->getMessage());
+            return null; // misconfigured — treat every token as invalid
+        }
 
         if (!hash_equals($expectedSig, $signature)) {
             return null; // Tampered or forged token

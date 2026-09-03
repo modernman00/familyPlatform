@@ -1,5 +1,6 @@
 import { format, render } from "timeago.js"
 import { toSentenceCase, id, log } from "@modernman00/shared-js-lib"
+import { esc } from "../global"
 import { renderTopReactions } from './showEmojiOnComment.js'
 
 const reqId = localStorage.getItem('requesterId');
@@ -8,7 +9,10 @@ export const commentHTML = (data, postId) => {
 
   const { profileImg, fullName, date_created, img, comment, comment_no, id } = data
   const imgURL = profileImg || img
-  const image = (imgURL) ? `/resources/images/profile/${imgURL}` : `/resources/images/profile/avatarM.png`
+  // comment + fullName + image path are user-authored — escape for innerHTML (SEC-2).
+  const image = esc((imgURL) ? `/resources/images/profile/${imgURL}` : `/resources/images/profile/avatarM.png`)
+  const nameSafe = esc(toSentenceCase(fullName))
+  const commentSafe = esc(comment)
   let counts = data?.reactions?.counts ?? {};
   let total = data?.reactions?.counts?.totalReactions ?? 0;
 
@@ -18,14 +22,14 @@ export const commentHTML = (data, postId) => {
 
   <div class="flex-grow-1">
     <div class="d-flex justify-content-between align-items-center">
-      <small><strong>${toSentenceCase(fullName)}</strong></small>
-      <small class="text-muted commentTiming" datetime="${date_created}" title="${date_created}">
+      <small><strong>${nameSafe}</strong></small>
+      <small class="text-muted commentTiming" datetime="${esc(date_created)}" title="${esc(date_created)}">
         ${format(date_created)}
       </small>
     </div>
 
     <div class="comment-text mb-2 p-3 shadow-sm" style="background-color: var(--hover-color); border-radius: 18px; border-top-left-radius: 4px; display: inline-block;">
-      <span style="font-size: 0.95rem; color: var(--text-color);">${comment}</span>
+      <span style="font-size: 0.95rem; color: var(--text-color);">${commentSafe}</span>
     </div>
 
       <div class="d-flex reaction-preview-section align-items-center mb-2 gap-2"> 

@@ -129,9 +129,8 @@ id("spouse_mobile")?.addEventListener("keyup", (event) => {
 });
 
 
-// processKidsSiblings needs array of emails, but we removed eager fetch
-// We will just pass an empty array to it for now.
-processKidsSiblings([], fName);
+// Kid/sibling email helper — checks each address against the server on demand.
+processKidsSiblings(fName);
 
 // Use a simple debounce for email check
 let emailTimeout;

@@ -29,7 +29,7 @@
        enterprise.js with ?render= here made it run an assessment on every member page,
        which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
-  <link rel="stylesheet" href="/public/css/main.css?v={{ time() }}">
+  <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
   @stack('styles')
 </head>
 
@@ -53,10 +53,12 @@
     <i class="bi bi-moon-fill"></i>
   </div>
 
+  @include('partials.cookie-banner')
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ time() }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ time() }}"></script>
-  <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ time() }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
 
   <script>
     if ('serviceWorker' in navigator) {

@@ -34,18 +34,23 @@ export const postData = async(url, object) => {
     }
 };
 
-export const fetchEmailData = ()=> {
-    // Make a GET request and return the promise
-    return axios.get(`${URL}getEmails`)
-        .then(response => {
-             const emailArray = response.data.message.map(item => item.email);
-            // Return the data or do further processing
-            return emailArray;
-        })
-        .catch(error => {
-            // Handle any errors that occur during the request
-            console.error('Error fetching data:', error);
-            throw error; // Rethrow the error to be handled by the caller
+/**
+ * Ask the server whether a single email address already belongs to a registered
+ * account. Replaces the old bulk fetch of every member email (SEC-4).
+ * @param {string} email
+ * @returns {Promise<boolean>}
+ */
+export const emailIsRegistered = async (email) => {
+    try {
+        const response = await axios.get(`${URL}getEmails`, {
+            params: { email },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
-}
+        return response?.data?.message?.exists === true;
+    } catch (error) {
+        // Fail closed-ish: treat as "not registered" so the invite path still works.
+        console.error('emailIsRegistered check failed:', error);
+        return false;
+    }
+};
 

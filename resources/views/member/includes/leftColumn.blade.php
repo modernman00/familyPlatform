@@ -46,8 +46,12 @@
         </div>
     </div>
 
-    <!-- Kin Requests Card -->
-    <div class="card border-0 shadow-sm mt-4" style="border-radius: 20px; background-color: var(--card-bg);">
+    <!-- Kin Requests Card (Only shown if there are pending requests) -->
+    <div class="card border-0 shadow-sm mt-4" 
+         x-show="!isLoadingRequests && friendRequests && friendRequests.length > 0" 
+         x-cloak 
+         x-transition
+         style="border-radius: 20px; background-color: var(--card-bg);">
 
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
             <template x-if="friendRequests.length > 1">
@@ -55,8 +59,8 @@
                     <span x-text="friendRequests.length"></span> Kin Requests
                 </h5>
             </template>
-            <template x-if="friendRequests.length <= 1">
-                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">Kin Requests</h5>
+            <template x-if="friendRequests.length === 1">
+                <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">Kin Request</h5>
             </template>
             <template x-if="friendRequests.length > 1">
                 <a href="/allMembers" class="text-decoration-none" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
@@ -64,43 +68,24 @@
         </div>
 
         <div class="card-body">
-            <!-- Loading state -->
-            <template x-if="isLoadingRequests">
-                <div class="text-center py-3">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                </div>
-            </template>
-
-            <!-- Empty state -->
-            <template x-if="!isLoadingRequests && friendRequests.length === 0">
-                <div class="text-center py-4">
-                    <div class="mb-2 d-inline-flex align-items-center justify-content-center rounded-circle bg-light p-3" style="width: 48px; height: 48px;">
-                        <i class="bi bi-people text-muted fs-4"></i>
-                    </div>
-                    <p class="text-muted small mt-1 mb-0">No pending Kin requests</p>
-                </div>
-            </template>
-
             <!-- Dynamic Requests List -->
-            <template x-if="!isLoadingRequests && friendRequests.length > 0">
-                <div class="d-flex flex-column gap-3">
-                    <template x-for="req in friendRequests" :key="req.id">
-                        <div class="d-flex flex-column align-items-center text-center p-3 border rounded-3" style="background-color: var(--hover-color); border-color: var(--border-color); border-radius: 14px;">
-                            <img :src="'/resources/images/profile/' + req.img" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 56px; height: 56px; object-fit: cover;">
-                            <span class="fw-semibold mb-2" style="font-size: 0.9rem;" x-text="req.firstName + ' ' + req.lastName"></span>
-                            
-                            <div class="d-flex gap-2 w-100">
-                                <a :href="getAcceptUrl(req)" class="btn btn-primary btn-sm flex-grow-1 fw-bold rounded-pill" title="Accept" style="text-decoration: none;">
-                                    <i class="bi bi-check-lg"></i> Accept
-                                </a>
-                                <a :href="getDeclineUrl(req)" class="btn btn-outline-danger btn-sm flex-grow-1 fw-bold rounded-pill" title="Decline" style="text-decoration: none;">
-                                    <i class="bi bi-x-lg"></i> Decline
-                                </a>
-                            </div>
+            <div class="d-flex flex-column gap-3">
+                <template x-for="req in friendRequests" :key="req.id">
+                    <div class="d-flex flex-column align-items-center text-center p-3 border rounded-3" style="background-color: var(--hover-color); border-color: var(--border-color); border-radius: 14px;">
+                        <img :src="'/resources/images/profile/' + req.img" alt="Avatar" class="rounded-circle shadow-sm mb-2" style="width: 56px; height: 56px; object-fit: cover;">
+                        <span class="fw-semibold mb-2" style="font-size: 0.9rem;" x-text="req.firstName + ' ' + req.lastName"></span>
+                        
+                        <div class="d-flex gap-2 w-100">
+                            <a :href="getAcceptUrl(req)" class="btn btn-primary btn-sm flex-grow-1 fw-bold rounded-pill" title="Accept" style="text-decoration: none;">
+                                <i class="bi bi-check-lg"></i> Accept
+                            </a>
+                            <a :href="getDeclineUrl(req)" class="btn btn-outline-danger btn-sm flex-grow-1 fw-bold rounded-pill" title="Decline" style="text-decoration: none;">
+                                <i class="bi bi-x-lg"></i> Decline
+                            </a>
                         </div>
-                    </template>
-                </div>
-            </template>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </div>

@@ -1,11 +1,16 @@
+import { getCsrfToken } from '../global'
+
 export const handleReaction = async (postNo, reactionType) => {
     try {
+        const token = getCsrfToken()
         const formData = new FormData()
         formData.append('post_no', postNo)
         formData.append('reaction_type', reactionType)
-        
+        formData.append('token', token)
+
         const response = await fetch('/api/engagement/react', {
             method: 'POST',
+            headers: { 'X-XSRF-TOKEN': token },
             body: formData
         })
         const data = await response.json()
@@ -16,13 +21,17 @@ export const handleReaction = async (postNo, reactionType) => {
     }
 }
 
-export const handlePollVote = async (optionId) => {
+export const handlePollVote = async (optionId, postNo = '') => {
     try {
+        const token = getCsrfToken()
         const formData = new FormData()
         formData.append('option_id', optionId)
-        
+        if (postNo) formData.append('post_no', postNo)
+        formData.append('token', token)
+
         const response = await fetch('/api/engagement/vote', {
             method: 'POST',
+            headers: { 'X-XSRF-TOKEN': token },
             body: formData
         })
         const data = await response.json()

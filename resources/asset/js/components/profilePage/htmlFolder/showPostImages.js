@@ -1,3 +1,5 @@
+import { esc } from "../../global";
+
 export const showPostImg = (data) => {
 
 // GET THE IMAGES WITH VALUES F=IF THERE ARE ANY. FILTER USING THE OBJECT KEY AND THEN MAP THROUGH THE VALUE
@@ -5,13 +7,16 @@ export const showPostImg = (data) => {
   .filter(key => key.startsWith('post_img') && data[key] !== null)
   .map(el => data[el])
 
-  const picsImgHtml = (imgElement, i, postNo) => `
-    <a href="/profilepage/img?dir=img&pics=${imgElement}&pID=${postNo}&path=post">
+  const picsImgHtml = (imgElement, i, postNo) => {
+    const nameSafe = esc(imgElement);
+    return `
+    <a href="/profilepage/img?dir=img&pics=${encodeURIComponent(imgElement)}&pID=${esc(postNo)}&path=post">
       <div class="w3-half">
-        <img src="/resources/images/post/${imgElement}" style="width:100%" alt="images${i}" class="w3-margin-bottom w3-hover-sepia" id="postImage${i}">
+        <img src="/resources/images/post/${nameSafe}" style="width:100%" alt="images${esc(i)}" class="w3-margin-bottom w3-hover-sepia" id="postImage${esc(i)}">
       </div>
     </a>
   `;
+  };
 
   const imgElements = postImagesWithValues.map((pics, i) => picsImgHtml(pics, i, data.post_no)).join('');
 

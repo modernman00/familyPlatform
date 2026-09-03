@@ -1,4 +1,5 @@
 import { id } from "@modernman00/shared-js-lib";
+import { esc } from '../global';
 import { initTree, centerOnElement, fitToScreen } from './events';
 import { showPersonDetails } from './showModal';
 import { initOnboardingTour } from './onboardingTour';
@@ -118,12 +119,14 @@ memberSearchInput?.addEventListener('input', (e) => {
 
   let resultsHtml = '';
   matches.slice(0, 6).forEach((item) => {
+    // Every field here is user-controlled family-member data — escape before
+    // it goes into innerHTML (SEC-2).
     resultsHtml += `
-      <div class="search-result-item" data-id="${item.id}" data-name="${item.name}">
-        <img src="${item.img}" alt="${item.name}">
+      <div class="search-result-item" data-id="${esc(item.id)}" data-name="${esc(item.name)}">
+        <img src="${esc(item.img)}" alt="${esc(item.name)}">
         <div class="search-result-info">
-          <div class="search-result-name">${item.name}</div>
-          <div class="search-result-meta">${item.role}</div>
+          <div class="search-result-name">${esc(item.name)}</div>
+          <div class="search-result-meta">${esc(item.role)}</div>
         </div>
       </div>
     `;

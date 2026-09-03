@@ -3,8 +3,9 @@ import Pusher from 'pusher-js';
 import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
 import { extractVideoFromText, cleanPostMessage } from './videoParser';
+import { getCsrfToken } from '../global';
 
-export function profileFeed() {
+export function profileFeed(opts = {}) {
     return {
         posts: [],
         isLoading: true,
@@ -12,8 +13,8 @@ export function profileFeed() {
         lightboxOpen: false,
         lightboxImages: [],
         lightboxIndex: 0,
-        currentUserId: localStorage.getItem('requesterId') || '',
-        currentFamCode: localStorage.getItem('requesterFamCode') || '',
+        currentUserId: opts.userId || localStorage.getItem('requesterId') || '',
+        currentFamCode: opts.famCode || localStorage.getItem('requesterFamCode') || '',
         commentInputs: {},
         activeCommentForms: {},
         activeReactions: {},
@@ -633,12 +634,28 @@ export function profileFeed() {
             try {
                 const key = process.env.MIX_PUSHER_APP_KEY;
                 const cluster = process.env.MIX_PUSHER_APP_CLUSTER;
-                if (!key || !cluster) return;
+                const famCode = (this.currentFamCode || '').replace(/[^A-Za-z0-9_-]/g, '');
+                if (!key || !cluster || !famCode) return;
 
-                this.pusher = new Pusher(key, { cluster, encrypted: true });
+                // One private, per-family channel. The server (Pusher::authoriseChannel)
+                // only signs the subscription if this session belongs to <famCode>,
+                // so another family cannot read this feed even with the public key.
+                this.pusher = new Pusher(key, {
+                    cluster,
+                    forceTLS: true,
+                    channelAuthorization: {
+                        endpoint: '/pusher/auth',
+                        headersProvider: () => ({
+                            'X-CSRF-Token': getCsrfToken(),
+                            'X-XSRF-TOKEN': getCsrfToken(),
+                            'X-Requested-With': 'XMLHttpRequest',
+                        }),
+                    },
+                });
 
-                const postsChannel = this.pusher.subscribe('posts-channel');
-                postsChannel.bind('new-post', (data) => {
+                const channel = this.pusher.subscribe(`private-family-${famCode}`);
+
+                channel.bind('new-post', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
                             if (!this.posts.some(p => String(p.post_no) === String(item?.post_no))) {
@@ -648,8 +665,7 @@ export function profileFeed() {
                     }
                 });
 
-                const commentsChannel = this.pusher.subscribe('comments-channel');
-                commentsChannel.bind('new-comment', (data) => {
+                channel.bind('new-comment', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
                             const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
@@ -663,28 +679,27 @@ export function profileFeed() {
                 // Edit/delete broadcasts (PostMessage::deletePost/updatePost/
                 // updateComment/deleteComment) send a single flat object, not an
                 // array like new-post/new-comment do.
-                postsChannel.bind('delete-post', (data) => {
+                channel.bind('delete-post', (data) => {
                     this.posts = this.posts.filter(p => String(p.post_no) !== String(data?.postNo));
                 });
-                postsChannel.bind('update-post', (data) => {
+                channel.bind('update-post', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
                     if (post) post.postMessage = data?.postMessage ?? post.postMessage;
                 });
 
-                commentsChannel.bind('delete-comment', (data) => {
+                channel.bind('delete-comment', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
                     if (post) {
                         post.comments = post.comments.filter(c => String(c.comment_no) !== String(data?.commentNo));
                     }
                 });
-                commentsChannel.bind('update-comment', (data) => {
+                channel.bind('update-comment', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
                     const comment = post?.comments.find(c => String(c.comment_no) === String(data?.commentNo));
                     if (comment) comment.comment = data?.comment ?? comment.comment;
                 });
 
-                const likesChannel = this.pusher.subscribe('likes-channel');
-                likesChannel.bind('like-event', (data) => {
+                channel.bind('like-event', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
                             const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));

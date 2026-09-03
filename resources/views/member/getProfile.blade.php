@@ -53,6 +53,45 @@
             </div>
         </div>
 
+        @if(!empty($publicPhotos))
+        {{-- Public Photo Gallery — shown only when images exist, placed prominently above info cards --}}
+        <div class="profile-gallery-card" style="margin-bottom: 24px;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div>
+                    <h3 class="mb-1"><i class="bi bi-images me-2" style="color: var(--accent-color);"></i>Public Photo Gallery</h3>
+                    <p class="text-muted small mb-0">Photos made public by {{ $data['fullName'] }} from their gallery</p>
+                </div>
+                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
+                    <i class="bi bi-camera-fill me-1"></i> {{ count($publicPhotos) }} {{ count($publicPhotos) === 1 ? 'Public Photo' : 'Public Photos' }}
+                </span>
+            </div>
+
+            <div class="public-gallery-grid">
+                @foreach ($publicPhotos as $idx => $photo)
+                    <div class="public-gallery-item" onclick="openSeeProfileLightbox({{ $idx }})">
+                        <img 
+                            src="/resources/images/post/{{ rawurlencode($photo['img']) }}" 
+                            alt="{{ $photo['caption'] ?? $photo['img'] }}" 
+                            class="public-gallery-img"
+                            loading="lazy"
+                            onerror="this.closest('.public-gallery-item').style.display='none';"
+                        >
+                        <div class="public-gallery-meta">
+                            <p class="public-gallery-caption" title="{{ $photo['caption'] ?? 'Shared memory' }}">
+                                {{ !empty($photo['caption']) ? $photo['caption'] : 'Shared memory' }}
+                            </p>
+                            @if(!empty($photo['created_at']))
+                                <span class="public-gallery-date">
+                                    <i class="bi bi-calendar3 me-1"></i>{{ date('M j, Y', strtotime($photo['created_at'])) }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         <div class="profile-content">
             <!-- Left Column -->
             <div class="left-column">
@@ -179,53 +218,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Public Photo Gallery Section (Full Width) -->
-            <div class="profile-gallery-card">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                    <div>
-                        <h3 class="mb-1"><i class="bi bi-images me-2" style="color: var(--accent-color);"></i>Public Photo Gallery</h3>
-                        <p class="text-muted small mb-0">Photos made public by {{ $data['fullName'] }} from their gallery</p>
-                    </div>
-                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2">
-                        <i class="bi bi-camera-fill me-1"></i> {{ count($publicPhotos ?? []) }} {{ count($publicPhotos ?? []) === 1 ? 'Public Photo' : 'Public Photos' }}
-                    </span>
-                </div>
-
-                @if(!empty($publicPhotos))
-                    <div class="public-gallery-grid">
-                        @foreach ($publicPhotos as $idx => $photo)
-                            <div class="public-gallery-item" onclick="openSeeProfileLightbox({{ $idx }})">
-                                <img 
-                                    src="/resources/images/post/{{ rawurlencode($photo['img']) }}" 
-                                    alt="{{ $photo['caption'] ?? $photo['img'] }}" 
-                                    class="public-gallery-img"
-                                    loading="lazy"
-                                    onerror="this.closest('.public-gallery-item').style.display='none';"
-                                >
-                                <div class="public-gallery-meta">
-                                    <p class="public-gallery-caption" title="{{ $photo['caption'] ?? 'Shared memory' }}">
-                                        {{ !empty($photo['caption']) ? $photo['caption'] : 'Shared memory' }}
-                                    </p>
-                                    @if(!empty($photo['created_at']))
-                                        <span class="public-gallery-date">
-                                            <i class="bi bi-calendar3 me-1"></i>{{ date('M j, Y', strtotime($photo['created_at'])) }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-5">
-                        <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle bg-light p-3" style="width: 60px; height: 60px;">
-                            <i class="bi bi-camera text-muted fs-2"></i>
-                        </div>
-                        <h6 class="fw-bold mb-1" style="color: var(--text-color);">No Public Photos Shared</h6>
-                        <p class="text-muted small mb-0">This member has not shared any gallery photos publicly yet.</p>
-                    </div>
-                @endif
             </div>
         </div>
     </div>

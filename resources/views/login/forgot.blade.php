@@ -2,6 +2,8 @@
 @section('title', 'Forgot Password')
 @section('content')
 
+    @include('partials.loader', ['scriptOnly' => true])
+
     <style nonce="{{ $nonce }}">
         body {
             background-color: #F4F5FB !important;

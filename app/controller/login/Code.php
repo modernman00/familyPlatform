@@ -41,8 +41,11 @@ final class Code
 
        /**
      * resendCode() — Generates and resends a fresh 2FA token to the user's email.
+     *
+     * Triggered by the "Resend Verification Code" link on the /login/code
+     * (a.k.a. /verify-email) Security Verification page.
      */
-    public function resendCode()
+    public function resendCode(): void
     {
         try {
             $email = $_SESSION['auth']['email'] ?? null;
@@ -52,6 +55,10 @@ final class Code
                 Utility::msgException(400, 'Session expired. Please try requesting a code again.');
                 return;
             }
+
+            // Throttle resends (5 per 15 min per email + per IP) so the endpoint
+            // can't be used to spam a user's inbox or hammer the mailer.
+            \Src\Limiter::limit((string) $email, 'login');
 
             $data = [
                 'email' => $email,

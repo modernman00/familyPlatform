@@ -42,7 +42,6 @@ final class RegisterTableData {
             'account' => [
                 'email' => $cleanPostData['email'] ?? null,
                 'password' => $cleanPostData['password'] ?? null,
-                'ai_consent' => $cleanPostData['ai_consent'] ?? 0,
                 'status' => 'active',
                 'type' => 'member',
                 'id' => $cleanPostData['id'] ?? null,

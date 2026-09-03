@@ -682,6 +682,20 @@
                   </div>
                 </div>
 
+                <div class="custom-switch">
+                  <div class="switch-info">
+                    <h6>Browser &amp; Mobile Notifications</h6>
+                    <p id="pushPrefHint">Get instant alerts on this device even when the app is closed.</p>
+                  </div>
+                  <div class="toggle-group">
+                    <span class="toggle-label" id="pushPrefLabel">OFF</span>
+                    <label class="switch">
+                      <input type="checkbox" id="pushPrefToggle" data-standalone="1">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
                 <button type="button" id="preferencesBtn" class="btn-save mt-3">Save Preferences</button>
               </form>
             </div>
@@ -746,6 +760,21 @@
 
                 <button type="button" id="privacyBtn" class="btn-save mt-3">Save Privacy Settings</button>
               </form>
+
+              <div class="section-divider mt-4"></div>
+              <div class="switch-info">
+                <h6>Your data</h6>
+                <p>Download a copy of the personal data we hold about your account (GDPR Article 15). Shared family content created by other members isn't included.</p>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <button type="button" id="dataExportBtn" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                  <i class="bi bi-download me-1"></i> Download my data
+                </button>
+                <button type="button" id="dataDeleteBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                  <i class="bi bi-trash3 me-1"></i> Request account deletion
+                </button>
+              </div>
+              <p id="dataExportStatus" class="small text-muted mt-2" style="display:none;"></p>
             </div>
 
           </div>

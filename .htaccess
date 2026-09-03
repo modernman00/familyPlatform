@@ -6,6 +6,16 @@
     Deny from all
 </FilesMatch>
 
+# SEC — the only PHP the web server may execute directly is the front controller.
+# Everything else (dev scripts, ad-hoc migrations, diagnostics, test harnesses)
+# is denied even if it is left in the deploy. index.php is granted back below.
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+<Files "index.php">
+    Require all granted
+</Files>
+
 # Remove the question mark from the request but maintain the query string
 RewriteEngine On
 
@@ -28,13 +38,23 @@ RewriteRule ^ index.php [L]
 
 
 <IfModule mod_headers.c>
-  Header set X-Frame-Options "SAMEORIGIN"
-  Header set X-XSS-Protection "1; mode=block"
-  Header set Strict-Transport-Security "max-age=31536000"
-  Header set X-Content-Type-Options "nosniff"
-  # Header set Content-Security-Policy "default-src 'none'; script-src 'self' https://fontawesome.com/ https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js; connect-src 'self'; img-src 'self'; style-src 'self' https://fonts.bunny.net https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css;"
-  # Header set Referrer-Policy "strict-origin-when-cross-origin"
-  Header set Expect-CT "max-age=7776000, enforce"
+  # Src\SecurityHandler::applyGlobalHeaders() already sets X-Frame-Options,
+  # X-Content-Type-Options, Referrer-Policy and HSTS on PHP responses. These
+  # lines re-assert them on static assets (which bypass PHP) and fix/add the
+  # two the shared-lib gets wrong or omits (SEC-3).
+  Header setifempty X-Frame-Options "SAMEORIGIN"
+  Header setifempty X-Content-Type-Options "nosniff"
+  Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+  # Deprecated, and its filter is itself an XSS vector on legacy engines. The
+  # shared-lib still emits "1; mode=block" from PHP — unset it then force off.
+  Header unset X-XSS-Protection
+  Header set X-XSS-Protection "0"
+  # Deny powerful features the app never uses.
+  Header set Permissions-Policy "accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+  # NOTE (SEC-2): the response CSP is built per-request by the shared-lib (nonce'd,
+  # currently Report-Only). Flipping it to enforced is staged separately — do not
+  # add a static CSP here, it would collide with the nonce'd one.
 </IfModule>
 
 

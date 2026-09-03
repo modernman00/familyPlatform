@@ -1,4 +1,5 @@
 import { id } from "@modernman00/shared-js-lib";
+import { esc } from '../global';
 
 const personModal = id('personModal');
 const modalBody = id('modalBody');
@@ -51,13 +52,14 @@ export const showPersonDetails = async (personData) => {
     </div>
   ` : '';
 
-  // Inject content into modal body
+  // Inject content into modal body — every field below is user-controlled
+  // family-member data, so escape it before it touches innerHTML (SEC-2).
   targetModalBody.innerHTML = `
     <div class="person-detail">
-      <img src="${img}" alt="${fullName}" class="person-image">
+      <img src="${esc(img)}" alt="${esc(fullName)}" class="person-image">
       <div class="person-info">
-        <h2 class="person-name">${fullName}</h2>
-        <div class="person-relation">${relation || 'Relative'}</div>
+        <h2 class="person-name">${esc(fullName)}</h2>
+        <div class="person-relation">${esc(relation || 'Relative')}</div>
         ${isDeceased ? '<span class="badge bg-secondary ms-2" style="font-size: 0.75rem;"><i class="bi bi-flower1"></i> Deceased</span>' : ''}
       </div>
     </div>
@@ -65,29 +67,29 @@ export const showPersonDetails = async (personData) => {
     <div class="detail-grid">
       <div class="detail-item">
         <div class="detail-label">Relationship</div>
-        <div class="detail-value">${relation || 'Family Member'}</div>
+        <div class="detail-value">${esc(relation || 'Family Member')}</div>
       </div>
 
       <div class="detail-item">
         <div class="detail-label">Marital Status</div>
-        <div class="detail-value">${maritalStatus || 'N/A'}</div>
+        <div class="detail-value">${esc(maritalStatus || 'N/A')}</div>
       </div>
 
       <div class="detail-item">
         <div class="detail-label">Occupation</div>
-        <div class="detail-value">${occupation || 'Not specified'}</div>
+        <div class="detail-value">${esc(occupation || 'Not specified')}</div>
       </div>
 
       <div class="detail-item">
         <div class="detail-label">Location / Origin</div>
-        <div class="detail-value">${country || 'N/A'}</div>
+        <div class="detail-value">${esc(country || 'N/A')}</div>
       </div>
 
       ${spouseName ? `
         <div class="detail-item" style="grid-column: span 2;">
           <div class="detail-label">Spouse / Partner</div>
           <div class="detail-value" style="display: flex; align-items: center; justify-content: space-between;">
-            <span>${spouseName}</span>
+            <span>${esc(spouseName)}</span>
             <span class="badge" style="background: var(--gold-light); color: var(--primary-dark); font-size: 0.75rem;"><i class="bi bi-heart-fill text-danger"></i> Partner</span>
           </div>
         </div>
@@ -96,7 +98,7 @@ export const showPersonDetails = async (personData) => {
       ${email ? `
         <div class="detail-item" style="grid-column: span 2;">
           <div class="detail-label">Email Address</div>
-          <div class="detail-value">${email}</div>
+          <div class="detail-value">${esc(email)}</div>
         </div>
       ` : ''}
     </div>
@@ -104,7 +106,7 @@ export const showPersonDetails = async (personData) => {
     ${bio ? `
       <div class="detail-item mt-3" style="width: 100%;">
         <div class="detail-label">Notes & Biography</div>
-        <div class="detail-value" style="font-size: 0.9rem; font-weight: 500;">${bio}</div>
+        <div class="detail-value" style="font-size: 0.9rem; font-weight: 500;">${esc(bio)}</div>
       </div>
     ` : ''}
 
@@ -114,7 +116,7 @@ export const showPersonDetails = async (personData) => {
 
     <div class="modal-actions mt-4" style="display: flex; gap: 10px; justify-content: flex-end;">
       ${personId ? `
-        <a href="/allMembers/seeProfile/${personId}" class="btn" style="background: var(--primary-color); color: white; border-radius: 14px; padding: 8px 20px; font-weight: 600; text-decoration: none;">
+        <a href="/allMembers/seeProfile/${encodeURIComponent(personId)}" class="btn" style="background: var(--primary-color); color: white; border-radius: 14px; padding: 8px 20px; font-weight: 600; text-decoration: none;">
           <i class="bi bi-person-fill"></i> View Profile
         </a>
       ` : ''}

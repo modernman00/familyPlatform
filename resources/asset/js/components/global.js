@@ -10,6 +10,36 @@ export const idValue = (id) => id(id).value
 export const idInnerHTML = (id) => id(id).innerHTML
 export const warningSign = "\u26A0"; // danger warning sign
 
+/**
+ * Escape a value for safe interpolation into an HTML template string.
+ * Use this on every user-controlled field (names, bios, occupations, free text)
+ * that ends up in an `.innerHTML = ` assignment \u2014 SEC-2.
+ * @param {*} value
+ * @returns {string}
+ */
+export const esc = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+/**
+ * Current CSRF token. Prefers the `XSRF-TOKEN` cookie (kept in sync with the
+ * session by app/config/init.php on every request) over the <meta> tag, which
+ * is frozen at page render and goes stale after a session-token regeneration
+ * (e.g. straight after 2FA).
+ * @returns {string}
+ */
+export const getCsrfToken = () => {
+    const fromCookie = (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/) || [])[1];
+    if (fromCookie) return decodeURIComponent(fromCookie);
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+};
+
 export const qSel = (name) => document.querySelector(name)
 export const qSelAll = (name) => document.querySelectorAll(name)
 export const qSelValue = (name) => qSel(name).value

@@ -26,10 +26,18 @@ final class CommentReactionController
   public static function addReaction(): void
   {
     try {
+      CheckToken::tokenCheck();
+
       $commentNo = (int) (\cleanSession((string) ($_POST['comment_no'] ?? '')));
       $reactionType = \cleanSession((string) ($_POST['reaction'] ?? ''));
       $userId = \cleanSession((string) ($_SESSION['id'] ?? ''));
       $famCode = \cleanSession((string) ($_SESSION['famCode'] ?? ''));
+
+      // SEC-5 — cap reaction spam per user (60 / 5 min via the shared limiter's
+      // dedicated 'comment_reactions' profile).
+      if ($userId !== '') {
+        \Src\Limiter::limit($userId . ':reaction', 'comment_reactions');
+      }
 
       // ── Input guards ───────────────────────────────────────────────────
       if (!$commentNo || !$userId || !$famCode) {

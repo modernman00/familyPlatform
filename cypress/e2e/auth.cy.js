@@ -53,8 +53,9 @@ describe('Authentication Flow', () => {
             expect(interception.response.statusCode).to.be.oneOf([200, 201]);
         });
 
-        // Ensure the notification confirmation renders and the session settles
-        cy.get('#login_notification', { timeout: 10000 })
+        // The loader partial's Swal bridge converts the inline success banner
+        // into a SweetAlert toast (see resources/views/partials/loader.blade.php).
+        cy.get('.swal2-popup', { timeout: 10000 })
             .should('be.visible')
             .and('contain.text', 'Verification code sent');
 

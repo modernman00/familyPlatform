@@ -10,6 +10,9 @@
 
 set -e # Exit immediately if a command exits with a non-zero status.
 
+# Always operate from the repo root (composer/npm/rsync-filter paths assume it).
+cd "$(dirname "$0")/.."
+
 # --- Configuration ---
 # TODO: Update these variables with actual Namecheap SSH details
 SSH_USER="bestiias"
@@ -85,37 +88,24 @@ fi
 
 echo "🔄 3/3: Syncing files to Namecheap ($SSH_HOST)..."
 
-# ALLOWLIST: only these paths are the deployed application. Anything not listed
-# stays local — no need to remember to exclude every new dev script/folder.
-# --delete-excluded removes stale files already on the server (old debug scripts,
-# cypress/, etc). 'protect' filters stop it from wiping server-only runtime data.
-rsync -avz --delete --delete-excluded \
+# macOS ships openrsync, whose filter support is unreliable. Require GNU rsync 3.x
+# (brew install rsync) so the .rsync-filter allowlist behaves predictably.
+RSYNC_BIN="$(command -v rsync)"
+for cand in /opt/homebrew/bin/rsync /usr/local/bin/rsync; do
+    [ -x "$cand" ] && RSYNC_BIN="$cand" && break
+done
+if ! "$RSYNC_BIN" --version 2>/dev/null | head -1 | grep -q "version 3"; then
+    echo "🛑 GNU rsync 3.x required for the deploy allowlist. Run: brew install rsync"
+    exit 1
+fi
+
+# ALLOWLIST via .rsync-filter in the repo root: only paths matched by a '+' rule
+# are sent; everything else (dev scripts, cypress/, migrations/, tests/, …) stays
+# local. --delete-excluded prunes anything stale already on the server; P(rotect)
+# rules in .rsync-filter keep server-only runtime data (uploads, storage, .env).
+"$RSYNC_BIN" -avz --delete --delete-excluded \
     -e "ssh -p $SSH_PORT" \
-    --filter='protect /resources/images' \
-    --filter='protect /public/img' \
-    --filter='protect /public/uploads' \
-    --filter='protect /storage' \
-    --filter='protect /.env' \
-    --filter='protect /.env_production' \
-    --filter='protect /.htaccess' \
-    --include='/app/***' \
-    --include='/bootstrap/***' \
-    --include='/cron/***' \
-    --include='/public/***' \
-    --include='/resources/***' \
-    --include='/vendor/***' \
-    --include='/index.php' \
-    --include='/service-worker.js' \
-    --include='/manifest.json' \
-    --include='/offline.html' \
-    --include='/robots.txt' \
-    --include='/favicon.ico' \
-    --include='/composer.json' \
-    --include='/composer.lock' \
-    --exclude='resources/images/**' \
-    --exclude='public/img/**' \
-    --exclude='public/uploads/**' \
-    --exclude='*' \
+    -f 'merge .rsync-filter' \
     ./ ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}
 
 # Restore the committed SW_VERSION line so the working tree / GitHub-sync stays clean.

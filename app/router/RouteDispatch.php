@@ -26,6 +26,7 @@ final class RouteDispatch
         $this->match = $router->match();
 
         if (!$this->match) {
+            http_response_code(404);
             view('errors.404');
             return;
         }

@@ -6,6 +6,8 @@
 
 @section('content')
 
+@include('partials.loader', ['scriptOnly' => true])
+
 <style nonce="{{ $nonce }}">
     /* CSS for the new Stitch design */
     body {

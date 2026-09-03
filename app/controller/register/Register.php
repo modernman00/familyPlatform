@@ -13,6 +13,13 @@ use Src\functionality\SendEmailFunctionality;
 
 final class Register extends Db
 {
+    /**
+     * GDPR-2 — UK GDPR (DPA 2018 s.9) sets 13 as the age at which a child can
+     * consent to an "information society service" on their own. Below this they
+     * must be added to the tree by a parent/guardian, not self-register. The
+     * DPIA may raise this; change it here if so.
+     */
+    private const MIN_SELF_REGISTER_AGE = 13;
 
     public function index(): void
     {
@@ -70,6 +77,9 @@ final class Register extends Db
                         'mobile' => '447809650814',
                         'password' => 'Password123!',
                         'confirm_password' => 'Password123!',
+                        'day' => '12',
+                        'month' => 'Mar',
+                        'year' => '1990',
                     ];
                 }
                 view('registration/register', ['registerPostData' => $registerPostData]);
@@ -129,7 +139,13 @@ final class Register extends Db
             // hash the password and confirm_password fields
             $cleanData = hashPasswordsInArray($cleanData);
 
-            $cleanData['ai_consent'] = !empty($input['ai_consent']) ? 1 : 0;
+            // GDPR-2 — age gate. A child under the Art. 8 age of consent cannot
+            // self-register; a parent/guardian adds them to the tree instead.
+            $this->assertOldEnoughToRegister(
+                (string) ($cleanData['day'] ?? ''),
+                (string) ($cleanData['month'] ?? ''),
+                (string) ($cleanData['year'] ?? '')
+            );
 
             // Determine initial family status
             $cleanData['familyStatus'] = 'approved';
@@ -237,6 +253,47 @@ final class Register extends Db
 
 
     /**
+     * Reject self-registration by anyone under the Art. 8 age of consent.
+     *
+     * Accepts the three parts posted by the shared-lib `birthday` field
+     * (`day` = 1–31, `month` = "Jan".."Dec" or 1–12, `year` = 4-digit).
+     *
+     * @throws \Src\Exceptions\BadRequestException when the date is missing,
+     *         malformed, in the future, or the person is younger than
+     *         self::MIN_SELF_REGISTER_AGE.
+     */
+    private function assertOldEnoughToRegister(string $day, string $month, string $year): void
+    {
+        $monthMap = [
+            'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4, 'may' => 5, 'jun' => 6,
+            'jul' => 7, 'aug' => 8, 'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12,
+        ];
+
+        $d = (int) trim($day);
+        $m = $monthMap[strtolower(substr(trim($month), 0, 3))] ?? (int) trim($month);
+        $y = (int) trim($year);
+
+        if ($d < 1 || $m < 1 || $m > 12 || $y < 1900 || !checkdate($m, $d, $y)) {
+            throw new \Src\Exceptions\BadRequestException('Please select a valid date of birth.');
+        }
+
+        $dob   = new \DateTimeImmutable(\sprintf('%04d-%02d-%02d', $y, $m, $d));
+        $today = new \DateTimeImmutable('today');
+
+        if ($dob > $today) {
+            throw new \Src\Exceptions\BadRequestException('Your date of birth cannot be in the future.');
+        }
+
+        if ($dob->diff($today)->y < self::MIN_SELF_REGISTER_AGE) {
+            throw new \Src\Exceptions\BadRequestException(
+                'You must be at least ' . self::MIN_SELF_REGISTER_AGE
+                . ' to create your own account. Ask a parent or guardian to '
+                . 'register and add you to the family tree.'
+            );
+        }
+    }
+
+    /**
      * Summary of setId
      * @param array $postData - array data from the input form
      * @param string|int $name - the input name 
@@ -273,6 +330,17 @@ final class Register extends Db
     {
         CorsHandler::setHeaders();
         try {
+            // SEC-5 — this endpoint is an unauthenticated "does this contact
+            // exist?" oracle. Throttle per IP so it can't be swept to enumerate
+            // the member base. 30 checks / 5 min is well above a real form fill.
+            try {
+                Limiter::limit(\Src\Utility::getUserIpAddr());
+            } catch (\Src\Exceptions\TooManyRequestsException $e) {
+                http_response_code(429);
+                echo json_encode(['status' => 'error', 'message' => 'Too many requests. Please slow down.']);
+                return;
+            }
+
             // Read JSON payload
             $rawInput = file_get_contents('php://input');
             $input = $rawInput !== false ? json_decode($rawInput, true) : null;
@@ -280,7 +348,7 @@ final class Register extends Db
                 echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
                 return;
             }
-            
+
             $mobile = !empty($input['mobile']) ? checkInput($input['mobile']) : null;
             $email = !empty($input['email']) ? checkInput($input['email']) : null;
             

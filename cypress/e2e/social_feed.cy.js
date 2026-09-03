@@ -38,6 +38,27 @@ describe('Social Feed Interactions', () => {
         cy.get('body', { timeout: 4000 }).should('contain.text', postContent);
     });
 
+    it('renders a post containing HTML as text, not markup (SEC-2 / stored XSS)', () => {
+        const marker = `xsstest${Date.now()}`;
+        const payload = `<img src=x onerror="window.__xss=1"> <b>${marker}</b>`;
+
+        openModal('postModal');
+        cy.get('textarea#postMessage').should('be.visible')
+            .invoke('val', payload).trigger('input').trigger('change');
+        cy.get('#submitPost').click();
+        cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
+
+        // Reload to render the stored post from the server on a fresh page.
+        cy.reload();
+
+        // The post's marker text must be visible...
+        cy.get('body', { timeout: 15000 }).should('contain.text', marker);
+        // ...the payload's onerror handler must never have run...
+        cy.window().its('__xss').should('be.undefined');
+        // ...and the literal `<img src=x>` from the payload must not be a real node.
+        cy.get('img[src="x"]').should('not.exist');
+    });
+
     it('denies submitting an empty post', () => {
         // Leave textarea empty
         openModal('postModal');
@@ -99,6 +120,48 @@ describe('Social Feed Interactions', () => {
         // no error popup to check for here - the meaningful assertion is that nothing was sent.
         cy.get('@commentInput').then(($input) => {
             expect($input[0].checkValidity()).to.be.false;
+        });
+    });
+
+    // ── Pusher private-channel authorisation (cross-family realtime leak) ──────
+    // The feed/events channels are now `private-family-<code>` and /pusher/auth
+    // must only sign a subscription the session actually belongs to. Test user
+    // is family "SHO", id "397755OLUSOLA".
+    describe('Pusher channel authorisation (POST /pusher/auth)', () => {
+        const authReq = (channel) =>
+            cy.getCookie('XSRF-TOKEN').then((c) =>
+                cy.request({
+                    method: 'POST',
+                    url: '/pusher/auth',
+                    form: true,
+                    body: { socket_id: '123.456', channel_name: channel },
+                    headers: { 'X-CSRF-Token': c ? c.value : '', 'X-Requested-With': 'XMLHttpRequest' },
+                    failOnStatusCode: false,
+                }),
+            );
+
+        it('signs a subscription to the session\'s own family channel', () => {
+            authReq('private-family-SHO').then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body).to.have.property('auth');
+            });
+        });
+
+        it('refuses another family\'s channel', () => {
+            authReq('private-family-MODERNMAN').then((res) => {
+                expect(res.status).to.eq(403);
+                expect(res.body).to.not.have.property('auth');
+            });
+        });
+
+        it('signs the session\'s own user channel but refuses another user\'s', () => {
+            authReq('private-user-397755OLUSOLA').then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body).to.have.property('auth');
+            });
+            authReq('private-user-999999SOMEONEELSE').then((res) => {
+                expect(res.status).to.eq(403);
+            });
         });
     });
 

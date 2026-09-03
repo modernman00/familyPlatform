@@ -3,6 +3,7 @@ namespace App\controller;
 
 use Src\Select;
 use App\classes\Insert;
+use Src\CheckToken;
 use Src\Exceptions\NotFoundException;
 use Src\Update;
 
@@ -32,41 +33,69 @@ final class NotificationController extends Select
     }
 
     /**
-     * Retrieves notifications based on the provided notification ID and family code.
+     * Returns the caller's own notification feed.
      *
-     * This function queries the 'notification' table for entries where the receiver ID
-     * matches either the notification ID or family code. The results are ordered by
-     * creation date in ascending order. Upon successful retrieval, it returns the data and
-     * sends a success message. In case of an exception, it handles the error appropriately.
+     * `notification.receiver_id` holds either a user id or a family code, so the
+     * allow-list is built from what the *session* holds — never from the URL
+     * segments, which a member could otherwise swap for another family's id/code
+     * to read their notifications (IDOR, SEC-1).
      *
-     * @return array|null
+     * @return array<int, mixed>|null
      */
-    public static function notificationById($id, $famCode)
+    public static function notificationById($id = null, $famCode = null)
     {
         try {
-            $notificationId = checkInput($id) ?? null;
-            $famCode = checkInput($famCode) ?? null;
-
-            if ($notificationId === null && $famCode === null) {
-                msgException(400, 'Either notification ID or family code must be provided');
+            $userId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+            if ($userId === '') {
+                msgException(401, 'Unauthorized');
+                return null;
             }
 
-            $query = "SELECT * FROM notification 
-                WHERE (receiver_id = ? OR receiver_id = ?) 
-                AND notification_status = ? 
+            $receivers = self::sessionReceiverIds($userId);
+
+            $placeholders = implode(',', array_fill(0, count($receivers), '?'));
+            $query = "SELECT * FROM notification
+                WHERE receiver_id IN ($placeholders)
+                AND notification_status = ?
                 ORDER BY created_at ASC";
-            $result = Select::selectFn2($query, [$notificationId, $famCode, "new"]);
+            $result = Select::selectFn2($query, [...$receivers, 'new']);
 
-
-            // Call msgSuccess after returning the result
             msgSuccess(200, $result);
 
             return $result;
-        } catch (\Exception $e) {
-            // Handle errors or log them
+        } catch (\Throwable $e) {
             showError($e);
             return null;
         }
+    }
+
+    /**
+     * The set of receiver_id values the current session is entitled to read:
+     * the user's own id plus every approved family code on the session.
+     *
+     * @return array<int, string>
+     */
+    private static function sessionReceiverIds(string $userId): array
+    {
+        $receivers = [$userId];
+
+        $famCodes = $_SESSION['famCodes'] ?? [];
+        if (is_string($famCodes)) {
+            $famCodes = [$famCodes];
+        }
+        if (is_array($famCodes)) {
+            foreach ($famCodes as $fc) {
+                if (is_string($fc) && $fc !== '') {
+                    $receivers[] = $fc;
+                }
+            }
+        }
+
+        if (!empty($_SESSION['famCode']) && is_string($_SESSION['famCode'])) {
+            $receivers[] = $_SESSION['famCode'];
+        }
+
+        return array_values(array_unique($receivers));
     }
 
     // make notification as read 
@@ -83,11 +112,19 @@ final class NotificationController extends Select
             }
 
 
-            $userId = $_SESSION['id'] ?? null;
-            if (!$userId) throw new NotFoundException('Unauthorized');
+            $userId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+            if ($userId === '') throw new NotFoundException('Unauthorized');
+
+            // Only dismiss a row the session is actually a recipient of — by
+            // user id or by one of its approved family codes.
+            $receivers = self::sessionReceiverIds($userId);
+            $placeholders = implode(',', array_fill(0, count($receivers), '?'));
             $db = \Src\Db::connect2();
-            $stmt = $db->prepare("UPDATE notification SET notification_status = 'deleted' WHERE no = ? AND receiver_id = ?");
-            $stmt->execute([$no, $userId]);
+            $stmt = $db->prepare(
+                "UPDATE notification SET notification_status = 'deleted'
+                 WHERE no = ? AND receiver_id IN ($placeholders)"
+            );
+            $stmt->execute([$no, ...$receivers]);
 
 
             // Call msgSuccess after returning the result
@@ -116,6 +153,7 @@ final class NotificationController extends Select
     public static function postSubscriberData(): void
     {
         try {
+            CheckToken::tokenCheck();
 
             $rawInput = file_get_contents("php://input");
             $inputData = json_decode($rawInput !== false ? $rawInput : '', true);
@@ -163,6 +201,42 @@ final class NotificationController extends Select
             msgSuccess(200, 'Subscription saved successfully');
         } catch (\Exception $e) {
             msgException(300, $e);
+        }
+    }
+
+    /**
+     * Removes a push subscription for the current user (PUSH-1 — "turn off
+     * browser notifications" in Settings, or an unsubscribe from the client).
+     * Scoped to the session user so one member can't delete another's rows.
+     */
+    public static function deleteSubscriberData(): void
+    {
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if ($userId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true);
+            $endpoint = is_array($input) && !empty($input['endpoint']) ? (string) $input['endpoint'] : '';
+
+            $db = \Src\Db::connect2();
+            if ($endpoint !== '') {
+                $stmt = $db->prepare('DELETE FROM pushNotification WHERE id = ? AND endpoint = ?');
+                $stmt->execute([$userId, $endpoint]);
+            } else {
+                // No endpoint given — drop every subscription this user has.
+                $stmt = $db->prepare('DELETE FROM pushNotification WHERE id = ?');
+                $stmt->execute([$userId]);
+            }
+
+            msgSuccess(200, 'Push notifications turned off');
+        } catch (\Throwable $e) {
+            showError($e);
         }
     }
 }

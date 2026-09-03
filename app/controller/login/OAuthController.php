@@ -46,69 +46,99 @@ class OAuthController
         exit;
     }
 
+    /**
+     * CSRF/state validation for an OAuth callback.
+     *
+     * The old check only rejected on a *mismatch* when a session state existed —
+     * so a callback with no prior `googleRedirect` (no `$_SESSION['oauth2state']`)
+     * sailed through, letting an attacker replay their own `code` to log a victim
+     * into the attacker's account (login-CSRF / session fixation). Now the
+     * session state MUST be present and match, constant-time, single-use.
+     */
+    private function assertOauthState(): void
+    {
+        $sessionState = $_SESSION['oauth2state'] ?? '';
+        $requestState = is_string($_GET['state'] ?? null) ? $_GET['state'] : '';
+        unset($_SESSION['oauth2state']); // single use, whatever the outcome
+
+        if ($sessionState === '' || $requestState === '' || !hash_equals($sessionState, $requestState)) {
+            http_response_code(400);
+            exit('Invalid or missing OAuth state. Please start sign-in again.');
+        }
+    }
+
     public function googleCallback(): void
     {
-        if (empty($_GET['state']) || (isset($_SESSION['oauth2state']) && $_GET['state'] !== $_SESSION['oauth2state'])) {
-            if (isset($_SESSION['oauth2state'])) {
-                unset($_SESSION['oauth2state']);
-            }
-            exit('Invalid state');
-        }
+        $this->assertOauthState();
 
         $provider = $this->getGoogleProvider();
 
         try {
             /** @var \League\OAuth2\Client\Token\AccessToken $token */
             $token = $provider->getAccessToken('authorization_code', [
-                'code' => $_GET['code']
+                'code' => is_string($_GET['code'] ?? null) ? $_GET['code'] : ''
             ]);
 
             /** @var \League\OAuth2\Client\Provider\GoogleUser $user */
             $user = $provider->getResourceOwner($token);
-            $this->handleSocialLogin($user->getEmail(), $user->getFirstName(), $user->getLastName(), $user->getId(), 'google');
+            // Google only returns an email once the provider has verified it.
+            $this->handleSocialLogin($user->getEmail(), $user->getFirstName(), $user->getLastName(), $user->getId(), 'google', true);
 
         } catch (\Exception $e) {
-            exit('Something went wrong: ' . $e->getMessage());
+            error_log('[OAuth google] ' . $e->getMessage());
+            http_response_code(502);
+            exit('Sign-in with Google failed. Please try again.');
         }
     }
 
     public function facebookCallback(): void
     {
-        if (empty($_GET['state']) || (isset($_SESSION['oauth2state']) && $_GET['state'] !== $_SESSION['oauth2state'])) {
-            if (isset($_SESSION['oauth2state'])) {
-                unset($_SESSION['oauth2state']);
-            }
-            exit('Invalid state');
-        }
+        $this->assertOauthState();
 
         $provider = $this->getFacebookProvider();
 
         try {
             /** @var \League\OAuth2\Client\Token\AccessToken $token */
             $token = $provider->getAccessToken('authorization_code', [
-                'code' => $_GET['code']
+                'code' => is_string($_GET['code'] ?? null) ? $_GET['code'] : ''
             ]);
 
             /** @var \League\OAuth2\Client\Provider\FacebookUser $user */
             $user = $provider->getResourceOwner($token);
-            $this->handleSocialLogin($user->getEmail(), $user->getFirstName(), $user->getLastName(), $user->getId(), 'facebook');
+            $fbData = $user->toArray();
+            // Facebook can hand back an unverified email; only trust it if the
+            // Graph API says so, else force the manual-registration path.
+            $emailVerified = !empty($fbData['verified']) || !empty($fbData['is_verified']);
+            $this->handleSocialLogin($user->getEmail(), $user->getFirstName(), $user->getLastName(), $user->getId(), 'facebook', $emailVerified);
 
         } catch (\Exception $e) {
-            exit('Something went wrong: ' . $e->getMessage());
+            error_log('[OAuth facebook] ' . $e->getMessage());
+            http_response_code(502);
+            exit('Sign-in with Facebook failed. Please try again.');
         }
     }
 
-    private function handleSocialLogin(?string $email, ?string $firstName, ?string $lastName, ?string $providerId, string $provider): void
+    private function handleSocialLogin(?string $email, ?string $firstName, ?string $lastName, ?string $providerId, string $provider, bool $emailVerified = false): void
     {
         if (!$email || !$providerId) {
-            exit('Social login failed to retrieve essential information.');
+            http_response_code(400);
+            exit('Sign-in did not return the information we need. Please register manually.');
         }
         $db = Db::connect2();
-        
+
         // Check if user exists
         $stmt = $db->prepare("SELECT id, email, token_version FROM account WHERE email = ?");
         $stmt->execute([$email]);
         $userRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        // Account-takeover guard: never bind this OAuth identity to an existing
+        // account (or log into it) unless the provider has *verified* the email.
+        // An unverified provider email would otherwise be an account-takeover
+        // vector — the person must prove control by logging in with a password.
+        if ($userRow && !empty($userRow['id']) && !$emailVerified) {
+            http_response_code(409);
+            exit('An account already exists for this email. Please sign in with your password.');
+        }
 
         if ($userRow && !empty($userRow['id'])) {
             $userId = (string) $userRow['id'];
@@ -136,6 +166,13 @@ class OAuthController
     /** @param array<string, mixed> $userRow */
     private function loginUser(string $userId, array $userRow = []): void
     {
+        // M-2 — defeat session fixation: the password path regenerates the id on
+        // auth; the OAuth path must too, or an attacker who planted a session id
+        // rides in on the victim's OAuth login.
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
+
         $db = Db::connect2();
         // Fetch family code
         $stmt = $db->prepare("SELECT famCode FROM personal WHERE id = ?");

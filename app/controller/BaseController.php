@@ -157,6 +157,91 @@ class BaseController
     }
 
     /**
+     * True when the logged-in session belongs to $famCode — checked against the
+     * session ('famCode' / 'famCodes') and, authoritatively, the user_families
+     * table. Used to family-scope profile and family-tree views so a member
+     * cannot enumerate other families' data by walking ids (IDOR).
+     */
+    public static function sessionSharesFamily(string $famCode): bool
+    {
+        $famCode = trim($famCode);
+        if ($famCode === '') {
+            return false;
+        }
+
+        $sessionCodes = [];
+        if (!empty($_SESSION['famCode']) && is_string($_SESSION['famCode'])) {
+            $sessionCodes[] = trim($_SESSION['famCode']);
+        }
+        $many = $_SESSION['famCodes'] ?? [];
+        if (is_string($many)) {
+            $many = [$many];
+        }
+        if (is_array($many)) {
+            foreach ($many as $fc) {
+                if (is_string($fc) && trim($fc) !== '') {
+                    $sessionCodes[] = trim($fc);
+                }
+            }
+        }
+        if (in_array($famCode, $sessionCodes, true)) {
+            return true;
+        }
+
+        $sessionId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+        if ($sessionId === '') {
+            return false;
+        }
+
+        try {
+            $stmt = Db::connect2()->prepare(
+                "SELECT 1 FROM user_families WHERE user_id = ? AND family_code = ? LIMIT 1"
+            );
+            $stmt->execute([$sessionId, $famCode]);
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            error_log('sessionSharesFamily check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Whether the current session may view member $memberId's profile / tree.
+     * Mirrors the directory-search visibility rule (AllMembersData::searchMembers):
+     * your own record, a shared family, or an approved connection either way.
+     */
+    public static function sessionCanViewMember(string $memberId, string $memberFamCode): bool
+    {
+        $sessionId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+        if ($sessionId === '') {
+            return false;
+        }
+        if ($memberId !== '' && hash_equals($sessionId, $memberId)) {
+            return true;
+        }
+        if (self::sessionSharesFamily($memberFamCode)) {
+            return true;
+        }
+        if ($memberId === '') {
+            return false;
+        }
+
+        try {
+            $stmt = Db::connect2()->prepare(
+                "SELECT 1 FROM requestMgt
+                 WHERE LOWER(status) IN ('approved','accepted')
+                   AND ((approver_id = ? AND requester_id = ?) OR (approver_id = ? AND requester_id = ?))
+                 LIMIT 1"
+            );
+            $stmt->execute([$sessionId, $memberId, $memberId, $sessionId]);
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable $e) {
+            error_log('sessionCanViewMember check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Format main person's data from multiple tables
      * @param array $data
      * @return array

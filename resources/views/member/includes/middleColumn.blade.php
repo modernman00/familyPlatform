@@ -109,7 +109,7 @@
   </div>
 
   <!-- Reactive Alpine.js Feed -->
-  <div x-data="profileFeed()" class="feed-posts-container">
+  <div x-data="profileFeed({ famCode: '{{ $data['famCode'] ?? '' }}', userId: '{{ $data['id'] ?? '' }}' })" class="feed-posts-container">
     <!-- Error Alert if loading fails -->
     <template x-if="errorMessage">
       <div class="alert alert-danger shadow-sm rounded-3 mb-4" role="alert">

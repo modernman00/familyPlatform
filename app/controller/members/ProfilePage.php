@@ -267,15 +267,16 @@ final class ProfilePage extends ProcessImg
     public function postComment(): void
     {
         try {
-            // $getComment = $this->processPostData();
+            $idClean = checkInput(data: $_SESSION['id'] ?? '');
+            $id = is_string($idClean) ? $idClean : '';
+            if ($id === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
 
-            // // get the profile pics of the commenter 
-
-            // $getComment['profileImg'] = Post::getProfilePicsById($getComment['id']);
-
-            // Insert::submitFormDynamic('comment', $getComment);
-
-            $id = checkInput(data: $_SESSION['id']);
+            // SEC-5 — cap comment spam per user (30 / 5 min via the shared limiter's
+            // 'post' profile).
+            \Src\Limiter::limit($id . ':comment', 'post');
             $newInput = [
                 'id' => $id,
                 'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],

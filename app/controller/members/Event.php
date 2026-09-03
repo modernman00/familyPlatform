@@ -170,11 +170,16 @@ final class Event extends AllMembersData
 
             $allNotification = SelectFn::selectAllRowsById('notification', 'no', $notificationNo);
 
-            Pusher::broadcast(
-                theChannel: 'notification-channel',
-                theEvent: 'new-notification',
-                theData: $allNotification
-            );
+            // The notification bar is polled by its owner, so push it to that
+            // viewer's own private channel — never a world-readable one.
+            $viewerId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+            if ($viewerId !== '') {
+                Pusher::broadcast(
+                    theChannel: Pusher::userChannel($viewerId),
+                    theEvent: 'new-notification',
+                    theData: $allNotification
+                );
+            }
         } catch (\Throwable $th) {
             showError(th: $th);
         }
@@ -366,7 +371,7 @@ final class Event extends AllMembersData
 
             AllFunctionalities::update2('events', 'deleted_at', date('Y-m-d H:i:s'), 'no', $eventNo);
 
-            Pusher::broadcast('events-channel', 'delete-event', ['no' => $eventNo]);
+            Pusher::broadcastToFamily((string) ($event['eventCode'] ?? $_SESSION['famCode'] ?? ''), 'delete-event', ['no' => $eventNo]);
 
             msgSuccess(200, "event deleted successfully");
         } catch (\Throwable $th) {
@@ -414,7 +419,7 @@ final class Event extends AllMembersData
             $getDateDiff = number2word($dateDiff);
             $dateDifference = $getDateDiff === 'Zero' ? 'Today' : ($getDateDiff === 'One' ? 'Tomorrow' : "in $getDateDiff Days");
 
-            Pusher::broadcast('events-channel', 'update-event', [
+            Pusher::broadcastToFamily((string) ($event['eventCode'] ?? $_SESSION['famCode'] ?? ''), 'update-event', [
                 'no' => $eventNo,
                 'eventName' => $data['eventName'],
                 'eventDate' => dateFormat($data['eventDate']),

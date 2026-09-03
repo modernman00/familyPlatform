@@ -40,6 +40,16 @@ $router->map('GET', '/signout/[a:redirect]?', 'App\controller\LogoutController@s
 $router->map('GET', '/login/code', 'App\controller\login\Code@show', 'code');
 
 $router->map('POST', '/login/code', 'App\controller\login\Code@verify', 'verify cost');
+
+// Alias: partyplatform-style Security Verification URL. Same 2FA-code flow as /login/code.
+$router->map('GET', '/verify-email', 'App\controller\login\Code@show', 'verify_email');
+
+$router->map('POST', '/verify-email', 'App\controller\login\Code@verify', 'verify_email_post');
+
+// Resend the emailed 2FA verification code
+$router->map('POST', '/login/code/resend', 'App\controller\login\Code@resendCode', 'resend_code');
+
+$router->map('POST', '/resendCode', 'App\controller\login\Code@resendCode', 'resend_code_alias');
 // // forgot
 // $router->map('GET', '/login/forgot', 'App\controller\login\Forgot@show', 'forgot_PASSWORD');
 

@@ -1,7 +1,6 @@
 <?php
 namespace App\controller;
 
-use App\model\Post;
 use Src\{Utility, SelectFn};
 
 final class Index 
@@ -45,28 +44,39 @@ final class Index
         }
     }
 
+    /**
+     * Answers "is this email already a registered account?" for the kid/sibling
+     * invite flow — one lookup, boolean answer, session required.
+     *
+     * Replaces a prior version that returned every approved account's email
+     * address to any caller (unauthenticated PII disclosure, SEC-4).
+     */
     public static function getEmails(): void
     {
-        $result = SelectFn::selectColumnByIdentifier('account', 'email', 'status', 'approved');
+        try {
+            $sessionId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+            if ($sessionId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
 
-        msgSuccess(200, $result);
+            $rawEmail = $_GET['email'] ?? '';
+            $clean = is_string($rawEmail) ? checkInput($rawEmail) : null;
+            $email = is_string($clean) ? strtolower(trim($clean)) : '';
+            if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+                msgException(400, 'A valid email query parameter is required');
+                return;
+            }
 
-    }
+            // SEC-5 — this is still an "does this email exist?" oracle even behind
+            // the session gate; throttle per user so it can't be swept.
+            \Src\Limiter::limit($sessionId . ':emailcheck', 'post');
 
-    public static function checking(): void
-    {
-        header('Content-Type: text/event-stream');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
+            $rows = SelectFn::selectAllRowsById('account', 'email', $email);
 
-         // 5 minutes
-        time();
-
-        while (true) {
-            $getUnpublishedPost = Post::getUnpublishedPost();
-            p($getUnpublishedPost);
-            echo ": heartbeat\n\n";
+            msgSuccess(200, ['exists' => !empty($rows)]);
+        } catch (\Throwable $th) {
+            Utility::showError($th);
         }
-
     }
 }

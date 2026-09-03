@@ -34,13 +34,31 @@ final class FamilyRequestController extends BaseController
   public static function request(): void
   {
     try {
-      CheckToken::tokenCheck();
-      // printArr jS DATA 
-
       $rawInput = file_get_contents("php://input");
-      $dataFromJs = json_decode($rawInput !== false ? $rawInput : '', true);
+      $dataFromJs = json_decode($rawInput !== false ? $rawInput : '', true) ?: [];
 
-      if (!$dataFromJs) {
+      // Defensively validate CSRF token for JSON and form payloads
+      $sessionToken = $_SESSION['token'] ?? '';
+      $jsonToken = $dataFromJs['token'] ?? '';
+      $headerToken = $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+      $postToken = $_POST['token'] ?? '';
+
+      $isTokenValid = false;
+      if (!empty($sessionToken)) {
+        if (!empty($headerToken) && hash_equals($sessionToken, $headerToken)) {
+          $isTokenValid = true;
+        } elseif (!empty($jsonToken) && hash_equals($sessionToken, $jsonToken)) {
+          $isTokenValid = true;
+        } elseif (!empty($postToken) && hash_equals($sessionToken, (string)$postToken)) {
+          $isTokenValid = true;
+        }
+      }
+
+      if (!$isTokenValid) {
+        CheckToken::tokenCheck();
+      }
+
+      if (empty($dataFromJs)) {
         msgException(301, "Invalid request data.");
       }
 
@@ -60,11 +78,35 @@ final class FamilyRequestController extends BaseController
 
       $requesterData = BaseController::membersData();
 
-      $theApproverID = $dataFromJs['approver']['approverId'];
-      $theRequesterID = $requesterData['id'];
-      $theApproverCode = $dataFromJs['approver']['approverCode'];
-      $theRequesterCode = $requesterData['famCode'];
-      $approverEmail = $dataFromJs['approver']['approverEmail'];
+      $theApproverID = $dataFromJs['approver']['approverId'] ?? $dataFromJs['approverId'] ?? $dataFromJs['target_id'] ?? '';
+      $theRequesterID = $requesterData['id'] ?? '';
+      $theRequesterCode = $requesterData['famCode'] ?? '';
+
+      $theApproverCode = $dataFromJs['approver']['approverCode'] ?? $dataFromJs['approverCode'] ?? '';
+      $approverEmail = $dataFromJs['approver']['approverEmail'] ?? $dataFromJs['approverEmail'] ?? '';
+      $approverFirstName = $dataFromJs['approver']['approverFirstName'] ?? $dataFromJs['approverFirstName'] ?? '';
+      $approverLastName = $dataFromJs['approver']['approverLastName'] ?? $dataFromJs['approverLastName'] ?? '';
+
+      // If approver details are missing from payload, resolve from database
+      if (!empty($theApproverID) && (empty($theApproverCode) || empty($approverEmail))) {
+        $singleCust = new SingleCustomerData();
+        $approverCust = $singleCust->getCustomerData((string)$theApproverID, ['personal', 'contact']);
+        if ($approverCust && is_array($approverCust)) {
+          $theApproverCode = $theApproverCode ?: ($approverCust['famCode'] ?? '');
+          $approverEmail = $approverEmail ?: ($approverCust['email'] ?? '');
+          $approverFirstName = $approverFirstName ?: ($approverCust['firstName'] ?? '');
+          $approverLastName = $approverLastName ?: ($approverCust['lastName'] ?? '');
+        }
+      }
+
+      $approverData = [
+        'approverId' => $theApproverID,
+        'approverCode' => $theApproverCode,
+        'approverEmail' => $approverEmail,
+        'approverFirstName' => $approverFirstName,
+        'approverLastName' => $approverLastName,
+        ...($dataFromJs['approver'] ?? [])
+      ];
 
       // validate the input 
 
@@ -98,29 +140,33 @@ final class FamilyRequestController extends BaseController
 
         // SEND EMAIL TO THE APPROVER
 
-        $requesterName = "
-        {$requesterData['firstName']} 
-        {$requesterData['lastName']}";
-
-        $approverName = "
-        {$dataFromJs['approver']['approverFirstName']} 
-        {$dataFromJs['approver']['approverLastName']}";
+        $requesterName = trim("{$requesterData['firstName']} {$requesterData['lastName']}");
+        $approverName = trim("{$approverFirstName} {$approverLastName}") ?: 'Family Member';
 
         // remove the requester email so it is not confused with the approver email
-        unset($requesterData['email']);
+        $requesterPayload = $requesterData;
+        unset($requesterPayload['email']);
 
-        $emailArray = [
-          'data' => [
-            'name' => $approverName,
-            'email' => $approverEmail,
-            ...$dataFromJs['approver'],
-            ...$requesterData
-          ],
-          'subject' => "Family request from $requesterName",
-          'viewPath' => $dataFromJs['emailPath'],
-        ];
+        $emailViewPath = $dataFromJs['emailPath'] ?? 'msg.request';
 
-        ToSendEmail::sendEmailGeneral($emailArray, 'member');
+        if (!empty($approverEmail)) {
+          try {
+            $emailArray = [
+              'data' => [
+                'name' => $approverName,
+                'email' => $approverEmail,
+                ...$approverData,
+                ...$requesterPayload
+              ],
+              'subject' => "Family request from $requesterName",
+              'viewPath' => $emailViewPath,
+            ];
+
+            ToSendEmail::sendEmailGeneral($emailArray, 'member');
+          } catch (\Throwable $emailEx) {
+            error_log('[FamilyRequestController] Email dispatch warning: ' . $emailEx->getMessage());
+          }
+        }
 
         // SENT NOTIFICATION TO APPROVER TAB
 
@@ -253,8 +299,6 @@ final class FamilyRequestController extends BaseController
 
           $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
 
-          msgSuccess(code: 200, msg: $lastInsertedId);
-
           // Send push notification to the requester about the decision - Service Manager JS
           PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
 
@@ -264,13 +308,27 @@ final class FamilyRequestController extends BaseController
 
           // if the source is from the profile page, refresh the page or use javascript to manage it 
 
-
           $requestApprovalFromProfilePage = $src ?? null;
 
           if ($requestApprovalFromProfilePage === "pp") {
             header("location: /profilePage");
           } else {
-            view('msg/requestApprover', compact('app'));
+            // Show premium approval landing page (email link click)
+            view('msg/requestApprovalSuccess', compact('app'));
+          }
+        } else {
+          // Rejection flow — show the same premium page with "declined" state
+          $app = parent::findMemberById($approver);
+          $app['decision'] = $decision;
+          $reqFirst = $req['firstName'] ?? 'A family member';
+          $reqLast = $req['lastName'] ?? '';
+          $app['requesterName'] = "{$reqFirst} {$reqLast}";
+
+          $requestApprovalFromProfilePage = $src ?? null;
+          if ($requestApprovalFromProfilePage === "pp") {
+            header("location: /profilePage");
+          } else {
+            view('msg/requestApprovalSuccess', compact('app'));
           }
         }
       } else {

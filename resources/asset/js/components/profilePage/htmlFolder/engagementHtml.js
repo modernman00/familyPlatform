@@ -1,9 +1,11 @@
+import { esc } from "../../global";
+
 export const renderPoll = (poll) => {
     if (!poll || !poll.options || !Array.isArray(poll.options)) return '';
-    
-    // Safely fallback the question text
-    const questionText = poll.question || '';
-    
+
+    // Poll question + option text are user-authored — escape for innerHTML (SEC-2).
+    const questionText = esc(poll.question || '');
+
     let html = `<div class="poll-container mt-3 p-3 bg-light rounded border border-light-subtle">
         <h6 class="fw-bold mb-3"><i class="fa fa-bar-chart me-2 text-primary"></i>${questionText}</h6>
         <div class="poll-options">`;
@@ -14,7 +16,7 @@ export const renderPoll = (poll) => {
         const percentage = opt?.percentage || 0;
         const barWidth = percentage + '%';
         const bgClass = isVoted ? 'bg-primary' : 'bg-secondary';
-        const optionText = opt?.option_text || '';
+        const optionText = esc(opt?.option_text || '');
         
         html += `
             <div class="poll-option mb-2 position-relative">

@@ -153,7 +153,7 @@ if (window.location.pathname === '/register') {
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
-} else if (window.location.pathname === '/login/code') {
+} else if (['/login/code', '/verify-email'].includes(window.location.pathname)) {
   if (qSel('.signup_login')) qSel('.signup_login').style.display = 'none'; // navbar mgt
 
   routePromise = import(

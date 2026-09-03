@@ -93,16 +93,25 @@ final class ReelsController extends BaseController
             // Handle direct video file upload
             if (!empty($_FILES['video_file']['name'])) {
                 $file = $_FILES['video_file'];
-                $allowedMimes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska', 'video/ogg'];
-                
-                // Validate MIME type
+                // MIME => extension. The stored extension is derived from the
+                // *sniffed* type only — never from the client-supplied filename
+                // or $_FILES['type'] (both attacker-controlled), so an uploaded
+                // .php can't land in the webroot with a .php name.
+                $allowedMimes = [
+                    'video/mp4'          => 'mp4',
+                    'video/webm'         => 'webm',
+                    'video/quicktime'    => 'mov',
+                    'video/x-matroska'   => 'mkv',
+                    'video/ogg'          => 'ogv',
+                ];
+
                 $finfo = finfo_open(FILEINFO_MIME_TYPE);
                 $mimeType = $finfo !== false ? finfo_file($finfo, $file['tmp_name']) : false;
                 if ($finfo !== false) {
                     finfo_close($finfo);
                 }
 
-                if (!in_array($mimeType, $allowedMimes, true) && !in_array($file['type'], $allowedMimes, true)) {
+                if (!is_string($mimeType) || !isset($allowedMimes[$mimeType])) {
                     throw new Exception('Invalid video format. Supported formats: MP4, WebM, QuickTime (MOV).', 400);
                 }
 
@@ -110,8 +119,8 @@ final class ReelsController extends BaseController
                     throw new Exception('Video file exceeds maximum allowed size (100MB).', 400);
                 }
 
-                $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $uniqueName = 'reel_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . ($ext ?: 'mp4');
+                $ext = $allowedMimes[$mimeType];
+                $uniqueName = 'reel_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
                 $targetDir = __DIR__ . '/../../../public/resources/videos/reels/';
 
                 if (!is_dir($targetDir)) {
@@ -141,8 +150,13 @@ final class ReelsController extends BaseController
             $thumbnailData = isset($_POST['thumbnail_data']) ? (string)$_POST['thumbnail_data'] : '';
             if (!empty($thumbnailData) && str_contains($thumbnailData, 'base64,')) {
                 $rawBase64 = explode('base64,', $thumbnailData)[1];
-                $decodedImg = base64_decode($rawBase64);
-                if ($decodedImg) {
+                $decodedImg = base64_decode($rawBase64, true);
+                // Confirm the bytes really are a raster image before writing.
+                $imgInfo = is_string($decodedImg) ? @getimagesizefromstring($decodedImg) : false;
+                $okThumb = is_array($imgInfo)
+                    && in_array($imgInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)
+                    && strlen((string) $decodedImg) <= 5 * 1024 * 1024;
+                if ($okThumb) {
                     $thumbDir = __DIR__ . '/../../../public/resources/images/reels/thumbs/';
                     if (!is_dir($thumbDir)) {
                         mkdir($thumbDir, 0755, true);

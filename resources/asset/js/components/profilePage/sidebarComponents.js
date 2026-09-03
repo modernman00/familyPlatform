@@ -1,6 +1,7 @@
 import axios from 'axios';
 import Pusher from 'pusher-js';
 import Swal from 'sweetalert2';
+import { getCsrfToken } from '../global';
 
 const csrfOptions = {
     xsrfCookieName: 'XSRF-TOKEN',
@@ -169,13 +170,26 @@ export function upcomingEvents(initialEvents) {
             try {
                 const key = process.env.MIX_PUSHER_APP_KEY;
                 const cluster = process.env.MIX_PUSHER_APP_CLUSTER;
-                if (!key || !cluster) return;
+                const famCode = (this.userData?.famCode || '').replace(/[^A-Za-z0-9_-]/g, '');
+                if (!key || !cluster || !famCode) return;
 
-                this.pusher = new Pusher(key, { cluster, encrypted: true });
+                // Per-family private channel — server-authorised in Pusher::authoriseChannel.
+                this.pusher = new Pusher(key, {
+                    cluster,
+                    forceTLS: true,
+                    channelAuthorization: {
+                        endpoint: '/pusher/auth',
+                        headersProvider: () => ({
+                            'X-CSRF-Token': getCsrfToken(),
+                            'X-XSRF-TOKEN': getCsrfToken(),
+                            'X-Requested-With': 'XMLHttpRequest',
+                        }),
+                    },
+                });
 
-                const eventsChannel = this.pusher.subscribe('events-channel');
-                eventsChannel.bind('update-event', (data) => this.applyEventUpdate(data));
-                eventsChannel.bind('delete-event', (data) => {
+                const channel = this.pusher.subscribe(`private-family-${famCode}`);
+                channel.bind('update-event', (data) => this.applyEventUpdate(data));
+                channel.bind('delete-event', (data) => {
                     this.events = this.events.filter(ev => String(ev.no) !== String(data?.no));
                 });
             } catch (e) {

@@ -24,8 +24,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{{ getenv('APP_LOGO') }}">
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="/PWA_Manifest.json">
-  <meta name="theme-color" content="var(--brand-primary)">
+  <link rel="manifest" href="/manifest.json" type="application/manifest+json">
+  <meta name="theme-color" content="#00bfa5">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Family Connect">
@@ -157,6 +157,8 @@
   </div>
 
   @include('includes.public_footer')
+
+  @include('partials.cookie-banner')
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   

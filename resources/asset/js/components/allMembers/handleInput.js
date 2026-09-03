@@ -1,5 +1,6 @@
 // resources/js/allMembers/handleInput.js
 import { id, msgException, showNotification, checkBox } from "@modernman00/shared-js-lib";
+import { esc } from "../global";
 import axios from "axios";
 
 /**
@@ -16,7 +17,7 @@ const renderInviteBlock = (container, rawQuery) => {
     <p>No matching name found – do you want us to send them a text/email to register to the platform?</p>
     ${checkBox("newMemberRequest")} <br>
 
-    <input type="hidden" id="newMemberName" value="${rawQuery}">
+    <input type="hidden" id="newMemberName" value="${esc(rawQuery)}">
 
     <input type="text" id="newMemberRequestName" class="form-control"
            name="newMemberRequestName"

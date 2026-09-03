@@ -19,7 +19,7 @@
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
 
-    <link rel="manifest" href="/PWA_Manifest.json" type="application/manifest+json"> />
+    <link rel="manifest" href="/manifest.json" type="application/manifest+json">
 
 
 </head>

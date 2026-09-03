@@ -57,9 +57,26 @@ $router->map(
 );
 
 
+// Pusher private-channel authorisation. pusher-js POSTs socket_id + channel_name
+// here; App\classes\Pusher::authoriseChannel checks the session owns that
+// channel before signing the subscription grant.
 $router->map(
-  method: 'POST', 
-  route: '/pushNotification/subscription', 
-  target: 'App\controller\NotificationController@postSubscriberData', 
+  method: 'POST',
+  route: '/pusher/auth',
+  target: 'App\classes\Pusher@authoriseChannel',
+  name: 'pusherAuth'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/pushNotification/subscription',
+  target: 'App\controller\NotificationController@postSubscriberData',
   name: 'postSubscriberData'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/pushNotification/unsubscribe',
+  target: 'App\controller\NotificationController@deleteSubscriberData',
+  name: 'deleteSubscriberData'
 );

@@ -5,8 +5,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    --brand-primary: var(--brand-primary);
-    --brand-secondary: var(--brand-secondary);
+    /* Canonical brand palette (mirrors resources/asset/scss/_variables.scss &
+       public/css/main.css). These were previously self-referential
+       (`var(--brand-primary)`), which is a guaranteed-invalid value — every
+       `var(--brand-primary)` on the public pages silently resolved to nothing,
+       leaving e.g. the login "Sign In" button transparent. */
+    --brand-primary: #00bfa5;
+    --brand-secondary: #004182;
     --brand-success: #057642;
     --bg-light: #f3f2ef;
     --bg-white: #ffffff;

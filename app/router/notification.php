@@ -34,10 +34,4 @@ $router->map(
   name: 'delete notification by id'
 );
 
-$router->map(
-  method: 'POST', 
-  route: '/pustNotification/subscription', 
-  target: 'App\controller\NotificationController@postSubscriberData',
-  name: 'post subscriber data'
-);
 

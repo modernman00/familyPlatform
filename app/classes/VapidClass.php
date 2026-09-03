@@ -2,29 +2,8 @@
 
 namespace App\classes;
 
-use Minishlink\WebPush\Subscription;
-use Minishlink\WebPush\WebPush;
-
-
 class VapidClass
 {
-    private function index(): array
-    {
-        $vapidPublicKey = self::urlBase64ToUint8Array(getenv('VAPID_PUBLIC_KEY'));
-        $vapidPrivateKey = self::urlBase64ToUint8Array(getenv('VAPID_PRIVATE_KEY'));
-        $auth = array(
-            'VAPID' => array(
-                'subject' => 'mailto:waledevtest@gmail.com',
-                'publicKey' => $vapidPublicKey,
-                'privateKey' => $vapidPrivateKey,
-            ),
-        );
-        return $auth;
-    }
-
-    // Function to send push notifications
-
-
     /**
      * @param false|string $base64String
      *

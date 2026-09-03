@@ -55,4 +55,47 @@ describe('Events and Profiles', () => {
             .should('contain.text', 'successfully saved');
     });
 
+    const csrf = () => cy.getCookie('XSRF-TOKEN').then((c) => (c ? c.value : ''));
+
+    it('member can export their own data (GDPR Art. 15)', () => {
+        csrf().then((token) => {
+            cy.request({
+                method: 'POST',
+                url: '/account/data-export',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-XSRF-TOKEN': token },
+            }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.headers['content-disposition']).to.contain('attachment');
+                expect(res.body).to.have.property('export_format');
+                expect(res.body.data).to.have.property('account');
+                expect(res.body.data.account[0].password).to.eq('[redacted]');
+            });
+        });
+    });
+
+    it('data-export rejects a request with no CSRF token (SEC)', () => {
+        cy.request({
+            method: 'POST',
+            url: '/account/data-export',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            failOnStatusCode: false,
+        }).then((res) => {
+            expect(res.status).to.be.oneOf([401, 403]);
+        });
+    });
+
+    it('member can request account deletion (GDPR Art. 17)', () => {
+        csrf().then((token) => {
+            cy.request({
+                method: 'POST',
+                url: '/account/request-deletion',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-XSRF-TOKEN': token },
+            }).then((res) => {
+                expect(res.status).to.eq(200);
+                const body = typeof res.body === 'string' ? JSON.parse(res.body) : res.body;
+                expect(body.message).to.contain('received your deletion request');
+            });
+        });
+    });
+
 });
