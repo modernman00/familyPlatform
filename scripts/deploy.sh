@@ -246,7 +246,8 @@ echo "✅ File transfer synchronized."
 if [ $DRY_RUN -eq 0 ]; then
     echo -e "\n🧹 [Stage 5/6] Executing Remote Maintenance & Cache Purge..."
     ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << REMOTE_CMD
-        # 1. Enforce strict permissions (SecOps: Marcus)
+        # 1. Enforce strict permissions and guarantee upload directories exist (SecOps: Marcus)
+        mkdir -p "${REMOTE_DIR}/resources/images/post" "${REMOTE_DIR}/resources/images/profile" "${REMOTE_DIR}/resources/images/photos" "${REMOTE_DIR}/resources/images/reels" "${REMOTE_DIR}/public/uploads" "${REMOTE_DIR}/storage" 2>/dev/null || true
         find "${REMOTE_DIR}" -type d -exec chmod 755 {} + 2>/dev/null || true
         find "${REMOTE_DIR}" -type f -exec chmod 644 {} + 2>/dev/null || true
         [ -f "${REMOTE_DIR}/.env" ] && chmod 600 "${REMOTE_DIR}/.env" 2>/dev/null || true

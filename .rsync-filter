@@ -8,13 +8,13 @@ P /.env
 P /.env_production
 P /storage/***
 P /public/uploads/***
-P /resources/images/profile/***
+P /resources/images/***
 P /bootstrap/log/***
 P /bootstrap/cache/***
 
 # 2. EXCLUDE user uploads from local sync
 - /public/uploads/***
-- /resources/images/profile/***
+- /resources/images/***
 - /storage/***
 
 # 3. ALLOWLIST (+) Core Application Code & Compiled Assets
