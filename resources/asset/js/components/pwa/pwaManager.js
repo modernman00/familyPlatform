@@ -339,12 +339,23 @@ class PWAManager {
     if (notifTab) {
       notifTab.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         triggerHaptic('selection');
+        
         const desktopNotifBtn = document.getElementById('notificationBtn');
-        if (desktopNotifBtn) {
-          desktopNotifBtn.click();
+        const dropdown = document.getElementById('notificationDropdown');
+        
+        if (dropdown && window.innerWidth < 992) {
+            // On mobile, append to body so it's not hidden by collapsed navbar
+            if (dropdown.parentNode !== document.body) {
+                document.body.appendChild(dropdown);
+                dropdown.classList.add('mobile-pwa-dropdown');
+            }
+            dropdown.classList.toggle('show');
+        } else if (desktopNotifBtn) {
+            desktopNotifBtn.click();
         } else {
-          window.location.href = '/notifications';
+            window.location.href = '/notifications';
         }
       });
     }

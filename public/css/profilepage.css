@@ -86,7 +86,35 @@ body {
 }
 
 .post-composer {
-  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.post-composer:focus-within,
+.post-composer:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+.composer-prompt:hover {
+  border-color: var(--primary-color) !important;
+  background-color: var(--hover-color) !important;
+}
+
+.composer-prompt:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.composer-quick-action {
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  padding: 8px 6px;
+  transition: background-color 0.15s ease;
+}
+
+.composer-quick-action:hover,
+.composer-quick-action:focus-visible {
+  background-color: var(--hover-color);
 }
 
 .post {
@@ -839,12 +867,61 @@ body {
 /* Action Bar Refinements */
 .composer-action-bar {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 6px 4px;
   padding: 8px 12px;
   border: 1px solid var(--border-color);
   background-color: var(--bg-color);
   border-radius: 50px;
+}
+
+/* The icon group must be allowed to shrink/wrap so it never pushes the Post
+   button outside the modal card on narrow viewports. */
+.composer-action-bar > .d-flex {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.composer-action-bar .submitPost {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+@media (max-width: 576px) {
+  #postModal .modal-content {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  #postModal .modal-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .composer-action-bar {
+    padding: 6px 8px;
+  }
+
+  .btn-composer-action {
+    width: 34px;
+    height: 34px;
+    font-size: 1.1rem;
+  }
+
+  .btn-composer-action.action-gif,
+  .btn-composer-action.gif-btn {
+    width: 30px;
+    height: 30px;
+    margin: 1px;
+  }
+
+  .composer-action-bar .submitPost {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
 }
 
 .btn-composer-action {

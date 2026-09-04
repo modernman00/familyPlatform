@@ -348,3 +348,34 @@
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
 }
+
+/* PWA Mobile specific override for Notification Dropdown */
+.mobile-pwa-dropdown {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 80px !important; /* Above bottom nav */
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 95% !important;
+  max-width: 400px;
+  z-index: 1060;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12) !important;
+  border-radius: var(--stitch-radius-lg) var(--stitch-radius-lg) var(--stitch-radius-md) var(--stitch-radius-md) !important;
+  margin-top: 0 !important;
+}
+
+.mobile-pwa-dropdown.show {
+  animation: stitchBottomUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes stitchBottomUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+

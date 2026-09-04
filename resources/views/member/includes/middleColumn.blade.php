@@ -78,6 +78,36 @@
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 
+  <!-- Post Composer (kept above the Kinship widget - creating a post is the
+       primary action; kin discovery is secondary) -->
+  <div class="card post-composer mb-4 border-0 shadow-sm" id="openPostModalTrigger" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);">
+    <div class="card-body p-3 p-sm-4">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle flex-shrink-0" width="44" height="44" style="object-fit: cover;">
+
+        <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
+          style="background-color: var(--bg-color); border: 1px solid var(--border-color); cursor: text; transition: border-color 0.2s, background-color 0.2s;">
+          <span style="color: var(--text-muted); font-size: 0.95rem;">Share a moment with your family...</span>
+        </div>
+      </div>
+
+      <div class="composer-quick-actions d-flex align-items-center gap-1 mt-3 pt-3" style="border-top: 1px solid var(--border-color);">
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
+          <i class="bi bi-camera-fill" style="color: #22c55e; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Photo</span>
+        </button>
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a video to a post">
+          <i class="bi bi-play-btn-fill" style="color: #ef4444; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Video</span>
+        </button>
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
+          <i class="bi bi-bar-chart-fill" style="color: #f97316; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Poll</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
   <!-- Distinct id from the desktop copy below (rightColumn.blade.php) - both render the
        same partial and would otherwise share id="kinshipRadarWidget", which left
@@ -85,17 +115,6 @@
        (frequently hidden) copy instead of whichever one is actually visible. -->
   <div class="d-lg-none">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
-  </div>
-
-  <!-- Post Composer -->
-  <div class="card post-composer mb-4 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);" data-bs-toggle="modal" id="openPostModalTrigger" data-bs-target="#postModal" tabindex="0">
-    <div class="card-body d-flex align-items-center p-4">
-      <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
-
-      <div class="flex-grow-1 rounded-pill px-4 py-3" style="background-color: var(--hover-color); cursor: pointer; transition: background-color 0.2s;">
-        <span style="color: var(--text-muted); font-size: 0.95rem;">Share a moment with your family...</span>
-      </div>
-    </div>
   </div>
 
   <!-- Memories Section (Hidden until loaded) -->

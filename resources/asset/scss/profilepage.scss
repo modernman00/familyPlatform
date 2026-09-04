@@ -277,12 +277,27 @@
 /* Action Bar Refinements */
 .composer-action-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    gap: 6px 4px;
     padding: 8px 12px;
     border: 1px solid var(--border-color);
     background-color: var(--bg-color);
     border-radius: 50px;
+
+    // The icon group must shrink/wrap so it never pushes the Post button
+    // outside the modal card on narrow viewports.
+    > .d-flex {
+        flex: 1 1 auto;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+
+    .submitPost {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
 }
 
 .btn-composer-action {

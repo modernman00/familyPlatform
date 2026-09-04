@@ -1,3 +1,7 @@
+{{-- Only render the widget when the engine actually returned suggestions.
+     getSuggestedKin() is typed `: array` and returns [] on every empty/error
+     path, so this guard fails closed (widget hidden), never fatal. --}}
+@if(!empty($suggestedKin))
 <div class="card border-0 shadow-sm mb-4 kinship-radar-widget" id="{{ $kinshipWidgetId ?? 'kinshipRadarWidget' }}" style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid #e2e8f0 !important;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -6,7 +10,7 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin & In-Laws</h6>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Relatives</h6>
                     <span class="text-muted" style="font-size: 0.75rem;">People you may know</span>
                 </div>
             </div>
@@ -14,7 +18,7 @@
         </div>
 
         <div class="d-flex flex-column gap-3" id="kinshipSuggestionsList">
-            @forelse(($suggestedKin ?? []) as $kin)
+            @foreach($suggestedKin as $kin)
                 @php
                     $kinAvatar = !empty($kin['profilePics']) ? (str_starts_with($kin['profilePics'], '/') ? $kin['profilePics'] : '/resources/images/profile/' . $kin['profilePics']) : '/resources/images/profile/avatarM.png';
                     $kinName = ucwords(strtolower(($kin['firstName'] ?? '') . ' ' . ($kin['lastName'] ?? '')));
@@ -53,12 +57,8 @@
                         <i class="bi bi-person-plus-fill"></i> Connect
                     </button>
                 </div>
-            @empty
-                <div class="text-center py-4 text-muted small">
-                    <i class="bi bi-shield-check text-success fs-3 d-block mb-2"></i>
-                    You're connected to all nearby kin! We'll suggest new relatives as more family members join.
-                </div>
-            @endforelse
+            @endforeach
         </div>
     </div>
 </div>
+@endif
