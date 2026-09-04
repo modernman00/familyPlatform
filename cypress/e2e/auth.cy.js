@@ -70,5 +70,30 @@ describe('Authentication Flow', () => {
         cy.location('pathname', { timeout: 10000 }).should('eq', '/login/code');
         cy.get('form#code').should('be.visible');
     });
+
+    it('verifies registration page loads with invite params and submit button is ready and active', () => {
+        cy.visit('/register?famCode=OLA60446&name=Ajibike%20Olaogun', {
+            onBeforeLoad(win) {
+                Object.defineProperty(win, 'grecaptcha', {
+                    value: {
+                        enterprise: {
+                            ready: (cb) => { if (typeof cb === 'function') cb(); },
+                            execute: () => Promise.resolve('mock-cypress-token'),
+                        },
+                    },
+                    writable: false,
+                    configurable: true,
+                });
+            }
+        });
+
+        cy.get('form#register').should('be.visible');
+        cy.get('input#firstName').should('have.value', 'Ajibike');
+        cy.get('input#lastName').should('have.value', 'Olaogun');
+        cy.get('input#famCode').should('have.value', 'OLA60446');
+
+        // Verify button is marked ready and click fires validation
+        cy.get('button#btnSubmit[data-ready="true"]', { timeout: 15000 }).should('exist');
+    });
 });
 

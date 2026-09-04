@@ -394,12 +394,21 @@ final class Organogram extends SingleCustomerData
             $sex = (($node['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
             $avatar = !empty($node['avatar_url']) ? (string)$node['avatar_url'] : "/resources/images/profile/{$sex}";
 
-            $formattedNodes[$node['id']] = [
-                'id' => (int) $node['id'],
-                'user_id' => $node['user_id'] ?? null,
-                'first_name' => (string)($node['first_name'] ?? ''),
-                'last_name' => (string)($node['last_name'] ?? ''),
-                'full_name' => trim(($node['first_name'] ?? '') . ' ' . ($node['last_name'] ?? '')),
+                $first = trim((string)($node['first_name'] ?? ''));
+                $last = trim((string)($node['last_name'] ?? ''));
+                if ($last !== '' && (strcasecmp($first, $last) === 0 || str_ends_with(strtolower($first), ' ' . strtolower($last)))) {
+                    $fullName = $first;
+                } else {
+                    $fullName = trim($first . ' ' . $last);
+                }
+                $fullName = trim((string)preg_replace('/\b(\w+)\s+\1\b/iu', '$1', $fullName));
+
+                $formattedNodes[$node['id']] = [
+                    'id' => (int) $node['id'],
+                    'user_id' => $node['user_id'] ?? null,
+                    'first_name' => $first,
+                    'last_name' => $last,
+                    'full_name' => $fullName,
                 'maiden_name' => $node['maiden_name'] ?? null,
                 'gender' => (string)($node['gender'] ?? 'Male'),
                 'birth_date' => $node['birth_date'] ?? null,

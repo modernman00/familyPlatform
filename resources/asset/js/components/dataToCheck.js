@@ -4,7 +4,7 @@ export const dataToCheckRegister = {
         id: [
             'firstName', 'lastName', 'country', 'mobile', 'email',
         ],
-        max: [15, 15, 15, 13, 45],
+        max: [15, 15, 30, 16, 45],
     },
     password: {
         pwd: 'password',

@@ -11,14 +11,28 @@
   <title>@yield('title') | OUR FAMILY NETWORK</title>
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
-  <!-- OpenGraph meta tags -->
-  <meta property="og:title" content="@yield('title') - Family Platform">
-  @yield('meta_tags')
-  <meta property="og:description" content="The Ultimate Social Platform for Your Family.">
+  @php
+    $appUrl = rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/');
+    $defaultOgImage = $appUrl . '/public/img/og-invite.jpg';
+  @endphp
+  <!-- OpenGraph & Social Sharing Meta Tags -->
+  <meta property="og:site_name" content="Family Platform">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="{{ getenv('IMG_CONTRACT') }}"> 
-  <meta property="og:url" content="{{ getenv('APP_URL') }}"> 
-  <meta property="og:site_name" content="OUR FAMILY NETWORK">
+  <meta property="og:title" content="@yield('og_title', 'Family Platform')">
+  <meta property="og:description" content="@yield('og_description', 'Connect with relatives, explore your family tree, and preserve cherished memories together.')">
+  <meta property="og:image" content="@yield('og_image', $defaultOgImage)">
+  <meta property="og:image:secure_url" content="@yield('og_image', $defaultOgImage)">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="@yield('og_url', $appUrl)">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="@yield('og_title', 'Family Platform')">
+  <meta name="twitter:description" content="@yield('og_description', 'Connect with relatives, explore your family tree, and preserve cherished memories together.')">
+  <meta name="twitter:image" content="@yield('og_image', $defaultOgImage)">
+  @yield('meta_tags')
   
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="{{ getenv('APP_LOGO') }}">

@@ -32,9 +32,31 @@ export const showPersonDetails = async (personData) => {
 
   if (!targetModal || !targetModalBody) return;
 
-  const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(fullName)}`;
+  // Clean duplicate repeated words in full name (e.g. "AJIBIKE OLAOGUN OLAOGUN" -> "Ajibike Olaogun")
+  let cleanName = (fullName || 'Family Member').trim().replace(/\s+/g, ' ');
+  const parts = cleanName.split(' ');
+  if (parts.length >= 2) {
+    const deduped = [];
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0 && parts[i].toLowerCase() === parts[i - 1].toLowerCase()) {
+        continue;
+      }
+      deduped.push(parts[i]);
+    }
+    cleanName = deduped.map(w => {
+      if (w === w.toUpperCase() && w.length > 1) {
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }
+      return w;
+    }).join(' ');
+  }
+
+  const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
   const inviteMessage = encodeURIComponent(
-    `Hey ${fullName}! I just added you to our family tree on FamilyPlatform. Click here to join and explore our family lineage: ${inviteLink}`
+    `🌳 *Family Tree Invitation* 🌳\n\n` +
+    `Hey *${cleanName}*! You've been added to our family tree on FamilyPlatform.\n\n` +
+    `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+    `👉 ${inviteLink}`
   );
 
   const claimSpotHtml = !isRegistered ? `
@@ -42,7 +64,7 @@ export const showPersonDetails = async (personData) => {
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join and share family memories.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <a href="whatsapp://send?text=${inviteMessage}" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
+        <a href="https://api.whatsapp.com/send?text=${inviteMessage}" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-whatsapp"></i> WhatsApp
         </a>
         <a href="sms:?body=${inviteMessage}" class="btn" style="background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">

@@ -38,13 +38,23 @@ const formEl = document.getElementById('register');
 if (formEl) {
     formEl.addEventListener('submit', (e) => {
         e.preventDefault();
+        const submitBtn = document.getElementById('btnSubmit') || document.getElementById('button');
+        submitBtn?.click();
     });
 }
 
+const targetButtonId = document.getElementById('btnSubmit') ? 'btnSubmit' : 'button';
+
 registerHandler({
-    formId:'register',
-    route:'/register',
+    formId: 'register',
+    buttonId: targetButtonId,
+    route: '/register',
     redirect: '/login',
     recaptchaAction: 'SUBMIT',
     optionalFields: ['surname']
-})
+});
+
+const submitBtn = document.getElementById('btnSubmit') || document.getElementById('button');
+if (submitBtn) {
+    submitBtn.setAttribute('data-ready', 'true');
+}

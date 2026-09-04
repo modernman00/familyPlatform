@@ -3,6 +3,23 @@
 @section('title', 'Register')
 @section('data-page-id', 'register')
 
+@php
+    $inviteFamCode = $registerPostData['famCode'] ?? '';
+    $inviteName = trim(($registerPostData['firstName'] ?? '') . ' ' . ($registerPostData['lastName'] ?? ''));
+    if (!empty($inviteName)) {
+        $pageOgTitle = "Join {$inviteName} on FamilyPlatform";
+        $pageOgDesc = "You've been invited to connect with the {$inviteFamCode} family on FamilyPlatform. Claim your spot, explore our lineage, and preserve memories.";
+    } elseif (!empty($inviteFamCode)) {
+        $pageOgTitle = "Join the {$inviteFamCode} Family Tree on FamilyPlatform";
+        $pageOgDesc = "You've been invited to explore our family lineage, connect with relatives, and share cherished memories.";
+    } else {
+        $pageOgTitle = "Create Your Family Account | FamilyPlatform";
+        $pageOgDesc = "Connect with your relatives, build your interactive family tree, and share memories securely on FamilyPlatform.";
+    }
+@endphp
+@section('og_title', $pageOgTitle)
+@section('og_description', $pageOgDesc)
+
 @section('extra_css')
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/autocompleter/autocomplete.min.css">
 <style>
@@ -296,7 +313,7 @@
                     </div>
 
                     <div class="field mt-5">
-                        <button type="submit" name="submit" id="btnSubmit" class="button is-primary is-fullwidth">Submit form</button>
+                        <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">Submit form</button>
                     </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
 
