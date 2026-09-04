@@ -76,7 +76,7 @@ final class PostDto implements JsonSerializable
             $userReaction = trim($row['user_reaction']);
         }
 
-        $userHasLiked = ($userReaction !== null);
+        $userHasLiked = ($userReaction !== null) || ($currentUserId !== null && !empty($row['user_has_liked']));
 
         $dateCreated = (string)($row['date_created'] ?? date('Y-m-d H:i:s'));
         $postTime = (string)($row['post_time'] ?? $dateCreated);
@@ -150,6 +150,7 @@ final class PostDto implements JsonSerializable
     /**
      * @return array<string, mixed>
      */
+    #[\Override]
     public function jsonSerialize(): array
     {
         return $this->toArray();

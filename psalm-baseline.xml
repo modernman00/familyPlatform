@@ -18,12 +18,6 @@
       <code><![CDATA[update2]]></code>
       <code><![CDATA[updateWithTimestamp]]></code>
     </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
     <UnusedVariable>
       <code><![CDATA[$id]]></code>
     </UnusedVariable>
@@ -41,16 +35,8 @@
       <code><![CDATA[addNewColArr]]></code>
       <code><![CDATA[alterAutoIncrement]]></code>
     </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
   </file>
   <file src="app/classes/Auth.php">
-    <InvalidArrayAccess>
-      <code><![CDATA[$data['auth']]]></code>
-    </InvalidArrayAccess>
     <MissingOverrideAttribute>
       <code><![CDATA[public static function fetchUser(int|string $user_id, int $tokenVersion = 1): ?string]]></code>
     </MissingOverrideAttribute>
@@ -67,9 +53,6 @@
     <ParamNameMismatch>
       <code><![CDATA[$user_id]]></code>
     </ParamNameMismatch>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
     <PossiblyUndefinedVariable>
       <code><![CDATA[$fetchData]]></code>
     </PossiblyUndefinedVariable>
@@ -103,9 +86,6 @@
       <code><![CDATA[exceptionHandler]]></code>
       <code><![CDATA[handleErrors]]></code>
     </MissingReturnType>
-    <PossiblyFalsePropertyAssignmentValue>
-      <code><![CDATA[getenv('APP_ENV')]]></code>
-    </PossiblyFalsePropertyAssignmentValue>
     <PossiblyUndefinedArrayOffset>
       <code><![CDATA[$_SERVER['REQUEST_URI']]]></code>
       <code><![CDATA[$_SERVER['REQUEST_URI']]]></code>
@@ -157,15 +137,6 @@
       <code><![CDATA[submitForm]]></code>
       <code><![CDATA[submitForm2]]></code>
     </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[lastInsertId]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
   </file>
   <file src="app/classes/Paginate.php">
     <MissingPropertyType>
@@ -207,15 +178,19 @@
       <code><![CDATA[$profileImg]]></code>
     </MissingPropertyType>
     <PossiblyInvalidCast>
-      <code><![CDATA[$imgDir]]></code>
       <code><![CDATA[$imgName]]></code>
-      <code><![CDATA[$postSource]]></code>
     </PossiblyInvalidCast>
   </file>
   <file src="app/classes/PushNotificationClass.php">
-    <MissingParamType>
-      <code><![CDATA[$userId]]></code>
-    </MissingParamType>
+    <PossiblyUnusedReturnValue>
+      <code><![CDATA[bool]]></code>
+    </PossiblyUnusedReturnValue>
+    <RedundantCast>
+      <code><![CDATA[(string) (getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png')]]></code>
+      <code><![CDATA[(string) (getenv('VAPID_PRIVATE_KEY') ?: '')]]></code>
+      <code><![CDATA[(string) (getenv('VAPID_PUBLIC_KEY') ?: '')]]></code>
+      <code><![CDATA[(string) (getenv('VAPID_SUBJECT') ?: 'mailto:support@myfamilyplatform.com')]]></code>
+    </RedundantCast>
   </file>
   <file src="app/classes/Request.php">
     <ForbiddenCode>
@@ -251,11 +226,6 @@
       <code><![CDATA[null]]></code>
     </TypeDoesNotContainNull>
   </file>
-  <file src="app/classes/VapidClass.php">
-    <PossiblyFalseOperand>
-      <code><![CDATA[$base64String]]></code>
-    </PossiblyFalseOperand>
-  </file>
   <file src="app/classes/VerifyToken.php">
     <InvalidScalarArgument>
       <code><![CDATA[401]]></code>
@@ -266,122 +236,6 @@
     <UndefinedFunction>
       <code><![CDATA[showErrorExp($th)]]></code>
     </UndefinedFunction>
-  </file>
-  <file src="app/classes/tables/account.php">
-    <ForbiddenCode>
-      <code><![CDATA[`<br><br>`]]></code>
-    </ForbiddenCode>
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/contact.php">
-    <ForbiddenCode>
-      <code><![CDATA[`<br><br>`]]></code>
-    </ForbiddenCode>
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/friendRequest.php">
-    <ForbiddenCode>
-      <code><![CDATA[`<br><br>`]]></code>
-    </ForbiddenCode>
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/interest.php">
-    <ForbiddenCode>
-      <code><![CDATA[`<br><br>`]]></code>
-    </ForbiddenCode>
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/kids.php">
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/notification.php">
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-  </file>
-  <file src="app/classes/tables/otherFamily.php">
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/personal.php">
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/siblings.php">
-    <MissingReturnType>
-      <code><![CDATA[index]]></code>
-    </MissingReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
-    <PossiblyUndefinedVariable>
-      <code><![CDATA[$sql]]></code>
-    </PossiblyUndefinedVariable>
-  </file>
-  <file src="app/classes/tables/work.php">
-    <InvalidClass>
-      <code><![CDATA[Insert]]></code>
-    </InvalidClass>
-    <PossiblyNullReference>
-      <code><![CDATA[exec]]></code>
-    </PossiblyNullReference>
   </file>
   <file src="app/classes/websocket/NotificationWebSocketHandler.php">
     <PossiblyUnusedParam>
@@ -398,13 +252,16 @@
     </UndefinedClass>
   </file>
   <file src="app/config/init.php">
-    <PossiblyUndefinedArrayOffset>
-      <code><![CDATA[$_ENV['APP_ENV']]]></code>
-    </PossiblyUndefinedArrayOffset>
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$_ENV['APP_URL'] ?? '']]></code>
+    </ArgumentTypeCoercion>
     <TypeDoesNotContainType>
       <code><![CDATA[$_SERVER['HTTPS'] === 1]]></code>
       <code><![CDATA[$_SERVER['HTTPS'] === 1]]></code>
     </TypeDoesNotContainType>
+    <UnusedVariable>
+      <code><![CDATA[$isProd]]></code>
+    </UnusedVariable>
   </file>
   <file src="app/controller/AddCol.php">
     <UndefinedClass>
@@ -416,16 +273,9 @@
     <DocblockTypeContradiction>
       <code><![CDATA[!\is_array($VerifyJWT)]]></code>
     </DocblockTypeContradiction>
-    <PossiblyInvalidCast>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$id]]></code>
-    </PossiblyInvalidCast>
     <PossiblyNullArrayOffset>
       <code><![CDATA[$map[$role]]]></code>
     </PossiblyNullArrayOffset>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
     <RedundantCondition>
       <code><![CDATA[SelectFn::selectAllRowsById($table, 'id', $id)]]></code>
       <code><![CDATA[SelectFn::selectAllRowsById('children', 'id', $id)]]></code>
@@ -446,18 +296,28 @@
     <InvalidArrayOffset>
       <code><![CDATA[$table[$i]]]></code>
     </InvalidArrayOffset>
-    <InvalidClass>
+    <UndefinedClass>
+      <code><![CDATA[Account]]></code>
+      <code><![CDATA[Contact]]></code>
+      <code><![CDATA[Interest]]></code>
+      <code><![CDATA[Notification]]></code>
+      <code><![CDATA[Personal]]></code>
       <code><![CDATA[Work]]></code>
       <code><![CDATA[friendRequest]]></code>
       <code><![CDATA[kids]]></code>
       <code><![CDATA[otherFamily]]></code>
       <code><![CDATA[siblings]]></code>
-    </InvalidClass>
+    </UndefinedClass>
+  </file>
+  <file src="app/controller/CronController.php">
+    <UndefinedConstant>
+      <code><![CDATA[BASE_PATH]]></code>
+    </UndefinedConstant>
   </file>
   <file src="app/controller/General.php">
     <TooFewArguments>
-      <code><![CDATA[sendText(message: $data['data']['mobile'], numbers: $data['mobile'])]]></code>
       <code><![CDATA[sendText(message: $message, numbers: $number)]]></code>
+      <code><![CDATA[sendText(message: $msg, numbers: (string)$data['mobile'])]]></code>
     </TooFewArguments>
   </file>
   <file src="app/controller/NotificationController.php">
@@ -466,28 +326,16 @@
       <code><![CDATA[$id]]></code>
       <code><![CDATA[$no]]></code>
     </MissingParamType>
-    <PossiblyInvalidCast>
-      <code><![CDATA[$no]]></code>
-    </PossiblyInvalidCast>
-    <UndefinedClass>
-      <code><![CDATA[Insert]]></code>
-    </UndefinedClass>
+    <UnusedParam>
+      <code><![CDATA[$famCode]]></code>
+      <code><![CDATA[$id]]></code>
+    </UnusedParam>
   </file>
   <file src="app/controller/ServeImgController.php">
-    <InvalidOperand>
-      <code><![CDATA[filesize($filePath)]]></code>
-      <code><![CDATA[filesize($filePath)]]></code>
-    </InvalidOperand>
     <MissingParamType>
       <code><![CDATA[$imgName]]></code>
       <code><![CDATA[$imgName]]></code>
     </MissingParamType>
-    <PossiblyFalseOperand>
-      <code><![CDATA[$mimeType]]></code>
-      <code><![CDATA[$mimeType]]></code>
-      <code><![CDATA[filesize($filePath)]]></code>
-      <code><![CDATA[filesize($filePath)]]></code>
-    </PossiblyFalseOperand>
   </file>
   <file src="app/controller/TestClass.php">
     <MissingReturnType>
@@ -511,9 +359,6 @@
     <MissingPropertyType>
       <code><![CDATA[$time]]></code>
     </MissingPropertyType>
-    <PossiblyInvalidIterator>
-      <code><![CDATA[$result]]></code>
-    </PossiblyInvalidIterator>
     <RedundantCondition>
       <code><![CDATA[$checkData]]></code>
       <code><![CDATA[$number]]></code>
@@ -560,26 +405,23 @@
       <code><![CDATA[$time]]></code>
     </UnusedVariable>
   </file>
-  <file src="app/controller/admin/Dashboard.php">
-    <InvalidClass>
-      <code><![CDATA[BaseController]]></code>
-    </InvalidClass>
+  <file src="app/controller/admin/AdminBlogController.php">
+    <PossiblyFalseOperand>
+      <code><![CDATA[$summary]]></code>
+    </PossiblyFalseOperand>
+    <PossiblyUndefinedArrayOffset>
+      <code><![CDATA[$_SERVER['DOCUMENT_ROOT']]]></code>
+    </PossiblyUndefinedArrayOffset>
+    <UndefinedConstant>
+      <code><![CDATA[BASE_PATH]]></code>
+    </UndefinedConstant>
   </file>
   <file src="app/controller/admin/ReviewApps.php">
-    <InvalidClass>
-      <code><![CDATA[BaseController]]></code>
-    </InvalidClass>
     <MissingPropertyType>
       <code><![CDATA[$id]]></code>
     </MissingPropertyType>
-    <PossiblyNullIterator>
-      <code><![CDATA[$data]]></code>
-    </PossiblyNullIterator>
   </file>
   <file src="app/controller/login/Code.php">
-    <MissingReturnType>
-      <code><![CDATA[resendCode]]></code>
-    </MissingReturnType>
     <UnusedVariable>
       <code><![CDATA[$anomaly]]></code>
     </UnusedVariable>
@@ -590,45 +432,55 @@
     </MissingConstructor>
   </file>
   <file src="app/controller/login/Login.php">
-    <InvalidClass>
-      <code><![CDATA[BaseController]]></code>
-      <code><![CDATA[BaseController]]></code>
-    </InvalidClass>
     <UnusedDocblockParam>
       <code><![CDATA[$sanitisedData]]></code>
     </UnusedDocblockParam>
+  </file>
+  <file src="app/controller/login/OAuthController.php">
+    <PossiblyInvalidCast>
+      <code><![CDATA[$requestState]]></code>
+    </PossiblyInvalidCast>
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[\League\OAuth2\Client\Provider\FacebookUser]]></code>
+    </UnnecessaryVarAnnotation>
   </file>
   <file src="app/controller/members/AllMembersController.php">
     <InvalidOperand>
       <code><![CDATA[$deleteProfile > 0]]></code>
     </InvalidOperand>
-    <MissingParamType>
-      <code><![CDATA[$apr]]></code>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$req]]></code>
-    </MissingParamType>
-    <PossiblyInvalidIterator>
-      <code><![CDATA[$result]]></code>
-    </PossiblyInvalidIterator>
-    <UndefinedClass>
-      <code><![CDATA[VerifyToken]]></code>
-      <code><![CDATA[verifyToken]]></code>
-      <code><![CDATA[verifyToken]]></code>
-    </UndefinedClass>
+    <PossiblyInvalidCast>
+      <code><![CDATA[$_GET['q']]]></code>
+    </PossiblyInvalidCast>
+    <RiskyCast>
+      <code><![CDATA[$_GET['limit']]]></code>
+      <code><![CDATA[$_GET['offset']]]></code>
+    </RiskyCast>
+  </file>
+  <file src="app/controller/members/AnalyticsController.php">
+    <PossiblyInvalidCast>
+      <code><![CDATA[$payload['event_type'] ?? '']]></code>
+      <code><![CDATA[$payload['target_id']]]></code>
+    </PossiblyInvalidCast>
   </file>
   <file src="app/controller/members/CommentReactionController.php">
-    <InvalidScalarArgument>
-      <code><![CDATA[$commentNo]]></code>
-      <code><![CDATA[$commentNo]]></code>
-    </InvalidScalarArgument>
-    <PossiblyNullIterator>
-      <code><![CDATA[$countReaction]]></code>
-    </PossiblyNullIterator>
+    <PossiblyInvalidCast>
+      <code><![CDATA[$_POST['comment_no'] ?? '']]></code>
+      <code><![CDATA[$_POST['reaction'] ?? '']]></code>
+    </PossiblyInvalidCast>
+    <PossiblyInvalidOperand>
+      <code><![CDATA[$userId]]></code>
+    </PossiblyInvalidOperand>
+  </file>
+  <file src="app/controller/members/DataPrivacyController.php">
+    <RedundantCast>
+      <code><![CDATA[(string) ($_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: '')]]></code>
+    </RedundantCast>
   </file>
   <file src="app/controller/members/EngagementController.php">
     <RiskyCast>
-      <code><![CDATA[$_POST['option_id']]]></code>
-      <code><![CDATA[$_POST['post_no']]]></code>
+      <code><![CDATA[$_POST['post_no'] ?? 0]]></code>
+      <code><![CDATA[$input['option_id'] ?? 0]]></code>
+      <code><![CDATA[$input['post_no'] ?? 0]]></code>
     </RiskyCast>
   </file>
   <file src="app/controller/members/Event.php">
@@ -636,16 +488,10 @@
       <code><![CDATA[extendEventByFrequency]]></code>
       <code><![CDATA[processEventUpdate]]></code>
     </MissingReturnType>
-    <PossiblyFalseOperand>
-      <code><![CDATA[getenv('MIX_APP_URL2')]]></code>
-    </PossiblyFalseOperand>
-    <PossiblyInvalidCast>
-      <code><![CDATA[$no]]></code>
-      <code><![CDATA[$no]]></code>
-      <code><![CDATA[$no]]></code>
-    </PossiblyInvalidCast>
+    <RedundantCast>
+      <code><![CDATA[(string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: (getenv('MIX_APP_URL2') ?: 'https://familyplatform.test'))]]></code>
+    </RedundantCast>
     <UndefinedClass>
-      <code><![CDATA[Select]]></code>
       <code><![CDATA[Select]]></code>
     </UndefinedClass>
     <UndefinedFunction>
@@ -657,64 +503,109 @@
   </file>
   <file src="app/controller/members/FamilyRequestController.php">
     <InvalidOperand>
-      <code><![CDATA[$dataFromJs['approver']]]></code>
+      <code><![CDATA[$dataFromJs['approver'] ?? []]]></code>
     </InvalidOperand>
     <MissingParamType>
       <code><![CDATA[$req]]></code>
       <code><![CDATA[$res]]></code>
     </MissingParamType>
     <PossiblyInvalidCast>
-      <code><![CDATA[$id]]></code>
+      <code><![CDATA[$postToken]]></code>
     </PossiblyInvalidCast>
-    <PossiblyInvalidIterator>
-      <code><![CDATA[$getRequesterDataById]]></code>
-    </PossiblyInvalidIterator>
+    <RedundantCast>
+      <code><![CDATA[(string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test'))]]></code>
+    </RedundantCast>
     <UndefinedConstant>
       <code><![CDATA[BR]]></code>
     </UndefinedConstant>
     <UnusedDocblockParam>
       <code><![CDATA[$id]]></code>
     </UnusedDocblockParam>
+    <UnusedVariable>
+      <code><![CDATA[$lastInsertedId]]></code>
+    </UnusedVariable>
+  </file>
+  <file src="app/controller/members/KinshipController.php">
+    <PossiblyInvalidCast>
+      <code><![CDATA[$payload['dismissed_user_id'] ?? '']]></code>
+    </PossiblyInvalidCast>
+    <RiskyCast>
+      <code><![CDATA[$_GET['limit']]]></code>
+    </RiskyCast>
   </file>
   <file src="app/controller/members/Organogram.php">
-    <DocblockTypeContradiction>
-      <code><![CDATA['']]></code>
-    </DocblockTypeContradiction>
-    <PossiblyInvalidCast>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$id]]></code>
-    </PossiblyInvalidCast>
     <PossiblyNullArrayOffset>
       <code><![CDATA[$map[$role]]]></code>
     </PossiblyNullArrayOffset>
     <RedundantCondition>
-      <code><![CDATA[SelectFn::selectAllRowsById($table, 'id', $id)]]></code>
-      <code><![CDATA[SelectFn::selectAllRowsById('children', 'id', $id)]]></code>
+      <code><![CDATA[!empty($nodes)]]></code>
     </RedundantCondition>
-    <RedundantConditionGivenDocblockType>
-      <code><![CDATA[$id]]></code>
-    </RedundantConditionGivenDocblockType>
-    <TypeDoesNotContainNull>
-      <code><![CDATA[[]]]></code>
-      <code><![CDATA[[]]]></code>
-    </TypeDoesNotContainNull>
-    <UndefinedDocblockClass>
-      <code><![CDATA[Exception]]></code>
-    </UndefinedDocblockClass>
-    <UnusedDocblockParam>
-      <code><![CDATA[$famCode]]></code>
-    </UnusedDocblockParam>
+    <RiskyCast>
+      <code><![CDATA[$input['node_id'] ?? 0]]></code>
+      <code><![CDATA[$input['node_id'] ?? 0]]></code>
+    </RiskyCast>
+  </file>
+  <file src="app/controller/members/OrganogramEditorController.php">
+    <PossiblyInvalidCast>
+      <code><![CDATA[$_POST['bio'] ?? '']]></code>
+      <code><![CDATA[$_POST['birth_date']]]></code>
+      <code><![CDATA[$_POST['email'] ?? '']]></code>
+      <code><![CDATA[$_POST['email'] ?? '']]></code>
+      <code><![CDATA[$_POST['email'] ?? '']]></code>
+      <code><![CDATA[$_POST['email'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_email'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['gender'] ?? '']]></code>
+      <code><![CDATA[$_POST['gender'] ?? 'Female']]></code>
+      <code><![CDATA[$_POST['gender'] ?? 'Male']]></code>
+      <code><![CDATA[$_POST['gender'] ?? 'Male']]></code>
+      <code><![CDATA[$_POST['last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['location'] ?? '']]></code>
+      <code><![CDATA[$_POST['maiden_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_email'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['occupation'] ?? '']]></code>
+    </PossiblyInvalidCast>
+    <PossiblyUndefinedArrayOffset>
+      <code><![CDATA[$_SERVER['REQUEST_METHOD']]]></code>
+      <code><![CDATA[$_SERVER['REQUEST_METHOD']]]></code>
+      <code><![CDATA[$_SERVER['REQUEST_METHOD']]]></code>
+      <code><![CDATA[$_SERVER['REQUEST_METHOD']]]></code>
+      <code><![CDATA[$_SERVER['REQUEST_METHOD']]]></code>
+    </PossiblyUndefinedArrayOffset>
+    <RiskyCast>
+      <code><![CDATA[$_POST['base_node_id'] ?? 0]]></code>
+      <code><![CDATA[$_POST['base_node_id'] ?? 0]]></code>
+      <code><![CDATA[$_POST['base_node_id'] ?? 0]]></code>
+      <code><![CDATA[$_POST['base_node_id'] ?? 0]]></code>
+      <code><![CDATA[$_POST['divorce_year']]]></code>
+      <code><![CDATA[$_POST['marriage_year']]]></code>
+      <code><![CDATA[$_POST['node_id'] ?? 0]]></code>
+      <code><![CDATA[$_POST['union_id'] ?? 0]]></code>
+    </RiskyCast>
   </file>
   <file src="app/controller/members/PostLikeController.php">
     <PossiblyInvalidCast>
-      <code><![CDATA[$token]]></code>
+      <code><![CDATA[$_GET['postNo'] ?? '']]></code>
     </PossiblyInvalidCast>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
+    <RedundantCast>
+      <code><![CDATA[(string) $famCode]]></code>
+    </RedundantCast>
     <UnusedDocblockParam>
       <code><![CDATA[$likeCount]]></code>
       <code><![CDATA[$likeCounterId]]></code>
@@ -722,103 +613,110 @@
     </UnusedDocblockParam>
   </file>
   <file src="app/controller/members/PostMessage.php">
-    <InvalidArrayOffset>
-      <code><![CDATA[$VerifyJWT['famCode']]]></code>
-    </InvalidArrayOffset>
     <MissingParamType>
-      <code><![CDATA[$commentNo]]></code>
       <code><![CDATA[$commentNo]]></code>
       <code><![CDATA[$postNo]]></code>
     </MissingParamType>
-    <PossiblyInvalidArrayAccess>
-      <code><![CDATA[$data['fullName']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['postFamCode']]]></code>
-      <code><![CDATA[$data['postFamCode']]]></code>
-      <code><![CDATA[$result[0]]]></code>
-      <code><![CDATA[Post::commentByNo($commentNo)['id']]]></code>
-      <code><![CDATA[Post::commentByNo($commentNo)['post_no']]]></code>
-      <code><![CDATA[Post::postByNo($commentPostNo)['id']]]></code>
-    </PossiblyInvalidArrayAccess>
-    <PossiblyInvalidArrayOffset>
-      <code><![CDATA[$data['fullName']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['id']]]></code>
-      <code><![CDATA[$data['postFamCode']]]></code>
-      <code><![CDATA[$data['postFamCode']]]></code>
-      <code><![CDATA[$result[0]["img"]]]></code>
-      <code><![CDATA[Post::commentByNo($commentNo)['id']]]></code>
-      <code><![CDATA[Post::commentByNo($commentNo)['post_no']]]></code>
-      <code><![CDATA[Post::postByNo($commentPostNo)['id']]]></code>
-    </PossiblyInvalidArrayOffset>
     <PossiblyInvalidCast>
-      <code><![CDATA[$famCode]]></code>
-      <code><![CDATA[$famCode]]></code>
+      <code><![CDATA[$rawPostNo]]></code>
     </PossiblyInvalidCast>
     <PossiblyUndefinedArrayOffset>
-      <code><![CDATA[$newComment[0]]]></code>
+      <code><![CDATA[$memberData['email']]]></code>
+      <code><![CDATA[$memberData['firstName']]]></code>
     </PossiblyUndefinedArrayOffset>
+    <RedundantCast>
+      <code><![CDATA[(string) (getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: ''))]]></code>
+    </RedundantCast>
     <RiskyCast>
       <code><![CDATA[$_GET['limit']]]></code>
       <code><![CDATA[$_GET['page']]]></code>
     </RiskyCast>
-    <TooFewArguments>
-      <code><![CDATA[AllMembersData::AllMembersEmailByFamCode($famCode)]]></code>
-    </TooFewArguments>
-    <UnusedDocblockParam>
-      <code><![CDATA[$postNo]]></code>
-    </UnusedDocblockParam>
   </file>
   <file src="app/controller/members/ProfilePage.php">
     <DocblockTypeContradiction>
       <code><![CDATA[!\is_array($verifyJWT)]]></code>
     </DocblockTypeContradiction>
-    <MissingPropertyType>
-      <code><![CDATA[$eventData]]></code>
-      <code><![CDATA[$friendRequestData]]></code>
-      <code><![CDATA[$id]]></code>
-    </MissingPropertyType>
     <PossiblyInvalidCast>
-      <code><![CDATA[$path]]></code>
-      <code><![CDATA[$token]]></code>
+      <code><![CDATA[$_GET['id']]]></code>
+      <code><![CDATA[$imgName]]></code>
     </PossiblyInvalidCast>
     <PossiblyInvalidIterator>
       <code><![CDATA[$pollOptionsRaw]]></code>
     </PossiblyInvalidIterator>
-    <PropertyNotSetInConstructor>
-      <code><![CDATA[$profileService]]></code>
-    </PropertyNotSetInConstructor>
+    <RiskyCast>
+      <code><![CDATA[$_GET['limit']]]></code>
+      <code><![CDATA[$_GET['page']]]></code>
+    </RiskyCast>
+  </file>
+  <file src="app/controller/members/ReelsController.php">
+    <PossiblyInvalidCast>
+      <code><![CDATA[$_POST['caption']]]></code>
+      <code><![CDATA[$_POST['category']]]></code>
+      <code><![CDATA[$_POST['music_title']]]></code>
+      <code><![CDATA[$_POST['thumbnail_data']]]></code>
+      <code><![CDATA[$_POST['video_url']]]></code>
+      <code><![CDATA[$payload['comment'] ?? '']]></code>
+      <code><![CDATA[$payload['reaction_type'] ?? 'like']]></code>
+    </PossiblyInvalidCast>
+    <RiskyCast>
+      <code><![CDATA[$_GET['limit']]]></code>
+      <code><![CDATA[$_GET['offset']]]></code>
+      <code><![CDATA[$_GET['reel_id']]]></code>
+      <code><![CDATA[$payload['reel_id'] ?? 0]]></code>
+      <code><![CDATA[$payload['reel_id'] ?? 0]]></code>
+      <code><![CDATA[$payload['reel_id'] ?? 0]]></code>
+    </RiskyCast>
+    <UnusedVariable>
+      <code><![CDATA[$videoPath]]></code>
+    </UnusedVariable>
   </file>
   <file src="app/controller/members/SettingController.php">
-    <InvalidScalarArgument>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$key]]></code>
-    </InvalidScalarArgument>
-    <PossiblyInvalidArrayAccess>
-      <code><![CDATA[$user[0]]]></code>
-    </PossiblyInvalidArrayAccess>
-    <PossiblyInvalidArrayOffset>
-      <code><![CDATA[$user[0]['password']]]></code>
-    </PossiblyInvalidArrayOffset>
     <PossiblyInvalidCast>
-      <code><![CDATA[$_POST[$f]]]></code>
+      <code><![CDATA[$_POST["children_email$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["children_first_name$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["children_last_name$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["children_name$i"]]]></code>
+      <code><![CDATA[$_POST["sibling_email$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["sibling_first_name$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["sibling_last_name$i"] ?? '']]></code>
+      <code><![CDATA[$_POST["sibling_name$i"]]]></code>
       <code><![CDATA[$_POST[$field]]]></code>
+      <code><![CDATA[$_POST[$field]]]></code>
+      <code><![CDATA[$_POST[$field]]]></code>
+      <code><![CDATA[$_POST['father_email']]]></code>
+      <code><![CDATA[$_POST['father_email'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_mobile']]]></code>
+      <code><![CDATA[$_POST['father_mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['father_name']]]></code>
+      <code><![CDATA[$_POST['mother_email']]]></code>
+      <code><![CDATA[$_POST['mother_email'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_first_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_last_name'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_maiden'] ?? $_POST['maiden_name']]]></code>
+      <code><![CDATA[$_POST['mother_mobile']]]></code>
+      <code><![CDATA[$_POST['mother_mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['mother_name']]]></code>
+      <code><![CDATA[$_POST['spouse_email']]]></code>
+      <code><![CDATA[$_POST['spouse_email'] ?? '']]></code>
+      <code><![CDATA[$_POST['spouse_mobile']]]></code>
+      <code><![CDATA[$_POST['spouse_mobile'] ?? '']]></code>
+      <code><![CDATA[$_POST['spouse_name']]]></code>
+      <code><![CDATA[$_POST['spouse_name'] ?? '']]></code>
       <code><![CDATA[$currentPassword]]></code>
       <code><![CDATA[$newPassword]]></code>
     </PossiblyInvalidCast>
+    <PossiblyUndefinedArrayOffset>
+      <code><![CDATA[$_POST['maritalStatus']]]></code>
+    </PossiblyUndefinedArrayOffset>
     <RiskyCast>
-      <code><![CDATA[$_POST['children']]]></code>
-      <code><![CDATA[$_POST['sibling']]]></code>
+      <code><![CDATA[$_POST['children'] ?? 0]]></code>
+      <code><![CDATA[$_POST['sibling'] ?? 0]]></code>
     </RiskyCast>
-    <UndefinedFunction>
-      <code><![CDATA[msgError(400, "All password fields are required.")]]></code>
-      <code><![CDATA[msgError(400, "Current password is incorrect.")]]></code>
-      <code><![CDATA[msgError(400, "New passwords do not match.")]]></code>
-      <code><![CDATA[msgError(400, "Password must be at least 6 characters.")]]></code>
-    </UndefinedFunction>
+    <UnusedVariable>
+      <code><![CDATA[$unionIdToLink]]></code>
+    </UnusedVariable>
   </file>
   <file src="app/controller/members/opp.php">
     <InvalidOperand>
@@ -830,42 +728,37 @@
   <file src="app/controller/register/Register.php">
     <InvalidReturnStatement>
       <code><![CDATA[[
-            'min' => [2, 2, 2, 2, 2, 2, 2, 2, 7],
-            'max' => [35, 35, 35, 35, 35, 16, 30, 50, 50],
+            'min' => [2, 2, 2, 7, 7, 7, 4],
+            'max' => [35, 35, 30, 16, 50, 50, 20],
             'data' => [
-                'firstName', 'lastName', 'fatherName', 'motherName', 'country', 'mobile', 'email', 'occupation', 'password'
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
             ]
         ]]]></code>
     </InvalidReturnStatement>
     <InvalidReturnType>
-      <code><![CDATA[array{min: array{0: 2, 1: 2, 2: 2, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 7}, max: array{0: 15, 1: 15, 2: 35, 3: 35, 4: 20, 5: 16, 6: 30, 7: 15, 8: 30}, data: array{0: 'firstName', 1: 'lastName', 2: 'fatherName', 3: 'motherName', 4: 'country', 5: 'mobile', 6: 'email', 7: 'occupation', 8: 'password'}}]]></code>
+      <code><![CDATA[array{min: array{0: 2, 1: 2, 2: 2, 3: 7, 4: 7, 5: 7}, max: array{0: 35, 1: 35, 2: 30, 3: 16, 4: 50, 5: 50}, data: array{0: 'firstName', 1: 'lastName', 2: 'country', 3: 'mobile', 4: 'email', 5: 'password'}}]]></code>
     </InvalidReturnType>
-    <MissingParamType>
-      <code><![CDATA[$day]]></code>
-      <code><![CDATA[$id]]></code>
-      <code><![CDATA[$month]]></code>
-      <code><![CDATA[$name]]></code>
-    </MissingParamType>
+    <PossiblyInvalidCast>
+      <code><![CDATA[$_GET['famCode']]]></code>
+      <code><![CDATA[$_GET['invite_token']]]></code>
+      <code><![CDATA[$_GET['name']]]></code>
+    </PossiblyInvalidCast>
+    <PossiblyUndefinedArrayOffset>
+      <code><![CDATA[$cleanData['famCode']]]></code>
+    </PossiblyUndefinedArrayOffset>
     <UnusedDocblockParam>
       <code><![CDATA[$array]]></code>
       <code><![CDATA[$data]]></code>
       <code><![CDATA[$table]]></code>
     </UnusedDocblockParam>
   </file>
-  <file src="app/controller/register/Search.php">
-    <InvalidClass>
-      <code><![CDATA[Base]]></code>
-    </InvalidClass>
-    <PossiblyInvalidCast>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-      <code><![CDATA[$subject]]></code>
-    </PossiblyInvalidCast>
+  <file src="app/dto/PostDto.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function jsonSerialize(): array]]></code>
+    </MissingOverrideAttribute>
+    <UnusedParam>
+      <code><![CDATA[$currentUserId]]></code>
+    </UnusedParam>
   </file>
   <file src="app/function/helper/optimiser.php">
     <InvalidOperand>
@@ -877,65 +770,21 @@
       <code><![CDATA[BR]]></code>
     </UndefinedConstant>
   </file>
-  <file src="app/function/helper/submitDataHelper.php">
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
-  </file>
   <file src="app/model/AllMembersData.php">
-    <InvalidOperand>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$key]]></code>
-      <code><![CDATA[$key]]></code>
-    </InvalidOperand>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$result]]></code>
+    </LessSpecificReturnStatement>
     <MissingParamType>
       <code><![CDATA[$famCode]]></code>
       <code><![CDATA[$id]]></code>
       <code><![CDATA[$id]]></code>
       <code><![CDATA[$postNo]]></code>
     </MissingParamType>
-    <PossiblyInvalidIterator>
-      <code><![CDATA[$getRequesterDataById1]]></code>
-    </PossiblyInvalidIterator>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[query]]></code>
-    </PossiblyNullReference>
-    <RedundantCondition>
-      <code><![CDATA[$memberData]]></code>
-    </RedundantCondition>
-    <TypeDoesNotContainNull>
-      <code><![CDATA[throw new Exception(self::ERR_MSG, 1)]]></code>
-    </TypeDoesNotContainNull>
-    <UnusedVariable>
-      <code><![CDATA[$memberData]]></code>
-    </UnusedVariable>
+    <MoreSpecificReturnType>
+      <code><![CDATA[' No Requester Data'|list{0?: array,...}|null]]></code>
+    </MoreSpecificReturnType>
   </file>
   <file src="app/model/EmailData.php">
-    <PossiblyFalsePropertyAssignmentValue>
-      <code><![CDATA[getenv("ADMIN_EMAIL")]]></code>
-      <code><![CDATA[getenv("ADMIN_PASSWORD")]]></code>
-      <code><![CDATA[getenv("ADMIN_USERNAME")]]></code>
-      <code><![CDATA[getenv("APP_EMAIL")]]></code>
-      <code><![CDATA[getenv("APP_PASSWORD")]]></code>
-      <code><![CDATA[getenv("APP_USERNAME")]]></code>
-      <code><![CDATA[getenv("TEST_EMAIL")]]></code>
-      <code><![CDATA[getenv("TEST_EMAIL")]]></code>
-      <code><![CDATA[getenv('ADMIN_SENDER')]]></code>
-      <code><![CDATA[getenv('APP_SENDER')]]></code>
-    </PossiblyFalsePropertyAssignmentValue>
     <PropertyNotSetInConstructor>
       <code><![CDATA[$password]]></code>
       <code><![CDATA[$senderEmail]]></code>
@@ -951,12 +800,6 @@
     <MissingClosureReturnType>
       <code><![CDATA[function($carry, $item) {]]></code>
     </MissingClosureReturnType>
-    <PossiblyNullReference>
-      <code><![CDATA[beginTransaction]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[rollBack]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[bool]]></code>
       <code><![CDATA[bool]]></code>
@@ -965,6 +808,7 @@
   <file src="app/model/Post.php">
     <InvalidDocblock>
       <code><![CDATA[[type]]]></code>
+      <code><![CDATA[public static function getAllImagesByAuthor(string $authorId, bool $publicOnly = false): array]]></code>
     </InvalidDocblock>
     <MissingParamType>
       <code><![CDATA[$id]]></code>
@@ -974,128 +818,41 @@
     <MissingReturnType>
       <code><![CDATA[fetchUpdatedLikes]]></code>
     </MissingReturnType>
-    <PossiblyInvalidArrayAccess>
-      <code><![CDATA[$result[0]]]></code>
-      <code><![CDATA[$result[0]]]></code>
-      <code><![CDATA[$result[0]]]></code>
-    </PossiblyInvalidArrayAccess>
-    <PossiblyInvalidArrayOffset>
-      <code><![CDATA[$result[0]['img']]]></code>
-    </PossiblyInvalidArrayOffset>
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
+    <RedundantCast>
+      <code><![CDATA[(bool)$ins->execute([$authorId, $safeImg, $isPublic])]]></code>
+      <code><![CDATA[(bool)$upd->execute([$isPublic, $authorId, $safeImg])]]></code>
+      <code><![CDATA[(int)($visibilityMap[$imgName] ?? 0)]]></code>
+      <code><![CDATA[(string) $id]]></code>
+    </RedundantCast>
+    <UnusedVariable>
+      <code><![CDATA[$images]]></code>
+    </UnusedVariable>
   </file>
   <file src="app/model/ReactionData.php">
-    <PossiblyNullReference>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-      <code><![CDATA[prepare]]></code>
-    </PossiblyNullReference>
     <PossiblyUnusedReturnValue>
       <code><![CDATA[bool]]></code>
     </PossiblyUnusedReturnValue>
   </file>
-  <file src="app/model/RegisterTableData.php">
-    <InvalidReturnStatement>
-      <code><![CDATA[[
-            'personal' =>  [
-                'firstName' => $cleanPostData['firstName'],
-                'lastName' => $cleanPostData['lastName'],
-                'famCode' => $cleanPostData['familyCode'],
-                'kids' => $cleanPostData['kids'],
-                'gender' => $cleanPostData['gender'],
-                'siblings' => $cleanPostData['siblings'],
-                'day' => $cleanPostData['day'],
-                'month' => $cleanPostData['month'],
-                'year' => $cleanPostData['year'],
-                'id' => $cleanPostData['id'],
-            ],
-            'work' => [
-                'employmentStatus' => $cleanPostData['employmentStatus'],
-                'occupation' => $cleanPostData['occupation'],
-                'id' => $cleanPostData['id']
-            ],
-            'contact' => [
-
-                'email' => $cleanPostData['email'],
-                'country' => $cleanPostData['country'],
-                'mobile' => $cleanPostData['mobile'],
-                'id' => $cleanPostData['id'],
-            ],
-            'account' => [
-                'email' => $cleanPostData['email'],
-                'password' => $cleanPostData['password'],
-                'status' => 'new',
-                'type' => 'member',
-                'id' => $cleanPostData['id'],
-            ],
-            'otherFamily' => [
-                'spouse_name' => $cleanPostData['spouse_name'],
-                'spouse_mobile' => $cleanPostData['spouse_mobile'],
-                'spouse_email' => $cleanPostData['spouse_email'],
-                'father_name' => $cleanPostData['father_name'],
-                'father_mobile' => $cleanPostData['father_mobile'],
-                'father_email' => $cleanPostData['father_email'],
-                'mother_name' => $cleanPostData['mother_name'],
-                'mother_mobile' => $cleanPostData['mother_mobile'],
-                'mother_email' => $cleanPostData['mother_email'],
-                // 'mother_maiden' => $cleanPostData['mother_maiden'],
-                'otherFamCode' => $cleanPostData['familyCode'],
-                'id' => $cleanPostData['id']
-            ],
-            'post' => [
-                'fullName' => $cleanPostData['firstName'],
-                'postMessage' => "Hey, welcome to your page",
-                'profileImg' => $profileAvatar,
-                'id' => $cleanPostData['id']
-            ],
-            'comment' => [
-                'fullName' => $cleanPostData['firstName'],
-                'comment' => "Your comment will show here",
-                'profileImg' => $profileAvatar,
-                'post_no' => 1000,
-                'id' => $cleanPostData['id']
-            ],
-            'profilePics' => [
-                'img' => $profileAvatar,
-                'id' => $cleanPostData['id']
-            ],
-            'events' => [
-                'eventName' => "{$cleanPostData['firstName']} Birthday",
-                'eventDate' => $cleanPostData['eventDate'],
-                'eventType' => 'Birthday',
-                'eventDescription' => "{$cleanPostData['firstName']} is adding another year",
-                'eventFrequency' => 'Annually',
-                // 'eventGroup' => 'Global',
-                'eventCode' => $cleanPostData['familyCode'],
-                'id' => $cleanPostData['id']
-            ],
-            'user_families' => [
-                'user_id' => $cleanPostData['id'],
-                'family_code' => $cleanPostData['familyCode'],
-                'status' => $cleanPostData['familyStatus'] ?? 'pending',
-                'role' => 'member'
-            ]
-
-        ]]]></code>
-    </InvalidReturnStatement>
-    <InvalidReturnType>
-      <code><![CDATA[array{personal: array{firstName: mixed, lastName: mixed, famCode: mixed, kids: mixed, gender: 'Male'|mixed, siblings: mixed, day: mixed, month: mixed, year: mixed, id: mixed}, work: array{employmentStatus: mixed, occupation: mixed, id: mixed}, contact: array{email: mixed, country: mixed, mobile: mixed, id: mixed}, account: array{email: mixed, password: mixed, status: 'new', type: 'member', id: mixed}, otherFamily: array{spouse_name: mixed, spouse_mobile: mixed, spouse_email: mixed, father_name: mixed, father_mobile: mixed, father_email: mixed, mother_name: mixed, mother_mobile: mixed, mother_email: mixed, mother_maiden: mixed, otherFamCode: mixed, id: mixed}, post: array{fullName: mixed, postMessage: 'Hey, welcome to your page', profileImg: 'avatarF.png'|'avatarM.png', id: mixed}, comment: array{fullName: mixed, comment: 'Your comment will show here', profileImg: 'avatarF.png'|'avatarM.png', post_no: 1000, id: mixed}, profilePics: array{img: 'avatarF.png'|'avatarM.png', id: mixed}, events: array{eventName: string, eventDate: mixed, eventType: 'Birthday', eventDescription: string, eventFrequency: 'Annually', eventGroup: 'Global', eventCode: mixed, id: mixed}}]]></code>
-    </InvalidReturnType>
+  <file src="app/model/Reel.php">
+    <RedundantCast>
+      <code><![CDATA[(string)$famCode]]></code>
+    </RedundantCast>
   </file>
-  <file src="app/model/SingleCustomerData.php">
-    <FalsableReturnStatement>
-      <code><![CDATA[false]]></code>
-    </FalsableReturnStatement>
+  <file src="app/repository/FeedRepository.php">
+    <RedundantCastGivenDocblockType>
+      <code><![CDATA[(string)$val]]></code>
+    </RedundantCastGivenDocblockType>
   </file>
   <file src="app/router/RouteDispatch.php">
     <ArgumentTypeCoercion>
       <code><![CDATA[$controller]]></code>
     </ArgumentTypeCoercion>
+    <DocblockTypeContradiction>
+      <code><![CDATA[!\is_array($VerifyJWT)]]></code>
+    </DocblockTypeContradiction>
     <InvalidStringClass>
       <code><![CDATA[new $controller]]></code>
     </InvalidStringClass>
@@ -1110,9 +867,30 @@
       <code><![CDATA[$this->match['target']]]></code>
     </PossiblyInvalidArrayAccess>
   </file>
-  <file src="app/services/ProfilepageService.php">
-    <MissingParamType>
-      <code><![CDATA[$userId]]></code>
-    </MissingParamType>
+  <file src="app/router/blog.php">
+    <UnnecessaryVarAnnotation>
+      <code><![CDATA[\AltoRouter]]></code>
+    </UnnecessaryVarAnnotation>
+  </file>
+  <file src="app/router/router.php">
+    <RedundantCast>
+      <code><![CDATA[(string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: '')]]></code>
+    </RedundantCast>
+  </file>
+  <file src="app/services/CloudflareStreamService.php">
+    <RedundantCast>
+      <code><![CDATA[(string) (getenv('CLOUDFLARE_STREAM_ACCOUNT_ID') ?: '')]]></code>
+      <code><![CDATA[(string) (getenv('CLOUDFLARE_STREAM_API_TOKEN') ?: '')]]></code>
+    </RedundantCast>
+  </file>
+  <file src="app/services/FamilyClaimService.php">
+    <RedundantCast>
+      <code><![CDATA[(string) ($_ENV['APP_KEY'] ?? getenv('APP_KEY') ?: ($_ENV['JWT_KEY'] ?? getenv('JWT_KEY') ?: ''))]]></code>
+    </RedundantCast>
+  </file>
+  <file src="app/services/KinshipEngineService.php">
+    <RedundantCastGivenDocblockType>
+      <code><![CDATA[(string)$id]]></code>
+    </RedundantCastGivenDocblockType>
   </file>
 </files>

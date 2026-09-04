@@ -268,7 +268,7 @@ class FeedRepository
                 if (is_int($val)) {
                     $stmt->bindValue($key + 1, $val, PDO::PARAM_INT);
                 } else {
-                    $stmt->bindValue($key + 1, (string)$val, PDO::PARAM_STR);
+                    $stmt->bindValue($key + 1, $val, PDO::PARAM_STR);
                 }
             }
 
