@@ -140,4 +140,48 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
             cy.get('#kinshipRadarWidgetMobile', { timeout: 15000 }).should('exist');
         });
     });
+
+    // ------------------------------------------------------------------
+    // LINEAGE WIZARD & MODAL DEFENSIVE ERROR HANDLING
+    // ------------------------------------------------------------------
+    describe('Lineage Wizard & Family Tree Modal Defensive Checks', () => {
+
+        it('opens Add Relative modal and asserts zero [object Object] in modal and error states', () => {
+            cy.visit('/organogram');
+
+            // Verify organogram page loaded
+            cy.get('body').should('be.visible');
+            cy.get('#addRelativeModal', { timeout: 15000 }).should('exist');
+
+            // Open the Add Relative modal via window helper or button click
+            cy.window().then((win) => {
+                if (typeof win.openAddRelativeModalFromBanner === 'function') {
+                    win.openAddRelativeModalFromBanner();
+                } else {
+                    cy.get('#openAddRelativeModalBtn').click({ force: true });
+                }
+            });
+
+            // Assert modal is shown and contains no broken object strings
+            cy.get('#addRelativeModal').should('be.visible');
+            cy.get('#addRelativeModal').should('not.contain.text', '[object Object]');
+
+            // Select partner type
+            cy.contains('button', 'Partner / Spouse').click();
+            cy.get('#step2-partner').should('be.visible');
+
+            // Remove client-side HTML5 required to test backend validation & defensive error parsing
+            cy.get('#addPartnerForm input[name="first_name"]').invoke('removeAttr', 'required');
+            cy.get('#submitPartnerBtn').click();
+
+            // Assert error is displayed cleanly as text and never prints [object Object]
+            cy.get('#addRelativeError', { timeout: 10000 }).should('be.visible');
+            cy.get('#addRelativeError').should('not.contain.text', '[object Object]');
+            cy.get('#addRelativeError').invoke('text').should('have.length.gt', 3);
+
+            // Close modal
+            cy.get('#addRelativeModal .btn-close').first().click();
+            cy.get('#addRelativeModal').should('not.be.visible');
+        });
+    });
 });

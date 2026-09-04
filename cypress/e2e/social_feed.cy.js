@@ -84,16 +84,43 @@ describe('Social Feed Interactions', () => {
         cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
     };
 
-    it('can like a post', () => {
-        createFreshPost(`Cypress Like Target ${Date.now()}`);
+    it('can like a post and persists state after page reload (cy.reload)', () => {
+        const postMarker = `Cypress Like Target ${Date.now()}`;
+        createFreshPost(postMarker);
 
-        // The "Like" text sits in an inner <span>, so restrict .contains() to the <button>
-        // itself. Liking a post is reactToPost() under the hood, which toggles fw-semibold
-        // (and an inline color) on the button, not a text-primary class.
-        cy.contains('button', 'Like').first().click();
+        cy.intercept('PUT', '**/profileCard/postLikes*').as('likeReq');
 
-        // Wait for class toggle (this tests Alpine reactivity)
-        cy.contains('button', 'Like').first().should('have.class', 'fw-semibold');
+        // Locate the created post card container
+        cy.contains(postMarker).parents('.card').within(() => {
+            // Assert initial unliked state (not bold)
+            cy.contains('button', 'Like').should('not.have.class', 'fw-semibold');
+
+            // Click Like button
+            cy.contains('button', 'Like').click();
+        });
+
+        // Wait for backend persistence request
+        cy.wait('@likeReq', { timeout: 15000 }).its('response.statusCode').should('be.oneOf', [200, 201]);
+
+        // Assert optimistic UI update
+        cy.contains(postMarker).parents('.card').within(() => {
+            cy.contains('button', 'Like').should('have.class', 'fw-semibold');
+        });
+
+        // Reload the page to test server-side hydration from AllMembersData::getVisiblePosts
+        cy.reload();
+
+        // Wait for feed to mount after reload
+        cy.get('#openPostModalTrigger', { timeout: 15000 }).should('be.visible');
+
+        // Verify the post retained its liked state across the refresh
+        cy.contains(postMarker, { timeout: 15000 }).should('be.visible')
+            .parents('.card').within(() => {
+                cy.contains('button', 'Like').should('have.class', 'fw-semibold');
+            });
+
+        // Assert zero [object Object] artifacts in the UI
+        cy.get('body').should('not.contain.text', '[object Object]');
     });
 
     it('can add a comment to a post', () => {
