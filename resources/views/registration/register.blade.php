@@ -132,7 +132,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         async verifyInviter() {
+            console.log('→ verifyInviter() called');
             if (!this.inviterFirstName.trim() || !this.inviterLastName.trim() || !this.inviterContact.trim()) {
+                console.log('✗ Missing inviter details');
                 Swal.fire({
                     icon: 'warning',
                     title: 'Missing Information',
@@ -142,9 +144,17 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            console.log('→ Verifying:', {
+                code: this.familyCode,
+                firstName: this.inviterFirstName,
+                lastName: this.inviterLastName,
+                contact: this.inviterContact
+            });
+
             this.verifying = true;
 
             try {
+                console.log('→ Calling verify API...');
                 const response = await fetch('/api/family-code/verify-inviter', {
                     method: 'POST',
                     headers: {
@@ -159,15 +169,23 @@ document.addEventListener('alpine:init', () => {
                     })
                 });
 
+                console.log('→ API response status:', response.status);
                 const data = await response.json();
+                console.log('→ API response:', data);
 
                 if (response.ok && data.verified) {
+                    console.log('✓ Verification successful!');
                     this.codeVerified = true;
-                    // Close modal after brief delay to show verification
+
+                    // Close modal after showing verified badge (1.5s to display the success message)
                     setTimeout(() => {
+                        console.log('Closing modal...');
                         this.codeExists = false;
+                        this.codeVerified = false;
+                        console.log('Modal closed');
                     }, 1500);
                 } else {
+                    console.log('✗ Verification failed:', data.message);
                     Swal.fire({
                         icon: 'error',
                         title: 'Verification Failed',
@@ -176,8 +194,13 @@ document.addEventListener('alpine:init', () => {
                     });
                 }
             } catch (error) {
-                console.error('Error verifying inviter:', error);
-                alert('An error occurred. Please try again.');
+                console.error('✗ Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    confirmButtonText: 'OK'
+                });
             } finally {
                 this.verifying = false;
             }

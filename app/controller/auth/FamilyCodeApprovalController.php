@@ -27,7 +27,8 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
-        $input = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        $input = $rawInput ? json_decode($rawInput, true) : [];
         $familyCode = $input['family_code'] ?? '';
 
         if (!$familyCode) {

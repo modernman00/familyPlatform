@@ -1,5 +1,5 @@
 <!-- Inviter Verification Modal -->
-<div id="inviter-verification-modal" class="modal" :class="{ 'is-active': codeExists && !codeVerified }">
+<div id="inviter-verification-modal" class="modal" :class="{ 'is-active': codeExists }">
     <div class="modal-background" @click="codeExists = false; codeVerified = false;"></div>
     <div class="modal-content" style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px;">
         <button class="modal-close is-large" type="button" @click="codeExists = false; codeVerified = false;"></button>
