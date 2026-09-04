@@ -121,11 +121,15 @@ final class FamilyRequestFlowTest extends FamilyRequestTestCase
             'INSERT INTO requestMgt (approver_id, requester_id, status, requesterCode, approverCode) VALUES (?, ?, ?, ?, ?)'
         )->execute([$approverId, $requesterId, 'Request sent', 'REQFAM', 'APPFAM']);
 
-        // dec=50 -> approved; src='pp' keeps the response to the JSON success
-        // payload instead of also rendering a full HTML view afterwards.
-        $this->captureJsonOutput(
-            fn() => FamilyRequestController::approveDelete($requesterId, $approverId, '50', 'APPFAM', 'pp')
-        );
+        // dec=50 -> approved; src='pp' now just issues a redirect to /profilePage
+        // with no response body (the JSON success payload was dropped in the
+        // Phase-4 ApiResponse work), so the DB side effects below are the check.
+        ob_start();
+        try {
+            FamilyRequestController::approveDelete($requesterId, $approverId, '50', 'APPFAM', 'pp');
+        } finally {
+            ob_end_clean();
+        }
 
         $row = $this->requestMgtRow($approverId, $requesterId);
         $this->assertNotNull($row);

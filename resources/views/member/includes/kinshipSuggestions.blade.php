@@ -1,7 +1,14 @@
-{{-- Only render the widget when the engine actually returned suggestions.
-     getSuggestedKin() is typed `: array` and returns [] on every empty/error
-     path, so this guard fails closed (widget hidden), never fatal. --}}
-@if(!empty($suggestedKin))
+{{-- The widget shell always renders: getSuggestedKin() is typed `: array` and
+     returns [] on every empty/error path, so @forelse falls through to the
+     @empty branch (a friendly "all caught up" state) rather than a fatal.
+     The Cypress kinship spec relies on #kinshipRadarWidget existing regardless
+     of whether there are suggestions. --}}
+@php
+    // The in-feed (mobile) copy scrolls horizontally like the Reels tray; the
+    // desktop sidebar copy stays a vertical stack. The widget id is the existing
+    // discriminator between the two placements.
+    $kinCarousel = ($kinshipWidgetId ?? 'kinshipRadarWidget') === 'kinshipRadarWidgetMobile';
+@endphp
 <div class="card border-0 shadow-sm mb-4 kinship-radar-widget" id="{{ $kinshipWidgetId ?? 'kinshipRadarWidget' }}" style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid #e2e8f0 !important;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -10,15 +17,15 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Relatives</h6>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin &amp; In-Laws</h6>
                     <span class="text-muted" style="font-size: 0.75rem;">People you may know</span>
                 </div>
             </div>
             <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.7rem; font-weight: 700;">Kinship Radar</span>
         </div>
 
-        <div class="d-flex flex-column gap-3" id="kinshipSuggestionsList">
-            @foreach($suggestedKin as $kin)
+        <div class="{{ $kinCarousel ? 'kinship-suggestions-scroll' : 'd-flex flex-column gap-3' }}" id="kinshipSuggestionsList">
+            @forelse(($suggestedKin ?? []) as $kin)
                 @php
                     $kinAvatar = !empty($kin['profilePics']) ? (str_starts_with($kin['profilePics'], '/') ? $kin['profilePics'] : '/resources/images/profile/' . $kin['profilePics']) : '/resources/images/profile/avatarM.png';
                     $kinName = ucwords(strtolower(($kin['firstName'] ?? '') . ' ' . ($kin['lastName'] ?? '')));
@@ -27,7 +34,7 @@
                     $primaryReason = $kin['primary_reason'] ?? 'Shared family heritage network';
                     $score = $kin['confidence_score'] ?? 75;
                 @endphp
-                <div class="p-3 rounded-4 bg-light kinship-item-card position-relative" id="kinCard_{{ $kinId }}" style="border: 1px solid #f1f5f9; transition: all 0.2s ease;">
+                <div class="p-3 rounded-4 bg-light kinship-item-card position-relative {{ $kinCarousel ? 'kinship-item-card--scroll' : '' }}" id="kinCard_{{ $kinId }}" style="border: 1px solid #f1f5f9; transition: all 0.2s ease;">
                     <!-- Top row: Avatar + Names + Dismiss -->
                     <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
                         <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
@@ -57,8 +64,12 @@
                         <i class="bi bi-person-plus-fill"></i> Connect
                     </button>
                 </div>
-            @endforeach
+            @empty
+                <div class="text-center py-4 text-muted small {{ $kinCarousel ? 'kinship-scroll-empty' : '' }}">
+                    <i class="bi bi-shield-check text-success fs-3 d-block mb-2"></i>
+                    You're connected to all nearby kin! We'll suggest new relatives as more family members join.
+                </div>
+            @endforelse
         </div>
     </div>
 </div>
-@endif

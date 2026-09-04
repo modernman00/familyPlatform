@@ -61,7 +61,8 @@ final class RouteDispatch
             'App\controller\ClearCache',
             'App\controller\login\OAuthController',
             'App\controller\BlogController',
-            'App\controller\ServeImgController'
+            'App\controller\ServeImgController',
+            'App\controller\auth\FamilyCodeApprovalController'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {

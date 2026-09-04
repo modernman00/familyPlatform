@@ -3,8 +3,6 @@ import { renderHtml } from "./html";
 import { createSearchHandler } from "./handleInput";
 import { getApiData, id, showError } from "@modernman00/shared-js-lib";
 
-const URL = process.env.MIX_APP_URL2;
-
 const allMembersContainer = id("allMembers");
 const memberCountBadge = id("memberCount");
 const memberCountDisplay = id("memberCountDisplay");
@@ -94,7 +92,7 @@ function setupFilterPills() {
 
 (async function bootstrapAllMembers() {
   try {
-    const url = `${URL}allMembers/processApiData`;
+    const url = `/allMembers/processApiData`;
 
     const famCodeData = await getApiData(url);
 
@@ -127,7 +125,7 @@ function setupFilterPills() {
         familyMembers,
         renderMembers,
         container: allMembersContainer,
-        searchUrl: `${URL}allMembers/search`
+        searchUrl: `/allMembers/search`
       });
 
       searchInput.addEventListener("input", handleSearch);

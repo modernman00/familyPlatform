@@ -353,7 +353,7 @@
 .mobile-pwa-dropdown {
   position: fixed !important;
   top: auto !important;
-  bottom: 80px !important; /* Above bottom nav */
+  bottom: calc(58px + env(safe-area-inset-bottom, 0px) + 12px) !important; /* Above bottom nav + 12px gap */
   left: 50% !important;
   transform: translateX(-50%) !important;
   width: 95% !important;

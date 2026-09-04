@@ -14,12 +14,12 @@ IFS=$'\n\t'
 cd "$(dirname "$0")/.."
 
 # --- Configuration (Overridable via Environment Variables) ---
-APP_NAME="${DEPLOY_APP_NAME:-FamilyPlatform}"
+APP_NAME="${DEPLOY_APP_NAME:-PartyPlatform}"
 SSH_USER="${DEPLOY_SSH_USER:-bestiias}"
 SSH_HOST="${DEPLOY_SSH_HOST:-premium145.web-hosting.com}"
 SSH_PORT="${DEPLOY_SSH_PORT:-21098}"
-REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/home/bestiias/myfamilyplatform}"
-LIVE_HEALTH_URL="${DEPLOY_HEALTH_URL:-https://myfamilyplatform.com}" # Live production domain
+REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/home/bestiias/mypartyplatform}"
+LIVE_HEALTH_URL="${DEPLOY_HEALTH_URL:-https://mypartyplatform.com}" # Update with live domain
 
 # Flags
 DRY_RUN=0
@@ -36,11 +36,41 @@ for arg in "$@"; do
     esac
 done
 
+# ------------------------------------------------------------------------------
+# STAGE 0: UNCOMMITTED CHANGES CHECK (TAT: Ryan / James / David)
+# ------------------------------------------------------------------------------
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+    echo "⚠️  WARNING: You have uncommitted changes in your workspace."
+    git status -s
+    
+    if [ $NON_INTERACTIVE -eq 1 ] || [ ! -t 0 ]; then
+        echo "🛑 FATAL: Non-interactive mode detected. Cannot prompt for commit message."
+        echo "Please commit your changes manually before running the deploy script in CI."
+        exit 1
+    fi
+
+    read -p "Do you want to commit these changes before deploying? (y/N): " AUTO_COMMIT < /dev/tty
+    if [[ "$AUTO_COMMIT" =~ ^[yY]$ ]]; then
+        read -p "📝 Enter commit message: " COMMIT_MSG < /dev/tty
+        if [ -z "$COMMIT_MSG" ]; then
+            echo "🛑 FATAL: Commit message cannot be empty. Aborting deployment."
+            exit 1
+        fi
+        git add .
+        git commit -m "$COMMIT_MSG"
+        echo "✅ Changes committed successfully."
+    else
+        echo "🛑 FATAL: Enterprise policy forbids deploying uncommitted changes. Aborting."
+        exit 1
+    fi
+fi
+
+
 START_TIME=$(date +%s)
 DEPLOY_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 DEPLOY_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 DEPLOY_USER=$(whoami)
-SW_FILE="service-worker.js"
+SW_FILE="sw.js"
 
 echo "======================================================================"
 echo " 🚀 [$APP_NAME] INITIATING ENTERPRISE DEPLOYMENT PIPELINE"
@@ -212,7 +242,7 @@ echo "🛡️  Asserting integrity of sync manifest before remote synchronizatio
 MANIFEST_FILE=$(mktemp /tmp/manifest_XXXXXX)
 "$RSYNC_BIN" -av --dry-run -f 'merge .rsync-filter' "$SANDBOX_DIR/" /tmp/manifest_check > "$MANIFEST_FILE" 2>&1
 if [ -d "resources/views" ]; then
-    if ! grep -E "resources/views/(index|base|about|login|contact)" "$MANIFEST_FILE" >/dev/null; then
+    if ! grep -E "resources/views/(index|base|attendee|pledges)" "$MANIFEST_FILE" >/dev/null; then
         echo "🛑 FATAL STRUCTURAL GATING: Filter matched zero Blade templates!"
         echo "Aborting deployment immediately to prevent remote --delete-excluded data loss."
         rm -f "$MANIFEST_FILE"
@@ -246,8 +276,7 @@ echo "✅ File transfer synchronized."
 if [ $DRY_RUN -eq 0 ]; then
     echo -e "\n🧹 [Stage 5/6] Executing Remote Maintenance & Cache Purge..."
     ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << REMOTE_CMD
-        # 1. Enforce strict permissions and guarantee upload directories exist (SecOps: Marcus)
-        mkdir -p "${REMOTE_DIR}/resources/images/post" "${REMOTE_DIR}/resources/images/profile" "${REMOTE_DIR}/resources/images/photos" "${REMOTE_DIR}/resources/images/reels" "${REMOTE_DIR}/public/uploads" "${REMOTE_DIR}/storage" 2>/dev/null || true
+        # 1. Enforce strict permissions (SecOps: Marcus)
         find "${REMOTE_DIR}" -type d -exec chmod 755 {} + 2>/dev/null || true
         find "${REMOTE_DIR}" -type f -exec chmod 644 {} + 2>/dev/null || true
         [ -f "${REMOTE_DIR}/.env" ] && chmod 600 "${REMOTE_DIR}/.env" 2>/dev/null || true
@@ -292,7 +321,8 @@ if [ $DRY_RUN -eq 0 ]; then
     if [ $PUSH_GIT -eq 1 ]; then
         DO_GIT_PUSH=1
     elif [ $NON_INTERACTIVE -eq 0 ] && [ -t 0 ]; then
-        echo -e "\n🐙 [Stage 7/7] GitHub Synchronization..."
+        echo -e "
+🐙 [Stage 7/7] GitHub Synchronization..."
         read -r -p "Do you want to push deployed commit (${DEPLOY_COMMIT:0:8}) to GitHub? (y/N): " PUSH_CONFIRM || PUSH_CONFIRM="n"
         if [[ "$PUSH_CONFIRM" =~ ^[yY]$ ]]; then
             DO_GIT_PUSH=1

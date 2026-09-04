@@ -190,9 +190,24 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
             cy.get('#addRelativeError').should('not.contain.text', '[object Object]');
             cy.get('#addRelativeError').invoke('text').should('have.length.gt', 3);
 
-            // Close modal
-            cy.get('#addRelativeModal .btn-close').first().click();
-            cy.get('#addRelativeModal').should('not.be.visible');
+            // Close modal. Bootstrap's [data-bs-dismiss] handler silently no-ops
+            // while the modal instance is still flagged `_isTransitioning` — a
+            // state that lingers on this branded modal under the dark-mode
+            // theme's CSS transitions — so a single .btn-close click can land in
+            // that window and leave the modal open. Retry the dismiss (the flag
+            // clears within a few hundred ms) until it's actually gone.
+            const dismissAddRelativeModal = (attempt = 0) => {
+                cy.get('body').then(($body) => {
+                    if (attempt >= 5 || !$body.find('#addRelativeModal.show').length) {
+                        return;
+                    }
+                    cy.get('#addRelativeModal .btn-close').first().click();
+                    cy.wait(500);
+                    dismissAddRelativeModal(attempt + 1);
+                });
+            };
+            dismissAddRelativeModal();
+            cy.get('#addRelativeModal', { timeout: 10000 }).should('not.be.visible');
         });
     });
 });

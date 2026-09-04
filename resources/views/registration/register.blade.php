@@ -20,6 +20,173 @@
 @section('og_title', $pageOgTitle)
 @section('og_description', $pageOgDesc)
 
+@section('extra_js')
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('familyCodeApprovalForm', () => ({
+        familyCode: '{{ old("famCode", "") }}',
+        codeExists: false,
+        codeVerified: false,
+        checkingCode: false,
+        verifying: false,
+        temporaryCode: '',
+        inviterFirstName: '{{ old("inviter_first_name") }}',
+        inviterLastName: '{{ old("inviter_last_name") }}',
+        inviterContact: '{{ old("inviter_email_or_mobile") }}',
+
+        init() {
+            const self = this;
+            console.log('✓ Alpine init called for family code approval');
+            const form = document.querySelector('form.register');
+            if (form) {
+                console.log('✓ Form found, binding blur listener');
+                form.addEventListener('blur', (e) => {
+                    if (e.target && e.target.name === 'famCode') {
+                        console.log('✓ Blur on famCode via delegation:', e.target.value);
+                        self.familyCode = e.target.value;
+                        self.checkFamilyCode();
+                    }
+                }, true);
+                form.addEventListener('input', (e) => {
+                    if (e.target && e.target.name === 'famCode') {
+                        console.log('✓ Input on famCode:', e.target.value);
+                        self.familyCode = e.target.value;
+                    }
+                });
+            } else {
+                console.log('✗ Form NOT found');
+            }
+            setTimeout(() => {
+                const familyCodeInput = document.querySelector('input[name="famCode"]');
+                if (familyCodeInput && !familyCodeInput.__familyCodeBound) {
+                    console.log('✓ Direct binding to famCode input');
+                    familyCodeInput.__familyCodeBound = true;
+                    familyCodeInput.addEventListener('blur', () => {
+                        console.log('✓ Direct blur on famCode:', familyCodeInput.value);
+                        self.familyCode = familyCodeInput.value;
+                        self.checkFamilyCode();
+                    });
+                    self.familyCode = familyCodeInput.value;
+                    if (self.familyCode.trim()) {
+                        self.checkFamilyCode();
+                    }
+                } else {
+                    console.log('✗ famCode input NOT found or already bound');
+                }
+            }, 100);
+        },
+
+        getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.content ||
+                   document.querySelector('input[name="_token"]')?.value ||
+                   document.querySelector('input[name="token"]')?.value || '';
+        },
+
+        async checkFamilyCode() {
+            console.log('→ checkFamilyCode() called');
+            const input = document.querySelector('input[name="famCode"]');
+            if (!input) {
+                console.log('✗ Input not found');
+                return;
+            }
+            this.familyCode = input.value;
+            console.log('→ Checking code:', this.familyCode);
+
+            if (!this.familyCode.trim()) {
+                console.log('✗ Empty code, resetting');
+                this.codeExists = false;
+                this.codeVerified = false;
+                return;
+            }
+
+            this.checkingCode = true;
+
+            try {
+                console.log('→ Calling API...');
+                const response = await fetch('/api/family-code/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': this.getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        family_code: this.familyCode
+                    })
+                });
+
+                console.log('→ API response status:', response.status);
+                const data = await response.json();
+                console.log('→ API data:', data);
+                this.codeExists = data.exists === true;
+                console.log('✓ codeExists set to:', this.codeExists);
+
+                if (this.codeExists) {
+                    this.temporaryCode = data.temporary_code || '';
+                }
+            } catch (error) {
+                console.error('Error checking family code:', error);
+                this.codeExists = false;
+            } finally {
+                this.checkingCode = false;
+            }
+        },
+
+        async verifyInviter() {
+            if (!this.inviterFirstName.trim() || !this.inviterLastName.trim() || !this.inviterContact.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please fill in all inviter details',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            this.verifying = true;
+
+            try {
+                const response = await fetch('/api/family-code/verify-inviter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': this.getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        family_code: this.familyCode,
+                        inviter_first_name: this.inviterFirstName,
+                        inviter_last_name: this.inviterLastName,
+                        inviter_email_or_mobile: this.inviterContact
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.verified) {
+                    this.codeVerified = true;
+                    // Close modal after brief delay to show verification
+                    setTimeout(() => {
+                        this.codeExists = false;
+                    }, 1500);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Verification Failed',
+                        text: data.message || 'Unable to verify inviter. Please check the information and try again.',
+                        confirmButtonText: 'Try Again'
+                    });
+                }
+            } catch (error) {
+                console.error('Error verifying inviter:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                this.verifying = false;
+            }
+        }
+    }));
+});
+</script>
+@endsection
+
 @section('extra_css')
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/autocompleter/autocomplete.min.css">
 <style>
@@ -179,6 +346,14 @@
     .stitch-divider span {
         padding: 0 12px;
     }
+
+    /* Hide form section titles */
+    .register .form-divider,
+    .register .title,
+    .register h2,
+    .register h3 {
+        display: none !important;
+    }
 </style>
 @endsection
 
@@ -227,7 +402,7 @@
                 </div>
                 @endif
 
-                <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off">
+                <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" x-data="familyCodeApprovalForm()">
                     @if(!empty($registerPostData['claim_node']))
                     <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
                     @endif
@@ -303,6 +478,13 @@
                     $form = new \Src\BuildFormBulma($formArray);
                     $form->genForm();
                     @endphp
+
+                    <!-- Inviter Verification Modal (shown when valid code entered) -->
+                    @include('components.auth.family-code-verification', ['errors' => $errors ?? []])
+
+                    <!-- Hidden inputs to track approval state -->
+                    <input type="hidden" id="joining_via_invitation" x-model="codeExists" name="joining_via_invitation">
+                    <input type="hidden" id="temporary_code" name="temporary_code" x-model="temporaryCode">
 
                     <div class="field mt-4">
                         <label class="checkbox">

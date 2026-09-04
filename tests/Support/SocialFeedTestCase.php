@@ -37,18 +37,27 @@ abstract class SocialFeedTestCase extends TestCase
         $this->authorId = 'PU_' . bin2hex(random_bytes(6));
         $this->famCode = 'PHPUNIT_FEED_' . bin2hex(random_bytes(4));
 
+        // CommentReactionController::addReaction() runs CheckToken::tokenCheck()
+        // first — mirror the session/header CSRF pair a real axios request sends.
+        $token = 'phpunit-' . bin2hex(random_bytes(8));
+
         $_SESSION = [
             'id' => $this->authorId,
             'famCode' => $this->famCode,
             'fName' => 'Feed',
             'lName' => 'Tester',
+            'token' => $token,
         ];
         $_POST = [];
         $_GET = [];
         $_FILES = [];
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['CONTENT_TYPE'] = 'application/json';
-        $_SERVER['HTTP_X_XSRF_TOKEN'] = '';
+        $_SERVER['HTTP_X_XSRF_TOKEN'] = $token;
+        // Unique per test so the DB-backed rate limiter's per-IP key (see
+        // Src\Limiter / Utility::getUserIpAddr) can't accumulate across runs
+        // inside its 5-minute fixed window and start rejecting reactions.
+        $_SERVER['REMOTE_ADDR'] = '127.' . random_int(1, 254) . '.' . random_int(1, 254) . '.' . random_int(1, 254);
     }
 
     protected function tearDown(): void

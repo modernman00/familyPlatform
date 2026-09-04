@@ -408,6 +408,42 @@ body {
   }
 }
 
+/* ── Kinship Radar — horizontal carousel (in-feed / mobile placement) ──────────
+   Mirrors the Family Reels tray: a snap-scrolling row of fixed-width cards with
+   the next one peeking to signal there's more. Desktop sidebar copy is untouched
+   (it keeps the vertical stack). */
+.kinship-suggestions-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 2px 2px 6px;
+}
+.kinship-suggestions-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.kinship-item-card--scroll {
+  flex: 0 0 82%;
+  max-width: 280px;
+  scroll-snap-align: start;
+}
+
+/* Keep the connect button comfortably tappable in the narrower card */
+.kinship-item-card--scroll .btn-connect-kin {
+  padding: 8px 12px;
+}
+
+/* Empty state should sit centred across the whole widget, not as one flex item */
+.kinship-suggestions-scroll .kinship-scroll-empty {
+  flex: 1 0 100%;
+}
+
 .btn-icon {
   background: none;
   border: none;

@@ -24,24 +24,32 @@
             gap: 6px;
         }
         .gallery-back-btn {
-            background: var(--card-bg);
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: transparent;
             color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 18px;
-            border-radius: 25px;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             text-decoration: none;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             transition: all 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 0;
+            z-index: 10;
         }
         .gallery-back-btn:hover {
-            background: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
-            transform: translateX(-3px);
+            background: var(--primary-color-subtle, rgba(79, 70, 229, 0.1));
+            color: var(--primary-color);
+            transform: scale(1.1);
+        }
+        .gallery-back-btn i {
+            margin-right: 0;
         }
         .empty-gallery-card {
             background: var(--card-bg);
@@ -106,15 +114,17 @@
 @endpush
 
 @section('content')
-    <div class="container" style="min-height: 100vh; max-width: 1300px; padding-top: 20px;">
+    <div class="container" style="min-height: 100vh; max-width: 1300px; padding-top: 20px; position: relative;">
+
+        <!-- Back Button (icon-only, top-left) -->
+        <a href="/profilePage" class="gallery-back-btn" title="Back to Profile">
+            <i class="bi bi-chevron-left"></i>
+        </a>
 
         <!-- Gallery Header -->
         <div class="gallery-header-box shadow-sm">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div class="d-flex align-items-center gap-3">
-                    <a href="/profilePage" class="gallery-back-btn shadow-sm">
-                        <i class="bi bi-arrow-left"></i> Back to Profile
-                    </a>
                     <div>
                         <h2 class="mb-0 fw-bold" style="font-family: 'Playfair Display', serif; color: var(--text-color);">
                             @if(isset($member['firstName']))
