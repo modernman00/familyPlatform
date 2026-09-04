@@ -6,10 +6,18 @@ namespace App\services;
 use App\model\SingleCustomerData;
 use App\model\Post;
 use App\model\AllMembersData as DataAll;
+use App\repository\FeedRepository;
 use Src\Exceptions\NotFoundException;
 
 final class ProfilepageService
 {
+    private FeedRepository $feedRepo;
+
+    public function __construct(?FeedRepository $feedRepo = null)
+    {
+        $this->feedRepo = $feedRepo ?? new FeedRepository();
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -32,7 +40,7 @@ final class ProfilepageService
             'memberData' => $memberData,
             'famCode' => $famCode,
             'friendRequests' => DataAll::getFriendRequestData($userId, "Request sent"),
-            'posts' => DataAll::getVisiblePosts($userId, (array)$famCodes, 50, 0),
+            'posts' => $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0),
             'comments' => Post::getAllCommentProfilePics(),
             'events' => DataAll::getEventDataByFamCode($famCode),
             'post2Id' => Post::postLink2Id($userId),

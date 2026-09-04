@@ -99,181 +99,30 @@ class AllMembersData extends InnerJoin
 
     /**
      * Gets visible posts for multiple family codes, implementing the Unified Feed.
+     * Delegated to FeedRepository (Single Source of Truth).
      */
     public static function getVisiblePosts(string $id, array $famCodes, int $limit, int $offset): array
     {
-        try {
-            $hasFamCodes = !empty($famCodes);
-            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
-            
-            // Allow users to see their own posts even if they don't have a valid famCode
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
-              FROM post
-              LEFT JOIN profilePics pp ON post.id = pp.id
-              LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = ?
-                  ) AS rm ON post.id = rm.approver_id
-            WHERE (";
-            
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-            
-            $query .= "post.id = rm.approver_id OR post.id = ?)
-            AND post.post_status = 'published'
-            AND post.date_deleted IS NULL
-            ORDER BY post.date_created DESC
-            LIMIT ? OFFSET ?";
-            
-            $params = [$id];
-            if ($hasFamCodes) {
-                $params = array_merge($params, $famCodes);
-            }
-            $params[] = $id; // Bind the user's ID to fetch their own posts
-            $params[] = $limit;
-            $params[] = $offset;
-
-            $result = parent::connect2()->prepare($query);
-            foreach ($params as $key => $val) {
-                if (is_int($val)) {
-                    $result->bindValue($key + 1, $val, PDO::PARAM_INT);
-                } else {
-                    $result->bindValue($key + 1, $val, PDO::PARAM_STR);
-                }
-            }
-            
-            $result->execute();
-            $posts = $result->fetchAll(PDO::FETCH_ASSOC);
-
-            // Fetch attached polls and reactions (Engagement Integration)
-            if (!empty($posts)) {
-                $postIds = array_column($posts, 'post_no');
-                
-                $polls = PollData::getPollsForPosts($postIds, $id);
-                $reactions = ReactionData::getReactionsForPosts($postIds);
-                $userReactions = ReactionData::getUserReactionsForPosts($id, $postIds);
-
-                // Re-map into posts array
-                foreach ($posts as &$post) {
-                    $pNo = $post['post_no'];
-                    $post['poll'] = $polls[$pNo] ?? null;
-                    
-                    $post['reactions'] = array_filter($reactions, function($r) use ($pNo) {
-                        return $r['post_no'] == $pNo;
-                    });
-                    
-                    $post['user_reaction'] = null;
-                    foreach ($userReactions as $ur) {
-                        if ($ur['post_no'] == $pNo) {
-                            $post['user_reaction'] = $ur['reaction_type'];
-                            break;
-                        }
-                    }
-                }
-                unset($post);
-            }
-
-            return $posts;
-        } catch (PDOException $e) {
-            showError($e);
-            throw $e; // Throw exception to expose schema mismatches to the API response
-        }
+        return (new \App\repository\FeedRepository())->getFeedPostsAsArray($id, $famCodes, $limit, $offset);
     }
 
     /**
-     * Gets posts from exactly one year ago today
+     * Gets posts from exactly one year ago today.
+     * Delegated to FeedRepository (Single Source of Truth).
      */
     public static function getMemories(string $id, array $famCodes): array
     {
-        try {
-            $hasFamCodes = !empty($famCodes);
-            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
-            
-            // Query for posts created exactly 1 year ago (matching month and day)
-            // Use range scan instead of DATE() function for index optimization
-            $query = "SELECT post.*, pp.img, rm.requester_id, rm.approver_id, rm.status, rm.requesterCode
-              FROM post
-              LEFT JOIN profilePics pp ON post.id = pp.id
-              LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = ?
-                  ) AS rm ON post.id = rm.approver_id
-            WHERE (";
-            
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-            
-            $query .= "post.id = rm.approver_id OR post.id = ?) 
-            AND post.post_status = 'published'
-            AND post.date_created >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
-            AND post.date_created < DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 YEAR), INTERVAL 1 DAY)
-            ORDER BY post.date_created DESC";
-            
-            $params = [$id];
-            if ($hasFamCodes) {
-                $params = array_merge($params, $famCodes);
-            }
-            $params[] = $id; // Bind the user's ID to fetch their own posts
-
-            $result = parent::connect2()->prepare($query);
-            foreach ($params as $key => $val) {
-                $result->bindValue($key + 1, $val, PDO::PARAM_STR);
-            }
-            
-            $result->execute();
-            return $result->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            showError($e);
-            throw $e;
-        }
+        $dtos = (new \App\repository\FeedRepository())->getMemories($id, $famCodes);
+        return array_map(fn($d) => $d->toArray(), $dtos);
     }
 
     /**
      * Counts visible posts for multiple family codes.
+     * Delegated to FeedRepository (Single Source of Truth).
      */
     public static function countVisiblePosts(string $id, array $famCodes): int
     {
-        try {
-            $hasFamCodes = !empty($famCodes);
-            $inQuery = $hasFamCodes ? implode(',', array_fill(0, count($famCodes), '?')) : "''";
-            
-            $query = "SELECT COUNT(*) as total
-              FROM post
-              LEFT JOIN (
-                      SELECT requester_id, approver_id, status, requesterCode
-                      FROM requestMgt
-                      WHERE requester_id IS NOT NULL AND requester_id = ?
-                  ) AS rm ON post.id = rm.approver_id
-            WHERE (";
-            
-            if ($hasFamCodes) {
-                $query .= "post.postFamCode IN ($inQuery) OR ";
-            }
-            
-            $query .= "post.id = rm.approver_id OR post.id = ?)
-            AND post.post_status = 'published'
-            AND post.date_deleted IS NULL";
-            
-            $params = [$id];
-            if ($hasFamCodes) {
-                $params = array_merge($params, $famCodes);
-            }
-            $params[] = $id; // Bind the user's ID to fetch their own posts
-
-            $result = parent::connect2()->prepare($query);
-            foreach ($params as $key => $val) {
-                $result->bindValue($key + 1, $val, PDO::PARAM_STR);
-            }
-            $result->execute();
-            return (int) $result->fetchColumn();
-        } catch (PDOException $e) {
-            showError($e);
-            throw $e;
-        }
+        return (new \App\repository\FeedRepository())->countFeedPosts($id, $famCodes);
     }
 
     /**

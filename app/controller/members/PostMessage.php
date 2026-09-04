@@ -57,8 +57,9 @@ final class PostMessage
             $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
             $offset = ($page - 1) * $limit;
 
-            // 1. Get visible posts with pagination across multiple families
-            $posts = AllMembersData::getVisiblePosts(
+            // 1. Get visible posts with pagination across multiple families via unified FeedRepository
+            $feedRepo = new \App\repository\FeedRepository();
+            $posts = $feedRepo->getFeedPostsAsArray(
                 $id,
                 $famCodes,
                 $limit,
@@ -66,8 +67,8 @@ final class PostMessage
             );
 
             // Get total count for pagination metadata
-            $total = AllMembersData::countVisiblePosts($id, $famCodes);
-            $lastPage = ceil($total / $limit);
+            $total = $feedRepo->countFeedPosts($id, $famCodes);
+            $lastPage = (int)ceil($total / $limit);
 
 
 
