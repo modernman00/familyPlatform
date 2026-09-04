@@ -500,19 +500,19 @@
         })
         .then(res => res.json())
         .then(data => {
-            const isOk = (data.status === 200 || data.status === 'success' || data.statusCode === 200);
+            const isOk = (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200);
             if (isOk) {
                 // Success - reload page to show new tree
                 window.location.reload();
             } else {
-                errorDiv.textContent = extractStudioErrorMessage(data.message || data.error || data);
+                errorDiv.textContent = window.extractErrorMessage ? window.extractErrorMessage(data) : extractStudioErrorMessage(data.message || data.error || data);
                 errorDiv.classList.remove('d-none');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         })
         .catch(err => {
-            errorDiv.textContent = 'A network error occurred. Please try again.';
+            errorDiv.textContent = window.extractErrorMessage ? window.extractErrorMessage(err, 'A network error occurred. Please try again.') : 'A network error occurred. Please try again.';
             errorDiv.classList.remove('d-none');
             btn.innerHTML = originalText;
             btn.disabled = false;

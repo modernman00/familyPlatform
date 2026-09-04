@@ -147,11 +147,22 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
     describe('Lineage Wizard & Family Tree Modal Defensive Checks', () => {
 
         it('opens Add Relative modal and asserts zero [object Object] in modal and error states', () => {
-            cy.visit('/organogram');
+            cy.visit('/organogram', {
+                onBeforeLoad(win) {
+                    win.localStorage.setItem('family_app_tour_completed', 'true');
+                }
+            });
 
             // Verify organogram page loaded
             cy.get('body').should('be.visible');
             cy.get('#addRelativeModal', { timeout: 15000 }).should('exist');
+
+            // Dismiss tour if present
+            cy.get('body').then(($body) => {
+                if ($body.find('#btnTourClose').length) {
+                    cy.get('#btnTourClose').click({ force: true });
+                }
+            });
 
             // Open the Add Relative modal via window helper or button click
             cy.window().then((win) => {

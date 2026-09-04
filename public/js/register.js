@@ -1,1 +1,2042 @@
-(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[685,707],{3559:function(e,n,t){"use strict";t.d(n,{Z:function(){return c}});var a=t(5671),r=t(3144);t(3659);function i(e,n){var t="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!t){if(Array.isArray(e)||(t=function(e,n){if(e){if("string"==typeof e)return o(e,n);var t={}.toString.call(e).slice(8,-1);return"Object"===t&&e.constructor&&(t=e.constructor.name),"Map"===t||"Set"===t?Array.from(e):"Arguments"===t||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t)?o(e,n):void 0}}(e))||n&&e&&"number"==typeof e.length){t&&(e=t);var a=0,r=function(){};return{s:r,n:function(){return a>=e.length?{done:!0}:{done:!1,value:e[a++]}},e:function(e){throw e},f:r}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var i,c=!0,l=!1;return{s:function(){t=t.call(e)},n:function(){var e=t.next();return c=e.done,e},e:function(e){l=!0,i=e},f:function(){try{c||null==t.return||t.return()}finally{if(l)throw i}}}}function o(e,n){(null==n||n>e.length)&&(n=e.length);for(var t=0,a=Array(n);t<n;t++)a[t]=e[t];return a}var c=function(){return(0,r.Z)(function e(n){(0,a.Z)(this,e),Array.isArray(n)||throwError("data must be an array of form elements"),this.data=n,this.error=[],this.result=0},[{key:"id",value:function(e){return document.getElementById(e)}},{key:"getData",value:function(){return this.data}},{key:"validateField",value:function(e){return"email"===(arguments.length>1&&void 0!==arguments[1]?arguments[1]:"general")?/^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-Z0-9]{2,4}$/.test(e):""!==e.trim()}},{key:"massValidate",value:function(){var e=this;this.data.forEach(function(n){var t,a=i(n);try{for(a.s();!(t=a.n()).done;){var r=t.value,o=e.id("".concat(r.name,"_error")),c=r.name.replace("_"," ");if(["submit","button","showPassword_id","g-recaptcha-response","cancel","token","checkbox_id"].includes(r.name)||["button"].includes(r.id)||["button"].includes(r.type))return;if(["spouse_name","spouse_mobile","spouse_email","father_mobile","father_email","mother_mobile","maiden_name","mother_email"].includes(r.name)&&(r.value=""===r.value?"Not Provided":r.value),(""===r.value||"select"===r.value)&&!e.validateField(r.value)){var l;if(o)o.innerHTML="".concat(null!==(l=r.placeholder)&&void 0!==l?l:"*"," cannot be left empty"),o.style.color="red";e.error.push("".concat(c.toUpperCase()," cannot be left empty")),e.result=!1}"email"!==r.name||e.validateField(r.value,"email")||(e.error.push('<li style="color: red;">Please enter a valid email</li>'),o&&(o.innerHTML="* Please enter a valid email"),e.result=!1)}}catch(e){a.e(e)}finally{a.f()}})}},{key:"emailVal",value:function(){var e="<li style=color:'red';> Please enter a valid email</li>",n=this.id("email_id")||this.id("email");if(n&&null===n.value.match(/^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/)){var t=this.id("email_error");t&&(t.innerHTML=e,t.style.color="red"),this.error.push(e)}}},{key:"clearError",value:function(){var e=this;this.error=[];var n=function(n){var t=e.id("".concat(n,"_error"));t&&(t.innerHTML="")};this.data.forEach(function(t){var a,r=i(t);try{var o=function(){var t=a.value,r=t.id,i=t.name,o=t.value;if(["submit","button","token","checkbox"].includes(r)||["token","submit"].includes(i))return 1;var c=e.id(r);c?(console.log("Adding listeners to element: ".concat(r)),c.addEventListener("keyup",function(){"select"!==o&&n(i)}),c.addEventListener("change",function(){n(i)})):console.warn("Element with ID '".concat(r,"' with post name '").concat(t.name,"' not found."))};for(r.s();!(a=r.n()).done;)o()}catch(e){r.e(e)}finally{r.f()}})}},{key:"clearHtml",value:function(){this.data.forEach(function(e){var n,t=i(e);try{for(t.s();!(n=t.n()).done;){var a=n.value;"submit"!=a.id&&"submit"!=a.name&&"checkbox"!=a.name&&(a.value="")}}catch(e){t.e(e)}finally{t.f()}})}},{key:"realTimeCheckLen",value:function(e,n){var t=this;try{for(var a=function(a){var r=t.id("".concat(e[a],"_id"));if(r||(r=t.id(e[a])),null==r||""===r)return console.warn("Element with ID '".concat(e[a],"' not found or is empty")),1;var i=n[a],o=t.id("".concat(e[a],"_error"));r.maxLength=parseInt(i)+1,r.addEventListener("keyup",function(){o&&(o.innerHTML=r.value.length>i?"You have reached the maximum limit":"",o.style.color="red");var n=t.id("".concat(e[a],"_help"));n&&(n.style.color="red",n.style.fontSize="10px",setTimeout(function(){n.style.display="none"},5e3))})},r=0;r<e.length;r++)a(r)}catch(e){console.error(e.message)}}},{key:"matchInput",value:function(e,n){var t,a,r;t=this.id("".concat(n,"_error")),a=this.id(e+"_id")||this.id(e),r=this.id(n+"_id")||this.id(n),a&&r&&r.addEventListener("keyup",function(){t&&(t.innerHTML=r.value!==a.value?"Your passwords do not match":"")})}},{key:"injectData",value:function(e,n){for(var t=0;t<e.length;t++)this.id(e[t]).innerHTML=n[t]}},{key:"duplicate",value:function(e,n){var t,a;t=this.id(e)||this.id(e.replace("_id","")),a=this.id(n)||this.id(n.replace("_id","")),t&&a&&t.addEventListener("keyup",function(){a.value=t.value})}},{key:"realTimeServer",value:function(e,n,t){var a,r,i;a=this.id(e),i=this.id(t),a.addEventListener("keyup",function(){if(0!=(r=a.value)){var e=new XMLHttpRequest;e.onreadystatechange=function(){4==this.readyState&&200==this.status&&(i.innerHTML=this.responseText)},e.open("GET","".concat(n,"=").concat(r),!0),e.send()}else i.innerHTML=""})}},{key:"isChecked",value:function(e,n,t){var a=this,r=function(){(a.id(e).checked||a.id(n).checked)&&(a.id(t).innerHTML="checked")};this.id(e).addEventListener("click",r),this.id(n).addEventListener("click",r)}},{key:"previousAddress",value:function(){var e=this,n=this.id("time_at_address_id"),t=this.id("previous_address_class");n.addEventListener("change",function(){"3 years+"!=n.value?(t.style.display="block",e.id("previous_address_help").innerHTML="Please enter your full address: House No, Street Name, Town/City and Post Code"):t.style.display="none"})}}])}()},3659:function(e,n,t){"use strict";t.d(n,{S2:function(){return a},wR:function(){return r}});t(7658),t(7338),t(3559);var a=function(e){return'<div class="control"> \n        <label class="radio">\n          <input type="radio" name="send'.concat(e,'" value="yes" id=').concat(e,'Yes > Yes \n        </label>\n        <label class="radio"> \n          <input type="radio" name="send').concat(e,'" value="no" id=').concat(e,"No checked> No \n        </label>\n      </div>")},r=function(e){return e.toLowerCase().split(" ").map(function(e){return e.charAt(0).toUpperCase()+e.slice(1)}).join(" ")}},6398:function(e,n,t){"use strict";t.d(n,{f:function(){return d}});var a=t(5861),r=t(4687),i=t.n(r),o=t(6328),c=t(7658),l=t(3659),u=t(2729),s=(t(893),function(){var e=(0,a.Z)(i().mark(function e(n){var t,a,r,o;return i().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:return e.prev=0,e.next=1,u.Z.get("".concat("/","getEmails"),{params:{email:n},headers:{"X-Requested-With":"XMLHttpRequest"}});case 1:return r=e.sent,e.abrupt("return",!0===(null==r||null===(t=r.data)||void 0===t||null===(a=t.message)||void 0===a?void 0:a.exists));case 2:return e.prev=2,o=e.catch(0),console.error("emailIsRegistered check failed:",o),e.abrupt("return",!1);case 3:case"end":return e.stop()}},e,null,[[0,2]])}));return function(n){return e.apply(this,arguments)}}()),d=function(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:null,t=new Map,r=function(){var e=(0,a.Z)(i().mark(function e(n){var a;return i().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(!t.has(n)){e.next=1;break}return e.abrupt("return",t.get(n));case 1:return e.next=2,s(n);case 2:return a=e.sent,t.set(n,a),e.abrupt("return",a);case 3:case"end":return e.stop()}},e)}));return function(n){return e.apply(this,arguments)}}(),d=function(){var e,t,a;return null!==(e=null!==(t=null===(a=(0,c.id)("famCode_id"))||void 0===a?void 0:a.value)&&void 0!==t?t:n)&&void 0!==e?e:""},m=null,v=function(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:200;return function(){for(var t=arguments.length,a=new Array(t),r=0;r<t;r++)a[r]=arguments[r];clearTimeout(m),m=setTimeout(function(){return e.apply(void 0,a)},n)}}(function(){var e=(0,a.Z)(i().mark(function e(n){var t,a,u,s,m,v,f,p,h,y,b,g,k,w,_,E,L,x,M,S,T,C,A;return i().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(e.prev=0,(u=n.target)&&"INPUT"===u.tagName&&"email"===u.type){e.next=1;break}return e.abrupt("return");case 1:if(s=u.id){e.next=2;break}return e.abrupt("return");case 2:if(m=o.m.kidEmailInput.includes(s),v=o.m.siblingEmail.includes(s),m||v){e.next=3;break}return e.abrupt("return");case 3:if(f=(u.value||"").toLowerCase().trim(),p=(0,c.id)("".concat(s,"_help"))){e.next=4;break}return e.abrupt("return");case 4:if(h=m?o.m.kidEmailInput:o.m.siblingEmail,y=m?o.m.childrenNameInput:o.m.siblingName,b=h.indexOf(s),g=y[b],(k=null!==(t=null===(a=(0,c.id)(g))||void 0===a?void 0:a.value)&&void 0!==t?t:"")||(x=m?"children":"sibling",M=b+1,S=null!==(w=null===(_=(0,c.id)("".concat(x,"_first_name").concat(M)))||void 0===_?void 0:_.value)&&void 0!==w?w:"",T=null!==(E=null===(L=(0,c.id)("".concat(x,"_last_name").concat(M)))||void 0===L?void 0:L.value)&&void 0!==E?E:"",k="".concat(S," ").concat(T).trim()),f){e.next=5;break}return p.style.display="none",p.innerHTML="",delete p.dataset.email,delete p.dataset.name,delete p.dataset.familyCode,e.abrupt("return");case 5:if(!(f.length>0&&f.length<7)){e.next=6;break}return p.style.display="block",p.innerHTML="Email may be too short",e.abrupt("return");case 6:return e.next=7,r(f);case 7:C=e.sent,p.style.display="block",p.dataset.email=f,p.dataset.name=k,p.dataset.familyCode=d(),p.innerHTML=C?"Great news! ".concat(k||"This person"," is already registered on the platform"):"".concat(k||"This person"," is not on the platform. Do you want us to send an email invite? ").concat((0,l.S2)(s)),e.next=9;break;case 8:e.prev=8,A=e.catch(0),(0,c.x2)(A);case 9:case"end":return e.stop()}},e,null,[[0,8]])}));return function(n){return e.apply(this,arguments)}}(),250),f=function(){var n=(0,a.Z)(i().mark(function n(t){var a,r,o,l,s,d,m,v,f,p,h;return i().wrap(function(n){for(;;)switch(n.prev=n.next){case 0:if(n.prev=0,(a=t.target)&&a.id){n.next=1;break}return n.abrupt("return");case 1:if(r=a.id.endsWith("Yes"),o=a.id.endsWith("No"),r||o){n.next=2;break}return n.abrupt("return");case 2:if(l=a.id.replace(/(Yes|No)$/,""),s=(0,c.id)("".concat(l,"_help"))){n.next=3;break}return n.abrupt("return");case 3:if(!o){n.next=4;break}return s.style.display="none",n.abrupt("return");case 4:if("1"!==s.dataset.sending){n.next=5;break}return n.abrupt("return");case 5:if(s.dataset.sending="1",d=s.dataset.email,m=s.dataset.name,v=s.dataset.familyCode,d&&m){n.next=6;break}return s.dataset.sending="",n.abrupt("return");case 6:return f={mobile:"",viewPath:"msg/contactNewMember",data:{email:d,name:m,yourName:e,familyCode:v},subject:"".concat(e," wants you to join the family network")},n.next=7,u.Z.post("/register/contactNewMember",f);case 7:p=n.sent,s.innerHTML=p.data.message||"Invite sent",setTimeout(function(){s.style.display="none"},5e3),s.dataset.sending="",n.next=9;break;case 8:n.prev=8,h=n.catch(0),(0,c.x2)(h);case 9:case"end":return n.stop()}},n,null,[[0,8]])}));return function(e){return n.apply(this,arguments)}}();return document.addEventListener("input",v,!0),document.addEventListener("click",f,!0),function(){document.removeEventListener("input",v,!0),document.removeEventListener("click",f,!0)}}},8824:function(e,n,t){"use strict";t.r(n);var a=t(5861),r=t(4687),i=t.n(r),o=t(893),c=t(6455),l=t.n(c),u=(0,o.id)("btnFamCode");u.addEventListener("click",function(){console.log("Generate Family Code clicked");try{var e=(0,o.id)("surname");if(e&&""!==e.value){var n=Date.now(),t=Math.ceil(Math.floor(Math.random()*n)/1e7),a=e.value.substring(0,4);(0,o.id)("createCode").value="".concat(a.toUpperCase()).concat(t),u.disabled=!0,u.innerText="Generated"}else l().fire({icon:"warning",title:"Missing Surname",text:"Please enter a surname first.",timer:3e3,showConfirmButton:!1})}catch(e){console.error("Family Code Generation Error:",e);var r=(0,o.id)("surname_error");r&&(r.innerHTML=e.message||"An error occurred")}});var s=(0,o.id)("copyIcon"),d=(0,o.id)("createFamCode"),m=(0,o.id)("createCode");s.addEventListener("click",function(){var e=(0,a.Z)(i().mark(function e(n){var t,a,r,c,u;return i().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(s.innerHTML="",e.prev=1,n.preventDefault(),!m.value){e.next=5;break}if(!navigator.clipboard||!navigator.clipboard.writeText){e.next=3;break}return e.next=2,navigator.clipboard.writeText(m.value);case 2:e.next=4;break;case 3:(t=document.createRange()).selectNode(d),(a=window.getSelection()).removeAllRanges(),a.addRange(t),document.execCommand("copy"),a.removeAllRanges();case 4:s.innerHTML="copied",(r=(0,o.id)("famCode"))?(r.value=m.value,console.log("Family code copied to form:",m.value)):console.error("Target input 'famCode' not found"),e.next=6;break;case 5:s.innerHTML="copy",(c=(0,o.id)("famCode"))&&(c.value=""),l().fire({icon:"warning",title:"Generate Code First",text:"Please generate the family code first.",timer:3e3,showConfirmButton:!1});case 6:e.next=8;break;case 7:e.prev=7,u=e.catch(1),console.error("Unable to copy the HTML output: ",u);case 8:case"end":return e.stop()}},e,null,[[1,7]])}));return function(n){return e.apply(this,arguments)}}())},826:function(e,n,t){"use strict";t.r(n);var a=t(893),r=function(e){var n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"Please, leave blank if not available",t=(0,a.id)(e);t&&n&&(t.innerHTML=n)};r("fatherMobile_help"),r("motherMobile_help"),r("motherEmail_help"),r("fatherEmail_help"),r("mobile_help","Nigeria: 2348036517179, UK: 447871717809"),r("password_help","Must be 8-20 characters long."),r("famCode_help","Ask a family member who already registered for the code if none then create one for your family ".concat("<button type='button' class='btn btn-sm btn-brand-outline ms-1 py-0' style='font-size: 0.8rem; vertical-align: baseline;' id='triggerFamCode'>here</button>"));var i=(0,a.id)("triggerFamCode"),o=(0,a.id)("modal-close-code"),c=(0,a.id)("modal-familyCode");i&&c&&i.addEventListener("click",function(){c.classList.add("is-active")}),o&&c&&o.addEventListener("click",function(){c.classList.remove("is-active")});var l=(0,a.id)("maritalStatus");l&&l.addEventListener("change",function(){var e=(0,a.id)("maritalStatus");e&&"Married"===e.value?(0,a.V_)("spouse"):(0,a.e6)("spouse")});var u=(0,a.id)("gender");u&&u.addEventListener("change",function(){var e=(0,a.id)("gender"),n=(0,a.id)("maritalStatus");e&&n&&"Female"===e.value&&"Yes"===n.value?(0,a.V_)("maidenName_div"):(0,a.e6)("maidenName_div")}),(0,a.e6)("spouse"),(0,a.e6)("maidenName_div");var s=(0,a.id)("register_notify_div");s&&(s.style.display="none");var d;(d=(0,a.id)("employmentStatus"))&&d.addEventListener("change",function(e){if("Student"===e.target.value){var n=(0,a.id)("occupation");n&&(n.value="Student")}});var m,v,f=function(e,n){if(!n)return"";var t="children"===e?"children":"sibling",a='\n    <option value="select">Choose</option>\n    <option value="With Spouse">With Spouse</option>\n    <option value="Not With Spouse">Not With Spouse</option>\n  ';return"sibling"===e&&(a='\n      <option value="select">Choose</option>\n      <option value="Same_Mother_Father">Same Mother & Father</option>\n      <option value="Same_Father">Only Same Father</option>\n      <option value="Same_Mother">Only Same Mother</option>\n    '),'\n    <div class="field-body">\n      <div class="field">\n        <p class="control is-expanded">\n          <span class="select is-normal is-success is-fullwidth">\n            <select name="'.concat(t,"_option").concat(n,'" id="').concat(t,"_option").concat(n,'">\n              ').concat(a,'\n            </select>\n          </span>\n        </p>\n      </div>\n\n      <div class="field">\n        <p class="control is-expanded">\n          <input\n            type="text"\n            placeholder="First name - ').concat(n,'"\n            name="').concat(t,"_first_name").concat(n,'"\n            class="input is-normal"\n            id="').concat(t,"_first_name").concat(n,'"\n          >\n        </p>\n      </div>\n\n      <div class="field">\n        <p class="control is-expanded">\n          <input\n            type="text"\n            placeholder="Last name - ').concat(n,'"\n            name="').concat(t,"_last_name").concat(n,'"\n            class="input is-normal"\n            id="').concat(t,"_last_name").concat(n,'"\n          >\n        </p>\n      </div>\n\n      <div class="field">\n        <p class="control is-expanded has-icons-left">\n          <input\n            type="email"\n            placeholder="Enter ').concat(t,"'s email - ").concat(n,'"\n            name="').concat(t,"_email").concat(n,'"\n            class="input is-normal"\n            id="').concat(t,"_email").concat(n,'"\n          >\n          <span class="icon is-small is-left">\n            <i class="fas fa-envelope"></i>\n          </span>\n        </p>\n        <p class="help is-danger" id="').concat(t,"_email").concat(n,'_help"></p>\n      </div>\n    </div>\n  ')},p=t(6328),h=t(8152),y=function(){var e,n,t=Number(null===(e=(0,a.id)("children"))||void 0===e?void 0:e.value)||0,r=Number(null===(n=(0,a.id)("sibling"))||void 0===n?void 0:n.value)||0;Object.assign(p.m,(0,h.W)(t,r))},b=function(e,n){try{var t=Number(n.target.value)||0,r="".concat(e,"_inputs"),i="".concat(e,"_div");(0,a.y8)(r);var o=(0,a.id)("".concat(e,"_help"));if(o&&(o.innerHTML=""),0===t)return void y();(0,a.tF)("div",r,i),o&&(o.innerHTML=t>1?"Please, enter their names and emails below":"Please, enter the name and email below",o.style.fontSize="1rem",o.style.color="#fc2003");var c=(0,a.id)(r);if(!c)return;for(var l=0;l<t;l++){var u=f(e,l+1);c.insertAdjacentHTML("beforeEnd",u)}y()}catch(e){(0,a.x2)(e)}};m=(0,a.id)("children"),v=(0,a.id)("sibling"),m&&m.addEventListener("change",function(e){return b("children",e)}),v&&v.addEventListener("change",function(e){return b("sibling",e)}),y();var g=t(2233),k={id:["firstName","lastName","country","mobile","email"],max:[15,15,30,16,45]},w={pwd:"password",pwd2:"confirm_password"},_=document.querySelectorAll(".register"),E=Array.from(_),L=new g.Z(E);!function(){try{L.clearError(),L.realTimeCheckLen(k.id,k.max),document.getElementById(w.pwd)&&L.matchInput(w.pwd,w.pwd2)}catch(e){console.log(e)}}();var x=document.getElementById("register");x&&x.addEventListener("submit",function(e){e.preventDefault();var n=document.getElementById("btnSubmit")||document.getElementById("button");null==n||n.click()});var M=document.getElementById("btnSubmit")?"btnSubmit":"button";(0,a.XN)({formId:"register",buttonId:M,route:"/register",redirect:"/login",recaptchaAction:"SUBMIT",optionalFields:["surname"]});var S=document.getElementById("btnSubmit")||document.getElementById("button");S&&S.setAttribute("data-ready","true");var T,C,A,N,I,H=t(5861),B=t(4687),P=t.n(B),F=t(2729),z=t(6398),Z=(0,a.id)("firstName").value,G=(0,a.id)("lastName").value,R=function(){var e=(0,H.Z)(P().mark(function e(n,t){var r,i,o,c;return P().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:return e.prev=0,i={},n&&(i.mobile=n),t&&(i.email=t),e.next=1,F.Z.post("/register/checkContact",i);case 1:return o=e.sent,e.abrupt("return",(null==o||null===(r=o.data)||void 0===r?void 0:r.exists)||!1);case 2:return e.prev=2,c=e.catch(0),(0,a.x2)(c),e.abrupt("return",!1);case 3:case"end":return e.stop()}},e,null,[[0,2]])}));return function(n,t){return e.apply(this,arguments)}}(),U=function(){var e=(0,H.Z)(P().mark(function e(n,t){var r,i,o,c;return P().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:return r="father"===n?"him":"her",(i=(0,a.id)("".concat(n,"Mobile_error"))).style.display="block",e.next=1,R(t,null);case 1:o=e.sent,i.innerHTML=o?"Great news that your ".concat(n," is already on the platform"):"<h4><i>Your ".concat(n," is not on the platform. Do you want us to send ").concat(r," a text/email to register to the platform</i>?</h4>").concat((0,a.S2)(n)),o||(c=function(){var e,r,o,c,l,u={mobile:t,viewPath:"msg/contactNewMember",data:{email:(null===(e=(0,a.id)("".concat(n,"_email")))||void 0===e?void 0:e.value)||"",mobile:(null===(r=(0,a.id)("".concat(n,"_mobile")))||void 0===r?void 0:r.value)||"",name:(null===(o=(0,a.id)("".concat(n,"_name")))||void 0===o?void 0:o.value)||"",familyCode:(null===(c=(0,a.id)("famCode"))||void 0===c?void 0:c.value)||(null===(l=(0,a.id)("familyCode"))||void 0===l?void 0:l.value)||"",yourName:"".concat(Z," ").concat(G)},subject:"".concat(Z," ").concat(G," Wants You: Experience the Magic of your Family Network Today!")};F.Z.post("/register/contactNewMember",u).then(function(e){var t;(0,a.c0)("".concat(n,"Mobile_help"),"is-success",(null==e||null===(t=e.data)||void 0===t?void 0:t.message)||"Success"),i.innerHTML=""}).catch(function(e){(0,a.c0)("".concat(n,"Mobile_error"),"is-danger",(null==e?void 0:e.message)||"An error occurred"),(0,a.x2)(e)})},setTimeout(function(){var e,t;null===(e=(0,a.id)("".concat(n,"Yes")))||void 0===e||e.addEventListener("click",c),null===(t=(0,a.id)("".concat(n,"No")))||void 0===t||t.addEventListener("click",function(){return i.style.display="none"})},100));case 2:case"end":return e.stop()}},e)}));return function(n,t){return e.apply(this,arguments)}}(),D=function(){var e=(0,H.Z)(P().mark(function e(n,t){var r,i;return P().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(e.prev=0,r=n.target.value){e.next=1;break}return e.abrupt("return");case 1:if(!(r.length>=11)){e.next=2;break}return e.next=2,U(t,r);case 2:e.next=4;break;case 3:e.prev=3,i=e.catch(0),(0,a.x2)(i);case 4:case"end":return e.stop()}},e,null,[[0,3]])}));return function(n,t){return e.apply(this,arguments)}}();null===(T=(0,a.id)("father_mobile"))||void 0===T||T.addEventListener("keyup",function(e){try{!function(e){D(e,"father")}(e)}catch(e){(0,a.x2)(e)}}),null===(C=(0,a.id)("mother_mobile"))||void 0===C||C.addEventListener("keyup",function(e){try{!function(e){D(e,"mother")}(e)}catch(e){(0,a.x2)(e)}}),null===(A=(0,a.id)("spouse_mobile"))||void 0===A||A.addEventListener("keyup",function(e){try{!function(e){D(e,"spouse")}(e)}catch(e){(0,a.x2)(e)}}),(0,z.f)(Z);null===(N=(0,a.id)("email"))||void 0===N||N.addEventListener("keyup",function(e){clearTimeout(I),I=setTimeout((0,H.Z)(P().mark(function n(){var t,r;return P().wrap(function(n){for(;;)switch(n.prev=n.next){case 0:if(t=e.target.value){n.next=1;break}return n.abrupt("return");case 1:return n.next=2,R(null,t);case 2:r=n.sent,(0,a.id)("email_error")&&((0,a.id)("email_error").innerHTML=r?"YOU HAVE ALREADY REGISTERED ON THE PLATFORM":"");case 3:case"end":return n.stop()}},n)})),500)});var j={Afghanistan:"93",Albania:"355",Algeria:"213",Andorra:"376",Angola:"244","Antigua and Barbuda":"1-268",Argentina:"54",Armenia:"374",Australia:"61",Austria:"43",Azerbaijan:"994",Bahamas:"1-242",Bahrain:"973",Bangladesh:"880",Barbados:"1-246",Belarus:"375",Belgium:"32",Belize:"501",Benin:"229",Bhutan:"975",Bolivia:"591","Bosnia and Herzegovina":"387",Botswana:"267",Brazil:"55",Brunei:"673",Bulgaria:"359","Burkina Faso":"226",Burundi:"257",Cambodia:"855",Cameroon:"237",Canada:"1","Cape Verde":"238","Central African Republic":"236",Chad:"235",Chile:"56",China:"86",Colombia:"57",Comoros:"269","Congo (Brazzaville)":"242","Congo (Kinshasa)":"243","Costa Rica":"506","Côte d'Ivoire":"225",Croatia:"385",Cuba:"53",Cyprus:"357","Czech Republic":"420",Denmark:"45",Djibouti:"253",Dominica:"1-767","Dominican Republic":"1-809, 1-829, 1-849","East Timor":"670",Ecuador:"593",Egypt:"20","El Salvador":"503","Equatorial Guinea":"240",Eritrea:"291",Estonia:"372",Ethiopia:"251",Fiji:"679",Finland:"358",France:"33",Gabon:"241",Gambia:"220",Georgia:"995",Germany:"49",Ghana:"233",Greece:"30",Grenada:"1-473",Guatemala:"502",Guinea:"224","Guinea-Bissau":"245",Guyana:"592",Haiti:"509",Honduras:"504",Hungary:"36",Iceland:"354",India:"91",Indonesia:"62",Iran:"98",Iraq:"964",Ireland:"353",Israel:"972",Italy:"39",Jamaica:"1-876",Japan:"81",Jordan:"962",Kazakhstan:"7",Kenya:"254",Kiribati:"686","North Korea":"850","South Korea":"82",Kosovo:"383",Kuwait:"965",Kyrgyzstan:"996",Laos:"856",Latvia:"371",Lebanon:"961",Lesotho:"266",Liberia:"231",Libya:"218",Liechtenstein:"423",Lithuania:"370",Luxembourg:"352",Macedonia:"389",Madagascar:"261",Malawi:"265",Malaysia:"60",Maldives:"960",Mali:"223",Malta:"356","Marshall Islands":"692",Mauritania:"222",Mauritius:"230",Mexico:"52",Micronesia:"691",Moldova:"373",Monaco:"377",Mongolia:"976",Montenegro:"382",Morocco:"212",Mozambique:"258",Myanmar:"95",Namibia:"264",Nauru:"674",Nepal:"977",Netherlands:"31","New Zealand":"64",Nicaragua:"505",Niger:"227",Nigeria:"234",Norway:"47",Oman:"968",Pakistan:"92",Palau:"680",Panama:"507","Papua New Guinea":"675",Paraguay:"595",Peru:"51",Philippines:"63",Poland:"48",Portugal:"351",Qatar:"974",Romania:"40",Russia:"7",Rwanda:"250","Saint Kitts and Nevis":"1-869","Saint Lucia":"1-758","Saint Vincent and the Grenadines":"1-784",Samoa:"685","San Marino":"378","Sao Tome and Principe":"239","Saudi Arabia":"966",Senegal:"221",Serbia:"381",Seychelles:"248","Sierra Leone":"232",Singapore:"65",Slovakia:"421",Slovenia:"386","Solomon Islands":"677",Somalia:"252","South Africa":"27","South Sudan":"211",Spain:"34","Sri Lanka":"94",Sudan:"249",Suriname:"597",Swaziland:"268",Sweden:"46",Switzerland:"41",Syria:"963",Taiwan:"886",Tajikistan:"992",Tanzania:"255",Thailand:"66",Togo:"228",Tonga:"676","Trinidad and Tobago":"1-868",Tunisia:"216",Turkey:"90",Turkmenistan:"993",Tuvalu:"688",Uganda:"256",Ukraine:"380","United Arab Emirates":"971","United Kingdom":"44","United States":"1",Uruguay:"598",Uzbekistan:"998",Vanuatu:"678","Vatican City":"379",Venezuela:"58",Vietnam:"84",Yemen:"967",Zambia:"260",Zimbabwe:"263"};!function(){var e=(0,a.id)("country"),n=(0,a.id)("mobile");if(e&&n&&(e.addEventListener("change",function(e){n.value=j[e.target.value]||""}),!n.value.trim())){var t=j[e.value];t&&(n.value=t)}}();t(8824),t(6137);var Y=document.getElementById("password"),K=document.getElementById("confirm_password");Y&&Y.setAttribute("autocomplete","new-password"),K&&K.setAttribute("autocomplete","new-password")},6137:function(){function e(e){e.classList.remove("is-active")}(document.querySelectorAll(".js-modal-trigger")||[]).forEach(function(e){var n=e.dataset.target,t=document.getElementById(n);e.addEventListener("click",function(){t.classList.add("is-active")})}),(document.querySelectorAll(".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button")||[]).forEach(function(n){var t=n.closest(".modal");n.addEventListener("click",function(){e(t)})}),document.addEventListener("keydown",function(n){"Escape"===n.code&&(document.querySelectorAll(".modal")||[]).forEach(function(n){e(n)})})},8152:function(e,n,t){"use strict";t.d(n,{W:function(){return a}});var a=function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:0,n=arguments.length>1&&void 0!==arguments[1]?arguments[1]:0,t=function(e){return Array.from({length:e},function(e,n){return n+1})};return{kidEmailInput:t(e).map(function(e){return"children_email".concat(e)}),childrenNameInput:t(e).map(function(e){return"children_name".concat(e)}),siblingEmail:t(n).map(function(e){return"sibling_email".concat(e)}),siblingName:t(n).map(function(e){return"sibling_name".concat(e)})}}},6328:function(e,n,t){"use strict";t.d(n,{m:function(){return a}});var a={kidEmailInput:[],childrenNameInput:[],siblingEmail:[],siblingName:[]}}}]);
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["register"],{
+
+/***/ "./resources/asset/js/components/FormHelper.js":
+/*!*****************************************************!*\
+  !*** ./resources/asset/js/components/FormHelper.js ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": function() { return /* binding */ FormHelper; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ "./node_modules/@babel/runtime/helpers/esm/classCallCheck.js");
+/* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/helpers/createClass */ "./node_modules/@babel/runtime/helpers/esm/createClass.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+
+
+
+
+function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t.return || t.return(); } finally { if (u) throw o; } } }; }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+
+var FormHelper = /*#__PURE__*/function () {
+  function FormHelper(data) {
+    (0,_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_0__["default"])(this, FormHelper);
+    if (!Array.isArray(data)) throwError('data must be an array of form elements');
+    this.data = data;
+    this.error = [];
+    this.result = 0;
+  }
+  return (0,_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_1__["default"])(FormHelper, [{
+    key: "id",
+    value: function id(x) {
+      return document.getElementById(x);
+    }
+
+    /**
+     * general validation; check empty status, at least a single input, mobile length, white space
+     */
+  }, {
+    key: "getData",
+    value: function getData() {
+      return this.data;
+    }
+  }, {
+    key: "validateField",
+    value: function validateField(value) {
+      var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'general';
+      var regexes = {
+        email: /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-Z0-9]{2,4}$/
+        // Add more regexes as needed
+      };
+      return type === 'email' ? regexes.email.test(value) : value.trim() !== '';
+    }
+  }, {
+    key: "massValidate",
+    value: function massValidate() {
+      var _this = this;
+      // const reg = /[a-zA-Z0-9./@]/g;
+      this.data.forEach(function (et) {
+        var _iterator = _createForOfIteratorHelper(et),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var post = _step.value;
+            // capture the error to a variable
+            var errMsg = _this.id("".concat(post.name, "_error"));
+            var postName = post.name.replace('_', ' ');
+            var asterisk = "*";
+
+            // rid it off the submit and token
+            if (['submit', 'button', 'showPassword_id', 'g-recaptcha-response', 'cancel', 'token', 'checkbox_id'].includes(post.name) || ['button'].includes(post.id) || ['button'].includes(post.type)) return;
+            // check if there is no value
+
+            if (['spouse_name', 'spouse_mobile', 'spouse_email', 'father_mobile', 'father_email', 'mother_mobile', 'maiden_name', 'mother_email'].includes(post.name)) {
+              // post.value is not prpvided if it is not provided 
+              post.value = post.value === "" ? "Not Provided" : post.value;
+            }
+            if (post.value === '' || post.value === 'select') {
+              if (!_this.validateField(post.value)) {
+                if (errMsg) {
+                  var _post$placeholder;
+                  errMsg.innerHTML = "".concat((_post$placeholder = post.placeholder) !== null && _post$placeholder !== void 0 ? _post$placeholder : asterisk, " cannot be left empty");
+                  errMsg.style.color = 'red';
+                }
+                _this.error.push("".concat(postName.toUpperCase(), " cannot be left empty"));
+                _this.result = false;
+              }
+            }
+            if (post.name === 'email' && !_this.validateField(post.value, 'email')) {
+              _this.error.push('<li style="color: red;">Please enter a valid email</li>');
+              if (errMsg) errMsg.innerHTML = '* Please enter a valid email';
+              _this.result = false;
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      });
+    }
+  }, {
+    key: "emailVal",
+    value: function emailVal() {
+      var emailExp = /^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/;
+      var msg = "<li style=color:'red';> Please enter a valid email</li>";
+      var emailEl = this.id('email_id') || this.id('email');
+      if (!emailEl) return;
+      var email = emailEl.value;
+      if (email.match(emailExp) === null) {
+        var errEl = this.id('email_error');
+        if (errEl) {
+          errEl.innerHTML = msg;
+          errEl.style.color = "red";
+        }
+        this.error.push(msg);
+      }
+    }
+  }, {
+    key: "clearError",
+    value: function clearError() {
+      var _this2 = this;
+      this.error = []; // Empty the error array
+
+      // Define a function to clear error messages for a given input element
+      var clearErrorForElement = function clearErrorForElement(elementName) {
+        var errorElement = _this2.id("".concat(elementName, "_error"));
+        if (errorElement) {
+          errorElement.innerHTML = '';
+        }
+      };
+      this.data.forEach(function (el) {
+        var _iterator2 = _createForOfIteratorHelper(el),
+          _step2;
+        try {
+          var _loop = function _loop() {
+            var post = _step2.value;
+            var id = post.id,
+              name = post.name,
+              value = post.value;
+
+            // Skip certain input types
+            if (['submit', 'button', 'token', 'checkbox'].includes(id) || ['token', 'submit'].includes(name)) {
+              return 1; // continue
+            }
+            var the_id = _this2.id(id);
+            if (the_id) {
+              console.log("Adding listeners to element: ".concat(id));
+              // Add keyup event listener to clear errors for non-select inputs
+              the_id.addEventListener('keyup', function () {
+                if (value !== 'select') {
+                  clearErrorForElement(name);
+                }
+              });
+
+              // Add change event listener to clear error message
+              the_id.addEventListener('change', function () {
+                clearErrorForElement(name);
+              });
+            } else {
+              console.warn("Element with ID '".concat(id, "' with post name '").concat(post.name, "' not found."));
+            }
+          };
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            if (_loop()) continue;
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
+        }
+      });
+    }
+  }, {
+    key: "clearHtml",
+    value: function clearHtml() {
+      this.data.forEach(function (el) {
+        var _iterator3 = _createForOfIteratorHelper(el),
+          _step3;
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var post = _step3.value;
+            if (post.id == 'submit' || post.name == 'submit' || post.name == 'checkbox') {
+              continue;
+            }
+            post.value = "";
+          }
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
+        }
+      });
+    }
+
+    /**
+     *
+     * @param {input is the id of the input/ this is an array [as, it, it]} input
+     * @param {* this is the max policy and it must be an integer} maxi
+     */
+  }, {
+    key: "realTimeCheckLen",
+    value: function realTimeCheckLen(input, maxi) {
+      var _this3 = this;
+      try {
+        var _loop2 = function _loop2(i) {
+          var theData = _this3.id("".concat(input[i], "_id"));
+          if (!theData) theData = _this3.id(input[i]);
+          if (theData === null || theData === undefined || theData === "") {
+            console.warn("Element with ID '".concat(input[i], "' not found or is empty"));
+            return 1; // continue
+          }
+          var max = maxi[i];
+          var error = _this3.id("".concat(input[i], "_error"));
+          theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
+          theData.addEventListener('keyup', function () {
+            if (error) {
+              error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+              error.style.color = 'red';
+            }
+            var help = _this3.id("".concat(input[i], "_help"));
+            if (help) {
+              help.style.color = 'red';
+              help.style.fontSize = '10px';
+              setTimeout(function () {
+                help.style.display = 'none';
+              }, 5000);
+            }
+          });
+        };
+        for (var i = 0; i < input.length; i++) {
+          if (_loop2(i)) continue;
+        }
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
+
+    /**
+     * the id for the password error should be password_help
+     * the id for your confirm pasword should confirm_password
+     * it will return an error message to the password_help input
+     */
+  }, {
+    key: "matchInput",
+    value: function matchInput(first, second) {
+      var error, firstInput, secondInput;
+      error = this.id("".concat(second, "_error"));
+      firstInput = this.id(first + '_id') || this.id(first);
+      secondInput = this.id(second + '_id') || this.id(second);
+      if (firstInput && secondInput) {
+        secondInput.addEventListener('keyup', function () {
+          if (error) error.innerHTML = secondInput.value !== firstInput.value ? 'Your passwords do not match' : "";
+        });
+      }
+    }
+    /**
+     *
+     * @param {the id of the input you want to inject to/ this is an array} idArray
+     * @param {*the comment or questions you want o inject} html
+     */
+  }, {
+    key: "injectData",
+    value: function injectData(idArray, html) {
+      var idData;
+      for (var i = 0; i < idArray.length; i++) {
+        idData = this.id(idArray[i]);
+        idData.innerHTML = html[i];
+      }
+    }
+
+    /**
+     *
+     * @param {this is an id and its value is for duplication} firstInput
+     * @param {* another id that accepts the value of the firstInput} takeFirstInput
+     */
+  }, {
+    key: "duplicate",
+    value: function duplicate(giveInput, takeInput) {
+      var giver, taker;
+      giver = this.id(giveInput) || this.id(giveInput.replace('_id', ''));
+      taker = this.id(takeInput) || this.id(takeInput.replace('_id', ''));
+      if (giver && taker) {
+        giver.addEventListener('keyup', function () {
+          taker.value = giver.value;
+        });
+      }
+    }
+
+    /**
+     *
+     * @param {current input that is being type to. the value is what will be checked realtime. the id is needed} input
+     * @param {* the url to get the info to . example is /search?hint} url
+     * @param {enter the id of the output element} output
+     */
+  }, {
+    key: "realTimeServer",
+    value: function realTimeServer(input, url, outputId) {
+      var theInput, inputVal, output;
+      theInput = this.id(input);
+      output = this.id(outputId);
+      theInput.addEventListener('keyup', function () {
+        inputVal = theInput.value;
+        if (inputVal == 0) {
+          output.innerHTML = "";
+          return;
+        } else {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+              output.innerHTML = this.responseText;
+            }
+          };
+          xmlhttp.open("GET", "".concat(url, "=").concat(inputVal), true);
+          xmlhttp.send();
+        }
+      });
+    }
+  }, {
+    key: "isChecked",
+    value: function isChecked(yesId, noId, hiddenInput) {
+      var _this4 = this;
+      var checked = function checked() {
+        if (_this4.id(yesId).checked) {
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        } else if (_this4.id(noId).checked) {
+          _this4.id(hiddenInput).innerHTML = 'checked';
+        }
+      };
+      this.id(yesId).addEventListener('click', checked);
+      this.id(noId).addEventListener('click', checked);
+    }
+  }, {
+    key: "previousAddress",
+    value: function previousAddress() {
+      var _this5 = this;
+      var timeAddy = this.id('time_at_address_id');
+      var prevAddy = this.id('previous_address_class');
+      var showPrev = function showPrev() {
+        if (timeAddy.value != '3 years+') {
+          prevAddy.style.display = 'block';
+          _this5.id('previous_address_help').innerHTML = "Please enter your full address: House No, Street Name, Town/City and Post Code";
+        } else {
+          prevAddy.style.display = 'none';
+        }
+      };
+      timeAddy.addEventListener('change', showPrev);
+    }
+  }]);
+}();
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/api/index.js":
+/*!****************************************************!*\
+  !*** ./resources/asset/js/components/api/index.js ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "emailIsRegistered": function() { return /* binding */ emailIsRegistered; },
+/* harmony export */   "getAllData": function() { return /* binding */ getAllData; },
+/* harmony export */   "postData": function() { return /* binding */ postData; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+
+
+
+var config = {
+  headers: {
+    'X-Requested-With': 'XMLHttpRequest',
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+};
+var URL = '/';
+var getAllData = /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee() {
+    var response, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          _context.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("".concat(URL, "allMembers/processApiData2"), config);
+        case 1:
+          response = _context.sent;
+          return _context.abrupt("return", response.data);
+        case 2:
+          _context.prev = 2;
+          _t = _context["catch"](0);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
+          // You can perform additional error handling actions if needed
+          throw _t;
+        case 3:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 2]]);
+  }));
+  return function getAllData() {
+    return _ref.apply(this, arguments);
+  };
+}();
+var postData = /*#__PURE__*/function () {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(url, object) {
+    var response, _t2;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _context2.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].post(url, object);
+        case 1:
+          response = _context2.sent;
+          console.log(response);
+          _context2.next = 3;
+          break;
+        case 2:
+          _context2.prev = 2;
+          _t2 = _context2["catch"](0);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(_t2);
+          // You can perform additional error handling actions if needed
+          throw _t2;
+        case 3:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[0, 2]]);
+  }));
+  return function postData(_x, _x2) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+
+/**
+ * Ask the server whether a single email address already belongs to a registered
+ * account. Replaces the old bulk fetch of every member email (SEC-4).
+ * @param {string} email
+ * @returns {Promise<boolean>}
+ */
+var emailIsRegistered = /*#__PURE__*/function () {
+  var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(email) {
+    var _response$data, _response$data$messag, response, _t3;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          _context3.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_3__["default"].get("".concat(URL, "getEmails"), {
+            params: {
+              email
+            },
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          });
+        case 1:
+          response = _context3.sent;
+          return _context3.abrupt("return", (response === null || response === void 0 ? void 0 : (_response$data = response.data) === null || _response$data === void 0 ? void 0 : (_response$data$messag = _response$data.message) === null || _response$data$messag === void 0 ? void 0 : _response$data$messag.exists) === true);
+        case 2:
+          _context3.prev = 2;
+          _t3 = _context3["catch"](0);
+          // Fail closed-ish: treat as "not registered" so the invite path still works.
+          console.error('emailIsRegistered check failed:', _t3);
+          return _context3.abrupt("return", false);
+        case 3:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[0, 2]]);
+  }));
+  return function emailIsRegistered(_x3) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/dataToCheck.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/components/dataToCheck.js ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Login": function() { return /* binding */ Login; },
+/* harmony export */   "dataToCheckRegister": function() { return /* binding */ dataToCheckRegister; }
+/* harmony export */ });
+
+
+var dataToCheckRegister = {
+  maxLength: {
+    id: ['firstName', 'lastName', 'country', 'mobile', 'email'],
+    max: [15, 15, 30, 16, 45]
+  },
+  password: {
+    pwd: 'password',
+    pwd2: 'confirm_password'
+  },
+  familyCheck: {
+    father: ["fatherYes", "fatherNo"],
+    mother: ["motherYes", "motherNo"],
+    spouse: ["spouseYes", "spouseNo"]
+  }
+};
+var Login = {
+  maxLength: {
+    id: ['email', 'password'],
+    max: [35, 35]
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/helper/general.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/helper/general.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "autoCompleter": function() { return /* binding */ autoCompleter; },
+/* harmony export */   "checkBox": function() { return /* binding */ checkBox; },
+/* harmony export */   "checkBox2": function() { return /* binding */ checkBox2; },
+/* harmony export */   "convertFormData": function() { return /* binding */ convertFormData; },
+/* harmony export */   "createAndAppendElement": function() { return /* binding */ createAndAppendElement; },
+/* harmony export */   "distinctValue": function() { return /* binding */ distinctValue; },
+/* harmony export */   "isChecked": function() { return /* binding */ isChecked; },
+/* harmony export */   "loaderIcon": function() { return /* binding */ loaderIcon; },
+/* harmony export */   "loaderIconBootstrap": function() { return /* binding */ loaderIconBootstrap; },
+/* harmony export */   "loaderIconBulma": function() { return /* binding */ loaderIconBulma; },
+/* harmony export */   "matchInput": function() { return /* binding */ matchInput; },
+/* harmony export */   "matchRegex": function() { return /* binding */ matchRegex; },
+/* harmony export */   "realTimeCheckLen": function() { return /* binding */ realTimeCheckLen; },
+/* harmony export */   "removeDiv": function() { return /* binding */ removeDiv; },
+/* harmony export */   "showResponse": function() { return /* binding */ showResponse; },
+/* harmony export */   "toSentenceCase": function() { return /* binding */ toSentenceCase; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/toConsumableArray */ "./node_modules/@babel/runtime/helpers/esm/toConsumableArray.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! autocompleter */ "./node_modules/autocompleter/autocomplete.js");
+/* harmony import */ var autocompleter__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(autocompleter__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _FormHelper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../FormHelper */ "./resources/asset/js/components/FormHelper.js");
+
+
+
+
+
+
+var loaderIconBootstrap = function loaderIconBootstrap() {
+  return "<div class=\"spinner-grow text-primary\" role=\"status\">\n        <span class=\"sr-only\">Loading...</span>\n        </div>";
+};
+var loaderIcon = function loaderIcon() {
+  return "<div class=\"loader\"></div>";
+};
+var loaderIconBulma = function loaderIconBulma() {
+  return "<div class=\"is-loading\"></div>";
+};
+var removeDiv = function removeDiv(div_id) {
+  var div = document.getElementById(div_id);
+  if (div) {
+    return div.remove();
+  }
+};
+var createAndAppendElement = function createAndAppendElement(elementType, setId, parent) {
+  var setClass = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var newDiv = document.createElement(elementType);
+  newDiv.setAttribute('id', setId);
+  if (setClass) newDiv.className = "field ".concat(setClass);else newDiv.className = "field ".concat(setId);
+  var parentDiv = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(parent);
+  if (!parentDiv) throw new Error("Parent element '".concat(parent, "' not found"));
+  return parentDiv.appendChild(newDiv);
+};
+
+/**
+ * 
+ * @param {the id of the input} inputId 
+ * @param {the api data or array data} data 
+ * @param { filterby is the data.filterby }
+ */
+var autoCompleter = function autoCompleter(inputId, data) {
+  autocompleter__WEBPACK_IMPORTED_MODULE_2___default()({
+    input: inputId,
+    fetch: function fetch(text, update) {
+      text = text.toLowerCase();
+      // you can also use AJAX requests instead of preloaded data
+      var suggestions = data.filter(function (n) {
+        return n.firstName.toLowerCase().startsWith(text);
+      });
+      update(suggestions);
+    },
+    onSelect: function onSelect(item) {
+      input.value = item.firstName;
+    }
+  });
+};
+var distinctValue = function distinctValue(array) {
+  return (0,_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_0__["default"])(new Set(array));
+};
+var checkBox = function checkBox(subject) {
+  return "<div class=\"control\"> \n        <label class=\"radio\">\n          <input type=\"radio\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes > Yes \n        </label>\n        <label class=\"radio\"> \n          <input type=\"radio\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No checked> No \n        </label>\n      </div>");
+};
+var checkBox2 = function checkBox2(subject) {
+  return "<div class=\"control\"> \n        <label class=\"checkbox\">\n          <input type=\"checkbox\" name=\"send".concat(subject, "\" value=\"yes\" id=").concat(subject, "Yes> Yes \n        </label>\n        <label class=\"checkbox\"> \n          <input type=\"checkbox\" name=\"send").concat(subject, "\" value=\"no\" id=").concat(subject, "No> No \n        </label>\n      </div>");
+};
+var isChecked = function isChecked(name, fn) {
+  var yesId = "".concat(name, "Yes");
+  var noId = "".concat(name, "No");
+  var checked = function checked() {
+    if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).checked) {
+      fn();
+    } else if ((0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).checked) {}
+  };
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(yesId).addEventListener('click', checked);
+  (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(noId).addEventListener('click', checked);
+};
+var matchRegex = function matchRegex(data) {
+  if (data) {
+    if (data != "Not Provided") {
+      var regex = /[<?/>]+/g;
+      var result = data.match(regex);
+      if (result === null) return true;
+    }
+  }
+};
+
+/**
+ * 
+ * @param { id of the first element} first 
+ * @param {* id of the second element} second 
+ * @param {* error id - if error - where to show it} err 
+ */
+var matchInput = function matchInput(first, second, err) {
+  var error, firstInput, secondInput;
+  error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(err);
+  firstInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(first);
+  secondInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(second);
+  secondInput.addEventListener('keyup', function () {
+    if (secondInput.value !== firstInput.value) {
+      error.innerHTML = 'Your passwords do not match';
+      error.style.color = "red";
+    } else {
+      error.innerHTML = "The password is matched: <i class='fa fa-check' aria-hidden='true'></i>";
+      error.style.color = "green";
+    }
+  });
+};
+
+/**
+ * Converts a string to sentence case.
+ *
+ * Sentence case is a string where the first letter of each word is capitalized, and the rest of the letters are in lowercase.
+ *
+ * @param {string} str The string to convert to sentence case.
+ * @returns {string} A new string in sentence case.
+ */
+var toSentenceCase = function toSentenceCase(str) {
+  return str.toLowerCase() // Convert the string to lowercase
+  .split(' ') // Split the string into words
+  .map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }) // Capitalize the first letter of each word
+  .join(' '); // Join the words back into a string
+};
+var convertFormData = function convertFormData(formId) {
+  var formInput = (0,_global__WEBPACK_IMPORTED_MODULE_1__.qSelAll)(formId);
+  var formInputArr = Array.from(formInput);
+  return new _FormHelper__WEBPACK_IMPORTED_MODULE_3__["default"](formInputArr);
+};
+var showResponse = function showResponse(theId, message, status) {
+  var responseEl = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)(theId);
+  var col = status ? 'green' : 'red';
+  responseEl.innerHTML = message;
+  responseEl.style.color = 'green';
+  responseEl.style.backgroundColor = col;
+  responseEl.style.color = 'white';
+  setTimeout(function () {
+    responseEl.innerHTML = '';
+  }, 5000); // Disappear after 5 seconds
+};
+
+/**
+   *
+   * @param {input is the id of the input/ this is an array [as, it, it]} input
+   * @param {* this is the max policy and it must be an integer} maxi
+   */
+
+var realTimeCheckLen = function realTimeCheckLen(input, maxi) {
+  try {
+    var _loop = function _loop(i) {
+      var theData = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_id"));
+      if (theData === null || theData === undefined || theData === "") {
+        throw new Error("Element with ID '".concat(input[i], "_id' not found or is empty"));
+      }
+      var max = maxi[i];
+      var error = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_error"));
+      theData.maxLength = parseInt(max) + 1; // Fixed the parsing issue here
+      theData.addEventListener('keyup', function () {
+        error.innerHTML = theData.value.length > max ? "You have reached the maximum limit" : "";
+        var help = (0,_global__WEBPACK_IMPORTED_MODULE_1__.id)("".concat(input[i], "_help"));
+        help.style.color = 'red';
+        help.style.fontSize = '10px';
+        error.style.color = 'red';
+        setTimeout(function () {
+          help.style.display = 'none';
+        }, 5000);
+      });
+    };
+    for (var i = 0; i < input.length; i++) {
+      _loop(i);
+    }
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/kidsAndSiblings.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/kidsAndSiblings.js ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "processKidsSiblings": function() { return /* binding */ processKidsSiblings; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../data/checkEmailObj */ "./resources/asset/js/data/checkEmailObj.js");
+/* harmony import */ var _components_global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _helper_general__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./helper/general */ "./resources/asset/js/components/helper/general.js");
+/* harmony import */ var _api_index__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./api/index */ "./resources/asset/js/components/api/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+
+
+
+
+
+
+
+var processKidsSiblings = function processKidsSiblings(firstName) {
+  var famCode = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  // Per-email existence check (scoped server lookup) with a tiny local cache so
+  // repeated keystrokes on the same address don't re-hit the endpoint.
+  var existsCache = new Map();
+  var checkExists = /*#__PURE__*/function () {
+    var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(email) {
+      var result;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (!existsCache.has(email)) {
+              _context.next = 1;
+              break;
+            }
+            return _context.abrupt("return", existsCache.get(email));
+          case 1:
+            _context.next = 2;
+            return (0,_api_index__WEBPACK_IMPORTED_MODULE_5__.emailIsRegistered)(email);
+          case 2:
+            result = _context.sent;
+            existsCache.set(email, result);
+            return _context.abrupt("return", result);
+          case 3:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return function checkExists(_x) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+  var getFamCode = function getFamCode() {
+    var _ref2, _id$value, _id;
+    return (_ref2 = (_id$value = (_id = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("famCode_id")) === null || _id === void 0 ? void 0 : _id.value) !== null && _id$value !== void 0 ? _id$value : famCode) !== null && _ref2 !== void 0 ? _ref2 : "";
+  };
+
+  // debounce so it doesn't fire too aggressively
+  var t = null;
+  var debounce = function debounce(fn) {
+    var wait = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 200;
+    return function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      clearTimeout(t);
+      t = setTimeout(function () {
+        return fn.apply(void 0, args);
+      }, wait);
+    };
+  };
+  var onInput = debounce(/*#__PURE__*/function () {
+    var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(e) {
+      var _id$value2, _id2, el, elementId, isKid, isSib, emailInput, helpEl, chooseEmail, chooseName, index, nameId, nameValue, _id$value3, _id3, _id$value4, _id4, prefix, no, fn, ln, exists, _t;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            _context2.prev = 0;
+            el = e.target;
+            if (!(!el || el.tagName !== "INPUT" || el.type !== "email")) {
+              _context2.next = 1;
+              break;
+            }
+            return _context2.abrupt("return");
+          case 1:
+            elementId = el.id;
+            if (elementId) {
+              _context2.next = 2;
+              break;
+            }
+            return _context2.abrupt("return");
+          case 2:
+            // Only handle the ids we generate
+            isKid = _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.kidEmailInput.includes(elementId);
+            isSib = _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingEmail.includes(elementId);
+            if (!(!isKid && !isSib)) {
+              _context2.next = 3;
+              break;
+            }
+            return _context2.abrupt("return");
+          case 3:
+            emailInput = (el.value || "").toLowerCase().trim();
+            helpEl = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(elementId, "_help"));
+            if (helpEl) {
+              _context2.next = 4;
+              break;
+            }
+            return _context2.abrupt("return");
+          case 4:
+            chooseEmail = isKid ? _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.kidEmailInput : _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingEmail;
+            chooseName = isKid ? _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.childrenNameInput : _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj.siblingName;
+            index = chooseEmail.indexOf(elementId);
+            nameId = chooseName[index];
+            nameValue = (_id$value2 = (_id2 = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)(nameId)) === null || _id2 === void 0 ? void 0 : _id2.value) !== null && _id$value2 !== void 0 ? _id$value2 : "";
+            if (!nameValue) {
+              prefix = isKid ? "children" : "sibling";
+              no = index + 1;
+              fn = (_id$value3 = (_id3 = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(prefix, "_first_name").concat(no))) === null || _id3 === void 0 ? void 0 : _id3.value) !== null && _id$value3 !== void 0 ? _id$value3 : "";
+              ln = (_id$value4 = (_id4 = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(prefix, "_last_name").concat(no))) === null || _id4 === void 0 ? void 0 : _id4.value) !== null && _id$value4 !== void 0 ? _id$value4 : "";
+              nameValue = "".concat(fn, " ").concat(ln).trim();
+            }
+            if (emailInput) {
+              _context2.next = 5;
+              break;
+            }
+            helpEl.style.display = "none";
+            helpEl.innerHTML = "";
+            delete helpEl.dataset.email;
+            delete helpEl.dataset.name;
+            delete helpEl.dataset.familyCode;
+            return _context2.abrupt("return");
+          case 5:
+            if (!(emailInput.length > 0 && emailInput.length < 7)) {
+              _context2.next = 6;
+              break;
+            }
+            helpEl.style.display = "block";
+            helpEl.innerHTML = "Email may be too short";
+            return _context2.abrupt("return");
+          case 6:
+            _context2.next = 7;
+            return checkExists(emailInput);
+          case 7:
+            exists = _context2.sent;
+            helpEl.style.display = "block";
+            helpEl.dataset.email = emailInput;
+            helpEl.dataset.name = nameValue;
+            helpEl.dataset.familyCode = getFamCode();
+            helpEl.innerHTML = exists ? "Great news! ".concat(nameValue || "This person", " is already registered on the platform") : "".concat(nameValue || "This person", " is not on the platform. Do you want us to send an email invite? ").concat((0,_helper_general__WEBPACK_IMPORTED_MODULE_4__.checkBox)(elementId));
+            _context2.next = 9;
+            break;
+          case 8:
+            _context2.prev = 8;
+            _t = _context2["catch"](0);
+            (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t);
+          case 9:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[0, 8]]);
+    }));
+    return function (_x2) {
+      return _ref3.apply(this, arguments);
+    };
+  }(), 250);
+  var onClick = /*#__PURE__*/function () {
+    var _ref4 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(e) {
+      var target, isYes, isNo, baseId, helpEl, email, name, familyCode, postObj, response, _t2;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.prev = 0;
+            target = e.target;
+            if (!(!target || !target.id)) {
+              _context3.next = 1;
+              break;
+            }
+            return _context3.abrupt("return");
+          case 1:
+            isYes = target.id.endsWith("Yes");
+            isNo = target.id.endsWith("No");
+            if (!(!isYes && !isNo)) {
+              _context3.next = 2;
+              break;
+            }
+            return _context3.abrupt("return");
+          case 2:
+            baseId = target.id.replace(/(Yes|No)$/, "");
+            helpEl = (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.id)("".concat(baseId, "_help"));
+            if (helpEl) {
+              _context3.next = 3;
+              break;
+            }
+            return _context3.abrupt("return");
+          case 3:
+            if (!isNo) {
+              _context3.next = 4;
+              break;
+            }
+            helpEl.style.display = "none";
+            return _context3.abrupt("return");
+          case 4:
+            if (!(helpEl.dataset.sending === "1")) {
+              _context3.next = 5;
+              break;
+            }
+            return _context3.abrupt("return");
+          case 5:
+            helpEl.dataset.sending = "1";
+            email = helpEl.dataset.email;
+            name = helpEl.dataset.name;
+            familyCode = helpEl.dataset.familyCode;
+            if (!(!email || !name)) {
+              _context3.next = 6;
+              break;
+            }
+            helpEl.dataset.sending = "";
+            return _context3.abrupt("return");
+          case 6:
+            postObj = {
+              mobile: "",
+              viewPath: "msg/contactNewMember",
+              data: {
+                email,
+                name,
+                yourName: firstName,
+                familyCode
+              },
+              subject: "".concat(firstName, " wants you to join the family network")
+            };
+            _context3.next = 7;
+            return axios__WEBPACK_IMPORTED_MODULE_6__["default"].post("/register/contactNewMember", postObj);
+          case 7:
+            response = _context3.sent;
+            helpEl.innerHTML = response.data.message || "Invite sent";
+            setTimeout(function () {
+              helpEl.style.display = "none";
+            }, 5000);
+            helpEl.dataset.sending = "";
+            _context3.next = 9;
+            break;
+          case 8:
+            _context3.prev = 8;
+            _t2 = _context3["catch"](0);
+            (0,_components_global__WEBPACK_IMPORTED_MODULE_3__.showError)(_t2);
+          case 9:
+          case "end":
+            return _context3.stop();
+        }
+      }, _callee3, null, [[0, 8]]);
+    }));
+    return function onClick(_x3) {
+      return _ref4.apply(this, arguments);
+    };
+  }();
+  document.addEventListener("input", onInput, true);
+  document.addEventListener("click", onClick, true);
+
+  // optional cleanup (if you ever re-init this)
+  return function () {
+    document.removeEventListener("input", onInput, true);
+    document.removeEventListener("click", onClick, true);
+  };
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/event.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/event.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "showSpouse": function() { return /* binding */ showSpouse; }
+/* harmony export */ });
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+var showMaidenName = function showMaidenName() {
+  var gender = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('gender');
+  var maritalStatus = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus');
+  if (gender && maritalStatus && gender.value === "Female" && maritalStatus.value === "Yes") {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showElement)('maidenName_div');
+  } else {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.hideElement)('maidenName_div');
+  }
+};
+var showSpouse = function showSpouse() {
+  var maritalStatus = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus');
+  if (maritalStatus && maritalStatus.value === "Married") {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showElement)('spouse');
+  } else {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.hideElement)('spouse');
+  }
+};
+
+// Add event listeners
+var maritalStatusEl = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('maritalStatus');
+if (maritalStatusEl) {
+  maritalStatusEl.addEventListener('change', showSpouse);
+}
+var genderEl = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('gender');
+if (genderEl) {
+  genderEl.addEventListener('change', showMaidenName);
+}
+
+// Hide elements by default
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.hideElement)('spouse');
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.hideElement)('maidenName_div');
+
+// Other initializations
+var registerNotifyDiv = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('register_notify_div');
+if (registerNotifyDiv) registerNotifyDiv.style.display = "none";
+
+// inject student after employment status value is student 
+
+var injectStudent = function injectStudent() {
+  var empStatus = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('employmentStatus');
+  if (empStatus) {
+    empStatus.addEventListener('change', function (e) {
+      var value = e.target.value;
+      if (value === "Student") {
+        var occ = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('occupation');
+        if (occ) occ.value = 'Student';
+      }
+    });
+  }
+};
+injectStudent();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/familyCode.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/register/familyCode.js ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_3__);
+
+
+
+
+var btnFamCode = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)("btnFamCode");
+btnFamCode.addEventListener("click", function () {
+  console.log("Generate Family Code clicked");
+  try {
+    var surnameEl = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('surname');
+    if (surnameEl && surnameEl.value !== "") {
+      var uniqueNumber = Date.now();
+      var uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
+      var getSurname = surnameEl.value;
+      var firstFourLetters = getSurname.substring(0, 4);
+      (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createCode').value = "".concat(firstFourLetters.toUpperCase()).concat(uniqueNumber1);
+      btnFamCode.disabled = true;
+      btnFamCode.innerText = "Generated";
+    } else {
+      sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire({
+        icon: 'warning',
+        title: 'Missing Surname',
+        text: 'Please enter a surname first.',
+        timer: 3000,
+        showConfirmButton: false
+      });
+    }
+  } catch (error) {
+    console.error("Family Code Generation Error:", error);
+    var errEl = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)("surname_error");
+    if (errEl) errEl.innerHTML = error.message || "An error occurred";
+  }
+});
+
+// Get references to the HTML output and the copy icon
+
+var copyIcon = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('copyIcon');
+var htmlOutputDiv = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createFamCode');
+var htmlOutput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('createCode');
+copyIcon.addEventListener('click', /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
+    var range, selection, targetInput, _targetInput, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          copyIcon.innerHTML = "";
+          _context.prev = 1;
+          e.preventDefault();
+
+          // check if the family code has been generated 
+          if (!htmlOutput.value) {
+            _context.next = 5;
+            break;
+          }
+          if (!(navigator.clipboard && navigator.clipboard.writeText)) {
+            _context.next = 3;
+            break;
+          }
+          _context.next = 2;
+          return navigator.clipboard.writeText(htmlOutput.value);
+        case 2:
+          _context.next = 4;
+          break;
+        case 3:
+          // Fallback to the deprecated method
+          range = document.createRange();
+          range.selectNode(htmlOutputDiv);
+          selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('copy');
+          selection.removeAllRanges();
+        case 4:
+          copyIcon.innerHTML = "copied";
+          targetInput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode');
+          if (targetInput) {
+            targetInput.value = htmlOutput.value;
+            console.log("Family code copied to form:", htmlOutput.value);
+          } else {
+            console.error("Target input 'famCode' not found");
+          }
+          _context.next = 6;
+          break;
+        case 5:
+          copyIcon.innerHTML = "copy";
+          _targetInput = (0,_shared__WEBPACK_IMPORTED_MODULE_2__.id)('famCode');
+          if (_targetInput) _targetInput.value = "";
+          sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire({
+            icon: 'warning',
+            title: 'Generate Code First',
+            text: 'Please generate the family code first.',
+            timer: 3000,
+            showConfirmButton: false
+          });
+        case 6:
+          _context.next = 8;
+          break;
+        case 7:
+          _context.prev = 7;
+          _t = _context["catch"](1);
+          console.error('Unable to copy the HTML output: ', _t);
+        case 8:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[1, 7]]);
+  }));
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}());
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/html/kids_Sibling.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/html/kids_Sibling.js ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "renderHtmlFamily": function() { return /* binding */ renderHtmlFamily; }
+/* harmony export */ });
+// register/html/kids_Sibling.js
+var renderHtmlFamily = function renderHtmlFamily(family, no) {
+  if (!no) return "";
+  var kids_sib = family === "children" ? "children" : "sibling";
+  var optionsHtml = "\n    <option value=\"select\">Choose</option>\n    <option value=\"With Spouse\">With Spouse</option>\n    <option value=\"Not With Spouse\">Not With Spouse</option>\n  ";
+  if (family === "sibling") {
+    optionsHtml = "\n      <option value=\"select\">Choose</option>\n      <option value=\"Same_Mother_Father\">Same Mother & Father</option>\n      <option value=\"Same_Father\">Only Same Father</option>\n      <option value=\"Same_Mother\">Only Same Mother</option>\n    ";
+  }
+  return "\n    <div class=\"field-body\">\n      <div class=\"field\">\n        <p class=\"control is-expanded\">\n          <span class=\"select is-normal is-success is-fullwidth\">\n            <select name=\"".concat(kids_sib, "_option").concat(no, "\" id=\"").concat(kids_sib, "_option").concat(no, "\">\n              ").concat(optionsHtml, "\n            </select>\n          </span>\n        </p>\n      </div>\n\n      <div class=\"field\">\n        <p class=\"control is-expanded\">\n          <input\n            type=\"text\"\n            placeholder=\"First name - ").concat(no, "\"\n            name=\"").concat(kids_sib, "_first_name").concat(no, "\"\n            class=\"input is-normal\"\n            id=\"").concat(kids_sib, "_first_name").concat(no, "\"\n          >\n        </p>\n      </div>\n\n      <div class=\"field\">\n        <p class=\"control is-expanded\">\n          <input\n            type=\"text\"\n            placeholder=\"Last name - ").concat(no, "\"\n            name=\"").concat(kids_sib, "_last_name").concat(no, "\"\n            class=\"input is-normal\"\n            id=\"").concat(kids_sib, "_last_name").concat(no, "\"\n          >\n        </p>\n      </div>\n\n      <div class=\"field\">\n        <p class=\"control is-expanded has-icons-left\">\n          <input\n            type=\"email\"\n            placeholder=\"Enter ").concat(kids_sib, "'s email - ").concat(no, "\"\n            name=\"").concat(kids_sib, "_email").concat(no, "\"\n            class=\"input is-normal\"\n            id=\"").concat(kids_sib, "_email").concat(no, "\"\n          >\n          <span class=\"icon is-small is-left\">\n            <i class=\"fas fa-envelope\"></i>\n          </span>\n        </p>\n        <p class=\"help is-danger\" id=\"").concat(kids_sib, "_email").concat(no, "_help\"></p>\n      </div>\n    </div>\n  ");
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/index.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/index.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _smallinput__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./smallinput */ "./resources/asset/js/components/register/smallinput.js");
+/* harmony import */ var _event__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./event */ "./resources/asset/js/components/register/event.js");
+/* harmony import */ var _onChangeKidSibling__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./onChangeKidSibling */ "./resources/asset/js/components/register/onChangeKidSibling.js");
+/* harmony import */ var _processForm__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./processForm */ "./resources/asset/js/components/register/processForm.js");
+/* harmony import */ var _mobileNameCheck__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./mobileNameCheck */ "./resources/asset/js/components/register/mobileNameCheck.js");
+/* harmony import */ var _injectCountryCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./injectCountryCode */ "./resources/asset/js/components/register/injectCountryCode.js");
+/* harmony import */ var _familyCode__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./familyCode */ "./resources/asset/js/components/register/familyCode.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./modal */ "./resources/asset/js/components/register/modal.js");
+/* harmony import */ var _modal__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_modal__WEBPACK_IMPORTED_MODULE_7__);
+
+
+
+
+
+
+
+
+var currentPs = document.getElementById("password");
+var confirmPs = document.getElementById("confirm_password");
+if (currentPs) currentPs.setAttribute('autocomplete', 'new-password');
+if (confirmPs) confirmPs.setAttribute('autocomplete', 'new-password');
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/injectCountryCode.js":
+/*!*********************************************************************!*\
+  !*** ./resources/asset/js/components/register/injectCountryCode.js ***!
+  \*********************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+
+// inject the country code once one of the country is picked
+
+// Object to map countries to country codes
+
+var countryCodes = {
+  Afghanistan: "93",
+  Albania: "355",
+  Algeria: "213",
+  Andorra: "376",
+  Angola: "244",
+  "Antigua and Barbuda": "1-268",
+  Argentina: "54",
+  Armenia: "374",
+  Australia: "61",
+  Austria: "43",
+  Azerbaijan: "994",
+  Bahamas: "1-242",
+  Bahrain: "973",
+  Bangladesh: "880",
+  Barbados: "1-246",
+  Belarus: "375",
+  Belgium: "32",
+  Belize: "501",
+  Benin: "229",
+  Bhutan: "975",
+  Bolivia: "591",
+  "Bosnia and Herzegovina": "387",
+  Botswana: "267",
+  Brazil: "55",
+  Brunei: "673",
+  Bulgaria: "359",
+  "Burkina Faso": "226",
+  Burundi: "257",
+  Cambodia: "855",
+  Cameroon: "237",
+  Canada: "1",
+  "Cape Verde": "238",
+  "Central African Republic": "236",
+  Chad: "235",
+  Chile: "56",
+  China: "86",
+  Colombia: "57",
+  Comoros: "269",
+  "Congo (Brazzaville)": "242",
+  "Congo (Kinshasa)": "243",
+  "Costa Rica": "506",
+  "Côte d'Ivoire": "225",
+  Croatia: "385",
+  Cuba: "53",
+  Cyprus: "357",
+  "Czech Republic": "420",
+  Denmark: "45",
+  Djibouti: "253",
+  Dominica: "1-767",
+  "Dominican Republic": "1-809, 1-829, 1-849",
+  "East Timor": "670",
+  Ecuador: "593",
+  Egypt: "20",
+  "El Salvador": "503",
+  "Equatorial Guinea": "240",
+  Eritrea: "291",
+  Estonia: "372",
+  Ethiopia: "251",
+  Fiji: "679",
+  Finland: "358",
+  France: "33",
+  Gabon: "241",
+  Gambia: "220",
+  Georgia: "995",
+  Germany: "49",
+  Ghana: "233",
+  Greece: "30",
+  Grenada: "1-473",
+  Guatemala: "502",
+  Guinea: "224",
+  "Guinea-Bissau": "245",
+  Guyana: "592",
+  Haiti: "509",
+  Honduras: "504",
+  Hungary: "36",
+  Iceland: "354",
+  India: "91",
+  Indonesia: "62",
+  Iran: "98",
+  Iraq: "964",
+  Ireland: "353",
+  Israel: "972",
+  Italy: "39",
+  Jamaica: "1-876",
+  Japan: "81",
+  Jordan: "962",
+  Kazakhstan: "7",
+  Kenya: "254",
+  Kiribati: "686",
+  "North Korea": "850",
+  "South Korea": "82",
+  Kosovo: "383",
+  Kuwait: "965",
+  Kyrgyzstan: "996",
+  Laos: "856",
+  Latvia: "371",
+  Lebanon: "961",
+  Lesotho: "266",
+  Liberia: "231",
+  Libya: "218",
+  Liechtenstein: "423",
+  Lithuania: "370",
+  Luxembourg: "352",
+  Macedonia: "389",
+  Madagascar: "261",
+  Malawi: "265",
+  Malaysia: "60",
+  Maldives: "960",
+  Mali: "223",
+  Malta: "356",
+  "Marshall Islands": "692",
+  Mauritania: "222",
+  Mauritius: "230",
+  Mexico: "52",
+  Micronesia: "691",
+  Moldova: "373",
+  Monaco: "377",
+  Mongolia: "976",
+  Montenegro: "382",
+  Morocco: "212",
+  Mozambique: "258",
+  Myanmar: "95",
+  Namibia: "264",
+  Nauru: "674",
+  Nepal: "977",
+  Netherlands: "31",
+  "New Zealand": "64",
+  Nicaragua: "505",
+  Niger: "227",
+  Nigeria: "234",
+  Norway: "47",
+  Oman: "968",
+  Pakistan: "92",
+  Palau: "680",
+  Panama: "507",
+  "Papua New Guinea": "675",
+  Paraguay: "595",
+  Peru: "51",
+  Philippines: "63",
+  Poland: "48",
+  Portugal: "351",
+  Qatar: "974",
+  Romania: "40",
+  Russia: "7",
+  Rwanda: "250",
+  "Saint Kitts and Nevis": "1-869",
+  "Saint Lucia": "1-758",
+  "Saint Vincent and the Grenadines": "1-784",
+  Samoa: "685",
+  "San Marino": "378",
+  "Sao Tome and Principe": "239",
+  "Saudi Arabia": "966",
+  Senegal: "221",
+  Serbia: "381",
+  Seychelles: "248",
+  "Sierra Leone": "232",
+  Singapore: "65",
+  Slovakia: "421",
+  Slovenia: "386",
+  "Solomon Islands": "677",
+  Somalia: "252",
+  "South Africa": "27",
+  "South Sudan": "211",
+  Spain: "34",
+  "Sri Lanka": "94",
+  Sudan: "249",
+  Suriname: "597",
+  Swaziland: "268",
+  Sweden: "46",
+  Switzerland: "41",
+  Syria: "963",
+  Taiwan: "886",
+  Tajikistan: "992",
+  Tanzania: "255",
+  Thailand: "66",
+  Togo: "228",
+  Tonga: "676",
+  "Trinidad and Tobago": "1-868",
+  Tunisia: "216",
+  Turkey: "90",
+  Turkmenistan: "993",
+  Tuvalu: "688",
+  Uganda: "256",
+  Ukraine: "380",
+  "United Arab Emirates": "971",
+  "United Kingdom": "44",
+  "United States": "1",
+  Uruguay: "598",
+  Uzbekistan: "998",
+  Vanuatu: "678",
+  "Vatican City": "379",
+  Venezuela: "58",
+  Vietnam: "84",
+  Yemen: "967",
+  Zambia: "260",
+  Zimbabwe: "263"
+};
+var injectCountryCode = function injectCountryCode() {
+  var countryEl = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('country');
+  var mobileEl = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('mobile');
+  if (!countryEl || !mobileEl) return;
+  countryEl.addEventListener('change', function (e) {
+    mobileEl.value = countryCodes[e.target.value] || '';
+  });
+
+  // Prefill from the country already selected on load (default option or the
+  // value carried over from the OAuth profile), unless a mobile number is
+  // already present so we never clobber what the user/provider supplied.
+  if (!mobileEl.value.trim()) {
+    var code = countryCodes[countryEl.value];
+    if (code) mobileEl.value = code;
+  }
+};
+injectCountryCode();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/mobileNameCheck.js":
+/*!*******************************************************************!*\
+  !*** ./resources/asset/js/components/register/mobileNameCheck.js ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var _kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../kidsAndSiblings */ "./resources/asset/js/components/kidsAndSiblings.js");
+
+
+
+var _id8, _id9, _id0, _id1;
+
+
+
+
+
+var fName = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("firstName").value;
+var lName = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("lastName").value;
+var checkContactExists = /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(mobileValue, emailValue) {
+    var _response$data, payload, response, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          payload = {};
+          if (mobileValue) payload.mobile = mobileValue;
+          if (emailValue) payload.email = emailValue;
+          _context.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post('/register/checkContact', payload);
+        case 1:
+          response = _context.sent;
+          return _context.abrupt("return", (response === null || response === void 0 ? void 0 : (_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.exists) || false);
+        case 2:
+          _context.prev = 2;
+          _t = _context["catch"](0);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(_t);
+          return _context.abrupt("return", false);
+        case 3:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 2]]);
+  }));
+  return function checkContactExists(_x, _x2) {
+    return _ref.apply(this, arguments);
+  };
+}();
+var setInput = /*#__PURE__*/function () {
+  var _ref2 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(name, value) {
+    var sex, genId, exists, processRadio;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          sex = name === "father" ? "him" : "her";
+          genId = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "Mobile_error"));
+          genId.style.display = "block";
+          _context2.next = 1;
+          return checkContactExists(value, null);
+        case 1:
+          exists = _context2.sent;
+          genId.innerHTML = exists ? "Great news that your ".concat(name, " is already on the platform") : "<h4><i>Your ".concat(name, " is not on the platform. Do you want us to send ").concat(sex, " a text/email to register to the platform</i>?</h4>").concat((0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.checkBox)(name));
+          if (!exists) {
+            processRadio = function processRadio() {
+              var _id, _id2, _id3, _id4, _id5;
+              var postObj = {
+                mobile: value,
+                viewPath: "msg/contactNewMember",
+                data: {
+                  email: ((_id = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "_email"))) === null || _id === void 0 ? void 0 : _id.value) || "",
+                  mobile: ((_id2 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "_mobile"))) === null || _id2 === void 0 ? void 0 : _id2.value) || "",
+                  name: ((_id3 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "_name"))) === null || _id3 === void 0 ? void 0 : _id3.value) || "",
+                  familyCode: ((_id4 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("famCode")) === null || _id4 === void 0 ? void 0 : _id4.value) || ((_id5 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)('familyCode')) === null || _id5 === void 0 ? void 0 : _id5.value) || "",
+                  yourName: "".concat(fName, " ").concat(lName)
+                },
+                subject: "".concat(fName, " ").concat(lName, " Wants You: Experience the Magic of your Family Network Today!")
+              };
+              axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/register/contactNewMember", postObj).then(function (response) {
+                var _response$data2;
+                (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showNotification)("".concat(name, "Mobile_help"), 'is-success', (response === null || response === void 0 ? void 0 : (_response$data2 = response.data) === null || _response$data2 === void 0 ? void 0 : _response$data2.message) || "Success");
+                genId.innerHTML = "";
+              }).catch(function (error) {
+                (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showNotification)("".concat(name, "Mobile_error"), 'is-danger', (error === null || error === void 0 ? void 0 : error.message) || "An error occurred");
+                (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(error);
+              });
+            }; // Wait for DOM update
+            setTimeout(function () {
+              var _id6, _id7;
+              (_id6 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "Yes"))) === null || _id6 === void 0 ? void 0 : _id6.addEventListener("click", processRadio);
+              (_id7 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("".concat(name, "No"))) === null || _id7 === void 0 ? void 0 : _id7.addEventListener("click", function () {
+                return genId.style.display = "none";
+              });
+            }, 100);
+          }
+        case 2:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2);
+  }));
+  return function setInput(_x3, _x4) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+var mobileFilter = /*#__PURE__*/function () {
+  var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee3(event, name) {
+    var value, _t2;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          value = event.target.value;
+          if (value) {
+            _context3.next = 1;
+            break;
+          }
+          return _context3.abrupt("return");
+        case 1:
+          if (!(value.length >= 11)) {
+            _context3.next = 2;
+            break;
+          }
+          _context3.next = 2;
+          return setInput(name, value);
+        case 2:
+          _context3.next = 4;
+          break;
+        case 3:
+          _context3.prev = 3;
+          _t2 = _context3["catch"](0);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(_t2);
+        case 4:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3, null, [[0, 3]]);
+  }));
+  return function mobileFilter(_x5, _x6) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+var fatherMobile = function fatherMobile(event) {
+  var setName = "father";
+  mobileFilter(event, setName);
+};
+var motherMobile = function motherMobile(event) {
+  var setName = "mother";
+  mobileFilter(event, setName);
+};
+var spouseMobile = function spouseMobile(event) {
+  var setName = "spouse";
+  mobileFilter(event, setName);
+};
+
+// Add event listeners with error handling
+(_id8 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("father_mobile")) === null || _id8 === void 0 ? void 0 : _id8.addEventListener("keyup", function (event) {
+  try {
+    fatherMobile(event);
+  } catch (error) {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(error);
+  }
+});
+(_id9 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("mother_mobile")) === null || _id9 === void 0 ? void 0 : _id9.addEventListener("keyup", function (event) {
+  try {
+    motherMobile(event);
+  } catch (error) {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(error);
+  }
+});
+(_id0 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("spouse_mobile")) === null || _id0 === void 0 ? void 0 : _id0.addEventListener("keyup", function (event) {
+  try {
+    spouseMobile(event);
+  } catch (error) {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showError)(error);
+  }
+});
+
+// Kid/sibling email helper — checks each address against the server on demand.
+(0,_kidsAndSiblings__WEBPACK_IMPORTED_MODULE_3__.processKidsSiblings)(fName);
+
+// Use a simple debounce for email check
+var emailTimeout;
+var checkPersonalEmail = function checkPersonalEmail(e) {
+  clearTimeout(emailTimeout);
+  emailTimeout = setTimeout(/*#__PURE__*/(0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee4() {
+    var email, exists;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          email = e.target.value;
+          if (email) {
+            _context4.next = 1;
+            break;
+          }
+          return _context4.abrupt("return");
+        case 1:
+          _context4.next = 2;
+          return checkContactExists(null, email);
+        case 2:
+          exists = _context4.sent;
+          if ((0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("email_error")) {
+            (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("email_error").innerHTML = exists ? "YOU HAVE ALREADY REGISTERED ON THE PLATFORM" : "";
+          }
+        case 3:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4);
+  })), 500);
+};
+(_id1 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)('email')) === null || _id1 === void 0 ? void 0 : _id1.addEventListener('keyup', checkPersonalEmail);
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/modal.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/register/modal.js ***!
+  \*********************************************************/
+/***/ (function() {
+
+// Functions to open and close a modal
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+function closeAllModals() {
+  (document.querySelectorAll('.modal') || []).forEach(function ($modal) {
+    closeModal($modal);
+  });
+}
+
+// Add a click event on buttons to open a specific modal
+(document.querySelectorAll('.js-modal-trigger') || []).forEach(function ($trigger) {
+  var modal = $trigger.dataset.target;
+  var $target = document.getElementById(modal);
+  $trigger.addEventListener('click', function () {
+    openModal($target);
+  });
+});
+
+// Add a click event on various child elements to close the parent modal
+(document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(function ($close) {
+  var $target = $close.closest('.modal');
+  $close.addEventListener('click', function () {
+    closeModal($target);
+  });
+});
+
+// Add a keyboard event to close all modals
+document.addEventListener('keydown', function (event) {
+  if (event.code === 'Escape') {
+    closeAllModals();
+  }
+});
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/onChangeKidSibling.js":
+/*!**********************************************************************!*\
+  !*** ./resources/asset/js/components/register/onChangeKidSibling.js ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "show": function() { return /* binding */ show; }
+/* harmony export */ });
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _html_kids_Sibling__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./html/kids_Sibling */ "./resources/asset/js/components/register/html/kids_Sibling.js");
+/* harmony import */ var _data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../data/checkEmailObj */ "./resources/asset/js/data/checkEmailObj.js");
+/* harmony import */ var _data_checkEmailFactory__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../data/checkEmailFactory */ "./resources/asset/js/data/checkEmailFactory.js");
+
+
+// import { getEnvironmentVariable as env} from 'environment-variable-reader'
+
+
+
+
+
+/**
+ * 
+ * @param kids_or_sib Think of it like this:
+
+Dropdown change → decides how many fields exist
+
+onChangeKidSibling.js → owns the counts
+
+checkEmailObj → shared live map of valid IDs
+
+processKidsSiblings → reacts to typing, doesn’t care about counts
+
+That separation is exactly what you want in a growing app.
+ */
+
+var syncCheckEmailObj = function syncCheckEmailObj() {
+  var _id, _id2;
+  var kids = Number((_id = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("children")) === null || _id === void 0 ? void 0 : _id.value) || 0;
+  var siblings = Number((_id2 = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("sibling")) === null || _id2 === void 0 ? void 0 : _id2.value) || 0;
+
+  // IMPORTANT: mutate the same object reference
+  Object.assign(_data_checkEmailObj__WEBPACK_IMPORTED_MODULE_2__.checkEmailObj, (0,_data_checkEmailFactory__WEBPACK_IMPORTED_MODULE_3__.makeCheckEmailObj)(kids, siblings));
+};
+var show = function show(kids_or_sib, event) {
+  try {
+    var value = Number(event.target.value) || 0;
+
+    // ✅ unique container IDs (avoid clashing with <select id="children">)
+    var containerId = "".concat(kids_or_sib, "_inputs");
+    var parentId = "".concat(kids_or_sib, "_div");
+
+    // remove the existing dynamic container
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.removeDiv)(containerId);
+    var helpEl = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("".concat(kids_or_sib, "_help"));
+    if (helpEl) helpEl.innerHTML = "";
+    if (value === 0) {
+      syncCheckEmailObj();
+      return;
+    }
+    // create the container under wrapper
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAndAppendElement)("div", containerId, parentId);
+    if (helpEl) {
+      helpEl.innerHTML = value > 1 ? "Please, enter their names and emails below" : "Please, enter the name and email below";
+      helpEl.style.fontSize = "1rem";
+      helpEl.style.color = "#fc2003";
+    }
+    var container = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)(containerId);
+    if (!container) return;
+    for (var i = 0; i < value; i++) {
+      var no = i + 1;
+      var html = (0,_html_kids_Sibling__WEBPACK_IMPORTED_MODULE_1__.renderHtmlFamily)(kids_or_sib, no);
+      container.insertAdjacentHTML("beforeEnd", html);
+    }
+
+    // 🔥 after DOM changes, regenerate ID lists
+    syncCheckEmailObj();
+  } catch (error) {
+    (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.showError)(error);
+  }
+};
+
+// ON CHANGE FOR THE NUMBER OF KIDS AND SIBLING 
+var onChangeKidAndSiblings = function onChangeKidAndSiblings() {
+  var kidInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("children");
+  var sibInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)("sibling");
+  if (kidInput) kidInput.addEventListener('change', function (event) {
+    return show('children', event);
+  });
+  if (sibInput) sibInput.addEventListener('change', function (event) {
+    return show('sibling', event);
+  });
+
+  // initialise on page load too (if selects already have values)
+  syncCheckEmailObj();
+};
+onChangeKidAndSiblings();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/processForm.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/register/processForm.js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib_FormHelper__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib/FormHelper */ "./node_modules/@modernman00/shared-js-lib/FormHelper.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _dataToCheck__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../dataToCheck */ "./resources/asset/js/components/dataToCheck.js");
+
+
+
+
+
+var formInput = document.querySelectorAll('.register');
+var formInputArr = Array.from(formInput);
+var formData = new _modernman00_shared_js_lib_FormHelper__WEBPACK_IMPORTED_MODULE_0__["default"](formInputArr);
+(function () {
+  try {
+    formData.clearError();
+    // set the maxlength, check the length of the value, raise error
+    formData.realTimeCheckLen(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.id, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.maxLength.max);
+    // check if password matches real time
+    var pwdEl = document.getElementById(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd);
+    if (pwdEl) {
+      formData.matchInput(_dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd, _dataToCheck__WEBPACK_IMPORTED_MODULE_2__.dataToCheckRegister.password.pwd2);
+    }
+
+    // formData.duplicate('firstName_id', 'alias_id')
+  } catch (error) {
+    console.log(error);
+  }
+})();
+var formEl = document.getElementById('register');
+if (formEl) {
+  formEl.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var submitBtn = document.getElementById('btnSubmit') || document.getElementById('button');
+    submitBtn === null || submitBtn === void 0 ? void 0 : submitBtn.click();
+  });
+}
+var targetButtonId = document.getElementById('btnSubmit') ? 'btnSubmit' : 'button';
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_1__.registerHandler)({
+  formId: 'register',
+  buttonId: targetButtonId,
+  route: '/register',
+  redirect: '/login',
+  recaptchaAction: 'SUBMIT',
+  optionalFields: ['surname']
+});
+var submitBtn = document.getElementById('btnSubmit') || document.getElementById('button');
+if (submitBtn) {
+  submitBtn.setAttribute('data-ready', 'true');
+}
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/register/smallinput.js":
+/*!**************************************************************!*\
+  !*** ./resources/asset/js/components/register/smallinput.js ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+
+/**
+ * 
+ * @param {*} Id - id of the element string
+ * @param {*} msg - messages to pass - string
+ */
+var showMsg = function showMsg(Id) {
+  var msg = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Please, leave blank if not available";
+  var el = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)(Id);
+  if (el && msg) {
+    el.innerHTML = msg;
+  }
+};
+
+// const href = "<a href='/createFamilyCode' target='_blank'>here</a>"
+var famCodeButton = "<button type='button' class='btn btn-sm btn-brand-outline ms-1 py-0' style='font-size: 0.8rem; vertical-align: baseline;' id='triggerFamCode'>here</button>";
+showMsg('fatherMobile_help');
+showMsg('motherMobile_help');
+showMsg('motherEmail_help');
+showMsg('fatherEmail_help');
+showMsg('mobile_help', "Nigeria: 2348036517179, UK: 447871717809");
+showMsg('password_help', 'Must be 8-20 characters long.');
+showMsg("famCode_help", "Ask a family member who already registered for the code if none then create one for your family ".concat(famCodeButton));
+
+// const lastName = id('lastName_id').value = "OLAOGUN"
+
+// TRIGGER THE MODAL
+
+// Functions to open and close a modal
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+var trigger = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('triggerFamCode');
+var close = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('modal-close-code');
+var modalClass = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.id)('modal-familyCode');
+if (trigger && modalClass) {
+  trigger.addEventListener('click', function () {
+    openModal(modalClass);
+  });
+}
+if (close && modalClass) {
+  close.addEventListener('click', function () {
+    closeModal(modalClass);
+  });
+}
+
+/***/ }),
+
+/***/ "./resources/asset/js/data/checkEmailFactory.js":
+/*!******************************************************!*\
+  !*** ./resources/asset/js/data/checkEmailFactory.js ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "makeCheckEmailObj": function() { return /* binding */ makeCheckEmailObj; }
+/* harmony export */ });
+// data/checkEmailFactory.js
+var makeCheckEmailObj = function makeCheckEmailObj() {
+  var kidsCount = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+  var siblingCount = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+  var range = function range(n) {
+    return Array.from({
+      length: n
+    }, function (_, i) {
+      return i + 1;
+    });
+  };
+  return {
+    kidEmailInput: range(kidsCount).map(function (n) {
+      return "children_email".concat(n);
+    }),
+    childrenNameInput: range(kidsCount).map(function (n) {
+      return "children_name".concat(n);
+    }),
+    siblingEmail: range(siblingCount).map(function (n) {
+      return "sibling_email".concat(n);
+    }),
+    siblingName: range(siblingCount).map(function (n) {
+      return "sibling_name".concat(n);
+    })
+  };
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/data/checkEmailObj.js":
+/*!**************************************************!*\
+  !*** ./resources/asset/js/data/checkEmailObj.js ***!
+  \**************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "checkEmailObj": function() { return /* binding */ checkEmailObj; }
+/* harmony export */ });
+// data/checkEmailObj.js
+var checkEmailObj = {
+  kidEmailInput: [],
+  childrenNameInput: [],
+  siblingEmail: [],
+  siblingName: []
+};
+
+/***/ })
+
+}]);
+//# sourceMappingURL=register.js.map

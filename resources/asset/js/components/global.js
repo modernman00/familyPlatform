@@ -209,3 +209,99 @@ export const showNotification = (elementId, addClass, message, timer = 5000) => 
                 msgException("Error removing notification" + " " + response.data.message);
             }
     }
+
+/**
+ * Defensive Error Unwrapping Utility
+ *
+ * Guarantees that [object Object] is NEVER returned under any error shape.
+ * Handles strings, standard Error objects, Axios responses, validation maps.
+ *
+ * @param {any} err
+ * @param {string} defaultMessage
+ * @returns {string}
+ */
+export const extractErrorMessage = (err, defaultMessage = 'An unexpected error occurred.') => {
+    if (err === null || err === undefined) {
+        return defaultMessage;
+    }
+
+    if (typeof err === 'string') {
+        const trimmed = err.trim();
+        return trimmed && trimmed !== '[object Object]' ? trimmed : defaultMessage;
+    }
+
+    if (err && typeof err === 'object') {
+        const resData = err.response ? err.response.data : (err.data || null);
+
+        if (resData) {
+            if (typeof resData === 'string') {
+                const trimmed = resData.trim();
+                if (trimmed && trimmed !== '[object Object]') return trimmed;
+            } else if (typeof resData === 'object') {
+                if (typeof resData.error === 'string' && resData.error.trim() && resData.error.trim() !== '[object Object]') {
+                    return resData.error.trim();
+                }
+                if (typeof resData.message === 'string' && resData.message.trim() && resData.message.trim() !== '[object Object]') {
+                    return resData.message.trim();
+                }
+                if (typeof resData.msg === 'string' && resData.msg.trim() && resData.msg.trim() !== '[object Object]') {
+                    return resData.msg.trim();
+                }
+
+                const errorsSource = resData.errors || resData.error;
+                if (errorsSource && typeof errorsSource === 'object') {
+                    if (Array.isArray(errorsSource)) {
+                        const msgs = errorsSource.map(m => typeof m === 'string' ? m : (m?.message || JSON.stringify(m))).filter(Boolean);
+                        if (msgs.length > 0) return msgs.join(', ');
+                    } else {
+                        const values = Object.values(errorsSource).flat().map(v => typeof v === 'string' ? v : (v?.message || JSON.stringify(v))).filter(Boolean);
+                        if (values.length > 0) return values.join(', ');
+                    }
+                }
+            }
+        }
+
+        if (typeof err.message === 'string' && err.message.trim() && err.message.trim() !== '[object Object]') {
+            return err.message.trim();
+        }
+
+        if (typeof err.error === 'string' && err.error.trim() && err.error.trim() !== '[object Object]') {
+            return err.error.trim();
+        }
+        if (typeof err.msg === 'string' && err.msg.trim() && err.msg.trim() !== '[object Object]') {
+            return err.msg.trim();
+        }
+
+        if (err.errors && typeof err.errors === 'object') {
+            if (Array.isArray(err.errors)) {
+                const msgs = err.errors.map(m => typeof m === 'string' ? m : (m?.message || JSON.stringify(m))).filter(Boolean);
+                if (msgs.length > 0) return msgs.join(', ');
+            } else {
+                const values = Object.values(err.errors).flat().map(v => typeof v === 'string' ? v : (v?.message || JSON.stringify(v))).filter(Boolean);
+                if (values.length > 0) return values.join(', ');
+            }
+        }
+
+        try {
+            if (typeof err.toString === 'function') {
+                const str = err.toString();
+                if (str && str !== '[object Object]' && typeof str === 'string') {
+                    return str;
+                }
+            }
+        } catch (_) {}
+
+        try {
+            const jsonStr = JSON.stringify(err);
+            if (jsonStr && jsonStr !== '{}' && jsonStr.length < 200) {
+                return jsonStr;
+            }
+        } catch (_) {}
+    }
+
+    return defaultMessage;
+};
+
+if (typeof window !== 'undefined') {
+    window.extractErrorMessage = extractErrorMessage;
+}
