@@ -17,7 +17,11 @@ define('BASE_PATH', $basePath !== false ? $basePath : __DIR__ . '/../../');
 
 $envDir = getenv('APP_ENV_DIR') ?: (string) ($_SERVER['APP_ENV_DIR'] ?? '');
 if ($envDir === '' || !is_readable(rtrim($envDir, '/') . '/.env')) {
-    $envDir = BASE_PATH;
+    if (is_readable('/home/bestiias/private/.env')) {
+        $envDir = '/home/bestiias/private';
+    } else {
+        $envDir = BASE_PATH;
+    }
 }
 
 $dotEnv = Dotenv::createUnsafeImmutable($envDir);

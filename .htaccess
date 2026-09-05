@@ -1,4 +1,11 @@
 # -------------------------------------------------------
+# SECRETS DIRECTORY (.env from /home/bestiias/private)
+# -------------------------------------------------------
+<IfModule mod_env.c>
+    SetEnv APP_ENV_DIR /home/bestiias/private
+</IfModule>
+
+# -------------------------------------------------------
 # BLOCK DIRECT ACCESS TO SENSITIVE FILES (TAT HOTFIX)
 # -------------------------------------------------------
 <FilesMatch "(^\.env|composer\.(json|lock)|package\.json|package-lock\.json|\.gitignore|phpunit\.xml|phpstan\.neon|\.sql|\.sh|\.bash|\.log)$">
