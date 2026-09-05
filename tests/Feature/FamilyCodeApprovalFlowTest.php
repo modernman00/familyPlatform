@@ -142,6 +142,10 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $familyCode = $_SESSION['test_family_code'];
         $inviterId = $_SESSION['test_inviter_id'];
 
+        // Update database to have NULL names for this specific test
+        $stmt = $this->pdo->prepare('UPDATE personal SET firstName = NULL, lastName = NULL WHERE id = ?');
+        $stmt->execute([$inviterId]);
+
         // Test with exact email/mobile match - should match even if names are NULL in DB
         $inviter = $this->service->findMatchingInviter(
             $familyCode,
