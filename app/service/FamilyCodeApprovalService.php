@@ -352,6 +352,7 @@ class FamilyCodeApprovalService
 
     /**
      * Mark reminder as sent
+     * @psalm-suppress PossiblyUnusedReturnValue
      */
     public function markReminderSent(int $requestId): bool
     {
@@ -381,6 +382,7 @@ class FamilyCodeApprovalService
 
     /**
      * Link approved user to family code (replace temp code with real code)
+     * @psalm-suppress PossiblyUnusedReturnValue
      */
     public function linkUserToFamily(string $userId, string $familyCode): bool
     {

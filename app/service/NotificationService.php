@@ -39,7 +39,7 @@ class NotificationService
 
         // TODO: Integrate with PushNotificationClass & Mail service
         // For now, just log that notification was sent
-        error_log("Approval notification sent to $approverEmail for request $requestId with token $approvalToken");
+        error_log("Approval notification sent to $approverEmail for request $requestId with family code $familyCode and token $approvalToken");
     }
 
     /**
@@ -71,7 +71,7 @@ class NotificationService
             return;
         }
 
-        error_log("Reminder sent to $email about pending approval from $inviterName");
+        error_log("Reminder sent to $email about pending approval from $inviterName (expires: $expiresAt)");
     }
 
     /**
@@ -88,7 +88,7 @@ class NotificationService
             return;
         }
 
-        error_log("Reminder sent to $email about pending approval for $requesterName");
+        error_log("Reminder sent to $email about pending approval for $requesterName (request $requestId, expires: $expiresAt)");
     }
 
     /**

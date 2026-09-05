@@ -15,7 +15,7 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 $basePath = realpath(__DIR__ . '/../../');
 define('BASE_PATH', $basePath !== false ? $basePath : __DIR__ . '/../../');
 
-$envDir = getenv('APP_ENV_DIR') ?: (string) ($_SERVER['APP_ENV_DIR'] ?? '');
+$envDir = getenv('APP_ENV_DIR') ?: ($_SERVER['APP_ENV_DIR'] ?? '');
 if ($envDir === '' || !is_readable(rtrim($envDir, '/') . '/.env')) {
     if (is_readable('/home/bestiias/private/.env')) {
         $envDir = '/home/bestiias/private';

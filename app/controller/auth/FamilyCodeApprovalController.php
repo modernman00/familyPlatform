@@ -43,13 +43,9 @@ class FamilyCodeApprovalController
         }
 
         try {
-            $cleanCode = trim((string)$familyCode);
+            $familyCodeString = is_string($familyCode) ? $familyCode : (is_scalar($familyCode) ? (string)$familyCode : '');
+            $cleanCode = trim($familyCodeString);
             $exists = $this->approvalService->familyCodeExists($cleanCode);
-
-            // Fetch sample matching codes from personal table to diagnose formatting
-            $diagStmt = $this->pdo->prepare('SELECT DISTINCT famCode FROM personal WHERE famCode LIKE ? OR famCode IS NOT NULL LIMIT 5');
-            $diagStmt->execute(['%' . substr($cleanCode, 0, 3) . '%']);
-            $diagCodes = $diagStmt->fetchAll(PDO::FETCH_COLUMN);
 
             if ($exists) {
                 $tempCode = $this->approvalService->generateTemporaryCode();
@@ -208,7 +204,8 @@ class FamilyCodeApprovalController
 
         // Verify approval token
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
-        if (!$token || !$this->approvalService->verifyApprovalToken($requestId, $token)) {
+        $tokenStr = is_string($token) ? $token : '';
+        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($requestId, $tokenStr)) {
             http_response_code(401);
             echo json_encode(['error' => 'Invalid or missing approval token']);
             return;
@@ -262,7 +259,8 @@ class FamilyCodeApprovalController
 
         // Verify approval token
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
-        if (!$token || !$this->approvalService->verifyApprovalToken($requestId, $token)) {
+        $tokenStr = is_string($token) ? $token : '';
+        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($requestId, $tokenStr)) {
             http_response_code(401);
             echo json_encode(['error' => 'Invalid or missing approval token']);
             return;
