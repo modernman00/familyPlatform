@@ -14,7 +14,12 @@ class FamilyCodeApprovalController
 
     public function __construct(?PDO $pdo = null)
     {
-        $this->pdo = $pdo ?? \Src\Db::connect2();
+        $this->pdo = $pdo ?? \Src\Db::connect2() ?? (new \Src\Db())->connect() ?? new PDO(
+            "mysql:host=" . ($_ENV['DB_HOST'] ?? 'localhost') . ";dbname=" . ($_ENV['DB_NAME'] ?? 'family') . ";charset=utf8mb4",
+            $_ENV['DB_USERNAME'] ?? 'root',
+            $_ENV['DB_PASSWORD'] ?? '',
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
         $this->approvalService = new FamilyCodeApprovalService($this->pdo);
         $this->notificationService = new NotificationService($this->pdo);
     }
@@ -29,24 +34,29 @@ class FamilyCodeApprovalController
 
         $rawInput = file_get_contents('php://input');
         $input = $rawInput ? json_decode($rawInput, true) : [];
-        $familyCode = $input['family_code'] ?? '';
+        $familyCode = $input['family_code'] ?? $_POST['family_code'] ?? '';
 
         if (!$familyCode) {
             http_response_code(400);
-            echo json_encode(['error' => 'Family code is required']);
+            echo json_encode(['error' => 'Family code is required', 'exists' => false]);
             return;
         }
 
-        $exists = $this->approvalService->familyCodeExists(trim($familyCode));
+        try {
+            $exists = $this->approvalService->familyCodeExists(trim((string)$familyCode));
 
-        if ($exists) {
-            $tempCode = $this->approvalService->generateTemporaryCode();
-            echo json_encode([
-                'exists' => true,
-                'temporary_code' => $tempCode
-            ]);
-        } else {
-            echo json_encode(['exists' => false]);
+            if ($exists) {
+                $tempCode = $this->approvalService->generateTemporaryCode();
+                echo json_encode([
+                    'exists' => true,
+                    'temporary_code' => $tempCode
+                ]);
+            } else {
+                echo json_encode(['exists' => false]);
+            }
+        } catch (\Throwable $e) {
+            error_log("checkFamilyCode error: " . $e->getMessage());
+            echo json_encode(['exists' => false, 'error' => $e->getMessage()]);
         }
     }
 
