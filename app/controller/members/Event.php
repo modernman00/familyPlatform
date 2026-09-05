@@ -416,8 +416,12 @@ final class Event extends AllMembersData
             // carries the same shape the sidebar already renders.
             $eventDateForDiff = is_string($data['eventDate']) ? $data['eventDate'] : '';
             $dateDiff = dateDifferenceInt(date('Y-m-d'), $eventDateForDiff);
-            $getDateDiff = number2word($dateDiff);
-            $dateDifference = $getDateDiff === 'Zero' ? 'Today' : ($getDateDiff === 'One' ? 'Tomorrow' : "in $getDateDiff Days");
+            if ($dateDiff < 0) {
+                $dateDifference = abs($dateDiff) === 1 ? 'Yesterday' : abs($dateDiff) . ' days ago';
+            } else {
+                $getDateDiff = number2word($dateDiff);
+                $dateDifference = ($dateDiff === 0 || strtolower($getDateDiff) === 'zero') ? 'Today' : (($dateDiff === 1 || strtolower($getDateDiff) === 'one') ? 'Tomorrow' : "in $getDateDiff Days");
+            }
 
             Pusher::broadcastToFamily((string) ($event['eventCode'] ?? $_SESSION['famCode'] ?? ''), 'update-event', [
                 'no' => $eventNo,

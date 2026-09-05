@@ -2,14 +2,17 @@
 $enrichedEvents = [];
 foreach(($eventData ?? []) as $event) {
     $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']);
-    $getDateDiff = number2word($dateDiff);
-
-    if($getDateDiff == 'Zero') {
-        $dateDifference = 'Today';
-    } else if($getDateDiff == 'One') {
-        $dateDifference = 'Tomorrow';
+    if ($dateDiff < 0) {
+        $dateDifference = abs($dateDiff) === 1 ? 'Yesterday' : abs($dateDiff) . ' days ago';
     } else {
-        $dateDifference = "in $getDateDiff Days";
+        $getDateDiff = number2word($dateDiff);
+        if ($dateDiff === 0 || strtolower($getDateDiff) === 'zero') {
+            $dateDifference = 'Today';
+        } else if ($dateDiff === 1 || strtolower($getDateDiff) === 'one') {
+            $dateDifference = 'Tomorrow';
+        } else {
+            $dateDifference = "in $getDateDiff Days";
+        }
     }
 
     $enrichedEvents[] = [

@@ -90,27 +90,25 @@ if [[ -z "$REMOTE_DIR" || "$REMOTE_DIR" == "/" || "$REMOTE_DIR" == "." || "$REMO
     exit 1
 fi
 
-# Locate GNU rsync 3.x (Required for advanced filter rules)
+# Locate rsync binary
 RSYNC_BIN=""
 CANDIDATES=(
     "/opt/homebrew/opt/rsync/bin/rsync"
     "/opt/homebrew/bin/rsync"
     "/usr/local/bin/rsync"
+    "/usr/bin/rsync"
 )
 which rsync >/dev/null 2>&1 && CANDIDATES+=("$(which rsync)")
 
 for cand in "${CANDIDATES[@]}"; do
     if [ -x "$cand" ]; then
-        VER_STR=$("$cand" --version 2>/dev/null || true)
-        if [[ "$VER_STR" =~ version\ 3 ]]; then
-            RSYNC_BIN="$cand"
-            break
-        fi
+        RSYNC_BIN="$cand"
+        break
     fi
 done
 
 if [ -z "$RSYNC_BIN" ]; then
-    echo "🛑 FATAL: GNU rsync 3.x required for atomic filter rules. (brew install rsync)"
+    echo "🛑 FATAL: rsync required for deployment."
     exit 1
 fi
 

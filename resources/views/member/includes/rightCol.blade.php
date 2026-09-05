@@ -9,18 +9,21 @@
 
          @foreach($eventData as $event)
 
-         @php
-         $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']);
-         $getDateDiff = number2word($dateDiff);
-
-         if($getDateDiff == 'Zero') {
-         $dateDifference = 'Today';
-         } else if($getDateDiff == 'One') {
-         $dateDifference = 'Tomorrow';
-         } else{
-         $dateDifference = "in $getDateDiff Days";
-         }
-         @endphp
+          @php
+          $dateDiff = dateDifferenceInt(date('Y-m-d'), $event['eventDate']);
+          if ($dateDiff < 0) {
+              $dateDifference = abs($dateDiff) === 1 ? 'Yesterday' : abs($dateDiff) . ' days ago';
+          } else {
+              $getDateDiff = number2word($dateDiff);
+              if ($dateDiff === 0 || strtolower($getDateDiff) === 'zero') {
+                  $dateDifference = 'Today';
+              } else if ($dateDiff === 1 || strtolower($getDateDiff) === 'one') {
+                  $dateDifference = 'Tomorrow';
+              } else {
+                  $dateDifference = "in $getDateDiff Days";
+              }
+          }
+          @endphp
 
 
          <p class="eventInfo"><strong>RSVP: </strong>{{ $event['firstName'] }} {{ $event['lastName'] }}</p>
