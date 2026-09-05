@@ -43,16 +43,26 @@ class FamilyCodeApprovalController
         }
 
         try {
-            $exists = $this->approvalService->familyCodeExists(trim((string)$familyCode));
+            $cleanCode = trim((string)$familyCode);
+            $exists = $this->approvalService->familyCodeExists($cleanCode);
+
+            // Fetch sample matching codes from personal table to diagnose formatting
+            $diagStmt = $this->pdo->prepare('SELECT DISTINCT famCode FROM personal WHERE famCode LIKE ? OR famCode IS NOT NULL LIMIT 5');
+            $diagStmt->execute(['%' . substr($cleanCode, 0, 3) . '%']);
+            $diagCodes = $diagStmt->fetchAll(PDO::FETCH_COLUMN);
 
             if ($exists) {
                 $tempCode = $this->approvalService->generateTemporaryCode();
                 echo json_encode([
                     'exists' => true,
-                    'temporary_code' => $tempCode
+                    'temporary_code' => $tempCode,
+                    'diag' => $diagCodes
                 ]);
             } else {
-                echo json_encode(['exists' => false]);
+                echo json_encode([
+                    'exists' => false,
+                    'diag' => $diagCodes
+                ]);
             }
         } catch (\Throwable $e) {
             error_log("checkFamilyCode error: " . $e->getMessage());
