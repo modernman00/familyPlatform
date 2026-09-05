@@ -14,7 +14,13 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 
 $basePath = realpath(__DIR__ . '/../../');
 define('BASE_PATH', $basePath !== false ? $basePath : __DIR__ . '/../../');
-$dotEnv = Dotenv::createUnsafeImmutable(BASE_PATH);
+
+$envDir = getenv('APP_ENV_DIR') ?: (string) ($_SERVER['APP_ENV_DIR'] ?? '');
+if ($envDir === '' || !is_readable(rtrim($envDir, '/') . '/.env')) {
+    $envDir = BASE_PATH;
+}
+
+$dotEnv = Dotenv::createUnsafeImmutable($envDir);
 $dotEnv->load();
 
 // phpdotenv leaves a ${VAR} reference to a never-defined variable as literal
