@@ -1,8 +1,7 @@
-{{-- The widget shell always renders: getSuggestedKin() is typed `: array` and
-     returns [] on every empty/error path, so @forelse falls through to the
-     @empty branch (a friendly "all caught up" state) rather than a fatal.
-     The Cypress kinship spec relies on #kinshipRadarWidget existing regardless
-     of whether there are suggestions. --}}
+{{-- Only render the widget when the engine actually returned suggestions.
+     getSuggestedKin() is typed `: array` and returns [] on every empty/error
+     path, so this guard fails closed (widget hidden), never fatal. --}}
+@if(!empty($suggestedKin))
 @php
     // The in-feed (mobile) copy scrolls horizontally like the Reels tray; the
     // desktop sidebar copy stays a vertical stack. The widget id is the existing
@@ -17,7 +16,7 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin &amp; In-Laws</h6>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Relatives</h6>
                     <span class="text-muted" style="font-size: 0.75rem;">People you may know</span>
                 </div>
             </div>
@@ -25,7 +24,7 @@
         </div>
 
         <div class="{{ $kinCarousel ? 'kinship-suggestions-scroll' : 'd-flex flex-column gap-3' }}" id="kinshipSuggestionsList">
-            @forelse(($suggestedKin ?? []) as $kin)
+            @foreach($suggestedKin as $kin)
                 @php
                     $kinAvatar = !empty($kin['profilePics']) ? (str_starts_with($kin['profilePics'], '/') ? $kin['profilePics'] : '/resources/images/profile/' . $kin['profilePics']) : '/resources/images/profile/avatarM.png';
                     $kinName = ucwords(strtolower(($kin['firstName'] ?? '') . ' ' . ($kin['lastName'] ?? '')));
@@ -64,12 +63,8 @@
                         <i class="bi bi-person-plus-fill"></i> Connect
                     </button>
                 </div>
-            @empty
-                <div class="text-center py-4 text-muted small {{ $kinCarousel ? 'kinship-scroll-empty' : '' }}">
-                    <i class="bi bi-shield-check text-success fs-3 d-block mb-2"></i>
-                    You're connected to all nearby kin! We'll suggest new relatives as more family members join.
-                </div>
-            @endforelse
+            @endforeach
         </div>
     </div>
 </div>
+@endif

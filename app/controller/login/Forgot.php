@@ -35,7 +35,9 @@ final class Forgot
   public function verify(): void
   {
     try {
-      PasswordRecoveryService::process(isCaptchaV3:true);
+        $nonProdEnvs = ['local', 'development', 'testing'];
+        $isCaptchaV3 = !in_array((string) getenv('APP_ENV'), $nonProdEnvs, true);
+        PasswordRecoveryService::process(isCaptchaV3: $isCaptchaV3);
     } catch (\Throwable $th) {
       Utility::showError($th);
     }

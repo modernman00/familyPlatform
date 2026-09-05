@@ -1,1 +1,28 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[535],{4051:function(e,t,r){r.r(t);var o,i=r(893),l="/login/code";localStorage.setItem("redirect",l),(0,i.KN)({formId:"login",route:"/login",redirect:l,recaptchaAction:"LOGIN",optionalFields:["rememberMe"]}),null===(o=document.getElementById("button"))||void 0===o||o.setAttribute("data-ready","true")}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["login"],{
+
+/***/ "./resources/asset/js/components/acctMgt/login.js":
+/*!********************************************************!*\
+  !*** ./resources/asset/js/components/acctMgt/login.js ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+var _document$getElementB;
+
+var redirect = '/login/code';
+localStorage.setItem('redirect', redirect);
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAdminLoginHandler)({
+  formId: 'login',
+  route: '/login',
+  redirect: redirect,
+  recaptchaAction: 'LOGIN',
+  optionalFields: ['rememberMe']
+});
+(_document$getElementB = document.getElementById('button')) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.setAttribute('data-ready', 'true');
+
+/***/ })
+
+}]);
+//# sourceMappingURL=login.js.map

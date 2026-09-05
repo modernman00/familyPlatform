@@ -9,12 +9,6 @@ use App\model\{
     Post
 };
 
-use Src\{
-    Sanitise,
-    //ProcessImg,
-  
-//  VerifyToken,
-};
 
 use Src\Exceptions\NotFoundException;
 
@@ -25,17 +19,7 @@ use Src\functionality\{
 
 use App\services\ProfilepageService;
 
-use App\classes\{ProcessImg, Insert};
-// use App\classes\VerifyToken;
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
-// use Pusher\Pusher;
-use App\model\AllMembersData as DataAll;
-
+use App\classes\ProcessImg;
 
 
 use Exception;

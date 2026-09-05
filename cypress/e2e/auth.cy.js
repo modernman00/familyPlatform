@@ -95,5 +95,39 @@ describe('Authentication Flow', () => {
         // Verify button is marked ready and click fires validation
         cy.get('button#btnSubmit[data-ready="true"]', { timeout: 15000 }).should('exist');
     });
-});
 
+    it('successfully submits a forgot password request', () => {
+        cy.intercept('POST', '/login/forgot', {
+            statusCode: 200,
+            body: { message: 'Password recovery initiated' }
+        }).as('forgotReq');
+        
+        cy.intercept('GET', '/login/code', {
+            statusCode: 200,
+            body: '<html><body>Mocked Code Verification Page</body></html>'
+        }).as('codePage');
+        
+        cy.visit('/login/forgot?verify=1', {
+            onBeforeLoad(win) {
+                // Mock reCAPTCHA to bypass the enterprise checks
+                win.grecaptcha = {
+                    enterprise: {
+                        ready: (cb) => cb(),
+                        execute: () => Promise.resolve('mock-cypress-token')
+                    }
+                };
+            }
+        });
+        
+        cy.get('input[name="email"]').should('be.visible');
+        cy.get('input[name="email"]').clear().type('cypress_test@myfamilyplatform.com');
+        cy.get('button#button').click();
+        
+        cy.wait('@forgotReq').then((interception) => {
+            expect(interception.response.statusCode).to.be.oneOf([200, 201]);
+        });
+        
+        // Assert redirect to code verification step
+        cy.location('pathname', { timeout: 10000 }).should('eq', '/login/code');
+    });
+});

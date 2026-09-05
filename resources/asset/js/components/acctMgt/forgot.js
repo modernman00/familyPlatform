@@ -5,8 +5,8 @@ sessionStorage.setItem('fromForgot', 'true');
 
 forgotSubmitHandler({
   formId: 'forgot',
-  route: '/forgot',
-  redirect: '/code',
+  route: '/login/forgot',
+  redirect: '/login/code',
   theme: 'bulma'
  
 });

@@ -8,7 +8,7 @@ setupPasswordChange({
   showToggleId: 'showPassword',
   helpId: 'non_existent_help',
   route: '/changePW',
-  redirect: 'login',
+  redirect: '/login',
   optionalFields: ['token', 'showPassword', 'confirm_password']
 });
 

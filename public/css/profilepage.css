@@ -356,6 +356,10 @@ body {
 }
 
 @media (max-width: 576px) {
+  body {
+    padding: 0;
+  }
+  
   .container-main {
     padding: 10px;
   }
@@ -429,8 +433,8 @@ body {
 }
 
 .kinship-item-card--scroll {
-  flex: 0 0 82%;
-  max-width: 280px;
+  flex: 0 0 92%;
+  max-width: 400px;
   scroll-snap-align: start;
 }
 
