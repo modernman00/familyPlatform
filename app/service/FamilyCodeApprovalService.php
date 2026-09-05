@@ -79,6 +79,7 @@ class FamilyCodeApprovalService
 
     /**
      * Get family members for a code (to find who to send approval notification to)
+     * @return array<int, array<string, mixed>>
      */
     public function getFamilyMembersForCode(string $code): array
     {
@@ -124,6 +125,7 @@ class FamilyCodeApprovalService
 
     /**
      * Create a pending approval request with signed token
+     * @return array<string, mixed>
      */
     public function createApprovalRequest(
         string $userId,
@@ -184,6 +186,7 @@ class FamilyCodeApprovalService
     /**
      * Find matching family member for inviter details
      * Matches by name and email/mobile
+     * @return array<string, mixed>|null
      */
     public function findMatchingInviter(
         string $familyCode,
@@ -271,6 +274,7 @@ class FamilyCodeApprovalService
 
     /**
      * Get approval requests for a user (for the inviter to approve)
+     * @return array<int, array<string, mixed>>
      */
     public function getPendingApprovalsForUser(string $userId): array
     {
@@ -285,6 +289,7 @@ class FamilyCodeApprovalService
 
     /**
      * Get approval request by ID
+     * @return array<string, mixed>|null
      */
     public function getApprovalRequest(int $requestId): ?array
     {
@@ -330,6 +335,7 @@ class FamilyCodeApprovalService
 
     /**
      * Get unapproved requests that need reminders (2 days old)
+     * @return array<int, array<string, mixed>>
      */
     public function getRequestsNeedingReminders(): array
     {

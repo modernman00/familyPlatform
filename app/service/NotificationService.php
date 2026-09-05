@@ -19,6 +19,7 @@ class NotificationService
 
     /**
      * Send approval request notification to inviter
+     * @param array<string, mixed>|null $newUserInfo
      */
     public function sendFamilyApprovalNotification(
         string $approverId,

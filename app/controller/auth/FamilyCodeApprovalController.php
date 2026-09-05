@@ -14,12 +14,11 @@ class FamilyCodeApprovalController
 
     public function __construct(?PDO $pdo = null)
     {
-        $this->pdo = $pdo ?? \Src\Db::connect2() ?? (new \Src\Db())->connect() ?? new PDO(
-            "mysql:host=" . ($_ENV['DB_HOST'] ?? 'localhost') . ";dbname=" . ($_ENV['DB_NAME'] ?? 'family') . ";charset=utf8mb4",
-            $_ENV['DB_USERNAME'] ?? 'root',
-            $_ENV['DB_PASSWORD'] ?? '',
-            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-        );
+        try {
+            $this->pdo = $pdo ?? \Src\Db::connect2();
+        } catch (\Throwable $e) {
+            $this->pdo = (new \Src\Db())->connect();
+        }
         $this->approvalService = new FamilyCodeApprovalService($this->pdo);
         $this->notificationService = new NotificationService($this->pdo);
     }
@@ -33,7 +32,8 @@ class FamilyCodeApprovalController
         header('Content-Type: application/json');
 
         $rawInput = file_get_contents('php://input');
-        $input = $rawInput ? json_decode($rawInput, true) : [];
+        $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
+        if (!is_array($input)) $input = [];
         $familyCode = $input['family_code'] ?? $_POST['family_code'] ?? '';
 
         if (!$familyCode) {
@@ -76,7 +76,9 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
-        $input = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
+        if (!is_array($input)) $input = [];
 
         $familyCode = $input['family_code'] ?? '';
         $inviterFirstName = $input['inviter_first_name'] ?? '';
@@ -122,7 +124,9 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
-        $input = json_decode(file_get_contents('php://input'), true);
+        $rawInput = file_get_contents('php://input');
+        $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
+        if (!is_array($input)) $input = [];
 
         $userId = $input['user_id'] ?? '';
         $familyCode = $input['family_code'] ?? '';
@@ -293,6 +297,7 @@ class FamilyCodeApprovalController
 
     /**
      * Get user info by ID
+     * @return array<string, mixed>|null
      */
     private function getUserInfo(string $userId): ?array
     {

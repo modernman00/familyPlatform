@@ -90,6 +90,7 @@ class FamilyCodeApprovalReminder
 
     /**
      * Run all reminder tasks
+     * @return array<string, int>
      */
     public function runAll(): array
     {
@@ -101,6 +102,7 @@ class FamilyCodeApprovalReminder
 
     /**
      * Get user info by ID
+     * @return array<string, mixed>|null
      */
     private function getUserInfo(string $userId): ?array
     {
