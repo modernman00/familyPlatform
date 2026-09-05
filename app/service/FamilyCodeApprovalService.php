@@ -48,21 +48,32 @@ class FamilyCodeApprovalService
     }
 
     /**
-     * Check if a family code exists and is valid (resilient to # and case)
+     * Check if a family code exists and is valid (resilient to #, case, and O vs 0 typos)
      */
     public function familyCodeExists(string $code): bool
     {
-        $clean = trim(str_replace('#', '', $code));
+        $clean = strtoupper(trim(str_replace('#', '', $code)));
         if ($clean === '') {
             return false;
         }
 
+        $variations = array_values(array_unique([
+            $clean,
+            $code,
+            (strlen($clean) >= 4) ? substr($clean, 0, 3) . 'O' . substr($clean, 4) : $clean,
+            (strlen($clean) >= 4) ? substr($clean, 0, 3) . '0' . substr($clean, 4) : $clean,
+            str_replace('0', 'O', $clean),
+            str_replace('O', '0', $clean)
+        ]));
+
+        $placeholders = implode(',', array_fill(0, count($variations), '?'));
         $stmt = $this->pdo->prepare(
-            'SELECT COUNT(*) FROM personal 
-             WHERE LOWER(TRIM(REPLACE(famCode, "#", ""))) = LOWER(?) 
-                OR LOWER(TRIM(famCode)) = LOWER(?)'
+            "SELECT COUNT(*) FROM personal 
+             WHERE UPPER(TRIM(REPLACE(famCode, '#', ''))) IN ($placeholders) 
+                OR UPPER(TRIM(famCode)) IN ($placeholders)"
         );
-        $stmt->execute([$clean, $code]);
+        $params = array_merge($variations, $variations);
+        $stmt->execute($params);
         return ((int)$stmt->fetchColumn()) > 0;
     }
 
@@ -71,20 +82,31 @@ class FamilyCodeApprovalService
      */
     public function getFamilyMembersForCode(string $code): array
     {
-        $clean = trim(str_replace('#', '', $code));
+        $clean = strtoupper(trim(str_replace('#', '', $code)));
         if ($clean === '') {
             return [];
         }
 
+        $variations = array_values(array_unique([
+            $clean,
+            $code,
+            (strlen($clean) >= 4) ? substr($clean, 0, 3) . 'O' . substr($clean, 4) : $clean,
+            (strlen($clean) >= 4) ? substr($clean, 0, 3) . '0' . substr($clean, 4) : $clean,
+            str_replace('0', 'O', $clean),
+            str_replace('O', '0', $clean)
+        ]));
+
+        $placeholders = implode(',', array_fill(0, count($variations), '?'));
         $stmt = $this->pdo->prepare(
-            'SELECT DISTINCT a.id, p.firstName, p.lastName, c.email, c.mobile
+            "SELECT DISTINCT a.id, p.firstName, p.lastName, c.email, c.mobile
              FROM personal p
              JOIN account a ON a.id = p.id
              LEFT JOIN contact c ON c.id = p.id
-             WHERE (LOWER(TRIM(REPLACE(p.famCode, "#", ""))) = LOWER(?) OR LOWER(TRIM(p.famCode)) = LOWER(?))
-               AND a.deleted_at IS NULL'
+             WHERE (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ($placeholders) OR UPPER(TRIM(p.famCode)) IN ($placeholders))
+               AND a.deleted_at IS NULL"
         );
-        $stmt->execute([$clean, $code]);
+        $params = array_merge($variations, $variations);
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 

@@ -55,13 +55,11 @@ class FamilyCodeApprovalController
                 $tempCode = $this->approvalService->generateTemporaryCode();
                 echo json_encode([
                     'exists' => true,
-                    'temporary_code' => $tempCode,
-                    'diag' => $diagCodes
+                    'temporary_code' => $tempCode
                 ]);
             } else {
                 echo json_encode([
-                    'exists' => false,
-                    'diag' => $diagCodes
+                    'exists' => false
                 ]);
             }
         } catch (\Throwable $e) {
