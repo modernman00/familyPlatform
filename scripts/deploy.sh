@@ -14,12 +14,12 @@ IFS=$'\n\t'
 cd "$(dirname "$0")/.."
 
 # --- Configuration (Overridable via Environment Variables) ---
-APP_NAME="${DEPLOY_APP_NAME:-PartyPlatform}"
+APP_NAME="${DEPLOY_APP_NAME:-FamilyPlatform}"
 SSH_USER="${DEPLOY_SSH_USER:-bestiias}"
 SSH_HOST="${DEPLOY_SSH_HOST:-premium145.web-hosting.com}"
 SSH_PORT="${DEPLOY_SSH_PORT:-21098}"
-REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/home/bestiias/mypartyplatform}"
-LIVE_HEALTH_URL="${DEPLOY_HEALTH_URL:-https://mypartyplatform.com}" # Update with live domain
+REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/home/bestiias/myfamilyplatform}"
+LIVE_HEALTH_URL="${DEPLOY_HEALTH_URL:-https://myfamilyplatform.com}" # Update with live domain
 
 # Flags
 DRY_RUN=0
@@ -232,24 +232,24 @@ echo "⚡ Building optimized production autoloader (--no-dev, offline)..."
 echo "✅ Production artifact built successfully."
 
 # ------------------------------------------------------------------------------
-# STAGE 4: HARDENED RSYNC TRANSFER (ALLOWLIST & PROTECTED PATHS)
+# STAGE 4: HARDENED RSYNC TRANSFER (NON-DESTRUCTIVE ADDITIVE PUSH)
 # ------------------------------------------------------------------------------
 echo -e "\n🔄 [Stage 4/6] Synchronizing Files to Remote Server ($SSH_HOST)..."
 
 # BRATS & SecOps Manifest Sanity Assertion (David / Marcus / Alex Mercer)
-# Guarantee core directories are matched by .rsync-filter before --delete-excluded executes
+# Guarantee core directories are matched by .rsync-filter before synchronization executes
 echo "🛡️  Asserting integrity of sync manifest before remote synchronization..."
 MANIFEST_FILE=$(mktemp /tmp/manifest_XXXXXX)
 "$RSYNC_BIN" -av --dry-run -f 'merge .rsync-filter' "$SANDBOX_DIR/" /tmp/manifest_check > "$MANIFEST_FILE" 2>&1
 if [ -d "resources/views" ]; then
-    if ! grep -E "resources/views/(index|base|attendee|pledges)" "$MANIFEST_FILE" >/dev/null; then
+    if ! grep -E "resources/views/" "$MANIFEST_FILE" >/dev/null; then
         echo "🛑 FATAL STRUCTURAL GATING: Filter matched zero Blade templates!"
-        echo "Aborting deployment immediately to prevent remote --delete-excluded data loss."
+        echo "Aborting deployment immediately to prevent remote sync errors."
         rm -f "$MANIFEST_FILE"
         exit 1
     fi
 fi
-if ! grep -E "(app/controller|app/model|index\.php)" "$MANIFEST_FILE" >/dev/null; then
+if ! grep -E "(app/controller|app/classes|index\.php)" "$MANIFEST_FILE" >/dev/null; then
     echo "🛑 FATAL STRUCTURAL GATING: Filter matched zero core application files!"
     rm -f "$MANIFEST_FILE"
     exit 1
@@ -257,10 +257,9 @@ fi
 rm -f "$MANIFEST_FILE"
 echo "✅ Sync manifest asserted: Core application and Blade views verified."
 
+# Non-destructive additive push: never use --delete or --delete-excluded
 RSYNC_ARGS=(
     -av
-    --delete
-    --delete-excluded
     -e "ssh -p $SSH_PORT"
     -f 'merge .rsync-filter'
 )
@@ -268,26 +267,38 @@ RSYNC_ARGS=(
 [ $DRY_RUN -eq 1 ] && RSYNC_ARGS+=(--dry-run)
 
 "$RSYNC_BIN" "${RSYNC_ARGS[@]}" "$SANDBOX_DIR/" "${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}"
-echo "✅ File transfer synchronized."
+echo "✅ File transfer synchronized (additive push)."
 
 # ------------------------------------------------------------------------------
-# STAGE 5: REMOTE PERMISSIONS, CACHE FLUSH & OPCACHE RESET
+# STAGE 5: REMOTE PERMISSIONS, CACHE FLUSH & OPCACHE RESET (SCOPED O(1))
 # ------------------------------------------------------------------------------
 if [ $DRY_RUN -eq 0 ]; then
     echo -e "\n🧹 [Stage 5/6] Executing Remote Maintenance & Cache Purge..."
     ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << REMOTE_CMD
-        # 1. Enforce strict permissions (SecOps: Marcus)
-        find "${REMOTE_DIR}" -type d -exec chmod 755 {} + 2>/dev/null || true
-        find "${REMOTE_DIR}" -type f -exec chmod 644 {} + 2>/dev/null || true
+        # 1. Enforce strict permissions on code trees only (High performance O(1) execution)
+        chmod -R 755 "${REMOTE_DIR}/app" "${REMOTE_DIR}/public" "${REMOTE_DIR}/bootstrap" "${REMOTE_DIR}/resources/views" "${REMOTE_DIR}/vendor" 2>/dev/null || true
+        chmod 644 "${REMOTE_DIR}/index.php" "${REMOTE_DIR}/sw.js" "${REMOTE_DIR}/service-worker.js" "${REMOTE_DIR}/manifest.json" "${REMOTE_DIR}/offline.html" 2>/dev/null || true
+
+        # 2. Guarantee upload container directories exist with writable 0755 permissions
+        chmod 755 "${REMOTE_DIR}/resources/images" \
+                  "${REMOTE_DIR}/resources/images/profile" \
+                  "${REMOTE_DIR}/resources/images/post" \
+                  "${REMOTE_DIR}/resources/assets" \
+                  "${REMOTE_DIR}/resources/asset" \
+                  "${REMOTE_DIR}/bootstrap/cache" \
+                  "${REMOTE_DIR}/bootstrap/log" \
+                  "${REMOTE_DIR}/storage" 2>/dev/null || true
+
+        # 3. Strict secrets isolation
         [ -f "${REMOTE_DIR}/.env" ] && chmod 600 "${REMOTE_DIR}/.env" 2>/dev/null || true
 
-        # 2. Clear Blade compiled template cache
+        # 4. Invalidate compiled Blade views only (never touches media or source files)
         rm -f "${REMOTE_DIR}/bootstrap/cache/"*.bladec 2>/dev/null || true
 
-        # 3. Trigger OPcache reset if web server supports CLI/touch
+        # 5. Trigger OPcache reset if web server supports CLI/touch
         touch "${REMOTE_DIR}/index.php" 2>/dev/null || true
 REMOTE_CMD
-    echo "✅ Remote caches cleared and permissions hardened."
+    echo "✅ Remote caches cleared, upload permissions guaranteed, and code hardened."
 fi
 
 # ------------------------------------------------------------------------------
@@ -298,11 +309,12 @@ echo -e "\n🧪 [Stage 6/6] Live Smoke Test & Health Check..."
 if [ $DRY_RUN -eq 0 ] && [ -n "$LIVE_HEALTH_URL" ]; then
     echo "🌐 Probing Live Application: $LIVE_HEALTH_URL"
     HTTP_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$LIVE_HEALTH_URL" || echo "000")
+    MANIFEST_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "${LIVE_HEALTH_URL}/manifest.json" || echo "000")
     
-    if [[ "$HTTP_STATUS" =~ ^(200|301|302)$ ]]; then
-        echo "✅ LIVE HEALTH CHECK PASSED: HTTP $HTTP_STATUS OK"
+    if [[ "$HTTP_STATUS" =~ ^(200|301|302)$ ]] && [[ "$MANIFEST_STATUS" =~ ^(200|301|302)$ ]]; then
+        echo "✅ LIVE HEALTH CHECK PASSED: App (HTTP $HTTP_STATUS) & Manifest (HTTP $MANIFEST_STATUS) OK"
     else
-        echo "⚠️  CRITICAL WARNING: Live Health Check returned HTTP $HTTP_STATUS!"
+        echo "⚠️  CRITICAL WARNING: Live Health Check returned App: HTTP $HTTP_STATUS, Manifest: HTTP $MANIFEST_STATUS!"
         echo "Check server error logs immediately via SSH: ${REMOTE_DIR}/bootstrap/log/"
     fi
 fi

@@ -378,6 +378,12 @@ The following mandates override any manual review assumptions. They are strictly
         return new self($cache ?? new CacheService());
     }
     ```
+*   **8. Strict String Enforcement for User IDs ⚡ NEW:** When writing PHP 8.1+ code, agents must ensure all user IDs are strictly typed as `string`, particularly in objects instantiated with IDs matching alphanumeric formats. This prevents ID truncation bugs (where alphanumeric IDs evaluate to 0 if typed as `int`).
+*   **9. Non-Destructive Deployments Mandate (Zero Deletes on Live) ⚡ NEW: 2026-09-05:** All deployment pipelines and automation scripts (`deploy.sh`, `rsync`, CI/CD workflows) across ALL company applications (`PartyPlatform`, `FamilyPlatform`, `LoanEasyFinance`, `iAccountApp`, `iDecide`, `TenantScore`, `ExecMindApp`) MUST operate strictly as **additive, non-destructive forward-only pushes (upserts)**.
+    - The use of `--delete`, `--delete-excluded`, or recursive deletion commands against live webroots is **STRICTLY FORBIDDEN**.
+    - All user media, uploads (`resources/assets/images/***`, `resources/images/***`, `public/uploads/***`, `public/media/***`, `storage/***`), logs, `.env` configurations, and persistent runtime directories MUST be explicitly protected.
+    - Remote maintenance steps in deployment pipelines MUST be scoped specifically to code/binary directories in constant $O(1)$ time and must NEVER traverse or scan user upload trees.
+    - David and Oladele hold a joint structural veto against any deployment script or CI configuration violating this mandate.
 
 ## 1. The Executive C-Suite (Direct Reports to CEO)
 

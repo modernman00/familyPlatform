@@ -3,18 +3,25 @@
 # Evaluated Top-Down: First Match Wins
 # ==============================================================================
 
-# 1. PROTECT (P) server-only runtime files from --delete / --delete-excluded
+# 1. PROTECT (P) server-only runtime files and user uploads
 P /.env
 P /.env_production
 P /storage/***
 P /public/uploads/***
+P /public/media/***
 P /resources/images/***
+P /resources/images/profile/***
+P /resources/images/post/***
+P /resources/assets/images/***
+P /resources/asset/images/***
 P /bootstrap/log/***
 P /bootstrap/cache/***
 
-# 2. EXCLUDE user uploads from local sync
+# 2. EXCLUDE user runtime uploads from overwriting remote state
 - /public/uploads/***
-- /resources/images/***
+- /public/media/***
+- /resources/images/profile/***
+- /resources/images/post/***
 - /storage/***
 
 # 3. ALLOWLIST (+) Core Application Code & Compiled Assets
@@ -22,16 +29,16 @@ P /bootstrap/cache/***
 + /bootstrap/***
 + /cron/***
 + /public/***
-# Include the resources/ dir itself so rsync descends into it; the '- *' rule
-# below would otherwise prune the whole tree and --delete-excluded would wipe
-# resources/views on the server (every Blade view -> "Template not found").
 + /resources/
 + /resources/views/***
 + /resources/asset/***
++ /resources/assets/***
 + /resources/fonts/***
++ /scripts/
 + /vendor/***
 + /index.php
 + /service-worker.js
++ /sw.js
 + /manifest.json
 + /offline.html
 + /robots.txt
@@ -42,3 +49,4 @@ P /bootstrap/cache/***
 
 # 4. EXCLUDE (-) Everything else (Dev scripts, tests, cypress, markdown, etc.)
 - *
+
