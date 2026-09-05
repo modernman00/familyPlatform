@@ -11,16 +11,59 @@ class FamilyCodeApprovalService
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
+        $this->ensureSchema();
     }
 
     /**
-     * Check if a family code exists and is valid
+     * Ensure the family_approval_requests table exists
+     */
+    private function ensureSchema(): void
+    {
+        try {
+            $this->pdo->exec(
+                "CREATE TABLE IF NOT EXISTS `family_approval_requests` (
+                  `no` int NOT NULL AUTO_INCREMENT,
+                  `id` varchar(255) NOT NULL,
+                  `family_code` varchar(50) NOT NULL,
+                  `inviter_first_name` varchar(100) NOT NULL,
+                  `inviter_last_name` varchar(100) NOT NULL,
+                  `inviter_email_or_mobile` varchar(100) NOT NULL,
+                  `approver_id` varchar(255) NULL,
+                  `temporary_code` varchar(50) NOT NULL,
+                  `status` enum('pending','approved','denied','expired') DEFAULT 'pending',
+                  `request_expires_at` timestamp NULL,
+                  `reminder_sent_at` timestamp NULL,
+                  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+                  `approved_at` timestamp NULL,
+                  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                  `deleted_at` timestamp NULL,
+                  PRIMARY KEY (`no`),
+                  KEY `family_code_idx` (`family_code`),
+                  KEY `status_expires_idx` (`status`, `request_expires_at`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+            );
+        } catch (\Throwable $e) {
+            // Non-blocking in case of restricted permissions
+        }
+    }
+
+    /**
+     * Check if a family code exists and is valid (resilient to # and case)
      */
     public function familyCodeExists(string $code): bool
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM personal WHERE famCode = ?');
-        $stmt->execute([$code]);
-        return $stmt->fetchColumn() > 0;
+        $clean = trim(str_replace('#', '', $code));
+        if ($clean === '') {
+            return false;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM personal 
+             WHERE LOWER(TRIM(REPLACE(famCode, "#", ""))) = LOWER(?) 
+                OR LOWER(TRIM(famCode)) = LOWER(?)'
+        );
+        $stmt->execute([$clean, $code]);
+        return ((int)$stmt->fetchColumn()) > 0;
     }
 
     /**
@@ -28,14 +71,20 @@ class FamilyCodeApprovalService
      */
     public function getFamilyMembersForCode(string $code): array
     {
+        $clean = trim(str_replace('#', '', $code));
+        if ($clean === '') {
+            return [];
+        }
+
         $stmt = $this->pdo->prepare(
             'SELECT DISTINCT a.id, p.firstName, p.lastName, c.email, c.mobile
              FROM personal p
              JOIN account a ON a.id = p.id
              LEFT JOIN contact c ON c.id = p.id
-             WHERE p.famCode = ? AND a.deleted_at IS NULL'
+             WHERE (LOWER(TRIM(REPLACE(p.famCode, "#", ""))) = LOWER(?) OR LOWER(TRIM(p.famCode)) = LOWER(?))
+               AND a.deleted_at IS NULL'
         );
-        $stmt->execute([$code]);
+        $stmt->execute([$clean, $code]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
@@ -45,7 +94,7 @@ class FamilyCodeApprovalService
     public function generateTemporaryCode(): string
     {
         do {
-            $tempCode = 'TEMP_' . bin2hex(random_bytes(6));
+            $tempCode = 'TEMP_' . strtoupper(bin2hex(random_bytes(4)));
         } while ($this->familyCodeExists($tempCode));
 
         return $tempCode;
@@ -61,6 +110,7 @@ class FamilyCodeApprovalService
         string $inviterLastName,
         string $inviterEmailOrMobile
     ): array {
+        $cleanCode = trim(str_replace('#', '', $familyCode));
         $tempCode = $this->generateTemporaryCode();
         $expiresAt = date('Y-m-d H:i:s', strtotime('+7 days'));
 
@@ -72,7 +122,7 @@ class FamilyCodeApprovalService
 
         $stmt->execute([
             $userId,
-            $familyCode,
+            $cleanCode,
             $inviterFirstName,
             $inviterLastName,
             $inviterEmailOrMobile,
@@ -80,7 +130,7 @@ class FamilyCodeApprovalService
             $expiresAt
         ]);
 
-        $requestId = $this->pdo->lastInsertId();
+        $requestId = (int)$this->pdo->lastInsertId();
         $approvalToken = $this->generateApprovalToken($requestId);
 
         return [
@@ -119,24 +169,34 @@ class FamilyCodeApprovalService
         string $lastName,
         string $emailOrMobile
     ): ?array {
-        // First try to match by email/mobile in the family
+        $cleanCode = trim(str_replace('#', '', $familyCode));
+        $cleanContact = trim($emailOrMobile);
+        $cleanPhoneDigits = preg_replace('/[^0-9]/', '', $cleanContact);
+
+        // Match by email/mobile in the family
         $stmt = $this->pdo->prepare(
             'SELECT a.id, p.firstName, p.lastName, c.email, c.mobile
              FROM personal p
              JOIN account a ON a.id = p.id
-             JOIN contact c ON c.id = p.id
-             WHERE p.famCode = ?
-             AND (LOWER(c.email) = LOWER(?) OR LOWER(c.mobile) = LOWER(?))
+             LEFT JOIN contact c ON c.id = p.id
+             WHERE (LOWER(TRIM(REPLACE(p.famCode, "#", ""))) = LOWER(?) OR LOWER(TRIM(p.famCode)) = LOWER(?))
+             AND (
+                 (c.email IS NOT NULL AND LOWER(TRIM(c.email)) = LOWER(?))
+                 OR (a.email IS NOT NULL AND LOWER(TRIM(a.email)) = LOWER(?))
+                 OR (c.mobile IS NOT NULL AND LOWER(TRIM(c.mobile)) = LOWER(?))
+                 OR (c.mobile IS NOT NULL AND REPLACE(REPLACE(REPLACE(REPLACE(c.mobile, " ", ""), "-", ""), "+", ""), "(", "") LIKE ?)
+             )
              AND a.deleted_at IS NULL
              LIMIT 1'
         );
 
-        $stmt->execute([$familyCode, $emailOrMobile, $emailOrMobile]);
+        $phonePattern = '%' . ($cleanPhoneDigits !== '' ? $cleanPhoneDigits : $cleanContact) . '%';
+        $stmt->execute([$cleanCode, $familyCode, $cleanContact, $cleanContact, $cleanContact, $phonePattern]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
             // Verify names match (fuzzy match to handle typos)
-            if ($this->namesMatch($firstName, $lastName, $result['firstName'] ?? '', $result['lastName'] ?? '')) {
+            if ($this->namesMatch($firstName, $lastName, (string)($result['firstName'] ?? ''), (string)($result['lastName'] ?? ''))) {
                 return $result;
             }
         }
