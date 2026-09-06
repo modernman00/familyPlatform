@@ -45,7 +45,7 @@ class FamilyCodeApprovalController
         try {
             $familyCodeString = is_string($familyCode) ? $familyCode : (is_scalar($familyCode) ? (string)$familyCode : '');
             $cleanCode = trim($familyCodeString);
-            $exists = $this->approvalService->familyCodeExists($cleanCode);
+            $exists = $this->approvalService->familyCodeExists($cleanCode); file_put_contents("cypress_debug.log", "Code: $cleanCode, Exists: " . ($exists ? "1" : "0") . "\n", FILE_APPEND);
 
             if ($exists) {
                 $tempCode = $this->approvalService->generateTemporaryCode();
@@ -140,6 +140,15 @@ class FamilyCodeApprovalController
             $inviterLastName = $input['inviter_last_name'] ?? '';
             $inviterContact = $input['inviter_email_or_mobile'] ?? '';
 
+            // Check for existing pending request to prevent duplicates
+            $stmt = $this->pdo->prepare('SELECT id FROM family_approval_requests WHERE id = ? AND status = "pending"');
+            $stmt->execute([$userId]);
+            if ($stmt->fetch()) {
+                http_response_code(409);
+                echo json_encode(['error' => 'A pending approval request already exists for this user.']);
+                return;
+            }
+
             // Create approval request
             $approvalData = $this->approvalService->createApprovalRequest(
                 $userId,
@@ -195,23 +204,23 @@ class FamilyCodeApprovalController
 
     /**
      * Approve a family code registration request
-     * POST /api/family-code/approve/{requestId}
+     * POST /api/family-code/approve/{id}
      * Required query param: ?token={approval_token}
      */
-    public function approveRequest(int $requestId): void
+    public function approveRequest(int $id): void
     {
         header('Content-Type: application/json');
 
         // Verify approval token
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
-        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($requestId, $tokenStr)) {
+        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
             http_response_code(401);
             echo json_encode(['error' => 'Invalid or missing approval token']);
             return;
         }
 
-        $request = $this->approvalService->getApprovalRequest($requestId);
+        $request = $this->approvalService->getApprovalRequest($id);
 
         if (!$request) {
             http_response_code(404);
@@ -225,48 +234,36 @@ class FamilyCodeApprovalController
             return;
         }
 
-        // Approve the request
-        $approved = $this->approvalService->approveRequest($requestId);
+        try {
+            $this->approvalService->approveRequest($id);
+            
+            // Link the user to the family network
+            $this->linkUserToFamily($request['id'], $request['family_code']);
 
-        if ($approved) {
-            // Link user to family code
-            $this->approvalService->linkUserToFamily($request['id'], $request['family_code']);
-
-            // Send confirmation notification to new user
-            $this->notificationService->sendApprovalConfirmationNotification(
-                $request['id'],
-                $request['family_code']
-            );
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Request approved! The user has been linked to your family.'
-            ]);
-        } else {
+            echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
+        } catch (\Throwable $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to approve request']);
+            echo json_encode(['error' => 'Failed to approve request: ' . $e->getMessage()]);
         }
     }
 
     /**
-     * Deny a family code registration request
-     * POST /api/family-code/deny/{requestId}
-     * Required query param: ?token={approval_token}
+     * Handle denying a family network join request (Inviter)
      */
-    public function denyRequest(int $requestId): void
+    public function denyRequest(int $id): void
     {
         header('Content-Type: application/json');
 
         // Verify approval token
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
-        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($requestId, $tokenStr)) {
+        if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
             http_response_code(401);
             echo json_encode(['error' => 'Invalid or missing approval token']);
             return;
         }
 
-        $request = $this->approvalService->getApprovalRequest($requestId);
+        $request = $this->approvalService->getApprovalRequest($id);
 
         if (!$request) {
             http_response_code(404);
@@ -280,16 +277,12 @@ class FamilyCodeApprovalController
             return;
         }
 
-        $denied = $this->approvalService->denyRequest($requestId);
-
-        if ($denied) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Request denied.'
-            ]);
-        } else {
+        try {
+            $this->approvalService->denyRequest($id);
+            echo json_encode(['success' => true, 'message' => 'Request denied successfully']);
+        } catch (\Throwable $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Failed to deny request']);
+            echo json_encode(['error' => 'Failed to deny request: ' . $e->getMessage()]);
         }
     }
 

@@ -1,5 +1,5 @@
 <!-- Inviter Verification Modal -->
-<div id="inviter-verification-modal" class="modal" :class="{ 'is-active': codeExists }" x-show="codeExists" style="display: none;" x-cloak>
+<div id="inviter-verification-modal" class="modal fade" :class="codeExists ? 'show d-block is-active' : ''" x-show="codeExists" x-transition style="background-color: rgba(0,0,0,0.5);" x-cloak>
     <div class="modal-background" @click="codeExists = false; codeVerified = false;"></div>
     <div class="modal-content" style="background: white; border-radius: 12px; padding: 2rem; max-width: 500px; z-index: 1060; margin: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
         <button class="modal-close is-large" type="button" @click="codeExists = false; codeVerified = false;" aria-label="close"></button>

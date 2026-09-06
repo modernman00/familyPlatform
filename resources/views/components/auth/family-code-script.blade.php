@@ -68,11 +68,28 @@
                     }
                 };
 
+                            this.familyCode = e.target.value;
+                        });
+                        
+                        famCodeInput.addEventListener('blur', (e) => {
+                            this.familyCode = e.target.value;
+                            this.checkFamilyCode();
+                        });
+                        
+                        // Initialize Alpine value if already present
+                        if (famCodeInput.value) {
+                            this.familyCode = famCodeInput.value;
+                            this.checkFamilyCode();
+                        }
+                    }
+                });
+
                 // Find input immediately or upon DOM readiness
                 const famInput = document.querySelector('input[name="famCode"]') || document.getElementById('famCode');
                 if (famInput) {
                     attachListeners(famInput);
                 } else {
+                    // Fallback: attempt to bind after a short delay in case the input is rendered later.
                     setTimeout(() => {
                         const lateInput = document.querySelector('input[name="famCode"]') || document.getElementById('famCode');
                         if (lateInput) attachListeners(lateInput);

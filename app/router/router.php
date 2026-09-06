@@ -11,6 +11,7 @@ $isNonProd = in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['
 include_once __DIR__ ."/home.php";
 if ($isNonProd) {
     include_once __DIR__ ."/dbTable.php";
+    include_once __DIR__ ."/test-e2e.php";
 }
 include_once __DIR__ . "/register.php";
 include_once __DIR__ . "/post.php";

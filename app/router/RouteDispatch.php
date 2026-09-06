@@ -62,7 +62,8 @@ final class RouteDispatch
             'App\controller\login\OAuthController',
             'App\controller\BlogController',
             'App\controller\ServeImgController',
-            'App\controller\auth\FamilyCodeApprovalController'
+            'App\controller\auth\FamilyCodeApprovalController',
+            'App\controller\test\E2ETestController'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {
