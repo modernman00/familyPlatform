@@ -746,4 +746,152 @@ final class Organogram extends SingleCustomerData
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Export High-Resolution Scalable Vector Dynasty Poster (A2/A3 Printable)
+     * Renders a royal, framed multi-generation genealogical tree in vector SVG.
+     * @param string|array<string, mixed>|null $id
+     * @return void
+     */
+    public function exportDynastyPoster($id = null): void
+    {
+        try {
+            $rawId = is_string($id) ? checkInput($id) : ($_SESSION['id'] ?? '');
+            $idStr = is_string($rawId) ? $rawId : (string)($_SESSION['id'] ?? '');
+
+            if (empty($idStr)) {
+                throw new NotFoundException('Member ID required');
+            }
+
+            $data = BaseController::findMemberById($idStr);
+            $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
+
+            if (!BaseController::sessionSharesFamily($familyCode)) {
+                throw new ForbiddenException('You can only export your own family dynasty poster.');
+            }
+
+            $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+
+            $familyName = htmlspecialchars((string)($data['lastName'] ?? 'Family'), ENT_QUOTES, 'UTF-8');
+            $nodes = $graphData['nodes'] ?? [];
+
+            // Group by generation level
+            $generations = [
+                -2 => ['name' => 'Grandparents & Ancestors', 'nodes' => []],
+                -1 => ['name' => 'Parents, Uncles & Aunts', 'nodes' => []],
+                 0 => ['name' => 'Core Household & Siblings', 'nodes' => []],
+                 1 => ['name' => 'Children & Descendants', 'nodes' => []],
+                 2 => ['name' => 'Grandchildren', 'nodes' => []],
+            ];
+
+            foreach ($nodes as $node) {
+                $lvl = (int)($node['generation_level'] ?? 0);
+                if (isset($generations[$lvl])) {
+                    $generations[$lvl]['nodes'][] = $node;
+                } else {
+                    $generations[0]['nodes'][] = $node;
+                }
+            }
+
+            // Track poster export analytics
+            \App\services\AnalyticsService::track($idStr, 'dynasty_poster_exported', null, [
+                'family_code' => $familyCode,
+                'total_nodes' => count($nodes)
+            ]);
+
+            // Vector Canvas Dimensions (300dpi standard 2400 x 3400)
+            $W = 2400;
+            $H = 3400;
+
+            header('Content-Type: image/svg+xml');
+            header('Content-Disposition: attachment; filename="' . $familyName . '_Dynasty_Poster.svg"');
+
+            echo '<?xml version="1.0" encoding="UTF-8"?>';
+            echo '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ' . $W . ' ' . $H . '" width="' . $W . '" height="' . $H . '">';
+            echo '<defs>';
+            echo '<linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">';
+            echo '<stop offset="0%" stop-color="#091e12"/>';
+            echo '<stop offset="50%" stop-color="#143621"/>';
+            echo '<stop offset="100%" stop-color="#0a1a0f"/>';
+            echo '</linearGradient>';
+            echo '<linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">';
+            echo '<stop offset="0%" stop-color="#bf953f"/>';
+            echo '<stop offset="25%" stop-color="#fcf6ba"/>';
+            echo '<stop offset="50%" stop-color="#b38728"/>';
+            echo '<stop offset="75%" stop-color="#fbf5b7"/>';
+            echo '<stop offset="100%" stop-color="#aa771c"/>';
+            echo '</linearGradient>';
+            echo '<filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">';
+            echo '<feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#d4af37" flood-opacity="0.35"/>';
+            echo '</filter>';
+            echo '</defs>';
+
+            // Background & Borders
+            echo '<rect width="' . $W . '" height="' . $H . '" fill="url(#bgGrad)"/>';
+            echo '<rect x="60" y="60" width="' . ($W - 120) . '" height="' . ($H - 120) . '" fill="none" stroke="url(#goldGrad)" stroke-width="10"/>';
+            echo '<rect x="80" y="80" width="' . ($W - 160) . '" height="' . ($H - 160) . '" fill="none" stroke="rgba(212, 175, 55, 0.4)" stroke-width="2"/>';
+
+            // Ornate Header
+            echo '<text x="' . ($W / 2) . '" y="240" font-family="Cinzel, Georgia, serif" font-size="82" font-weight="bold" fill="url(#goldGrad)" text-anchor="middle" letter-spacing="6">THE ' . strtoupper($familyName) . ' DYNASTY</text>';
+            echo '<text x="' . ($W / 2) . '" y="310" font-family="sans-serif" font-size="34" font-weight="600" fill="rgba(255, 255, 255, 0.75)" text-anchor="middle" letter-spacing="4">OFFICIAL LINEAGE &amp; HERITAGE RECORD</text>';
+            echo '<line x1="' . ($W / 2 - 300) . '" y1="360" x2="' . ($W / 2 + 300) . '" y2="360" stroke="url(#goldGrad)" stroke-width="4"/>';
+
+            // Generations
+            $currentY = 480;
+            $activeGens = array_filter($generations, fn($g) => count($g['nodes']) > 0);
+            $tierHeight = (int)(($H - 700) / max(count($activeGens), 1));
+
+            foreach ($activeGens as $genLevel => $gen) {
+                // Tier Header
+                echo '<rect x="160" y="' . ($currentY - 40) . '" width="' . ($W - 320) . '" height="50" rx="25" fill="rgba(212, 175, 55, 0.12)" stroke="rgba(212, 175, 55, 0.3)" stroke-width="1"/>';
+                echo '<text x="' . ($W / 2) . '" y="' . ($currentY - 6) . '" font-family="sans-serif" font-size="24" font-weight="bold" fill="#d4af37" text-anchor="middle" letter-spacing="3">' . strtoupper((string)$gen['name']) . '</text>';
+
+                // Nodes in this generation
+                $genNodes = $gen['nodes'];
+                $nodeCount = count($genNodes);
+                $nodeWidth = 320;
+                $nodeHeight = 160;
+                $totalWidth = $nodeCount * ($nodeWidth + 60);
+                $startX = (int)(($W - $totalWidth) / 2);
+
+                if ($startX < 120) {
+                    $startX = 120;
+                }
+
+                $nx = $startX;
+                $ny = $currentY + 50;
+
+                foreach ($genNodes as $idx => $gn) {
+                    $name = htmlspecialchars((string)($gn['full_name'] ?? 'Relative'), ENT_QUOTES, 'UTF-8');
+                    $role = htmlspecialchars((string)($gn['bio'] ?? 'Family Member'), ENT_QUOTES, 'UTF-8');
+                    $isDec = !empty($gn['is_deceased']);
+
+                    echo '<g transform="translate(' . $nx . ', ' . $ny . ')">';
+                    echo '<rect width="' . $nodeWidth . '" height="' . $nodeHeight . '" rx="20" fill="rgba(255, 255, 255, 0.08)" stroke="' . ($isDec ? '#94a3b8' : 'url(#goldGrad)') . '" stroke-width="3" filter="url(#goldGlow)"/>';
+                    echo '<text x="' . ($nodeWidth / 2) . '" y="60" font-family="sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">' . $name . '</text>';
+                    echo '<text x="' . ($nodeWidth / 2) . '" y="95" font-family="sans-serif" font-size="16" font-weight="600" fill="#d4af37" text-anchor="middle">' . strtoupper($role) . '</text>';
+                    if ($isDec) {
+                        echo '<text x="' . ($nodeWidth / 2) . '" y="130" font-family="sans-serif" font-size="14" font-style="italic" fill="#cbd5e1" text-anchor="middle">In Loving Memory</text>';
+                    }
+                    echo '</g>';
+
+                    $nx += $nodeWidth + 60;
+                    if ($nx + $nodeWidth > $W - 120) {
+                        $nx = $startX;
+                        $ny += $nodeHeight + 30;
+                    }
+                }
+
+                $currentY += $tierHeight;
+            }
+
+            // Footer
+            echo '<text x="' . ($W / 2) . '" y="' . ($H - 140) . '" font-family="sans-serif" font-size="22" fill="rgba(255, 255, 255, 0.6)" text-anchor="middle">Generated on ' . date('F j, Y') . ' • Total Dynasty Members: ' . count($nodes) . ' • Verified on FamilyPlatform</text>';
+            echo '</svg>';
+            exit;
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 }

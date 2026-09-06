@@ -18,3 +18,6 @@ $router->map('POST', '/member/organogram/editor/sibling', 'App\controller\member
 $router->map('POST', '/member/organogram/editor/update', 'App\controller\members\OrganogramEditorController@updateNode', 'MEMBER_ORGANOGRAM_UPDATE_NODE');
 $router->map('POST', '/api/claim-family-node', 'App\controller\members\Organogram@claimNode', 'API_CLAIM_FAMILY_NODE');
 $router->map('POST', '/api/dismiss-claim-node', 'App\controller\members\Organogram@dismissClaimNode', 'API_DISMISS_CLAIM_NODE');
+$router->map('GET', '/member/organogram/export-poster/[*:id]', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER');
+$router->map('GET', '/member/organogram/export-poster', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER_DEFAULT');
+

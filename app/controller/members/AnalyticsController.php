@@ -45,6 +45,11 @@ final class AnalyticsController extends BaseController
                 'kinship_connect',
                 'kinship_dismiss',
                 'kinship_impression',
+                'kinship_path_traced',
+                'tree_view_mode_switched',
+                'heritage_story_exported',
+                'tree_invite_claim',
+                'dynasty_poster_exported'
             ];
 
             if (empty($eventType) || !in_array($eventType, $allowedEvents, true)) {

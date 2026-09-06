@@ -64,12 +64,15 @@ export const showPersonDetails = async (personData) => {
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join and share family memories.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <a href="https://api.whatsapp.com/send?text=${inviteMessage}" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
+        <a href="https://api.whatsapp.com/send?text=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'whatsapp' })" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-whatsapp"></i> WhatsApp
         </a>
-        <a href="sms:?body=${inviteMessage}" class="btn" style="background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
+        <a href="sms:?body=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'sms' })" class="btn" style="background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-chat-text"></i> SMS
         </a>
+        <button type="button" onclick="if(window.copyInviteToClipboard) window.copyInviteToClipboard('${inviteLink}', this)" class="btn btn-secondary" style="border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; font-weight: 600;">
+          <i class="bi bi-clipboard-check"></i> Copy Link
+        </button>
       </div>
     </div>
   ` : '';
@@ -84,6 +87,14 @@ export const showPersonDetails = async (personData) => {
         <div class="person-relation">${esc(relation || 'Relative')}</div>
         ${isDeceased ? '<span class="badge bg-secondary ms-2" style="font-size: 0.75rem;"><i class="bi bi-flower1"></i> Deceased</span>' : ''}
       </div>
+    </div>
+
+    <!-- Kinship Pathfinder Shortcut -->
+    <div class="kinship-action-section mt-3 mb-3">
+      <button type="button" class="btn btn-sm btn-outline-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2" id="btnTraceKinship" onclick="if(window.traceKinshipToSelected) window.traceKinshipToSelected('${esc(String(nodeId || personId || ''))}', '${esc(cleanName)}')">
+        <i class="bi bi-diagram-2-fill text-primary"></i> Trace Relationship to Me
+      </button>
+      <div id="kinshipPathTrail" class="kinship-path-trail mt-2 d-none"></div>
     </div>
 
     <div class="detail-grid">
@@ -136,7 +147,10 @@ export const showPersonDetails = async (personData) => {
 
     ${claimSpotHtml}
 
-    <div class="modal-actions mt-4" style="display: flex; gap: 10px; justify-content: flex-end;">
+    <div class="modal-actions mt-4" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+      <button type="button" class="btn" onclick="if(window.openHeritageStoryModal) window.openHeritageStoryModal('${esc(cleanName)}', '${esc(relation)}', '${esc(img)}', ${isDeceased ? 'true' : 'false'})" style="background: linear-gradient(135deg, var(--gold-accent), #b45309); color: white; border-radius: 14px; padding: 8px 16px; font-weight: 600; border: none;">
+        <i class="bi bi-stars"></i> Story Card
+      </button>
       ${personId ? `
         <a href="/allMembers/seeProfile/${encodeURIComponent(personId)}" class="btn" style="background: var(--primary-color); color: white; border-radius: 14px; padding: 8px 20px; font-weight: 600; text-decoration: none;">
           <i class="bi bi-person-fill"></i> View Profile

@@ -1,0 +1,190 @@
+# ==============================================================================
+# RED TEAM CUSTOM RULES — FamilyPlatform deploy gate (Stage 2.5)
+# ------------------------------------------------------------------------------
+# Scope: app/ (the only PHP source tree). Rules target sinks that must NEVER
+# appear in this codebase. Keep them tight — a false positive blocks deploys.
+# Run locally:  semgrep scan --config tests/security/red-team-rules.yaml app/
+# ==============================================================================
+rules:
+  # --- Remote code execution ---------------------------------------------------
+  - id: rt-php-code-execution-sink
+    languages: [php]
+    severity: ERROR
+    message: >
+      Dynamic code execution sink (eval/assert-expr/create_function). This is a
+      remote-code-execution class vulnerability and is forbidden in app/.
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: create_function(...)
+          - pattern: assert($EXPR)
+      - pattern-not: assert($X === $Y)
+      - pattern-not: assert($X == $Y)
+      - pattern-not: assert($X !== $Y)
+      - pattern-not: assert($X instanceof $C)
+
+  # --- OS command execution --------------------------------------------------
+  - id: rt-php-os-command-sink
+    languages: [php]
+    severity: ERROR
+    message: >
+      OS command execution sink. Shelling out from the web tier is forbidden;
+      if a subprocess is genuinely required, isolate it behind a reviewed
+      allowlisted wrapper outside app/.
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-78: OS Command Injection"
+    pattern-either:
+      - pattern: system(...)
+      - pattern: exec(...)
+      - pattern: shell_exec(...)
+      - pattern: passthru(...)
+      - pattern: proc_open(...)
+      - pattern: popen(...)
+      - pattern: pcntl_exec(...)
+      - pattern: $X = `...`
+
+  # --- preg_replace /e modifier (legacy RCE) ---------------------------------
+  - id: rt-php-preg-replace-eval
+    languages: [php]
+    severity: ERROR
+    message: >
+      preg_replace() with the /e (PREG_REPLACE_EVAL) modifier executes the
+      replacement as PHP code. Use preg_replace_callback() instead.
+    metadata:
+      category: security
+      cwe: "CWE-95: Eval Injection"
+    patterns:
+      - pattern: preg_replace("$REGEX", ...)
+      - metavariable-regex:
+          metavariable: $REGEX
+          regex: '.*/[a-df-z]*e[a-df-z]*$'
+
+  # --- Untrusted deserialization -------------------------------------------
+  - id: rt-php-unserialize-user-input
+    languages: [php]
+    severity: ERROR
+    message: >
+      unserialize() on request-controlled data enables PHP object injection.
+      Use json_decode() for untrusted payloads.
+    metadata:
+      category: security
+      owasp: "A08:2021 - Software and Data Integrity Failures"
+      cwe: "CWE-502: Deserialization of Untrusted Data"
+    pattern-either:
+      - pattern: unserialize($_GET[...])
+      - pattern: unserialize($_POST[...])
+      - pattern: unserialize($_REQUEST[...])
+      - pattern: unserialize($_COOKIE[...])
+      - pattern: unserialize(base64_decode($_GET[...]))
+      - pattern: unserialize(base64_decode($_POST[...]))
+      - pattern: unserialize(base64_decode($_REQUEST[...]))
+      - pattern: unserialize(base64_decode($_COOKIE[...]))
+
+  # --- Dynamic file inclusion --------------------------------------------
+  - id: rt-php-file-inclusion-user-input
+    languages: [php]
+    severity: ERROR
+    message: >
+      include/require path derived from request input is a Local/Remote File
+      Inclusion vulnerability. Resolve against a fixed allowlist instead.
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-98: PHP Remote File Inclusion"
+    pattern-either:
+      - pattern: include $_GET[...];
+      - pattern: include $_POST[...];
+      - pattern: include $_REQUEST[...];
+      - pattern: include_once $_GET[...];
+      - pattern: include_once $_REQUEST[...];
+      - pattern: require $_GET[...];
+      - pattern: require $_REQUEST[...];
+      - pattern: require_once $_GET[...];
+      - pattern: require_once $_REQUEST[...];
+      - pattern: include "..." . $_GET[...];
+      - pattern: include "..." . $_REQUEST[...];
+      - pattern: require "..." . $_GET[...];
+      - pattern: require "..." . $_REQUEST[...];
+
+  # --- extract() on request arrays (variable overwrite) --------------------
+  - id: rt-php-extract-request
+    languages: [php]
+    severity: ERROR
+    message: >
+      extract() on a request superglobal lets an attacker overwrite arbitrary
+      local variables. Read the specific keys you need explicitly.
+    metadata:
+      category: security
+      cwe: "CWE-621: Variable Extraction Error"
+    pattern-either:
+      - pattern: extract($_GET)
+      - pattern: extract($_POST)
+      - pattern: extract($_REQUEST)
+      - pattern: extract($_COOKIE)
+      - pattern: extract($_SERVER)
+
+  # --- Reflected XSS: raw echo of request input --------------------------
+  - id: rt-php-reflected-echo-superglobal
+    languages: [php]
+    severity: ERROR
+    message: >
+      Request input echoed to the response without encoding — reflected XSS.
+      Wrap in htmlspecialchars(..., ENT_QUOTES, 'UTF-8') or the project's
+      escaping helper.
+    metadata:
+      category: security
+      owasp: "A03:2021 - Injection"
+      cwe: "CWE-79: Cross-site Scripting"
+    pattern-either:
+      - pattern: echo $_GET[...];
+      - pattern: echo $_POST[...];
+      - pattern: echo $_REQUEST[...];
+      - pattern: print($_GET[...]);
+      - pattern: print($_REQUEST[...]);
+      - pattern: printf(..., $_GET[...]);
+      - pattern: printf(..., $_REQUEST[...]);
+
+  # --- TLS verification disabled ----------------------------------------
+  - id: rt-php-tls-verification-disabled
+    languages: [php]
+    severity: ERROR
+    message: >
+      TLS certificate/host verification disabled on an outbound HTTP client.
+      This exposes every request to man-in-the-middle interception.
+    metadata:
+      category: security
+      owasp: "A02:2021 - Cryptographic Failures"
+      cwe: "CWE-295: Improper Certificate Validation"
+    pattern-either:
+      - pattern: curl_setopt($CH, CURLOPT_SSL_VERIFYPEER, false);
+      - pattern: curl_setopt($CH, CURLOPT_SSL_VERIFYPEER, 0);
+      - pattern: curl_setopt($CH, CURLOPT_SSL_VERIFYHOST, 0);
+      - pattern: curl_setopt($CH, CURLOPT_SSL_VERIFYHOST, false);
+      - pattern: curl_setopt_array($CH, [..., CURLOPT_SSL_VERIFYPEER => false, ...]);
+
+  # --- Weak hashing of credentials / secrets ---------------------------
+  - id: rt-php-weak-password-hash
+    languages: [php]
+    severity: ERROR
+    message: >
+      md5()/sha1()/crypt()-DES used on a password or secret. Use password_hash()
+      with PASSWORD_DEFAULT / PASSWORD_ARGON2ID.
+    metadata:
+      category: security
+      owasp: "A02:2021 - Cryptographic Failures"
+      cwe: "CWE-916: Use of Password Hash With Insufficient Computational Effort"
+    patterns:
+      - pattern-either:
+          - pattern: md5($PW)
+          - pattern: sha1($PW)
+          - pattern: hash("md5", $PW)
+          - pattern: hash("sha1", $PW)
+      - metavariable-regex:
+          metavariable: $PW
+          regex: '(?i).*(pass|passwd|pwd|secret|token|credential).*'

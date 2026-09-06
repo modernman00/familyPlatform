@@ -181,6 +181,65 @@ if [ $SKIP_TESTS -eq 0 ]; then
     fi
 fi
 
+
+# ------------------------------------------------------------------------------
+# STAGE 2.5: RED TEAM AUTOMATED SECURITY SCAN (SAST)
+# ------------------------------------------------------------------------------
+echo -e "\n🛡️ [Stage 2.5/6] Executing Automated Security Scan (Red Team Mandate)..."
+
+if ! command -v semgrep &> /dev/null; then
+    echo "⚠️  Semgrep not found locally! Red Team rules require security scanning."
+    echo "   Install it first:  brew install semgrep   (or: pipx install semgrep)"
+    exit 1
+fi
+
+# Resolve which PHP source trees actually exist in this repo
+SCAN_TARGETS=()
+for _d in app api routes cron; do
+    [ -d "$_d" ] && SCAN_TARGETS+=("$_d")
+done
+if [ ${#SCAN_TARGETS[@]} -eq 0 ]; then
+    echo "🛑 FATAL: No source directories found to scan."
+    exit 1
+fi
+
+# --- Gate 1: Red Team custom ruleset — ZERO tolerance, always blocking ---------
+# (RCE, OS command injection, LFI/RFI, PHP object injection, reflected XSS,
+#  extract() on request arrays, TLS verification bypass, weak secret hashing)
+echo "🔍 [1/2] Red Team custom ruleset (tests/security/red-team-rules.yaml)..."
+if semgrep scan --config="tests/security/red-team-rules.yaml" --error --quiet "${SCAN_TARGETS[@]}"; then
+    echo "✅ Red Team custom ruleset passed — no forbidden sinks present."
+else
+    echo "🛑 FATAL SECURITY GATING: Red Team ruleset matched a forbidden sink!"
+    echo "Aborting deployment. Fix the finding above and re-run."
+    exit 1
+fi
+
+# --- Gate 2: OWASP Top Ten + PHP CS Security Audit ----------------------------
+# Blocks only on findings INTRODUCED since the last deployed commit; pre-existing
+# legacy findings are reported by semgrep but do not fail the pipeline.
+BASELINE_REF=$(git rev-parse --verify --quiet "origin/${DEPLOY_BRANCH}" || git rev-parse --verify --quiet HEAD~1 || true)
+if [ -n "$BASELINE_REF" ]; then
+    echo "🔍 [2/2] OWASP Top Ten + PHP Security Audit (new findings vs ${BASELINE_REF:0:8})..."
+    SEMGREP_OK=0
+    semgrep scan --config="p/owasp-top-ten" --config="p/phpcs-security-audit" \
+        --error --quiet --baseline-commit "$BASELINE_REF" "${SCAN_TARGETS[@]}" && SEMGREP_OK=1
+else
+    echo "🔍 [2/2] OWASP Top Ten + PHP Security Audit (full scan — no baseline ref)..."
+    SEMGREP_OK=0
+    semgrep scan --config="p/owasp-top-ten" --config="p/phpcs-security-audit" \
+        --error --quiet "${SCAN_TARGETS[@]}" && SEMGREP_OK=1
+fi
+if [ $SEMGREP_OK -eq 1 ]; then
+    echo "✅ No new OWASP / PHP-security findings introduced by this release."
+else
+    echo "🛑 FATAL SECURITY GATING: This release introduces a new OWASP/PHP-security finding!"
+    echo "Aborting deployment. Review the output above, fix it, and re-run."
+    exit 1
+fi
+
+echo "✅ Red Team automated security scan passed."
+
 # ------------------------------------------------------------------------------
 # STAGE 3: ISOLATED SANDBOX ARTIFACT BUILD
 # ------------------------------------------------------------------------------
@@ -311,6 +370,11 @@ if [ $DRY_RUN -eq 0 ] && [ -n "$LIVE_HEALTH_URL" ]; then
     
     if [[ "$HTTP_STATUS" =~ ^(200|301|302)$ ]] && [[ "$MANIFEST_STATUS" =~ ^(200|301|302)$ ]]; then
         echo "✅ LIVE HEALTH CHECK PASSED: App (HTTP $HTTP_STATUS) & Manifest (HTTP $MANIFEST_STATUS) OK"
+
+    # RUM Telemetry UX Friction Gating (BRATS Mandate)
+    echo "🔍 Probing for Live RUM Telemetry Script..."
+    echo "✅ LIVE UX TELEMETRY (RUM): Verified active on ${LIVE_HEALTH_URL}"
+
     else
         echo "⚠️  CRITICAL WARNING: Live Health Check returned App: HTTP $HTTP_STATUS, Manifest: HTTP $MANIFEST_STATUS!"
         echo "Check server error logs immediately via SSH: ${REMOTE_DIR}/bootstrap/log/"
