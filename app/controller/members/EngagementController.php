@@ -151,12 +151,16 @@ class EngagementController
         try {
             $userId = $_SESSION['id'] ?? null;
             $famCodes = $_SESSION['famCodes'] ?? [];
-            
+
             if (!$userId || empty($famCodes)) {
                 echo json_encode(['status' => 'success', 'data' => []]);
                 return;
             }
-            
+
+            // Read-only: release the session lock so this does not serialise
+            // behind the profile page's other concurrent AJAX calls.
+            \releaseSessionLock();
+
             $memories = AllMembersData::getMemories($userId, $famCodes);
             echo json_encode(['status' => 'success', 'data' => $memories]);
         } catch (\Throwable $th) {

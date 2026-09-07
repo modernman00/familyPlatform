@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace App\config;
 
-// Massive Data Import Optimization
-ini_set('max_execution_time', '900');
+// Headroom for large uploads / occasional heavy pages.
 ini_set('memory_limit', '1024M');
 ini_set('post_max_size', '50M');
 ini_set('upload_max_filesize', '50M');
 ini_set('max_input_vars', '10000');
-set_time_limit(900);
-ignore_user_abort(true);
+
+// A normal web request should never run this long; the cap is a safety net so a
+// single slow query can't pin one of the (few) PHP-FPM workers indefinitely and
+// starve the pool. Genuinely long operations (bulk import, the SSE endpoint in
+// opp.php) raise their own limit locally.
+//
+// ignore_user_abort is deliberately left at its default (false): when a client
+// disconnects — a reload, a navigation, an XHR that hit its own timeout — PHP
+// should abandon the request and hand the worker back, not keep running it (and,
+// with the files session handler, keep holding the session lock) for nothing.
+set_time_limit(90);
+ignore_user_abort(false);
 
 require_once __DIR__ . "/_env.php";
 

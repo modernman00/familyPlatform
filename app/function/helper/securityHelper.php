@@ -145,12 +145,12 @@ HTML;
 
 /**
  * Get PWA cache strategy for the current page type.
- * 
+ *
  * Returns the appropriate caching strategy based on page type:
  * - 'network-first' for authenticated pages (always check server first)
  * - 'cache-first' for static assets
  * - 'stale-while-revalidate' for semi-dynamic content
- * 
+ *
  * @param string $pageType 'authenticated', 'static', or 'dynamic'
  * @return string
  */
@@ -162,4 +162,29 @@ function getPWACacheStrategy(string $pageType = 'authenticated'): string
         'dynamic' => 'stale-while-revalidate',
         default => 'network-first'
     };
+}
+
+/**
+ * Flush the session and release its file lock for the rest of a read-only request.
+ *
+ * PHP's default (files) session handler holds an exclusive lock from
+ * session_start() until the request finishes. The profile page fires a burst of
+ * concurrent AJAX calls on load (feed, comments, friend requests, notifications,
+ * memories…) that all carry the same session cookie, so that lock serialises
+ * them one-behind-another on a small FPM worker pool — and because init.php sets
+ * ignore_user_abort(true), a slow endpoint keeps holding the lock even after the
+ * browser has already timed the request out, stalling everything queued behind it.
+ *
+ * Any handler that only *reads* $_SESSION can let go of the lock the moment it
+ * has copied out what it needs. $_SESSION stays readable afterwards; only further
+ * writes would fail to persist — so never call this before code that assigns to
+ * $_SESSION.
+ *
+ * @return void
+ */
+function releaseSessionLock(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
 }

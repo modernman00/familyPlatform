@@ -53,6 +53,10 @@ final class NotificationController extends Select
 
             $receivers = self::sessionReceiverIds($userId);
 
+            // Read-only: drop the session lock so this does not block the profile
+            // page's other concurrent AJAX calls sharing the same session file.
+            \releaseSessionLock();
+
             $placeholders = implode(',', array_fill(0, count($receivers), '?'));
             $query = "SELECT * FROM notification
                 WHERE receiver_id IN ($placeholders)

@@ -381,6 +381,11 @@ final class FamilyRequestController extends BaseController
       $id = parent::returnId();
       $result = [];
 
+      // Read-only endpoint (per-member findMemberById lookups can be slow): let go
+      // of the session lock so it does not stall the profile page's other
+      // concurrent AJAX calls sharing the same session file.
+      \releaseSessionLock();
+
       $select = Select::formAndMatchQuery(selection: "SELECT_AND", table: "requestMgt", identifier1: "approver_id", identifier2: "status");
 
       $getRequesterDataById = Select::selectFn2(query: $select, bind: [$id, 'Request sent']);

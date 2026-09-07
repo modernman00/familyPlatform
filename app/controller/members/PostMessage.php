@@ -52,6 +52,11 @@ final class PostMessage
             $id = (string) $id;
             $famCodes = $_SESSION['famCodes'] ?? [\cleanSession((string)($_SESSION['famCode'] ?? ''))];
 
+            // Read-only from here on: drop the session lock so this (comment- and
+            // reaction-heavy) query does not block the profile page's other
+            // concurrent AJAX calls queued behind the same session file lock.
+            \releaseSessionLock();
+
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
             $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
@@ -89,9 +94,6 @@ final class PostMessage
                 return;
             }
 
-            $count = count($posts);
-
-
             // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
             foreach ($posts as &$post) {
 
@@ -125,7 +127,6 @@ final class PostMessage
             // 8. Unset references to prevent bugs
             unset($post);
 
-            $_SESSION['POST_COUNT'] = $count;
             msgSuccess(
                 code: 200,
                 msg: [
