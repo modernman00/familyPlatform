@@ -323,10 +323,19 @@ if [ -f "service-worker.js" ]; then
     echo "🔁 Stamped Root Service Worker: ${SW_BUILD}"
 fi
 
-# Hybrid vendor strategy: rsync local vendor/ (no remote deploy key needed),
-# then regenerate the autoloader on the remote with the server's own PHP binary.
-# Local dump-autoload is intentionally NOT run here — this is done on the remote
-# after rsync to guarantee the correct PHP platform and extensions are used.
+# Vendor strategy: rsync local vendor/ (no remote deploy key needed), then build the
+# optimized production autoloader *inside the sandbox* before upload. This removes the
+# hard dependency on Composer existing on the shared host. dump-autoload only (re)writes
+# pure-PHP autoloader files (autoload_classmap/static/etc.) — it never compiles
+# platform-specific binaries — so generating it locally is safe across PHP versions.
+if command -v composer >/dev/null 2>&1; then
+    echo "⚡ Optimizing Composer autoloader in sandbox (local)..."
+    if ! (cd "$SANDBOX" && composer dump-autoload --optimize --no-dev --no-interaction --quiet); then
+        echo "⚠️  WARNING: local composer dump-autoload failed; uploading existing vendor/autoload.php as-is."
+    fi
+else
+    echo "⚠️  WARNING: composer not found locally; uploading existing vendor/autoload.php as-is."
+fi
 echo "✅ Sandbox assembled."
 
 ################################################################################
@@ -378,22 +387,9 @@ rsync -az --delete \
 
 echo "✅ Rsync upload complete."
 
-# Regenerate autoloader on the remote server using the server's PHP binary.
-# Uses 'command -v composer' for portability across hosting providers.
-# (Rajan R-09: hardcoded /usr/local/bin/composer breaks cross-portfolio use)
-echo "⚡ Regenerating Composer autoloader on remote server..."
-RELEASE_PATH="${RELEASES_DIR}/${RELEASE_ID}"
-ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << EOF
-COMPOSER_BIN=\$(command -v composer 2>/dev/null || echo "/usr/local/bin/composer")
-if [ ! -x "\$COMPOSER_BIN" ]; then
-    echo "🛑 FATAL: composer not found on remote server."
-    exit 1
-fi
-cd "${RELEASE_PATH}" || exit 1
-"\$COMPOSER_BIN" dump-autoload --optimize --no-dev --no-interaction --quiet
-EOF
-[ $? -eq 0 ] || { echo "🛑 FATAL: composer dump-autoload failed on remote server. Aborting deployment."; exit 1; }
-echo "✅ Remote autoloader optimized."
+# Autoloader was already optimized locally in the sandbox and uploaded via rsync.
+# No remote Composer binary is required — this removes the shared-host dependency.
+echo "✅ Autoloader uploaded with release (no remote Composer required)."
 
 ################################################################################
 # 10. ACTIVATE ATOMIC SYMLINK, BIND PERSISTENT STORAGE & WARM CACHES
