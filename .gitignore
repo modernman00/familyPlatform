@@ -26,6 +26,8 @@ public/js
 olaogun.test-key.pem
 olaogun.test.pem 
 
+.deploy.env
+
 server.crt
 localhost-key.pem
 localhost.pem
