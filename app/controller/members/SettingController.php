@@ -245,11 +245,27 @@ final class SettingController extends BaseController
                     UpdateFn::updateMultiple('otherFamily', $cleanOtherFamily, 'id');
                 } else {
                     $cleanOtherFamily['otherFamCode'] = (string)($_SESSION['famCode'] ?? '');
-                    $cols = array_keys($cleanOtherFamily);
+
+                    // Column names are restricted to this fixed allowlist so the
+                    // INSERT column list can never contain user-controlled text;
+                    // every value is still bound through a "?" placeholder.
+                    $allowedCols = [
+                        'id', 'otherFamCode',
+                        'father_name', 'father_email', 'father_mobile',
+                        'mother_name', 'maiden_name', 'mother_email', 'mother_mobile',
+                        'spouse_name', 'spouse_email', 'spouse_mobile',
+                    ];
+                    // array_intersect keeps only entries that appear in the
+                    // hard-coded $allowedCols, so $cols is a subset of literal
+                    // strings regardless of the request.
+                    $cols = array_values(array_intersect($allowedCols, array_keys($cleanOtherFamily)));
+                    $values = array_map(static fn(string $c): mixed => $cleanOtherFamily[$c], $cols);
                     $placeholders = array_fill(0, count($cols), '?');
+                    // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- column names come only from the fixed $allowedCols allow-list above; all values are bound via "?" placeholders.
                     $sql = "INSERT INTO otherFamily (" . implode(', ', $cols) . ") VALUES (" . implode(', ', $placeholders) . ")";
+                    // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable -- $sql is built from the allow-list above, not request data.
                     $insStmt = $db->prepare($sql);
-                    $insStmt->execute(array_values($cleanOtherFamily));
+                    $insStmt->execute($values);
                 }
             }
 

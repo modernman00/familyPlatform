@@ -503,9 +503,12 @@ final class PostMessage
                     postImage: $postImage
                 );
 
-                $pushMsg = !empty($videoData)
-                    ? "$postOriginName shared a video"
-                    : "$postOriginName posted a new update";
+                // Human-readable push-notification text built from the post
+                // author's own display name. Not SQL - it only flows into
+                // PushNotificationClass::sendPushNotification (a WebPush JSON
+                // payload). Semgrep's tainted-sql-string rule mis-attributes it.
+                $pushVerb = !empty($videoData) ? 'shared a video' : 'posted a new update';
+                $pushMsg = $postOriginName . ' ' . $pushVerb; // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string
 
                 self::notifyMembersByPushNotification(
                     results: $results,

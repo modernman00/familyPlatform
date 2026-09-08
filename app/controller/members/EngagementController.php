@@ -139,9 +139,12 @@ class EngagementController
 
             http_response_code(200);
             header('Content-Type: application/json');
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response, served as application/json; json_encode escapes the payload and the browser never HTML-renders it.
             echo json_encode(['status' => 'success', 'poll' => $pollData]);
         } catch (\Throwable $th) {
             http_response_code(400);
+            header('Content-Type: application/json');
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API error response, application/json.
             echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
         }
     }

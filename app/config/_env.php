@@ -15,8 +15,20 @@ require_once __DIR__ . "/../../vendor/autoload.php";
 $basePath = realpath(__DIR__ . '/../../');
 define('BASE_PATH', $basePath !== false ? $basePath : __DIR__ . '/../../');
 
-$envDir = getenv('APP_ENV_DIR') ?: ($_SERVER['APP_ENV_DIR'] ?? '');
-if ($envDir === '' || !is_readable(rtrim($envDir, '/') . '/.env')) {
+// APP_ENV_DIR is a deployment-set server var (vhost / .htaccess SetEnv), never a
+// request value. Still, only honour it when it is an absolute path with no
+// traversal segments and points at a readable .env, so a misconfigured
+// environment can never redirect the config load somewhere unexpected.
+$envDirRaw = getenv('APP_ENV_DIR') ?: ($_SERVER['APP_ENV_DIR'] ?? '');
+$envDir = '';
+if ($envDirRaw !== '' && $envDirRaw[0] === '/' && !str_contains($envDirRaw, '..')) {
+    $candidate = rtrim($envDirRaw, '/');
+    // nosemgrep: php.lang.security.injection.tainted-filename.tainted-filename -- APP_ENV_DIR is a server-set environment variable (Apache SetEnv / vhost), not a request input; it is additionally constrained above to an absolute, traversal-free path.
+    if (is_readable($candidate . '/.env')) {
+        $envDir = $candidate;
+    }
+}
+if ($envDir === '') {
     if (is_readable('/home/bestiias/private/.env')) {
         $envDir = '/home/bestiias/private';
     } else {

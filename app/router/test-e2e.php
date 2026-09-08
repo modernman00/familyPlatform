@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 /**
  * E2E Testing Routes
- * NOTE: This file is only included from router.php when APP_ENV is non-prod.
- *
- * @var \AltoRouter $router
+ * NOTE: This file is only included from router.php when APP_ENV is non-prod,
+ * where $router is the AltoRouter instance created in router.php.
  */
 
 $router->map('GET', '/api/test/get-valid-family-code', 'App\controller\test\E2ETestController@getValidFamilyCode', 'test-valid-family-code');

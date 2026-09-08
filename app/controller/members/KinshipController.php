@@ -68,6 +68,7 @@ final class KinshipController extends BaseController
                 AnalyticsService::trackBatch($userId, 'kinship_impression', $impressionEvents);
             }
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json set above); json_encode escapes the payload.
             echo json_encode([
                 'status' => 'success',
                 'data'   => $sanitisedSuggestions,

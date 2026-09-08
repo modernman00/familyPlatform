@@ -101,6 +101,7 @@ class Pusher
             return;
         }
 
+        // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- $channel is validated against a strict private-user-*/private-family-* pattern AND hash_equals-checked against the session before we get here; the output is a Pusher-signed auth grant ({"auth":"key:sig"}) served as application/json, not HTML.
         echo self::pusher()->authorizeChannel($channel, $socketId);
     }
 

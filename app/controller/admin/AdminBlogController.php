@@ -54,8 +54,10 @@ final class AdminBlogController extends BaseController
 
             $coverImage = null;
             if (!empty($_FILES['cover_image']) && $_FILES['cover_image']['error'] !== UPLOAD_ERR_NO_FILE) {
-                // Ensure directory exists
-                $targetDir = $_SERVER['DOCUMENT_ROOT'] . '/public/images/blogs/';
+                // Fixed, application-relative upload directory - no request data
+                // is involved in this path.
+                $docRoot = defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 3);
+                $targetDir = rtrim($docRoot, '/') . '/public/images/blogs/';
                 if (!is_dir($targetDir)) {
                     mkdir($targetDir, 0755, true);
                 }
