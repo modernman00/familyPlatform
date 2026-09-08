@@ -130,12 +130,20 @@ document.addEventListener('DOMContentLoaded', () => {
         padding: 0 12px;
     }
 
-    /* Hide form section titles */
+    /* Hide the auto-generated form section titles ("Personal Information" etc). */
     .register .form-divider,
     .register .title,
     .register h2,
     .register h3 {
         display: none !important;
+    }
+
+    /* ...but #inviter-verification-modal lives inside <form class="register">
+       (so it can share the Alpine component), and its own <h3> heading must
+       stay visible. Re-assert it with higher specificity. */
+    #inviter-verification-modal h3,
+    #inviter-verification-modal h2 {
+        display: block !important;
     }
 </style>
 @endsection
@@ -265,8 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <!-- Inviter Verification Modal (shown when valid code entered) -->
                     @include('components.auth.family-code-verification', ['errors' => $errors ?? []])
 
-                    <!-- Hidden inputs to track approval state -->
-                    <input type="hidden" id="joining_via_invitation" x-model="codeExists" name="joining_via_invitation">
+                    <!-- Hidden inputs to track approval state. joining_via_invitation
+                         must reflect a *verified* invitation, not merely that the
+                         code exists, so the server creates the approval request. -->
+                    <input type="hidden" id="joining_via_invitation" :value="codeVerified ? 'true' : 'false'" name="joining_via_invitation">
                     <input type="hidden" id="temporary_code" name="temporary_code" x-model="temporaryCode">
 
                     <div class="field mt-4">

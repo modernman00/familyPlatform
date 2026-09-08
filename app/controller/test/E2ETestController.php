@@ -3,6 +3,7 @@
 namespace App\controller\test;
 
 use PDO;
+use PDOStatement;
 
 class E2ETestController
 {
@@ -11,7 +12,7 @@ class E2ETestController
     public function __construct()
     {
         // Enforce that this is only used in non-prod
-        if (!in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['local', 'development', 'testing'], true)) {
+        if (!in_array($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: '', ['local', 'development', 'testing'], true)) {
             header('HTTP/1.1 403 Forbidden');
             echo json_encode(['error' => 'Forbidden']);
             exit;
@@ -22,22 +23,70 @@ class E2ETestController
         } catch (\Throwable $e) {
             $this->pdo = (new \Src\Db())->connect();
         }
+
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public function getValidFamilyCode()
+    /**
+     * @param list<int|string> $params
+     */
+    private function run(string $sql, array $params = []): PDOStatement
     {
-        $stmt = $this->pdo->query("SELECT famCode as code FROM personal LIMIT 1");
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt;
+    }
+
+    public function getValidFamilyCode(): never
+    {
+        // Return a family code that has at least one usable inviter, so the
+        // "family code exists" check and the inviter-verification step agree.
+        $row = $this->run(
+            "SELECT p.famCode AS code
+             FROM personal p
+             JOIN account a ON a.id = p.id
+             LEFT JOIN contact c ON c.id = p.id
+             WHERE p.famCode IS NOT NULL AND p.famCode <> ''
+               AND a.deleted_at IS NULL
+               AND TRIM(COALESCE(p.firstName, '')) <> ''
+               AND TRIM(COALESCE(p.lastName, '')) <> ''
+               AND (
+                   (a.email IS NOT NULL AND a.email <> '')
+                   OR (c.email IS NOT NULL AND c.email <> '')
+                   OR (c.mobile IS NOT NULL AND c.mobile <> '')
+               )
+             LIMIT 1"
+        )->fetch(PDO::FETCH_ASSOC);
 
         header('Content-Type: application/json');
         echo json_encode($row ?: ['code' => 'NONE']);
         exit;
     }
 
-    public function getValidFamilyCodeWithInviter()
+    public function getValidFamilyCodeWithInviter(): never
     {
-        $stmt = $this->pdo->query("SELECT p.famCode, p.firstName, p.lastName, a.email FROM personal p JOIN account a ON p.id = a.id WHERE a.email IS NOT NULL AND p.famCode IS NOT NULL LIMIT 1");
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Mirror FamilyCodeApprovalService::findMatchingInviter: a non-deleted
+        // member of the family, with a real name and a contact the verify step
+        // can match on.
+        $row = $this->run(
+            "SELECT p.famCode, p.firstName, p.lastName,
+                    COALESCE(NULLIF(c.email, ''), a.email) AS email,
+                    c.mobile
+             FROM personal p
+             JOIN account a ON a.id = p.id
+             LEFT JOIN contact c ON c.id = p.id
+             WHERE p.famCode IS NOT NULL AND p.famCode <> ''
+               AND a.deleted_at IS NULL
+               AND TRIM(COALESCE(p.firstName, '')) <> ''
+               AND TRIM(COALESCE(p.lastName, '')) <> ''
+               AND (
+                   (a.email IS NOT NULL AND a.email <> '')
+                   OR (c.email IS NOT NULL AND c.email <> '')
+                   OR (c.mobile IS NOT NULL AND c.mobile <> '')
+               )
+             LIMIT 1"
+        )->fetch(PDO::FETCH_ASSOC);
 
         header('Content-Type: application/json');
         if ($row) {
@@ -46,7 +95,7 @@ class E2ETestController
                 'inviter' => [
                     'firstName' => $row['firstName'],
                     'lastName' => $row['lastName'],
-                    'email' => $row['email']
+                    'email' => $row['email'] ?: $row['mobile']
                 ]
             ]);
         } else {
@@ -55,27 +104,25 @@ class E2ETestController
         exit;
     }
 
-    public function getPendingApprovalRequests()
+    public function getPendingApprovalRequests(): never
     {
-        $stmt = $this->pdo->query("SELECT * FROM family_approval_requests WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10");
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+        $rows = $this->run("SELECT * FROM family_approval_requests WHERE status = 'pending' ORDER BY created_at DESC LIMIT 10")->fetchAll(PDO::FETCH_ASSOC);
+
         $approvalService = new \App\service\FamilyCodeApprovalService($this->pdo);
 
         foreach ($rows as &$row) {
             $row['approval_token'] = $approvalService->generateApprovalToken((int)$row['no']);
         }
+        unset($row);
 
         header('Content-Type: application/json');
         echo json_encode($rows);
         exit;
     }
 
-    public function getApprovalRequest($id)
+    public function getApprovalRequest(int|string $id): never
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM family_approval_requests WHERE no = ?");
-        $stmt->execute([$id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $this->run("SELECT * FROM family_approval_requests WHERE no = ?", [$id])->fetch(PDO::FETCH_ASSOC);
 
         if ($row) {
             $approvalService = new \App\service\FamilyCodeApprovalService($this->pdo);

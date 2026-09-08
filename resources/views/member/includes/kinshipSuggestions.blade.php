@@ -1,8 +1,9 @@
-{{-- Only render the widget when the engine actually returned suggestions.
-     getSuggestedKin() is typed `: array` and returns [] on every empty/error
-     path, so this guard fails closed (widget hidden), never fatal. --}}
-@if(!empty($suggestedKin))
+{{-- Kinship Radar widget. Always rendered so the "People You May Know" surface
+     is a stable target; getSuggestedKin() is typed `: array` and returns [] on
+     every empty/error path, in which case we show the empty state rather than
+     hiding the whole widget. --}}
 @php
+    $suggestedKin = $suggestedKin ?? [];
     // The in-feed (mobile) copy scrolls horizontally like the Reels tray; the
     // desktop sidebar copy stays a vertical stack. The widget id is the existing
     // discriminator between the two placements.
@@ -16,13 +17,19 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div>
-                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Relatives</h6>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; letter-spacing: -0.01em;">Suggested Kin &amp; In-Laws</h6>
                     <span class="text-muted" style="font-size: 0.75rem;">People you may know</span>
                 </div>
             </div>
             <span class="badge rounded-pill bg-light text-primary border" style="font-size: 0.7rem; font-weight: 700;">Kinship Radar</span>
         </div>
 
+        @if(empty($suggestedKin))
+            <div class="text-center text-muted py-3" id="kinshipEmptyState" style="font-size: 0.82rem;">
+                <i class="bi bi-check2-circle text-success d-block mb-2" style="font-size: 1.5rem;"></i>
+                You're connected to all nearby kin. We'll surface new suggestions as your family network grows.
+            </div>
+        @else
         <div class="{{ $kinCarousel ? 'kinship-suggestions-scroll' : 'd-flex flex-column gap-3' }}" id="kinshipSuggestionsList">
             @foreach($suggestedKin as $kin)
                 @php
@@ -65,6 +72,6 @@
                 </div>
             @endforeach
         </div>
+        @endif
     </div>
 </div>
-@endif

@@ -7,6 +7,7 @@
             familyCode: '{{ old("famCode", "") }}',
             codeExists: false,
             codeVerified: false,
+            showInviterModal: false,
             checkingCode: false,
             verifying: false,
             temporaryCode: '',
@@ -68,22 +69,6 @@
                     }
                 };
 
-                            this.familyCode = e.target.value;
-                        });
-                        
-                        famCodeInput.addEventListener('blur', (e) => {
-                            this.familyCode = e.target.value;
-                            this.checkFamilyCode();
-                        });
-                        
-                        // Initialize Alpine value if already present
-                        if (famCodeInput.value) {
-                            this.familyCode = famCodeInput.value;
-                            this.checkFamilyCode();
-                        }
-                    }
-                });
-
                 // Find input immediately or upon DOM readiness
                 const famInput = document.querySelector('input[name="famCode"]') || document.getElementById('famCode');
                 if (famInput) {
@@ -125,6 +110,7 @@
                 if (!cleanCode || cleanCode.length < 4) {
                     this.codeExists = false;
                     this.codeVerified = false;
+                    this.showInviterModal = false;
                     return;
                 }
 
@@ -156,15 +142,23 @@
 
                     if (this.codeExists) {
                         this.temporaryCode = data.temporary_code || '';
-                        // Focus on first inviter field when modal opens
-                        setTimeout(() => {
-                            const firstField = document.getElementById('inviter_first_name');
-                            if (firstField) firstField.focus();
-                        }, 200);
+                        // Open the modal only if the inviter has not been
+                        // verified yet for this code.
+                        if (!this.codeVerified) {
+                            this.showInviterModal = true;
+                            // Focus on first inviter field when modal opens
+                            setTimeout(() => {
+                                const firstField = document.getElementById('inviter_first_name');
+                                if (firstField) firstField.focus();
+                            }, 200);
+                        }
+                    } else {
+                        this.showInviterModal = false;
                     }
                 } catch (error) {
                     console.error('Error checking family code:', error);
                     this.codeExists = false;
+                    this.showInviterModal = false;
                 } finally {
                     this.checkingCode = false;
                 }
@@ -206,9 +200,11 @@
                     if (response.ok && data.verified) {
                         this.codeVerified = true;
 
-                        // Give user visual feedback then close modal
+                        // Give user visual feedback then close the modal. Keep
+                        // codeExists true so the hidden joining_via_invitation
+                        // flag stays set for the form submit.
                         setTimeout(() => {
-                            this.codeExists = false;
+                            this.showInviterModal = false;
                         }, 1600);
                     } else {
                         Swal.fire({

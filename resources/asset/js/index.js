@@ -243,6 +243,14 @@ if (window.location.pathname === '/register') {
 }
 
 
-routePromise.finally(() => {
-  Alpine.start();
-});
+// Start Alpine only once the DOM is fully parsed. This bundle is included
+// before @yield('extra_js'), so page-specific components registered there
+// (e.g. familyCodeApprovalForm on /register) would otherwise miss the
+// alpine:init event and initialise as empty {}.
+const startAlpine = () => routePromise.finally(() => Alpine.start());
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startAlpine, { once: true });
+} else {
+  startAlpine();
+}

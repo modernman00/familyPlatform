@@ -777,20 +777,21 @@ final class Organogram extends SingleCustomerData
             $nodes = $graphData['nodes'] ?? [];
 
             // Group by generation level
-            $generations = [
-                -2 => ['name' => 'Grandparents & Ancestors', 'nodes' => []],
-                -1 => ['name' => 'Parents, Uncles & Aunts', 'nodes' => []],
-                 0 => ['name' => 'Core Household & Siblings', 'nodes' => []],
-                 1 => ['name' => 'Children & Descendants', 'nodes' => []],
-                 2 => ['name' => 'Grandchildren', 'nodes' => []],
+            $genNames = [
+                -2 => 'Grandparents & Ancestors',
+                -1 => 'Parents, Uncles & Aunts',
+                 0 => 'Core Household & Siblings',
+                 1 => 'Children & Descendants',
+                 2 => 'Grandchildren',
             ];
+            $genBuckets = array_fill_keys(array_keys($genNames), []);
 
             foreach ($nodes as $node) {
                 $lvl = (int)($node['generation_level'] ?? 0);
-                if (isset($generations[$lvl])) {
-                    $generations[$lvl]['nodes'][] = $node;
+                if (isset($genBuckets[$lvl])) {
+                    $genBuckets[$lvl][] = $node;
                 } else {
-                    $generations[0]['nodes'][] = $node;
+                    $genBuckets[0][] = $node;
                 }
             }
 
@@ -839,13 +840,18 @@ final class Organogram extends SingleCustomerData
 
             // Generations
             $currentY = 480;
-            $activeGens = array_filter($generations, fn($g) => count($g['nodes']) > 0);
+            $activeGens = [];
+            foreach ($genBuckets as $lvl => $bucket) {
+                if (count($bucket) > 0) {
+                    $activeGens[] = ['name' => $genNames[$lvl], 'nodes' => $bucket];
+                }
+            }
             $tierHeight = (int)(($H - 700) / max(count($activeGens), 1));
 
-            foreach ($activeGens as $genLevel => $gen) {
+            foreach ($activeGens as $gen) {
                 // Tier Header
                 echo '<rect x="160" y="' . ($currentY - 40) . '" width="' . ($W - 320) . '" height="50" rx="25" fill="rgba(212, 175, 55, 0.12)" stroke="rgba(212, 175, 55, 0.3)" stroke-width="1"/>';
-                echo '<text x="' . ($W / 2) . '" y="' . ($currentY - 6) . '" font-family="sans-serif" font-size="24" font-weight="bold" fill="#d4af37" text-anchor="middle" letter-spacing="3">' . strtoupper((string)$gen['name']) . '</text>';
+                echo '<text x="' . intdiv($W, 2) . '" y="' . ($currentY - 6) . '" font-family="sans-serif" font-size="24" font-weight="bold" fill="#d4af37" text-anchor="middle" letter-spacing="3">' . strtoupper($gen['name']) . '</text>';
 
                 // Nodes in this generation
                 $genNodes = $gen['nodes'];
@@ -862,17 +868,17 @@ final class Organogram extends SingleCustomerData
                 $nx = $startX;
                 $ny = $currentY + 50;
 
-                foreach ($genNodes as $idx => $gn) {
+                foreach ($genNodes as $gn) {
                     $name = htmlspecialchars((string)($gn['full_name'] ?? 'Relative'), ENT_QUOTES, 'UTF-8');
                     $role = htmlspecialchars((string)($gn['bio'] ?? 'Family Member'), ENT_QUOTES, 'UTF-8');
                     $isDec = !empty($gn['is_deceased']);
 
                     echo '<g transform="translate(' . $nx . ', ' . $ny . ')">';
                     echo '<rect width="' . $nodeWidth . '" height="' . $nodeHeight . '" rx="20" fill="rgba(255, 255, 255, 0.08)" stroke="' . ($isDec ? '#94a3b8' : 'url(#goldGrad)') . '" stroke-width="3" filter="url(#goldGlow)"/>';
-                    echo '<text x="' . ($nodeWidth / 2) . '" y="60" font-family="sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">' . $name . '</text>';
-                    echo '<text x="' . ($nodeWidth / 2) . '" y="95" font-family="sans-serif" font-size="16" font-weight="600" fill="#d4af37" text-anchor="middle">' . strtoupper($role) . '</text>';
+                    echo '<text x="' . intdiv($nodeWidth, 2) . '" y="60" font-family="sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">' . $name . '</text>';
+                    echo '<text x="' . intdiv($nodeWidth, 2) . '" y="95" font-family="sans-serif" font-size="16" font-weight="600" fill="#d4af37" text-anchor="middle">' . strtoupper($role) . '</text>';
                     if ($isDec) {
-                        echo '<text x="' . ($nodeWidth / 2) . '" y="130" font-family="sans-serif" font-size="14" font-style="italic" fill="#cbd5e1" text-anchor="middle">In Loving Memory</text>';
+                        echo '<text x="' . intdiv($nodeWidth, 2) . '" y="130" font-family="sans-serif" font-size="14" font-style="italic" fill="#cbd5e1" text-anchor="middle">In Loving Memory</text>';
                     }
                     echo '</g>';
 

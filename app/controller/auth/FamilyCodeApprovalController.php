@@ -45,7 +45,7 @@ class FamilyCodeApprovalController
         try {
             $familyCodeString = is_string($familyCode) ? $familyCode : (is_scalar($familyCode) ? (string)$familyCode : '');
             $cleanCode = trim($familyCodeString);
-            $exists = $this->approvalService->familyCodeExists($cleanCode); file_put_contents("cypress_debug.log", "Code: $cleanCode, Exists: " . ($exists ? "1" : "0") . "\n", FILE_APPEND);
+            $exists = $this->approvalService->familyCodeExists($cleanCode);
 
             if ($exists) {
                 $tempCode = $this->approvalService->generateTemporaryCode();
@@ -235,10 +235,14 @@ class FamilyCodeApprovalController
         }
 
         try {
-            $this->approvalService->approveRequest($id);
-            
+            if (!$this->approvalService->approveRequest($id)) {
+                http_response_code(422);
+                echo json_encode(['error' => 'Request could not be approved']);
+                return;
+            }
+
             // Link the user to the family network
-            $this->linkUserToFamily($request['id'], $request['family_code']);
+            $this->approvalService->linkUserToFamily($request['id'], $request['family_code']);
 
             echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
         } catch (\Throwable $e) {
@@ -278,7 +282,11 @@ class FamilyCodeApprovalController
         }
 
         try {
-            $this->approvalService->denyRequest($id);
+            if (!$this->approvalService->denyRequest($id)) {
+                http_response_code(422);
+                echo json_encode(['error' => 'Request could not be denied']);
+                return;
+            }
             echo json_encode(['success' => true, 'message' => 'Request denied successfully']);
         } catch (\Throwable $e) {
             http_response_code(500);

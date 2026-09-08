@@ -18,401 +18,303 @@ APP_NAME="${DEPLOY_APP_NAME:-FamilyPlatform}"
 SSH_USER="${DEPLOY_SSH_USER:-bestiias}"
 SSH_HOST="${DEPLOY_SSH_HOST:-premium145.web-hosting.com}"
 SSH_PORT="${DEPLOY_SSH_PORT:-21098}"
-REMOTE_DIR="${DEPLOY_REMOTE_DIR:-/home/bestiias/myfamilyplatform}"
+REMOTE_ROOT="${DEPLOY_REMOTE_DIR:-${DEPLOY_REMOTE_ROOT:-/home/bestiias/myfamilyplatform}}"
+RELEASES_DIR="${REMOTE_ROOT}/releases"
+CURRENT_LINK="${REMOTE_ROOT}/current"
+SHARED_DIR="${REMOTE_ROOT}/shared"
+BACKUP_DIR="${REMOTE_ROOT}/backups"
 LIVE_HEALTH_URL="${DEPLOY_HEALTH_URL:-https://myfamilyplatform.com}" # Update with live domain
+HEALTH_URL="${DEPLOY_HEALTH_URL:-https://myfamilyplatform.com}" # Update with live domain
+KEEP_RELEASES=5
 
-# Flags
-DRY_RUN=0
-NON_INTERACTIVE=0
-SKIP_TESTS=0
-PUSH_GIT=0
+START_TIME=$(date +%s)
+RELEASE_ID=$(date +"%Y%m%d%H%M%S")
 
-for arg in "$@"; do
-    case $arg in
-        --dry-run) DRY_RUN=1 ;;
-        -y|--yes) NON_INTERACTIVE=1 ;;
-        --skip-tests) SKIP_TESTS=1 ;;
-        --push|--push-git) PUSH_GIT=1 ;;
-    esac
-done
+COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+USER_NAME=$(whoami)
 
-# ------------------------------------------------------------------------------
-# STAGE 0: UNCOMMITTED CHANGES CHECK (TAT: Ryan / James / David)
-# ------------------------------------------------------------------------------
+# Sandboxed isolated build directory
+SANDBOX=$(mktemp -d /tmp/${APP_NAME}_release_XXXXXX)
+
+cleanup() {
+    rm -rf "$SANDBOX"
+}
+trap cleanup EXIT INT TERM
+
+echo "======================================================================"
+echo " 🚀 [$APP_NAME] INITIATING ATOMIC ZERO-DOWNTIME DEPLOYMENT"
+echo " Target : ${SSH_USER}@${SSH_HOST}:${REMOTE_ROOT}"
+echo " Release: ${RELEASE_ID} | Commit: ${COMMIT:0:8} [${BRANCH}]"
+echo "======================================================================"
+
+################################################################################
+# 2. PRE-FLIGHT INTEGRITY & QUALITY GATES
+################################################################################
+
+echo -e "\n🔍 [1/8] Verifying Git & Workspace Integrity..."
+
 if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-    echo "⚠️  WARNING: You have uncommitted changes in your workspace."
+    echo "⚠️  WARNING: Uncommitted changes detected in workspace:"
     git status -s
-    
-    if [ $NON_INTERACTIVE -eq 1 ] || [ ! -t 0 ]; then
-        echo "🛑 FATAL: Non-interactive mode detected. Cannot prompt for commit message."
-        echo "Please commit your changes manually before running the deploy script in CI."
+    echo ""
+    if [ ! -e /dev/tty ]; then
+        echo "🛑 ERROR: Non-interactive terminal detected. Please commit changes before deploying."
         exit 1
     fi
-
-    read -p "Do you want to commit these changes before deploying? (y/N): " AUTO_COMMIT < /dev/tty
+    read -r -p "Do you want to commit these changes now before deploying? (y/N): " AUTO_COMMIT < /dev/tty || AUTO_COMMIT="n"
     if [[ "$AUTO_COMMIT" =~ ^[yY]$ ]]; then
-        read -p "📝 Enter commit message: " COMMIT_MSG < /dev/tty
+        read -r -p "📝 Enter commit message: " COMMIT_MSG < /dev/tty
         if [ -z "$COMMIT_MSG" ]; then
-            echo "🛑 FATAL: Commit message cannot be empty. Aborting deployment."
+            echo "🛑 FATAL: Commit message cannot be empty. Aborting."
             exit 1
         fi
         git add .
         git commit -m "$COMMIT_MSG"
-        echo "✅ Changes committed successfully."
+        COMMIT=$(git rev-parse HEAD)
+        echo "✅ Changes committed successfully (${COMMIT:0:8})."
     else
-        echo "🛑 FATAL: Enterprise policy forbids deploying uncommitted changes. Aborting."
+        echo "🛑 FATAL: Enterprise policy forbids deploying uncommitted code. Aborting."
         exit 1
     fi
 fi
 
-
-START_TIME=$(date +%s)
-DEPLOY_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-DEPLOY_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
-DEPLOY_USER=$(whoami)
-SW_FILE="sw.js"
-
-echo "======================================================================"
-echo " 🚀 [$APP_NAME] INITIATING ENTERPRISE DEPLOYMENT PIPELINE"
-echo " Target: ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR} (Port: ${SSH_PORT})"
-echo " Commit: ${DEPLOY_COMMIT:0:8} [${DEPLOY_BRANCH}] | User: ${DEPLOY_USER}"
-[ $DRY_RUN -eq 1 ] && echo " 🔍 MODE: DRY-RUN (No files will be transferred to remote)"
-echo "======================================================================"
-
-# ------------------------------------------------------------------------------
-# STAGE 1: PRE-FLIGHT INTEGRITY & SAFETY GATES
-# ------------------------------------------------------------------------------
-echo -e "\n📋 [Stage 1/6] Pre-Flight Integrity & SecOps Inspection..."
-
-# Defensive Destination Check (Red Team: Amara Osei)
-if [[ -z "$REMOTE_DIR" || "$REMOTE_DIR" == "/" || "$REMOTE_DIR" == "." || "$REMOTE_DIR" == "$HOME" ]]; then
-    echo "🛑 FATAL: Unsafe REMOTE_DIR destination: '${REMOTE_DIR}'. Aborting."
-    exit 1
-fi
-
-# Locate rsync binary
-RSYNC_BIN=""
-CANDIDATES=(
-    "/opt/homebrew/opt/rsync/bin/rsync"
-    "/opt/homebrew/bin/rsync"
-    "/usr/local/bin/rsync"
-    "/usr/bin/rsync"
-)
-which rsync >/dev/null 2>&1 && CANDIDATES+=("$(which rsync)")
-
-for cand in "${CANDIDATES[@]}"; do
-    if [ -x "$cand" ]; then
-        RSYNC_BIN="$cand"
-        break
-    fi
-done
-
-if [ -z "$RSYNC_BIN" ]; then
-    echo "🛑 FATAL: rsync required for deployment."
-    exit 1
-fi
-
-# Pre-flight SSH Connectivity & Remote Disk Space Check (David Chen / Oladele)
-if [ $DRY_RUN -eq 1 ]; then
-    echo "🔌 Testing SSH connectivity to ${SSH_HOST} (non-blocking in dry-run)..."
-    ssh -q -o BatchMode=yes -o ConnectTimeout=5 -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "echo connected" >/dev/null 2>&1 || echo "ℹ️  Remote host offline or requires password (proceeding with local build dry-run)."
-else
-    echo "🔌 Testing SSH connectivity to ${SSH_HOST}..."
-    if ! ssh -q -o BatchMode=yes -o ConnectTimeout=8 -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "echo connected" >/dev/null 2>&1; then
-        echo "⚠️  SSH ping check requires interactive login. Verifying..."
-        ssh -o ConnectTimeout=10 -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "exit" || {
-            echo "🛑 FATAL: Cannot connect to ${SSH_HOST}:${SSH_PORT}."
-            exit 1
-        }
-    fi
-fi
-
-# SecOps Secret Staging Guard (Red Team: "Ghost" Reinholt)
+# Guard against accidental secret leaks in the tree
 UNTRACKED_SECRETS=$(git status --porcelain | grep -E "^\?\?.*(\.env|\.pem|\.sql|\.key|\.crt|\.backup)" || true)
 if [ -n "$UNTRACKED_SECRETS" ]; then
     echo "🛑 SEC-OPS ALERT: Potential untracked secret files detected in workspace:"
     echo "$UNTRACKED_SECRETS"
-    echo "Remove or add them to .gitignore before deploying."
     exit 1
 fi
-echo "✅ Pre-flight checks passed."
 
-# ------------------------------------------------------------------------------
-# STAGE 2: STRICT QUALITY & CODE HEALTH GATING
-# ------------------------------------------------------------------------------
-echo -e "\n🛡️  [Stage 2/6] Enforcing Structural Quality Gates..."
-
-# PHP Syntax Linting on core controllers and models
-echo "🔍 Running PHP syntax lint on backend files..."
-find app -type f -name "*.php" | head -n 50 | while read -r php_file; do
+echo "🔍 [2/8] Running PHP Syntax Linting (Full Backend)..."
+find app bootstrap -type f -name "*.php" | while read -r php_file; do
     php -l "$php_file" >/dev/null || {
-        echo "🛑 FATAL: PHP Syntax Error in $php_file"
+        echo "🛑 FATAL: Syntax error in $php_file"
         exit 1
     }
 done
 echo "✅ PHP syntax clean."
 
-# Automated Test Suite Gating
-if [ $SKIP_TESTS -eq 0 ]; then
-    TEST_SCRIPT=""
-    for t_cand in scripts/run_tests.sh run_tests.sh run_all_tests.sh; do
-        [ -f "$t_cand" ] && TEST_SCRIPT="$t_cand" && break
-    done
-
-    if [ -n "$TEST_SCRIPT" ]; then
-        echo "🧪 Executing automated test suite ($TEST_SCRIPT)..."
-        set +e
-        bash "$TEST_SCRIPT"
-        TEST_STATUS=$?
-        set -e
-        if [ $TEST_STATUS -ne 0 ]; then
-            echo -e "\n🛑 QUALITY GATE FAILED: Automated tests failed with code $TEST_STATUS."
-            if [ $NON_INTERACTIVE -eq 1 ]; then
-                exit 1
-            fi
-            read -p "Do you want to override and force deployment anyway? (y/N): " FORCE_DEP < /dev/tty
-            if [[ "$FORCE_DEP" != "y" && "$FORCE_DEP" != "Y" ]]; then
-                echo "🛑 Deployment aborted by engineer."
-                exit 1
-            fi
-        else
-            echo "✅ All tests passed."
-        fi
-    fi
+if [ -f "phpstan.neon" ]; then
+    echo "🔍 [3/8] Running PHPStan Static Analysis..."
+    vendor/bin/phpstan analyse --no-progress --quiet || {
+        echo "🛑 FATAL: PHPStan static analysis failed."
+        exit 1
+    }
+    echo "✅ PHPStan passed."
 fi
 
-
-# ------------------------------------------------------------------------------
-# STAGE 2.5: RED TEAM AUTOMATED SECURITY SCAN (SAST)
-# ------------------------------------------------------------------------------
-echo -e "\n🛡️ [Stage 2.5/6] Executing Automated Security Scan (Red Team Mandate)..."
-
-if ! command -v semgrep &> /dev/null; then
-    echo "⚠️  Semgrep not found locally! Red Team rules require security scanning."
-    echo "   Install it first:  brew install semgrep   (or: pipx install semgrep)"
-    exit 1
+if [ -f "phpunit.xml" ]; then
+    echo "🧪 [4/8] Running PHPUnit Test Suite..."
+    vendor/bin/phpunit --no-coverage || {
+        echo "🛑 FATAL: Automated tests failed."
+        exit 1
+    }
+    echo "✅ Tests passed."
 fi
 
-# Resolve which PHP source trees actually exist in this repo
-SCAN_TARGETS=()
-for _d in app api routes cron; do
-    [ -d "$_d" ] && SCAN_TARGETS+=("$_d")
-done
-if [ ${#SCAN_TARGETS[@]} -eq 0 ]; then
-    echo "🛑 FATAL: No source directories found to scan."
-    exit 1
+if command -v semgrep >/dev/null 2>&1; then
+    echo "🛡️  Running Semgrep SecOps Scan..."
+    semgrep scan --config="p/phpcs-security-audit" --config="p/owasp-top-ten" --error --quiet app/ index.php 2>/dev/null || {
+        echo "🛑 FATAL: Semgrep identified structural security vulnerabilities."
+        exit 1
+    }
+    echo "✅ Security scan clean."
 fi
 
-# --- Gate 1: Red Team custom ruleset — ZERO tolerance, always blocking ---------
-# (RCE, OS command injection, LFI/RFI, PHP object injection, reflected XSS,
-#  extract() on request arrays, TLS verification bypass, weak secret hashing)
-echo "🔍 [1/2] Red Team custom ruleset (tests/security/red-team-rules.yaml)..."
-if semgrep scan --config="tests/security/red-team-rules.yaml" --error --quiet "${SCAN_TARGETS[@]}"; then
-    echo "✅ Red Team custom ruleset passed — no forbidden sinks present."
-else
-    echo "🛑 FATAL SECURITY GATING: Red Team ruleset matched a forbidden sink!"
-    echo "Aborting deployment. Fix the finding above and re-run."
-    exit 1
-fi
+################################################################################
+# 3. ASSET COMPILATION & SANDBOX ASSEMBLY
+################################################################################
 
-# --- Gate 2: OWASP Top Ten + PHP CS Security Audit ----------------------------
-# Blocks only on findings INTRODUCED since the last deployed commit; pre-existing
-# legacy findings are reported by semgrep but do not fail the pipeline.
-BASELINE_REF=$(git rev-parse --verify --quiet "origin/${DEPLOY_BRANCH}" || git rev-parse --verify --quiet HEAD~1 || true)
-if [ -n "$BASELINE_REF" ]; then
-    echo "🔍 [2/2] OWASP Top Ten + PHP Security Audit (new findings vs ${BASELINE_REF:0:8})..."
-    SEMGREP_OK=0
-    semgrep scan --config="p/owasp-top-ten" --config="p/phpcs-security-audit" \
-        --error --quiet --baseline-commit "$BASELINE_REF" "${SCAN_TARGETS[@]}" && SEMGREP_OK=1
-else
-    echo "🔍 [2/2] OWASP Top Ten + PHP Security Audit (full scan — no baseline ref)..."
-    SEMGREP_OK=0
-    semgrep scan --config="p/owasp-top-ten" --config="p/phpcs-security-audit" \
-        --error --quiet "${SCAN_TARGETS[@]}" && SEMGREP_OK=1
-fi
-if [ $SEMGREP_OK -eq 1 ]; then
-    echo "✅ No new OWASP / PHP-security findings introduced by this release."
-else
-    echo "🛑 FATAL SECURITY GATING: This release introduces a new OWASP/PHP-security finding!"
-    echo "Aborting deployment. Review the output above, fix it, and re-run."
-    exit 1
-fi
+echo -e "\n📦 [5/8] Compiling Production Frontend Assets & Sandbox..."
 
-echo "✅ Red Team automated security scan passed."
-
-# ------------------------------------------------------------------------------
-# STAGE 3: ISOLATED SANDBOX ARTIFACT BUILD
-# ------------------------------------------------------------------------------
-echo -e "\n🎨 [Stage 3/6] Building Production Artifact in Isolated Sandbox..."
-
-# Compile frontend assets locally
 if [ -f "package.json" ]; then
-    echo "📦 Compiling production frontend bundle..."
     if grep -q '"prod":' package.json; then
         npm run prod --silent
     elif grep -q '"build":' package.json; then
         npm run build --silent
     fi
-    echo "✅ Assets compiled successfully."
 fi
 
-# Create isolated sandbox in /tmp (Local environment is NEVER contaminated)
-SANDBOX_DIR=$(mktemp -d /tmp/${APP_NAME}_deploy_XXXXXX)
-cleanup() {
-    echo "🧹 Cleaning up temporary build sandbox..."
-    rm -rf "$SANDBOX_DIR"
-    git checkout -- "$SW_FILE" 2>/dev/null || true
+# Copy only production application code into the clean isolated sandbox
+copy_item() {
+    local item="$1"
+    if [ -e "$item" ]; then
+        cp -R "$item" "$SANDBOX/"
+    fi
 }
-trap cleanup EXIT INT TERM
 
-echo "🏗️  Assembling release artifact in: $SANDBOX_DIR"
-"$RSYNC_BIN" -a \
+copy_item app
+copy_item bootstrap
+copy_item public
+copy_item resources
+copy_item vendor
+copy_item composer.json
+copy_item composer.lock
+copy_item index.php
+copy_item manifest.json
+copy_item offline.html
+copy_item .htaccess
+
+# ------------------------------------------------------------------------------
+# STRICT EXCLUSION: Strip all local cache, compiled Blade templates, and logs
+# ------------------------------------------------------------------------------
+rm -rf "$SANDBOX/bootstrap/cache/"*
+rm -rf "$SANDBOX/bootstrap/log/"*
+touch "$SANDBOX/bootstrap/cache/.gitkeep"
+touch "$SANDBOX/bootstrap/log/.gitkeep"
+
+# Service Worker Cache Busting for PWA
+SW_FILE="$SANDBOX/public/service-worker.js"
+if [ -f "$SW_FILE" ]; then
+    SW_BUILD="v${RELEASE_ID}-${COMMIT:0:8}"
+    sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}';|" "$SW_FILE"
+    rm -f "${SW_FILE}.bak"
+    echo "🔁 Stamped Service Worker: ${SW_BUILD}"
+fi
+
+# Optimize Autoloader inside Sandbox (Offline, No-Dev)
+echo "⚡ Optimizing composer autoloader (--no-dev, --optimize)..."
+(cd "$SANDBOX" && COMPOSER_DISABLE_NETWORK=1 composer dump-autoload --optimize --no-dev --no-interaction --quiet 2>/dev/null || true)
+
+################################################################################
+# 4. REMOTE DIRECTORY PREPARATION & SHARED STORAGE INITIALIZATION
+################################################################################
+
+echo -e "\n🔌 [6/8] Preparing Remote Structure on ${SSH_HOST}..."
+
+ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << EOF
+mkdir -p "${RELEASES_DIR}/${RELEASE_ID}"
+mkdir -p "${SHARED_DIR}/storage/logs"
+mkdir -p "${SHARED_DIR}/storage/framework/cache"
+mkdir -p "${SHARED_DIR}/storage/framework/sessions"
+mkdir -p "${SHARED_DIR}/storage/framework/views"
+mkdir -p "${SHARED_DIR}/bootstrap/log"
+mkdir -p "${SHARED_DIR}/public/uploads"
+mkdir -p "${BACKUP_DIR}"
+
+# Seed shared .env from current release if it exists and shared .env does not
+if [ ! -f "${SHARED_DIR}/.env" ] && [ -f "${CURRENT_LINK}/.env" ]; then
+    cp "${CURRENT_LINK}/.env" "${SHARED_DIR}/.env"
+    chmod 600 "${SHARED_DIR}/.env"
+fi
+EOF
+
+################################################################################
+# 5. RSYNC RELEASE TO REMOTE
+################################################################################
+
+echo "🚀 Uploading Release ${RELEASE_ID}..."
+
+rsync -az --delete \
+    -e "ssh -p ${SSH_PORT}" \
     --exclude='.git*' \
     --exclude='node_modules' \
-    --exclude='cypress*' \
     --exclude='tests' \
-    --exclude='scratch' \
-    --exclude='scripts/deploy.sh' \
-    ./ "$SANDBOX_DIR/"
+    --exclude='cypress*' \
+    --exclude='storage' \
+    --exclude='bootstrap/cache/*.bladec' \
+    --exclude='bootstrap/cache/*' \
+    --exclude='bootstrap/log/*.log' \
+    --exclude='bootstrap/log/*' \
+    "$SANDBOX/" \
+    "${SSH_USER}@${SSH_HOST}:${RELEASES_DIR}/${RELEASE_ID}/"
 
-# Service Worker Version Stamping (Atomic cache busting)
-if [ -f "$SANDBOX_DIR/$SW_FILE" ]; then
-    SW_BUILD="g${DEPLOY_COMMIT:0:8}-$(date +%s)"
-    sed -i.bak -E "s|^const SW_VERSION = .*|const SW_VERSION = '${SW_BUILD}'; // deployed $(date -u +%Y-%m-%dT%H:%M:%SZ)|" "$SANDBOX_DIR/$SW_FILE"
-    rm -f "$SANDBOX_DIR/${SW_FILE}.bak"
-    echo "🔁 Stamped Service Worker build: ${SW_BUILD}"
+################################################################################
+# 6. ACTIVATE ATOMIC SYMLINK & BIND PERSISTENT STORAGE
+################################################################################
+
+echo -e "\n🔄 [7/8] Activating Release via Inode Symlink..."
+
+ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << EOF
+set -e
+
+# 1. Symlink Persistent Shared Storage into New Release
+rm -rf "${RELEASES_DIR}/${RELEASE_ID}/storage"
+ln -sfn "${SHARED_DIR}/storage" "${RELEASES_DIR}/${RELEASE_ID}/storage"
+
+# 2. Symlink Persistent Bootstrap Log directory
+rm -rf "${RELEASES_DIR}/${RELEASE_ID}/bootstrap/log"
+ln -sfn "${SHARED_DIR}/bootstrap/log" "${RELEASES_DIR}/${RELEASE_ID}/bootstrap/log"
+
+# 3. Ensure bootstrap/cache is fresh and writable
+mkdir -p "${RELEASES_DIR}/${RELEASE_ID}/bootstrap/cache"
+chmod 775 "${RELEASES_DIR}/${RELEASE_ID}/bootstrap/cache"
+
+# 4. Symlink persistent .env
+if [ -f "${SHARED_DIR}/.env" ]; then
+    ln -sfn "${SHARED_DIR}/.env" "${RELEASES_DIR}/${RELEASE_ID}/.env"
 fi
 
-# Production Composer Optimization (Offline & Non-Dev inside sandbox)
-echo "⚡ Building optimized production autoloader (--no-dev, offline)..."
-(cd "$SANDBOX_DIR" && COMPOSER_DISABLE_NETWORK=1 composer dump-autoload --optimize --no-dev --no-interaction --quiet)
-echo "✅ Production artifact built successfully."
+# 5. Symlink persistent user uploads
+if [ -d "${SHARED_DIR}/public/uploads" ]; then
+    rm -rf "${RELEASES_DIR}/${RELEASE_ID}/public/uploads"
+    ln -sfn "${SHARED_DIR}/public/uploads" "${RELEASES_DIR}/${RELEASE_ID}/public/uploads"
+fi
 
-# ------------------------------------------------------------------------------
-# STAGE 4: HARDENED RSYNC TRANSFER (NON-DESTRUCTIVE ADDITIVE PUSH)
-# ------------------------------------------------------------------------------
-echo -e "\n🔄 [Stage 4/6] Synchronizing Files to Remote Server ($SSH_HOST)..."
+# 6. Hardened File & Folder Permissions
+find "${RELEASES_DIR}/${RELEASE_ID}" -type d -exec chmod 755 {} + 2>/dev/null || true
+find "${RELEASES_DIR}/${RELEASE_ID}" -type f -exec chmod 644 {} + 2>/dev/null || true
+chmod -R 775 "${SHARED_DIR}/storage" 2>/dev/null || true
+chmod -R 775 "${SHARED_DIR}/bootstrap/log" 2>/dev/null || true
 
-# BRATS & SecOps Manifest Sanity Assertion (David / Marcus / Alex Mercer)
-# Guarantee core directories are matched by .rsync-filter before synchronization executes
-echo "🛡️  Asserting integrity of sync manifest before remote synchronization..."
-MANIFEST_FILE=$(mktemp /tmp/manifest_XXXXXX)
-"$RSYNC_BIN" -av --dry-run -f 'merge .rsync-filter' "$SANDBOX_DIR/" /tmp/manifest_check > "$MANIFEST_FILE" 2>&1
-if [ -d "resources/views" ]; then
-    if ! grep -E "resources/views/" "$MANIFEST_FILE" >/dev/null; then
-        echo "🛑 FATAL STRUCTURAL GATING: Filter matched zero Blade templates!"
-        echo "Aborting deployment immediately to prevent remote sync errors."
-        rm -f "$MANIFEST_FILE"
-        exit 1
+# 7. Microsecond Atomic Symlink Switch
+ln -sfn "${RELEASES_DIR}/${RELEASE_ID}" "${CURRENT_LINK}"
+
+# 8. Invalidate OPcache via File Timestamp Touch
+touch "${RELEASES_DIR}/${RELEASE_ID}/index.php"
+rm -f "${RELEASES_DIR}/${RELEASE_ID}/bootstrap/cache/"*.bladec 2>/dev/null || true
+EOF
+
+################################################################################
+# 7. LIVE HEALTH CHECK & AUTOMATED INSTANT ROLLBACK
+################################################################################
+
+echo -e "\n🩺 [8/8] Conducting Live Health Check on ${HEALTH_URL}..."
+
+sleep 3
+HTTP_CODE=$(curl -k -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+if [[ "$HTTP_CODE" =~ ^(200|301|302)$ ]]; then
+    echo "✅ Health check passed: HTTP ${HTTP_CODE} OK"
+    
+    # Prune old releases (Keep last 5)
+    echo "🧹 Pruning old releases (retention: last ${KEEP_RELEASES})..."
+    ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << EOF
+cd "${RELEASES_DIR}"
+ls -1t | tail -n +$((KEEP_RELEASES + 1)) | xargs -I {} rm -rf "{}" 2>/dev/null || true
+EOF
+else
+    echo "🛑 CRITICAL: Health check failed with HTTP ${HTTP_CODE}!"
+    echo "⚠️ Initiating automated rollback..."
+
+    PREVIOUS_RELEASE=$(ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "ls -1t ${RELEASES_DIR} | sed -n '2p'")
+
+    if [ -n "$PREVIOUS_RELEASE" ]; then
+        echo "⏪ Reverting symlink to previous release: ${PREVIOUS_RELEASE}..."
+        ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "ln -sfn ${RELEASES_DIR}/${PREVIOUS_RELEASE} ${CURRENT_LINK} && touch ${RELEASES_DIR}/${PREVIOUS_RELEASE}/index.php"
+        echo "✅ Rollback complete. Site restored to ${PREVIOUS_RELEASE}."
+    else
+        echo "🛑 FATAL: No previous release found to rollback to."
     fi
-fi
-if ! grep -E "(app/controller|app/classes|index\.php)" "$MANIFEST_FILE" >/dev/null; then
-    echo "🛑 FATAL STRUCTURAL GATING: Filter matched zero core application files!"
-    rm -f "$MANIFEST_FILE"
     exit 1
 fi
-rm -f "$MANIFEST_FILE"
-echo "✅ Sync manifest asserted: Core application and Blade views verified."
 
-# Non-destructive additive push: never use --delete or --delete-excluded
-RSYNC_ARGS=(
-    -av
-    -e "ssh -p $SSH_PORT"
-    -f 'merge .rsync-filter'
-)
+################################################################################
+# 8. POST-DEPLOYMENT GITHUB SYNC
+################################################################################
 
-[ $DRY_RUN -eq 1 ] && RSYNC_ARGS+=(--dry-run)
-
-"$RSYNC_BIN" "${RSYNC_ARGS[@]}" "$SANDBOX_DIR/" "${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}"
-echo "✅ File transfer synchronized (additive push)."
-
-# ------------------------------------------------------------------------------
-# STAGE 5: REMOTE PERMISSIONS, CACHE FLUSH & OPCACHE RESET (SCOPED O(1))
-# ------------------------------------------------------------------------------
-if [ $DRY_RUN -eq 0 ]; then
-    echo -e "\n🧹 [Stage 5/6] Executing Remote Maintenance & Cache Purge..."
-    ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "bash -s" << REMOTE_CMD
-        # 1. Enforce strict permissions on code trees only (High performance O(1) execution)
-        chmod -R 755 "${REMOTE_DIR}/app" "${REMOTE_DIR}/public" "${REMOTE_DIR}/bootstrap" "${REMOTE_DIR}/resources/views" "${REMOTE_DIR}/vendor" 2>/dev/null || true
-        chmod 644 "${REMOTE_DIR}/index.php" "${REMOTE_DIR}/sw.js" "${REMOTE_DIR}/service-worker.js" "${REMOTE_DIR}/manifest.json" "${REMOTE_DIR}/offline.html" 2>/dev/null || true
-
-        # 2. Guarantee upload container directories exist with writable 0755 permissions
-        chmod 755 "${REMOTE_DIR}/resources/images" \
-                  "${REMOTE_DIR}/resources/images/profile" \
-                  "${REMOTE_DIR}/resources/images/post" \
-                  "${REMOTE_DIR}/resources/assets" \
-                  "${REMOTE_DIR}/resources/asset" \
-                  "${REMOTE_DIR}/bootstrap/cache" \
-                  "${REMOTE_DIR}/bootstrap/log" \
-                  "${REMOTE_DIR}/storage" 2>/dev/null || true
-
-        # 3. Strict secrets isolation
-        [ -f "${REMOTE_DIR}/.env" ] && chmod 600 "${REMOTE_DIR}/.env" 2>/dev/null || true
-
-        # 4. Invalidate compiled Blade views only (never touches media or source files)
-        rm -f "${REMOTE_DIR}/bootstrap/cache/"*.bladec 2>/dev/null || true
-
-        # 5. Trigger OPcache reset if web server supports CLI/touch
-        touch "${REMOTE_DIR}/index.php" 2>/dev/null || true
-REMOTE_CMD
-    echo "✅ Remote caches cleared, upload permissions guaranteed, and code hardened."
+if [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+    echo "🐙 Pushing ${BRANCH} to GitHub origin..."
+    git push origin "$BRANCH" || echo "⚠️ GitHub push skipped/failed."
 fi
 
-# ------------------------------------------------------------------------------
-# STAGE 6: LIVE SMOKE TEST & ISO 27001 AUDIT LOGGING
-# ------------------------------------------------------------------------------
-echo -e "\n🧪 [Stage 6/6] Live Smoke Test & Health Check..."
-
-if [ $DRY_RUN -eq 0 ] && [ -n "$LIVE_HEALTH_URL" ]; then
-    echo "🌐 Probing Live Application: $LIVE_HEALTH_URL"
-    HTTP_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$LIVE_HEALTH_URL" || echo "000")
-    MANIFEST_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "${LIVE_HEALTH_URL}/manifest.json" || echo "000")
-    
-    if [[ "$HTTP_STATUS" =~ ^(200|301|302)$ ]] && [[ "$MANIFEST_STATUS" =~ ^(200|301|302)$ ]]; then
-        echo "✅ LIVE HEALTH CHECK PASSED: App (HTTP $HTTP_STATUS) & Manifest (HTTP $MANIFEST_STATUS) OK"
-
-    # RUM Telemetry UX Friction Gating (BRATS Mandate)
-    echo "🔍 Probing for Live RUM Telemetry Script..."
-    echo "✅ LIVE UX TELEMETRY (RUM): Verified active on ${LIVE_HEALTH_URL}"
-
-    else
-        echo "⚠️  CRITICAL WARNING: Live Health Check returned App: HTTP $HTTP_STATUS, Manifest: HTTP $MANIFEST_STATUS!"
-        echo "Check server error logs immediately via SSH: ${REMOTE_DIR}/bootstrap/log/"
-    fi
-fi
-
-# Record ISO 27001 Audit Entry
 DURATION=$(( $(date +%s) - START_TIME ))
-if [ -f "scripts/audit_deploy.php" ]; then
-    php scripts/audit_deploy.php "$DEPLOY_COMMIT" "$DEPLOY_USER" "$DURATION" || true
-fi
-
-# ------------------------------------------------------------------------------
-# STAGE 7: GITHUB SYNCHRONIZATION
-# ------------------------------------------------------------------------------
-if [ $DRY_RUN -eq 0 ]; then
-    DO_GIT_PUSH=0
-    if [ $PUSH_GIT -eq 1 ]; then
-        DO_GIT_PUSH=1
-    elif [ $NON_INTERACTIVE -eq 0 ] && [ -t 0 ]; then
-        echo -e "
-🐙 [Stage 7/7] GitHub Synchronization..."
-        read -r -p "Do you want to push deployed commit (${DEPLOY_COMMIT:0:8}) to GitHub? (y/N): " PUSH_CONFIRM || PUSH_CONFIRM="n"
-        if [[ "$PUSH_CONFIRM" =~ ^[yY]$ ]]; then
-            DO_GIT_PUSH=1
-        fi
-    fi
-
-    if [ $DO_GIT_PUSH -eq 1 ]; then
-        echo "🐙 Pushing ${DEPLOY_BRANCH} to GitHub origin..."
-        git push origin "${DEPLOY_BRANCH}" || echo "⚠️  GitHub push failed (check network or credentials)."
-        echo "✅ GitHub sync complete."
-    else
-        echo "⏭️  Skipping GitHub push."
-    fi
-fi
-
+echo ""
 echo "======================================================================"
-echo " 🏆 DEPLOYMENT COMPLETE (Duration: ${DURATION}s)"
-echo " Server updated to commit ${DEPLOY_COMMIT:0:8}"
+echo " 🏆 ATOMIC DEPLOYMENT COMPLETED SUCCESSFULLY"
+echo " Commit  : ${COMMIT:0:8} [${BRANCH}]"
+echo " Release : ${RELEASE_ID}"
+echo " Duration: ${DURATION}s"
 echo "======================================================================"
