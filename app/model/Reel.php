@@ -49,7 +49,7 @@ final class Reel extends Select
             $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $stmt->execute();
 
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []; return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
             error_log("[Reel::getReelsFeed] " . $e->getMessage());
             return [];
@@ -106,7 +106,7 @@ final class Reel extends Select
             $stmt->execute();
 
             $res = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $res ?: null;
+            return $res ? self::normalizeMediaUrls($res) : null;
         } catch (\Throwable $e) {
             return null;
         }
@@ -181,7 +181,7 @@ final class Reel extends Select
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':reelId' => $reelId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: []; return array_map([self::class, 'normalizeMediaUrls'], $rows);
         } catch (\Throwable $e) {
             return [];
         }
@@ -241,5 +241,21 @@ final class Reel extends Select
         $stmt = $pdo->prepare("DELETE FROM family_reels WHERE id = :id AND user_id = :userId");
         $stmt->execute([':id' => $reelId, ':userId' => (string)$userId]);
         return $stmt->rowCount() > 0;
+    }
+    /**
+     * Normalize legacy /public/ path prefixes for video and thumbnail URLs.
+     *
+     * @param array<string, mixed> $reel
+     * @return array<string, mixed>
+     */
+    private static function normalizeMediaUrls(array $reel): array
+    {
+        if (isset($reel['video_url']) && is_string($reel['video_url'])) {
+            $reel['video_url'] = str_replace('/public/resources/videos/reels/', '/resources/videos/reels/', $reel['video_url']);
+        }
+        if (isset($reel['thumbnail_url']) && is_string($reel['thumbnail_url'])) {
+            $reel['thumbnail_url'] = str_replace('/public/resources/images/reels/thumbs/', '/resources/images/reels/thumbs/', $reel['thumbnail_url']);
+        }
+        return $reel;
     }
 }

@@ -122,7 +122,7 @@ final class ReelsController extends BaseController
 
                 $ext = $allowedMimes[$mimeType];
                 $uniqueName = 'reel_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-                $targetDir = __DIR__ . '/../../../public/resources/videos/reels/';
+                $targetDir = __DIR__ . '/../../../resources/videos/reels/';
 
                 if (!is_dir($targetDir)) {
                     mkdir($targetDir, 0755, true);
@@ -133,7 +133,7 @@ final class ReelsController extends BaseController
                     throw new Exception('Failed to save uploaded video on server.', 500);
                 }
 
-                $videoPath = '/public/resources/videos/reels/' . $uniqueName;
+                $videoPath = '/resources/videos/reels/' . $uniqueName;
             } elseif (!empty($videoUrlInput)) {
                 // Parse video URL (YouTube, Vimeo, Cloudflare Stream, or direct video)
                 $videoData = VideoParser::parseVideoUrl($videoUrlInput);
@@ -158,13 +158,13 @@ final class ReelsController extends BaseController
                     && in_array($imgInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)
                     && strlen((string) $decodedImg) <= 5 * 1024 * 1024;
                 if ($okThumb) {
-                    $thumbDir = __DIR__ . '/../../../public/resources/images/reels/thumbs/';
+                    $thumbDir = __DIR__ . '/../../../resources/images/reels/thumbs/';
                     if (!is_dir($thumbDir)) {
                         mkdir($thumbDir, 0755, true);
                     }
                     $thumbName = 'thumb_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(3)) . '.jpg';
                     file_put_contents($thumbDir . $thumbName, $decodedImg);
-                    $thumbnailPath = '/public/resources/images/reels/thumbs/' . $thumbName;
+                    $thumbnailPath = '/resources/images/reels/thumbs/' . $thumbName;
                 }
             }
 

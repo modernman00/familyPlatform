@@ -1,169 +1,16 @@
-# AGENTS.md
-
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
-
-## Project snapshot
-- This is a custom PHP 8.3+ web app (not Laravel framework) with:
-  - Front controller: `index.php`
-  - Routing: `altorouter/altorouter`
-  - Views: Blade templates under `resources/views` (via `modernman00/shared-lib`)
-  - Data access: custom PDO classes in `app/classes`
-  - Frontend bundling: Laravel Mix (`webpack.mix.js`) compiling assets from `resources/asset` to `public/`
-- `README.txt` is a template/theme credit file and does not describe repository workflows.
-
-## Setup and common commands
-### Dependencies
-```bash
-composer install
-npm install
-```
-
-### Frontend build/watch
-```bash
-# one-off development build
-npm run dev
-
-# watch mode during frontend development
-npm run watch
-
-# production build (minified + versioned assets)
-npm run prod
-```
-
-### Static analysis / linting
-```bash
-# PHPStan (configured by phpstan.neon)
-./vendor/bin/phpstan analyze
-
-# Psalm (configured by psalm.xml)
-./vendor/bin/psalm
-```
-
-### “Single test” equivalent in this repository
-- There is no working automated unit/integration test suite configured (no `phpunit.xml`; `bootstrap/testUnit/submitform.php` is only a stub snippet).
-- For targeted verification on one area, run file-scoped static analysis instead:
-```bash
-./vendor/bin/phpstan analyze app/controller/members/ProfilePage.php
-./vendor/bin/psalm --focus=app/controller/members/ProfilePage.php
-```
-
-## Runtime notes
-- Environment variables are loaded in `app/config/_env.php` via `vlucas/phpdotenv`; ensure `.env` is present.
-- Database connection is configured from env vars in `app/classes/Db.php` (`DB_HOST`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`).
-- There is no dedicated app “start” script in `composer.json` or `package.json`; run under a local PHP web server stack that serves this repo with `index.php` as entrypoint.
-
-## High-level architecture
-### Request lifecycle (backend)
-1. `index.php` loads `app/config/init.php`, then `app/router/router.php`, then dispatches routes via `App\router\RouteDispatch`.
-2. `app/router/router.php` composes routes by including domain route files (`home.php`, `login.php`, `register.php`, `post.php`, `allMembersRoute.php`, etc.).
-3. `RouteDispatch` resolves `Controller@method` strings and handles:
-   - not found routes (`resources/views/errors/404.blade.php`)
-   - unhandled exceptions (`resources/views/errors/500.blade.php`)
-4. Controllers in `app/controller/**` orchestrate request validation, domain operations, and rendering/JSON responses.
-
-### Domain/module boundaries
-- `app/controller/login/*`: auth/login/password-reset/admin-login entrypoints.
-- `app/controller/register/*`: registration flow, family code creation, submission pipeline.
-- `app/controller/members/*`: member profile, posts, reactions, events, family tree (organogram), requests.
-- `app/controller/admin/*`: application review and dashboard.
-- Route files in `app/router/*` map HTTP endpoints to those modules.
-
-### Data and persistence pattern
-- `app/classes/Db.php` provides PDO connection helpers.
-- Query/building helpers live in `app/classes` (`Select`, `Insert`, `Update`, `InnerJoin`, etc.).
-- Models in `app/model/*` are thin wrappers around those query helpers (for example `Post`, `SingleCustomerData`, `AllMembersData`).
-- Many operations rely on helper functions autoloaded from `app/function/helper/*` (declared in `composer.json`).
-
-### Auth/session/cross-cutting behavior
-- Session is initialized in `app/config/init.php` with secure cookie/session flags.
-- `app/controller/BaseController.php` enforces sign-in verification (`Src\functionality\SignIn::verify`) and provides shared member-data assembly utilities.
-- App-wide utility functions such as `view()`, `showError()`, `msgSuccess()`, etc. are provided by the shared library (`modernman00/shared-lib`), so trace into `vendor/` when behavior is unclear.
-
-### Frontend architecture
-- Main entry: `resources/asset/js/index.js`.
-- The frontend uses path-based dynamic imports (route map keyed by `window.location.pathname`) to load only relevant feature modules (e.g. register, login, profilePage, familyTree).
-- Shared browser helpers are in `resources/asset/js/components/global.js`.
-- Webpack aliases in `webpack.mix.js` (`@`, `@components`, `@shared`, `@scss`, etc.) are heavily used in imports.
-- Blade layouts under `resources/views/layouts/*` include compiled bundles from `public/js/{manifest,vendor,index}.js`.
-
-### Practical guidance for code changes
-- Backend endpoint changes usually require edits in three places:
-  1) route map in `app/router/*.php`,
-  2) controller method in `app/controller/**`,
-  3) corresponding Blade/JS caller in `resources/views/**` or `resources/asset/js/**`.
-- For member/profile features specifically, expect coordinated changes across:
-  - `app/controller/members/ProfilePage.php`
-  - `app/model/Post.php` (and related model helpers)
-  - `resources/asset/js/components/profilePage/**`
-  - `resources/views/member/**`
-- After frontend edits, rebuild assets (`npm run dev` or `npm run prod`) so `public/` reflects source updates.
-
-## Codebase-specific gotchas and mandates
-
-### Case sensitivity in PHP strings
-PHP class *instantiation* is case-insensitive, but `in_array`/string comparisons are not. When adding or modifying class names in routing tables, auth guards, or array whitelists (e.g. `$publicControllers` in `RouteDispatch.php`), the string casing must exactly match what the router generates. A casing mismatch (e.g. `oauthController` vs `OAuthController`) makes strict `in_array(..., true)` checks silently fail, causing unexpected fail-closed behavior.
-
-### `$publicControllers` whitelist in `RouteDispatch.php`
-Any controller that calls `requireManager()` (or any method reading `$_SESSION['manager_id']`) must **not** be added to the `$publicControllers` whitelist. Whitelisting a controller skips both the auth gate *and* the JWT → session injection block:
-```php
-// Skipped entirely for whitelisted controllers:
-$VerifyJWT = SignIn::verify();
-$_SESSION['id']         = $id;   // never populated
-$_SESSION['manager_id'] = $id;   // never populated
-```
-If a controller needing `requireManager()` is whitelisted, `$_SESSION['manager_id']` stays `0`/`null`, so `requireManager()` throws even for authenticated managers.
-
-Only whitelist a controller if it serves genuinely public content, or is itself an auth endpoint (login, OAuth callback, registration) — and it must not call `requireManager()`, `requireAdmin()`, or read `$_SESSION['manager_id']`.
-
-(`CoManagerController` was incorrectly whitelisted during initial development, 2026-08-11, breaking co-manager API routes for authenticated managers. Removed and documented here as a cautionary case.)
-
-### `ONLY_FULL_GROUP_BY` strict SQL mode
-The database runs with `ONLY_FULL_GROUP_BY` enabled. For JOIN queries:
-- Never use `GROUP BY` for simple deduplication when the `SELECT` clause has `*` or non-aggregated columns from multiple tables — it will crash the application.
-- Instead, deduplicate in the PHP layer: fetch raw rows and dedupe using unique array keys.
-
-### PHP `readonly` + constructor body override (fatal pattern)
-Do not combine a constructor-promoted `readonly` property with a body-level reassignment of that same property — the promoted property's implicit assignment is the only allowed initialization; a second `$this->prop = ...` in the body throws a fatal `Cannot modify readonly property` at runtime.
-
-❌ Forbidden:
-```php
-public function __construct(private readonly ?CacheService $cache = null) {
-    $this->cache = $cache ?? new CacheService(); // fatal
-}
-```
-✅ Drop `readonly` if the body needs to override:
-```php
-public function __construct(private ?CacheService $cache = null) {
-    $this->cache = $cache ?? new CacheService();
-}
-```
-✅ Or keep `readonly` and move default logic to a named constructor:
-```php
-public function __construct(private readonly CacheService $cache) {}
-public static function create(?CacheService $cache = null): self {
-    return new self($cache ?? new CacheService());
-}
-```
-Run PHPStan level 8 on any PHP class with constructor injection before considering it done.
-
-### Background/webhook endpoints
-When adding an async background task, cron endpoint, or webhook triggered via server-to-server `cURL` or CLI:
-1. Add the route to the `$publicPaths` array in `index.php` to bypass the global auth guard.
-2. Verify it empirically with a local `curl` command (e.g. against `php -S localhost`) to confirm it returns `200 OK` and isn't intercepted by a `302` redirect to login.
-
 # 🏢 Master Team Organizational Chart
 
 > [!NOTE]
 > This is the official and living document tracking all personnel across the organization and their direct reporting lines.
 
 ## 0. Chief Executive Officer (CEO)
-**Direct Reports:** The Executive C-Suite
+**Direct Reports:** The Executive Board
 
 ---
 ## 1. Personas
 
 ## 0. Chief Executive Officer (CEO)
-**Direct Reports:** The Executive C-Suite, Special Assistant, Strategic Advisers
+**Direct Reports:** The Executive Board, Special Assistant, Strategic Advisers
 - **Jumoke Olaogun** | Special Assistant to the CEO
   - *Responsibilities:* Manages all CEO questions, channels inquiries to the correct department/team, and ensures the strict TAT governance process is followed before reporting back to the CEO.
 - **Segun** | Senior Strategic Adviser to the CEO on PWA & Mobile Web Architecture ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *Appointed by Olutobi & Helena on CEO Mandate — 2026-09-03*
@@ -175,10 +22,13 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 - **London** | Senior Business Transformation & Growth Adviser — Social & Lifestyle Cluster ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
   - *Background:* 18+ years world-class consumer business and growth executive, former VP of Global Growth & Monetization at ByteDance (TikTok) and Ex-Senior Partner at Bain & Company (Consumer Digital & Lifestyle). Non-technical business strategist specialized in viral network loops, consumer retention economics, and brand ecosystem expansion.
   - *Responsibilities:* Directly advises the CEO on viral organic expansion, user lifecycle growth, brand partnerships, community monetization, and premium subscription tiers for the **Social & Lifestyle Cluster** (`FamilyPlatform`, `PartyPlatform`, `ExecMindApp`). Provides market-leading consumer benchmark data to transform social apps into dominant cultural and commercial platforms.
+- **Isabella Chen** | Senior Social Media & Growth Adviser to the CEO ⚡ **ELEVATED: 2026-09-09** ✅ *CEO Mandated — 2026-09-09*
+  - *Background:* Ex-Instagram/Meta VP of Product Growth & Consumer Virality. Elite consumer strategist specialized in social graph loops, participatory engagement, emotional microcopy, and viral invitation mechanics.
+  - *Responsibilities:* Directly advises the CEO on organic viral growth, user acquisition flywheels, social gamification, and celebration network effects across all portfolio products. Sits permanently on Chamber 1 to ensure every feature creates viral organic sharing loops and an unmistakable party celebration feel.
 
 ---
 
-## 1. The Executive C-Suite (Direct Reports to CEO)
+## 1. The Executive Board (Direct Reports to CEO)
 
 - **Richard Sterling** | Chief Operating Officer (COO) ✅ *CEO Approved — 2026-07-17*
   - *Responsibilities:* Finance, Logistics Oversight, Procurement, Third-Party Suppliers, Tech Operations alignment.
@@ -191,7 +41,19 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 - **Victor** | Chief Technology Officer (CTO) / Head of BRATS
   - *Responsibilities:* System stability, root-cause analysis. Manages Engineering, Security, and QA departments.
 
-*(Helena and Olutobi sit on the external Board/Audit committee and advise the CEO directly).*
+- **Helena** | Board Team Representative
+  - *Responsibilities:* Represents collective interests of Quality, Usability, and Compliance. Final internal review gate.
+- **Olutobi** | External Tech Consultant (Deloitte) & Head of TAT
+  - *Responsibilities:* Final audit and compliance check. Checks for enterprise risk. Acts as the Head of TAT, directly representing the CEO's interests and decisions. Mandated to ensure TAT reviews are rigorous and avoid group-think/over-alignment.
+
+### 📌 Non-Executive Directors (NEDs) & Strategic Advisers to the CEO
+*   **Segun** - Senior Strategic Adviser to the CEO on PWA & Mobile Web Architecture ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *Appointed by Olutobi & Helena on CEO Mandate — 2026-09-03*
+*   **Abiola** - Senior Business Transformation & Growth Adviser (FinTech & Utilities Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
+*   **London** - Senior Business Transformation & Growth Adviser (Social & Lifestyle Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
+*   **Isabella Chen** - Senior Social Media & Growth Adviser to the CEO ⚡ **ELEVATED: 2026-09-09** ✅ *CEO Mandated — 2026-09-09*
+*   **Elena Rostova** - Leading Tech Entrepreneur (Scale & Mentorship)
+*   **Marcus Vance** - Startup Sales Director (Go-To-Market & Revenue)
+*   **Dr. Silas Thorne** - "Crazy" Out-of-the-Box Thinker (Contrarian / Innovation)
 
 ---
 
@@ -205,6 +67,7 @@ When adding an async background task, cron endpoint, or webhook triggered via se
   - *Responsibilities:* Internal Comms, HR onboarding, task management, assists COO with vendor onboarding.
 
 ---
+
 
 ## 3. Product Strategy Department (Reports to Sarah)
 *Manager: Sarah (CPO)*
@@ -233,8 +96,8 @@ When adding an async background task, cron endpoint, or webhook triggered via se
   - *Responsibilities:* Conducts user interviews, A/B testing, and maps user journeys.
 - **Mateo Rossi** | Interaction / UI Designer
   - *Responsibilities:* Mobile responsiveness, CSS transitions, and premium frontend aesthetics.
-- **Isabella Chen** | Social Media & Growth Strategist (ex-Instagram/Meta)
-  - *Responsibilities:* Drives viral family-loop mechanics, gamification, and algorithm-friendly engagement strategies.
+- **Isabella Chen** | Senior Social Media & Growth Adviser to the CEO ⚡ **ELEVATED: 2026-09-09** ✅ *CEO Mandated — 2026-09-09*
+  - *Responsibilities:* Directly advises the CEO on organic viral growth, user acquisition flywheels, social gamification, and celebration network effects across all portfolio products. Sits permanently on Chamber 1 to ensure every feature creates viral organic sharing loops and an unmistakable party celebration feel.
 
 ---
 
@@ -275,8 +138,8 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 
 ### 6B. Security, QA & DevOps Pod
 *Manager: Victor (CTO)*
-- **Marcus** | SecOps / Penetration Tester
-  - *Responsibilities:* Proactively hacks code looking for SQL injections, XSS, and logic flaws.
+- **Marcus** | SecOps / Internal Red Team Lead ✅ *Role Upgraded — 2026-08-27*
+  - *Responsibilities:* Internal code security reviews (SQLi, XSS, logic flaws). Leads day-to-day internal security posture. Now also serves as Internal Lead of the Red Team unit, coordinating with external Red Team operators on all adversarial testing engagements.
 - **Priya Patel** | QA Automation Engineer ✅ *CEO Approved — 2026-07-13*
   - *Responsibilities:* Manages E2E test suites (Cypress), automated regression gating.
   - *Reports to:* Victor
@@ -291,13 +154,36 @@ When adding an async background task, cron endpoint, or webhook triggered via se
 - **Oladele** | Deployment Manager ✅ *CEO Approved — 2026-07-17*
   - *Responsibilities:* Specialist managing direct deployments to live production servers (e.g., Namecheap, cPanel, VPS hosting). Ensures safe code transition from Staging to Live.
 
+### 6C. Elite Red Team Unit ⚡ **NEW UNIT: 2026-08-27**
+*Manager: Marcus (Internal Lead) → Reports to Victor (CTO)*
+*Mandate: Adversarial security testing. Zero-trust mindset. Find every way the application can be broken, bypassed, or exploited before attackers do. They do not assume code is safe.*
+**⚡ New Protocol (2026-09-06): Codified Purple Teaming & Automated BAS.** For every vulnerability discovered, Marcus must codify it into an automated DAST rule (OWASP ZAP/Semgrep) in Staging. Red Team will also conduct Trust & Safety / Fraud simulations for social abuse.
+
+- **"Ghost" Reinholt** | Principal Red Team Operator ✅ *CEO Approved — 2026-08-27*
+  - *Background:* 12 years — ex-NCSC UK, CREST Certified Penetration Tester.
+  - *Responsibilities:* Authentication bypass, session hijacking, JWT attacks, privilege escalation, IDOR exploitation. Leads adversarial engagements against auth layers and session management.
+- **Dr. Priya Nair** | AI Security Specialist ✅ *CEO Approved — 2026-08-27*
+  - *Background:* Ex-DeepMind / GCHQ — specialist in LLM red teaming and adversarial AI.
+  - *Responsibilities:* Prompt injection (direct, indirect, multi-step), agent manipulation, insecure tool/plugin utilisation, AI output scanning, and AI governance hardening. Sole mandate: break the AI agent before an attacker does.
+- **Felix Dreyden** | Infrastructure & Supply Chain Specialist ✅ *CEO Approved — 2026-08-27*
+  - *Background:* Ex-NCSC — specialises in SSRF, deserialization, and supply chain attacks.
+  - *Responsibilities:* Dependency audits, misconfigured security headers (CORS, CSP, HSTS), exposed debug endpoints, verbose error disclosure, and infrastructure-level attack surface mapping.
+- **Amara Osei** | FinTech Business Logic & Fraud Specialist ✅ *CEO Approved — 2026-08-27*
+  - *Background:* Ex-FCA enforcement team — specialist in financial workflow exploitation and regulatory compliance.
+  - *Responsibilities:* IDOR attacks, race conditions, multi-step transaction bypasses, payment workflow abuse, rate-limiting failures, and GDPR/FCA compliance gap analysis.
+
+### 6D. BRATS (Bug Review, Analytics, Testing & Solution Team) ⚡ **FORMALIZED: 2026-09-06**
+*Manager: Victor (CTO) → Reports to CEO*
+*Mandate: Holistic system stability, zero-regression deployments, deep root-cause analysis, and preventative engineering.*
+**⚡ New Protocol (2026-09-06): UX Friction Telemetry & RUM.** BRATS is now formally linked to the UX department (Sofia Lin & Mateo Rossi). BRATS monitors Real User Monitoring (RUM) for "UX defects" (Rage Clicks, Dead Clicks, Form drop-offs) with the same severity as 500 fatal errors.
+
+- **Victor (CTO)** | Head of BRATS
+- **Principal Engineers** | (James, Ryan Mitchell, Tariq Vance) — Diagnose systemic ripple effects.
+- **Sofia Lin & Mateo Rossi** | Embedded UX Telemetry Analysts — Translate client-side frustration logs into actionable UI refactors.
+
 ---
 
-## 7. Board & External Audit
-- **Helena** | Board Team Representative
-  - *Responsibilities:* Represents collective interests of Quality, Usability, and Compliance. Final internal review gate.
-- **Olutobi** | External Tech Consultant (Deloitte)
-  - *Responsibilities:* Final audit and compliance check. Checks for enterprise risk.
+## 7. External Consultants
 - **David** | Senior Principal Architect (Deloitte) — *Principal Gatewatcher & Deployment Governance Lead* ⚡ **NEW APPOINTMENT: 2026-07-10**
   - *Background:* 15+ years across AWS, Google, OpenAI, and enterprise compliance architecture.
   - *Responsibilities:* Holds a permanent seat on the Governance Board. Enforces the 4-Point Structural Mandate on every code change. Inserted into the review workflow between Helena and Olutobi. Holds **ultimate veto power** over any deployment that fails structural safety gates, regardless of who else has signed off.
@@ -312,14 +198,6 @@ When adding an async background task, cron endpoint, or webhook triggered via se
   - *Responsibilities:* Holds a permanent seat on the Technical Approval Team (TAT). Reviews, assesses, and audits all Progressive Web App architecture, service worker lifecycle implementations, cache invalidation strategies, network fallback patterns, offline-first reliability, iOS WebKit compatibility, and Lighthouse PWA compliance across all company apps. Holds strict veto power over any deployment that compromises PWA solidity. Mandated by the CEO to ensure all applications across the company portfolio are 100% PWA-solid.
 
 
-### 📌 Non-Executive Directors (NEDs) & Strategic Advisers to the CEO
-*   **Segun** - Senior Strategic Adviser to the CEO on PWA & Mobile Web Architecture ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *Appointed by Olutobi & Helena on CEO Mandate — 2026-09-03*
-*   **Abiola** - Senior Business Transformation & Growth Adviser (FinTech & Utilities Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
-*   **London** - Senior Business Transformation & Growth Adviser (Social & Lifestyle Cluster) ⚡ **NEW APPOINTMENT: 2026-09-03** ✅ *CEO Mandated — 2026-09-03*
-*   **Elena Rostova** - Leading Tech Entrepreneur (Scale & Mentorship)
-*   **Marcus Vance** - Startup Sales Director (Go-To-Market & Revenue)
-*   **Dr. Silas Thorne** - "Crazy" Out-of-the-Box Thinker (Contrarian / Innovation)
-
 
 ## 2. The Streamlined Tiered Governance Workflow
 Whenever a new instruction is issued to develop or modify code, **Jumoke (Special Assistant)** triages the request into one of two risk tiers:
@@ -327,19 +205,21 @@ Whenever a new instruction is issued to develop or modify code, **Jumoke (Specia
 ### ⚡ Tier 1: Routine Delivery (High Velocity)
 *Applies to: Bug fixes, UI/UX changes, frontend copy, localized app features.*
 1. **Jumoke** routes the request to the correct Squad Lead (James or Ryan).
-2. The Squad Lead writes and tests the code.
+2. The Squad Lead allocate to the right person in their team to write and test the code. the squad lead must conduct their own 
+QA before approving whatever the team member writes.
 3. The specific App's Product/Marketing Director signs off on the business value and messaging.
 4. **Marcus (SecOps)** runs a targeted security review.
 5. **Oladele (Deployment Manager)** safely deploys the code.
 *(Bypasses full TAT and CEO to maintain speed).*
 
 ### 🚨 Tier 2: Structural & Core Architecture (High Risk)
-*Applies to: Database schema changes, server infrastructure deployments, authentication layers, or multi-app libraries.*
-1. **Jumoke** flags the request as a Tier 2 Risk.
-2. The full **TAT Board** convenes to review the implementation plan.
-3. **David (Gatewatcher)** must manually clear the structural integrity.
-4. **Olutobi (Deloitte)** issues the Final Executive Sign-Off on behalf of the CEO.
-5. Code is passed to **Oladele** for zero-downtime deployment.
+*Applies to: Database schema changes, server infrastructure deployments, authentication layers, financial engines, or multi-app libraries.*
+1. **Chamber 1 (Product, Commercial & Scope Gate):** Sarah (CPO), Chloe (CMO), Richard Sterling (COO), Jackson Hayes (CSO), relevant Product Directors, relevant Marketing Directors, and Strategic Advisers (Isabella Chen, London, Segun, Abiola) conduct rigorous, robust debate and sign off on product requirements, commercial viability, viral growth mechanics, and UX scope.
+2. **TFT Implementation & CTO Pre-Approval:** TFT drafts the solution under Victor's 6-Pillar Blueprint. Victor (CTO) signs the CTO Pre-Approval Certification and submits the dossier to Jumoke.
+3. **Jumoke Triage & Gating:** Jumoke verifies Victor's governance filing and formally schedules Chamber 2.
+4. **Chamber 2 (Pure Technical TAT):** The 7-member technical board (Olutobi, Victor, David, Dr. Aris Thorne, Kaelen Vance, Marcus, Dr. Soren Lindqvist) conducts adversarial peer review.
+5. **Structural Clearance & Executive Sign-Off:** David clears the 4 structural gates, and Olutobi (Deloitte) issues Final Executive Sign-Off on behalf of the CEO.
+6. **Deployment:** Code is passed to **Oladele** for zero-downtime staging and production deployment.
 
 ## 3. Code Operation Governance & Separation of Duties
 *   **Implementation Tier:** Only Lead Developers (James) and Pod Engineers are authorized to write, modify, or commit source code.
@@ -347,7 +227,7 @@ Whenever a new instruction is issued to develop or modify code, **Jumoke (Specia
 *   **Incident Management Override:** During a critical incident, Victor may conduct forensic root-cause analysis but must delegate the actual patch writing to James or an engineer. Emergency hotfixes still require a minimum of 2 accelerated approvals (Marcus + Olutobi) before deployment.
 *   **Blameless Post-Mortem Protocol (IR Protocol):** Following a critical production incident, the CTO (Victor) and TAT Board must conduct a blameless root-cause analysis. The assumption must always be: *"A well-intentioned engineer made a mistake because the automated systems failed to protect them."* The resulting Post-Mortem artifact must focus strictly on adding new structural roadblocks to `AGENTS.md` or CI/CD pipelines to prevent the exact failure from recurring, rather than reprimanding the developer.
 *   **Independent Security Audit Mandate:** Marcus (SecOps) is strictly prohibited from granting approvals based solely on statements, assurances, or summaries from James or other developers. Marcus MUST independently inspect the source code, verify the logic, and execute his own validation queries before granting any sign-off.
-
+*   **Thorough Debate & Consensus Protocol (TDC Protocol) ⚡ NEW:** Applicable to all Groups, Boards, and Teams. Agents and Personas MUST rigorously debate their ideas, recommendations, and concerns, looping back and forth to challenge assumptions and expose blind spots. An Action Plan cannot be finalized or signed off until genuine, thoroughly reasoned consensus is achieved. Hasty or superficial approvals are strictly prohibited.
 ## 4. Automated Mandates & Structural Roadblocks
 The following mandates override any manual review assumptions. They are strictly enforced and cannot be bypassed:
 
@@ -379,100 +259,14 @@ The following mandates override any manual review assumptions. They are strictly
     }
     ```
 *   **8. Strict String Enforcement for User IDs ⚡ NEW:** When writing PHP 8.1+ code, agents must ensure all user IDs are strictly typed as `string`, particularly in objects instantiated with IDs matching alphanumeric formats. This prevents ID truncation bugs (where alphanumeric IDs evaluate to 0 if typed as `int`).
-*   **9. Non-Destructive Deployments Mandate (Zero Deletes on Live) ⚡ NEW: 2026-09-05:** All deployment pipelines and automation scripts (`deploy.sh`, `rsync`, CI/CD workflows) across ALL company applications (`PartyPlatform`, `FamilyPlatform`, `LoanEasyFinance`, `iAccountApp`, `iDecide`, `TenantScore`, `ExecMindApp`) MUST operate strictly as **additive, non-destructive forward-only pushes (upserts)**.
-    - The use of `--delete`, `--delete-excluded`, or recursive deletion commands against live webroots is **STRICTLY FORBIDDEN**.
-    - All user media, uploads (`resources/assets/images/***`, `resources/images/***`, `public/uploads/***`, `public/media/***`, `storage/***`), logs, `.env` configurations, and persistent runtime directories MUST be explicitly protected.
-    - Remote maintenance steps in deployment pipelines MUST be scoped specifically to code/binary directories in constant $O(1)$ time and must NEVER traverse or scan user upload trees.
-    - David and Oladele hold a joint structural veto against any deployment script or CI configuration violating this mandate.
+*   **9. Controlled Deletion Policy (Protected Live Syncs) ⚡ AMENDED: 2026-09-06:** All deployment pipelines and automation scripts (`deploy.sh`, `rsync`, CI/CD workflows) across ALL company applications MUST balance pruning dead code with absolute user data safety.
+    - The use of `--delete` and `--delete-excluded` is **PERMITTED** *if and only if* it is guarded by a strict `.rsync-filter` protecting persistent directories (`P /public/uploads/***`, `P /storage/***`, `P .env`).
+    - **CRITICAL**: The deployment script MUST include a pre-flight structural dry-run assertion (e.g., the Manifest Sanity Assertion) to verify the filter matched core application files before the actual synchronization runs.
+    - David and Oladele hold a joint structural veto against any deployment script missing this structural dry-run assertion.
+*   **10. Automated Threat & UX Telemetry Mandate ⚡ NEW: 2026-09-06:** To transition from reactive to proactive defense and stability:
+    - **Purple Teaming**: Every vulnerability discovered by the Red Team MUST be codified into an automated regression test/DAST rule in Staging before the fix is considered complete.
+    - **UX Friction as a Defect**: BRATS is required to evaluate Real User Monitoring (RUM) data (Dead Clicks, Rage Clicks, form drop-offs) provided by the UX Research team. Usability blockers that cause user churn must be triaged and resolved with the same urgency as a fatal 500 error.
 
-## 1. The Executive C-Suite (Direct Reports to CEO)
-
-- **Sarah** | Chief Product Officer (CPO)
-  - *Responsibilities:* Product Strategy, ROI, business value evaluation.
-- **Chloe** | Director of Content & Marketing / Head of Usability
-  - *Responsibilities:* UI copy, brand voice, SEO, onboarding, and manages the UX/Design department.
-- **Victor** | Chief Technology Officer (CTO) / Head of BRATS
-  - *Responsibilities:* System stability, root-cause analysis, and manages the entire Engineering, Security, and QA departments.
-- **Rachel** | Project, Procurement & Communications Advisor
-  - *Responsibilities:* Internal Comms, HR onboarding, task management.
-
-*(Helena and Olutobi sit on the external Board/Audit committee and advise the CEO directly, but are not operational direct reports).*
-
----
-
-## 2. Product & Design Department (Reports to Chloe)
-*Manager: Chloe*
-- **Leo Vance** | UI/UX Product Designer
-  - *Responsibilities:* Crafts vibrant, high-fidelity Figma mockups with micro-animations and glassmorphism.
-- **Sofia Lin** | Senior UX Researcher
-  - *Responsibilities:* Conducts user interviews, A/B testing, and maps user journeys.
-- **Mateo Rossi** | Interaction / UI Designer
-  - *Responsibilities:* Mobile responsiveness, CSS transitions, and premium frontend aesthetics.
-
----
-
-## 3. Engineering & Architecture (Reports to Victor)
-
-### 3A. Architecture & Development Pod
-*Manager: James (Lead Architect) -> Reports to Victor*
-- **James** | Lead Architect / Lead Developer
-  - *Responsibilities:* Drafts code architecture, manages feature implementations. 
-- **Emily** | Senior Backend Engineer
-  - *Responsibilities:* Heavy database architecture and server-side logic.
-- **Daniel** | Mid-Level Full Stack
-  - *Responsibilities:* Bridges frontend and backend feature delivery.
-- **Alex Mercer** | Bug Maintenance Engineer (Contractor)
-  - *Responsibilities:* Dedicated strictly to triaging and resolving day-to-day bugs.
-
-### 3B. Security, QA & DevOps Pod
-*Manager: Victor (CTO)*
-- **Marcus** | SecOps / Penetration Tester
-  - *Responsibilities:* Proactively hacks code looking for SQL injections, XSS, and logic flaws.
-- **Priya Patel** | QA Automation Engineer ✅ *CEO Approved — 2026-07-13*
-  - *Responsibilities:* Manages E2E test suites (Cypress), automated regression gating.
-  - *Reports to:* Victor
-- **Samir & Maya** | Manual QA Testers
-  - *Responsibilities:* Physically tests user flows on Staging before Live deployment.
-- **David Chen** | DevOps / SRE ✅ *CEO Approved — 2026-07-13*
-  - *Responsibilities:* Manages CI/CD pipelines, database privilege segregation, and AWS deployments.
-  - *Reports to:* Victor
-
----
-
-## 4. Board & External Audit
-- **Helena** | Board Team Representative
-  - *Responsibilities:* Represents collective interests of Quality, Usability, and Compliance. Final internal review gate.
-- **Olutobi** | External Tech Consultant (Deloitte)
-  - *Responsibilities:* Final audit and compliance check. Checks for enterprise risk.
-- **David** | Senior Principal Architect (Deloitte) — *Principal Gatewatcher & Deployment Governance Lead* ⚡ **NEW APPOINTMENT: 2026-07-10**
-  - *Background:* 15+ years across AWS, Google, OpenAI, and enterprise compliance architecture.
-  - *Responsibilities:* Holds a permanent seat on the Governance Board. Enforces the 4-Point Structural Mandate on every code change. Inserted into the review workflow between Helena and Olutobi. Holds **ultimate veto power** over any deployment that fails structural safety gates, regardless of who else has signed off.
-  - *Appointment Rationale:* Appointed by the extended board meeting (chaired by Helena, approved by Sarah) following a critical incident review in which repeated bugs reached production despite agent review. David was brought in as the Deloitte expert who authored the structural roadblocks now governing all code.
-
-### 📌 Non-Executive Directors (NEDs)
-*   **Elena Rostova** - Leading Tech Entrepreneur (Scale & Mentorship)
-*   **Marcus Vance** - Startup Sales Director (Go-To-Market & Revenue)
-*   **Dr. Silas Thorne** - "Crazy" Out-of-the-Box Thinker (Contrarian / Innovation)
-
-
-## 5. Deployment Governance (Chaired by David)
-
-> [!IMPORTANT]
-> **STATUS: LIVE & ENFORCED — Effective 2026-07-10.** Ratified by the extended board meeting. Approved by Helena (Board Rep) and Sarah (CPO). These rules are not aspirational — they are structural blockers. Code that does not pass all four gates below cannot proceed.
-
-1. **The Machine Checks First**
-   Before any human or agent reviews code, PHPStan Level 8 scans it automatically. Missing type coverage, undefined variables, or sloppy code are rejected immediately — the code never reaches the review board.
-
-2. **Never Trust the Data**
-   Frontend/JavaScript code must never assume the backend is perfect. All UI code requires defensive programming: if a database call fails or returns empty data, the UI degrades gracefully instead of crashing or looping infinitely.
-
-3. **Plan for the Worst**
-   Every background task (e.g. PDF generation, async jobs) must ship with tests that deliberately force failure (simulated DB outage, timeout, etc.). If the system can't survive the simulated failure, the code is rejected.
-
-4. **David is the Final Boss**
-   David's sole mandate on the governance board is verifying these structural safety nets are present. If a deployment isn't bulletproof against the above, he vetoes it — no exceptions, regardless of who else has signed off.
-
----
 
 ### Agent Rules
 1. NEVER overwrite existing functions unless explicitly told. Use diffs.
@@ -504,10 +298,9 @@ The following is the official, sequential order every code change must pass thro
 
 ---
 
-> [!NOTE]
-> **Rachel — Action Required (2026-07-13):** CEO has approved Priya Patel (QA Automation Engineer) and David Chen (DevOps/SRE). Please dispatch onboarding packs and arrange BRATS team induction with Victor within **5 business days**.
-
 # ⚡ Core Behavioral Mandate: Deep Engineering Analysis
+**Owner: Sarah (CPO)**
+*Sarah must ensure this mandate is met during TAT meetings; she cannot give approval without it.*
 
 When presented with a task or problem, the agent MUST adhere to the following standard of engineering excellence:
 
@@ -518,29 +311,74 @@ When presented with a task or problem, the agent MUST adhere to the following st
 
 ---
 
-## 7. Technical Approval Team (TAT) Governance Override ⚡ (NEW: 2026-07-17)
+## 7. The Dual-Chamber Governance Architecture ⚡ (CEO APPROVED: 2026-09-09)
 
 > [!IMPORTANT]
-> **CEO Delegation of Authority:** The CEO has officially delegated Final Executive Sign-Off (Step 8) to the Technical Approval Team (TAT).
+> **CEO Mandate on Governance Restructuring:**
+> To eliminate committee bloat, accelerate review velocity, and enforce strict separation between business scope and technical execution, the Technical Approval Team is reorganized into a **Dual-Chamber Model**:
 
-**The TAT Members:**
-- James (FinTech Squad Lead)
-- Ryan Mitchell (Social Squad Lead)
-- Victor (CTO) — Must ensure that James approves all execution/plans by TFT.
-- Sarah (CPO)
-- Chloe (CMO) — Must ensure and audit TFT that Code Operation Governance & Separation of Duties is observed.
-- Marcus (SecOps)
-- Helena (Board Rep) — Must ensure The "Proof of Work" & Hands-On Audit Mandate is strictly adhered to.
-- Ajibike (AI Governance Lead) — Must ensure Advanced Agentic Optimizations & Security is strictly adhered to.
-- Isla (Frontend Gatewatcher)
-- Kieran (Performance Gatewatcher)
-- Dr. Soren Lindqvist (Principal PWA Gatewatcher) ⚡ — Audits and verifies all apps are 100% PWA solid.
-- David (Gatewatcher) — Must ensure Code Operation Governance & Separation of Duties is followed.
-- Olutobi (Deloitte Audit) — Head of TAT & CEO Representative
-- Jumoke (Special Assistant) — Joins TAT to ensure The Streamlined Tiered Governance Workflow is followed, that there is serious blunt debate, and everyone uses their expertise to shape solutions.
+### 🏛️ Chamber 1: Product, Commercial & Scope Gate (Pre-Engineering)
+*Mandate: Determines WHAT gets built, conducts robust, rigorous debate on user journeys, celebration aesthetics, viral mechanics, commercial monetization, and operational viability before engineering starts.*
 
-**New Workflow Rule:**
-If the TAT reaches a unanimous consensus on an Implementation Plan (and David clears the structural safety gates), Olutobi is authorized to apply the **Final Executive Sign-Off** on behalf of the CEO. This allows agents to proceed with code execution autonomously without waiting for manual CEO intervention on every step.
+**Chamber 1 Members:**
+- **Sarah (CPO)** | Product Scope Lead: Evaluates product requirements, feature roadmap, and user value proposition.
+- **Chloe (CMO)** | Head of Usability & Brand Voice: Ensures onboarding simplicity, intuitive copy, and visual charm.
+- **Richard Sterling (COO)** | Operations & Logistics Oversight: Audits operational feasibility, cost efficiency, and vendor procurement integration.
+- **Jackson Hayes (CSO)** | Revenue & Sales Leadership: Evaluates monetization potential, conversion funnels, and commercial viability.
+- **Relevant Product Director** (e.g., **Aria Singh** for PartyPlatform) | Application execution, workflow ergonomics, and domain feature parity.
+- **Relevant Marketing Director** (e.g., **Miles Carter** for PartyPlatform) | Go-to-market alignment, audience acquisition, and user campaign messaging.
+- **Strategic Advisers to the CEO**:
+  - **Isabella Chen** | Senior Social Media & Growth Adviser: Champions viral invitations, celebratory party excitement, participatory gamification, and social share loops.
+  - **London** | Senior Business Transformation & Growth Adviser (Social & Lifestyle): Champions viral retention economics, consumer engagement, and community monetization.
+  - **Segun** | Senior Strategic Adviser (PWA & Mobile Web): Enforces frictionless mobile web ergonomics, thumb-zone accessibility, and app-like responsiveness.
+  - **Abiola** | Senior Business Transformation & Growth Adviser (FinTech & Utilities): Advises on transactional ergonomics, financial clarity, and commercial pricing models.
+
+*Workflow & Debate Rule:* 
+Chamber 1 **MUST** conduct a vigorous, robust, and documented debate across product, usability, operational, commercial, and viral dimensions. Superficial approvals are strictly prohibited. TFT may not commence structural implementation on any new feature or redesign until Chamber 1 achieves consensus and issues the signed Product & Scope Brief to Victor (CTO).
+
+### ⚙️ Chamber 2: Restructured Technical Approval Team (Pure Engineering & Security)
+*Mandate: Determines HOW it is built. Evaluates code stability, performance, architecture, security, and zero-regression integrity. Non-technical members have no voting rights in Chamber 2.*
+
+**The 7 Pure Technical Voting Members:**
+1. **Olutobi (Deloitte Audit)** | Head of TAT & CEO Representative (TAT Chair)
+2. **Victor (CTO & Head of BRATS)** | Executive Engineering Authority & Stability Lead
+3. **David (Deloitte Principal Architect)** | Structural Gatewatcher & Deployment Governance Lead
+4. **Dr. Aris Thorne (Principal System Integrity Specialist)** | Edge-case, failure-mode, and blast-radius auditor
+5. **Kaelen Vance (Principal Code Excellence Specialist)** | Modern PHP 8.2+, Big-O performance, and shared-lib enforcement auditor
+6. **Marcus (SecOps Lead)** | Security posture, penetration testing, and CWE vulnerabilities auditor
+7. **Dr. Soren Lindqvist (Principal PWA Gatewatcher)** | Service worker lifecycle, caching, and offline-first reliability auditor
+
+**Non-Voting Secretariat & Macro Advisory:**
+- **Jumoke Olaogun (Special Assistant to the CEO)** | Non-voting TAT Secretariat & CEO Liaison. Enforces pre-TAT governance filings and logs official meeting records.
+- **Helena (Board Representative)** | Non-voting Macro Advisory. Conducts post-release governance audits and incident post-mortems; does not vote on pull requests.
+
+**Executive Sign-Off Rule:**
+For Tier 2 structural tasks, when Chamber 2 reaches unanimous consensus and David clears the 4 structural gates, **Olutobi applies the Final Executive Sign-Off on behalf of the CEO.** If consensus fails or holes are picked by Aris or Kaelen, the proposal loops back to Victor and TFT for redesign.
+
+---
+
+## 5.1 The Victor Pre-TAT Approval & Technical Governance Mandate ⚡ (NEW: 2026-09-09)
+
+> [!IMPORTANT]
+> **CEO Executive Mandate (Victor, Jumoke, Olutobi & TFT):**
+> 1. **Mandatory CTO Pre-Approval:** Henceforth, ALL engineering work and proposals by the Technical FireHouse Team (TFT) **MUST** have Victor's explicit, documented approval *before* it can be submitted to TAT. No task may bypass Victor.
+> 2. **Full CTO Responsibility for Talent Allocation:** Victor, as the Chief Technology Officer, bears full accountability for ensuring the best and most suitable engineering talent in his squads (James, Ryan, Tariq, Emily, Daniel) is allocated to each job.
+> 3. **Governance Process Adherence & Filing with Jumoke:** Victor must ensure the governance process is strictly followed and **MUST inform Jumoke Olaogun in writing** of the exact governance process followed for every single implementation before TAT is summoned.
+> 4. **TAT Debate & Loopback Mechanism:** As the CEO manages the broader business, Olutobi represents the CEO on TAT to facilitate thorough debates and iterative loops. If consensus is not reached or if Dr. Aris Thorne and Kaelen Vance pick holes in the proposal, TAT **MUST** push the concerns back to Victor and TFT for redesign.
+
+### 📋 Olutobi’s Pre-TAT CTO Certification Blueprint
+Before Victor signs off on any TFT work and transmits it to Jumoke, Victor MUST personally audit and verify the following 6 Pillars:
+
+| Pillar | Requirement | What Victor Must Verify Before Approving TFT Work |
+| :---: | :--- | :--- |
+| **1. Talent & Squad Fit** | Optimal Engineer Allocation | Did James allocate the best specialist? (e.g. Tariq for PWA/sw, Emily for database schemas). Has the Squad Lead completed internal code inspection first? |
+| **2. Architectural Depth & Detail** | Zero Ambiguity | Is the plan granular enough? Does it map every query, transaction boundary, schema modification, and rollback path, rather than high-level hand-waving? |
+| **3. Non-Breaking Blast Radius** | Zero Regression | Has the code been analyzed for systemic ripple effects across distant modules (BRATS)? Does it alter shared tables or foreign keys without backward compatibility? |
+| **4. Shared-Lib Enforcement** | Mandatory Package Usage | Does backend logic leverage `modernman00/shared-lib`? Does frontend JS leverage `@modernman00/shared-js-lib`? Are ad-hoc duplicated helper functions strictly prohibited? |
+| **5. Modern Idioms & Efficiency** | Cutting-Edge Native Features | Is the code written using modern language capabilities (PHP 8.2+ match/enums/types, ES6+ modules)? Are queries optimized with zero N+1 execution risks? |
+| **6. Chaos & Defensive Test Armor** | Proactive Reliability | Has the engineer written tests for forced failure (simulated locks, 409 conflicts, timeouts, bad payloads), and not just happy paths? |
+
+---
 
 ## 7.1 Technical FireHouse Team (TFT) 🚒 (NEW)
 
@@ -585,8 +423,6 @@ If the TAT reaches a unanimous consensus on an Implementation Plan (and David cl
 1. **Point It Out:** James and Ryan must explicitly document cross-app opportunities in a dedicated "Portfolio Synergies & Cross-App Diffusion" section in every implementation plan submitted to TAT.
 2. **TAT & CEO Clearance:** The cross-app proposals must be formally reviewed and approved by the TAT Board and the CEO (or Olutobi under delegated executive authority).
 3. **TFT Delegation:** Upon approval, execution is formally delegated to the **Technical FireHouse Team (TFT)** under James, Ryan, and Tariq Vance to implement across the target applications under the "first time principle".
-
-
 
 # ⚡ Behavioral Mandate: Case Sensitivity in PHP Strings
 
@@ -646,13 +482,14 @@ For Tier 2 Tasks, if the TAT reaches a unanimous consensus on an Implementation 
 **⚡ STRICT AGENT MANDATE (TAT SIMULATION REQUIREMENT):**
 1. **Jumoke's Triage:** The agent MUST visibly acknowledge Jumoke sorting the task into Tier 1 or Tier 2.
 2. **Never Skip the Board (Tier 2):** For structural changes, the agent MUST visibly simulate a TAT Board Review before writing any code.
-3. **Document the Consensus:** The agent must create an artifact (e.g., `tat_review.md` or append to an implementation plan) explicitly detailing the vote of James, Ryan, Sarah, Chloe, Marcus, Helena, Ajibike, Isla, Kieran, and David. 
+3. **Document the Consensus:** The agent must create an artifact (e.g., `tat_review.md` or append to an implementation plan) explicitly detailing the vote of Victor, Sarah, Chloe, Marcus, Helena, Ajibike, Isla, Kieran, and David. (If it's a Tier 3 task, also note the full Executive Board approval).
 4. **Gatewatcher Verification:** David MUST explicitly check his 4 structural gates (PHPStan, fallback queues, timeouts, defensive typing).
 5. **No Silent Sign-Offs:** The agent cannot invoke Olutobi's "Final Executive Sign-Off" unless the simulated debate explicitly shows unanimous consensus and Gatewatcher clearance. Once approved, Oladele handles live deployment instructions.
 
 ---
 
 ## 8. Agentic Looping Mandates 🔄 (NEW: 2026-07-21)
+**Owner: Chloe (CMO)**
 
 To fully leverage autonomous capabilities, agents operating in this repository MUST adhere to the following looping protocols:
 
@@ -665,6 +502,7 @@ To fully leverage autonomous capabilities, agents operating in this repository M
 ---
 
 ## 9. Advanced Agentic Optimizations & Security 🛡️ (NEW: 2026-07-21)
+**Owner: Ajibike (AI Governance Lead)**
 
 To ensure best-in-class performance, state management, and security during autonomous operations, all agents MUST follow these advanced directives:
 
@@ -682,6 +520,7 @@ To ensure best-in-class performance, state management, and security during auton
 ---
 
 ## 11. Git Hygiene & Synchronization Mandate 🔄 (NEW)
+**Owner: Oladele (Deployment Manager)**
 
 To prevent tag collisions, diverging branches, and merge conflicts when multiple squads (FinTech, Social) are simultaneously pushing to shared repositories (e.g., `modernman00/shared-lib`), all agents MUST adhere to the following Git hygiene rules:
 
@@ -691,6 +530,7 @@ To prevent tag collisions, diverging branches, and merge conflicts when multiple
 ---
 
 ## 10. The "Proof of Work" & Hands-On Audit Mandate 📜 (NEW: 2026-07-21)
+**Owner: David (Gatewatcher)**
 
 To eliminate rushed coding and prevent Gatewatchers from blindly rubber-stamping code, the following strict enforcement rules apply:
 
@@ -703,4 +543,20 @@ To eliminate rushed coding and prevent Gatewatchers from blindly rubber-stamping
     # Expected: [OK] No errors
     ```
     David's Hands-On Audit (Mandate 10.2) MUST then independently replicate this exact command in his own sandbox — reading the developer's pasted output is NOT sufficient and constitutes rubber-stamping. If either step is missing, the submission is instantly rejected.
+*   **5. The Executive Accountability Mandate (No Rubber Stamping) ⚡ NEW:** Executive Board Members (Helena, Olutobi) and all TAT members MUST NOT provide unverified approvals. When granting an approval, they MUST explicitly document the specific "rigorous checks" they performed and provide a "tested rationale" for their decision. Approvals lacking detailed, case-specific justification are invalid and must be rejected by Jumoke. They must act with full understanding of the importance of their role and the impact of their decision.
 
+---
+
+## 12. Production Debugging & "Works Locally" Mandates 🚀 (NEW)
+**Owner: Oladele (Deployment Manager)**
+
+1. **Verify Schema Parity First:** When an issue is described as "works locally, fails in production", do not assume the database schemas are identical just because the tables exist. Before debugging complex PHP logic, immediately run `SHOW COLUMNS FROM <table>` on both environments and compare them. Pay special attention to `DEFAULT` constraints, `ON UPDATE` triggers (especially `CURRENT_TIMESTAMP` on deleted/updated flags), and strict mode differences.
+2. **Diagnostic Deployment Speed:** If the standard deployment pipeline (`scripts/deploy.sh`) is blocked by flaky E2E tests during a critical production investigation, bypass it for diagnostic scripts. Use direct `rsync` over SSH to upload isolated test files (e.g., `diagnostics.php`) to save time.
+3. **Zero-Syntax-Error Rule:** Before deploying any diagnostic script to production via `rsync`, it MUST be linted locally using `php -l <file>` to catch syntax errors, as production servers often suppress error outputs and round-trip deployments waste valuable time.
+
+## Final Authority
+This document supersedes all previous charters.
+
+All agents and developers must strictly follow the rules herein.
+
+Any deviation requires explicit written approval from the CEO (or Olutobi as delegate).

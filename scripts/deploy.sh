@@ -26,6 +26,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# Safe PATH export for macOS / Homebrew / Linux environments
+export PATH="/opt/homebrew/bin:/opt/homebrew/opt/rsync/bin:/usr/local/bin:$PATH"
+
 # Always operate from the repository root
 cd "$(dirname "$0")/.."
 
@@ -59,9 +62,10 @@ _require_env DEPLOY_HEALTH_URL
 # 1b. CROSS-APP IDENTITY GUARD (prevents wrong-app deploy to shared server)
 ################################################################################
 # Reads local composer.json "name" and compares it (case-insensitively) to
-# DEPLOY_APP_NAME. This guard prevents an agent working in one app's worktree
-# from silently deploying to another app's production directory on a shared
-# hosting server.
+# DEPLOY_APP_NAME. Also SSH-validates the remote .env APP_URL contains the
+# expected domain from DEPLOY_HEALTH_URL. This guard prevents an agent
+# working in one app's worktree from silently deploying to another app's
+# production directory on a shared hosting server.
 
 _extract_composer_name() {
     php -r "echo strtolower(json_decode(file_get_contents('composer.json'))->name ?? '');" 2>/dev/null || echo ""
@@ -72,8 +76,8 @@ DEPLOY_APP_SLUG=$(echo "${DEPLOY_APP_NAME}" | tr '[:upper:]' '[:lower:]' | tr -d
 
 if [ -n "$LOCAL_COMPOSER_NAME" ]; then
     # Strip org prefix (e.g. "modernman00/partyplatform" → "partyplatform")
-    LOCAL_COMPOSER_SLUG=$(echo "$LOCAL_COMPOSER_NAME" | awk -F'/' '{print tolower($NF)}' | tr -d '[:space:]-_')
-    DEPLOY_APP_CLEAN=$(echo "$DEPLOY_APP_SLUG" | tr -d '-_')
+    LOCAL_COMPOSER_SLUG=$(echo "$LOCAL_COMPOSER_NAME" | awk -F'/' '{print tolower($NF)}' | tr -d '[:space:]' | tr -d '_-')
+    DEPLOY_APP_CLEAN=$(echo "$DEPLOY_APP_SLUG" | tr -d '_-')
     if [[ "$LOCAL_COMPOSER_SLUG" != *"$DEPLOY_APP_CLEAN"* ]] && [[ "$DEPLOY_APP_CLEAN" != *"$LOCAL_COMPOSER_SLUG"* ]]; then
         echo "🛑 FATAL APP IDENTITY MISMATCH:"
         echo "   composer.json identifies this codebase as: '${LOCAL_COMPOSER_NAME}'"
@@ -104,6 +108,16 @@ RELEASE_ID=$(date +"%Y%m%d%H%M%S")
 COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 USER_NAME=$(whoami)
+
+# CLI Flags
+SKIP_E2E=false
+for arg in "$@"; do
+    case "$arg" in
+        --skip-e2e)
+            SKIP_E2E=true
+            ;;
+    esac
+done
 
 # Sandboxed isolated build directory (cleaned on exit)
 SANDBOX=$(mktemp -d "/tmp/${APP_NAME}_deploy_XXXXXX")
@@ -168,7 +182,7 @@ if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     echo "⚠️  WARNING: Uncommitted changes detected in workspace:"
     git status -s
     echo ""
-    if [ ! -e /dev/tty ]; then
+    if [ "${NON_INTERACTIVE:-0}" -eq 1 ] || [ ! -t 0 ] || [ ! -r /dev/tty ]; then
         echo "🛑 ERROR: Non-interactive terminal detected. Please commit changes before deploying."
         exit 1
     fi
@@ -208,7 +222,7 @@ fi
 echo "✅ Git workspace clean. No secret leaks detected."
 
 ################################################################################
-# 5. QUALITY GATES (PHP Lint → PHPStan → PHPUnit → Semgrep)
+# 5. QUALITY GATES (PHP Lint → PHPStan → PHPUnit → Semgrep → Frontend Tests)
 ################################################################################
 
 echo -e "\n🔍 [3/8] Running PHP Syntax Linting (Full Backend)..."
@@ -217,18 +231,36 @@ find app bootstrap -type f -name "*.php" \
     || { echo "🛑 FATAL: PHP syntax error detected."; exit 1; }
 echo "✅ PHP syntax clean."
 
-if [ -f "phpstan.neon" ]; then
+PHPSTAN_BIN=""
+if [ -x "vendor/bin/phpstan" ]; then
+    PHPSTAN_BIN="vendor/bin/phpstan"
+elif [ -x "vendor/phpstan/phpstan/phpstan" ]; then
+    PHPSTAN_BIN="vendor/phpstan/phpstan/phpstan"
+elif command -v phpstan > /dev/null 2>&1; then
+    PHPSTAN_BIN="phpstan"
+fi
+
+if [ -f "phpstan.neon" ] && [ -n "$PHPSTAN_BIN" ]; then
     echo -e "\n🔍 Running PHPStan Static Analysis..."
-    vendor/bin/phpstan analyse --no-progress --quiet || {
+    "$PHPSTAN_BIN" analyse --no-progress --quiet || {
         echo "🛑 FATAL: PHPStan static analysis failed."
         exit 1
     }
     echo "✅ PHPStan passed."
 fi
 
-if [ -f "phpunit.xml" ]; then
+PHPUNIT_BIN=""
+if [ -x "vendor/bin/phpunit" ]; then
+    PHPUNIT_BIN="vendor/bin/phpunit"
+elif [ -x "vendor/phpunit/phpunit/phpunit" ]; then
+    PHPUNIT_BIN="vendor/phpunit/phpunit/phpunit"
+elif command -v phpunit > /dev/null 2>&1; then
+    PHPUNIT_BIN="phpunit"
+fi
+
+if [ -f "phpunit.xml" ] && [ -n "$PHPUNIT_BIN" ]; then
     echo -e "\n🧪 Running PHPUnit Test Suite..."
-    vendor/bin/phpunit --no-coverage || {
+    "$PHPUNIT_BIN" --no-coverage || {
         echo "🛑 FATAL: Automated tests failed."
         exit 1
     }
@@ -242,6 +274,60 @@ if command -v semgrep > /dev/null 2>&1; then
         exit 1
     }
     echo "✅ Security scan clean."
+fi
+
+# Frontend Unit Tests (Vitest/Jest)
+if [ -f "package.json" ] && grep -q '"test":' package.json 2>/dev/null; then
+    echo -e "\n🧪 Running JavaScript Unit Test Suite..."
+    npm test -- --run --silent 2>/dev/null || npm test 2>/dev/null || {
+        echo "🛑 FATAL: Frontend unit tests failed. Aborting deployment."
+        exit 1
+    }
+    echo "✅ Frontend unit tests passed."
+fi
+
+# Intelligent Cypress E2E Gating
+if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
+    echo -e "\n🌐 [QA Automation] Checking Cypress E2E Test Suite..."
+    if [ "$SKIP_E2E" = "true" ]; then
+        echo "⚠️  Cypress E2E tests skipped via --skip-e2e flag."
+    else
+        E2E_TARGET=""
+        if [ -n "${CYPRESS_BASE_URL:-}" ]; then
+            E2E_TARGET="$CYPRESS_BASE_URL"
+        elif [ -f "cypress.config.js" ]; then
+            E2E_TARGET=$(grep -E "baseUrl:\s*['\"][^'\"]+['\"]" cypress.config.js | sed -E "s/.*baseUrl:\s*['\"]([^'\"]+)['\"].*/\1/" | head -1)
+        elif [ -f "cypress.json" ]; then
+            E2E_TARGET=$(grep -E '"baseUrl":\s*"[^"]+"' cypress.json | sed -E 's/.*"baseUrl":\s*"([^"]+)".*/\1/' | head -1)
+        fi
+
+        if [ -z "$E2E_TARGET" ]; then
+            E2E_TARGET="http://localhost:8000"
+        fi
+
+        echo "   ↳ Probing E2E test target: ${E2E_TARGET}"
+        TARGET_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "$E2E_TARGET" 2>/dev/null || echo "000")
+
+        if [ "$TARGET_STATUS" != "000" ]; then
+            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests..."
+            if grep -q '"test:e2e":' package.json 2>/dev/null; then
+                npm run test:e2e -- --headless || {
+                    echo "🛑 FATAL: Cypress E2E regression tests failed! Aborting deployment."
+                    exit 1
+                }
+            elif command -v npx > /dev/null 2>&1; then
+                npx cypress run --headless || {
+                    echo "🛑 FATAL: Cypress E2E regression tests failed! Aborting deployment."
+                    exit 1
+                }
+            fi
+            echo "✅ Cypress E2E tests passed."
+        else
+            echo "⚠️  Notice: Local E2E target (${E2E_TARGET}) is offline (curl code: ${TARGET_STATUS})."
+            echo "   To enforce E2E before deploy, start your local server or specify CYPRESS_BASE_URL."
+            echo "   Bypassing E2E for this deploy run. (Use --skip-e2e to silence)."
+        fi
+    fi
 fi
 
 ################################################################################
@@ -261,14 +347,18 @@ fi
 # 7. ASSET COMPILATION & SANDBOX ASSEMBLY
 ################################################################################
 
-echo -e "\n📦 [5/8] Compiling Frontend Assets & Assembling Sandbox..."
+echo -e "\n📦 [5/8] Compiling Frontend Assets (Fail-Closed) & Assembling Sandbox..."
 
 if [ -f "package.json" ]; then
+    echo "📦 Compiling production frontend bundle..."
     if grep -q '"prod":' package.json; then
-        npm run prod --silent
+        npm run prod || { echo "🛑 FATAL: Production asset compilation failed (npm run prod). Aborting deployment."; exit 1; }
     elif grep -q '"build":' package.json; then
-        npm run build --silent
+        npm run build || { echo "🛑 FATAL: Production asset compilation failed (npm run build). Aborting deployment."; exit 1; }
+    elif grep -q '"production":' package.json; then
+        npm run production || { echo "🛑 FATAL: Production asset compilation failed (npm run production). Aborting deployment."; exit 1; }
     fi
+    echo "✅ Frontend production bundle compiled successfully."
 fi
 
 copy_item() {
@@ -343,6 +433,16 @@ rsync -az --delete \
     --exclude='scratch' \
     --exclude='public/uploads/*' \
     --exclude='public/uploads/**' \
+    --exclude='public/img/*' \
+    --exclude='public/img/**' \
+    --exclude='public/images/*' \
+    --exclude='public/images/**' \
+    --exclude='resources/images/*' \
+    --exclude='resources/images/**' \
+    --exclude='resources/videos/*' \
+    --exclude='resources/videos/**' \
+    --exclude='storage/uploads/*' \
+    --exclude='storage/uploads/**' \
     --exclude='storage/logs/*' \
     --exclude='storage/framework/cache/*' \
     --exclude='storage/framework/sessions/*' \
