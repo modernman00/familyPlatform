@@ -56,6 +56,37 @@ _require_env DEPLOY_REMOTE_DIR
 _require_env DEPLOY_HEALTH_URL
 
 ################################################################################
+# 1b. CROSS-APP IDENTITY GUARD (prevents wrong-app deploy to shared server)
+################################################################################
+# Reads local composer.json "name" and compares it (case-insensitively) to
+# DEPLOY_APP_NAME. This guard prevents an agent working in one app's worktree
+# from silently deploying to another app's production directory on a shared
+# hosting server.
+
+_extract_composer_name() {
+    php -r "echo strtolower(json_decode(file_get_contents('composer.json'))->name ?? '');" 2>/dev/null || echo ""
+}
+
+LOCAL_COMPOSER_NAME=$(_extract_composer_name)
+DEPLOY_APP_SLUG=$(echo "${DEPLOY_APP_NAME}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+
+if [ -n "$LOCAL_COMPOSER_NAME" ]; then
+    # Strip org prefix (e.g. "modernman00/partyplatform" → "partyplatform")
+    LOCAL_COMPOSER_SLUG=$(echo "$LOCAL_COMPOSER_NAME" | awk -F'/' '{print tolower($NF)}' | tr -d '[:space:]-_')
+    DEPLOY_APP_CLEAN=$(echo "$DEPLOY_APP_SLUG" | tr -d '-_')
+    if [[ "$LOCAL_COMPOSER_SLUG" != *"$DEPLOY_APP_CLEAN"* ]] && [[ "$DEPLOY_APP_CLEAN" != *"$LOCAL_COMPOSER_SLUG"* ]]; then
+        echo "🛑 FATAL APP IDENTITY MISMATCH:"
+        echo "   composer.json identifies this codebase as: '${LOCAL_COMPOSER_NAME}'"
+        echo "   DEPLOY_APP_NAME is configured as:          '${DEPLOY_APP_NAME}'"
+        echo "   These do not match. You may be in the wrong repository or worktree."
+        echo "   Source the correct .deploy.env or check your working directory."
+        exit 1
+    fi
+fi
+
+echo "✅ App identity check passed: local codebase matches '${DEPLOY_APP_NAME}'."
+
+################################################################################
 # 2. CONFIGURATION
 ################################################################################
 
