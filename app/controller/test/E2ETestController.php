@@ -138,4 +138,55 @@ class E2ETestController
         }
         exit;
     }
+
+    public function clearRateLimit(): never
+    {
+        try {
+            $this->run("TRUNCATE TABLE rate_limit_attempts");
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+        } catch (\Throwable $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    public function seedTestUser(): never
+    {
+        $email = 'cypress_test@myfamilyplatform.com';
+        $password = 'National2';
+        $userId = \bin2hex(\random_bytes(8));
+
+        // Check if user already exists
+        $existing = $this->run("SELECT id FROM account WHERE email = ?", [$email])->fetch(PDO::FETCH_ASSOC);
+        if ($existing) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Test user already exists']);
+            exit;
+        }
+
+        try {
+            // Create account
+            $this->run(
+                "INSERT INTO account (id, email, password, deleted_at) VALUES (?, ?, ?, NULL)",
+                [$userId, $email, \password_hash($password, PASSWORD_ARGON2ID)]
+            );
+
+            // Create personal data
+            $this->run(
+                "INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)",
+                [$userId, 'Cypress', 'Test', 'TEST' . \strtoupper(\substr($userId, 0, 4))]
+            );
+
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Test user created', 'id' => $userId]);
+        } catch (\Throwable $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
 }

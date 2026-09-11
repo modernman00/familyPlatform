@@ -12,6 +12,12 @@ describe('Authentication Flow', () => {
             url: '/tests/clear-rate-limit',
             failOnStatusCode: false
         });
+        // Seed test user if it doesn't exist
+        cy.request({
+            method: 'POST',
+            url: '/tests/seed-test-user',
+            failOnStatusCode: false
+        });
         // Warm the /login route (PHP opcache, session, DB pool) so the first real
         // page load of the run isn't racing a cold server for a worker.
         cy.request({ url: '/login', failOnStatusCode: false });
