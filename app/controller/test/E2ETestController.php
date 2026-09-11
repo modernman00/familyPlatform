@@ -142,7 +142,7 @@ class E2ETestController
     public function clearRateLimit(): never
     {
         try {
-            $this->run("TRUNCATE TABLE rate_limit_attempts");
+            $this->run("TRUNCATE TABLE rate_limiter");
             header('Content-Type: application/json');
             echo json_encode(['success' => true]);
         } catch (\Throwable $e) {
