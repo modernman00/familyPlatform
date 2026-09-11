@@ -269,7 +269,7 @@ final class NotificationController extends Select
     {
         try {
             $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
-            if ($userId === '') {
+            if (!is_string($userId) || $userId === '') {
                 msgException(401, 'Unauthorized');
                 return;
             }
@@ -305,7 +305,7 @@ final class NotificationController extends Select
     {
         try {
             $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
-            if ($userId === '') {
+            if (!is_string($userId) || $userId === '') {
                 msgException(401, 'Unauthorized');
                 return;
             }
