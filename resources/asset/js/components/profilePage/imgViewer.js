@@ -1,7 +1,2 @@
-import {showComment} from "./html"
-import { getAllData } from "../helper/http"
-
-
-
-
-
+// imgViewer.js - Placeholder for gallery viewer utilities
+export {};

@@ -56,7 +56,7 @@ final class RegisterTableData {
                 'mother_name' => $cleanPostData['mother_name'] ?? "",
                 'mother_mobile' => $cleanPostData['mother_mobile'] ?? "",
                 'mother_email' => $cleanPostData['mother_email'] ?? "",
-                'otherFamCode' => $cleanPostData['famCode'] ?? null,
+                'otherFamCode' => $cleanPostData['otherFamCode'] ?? null,
                 'id' => $cleanPostData['id'] ?? null
             ],
             'post' => [

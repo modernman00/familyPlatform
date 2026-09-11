@@ -93,7 +93,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'register' */
-    /* webpackPrefetch: true */
     './components/register/'
   )
     .then((module) => module.default)
@@ -104,7 +103,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'all_members' */
-    /* webpackPrefetch: true */
     './components/allMembers/'
   )
     .then((module) => module.default)
@@ -114,7 +112,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'reels' */
-    /* webpackPrefetch: true */
     './components/reels/reelsPlayer'
   )
     .then((module) => module.default)
@@ -126,7 +123,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'login' */
-    /* webpackPrefetch: true */
     './components/acctMgt/login'
   )
     .then((module) => module.default)
@@ -138,7 +134,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'adminLogin' */
-    /* webpackPrefetch: true */
     './components/acctMgt/adminLogin'
   )
     .then((module) => module.default)
@@ -148,7 +143,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'forgotPwd' */
-    /* webpackPrefetch: true */
     './components/forgotPwd/'
   )
     .then((module) => module.default)
@@ -158,7 +152,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'code' */
-    /* webpackPrefetch: true */
     './components/acctMgt/code'
   )
     .then((module) => module.default)
@@ -174,7 +167,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'profilePage' */
-    /* webpackPrefetch: true */
     './components/profilePage/'
   )
     .then((module) => module.default)
@@ -185,7 +177,6 @@ if (window.location.pathname === '/register') {
   // qSel('#loader').style.display ="none" // loader
   routePromise = import(
     /* webpackChunkName: 'changePW' */
-    /* webpackPrefetch: true */
     './components/changePW/'
   )
     .then((module) => module.default)
@@ -194,7 +185,6 @@ if (window.location.pathname === '/register') {
   // qSel('.login').style.display ="none" // navbar mgt
   routePromise = import(
     /* webpackChunkName: 'img' */
-    /* webpackPrefetch: true */
     './components/profilePage/imgViewer'
   )
     .then((module) => module.default)
@@ -202,7 +192,6 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/createFamilyCode') {
   routePromise = import(
     /* webpackChunkName: 'familyCode' */
-    /* webpackPrefetch: true */
     './components/register/familyCode'
   )
     .then((module) => module.default)
@@ -213,7 +202,6 @@ if (window.location.pathname === '/register') {
 } else if (checkURL('accountSetting')) {
   routePromise = import(
     /* webpackChunkName: 'accountSetting' */
-    /* webpackPrefetch: true */
     './components/accountSetting'
   )
     .then((module) => module.default)
@@ -223,7 +211,6 @@ if (window.location.pathname === '/register') {
 
   routePromise = import(
     /* webpackChunkName: 'organogram' */
-    /* webpackPrefetch: true */
     './components/familyTree/index.js'
   )
     .then((module) => module.default)

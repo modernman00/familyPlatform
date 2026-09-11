@@ -113,14 +113,14 @@ try {
                 // Explicitly ensure all accumulated image files are appended directly to formData
                 const selectedFiles = getSelectedPostFiles();
                 const fileInput = document.getElementById('imageUpload');
-                const filesToAppend = (selectedFiles && selectedFiles.length > 0)
+                const rawFiles = (selectedFiles && selectedFiles.length > 0)
                     ? selectedFiles
                     : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
 
-                if (filesToAppend.length > 0) {
+                if (rawFiles.length > 0) {
                     formData.delete('post_img[]');
                     formData.delete('post_img');
-                    filesToAppend.forEach((file) => {
+                    rawFiles.forEach((file) => {
                         formData.append('post_img[]', file, file.name);
                     });
                 }

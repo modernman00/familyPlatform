@@ -75,6 +75,9 @@ const handleHashNavigation = () => {
     '#password': 'v-pills-password-tab',
     '#preferences': 'v-pills-preferences-tab',
     '#privacy': 'v-pills-privacy-tab',
+    '#familycode': 'v-pills-familycode-tab',
+    '#family-code': 'v-pills-familycode-tab',
+    '#family-network': 'v-pills-familycode-tab',
   };
 
   const targetTabId = hashMap[hash.toLowerCase()];

@@ -1,3 +1,6 @@
+@php
+    $reelsExpDays = \App\model\Reel::getExpirationDays();
+@endphp
 <div class="modal fade" id="createReelModal" tabindex="-1" aria-labelledby="createReelModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
@@ -8,7 +11,7 @@
                     </div>
                     <div>
                         <h5 class="modal-title fw-bold mb-0 text-dark" id="createReelModalLabel">Publish Family Reel</h5>
-                        <p class="text-muted small mb-0">Share a milestone, memory, or family story.</p>
+                        <p class="text-muted small mb-0">Share a milestone, memory, or family story {{ $reelsExpDays > 0 ? '(active for ' . $reelsExpDays . ' ' . ($reelsExpDays === 1 ? 'day' : 'days') . ')' : '(saved permanently)' }}.</p>
                     </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

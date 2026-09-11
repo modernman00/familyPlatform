@@ -304,6 +304,9 @@
             <button class="nav-link" id="v-pills-marital-tab" data-bs-toggle="pill" data-bs-target="#v-pills-marital" type="button" role="tab" aria-controls="v-pills-marital" aria-selected="false">
               <i class="bi bi-heart-fill"></i> Marital Status
             </button>
+            <button class="nav-link" id="v-pills-familycode-tab" data-bs-toggle="pill" data-bs-target="#v-pills-familycode" type="button" role="tab" aria-controls="v-pills-familycode" aria-selected="false">
+              <i class="bi bi-diagram-3-fill"></i> Family Network & Code
+            </button>
           </div>
         </div>
       </div>
@@ -777,7 +780,648 @@
               <p id="dataExportStatus" class="small text-muted mt-2" style="display:none;"></p>
             </div>
 
+            <!-- FAMILY NETWORK & CODE TAB -->
+            <div class="tab-pane fade" id="v-pills-familycode" role="tabpanel" aria-labelledby="v-pills-familycode-tab">
+              <div class="section-title">Family Network & Code Management</div>
+              <div class="section-subtitle">Manage your active family code, branch out into your own private family space, or join another family network.</div>
+              <div class="section-divider"></div>
+
+              <!-- Notifications Alert -->
+              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="famCodeAlert" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                  <p id="famCodeAlertMessage" class="mb-0"></p>
+                </div>
+              </div>
+
+              <!-- Active Pending Request Alert (if any) -->
+              @if(!empty($pendingFamilyRequest))
+              <div class="alert alert-warning shadow-sm border-0 rounded-3 p-3 mb-4" id="pendingRequestAlert" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e;">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-hourglass-split me-1 text-warning"></i> Pending Family Transfer Request</h6>
+                    <p class="small mb-0">
+                      You requested to join family code <strong class="badge bg-warning text-dark">{{ $pendingFamilyRequest['family_code'] }}</strong>.
+                      Awaiting approval from <strong>{{ $pendingFamilyRequest['inviter_first_name'] }} {{ $pendingFamilyRequest['inviter_last_name'] }}</strong>.
+                    </p>
+                  </div>
+                  <button type="button" id="cancelRequestBtn" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+                    <i class="bi bi-x-circle me-1"></i> Cancel Request
+                  </button>
+                </div>
+              </div>
+              @endif
+
+              <!-- Current Family Code Card -->
+              <div class="card border-0 shadow-sm rounded-3 mb-4" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0;">
+                <div class="card-body p-4">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                      <span class="text-uppercase text-muted fw-bold small" style="letter-spacing: 0.05em;">Your Current Family Code</span>
+                      <h3 class="fw-bolder text-primary mb-1 mt-1" id="currentFamCodeText" style="letter-spacing: 1px;">
+                        <i class="bi bi-hash text-muted"></i><span id="currentFamCodeValue">{{ $accountData['famCode'] ?? 'NOT ASSIGNED' }}</span>
+                      </h3>
+                      <p class="text-muted small mb-0">
+                        This code links your profile, personal memories, family tree, and shared feed with other verified family members.
+                      </p>
+                    </div>
+                    <div>
+                      <button type="button" id="copyCurrentFamCodeBtn" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" data-code="{{ $accountData['famCode'] ?? '' }}">
+                        <i class="bi bi-clipboard me-1"></i> Copy Code
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Secondary / Maternal / Maiden Family Code Card -->
+              <div class="card border-0 shadow-sm rounded-3 mb-4" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                <div class="card-body p-4">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #faf5ff; color: #9333ea;">
+                      <i class="bi bi-diagram-3-fill fs-4"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h5 class="fw-bold mb-0">Secondary / Maternal / Maiden Family Code</h5>
+                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #f3e8ff; color: #7e22ce; font-size: 0.75rem;">Dual Lineage &amp; In-Laws</span>
+                      </div>
+                      <span class="text-muted small">Connect to your maternal relatives and in-law circles in the Kinship Suggestion Engine.</span>
+                    </div>
+                    <div>
+                      @if(!empty($accountData['otherFamCode']))
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" id="secondaryCodeStatusBadge">
+                          <i class="bi bi-check2-circle me-1"></i> Active Link: <strong>{{ $accountData['otherFamCode'] }}</strong>
+                        </span>
+                      @else
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;" id="secondaryCodeStatusBadge">
+                          <i class="bi bi-dash-circle me-1"></i> Not Linked
+                        </span>
+                      @endif
+                    </div>
+                  </div>
+
+                  <div class="p-3 rounded-3 mb-3" style="background-color: #faf5ff; border: 1px solid #f3e8ff; font-size: 0.85rem; color: #581c87;">
+                    <div class="d-flex align-items-start gap-2">
+                      <i class="bi bi-info-circle-fill text-purple mt-1"></i>
+                      <div>
+                        <strong>How this works:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                          <li><strong>For Married Women:</strong> Enter your biological maiden family code to stay connected with your parents' and siblings' lineage.</li>
+                          <li><strong>For All Members:</strong> Enter your mother's maternal family code to automatically discover maternal aunts, uncles, and cousins.</li>
+                          <li><em>Your primary household tree (<span class="fw-bold text-dark">{{ $accountData['famCode'] ?? 'Primary' }}</span>) remains completely unchanged.</em></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <form id="secondaryFamCodeForm" onsubmit="return false;">
+                    <div class="row g-3 align-items-center">
+                      <div class="col-md-7">
+                        <label class="form-label small fw-bold text-muted text-uppercase" for="otherFamCodeInput">Maternal / Maiden Family Code</label>
+                        <div class="input-group">
+                          <span class="input-group-text bg-light text-muted fw-bold">#</span>
+                          <input type="text" name="otherFamCode" id="otherFamCodeInput" class="form-control text-uppercase fw-bold" placeholder="e.g. ADE123" value="{{ $accountData['otherFamCode'] ?? '' }}" maxlength="12">
+                        </div>
+                        <div class="form-text">Must be different from your primary family code ({{ $accountData['famCode'] ?? '' }}).</div>
+                      </div>
+                      <div class="col-md-5 d-flex align-items-end gap-2 pt-2">
+                        <button type="button" id="btnSaveOtherFamCode" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm flex-grow-1">
+                          <i class="bi bi-check-lg me-1"></i> Save Secondary Code
+                        </button>
+                        <button type="button" id="btnClearOtherFamCode" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold {{ empty($accountData['otherFamCode']) ? 'd-none' : '' }}" title="Clear secondary family code">
+                          <i class="bi bi-x-circle me-1"></i> Clear
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Two Operational Panels: Stay Solo vs Join Existing -->
+              <div class="row g-4">
+                
+                <!-- 1. Branch Out Solo -->
+                <div class="col-md-6">
+                  <div class="card h-100 border-0 shadow-sm rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                    <div class="card-body p-4 d-flex flex-column">
+                      <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #eff6ff; color: #3b82f6;">
+                          <i class="bi bi-tree-fill fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="fw-bold mb-0">Start Your Own Family Space</h5>
+                          <span class="badge bg-light text-primary border border-primary-subtle">Branch Out / Solo</span>
+                        </div>
+                      </div>
+                      
+                      <p class="text-muted small mb-4 flex-grow-1">
+                        Want to establish an independent household tree or branch out on your own? Generating a new code provisions a fresh private family lineage where you are the administrator.
+                      </p>
+
+                      <form id="staySoloForm" onsubmit="return false;">
+                        <div class="mb-3">
+                          <label class="form-label" for="soloSurname">Family Surname (Optional)</label>
+                          <input type="text" name="surname" id="soloSurname" class="form-control" placeholder="{{ $lastName ?: 'Surname' }}" value="{{ $lastName }}">
+                          <div class="form-text">Will create your 6-character code (e.g. {{ strtoupper(substr($lastName ?: 'OLA', 0, 3)) }}345).</div>
+                        </div>
+
+                        <button type="button" id="btnStaySolo" class="btn btn-primary w-100 py-2 fw-semibold rounded-3 shadow-sm">
+                          <i class="bi bi-stars me-1"></i> Generate New Solo Code (6-char)
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2. Transfer / Join Existing Family -->
+                <div class="col-md-6">
+                  <div class="card h-100 border-0 shadow-sm rounded-3" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                    <div class="card-body p-4 d-flex flex-column">
+                      <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #ecfdf5; color: #10b981;">
+                          <i class="bi bi-people-fill fs-4"></i>
+                        </div>
+                        <div>
+                          <h5 class="fw-bold mb-0">Join Another Family Network</h5>
+                          <span class="badge bg-light text-success border border-success-subtle">Transfer Request</span>
+                        </div>
+                      </div>
+
+                      <p class="text-muted small mb-3">
+                        Moving to an existing family network? Enter the family code and the details of a family member who can verify your relationship.
+                      </p>
+
+                      <form id="joinFamilyForm" onsubmit="return false;">
+                        <div class="mb-2">
+                          <label class="form-label" for="targetFamCode">Target Family Code *</label>
+                          <input type="text" name="family_code" id="targetFamCode" class="form-control text-uppercase fw-bold" placeholder="e.g. OLA345" maxlength="10" required>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                          <div class="col-6">
+                            <label class="form-label" for="inviterFirstName">Inviter First Name *</label>
+                            <input type="text" name="inviter_first_name" id="inviterFirstName" class="form-control" placeholder="First Name" required>
+                          </div>
+                          <div class="col-6">
+                            <label class="form-label" for="inviterLastName">Inviter Last Name *</label>
+                            <input type="text" name="inviter_last_name" id="inviterLastName" class="form-control" placeholder="Last Name" required>
+                          </div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label" for="inviterContact">Inviter Email or Mobile *</label>
+                          <input type="text" name="inviter_email_or_mobile" id="inviterContact" class="form-control" placeholder="email@example.com or phone" required>
+                        </div>
+
+                        <button type="button" id="btnRequestJoin" class="btn btn-success w-100 py-2 fw-semibold rounded-3 shadow-sm">
+                          <i class="bi bi-send-check me-1"></i> Send Transfer Request
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // 1. Copy Family Code
+    const copyBtn = document.getElementById('copyCurrentFamCodeBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async function() {
+        const valSpan = document.getElementById('currentFamCodeValue');
+        const code = (valSpan ? valSpan.textContent : copyBtn.getAttribute('data-code') || '').trim();
+        if (!code) return;
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(code);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = code;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+
+          const originalHtml = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="bi bi-check2 me-1"></i> Copied!';
+          copyBtn.classList.remove('btn-outline-primary');
+          copyBtn.classList.add('btn-success');
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHtml;
+            copyBtn.classList.remove('btn-success');
+            copyBtn.classList.add('btn-outline-primary');
+          }, 2500);
+
+          if (window.Swal) {
+            window.Swal.fire({
+              toast: true,
+              position: 'top-end',
+              icon: 'success',
+              title: 'Family Code copied: ' + code,
+              showConfirmButton: false,
+              timer: 2500
+            });
+          }
+        } catch (err) {
+          console.error('Clipboard copy error:', err);
+        }
+      });
+    }
+
+    // 2. Branch Out Solo
+    const btnStaySolo = document.getElementById('btnStaySolo');
+    if (btnStaySolo) {
+      btnStaySolo.addEventListener('click', function() {
+        const surnameInput = document.getElementById('soloSurname');
+        const surname = surnameInput ? surnameInput.value.trim() : '';
+
+        const proceed = () => {
+          btnStaySolo.disabled = true;
+          const origHtml = btnStaySolo.innerHTML;
+          btnStaySolo.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Generating...';
+
+          const fd = new FormData();
+          fd.append('action', 'staySoloCode');
+          fd.append('surname', surname);
+          if (csrfToken) {
+            fd.append('token', csrfToken);
+          }
+
+          fetch('/accountSetting', {
+            method: 'POST',
+            body: fd,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-XSRF-TOKEN': csrfToken,
+              'X-CSRF-TOKEN': csrfToken
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            btnStaySolo.disabled = false;
+            btnStaySolo.innerHTML = origHtml;
+
+            if (data.status === 200 || data.success) {
+              const newCode = (data.data && data.data.family_code) || 'Updated';
+              const valSpan = document.getElementById('currentFamCodeValue');
+              if (valSpan) valSpan.textContent = newCode;
+              if (copyBtn) copyBtn.setAttribute('data-code', newCode);
+
+              if (window.Swal) {
+                window.Swal.fire({
+                  icon: 'success',
+                  title: 'Branched Out Successfully!',
+                  html: 'Your new solo Family Code is <strong>' + newCode + '</strong>.<br><br>Your profile has been transitioned to your new private family tree.',
+                  confirmButtonColor: '#4f46e5'
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                alert('Success! Your new Family Code is: ' + newCode);
+                window.location.reload();
+              }
+            } else {
+              const err = data.message || (data.data && data.data.message) || 'Could not generate solo family code.';
+              if (window.Swal) {
+                window.Swal.fire({ icon: 'error', title: 'Error', text: err, confirmButtonColor: '#4f46e5' });
+              } else {
+                alert(err);
+              }
+            }
+          })
+          .catch(err => {
+            btnStaySolo.disabled = false;
+            btnStaySolo.innerHTML = origHtml;
+            console.error('Solo code error:', err);
+            if (window.Swal) {
+              window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to process request. Please try again.', confirmButtonColor: '#4f46e5' });
+            }
+          });
+        };
+
+        if (window.Swal) {
+          window.Swal.fire({
+            title: 'Branch Out to Solo Family?',
+            html: 'This will generate a brand-new unique Family Code for you.<br><br>You will become the family administrator of your own lineage with a fresh family tree. Are you sure you want to proceed?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Branch Out',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#4f46e5'
+          }).then((res) => {
+            if (res.isConfirmed) {
+              proceed();
+            }
+          });
+        } else {
+          if (confirm('Are you sure you want to branch out to your own solo family space?')) {
+            proceed();
+          }
+        }
+      });
+    }
+
+    // 3. Request to Join Another Family
+    const btnRequestJoin = document.getElementById('btnRequestJoin');
+    if (btnRequestJoin) {
+      btnRequestJoin.addEventListener('click', function() {
+        const famCodeEl = document.getElementById('targetFamCode');
+        const fNameEl = document.getElementById('inviterFirstName');
+        const lNameEl = document.getElementById('inviterLastName');
+        const contactEl = document.getElementById('inviterContact');
+
+        const famCode = famCodeEl ? famCodeEl.value.trim() : '';
+        const fName = fNameEl ? fNameEl.value.trim() : '';
+        const lName = lNameEl ? lNameEl.value.trim() : '';
+        const contact = contactEl ? contactEl.value.trim() : '';
+
+        if (!famCode || !fName || !lName || !contact) {
+          if (window.Swal) {
+            window.Swal.fire({
+              icon: 'warning',
+              title: 'Missing Required Fields',
+              text: 'Please fill in target family code and all inviter details.',
+              confirmButtonColor: '#10b981'
+            });
+          } else {
+            alert('Please fill in target family code and all inviter details.');
+          }
+          return;
+        }
+
+        btnRequestJoin.disabled = true;
+        const origHtml = btnRequestJoin.innerHTML;
+        btnRequestJoin.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Submitting...';
+
+        const fd = new FormData();
+        fd.append('action', 'requestJoinFamily');
+        fd.append('family_code', famCode);
+        fd.append('inviter_first_name', fName);
+        fd.append('inviter_last_name', lName);
+        fd.append('inviter_email_or_mobile', contact);
+        if (csrfToken) {
+          fd.append('token', csrfToken);
+        }
+
+        fetch('/accountSetting', {
+          method: 'POST',
+          body: fd,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': csrfToken,
+            'X-CSRF-TOKEN': csrfToken
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          btnRequestJoin.disabled = false;
+          btnRequestJoin.innerHTML = origHtml;
+
+          if (data.status === 200 || data.success) {
+            const msg = data.message || (data.data && data.data.message) || 'Transfer request submitted successfully.';
+            if (window.Swal) {
+              window.Swal.fire({
+                icon: 'success',
+                title: 'Request Sent!',
+                text: msg,
+                confirmButtonColor: '#10b981'
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              alert(msg);
+              window.location.reload();
+            }
+          } else {
+            const err = data.message || (data.data && data.data.message) || 'Could not submit transfer request.';
+            if (window.Swal) {
+              window.Swal.fire({ icon: 'error', title: 'Request Failed', text: err, confirmButtonColor: '#10b981' });
+            } else {
+              alert(err);
+            }
+          }
+        })
+        .catch(err => {
+          btnRequestJoin.disabled = false;
+          btnRequestJoin.innerHTML = origHtml;
+          console.error('Join request error:', err);
+          if (window.Swal) {
+            window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to process request. Please try again.', confirmButtonColor: '#10b981' });
+          }
+        });
+      });
+    }
+
+    // 4. Cancel Pending Request
+    const cancelBtn = document.getElementById('cancelRequestBtn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function() {
+        const proceedCancel = () => {
+          cancelBtn.disabled = true;
+          const origHtml = cancelBtn.innerHTML;
+          cancelBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+          const fd = new FormData();
+          fd.append('action', 'cancelFamilyRequest');
+          if (csrfToken) {
+            fd.append('token', csrfToken);
+          }
+
+          fetch('/accountSetting', {
+            method: 'POST',
+            body: fd,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-XSRF-TOKEN': csrfToken,
+              'X-CSRF-TOKEN': csrfToken
+            }
+          })
+          .then(res => res.json())
+          .then(data => {
+            cancelBtn.disabled = false;
+            cancelBtn.innerHTML = origHtml;
+
+            if (data.status === 200 || data.success) {
+              const alertBox = document.getElementById('pendingRequestAlert');
+              if (alertBox) alertBox.style.display = 'none';
+
+              if (window.Swal) {
+                window.Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'info',
+                  title: 'Transfer request cancelled.',
+                  showConfirmButton: false,
+                  timer: 2500
+                });
+              }
+            } else {
+              const err = data.message || 'Could not cancel request.';
+              if (window.Swal) {
+                window.Swal.fire({ icon: 'error', title: 'Error', text: err });
+              }
+            }
+          })
+          .catch(err => {
+            cancelBtn.disabled = false;
+            cancelBtn.innerHTML = origHtml;
+            console.error('Cancel request error:', err);
+          });
+        };
+
+        if (window.Swal) {
+          window.Swal.fire({
+            title: 'Cancel Request?',
+            text: 'Are you sure you want to cancel your pending family transfer request?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Cancel Request',
+            cancelButtonText: 'Keep Request',
+            confirmButtonColor: '#dc2626'
+          }).then((res) => {
+            if (res.isConfirmed) proceedCancel();
+          });
+        } else {
+          if (confirm('Cancel your pending transfer request?')) proceedCancel();
+        }
+      });
+    }
+
+    // 5. Update Secondary / Maternal / Maiden Family Code
+    const btnSaveOtherCode = document.getElementById('btnSaveOtherFamCode');
+    const btnClearOtherCode = document.getElementById('btnClearOtherFamCode');
+    const otherCodeInput = document.getElementById('otherFamCodeInput');
+    const secStatusBadge = document.getElementById('secondaryCodeStatusBadge');
+
+    const submitSecondaryCode = (codeToSave) => {
+      if (btnSaveOtherCode) {
+        btnSaveOtherCode.disabled = true;
+      }
+      if (btnClearOtherCode) {
+        btnClearOtherCode.disabled = true;
+      }
+
+      const fd = new FormData();
+      fd.append('action', 'updateSecondaryFamilyCode');
+      fd.append('otherFamCode', codeToSave);
+      if (csrfToken) {
+        fd.append('token', csrfToken);
+      }
+
+      fetch('/accountSetting', {
+        method: 'POST',
+        body: fd,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-XSRF-TOKEN': csrfToken,
+          'X-CSRF-TOKEN': csrfToken
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (btnSaveOtherCode) btnSaveOtherCode.disabled = false;
+        if (btnClearOtherCode) btnClearOtherCode.disabled = false;
+
+        if (data.status === 200 || data.success) {
+          const msg = data.message || (data.data && data.data.message) || 'Secondary family code updated successfully.';
+          const newCode = (codeToSave || '').trim().toUpperCase().replace('#', '');
+          
+          if (otherCodeInput) {
+            otherCodeInput.value = newCode;
+          }
+
+          if (secStatusBadge) {
+            if (newCode) {
+              secStatusBadge.style.backgroundColor = '#ecfdf5';
+              secStatusBadge.style.color = '#047857';
+              secStatusBadge.style.borderColor = '#a7f3d0';
+              secStatusBadge.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Active Link: <strong>${newCode}</strong>`;
+              if (btnClearOtherCode) btnClearOtherCode.classList.remove('d-none');
+            } else {
+              secStatusBadge.style.backgroundColor = '#f1f5f9';
+              secStatusBadge.style.color = '#64748b';
+              secStatusBadge.style.borderColor = '#e2e8f0';
+              secStatusBadge.innerHTML = `<i class="bi bi-dash-circle me-1"></i> Not Linked`;
+              if (btnClearOtherCode) btnClearOtherCode.classList.add('d-none');
+            }
+          }
+
+          if (window.Swal) {
+            window.Swal.fire({
+              icon: 'success',
+              title: newCode ? 'Secondary Code Linked!' : 'Secondary Code Cleared',
+              text: msg,
+              confirmButtonColor: '#4f46e5'
+            });
+          } else {
+            alert(msg);
+          }
+        } else {
+          const err = data.message || (data.data && data.data.message) || 'Could not update secondary family code.';
+          if (window.Swal) {
+            window.Swal.fire({ icon: 'error', title: 'Update Failed', text: err, confirmButtonColor: '#4f46e5' });
+          } else {
+            alert(err);
+          }
+        }
+      })
+      .catch(err => {
+        if (btnSaveOtherCode) btnSaveOtherCode.disabled = false;
+        if (btnClearOtherCode) btnClearOtherCode.disabled = false;
+        console.error('Secondary code update error:', err);
+        if (window.Swal) {
+          window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to update. Please try again.', confirmButtonColor: '#4f46e5' });
+        } else {
+          alert('Network error while updating secondary code.');
+        }
+      });
+    };
+
+    if (btnSaveOtherCode) {
+      btnSaveOtherCode.addEventListener('click', function() {
+        const codeVal = otherCodeInput ? otherCodeInput.value.trim() : '';
+        submitSecondaryCode(codeVal);
+      });
+    }
+
+    if (btnClearOtherCode) {
+      btnClearOtherCode.addEventListener('click', function() {
+        const proceedClear = () => {
+          submitSecondaryCode('');
+        };
+
+        if (window.Swal) {
+          window.Swal.fire({
+            title: 'Clear Secondary Family Code?',
+            text: 'This will disconnect your profile from maternal and in-law kinship suggestions for this code.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Clear Code',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc2626'
+          }).then(res => {
+            if (res.isConfirmed) proceedClear();
+          });
+        } else {
+          if (confirm('Clear your secondary family code?')) proceedClear();
+        }
+      });
+    }
+  });
+  </script>
         </div>
       </div>
     </div>

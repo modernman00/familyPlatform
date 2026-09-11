@@ -175,24 +175,84 @@
     </div>
     
     <!-- Premium Alpine Lightbox Modal -->
-    <div x-cloak x-show="lightboxOpen" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.95); z-index: 9999; backdrop-filter: blur(15px); align-items: center; justify-content: center;" :style="lightboxOpen ? 'display: flex;' : 'display: none;'" x-transition.opacity.duration.300ms @keydown.escape.window="closeLightbox()" @keydown.right.window="nextLightboxImage()" @keydown.left.window="prevLightboxImage()" @click.self="closeLightbox()">
+    <div x-cloak x-show="lightboxOpen" 
+         class="lightbox-overlay"
+         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.92); z-index: 99999; backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;"
+         x-transition:enter="transition ease-out duration-250"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         @keydown.escape.window="closeLightbox()"
+         @keydown.right.window="nextLightboxImage()"
+         @keydown.left.window="prevLightboxImage()"
+         @touchstart.passive="onLightboxTouchStart($event)"
+         @touchend.passive="onLightboxTouchEnd($event)"
+         @click="closeLightbox()">
         
-        <!-- Close Button -->
-        <button @click="closeLightbox()" style="position: absolute; top: 20px; right: 30px; background: rgba(255,255,255,0.15); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 28px; font-weight: 300; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='scale(1)';">&times;</button>
+        <!-- Close Button (High contrast, 48px touch target) -->
+        <button type="button" 
+                @click.stop="closeLightbox()" 
+                aria-label="Close photo view"
+                style="position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 46px; height: 46px; border-radius: 50%; font-size: 26px; line-height: 1; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; z-index: 100002; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+            <i class="bi bi-x-lg" style="font-size: 1.15rem;"></i>
+        </button>
         
         <!-- Previous Button -->
-        <button @click.prevent.stop="prevLightboxImage()" x-show="lightboxImages && lightboxImages.length > 1" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: none; color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 10000; user-select: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-50%) scale(1.05)';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(-50%) scale(1)';">&#10094;</button>
+        <button type="button" 
+                @click.stop.prevent="prevLightboxImage()" 
+                x-show="lightboxImages && lightboxImages.length > 1" 
+                aria-label="Previous photo"
+                style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 50px; height: 50px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+            <i class="bi bi-chevron-left"></i>
+        </button>
 
         <!-- Main Image Container -->
-        <div style="position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" @click.self="closeLightbox()">
-            <img :src="(lightboxImages && lightboxImages[lightboxIndex]) ? '/resources/images/post/' + encodeURIComponent(lightboxImages[lightboxIndex]) : ''" style="max-width: 100%; max-height: 100%; border-radius: 4px; object-fit: contain; box-shadow: 0 30px 60px rgba(0,0,0,0.6);" alt="Enlarged image" @click.stop>
+        <div class="lightbox-image-container" 
+             style="position: relative; max-width: 92vw; max-height: 86vh; display: flex; align-items: center; justify-content: center; user-select: none;" 
+             @click.stop>
+            
+            <!-- Loading Spinner -->
+            <div x-show="lightboxLoading" 
+                 class="spinner-border text-light position-absolute" 
+                 style="width: 3rem; height: 3rem; z-index: 100000;" 
+                 role="status">
+                <span class="visually-hidden">Loading photo...</span>
+            </div>
+
+            <!-- Image View -->
+            <img :src="getPostImageUrl(lightboxImages[lightboxIndex])" 
+                 x-on:load="lightboxLoading = false; lightboxError = false;"
+                 x-on:error="lightboxLoading = false; lightboxError = true;"
+                 x-show="!lightboxError"
+                 style="max-width: 100%; max-height: 84vh; border-radius: 8px; object-fit: contain; box-shadow: 0 25px 60px rgba(0,0,0,0.7); transition: transform 0.2s ease;" 
+                 alt="Enlarged family photo"
+                 @click.stop>
+
+            <!-- Fallback if Image Fails to Load -->
+            <div x-show="lightboxError" 
+                 class="text-center text-white p-4" 
+                 style="background: rgba(30,30,30,0.85); border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);">
+                <i class="bi bi-image text-secondary mb-2" style="font-size: 2.5rem; display: block;"></i>
+                <p class="mb-2 fw-semibold">Photo unavailable</p>
+                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3" @click.stop="closeLightbox()">Close</button>
+            </div>
         </div>
         
         <!-- Next Button -->
-        <button @click.prevent.stop="nextLightboxImage()" x-show="lightboxImages && lightboxImages.length > 1" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: none; color: white; width: 55px; height: 55px; border-radius: 50%; font-size: 24px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 10000; user-select: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-50%) scale(1.05)';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='translateY(-50%) scale(1)';">&#10095;</button>
+        <button type="button" 
+                @click.stop.prevent="nextLightboxImage()" 
+                x-show="lightboxImages && lightboxImages.length > 1" 
+                aria-label="Next photo"
+                style="position: absolute; right: 18px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25); color: #ffffff; width: 50px; height: 50px; border-radius: 50%; font-size: 22px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s ease; z-index: 100002; user-select: none; box-shadow: 0 4px 14px rgba(0,0,0,0.5);">
+            <i class="bi bi-chevron-right"></i>
+        </button>
         
-        <!-- Image Counter -->
-        <div x-show="lightboxImages && lightboxImages.length > 1" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); color: white; font-size: 15px; font-weight: 500; background: rgba(0,0,0,0.7); padding: 8px 24px; border-radius: 30px; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 10000;" x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
+        <!-- Image Counter Badge -->
+        <div x-show="lightboxImages && lightboxImages.length > 1" 
+             style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); color: #ffffff; font-size: 14px; font-weight: 600; background: rgba(0,0,0,0.75); padding: 6px 20px; border-radius: 30px; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(0,0,0,0.5); z-index: 100002; border: 1px solid rgba(255,255,255,0.2);" 
+             x-text="(lightboxIndex + 1) + ' / ' + lightboxImages.length"></div>
     </div>
   </div>
 

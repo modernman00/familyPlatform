@@ -477,12 +477,39 @@ class FamilyReelsPlayer {
         }
     }
 
-    shareReel(reel) {
+    async shareReel(reel) {
+        if (!reel) return;
+        const creatorName = (reel.firstName ? `${reel.firstName} ${reel.lastName || ''}` : 'Family').trim();
         const shareUrl = `${window.location.origin}/reels?id=${reel.id}`;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                this.showToast('Reel link copied to clipboard!', 'success');
-            });
+        const shareTitle = `Family Reel by ${creatorName}`;
+        const shareText = reel.caption ? `"${reel.caption}" - Watch on Family Platform` : `Watch this family memory by ${creatorName} on Family Platform`;
+
+        // 1. Try Native Mobile / Desktop Web Share API
+        if (typeof navigator.share === 'function') {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl
+                });
+                return;
+            } catch (err) {
+                // If user cancelled the share sheet, exit gracefully without showing error
+                if (err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) {
+                    return;
+                }
+                console.warn('[ReelsPlayer] Web Share failed, falling back to clipboard:', err);
+            }
+        }
+
+        // 2. Fallback to Clipboard Copy
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                this.showToast('Private family link copied to clipboard!', 'success');
+            } catch (err) {
+                this.showToast(shareUrl, 'info');
+            }
         } else {
             this.showToast(shareUrl, 'info');
         }

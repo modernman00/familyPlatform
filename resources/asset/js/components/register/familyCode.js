@@ -7,12 +7,14 @@ btnFamCode.addEventListener("click", function() {
     try {
         const surnameEl = id('surname');
         if (surnameEl && surnameEl.value !== "") {
-            const uniqueNumber = Date.now();
-            const uniqueNumber1 = Math.ceil(Math.floor(Math.random() * uniqueNumber) / 10000000);
-            const getSurname = surnameEl.value;
-            const firstFourLetters = getSurname.substring(0, 4);
+            const rawSurname = (surnameEl.value || '').replace(/[^A-Za-z]/g, '');
+            let prefix = rawSurname.substring(0, 3).toUpperCase();
+            if (prefix.length < 3) {
+                prefix = prefix.padEnd(3, 'X');
+            }
+            const randomThreeDigits = Math.floor(100 + Math.random() * 900);
 
-            id('createCode').value = `${firstFourLetters.toUpperCase()}${uniqueNumber1}`;
+            id('createCode').value = `${prefix}${randomThreeDigits}`;
             btnFamCode.disabled = true;
             btnFamCode.innerText = "Generated";
         } else {

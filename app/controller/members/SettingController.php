@@ -19,7 +19,13 @@ final class SettingController extends BaseController
 
             $accountData = parent::membersData();
 
-            Utility::view('/member/accountSetting', ['accountData' => $accountData]);
+            $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
+            $pendingFamilyRequest = $approvalService->getPendingRequestForUser((string)$accountData['id']);
+
+            Utility::view('/member/accountSetting', [
+                'accountData' => $accountData,
+                'pendingFamilyRequest' => $pendingFamilyRequest
+            ]);
 
         } catch (\Throwable $th) {
             Utility::showError($th);
@@ -101,6 +107,152 @@ final class SettingController extends BaseController
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
                     msgSuccess(200, "Privacy settings successfully updated.");
+                    return;
+                }
+
+                // 4. Stay Solo / Generate New Family Code
+                if ($action === 'staySoloCode') {
+                    $userId = (string)$_POST['id'];
+                    $memberData = parent::findMemberById($userId);
+                    $surname = (string)($_POST['surname'] ?? ($memberData['lastName'] ?? ''));
+                    if (empty($surname)) {
+                        $surname = 'Family';
+                    }
+
+                    $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
+                    $newCode = $approvalService->switchUserToSoloFamily($userId, $surname, $memberData);
+
+                    // Update session and return new code
+                    $_SESSION['famCode'] = $newCode;
+
+                    msgSuccess(200, "Successfully branched out! Your new solo Family Code is {$newCode}.", [
+                        'family_code' => $newCode
+                    ]);
+                    return;
+                }
+
+                // 5. Request to Join Another Family Network
+                if ($action === 'requestJoinFamily') {
+                    $userId = (string)$_POST['id'];
+                    $targetCode = trim((string)($_POST['family_code'] ?? ''));
+                    $inviterFirstName = trim((string)($_POST['inviter_first_name'] ?? ''));
+                    $inviterLastName = trim((string)($_POST['inviter_last_name'] ?? ''));
+                    $inviterContact = trim((string)($_POST['inviter_email_or_mobile'] ?? ''));
+
+                    if (empty($targetCode) || empty($inviterFirstName) || empty($inviterLastName) || empty($inviterContact)) {
+                        msgException(400, "All fields are required to join another family network.");
+                        return;
+                    }
+
+                    $cleanTargetCode = strtoupper(trim(str_replace('#', '', $targetCode)));
+                    $currentCode = strtoupper(trim(str_replace('#', '', (string)($_SESSION['famCode'] ?? ''))));
+
+                    if ($cleanTargetCode === $currentCode) {
+                        msgException(400, "You are already a member of family code {$cleanTargetCode}.");
+                        return;
+                    }
+
+                    $pdo = \Src\Db::connect2();
+                    $approvalService = new \App\service\FamilyCodeApprovalService($pdo);
+
+                    if (!$approvalService->familyCodeExists($cleanTargetCode)) {
+                        msgException(404, "Family code '{$targetCode}' was not found. Please verify the code with your family member.");
+                        return;
+                    }
+
+                    // Check for existing pending request
+                    $existingReq = $approvalService->getPendingRequestForUser($userId);
+                    if ($existingReq) {
+                        msgException(409, "You already have a pending transfer request for family code {$existingReq['family_code']}. Please cancel it before requesting a new one.");
+                        return;
+                    }
+
+                    // Verify inviter exists in target family
+                    $inviter = $approvalService->findMatchingInviter(
+                        $cleanTargetCode,
+                        $inviterFirstName,
+                        $inviterLastName,
+                        $inviterContact
+                    );
+
+                    if (!$inviter) {
+                        msgException(422, "Could not find a matching family member in family {$cleanTargetCode} with the provided details. Please verify their name and contact information.");
+                        return;
+                    }
+
+                    // Create approval request
+                    $approvalData = $approvalService->createApprovalRequest(
+                        $userId,
+                        $cleanTargetCode,
+                        $inviterFirstName,
+                        $inviterLastName,
+                        $inviterContact
+                    );
+
+                    // Dispatch notification to inviter
+                    $notificationService = new \App\service\NotificationService($pdo);
+                    $newUserInfo = [
+                        'id' => $userId,
+                        'firstName' => $_SESSION['fName'] ?? '',
+                        'lastName' => $_SESSION['lName'] ?? '',
+                        'email' => $_SESSION['email'] ?? '',
+                        'mobile' => ''
+                    ];
+
+                    $notificationService->sendFamilyApprovalNotification(
+                        (string)$inviter['id'],
+                        $newUserInfo,
+                        (int)$approvalData['request_id'],
+                        $cleanTargetCode,
+                        (string)$approvalData['approval_token']
+                    );
+
+                    msgSuccess(200, "Transfer request submitted! An approval request has been sent to {$inviterFirstName} {$inviterLastName}. Your family code will update as soon as they approve.");
+                    return;
+                }
+
+                // 6. Cancel pending family join/transfer request
+                if ($action === 'cancelFamilyRequest') {
+                    $userId = (string)$_POST['id'];
+                    $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
+                    $approvalService->cancelPendingRequest($userId);
+
+                    msgSuccess(200, "Pending family transfer request has been cancelled.");
+                    return;
+                }
+
+                // 7. Update Secondary / Maternal / Maiden Family Code (otherFamCode)
+                if ($action === 'updateSecondaryFamilyCode') {
+                    $userId = (string)$_POST['id'];
+                    $rawCode = trim((string)($_POST['otherFamCode'] ?? ''));
+                    $cleanCode = strtoupper(trim(str_replace('#', '', $rawCode)));
+
+                    $currentPrimaryCode = strtoupper(trim((string)($_SESSION['famCode'] ?? '')));
+
+                    if (!empty($cleanCode) && $cleanCode === $currentPrimaryCode) {
+                        msgException(422, "Your secondary/maternal family code cannot be identical to your primary family code ({$currentPrimaryCode}). It is meant for your maternal kin or biological maiden family.");
+                        return;
+                    }
+
+                    $db = Db::connect2();
+                    $chkOther = $db->prepare("SELECT id FROM otherFamily WHERE id = ?");
+                    $chkOther->execute([$userId]);
+
+                    if ($chkOther->fetch()) {
+                        $upd = $db->prepare("UPDATE otherFamily SET otherFamCode = ? WHERE id = ?");
+                        $upd->execute([$cleanCode !== '' ? $cleanCode : null, $userId]);
+                    } else {
+                        $ins = $db->prepare("INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)");
+                        $ins->execute([$userId, $cleanCode !== '' ? $cleanCode : null]);
+                    }
+
+                    if (empty($cleanCode)) {
+                        msgSuccess(200, "Secondary family code has been cleared.");
+                    } else {
+                        msgSuccess(200, "Secondary / maternal family code successfully updated to {$cleanCode}! The Kinship Engine will now discover maternal kin and in-laws for you.", [
+                            'otherFamCode' => $cleanCode
+                        ]);
+                    }
                     return;
                 }
             }
@@ -229,10 +381,14 @@ final class SettingController extends BaseController
             if (isset($_POST['spouse_mobile'])) {
                 $updatesOtherFamily['spouse_mobile'] = trim((string)$_POST['spouse_mobile']);
             }
+            if (isset($_POST['otherFamCode'])) {
+                $updatesOtherFamily['otherFamCode'] = strtoupper(trim(str_replace('#', '', (string)$_POST['otherFamCode'])));
+            }
 
             if (!empty($updatesOtherFamily)) {
                 $updatesOtherFamily['id'] = $_POST['id'];
                 $cleanOtherFamily = LoginUtility::getSanitisedInputData($updatesOtherFamily, null, [
+                    'otherFamCode',
                     'father_name', 'father_email', 'father_mobile',
                     'mother_name', 'maiden_name', 'mother_email', 'mother_mobile',
                     'spouse_name', 'spouse_email', 'spouse_mobile'
@@ -244,8 +400,6 @@ final class SettingController extends BaseController
                 if ($chkOther->fetch()) {
                     UpdateFn::updateMultiple('otherFamily', $cleanOtherFamily, 'id');
                 } else {
-                    $cleanOtherFamily['otherFamCode'] = (string)($_SESSION['famCode'] ?? '');
-
                     // Column names are restricted to this fixed allowlist so the
                     // INSERT column list can never contain user-controlled text;
                     // every value is still bound through a "?" placeholder.

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\controller\BaseController;
+use App\classes\PushNotificationClass;
 use Src\CheckToken;
 use Src\Select;
 use Src\UpdateFn;
@@ -40,10 +41,21 @@ final class ApprovalController extends BaseController
                     throw new \Exception("Request not found or already processed.");
                 }
 
-                // Add notification logic here to alert other pending reviewers that it's been approved
-                // ... (Could insert into notification table)
-
                 $db->commit();
+
+                // Send web push notification to requester
+                try {
+                    PushNotificationClass::sendPushNotification(
+                        userId: (string)$userId,
+                        message: "Your request to join family code {$familyCode} has been approved!",
+                        url: "/profilePage",
+                        title: "Family Membership Approved",
+                        tag: "family-code-approved"
+                    );
+                } catch (\Throwable $pushEx) {
+                    error_log('[ApprovalController] Push notification warning: ' . $pushEx->getMessage());
+                }
+
                 msgSuccess(200, "Application successfully approved.");
             } catch (\Exception $e) {
                 $db->rollBack();

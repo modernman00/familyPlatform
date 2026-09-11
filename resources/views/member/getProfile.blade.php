@@ -232,6 +232,17 @@
     <script>
         const seeProfilePublicPhotos = @json(array_values($publicPhotos ?? []));
 
+        function getSafeSeeProfileImgUrl(img) {
+            if (!img || typeof img !== 'string') return '';
+            let clean = img.trim();
+            if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('blob:') || clean.startsWith('data:')) {
+                return clean;
+            }
+            const parts = clean.split(/[/\\]/);
+            const basename = parts[parts.length - 1];
+            return '/resources/images/post/' + encodeURIComponent(basename);
+        }
+
         function openSeeProfileLightbox(index) {
             if (!seeProfilePublicPhotos || index < 0 || index >= seeProfilePublicPhotos.length) return;
             const photo = seeProfilePublicPhotos[index];
@@ -240,7 +251,7 @@
             const caption = document.getElementById('seeProfileLightboxCaption');
 
             if (modal && img) {
-                img.src = '/resources/images/post/' + encodeURIComponent(photo.img);
+                img.src = getSafeSeeProfileImgUrl(photo.img);
                 if (caption) {
                     caption.textContent = photo.caption || (photo.created_at ? 'Posted on ' + photo.created_at : '');
                 }

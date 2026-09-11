@@ -157,29 +157,50 @@ final class NotificationController extends Select
     public static function postSubscriberData(): void
     {
         try {
-            CheckToken::tokenCheck();
+            $rawInput = (string)file_get_contents("php://input");
+            $inputData = json_decode($rawInput !== '' ? $rawInput : '', true);
+            if (!is_array($inputData)) {
+                $inputData = [];
+            }
 
-            $rawInput = file_get_contents("php://input");
-            $inputData = json_decode($rawInput !== false ? $rawInput : '', true);
-            // Validate the input data
+            // Robust CSRF verification across headers and JSON payload
+            $sessionToken = $_SESSION['token'] ?? '';
+            $requestToken = $_SERVER['HTTP_X_XSRF_TOKEN'] 
+                ?? $_SERVER['HTTP_X_CSRF_TOKEN'] 
+                ?? $_SERVER['HTTP_CSRF_TOKEN'] 
+                ?? ($inputData['token'] ?? ($_POST['token'] ?? ''));
+
+            if (empty($sessionToken) || !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
+                msgException(401, 'Unauthorized CSRF Token');
+                return;
+            }
+
+            // Validate subscription payload
             if (!isset(
                 $inputData['endpoint'],
                 $inputData['keys']['p256dh'],
                 $inputData['keys']['auth']
-            )) {
-                msgException(300, 'Invalid subscription data');
+            ) || empty($inputData['endpoint'])) {
+                msgException(422, 'Invalid subscription data');
+                return;
             }
 
             $userId = !empty($inputData['id']) ? cleanSession((string)$inputData['id']) : (isset($_SESSION['id']) ? cleanSession((string)$_SESSION['id']) : '');
             if (empty($userId)) {
-                msgException(300, 'User authentication required for push subscription');
+                msgException(401, 'User authentication required for push subscription');
                 return;
             }
 
             $endpoint = (string)$inputData['endpoint'];
             $p256dhKey = (string)$inputData['keys']['p256dh'];
             $authKey = (string)$inputData['keys']['auth'];
-            // Prepare the data to insert
+
+            // Red Team SSRF Safeguard
+            if (!\App\classes\PushNotificationClass::isAllowedPushEndpoint($endpoint)) {
+                msgException(422, 'Invalid or untrusted push endpoint host');
+                return;
+            }
+
             $data = [
                 'id' => $userId,
                 'endpoint' => $endpoint,
@@ -187,24 +208,20 @@ final class NotificationController extends Select
                 'authKey' => $authKey
             ];
 
-            // Check if the subscription already exists for this user and endpoint
-
+            // Check if subscription already exists for this user and endpoint
             $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE id = ? AND endpoint = ?', [$userId, $endpoint]);
 
             if ($existingSubscription) {
-
                 $update = new Update('pushNotification');
-                $update->updateMultiplePOST($data, 'id');
-                // If subscription exists, update the keys
-
+                $update->makeUpdate($data, ['id', 'endpoint']);
             } else {
-                // If not, insert a new subscription
                 Insert::submitFormDynamicLastId('pushNotification', $data, 'id');
             }
 
             msgSuccess(200, 'Subscription saved successfully');
-        } catch (\Exception $e) {
-            msgException(300, $e);
+        } catch (\Throwable $e) {
+            error_log('[Push] Subscription registration failed: ' . $e->getMessage());
+            msgException(500, 'Failed to save push subscription');
         }
     }
 
@@ -241,6 +258,100 @@ final class NotificationController extends Select
             msgSuccess(200, 'Push notifications turned off');
         } catch (\Throwable $e) {
             showError($e);
+        }
+    }
+
+    /**
+     * Synchronized cross-device mark-as-read API.
+     * Marks notification read, emits Pusher sync event, and triggers silent push dismiss.
+     */
+    public static function markAsReadSync(?string $notifId = null): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if ($userId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            if (empty($notifId)) {
+                $rawInput = file_get_contents('php://input');
+                $input = json_decode($rawInput !== false ? $rawInput : '', true);
+                $notifId = is_array($input) && !empty($input['id']) ? (string)$input['id'] : '';
+            }
+
+            if (empty($notifId)) {
+                msgException(422, 'Notification ID required');
+                return;
+            }
+
+            $success = \App\services\NotificationOrchestrator::markAsRead($notifId, $userId);
+
+            if ($success) {
+                msgSuccess(200, 'Notification marked as read across all devices');
+            } else {
+                msgException(400, 'Could not update notification state');
+            }
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] markAsReadSync error: ' . $e->getMessage());
+            msgException(500, 'Server error syncing notification');
+        }
+    }
+
+    /**
+     * Lightweight client presence ping when PWA tab is active.
+     */
+    public static function recordClientPresence(): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
+            if ($userId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            $userChannel = \App\classes\Pusher::userChannel($userId);
+            \App\services\NotificationOrchestrator::updatePresence($userId, $userChannel, true);
+
+            msgSuccess(200, 'Presence updated');
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] presence error: ' . $e->getMessage());
+            msgException(500, 'Failed to update presence');
+        }
+    }
+
+    /**
+     * Pusher webhook receiver for channel_occupied / channel_vacated events.
+     */
+    public static function handlePusherWebhook(): void
+    {
+        try {
+            $rawBody = (string)file_get_contents('php://input');
+            $data = json_decode($rawBody, true);
+
+            if (!is_array($data) || empty($data['events']) || !is_array($data['events'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid webhook payload']);
+                return;
+            }
+
+            foreach ($data['events'] as $event) {
+                $channel = $event['channel'] ?? '';
+                $name = $event['name'] ?? ''; // 'channel_occupied' or 'channel_vacated'
+
+                if (preg_match('/^private-user-(.+)$/', $channel, $matches)) {
+                    $userId = $matches[1];
+                    $isActive = ($name === 'channel_occupied');
+                    \App\services\NotificationOrchestrator::updatePresence($userId, $channel, $isActive);
+                }
+            }
+
+            http_response_code(200);
+            echo json_encode(['status' => 'ok']);
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] Webhook error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Webhook processing failed']);
         }
     }
 }

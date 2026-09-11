@@ -482,10 +482,41 @@ body.dark-mode {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
     }
 
-    .form-control, .inputComment, textarea, input[type="text"], input[type="url"], input[type="search"] {
+    .form-control, .form-select, .inputComment, textarea, input[type="text"], input[type="password"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"] {
         background-color: #0f172a !important;
-        color: #f1f5f9 !important;
-        border-color: rgba(255, 255, 255, 0.15) !important;
+        color: #f8fafc !important;
+        border-color: #334155 !important;
+
+        &::placeholder {
+            color: #64748b !important;
+            opacity: 1 !important;
+        }
+
+        &:focus {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+            border-color: #818cf8 !important;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+        }
+    }
+
+    .dropdown-menu {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+
+        .dropdown-item {
+            color: #cbd5e1 !important;
+
+            &:hover, &:focus {
+                background-color: #334155 !important;
+                color: #ffffff !important;
+            }
+        }
+
+        .dropdown-divider {
+            border-color: #334155 !important;
+        }
     }
 
     .modal-content {

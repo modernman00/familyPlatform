@@ -276,6 +276,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/manifest.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/vendor.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/index.js" defer></script>
+    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
     {{-- <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/shared-lib.js" defer></script> --}}
 
 

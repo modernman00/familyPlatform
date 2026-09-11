@@ -18,6 +18,88 @@ final class ReelsController extends BaseController
     public function index(): void
     {
         try {
+            $targetReelId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+            $targetReel = null;
+            if ($targetReelId > 0) {
+                $targetReel = Reel::getReelById($targetReelId);
+            }
+
+            $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/');
+
+            $ogMeta = null;
+            if ($targetReel) {
+                $creatorName = trim(($targetReel['firstName'] ?? 'Family') . ' ' . ($targetReel['lastName'] ?? ''));
+                $title = "Family Reel by {$creatorName}";
+                $description = !empty($targetReel['caption']) ? (string)$targetReel['caption'] : "Watch this family memory by {$creatorName} on Family Platform.";
+                $rawThumb = !empty($targetReel['thumbnail_url']) ? (string)$targetReel['thumbnail_url'] : '';
+
+                if (str_starts_with($rawThumb, 'http://') || str_starts_with($rawThumb, 'https://')) {
+                    $image = $rawThumb;
+                } elseif (!empty($rawThumb)) {
+                    $image = $baseUrl . '/' . ltrim($rawThumb, '/');
+                } elseif (!empty($targetReel['profilePics'])) {
+                    $image = $baseUrl . '/resources/images/profile/' . basename((string)$targetReel['profilePics']);
+                } else {
+                    $image = $baseUrl . '/public/img/favicon/android-chrome-512x512.png';
+                }
+
+                $ogMeta = [
+                    'title' => $title,
+                    'description' => $description,
+                    'image' => $image,
+                    'url' => $baseUrl . '/reels?id=' . $targetReel['id'],
+                ];
+            }
+
+            // Detect social bot/crawler scrapers for WhatsApp, iMessage, Facebook, Twitter, etc.
+            $userAgent = strtolower((string)($_SERVER['HTTP_USER_AGENT'] ?? ''));
+            $isBot = false;
+            $botSignatures = [
+                'whatsapp', 'facebookexternalhit', 'facebot', 'twitterbot',
+                'applebot', 'slackbot', 'telegrambot', 'skypeuripreview',
+                'linkedinbot', 'discordbot', 'pinterest', 'googlebot', 'bingbot'
+            ];
+            foreach ($botSignatures as $sig) {
+                if (str_contains($userAgent, $sig)) {
+                    $isBot = true;
+                    break;
+                }
+            }
+
+            // If crawler bot, serve instant OG HTML markup without requiring login session
+            if ($isBot && $ogMeta) {
+                header('Content-Type: text/html; charset=utf-8');
+                $escTitle = htmlspecialchars($ogMeta['title'], ENT_QUOTES, 'UTF-8');
+                $escDesc = htmlspecialchars($ogMeta['description'], ENT_QUOTES, 'UTF-8');
+                $escImg = htmlspecialchars($ogMeta['image'], ENT_QUOTES, 'UTF-8');
+                $escUrl = htmlspecialchars($ogMeta['url'], ENT_QUOTES, 'UTF-8');
+
+                echo "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n" .
+                     "    <meta charset=\"UTF-8\">\n" .
+                     "    <title>{$escTitle}</title>\n" .
+                     "    <meta name=\"description\" content=\"{$escDesc}\">\n" .
+                     "    <meta property=\"og:type\" content=\"video.other\">\n" .
+                     "    <meta property=\"og:site_name\" content=\"Family Platform\">\n" .
+                     "    <meta property=\"og:title\" content=\"{$escTitle}\">\n" .
+                     "    <meta property=\"og:description\" content=\"{$escDesc}\">\n" .
+                     "    <meta property=\"og:image\" content=\"{$escImg}\">\n" .
+                     "    <meta property=\"og:image:secure_url\" content=\"{$escImg}\">\n" .
+                     "    <meta property=\"og:image:type\" content=\"image/jpeg\">\n" .
+                     "    <meta property=\"og:image:width\" content=\"720\">\n" .
+                     "    <meta property=\"og:image:height\" content=\"1280\">\n" .
+                     "    <meta property=\"og:url\" content=\"{$escUrl}\">\n" .
+                     "    <meta name=\"twitter:card\" content=\"summary_large_image\">\n" .
+                     "    <meta name=\"twitter:title\" content=\"{$escTitle}\">\n" .
+                     "    <meta name=\"twitter:description\" content=\"{$escDesc}\">\n" .
+                     "    <meta name=\"twitter:image\" content=\"{$escImg}\">\n" .
+                     "</head>\n<body>\n" .
+                     "    <h1>{$escTitle}</h1>\n" .
+                     "    <p>{$escDesc}</p>\n" .
+                     "    <img src=\"{$escImg}\" alt=\"Reel Thumbnail\">\n" .
+                     "</body>\n</html>";
+                exit;
+            }
+
             SignIn::verify();
 
             $userId = (string)($_SESSION['id'] ?? '');
@@ -32,7 +114,8 @@ final class ReelsController extends BaseController
             view('member/reels', [
                 'data' => $data,
                 'initialReels' => $initialReels,
-                'totalReels' => count($initialReels)
+                'totalReels' => count($initialReels),
+                'ogMeta' => $ogMeta
             ]);
         } catch (\Throwable $th) {
             showError($th);

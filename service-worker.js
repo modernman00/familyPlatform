@@ -29,6 +29,7 @@ const PRECACHE_ASSETS = [
   '/public/js/vendor.js',
   '/public/js/vendor/familytree.js',
   '/public/js/index.js',
+  '/public/js/pwa-notifications.js',
   '/public/img/favicon/android-chrome-192x192.png',
   '/public/img/favicon/android-chrome-512x512.png',
   '/public/img/favicon/apple-touch-icon.png',
@@ -232,16 +233,29 @@ async function networkFirstWithFallback(request) {
 }
 
 /**
- * 4. Web Push Notification Listener
+ * 4. Web Push & PWA Real-Time Sync Engine
  */
+let syncBroadcastChannel = null;
+try {
+  if (typeof BroadcastChannel !== 'undefined') {
+    syncBroadcastChannel = new BroadcastChannel('fp_notification_sync');
+  }
+} catch (err) {
+  console.warn('[SW] BroadcastChannel not supported in this environment');
+}
+
 self.addEventListener('push', (event) => {
   let data = {
-    title: 'FamilyPlatform Update',
-    body: 'You have a new family message or update.',
+    title: 'FamilyPlatform',
+    body: 'You have a new update.',
     icon: '/public/img/favicon/android-chrome-192x192.png',
     badge: '/public/img/favicon/favicon-32x32.png',
     url: '/profilePage',
-    tag: 'family-notification'
+    tag: 'family-notification',
+    badgeCount: null,
+    isSilent: false,
+    syncAction: null,
+    targetNotificationId: null
   };
 
   if (event.data) {
@@ -253,21 +267,83 @@ self.addEventListener('push', (event) => {
     }
   }
 
-  const options = {
-    body: data.body,
-    icon: data.icon,
-    badge: data.badge,
-    tag: data.tag,
-    data: { url: data.url },
-    vibrate: [100, 50, 100],
-    actions: data.actions || [
-      { action: 'open', title: 'Open' },
-      { action: 'close', title: 'Dismiss' }
-    ]
-  };
+  // A. Cross-Device Dismissal Sync Event
+  if (data.syncAction === 'CLOSE_NOTIFICATION') {
+    event.waitUntil(
+      Promise.all([
+        self.registration.getNotifications().then((notifications) => {
+          notifications.forEach((n) => {
+            if (
+              (data.targetNotificationId && n.data?.id === data.targetNotificationId) ||
+              (data.tag && n.tag === data.tag)
+            ) {
+              n.close();
+            }
+          });
+        }),
+        'setAppBadge' in navigator && typeof data.badgeCount === 'number'
+          ? (data.badgeCount > 0 ? navigator.setAppBadge(data.badgeCount) : navigator.clearAppBadge())
+          : Promise.resolve()
+      ])
+    );
+    return;
+  }
 
+  // B. Web Badging API Sync (iOS 16.4+ Standalone & Android PWA)
+  if ('setAppBadge' in navigator && typeof data.badgeCount === 'number') {
+    if (data.badgeCount > 0) {
+      navigator.setAppBadge(data.badgeCount).catch(() => {});
+    } else {
+      navigator.clearAppBadge().catch(() => {});
+    }
+  }
+
+  // C. Intelligent Foreground Check: Suppress OS noise if app is focused & open
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      const isAppFocused = clientList.some(
+        (client) => client.visibilityState === 'visible' && client.focused
+      );
+
+      if (isAppFocused) {
+        // App is currently open on screen: Broadcast to on-app UI toast
+        if (syncBroadcastChannel) {
+          syncBroadcastChannel.postMessage({
+            type: 'ON_APP_NOTIFICATION',
+            payload: data
+          });
+        }
+        clientList.forEach((client) => {
+          client.postMessage({
+            type: 'ON_APP_NOTIFICATION',
+            payload: data
+          });
+        });
+        // Silent completion - no noisy OS banner needed
+        return;
+      }
+
+      // App is in background/locked: Show native OS notification
+      const options = {
+        body: data.body,
+        icon: data.icon || '/public/img/favicon/android-chrome-192x192.png',
+        badge: data.badge || '/public/img/favicon/favicon-32x32.png',
+        tag: data.tag || 'family-alert',
+        renotify: true,
+        data: {
+          id: data.targetNotificationId || data.id,
+          url: data.url || '/profilePage'
+        },
+        vibrate: data.isSilent ? [] : [100, 50, 100],
+        silent: !!data.isSilent,
+        actions: [
+          { action: 'open', title: 'Open' },
+          { action: 'mark_read', title: 'Mark as Read' }
+        ]
+      };
+
+      return self.registration.showNotification(data.title, options);
+    })
   );
 });
 
@@ -277,14 +353,33 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  if (event.action === 'close') return;
+  const action = event.action;
+  const notifData = event.notification.data || {};
+  const targetUrl = notifData.url || '/profilePage';
 
-  const targetUrl = event.notification.data?.url || '/profilePage';
+  // Mark as read action button clicked directly from OS notification
+  if (action === 'mark_read') {
+    if (notifData.id) {
+      event.waitUntil(
+        fetch(`/api/notifications/read/${encodeURIComponent(notifData.id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(() => {
+          if ('clearAppBadge' in navigator) navigator.clearAppBadge();
+        }).catch(() => {})
+      );
+    }
+    return;
+  }
 
+  // Default / 'open' action: Bring PWA to focus or open new standalone window
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes(targetUrl) && 'focus' in client) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          if ('navigate' in client) {
+            client.navigate(targetUrl);
+          }
           return client.focus();
         }
       }

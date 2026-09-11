@@ -80,3 +80,31 @@ $router->map(
   target: 'App\controller\NotificationController@deleteSubscriberData',
   name: 'deleteSubscriberData'
 );
+
+$router->map(
+  method: 'PUT',
+  route: '/api/notifications/read',
+  target: 'App\controller\NotificationController@markAsReadSync',
+  name: 'notificationMarkReadSync'
+);
+
+$router->map(
+  method: 'PUT',
+  route: '/api/notifications/read/[*:id]',
+  target: 'App\controller\NotificationController@markAsReadSync',
+  name: 'notificationMarkReadSyncId'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/notifications/presence',
+  target: 'App\controller\NotificationController@recordClientPresence',
+  name: 'notificationRecordPresence'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/pusher/webhook',
+  target: 'App\controller\NotificationController@handlePusherWebhook',
+  name: 'pusherWebhook'
+);

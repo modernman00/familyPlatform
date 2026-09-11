@@ -1,5 +1,6 @@
 import { id } from '@shared';
 import Swal from 'sweetalert2';
+import { compressImageFile } from './helper/imageCompressor';
 
 let selectedFilesStore = [];
 
@@ -9,7 +10,16 @@ export const clearSelectedPostFiles = () => {
 };
 
 /**
- * Handles image file selection and previews thumbnails
+ * Formats bytes to human-readable string (e.g., 250 KB)
+ */
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+/**
+ * Handles image file selection and previews thumbnails with client-side compression
  * 
  * @param {string} fileInputId - The id of the hidden file input element
  * @param {string} previewListId - The id of the container where preview thumbnails are shown
@@ -42,9 +52,11 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
 
     // Create a new DataTransfer to update the file input
     const dataTransfer = new DataTransfer();
+    let totalBytes = 0;
 
     files.forEach((file, index) => {
       dataTransfer.items.add(file);
+      totalBytes += file.size;
 
       // Create wrapper for image and remove button
       const wrapper = document.createElement('div');
@@ -87,24 +99,24 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
     // Update the file input with the new list of files
     imageInput.files = dataTransfer.files;
 
-    // Show file names and reveal preview container
+    // Show file names and reveal preview container with optimized total size
     if (fileNamesDisplay) {
-      fileNamesDisplay.textContent = `${files.length} image${files.length > 1 ? 's' : ''} selected: ` + files.map(f => f.name).join(', ');
+      fileNamesDisplay.innerHTML = `<span class="fw-semibold">${files.length} image${files.length > 1 ? 's' : ''} ready</span> <small class="text-muted">(${formatFileSize(totalBytes)})</small>`;
     }
     previewContainer.classList.remove('d-none');
   };
 
-  imageInput.addEventListener('change', () => {
-    const selectedFiles = Array.from(imageInput.files || []);
-    if (!selectedFiles.length) return;
+  imageInput.addEventListener('change', async () => {
+    const rawSelectedFiles = Array.from(imageInput.files || []);
+    if (!rawSelectedFiles.length) return;
 
-    // Check for file size limit (10MB matching backend limit in FileUploader)
-    const validFiles = selectedFiles.filter(file => {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    // Check for raw file size limit (25MB max pre-compression limit)
+    const validRawFiles = rawSelectedFiles.filter(file => {
+      if (file.size > 25 * 1024 * 1024) {
         Swal.fire({
           icon: 'error',
           title: 'File Too Large',
-          text: `File ${file.name} is too large. Maximum 10MB allowed per image.`,
+          text: `File ${file.name} exceeds 25MB. Please choose a smaller image.`,
           timer: 3500,
           showConfirmButton: false
         });
@@ -113,9 +125,22 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       return true;
     });
 
+    if (!validRawFiles.length) return;
+
+    // Show quick optimizing status if files are chosen
+    if (fileNamesDisplay) {
+      fileNamesDisplay.textContent = 'Optimizing photos for instant upload...';
+      previewContainer.classList.remove('d-none');
+    }
+
+    // High-speed parallel client-side compression (downscales to max 1920px Retina standard)
+    const compressedFiles = await Promise.all(
+      validRawFiles.map(file => compressImageFile(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.82 }))
+    );
+
     // Merge newly selected files with existing accumulated files (deduplicating by name and size)
     const existingIdentifiers = new Set(accumulatedFiles.map(f => `${f.name}_${f.size}`));
-    const newUniqueFiles = validFiles.filter(f => !existingIdentifiers.has(`${f.name}_${f.size}`));
+    const newUniqueFiles = compressedFiles.filter(f => !existingIdentifiers.has(`${f.name}_${f.size}`));
     
     const combinedFiles = [...accumulatedFiles, ...newUniqueFiles];
 

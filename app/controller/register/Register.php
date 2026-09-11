@@ -67,6 +67,28 @@ final class Register extends Db
                     }
                 }
 
+                if (!empty($registerPostData['famCode'])) {
+                    $famCodeRaw = $registerPostData['famCode'];
+                    // GET params can arrive as a plain string or as an array (e.g. ?famCode[]=X).
+                    // PHPStan tells us the union type here is non-empty-array|non-falsy-string.
+                    if (is_string($famCodeRaw)) {
+                        $famCodeStr = $famCodeRaw;
+                    } else {
+                        // Must be a non-empty-array at this point.
+                        $first = reset($famCodeRaw);
+                        $famCodeStr = is_string($first) ? $first : '';
+                    }
+                    if ($famCodeStr !== '') {
+                        $familySurname = self::getFamilySurnameByCode($famCodeStr);
+                        if ($familySurname) {
+                            $registerPostData['familySurname'] = $familySurname;
+                        }
+                    }
+                }
+                if (empty($registerPostData['familySurname']) && !empty($registerPostData['lastName'])) {
+                    $registerPostData['familySurname'] = $registerPostData['lastName'];
+                }
+
                 $env = getenv('APP_ENV');
                 if (($env === 'development' || $env === 'local') && empty($registerPostData)) {
                     $registerPostData = [
@@ -147,8 +169,14 @@ final class Register extends Db
                 (string) ($cleanData['year'] ?? '')
             );
 
-            // Determine initial family status
-            $cleanData['familyStatus'] = 'approved';
+            // Determine initial family status.
+            // If the new user is joining an EXISTING family code via invitation,
+            // they start as 'pending' — the inviter must approve before they gain
+            // family-scoped access. Users creating a brand-new family code are
+            // 'approved' immediately (they ARE the founding member).
+            $joiningViaInvitation = !empty($input['joining_via_invitation']) && $input['joining_via_invitation'] === 'true';
+            $existingFamCode = !empty($cleanData['famCode']);
+            $cleanData['familyStatus'] = ($joiningViaInvitation && $existingFamCode) ? 'pending' : 'approved';
 
             // create sessions and some variables
            sessSet('id',$cleanData['id']);
@@ -206,6 +234,52 @@ final class Register extends Db
                     error_log("FamilyClaimService registration error: " . $e->getMessage());
                 }
 
+                // If joining via invitation, create the approval request & notify the inviter
+                if ($joiningViaInvitation && !empty($cleanData['famCode'])) {
+                    try {
+                        $approvalService = new \App\service\FamilyCodeApprovalService($dbConnection);
+                        $notificationService = new \App\service\NotificationService($dbConnection);
+
+                        $inviterFirstName = trim((string)($input['inviter_first_name'] ?? ''));
+                        $inviterLastName  = trim((string)($input['inviter_last_name'] ?? ''));
+                        $inviterContact   = trim((string)($input['inviter_email_or_mobile'] ?? ''));
+
+                        $approvalData = $approvalService->createApprovalRequest(
+                            (string)$cleanData['id'],
+                            (string)$cleanData['famCode'],
+                            $inviterFirstName,
+                            $inviterLastName,
+                            $inviterContact
+                        );
+
+                        $inviter = $approvalService->findMatchingInviter(
+                            (string)$cleanData['famCode'],
+                            $inviterFirstName,
+                            $inviterLastName,
+                            $inviterContact
+                        );
+
+                        if ($inviter) {
+                            $newUserInfo = [
+                                'id' => (string)$cleanData['id'],
+                                'firstName' => (string)($cleanData['firstName'] ?? ''),
+                                'lastName'  => (string)($cleanData['lastName'] ?? ''),
+                                'email'     => (string)($cleanData['email'] ?? '')
+                            ];
+
+                            $notificationService->sendFamilyApprovalNotification(
+                                (string)$inviter['id'],
+                                $newUserInfo,
+                                (int)$approvalData['request_id'],
+                                (string)$cleanData['famCode'],
+                                (string)$approvalData['approval_token']
+                            );
+                        }
+                    } catch (\Throwable $approvalEx) {
+                        error_log('[Register.php] Approval request creation warning: ' . $approvalEx->getMessage());
+                    }
+                }
+
                 SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
 
                 if (isset($_SESSION['oauth_pending'])) {
@@ -218,9 +292,14 @@ final class Register extends Db
                     
                     msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
                 } else {
-                    $successMsg = "Hello $firstName - Your registration is complete! Please log in to verify your email and access your account.";
+                    if ($joiningViaInvitation) {
+                        $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. Once they approve, you'll have access to the family network.";
+                    } else {
+                        $successMsg = "Hello $firstName - Your registration is complete! Please log in to verify your email and access your account.";
+                    }
                     msgSuccess(200, $successMsg, "/login");
                 }
+
 
             } catch (\Throwable $th) {
                 if ($dbConnection->inTransaction()) {
@@ -385,5 +464,37 @@ final class Register extends Db
             echo json_encode(['status' => 'error', 'message' => 'An internal error occurred']);
             return;
         }
+    }
+
+    /**
+     * Resolves the family surname associated with a given family code from database tables.
+     */
+    public static function getFamilySurnameByCode(string $famCode): ?string
+    {
+        $famCode = trim($famCode);
+        if ($famCode === '') {
+            return null;
+        }
+
+        try {
+            $db = self::connect2();
+            $stmt = $db->prepare("SELECT lastName FROM personal WHERE famCode = ? AND lastName IS NOT NULL AND TRIM(lastName) != '' ORDER BY id ASC LIMIT 1");
+            $stmt->execute([$famCode]);
+            $surname = $stmt->fetchColumn();
+            if ($surname && is_string($surname) && trim($surname) !== '') {
+                return trim($surname);
+            }
+
+            $stmtNode = $db->prepare("SELECT last_name FROM family_nodes WHERE family_code = ? AND last_name IS NOT NULL AND TRIM(last_name) != '' ORDER BY id ASC LIMIT 1");
+            $stmtNode->execute([$famCode]);
+            $nodeSurname = $stmtNode->fetchColumn();
+            if ($nodeSurname && is_string($nodeSurname) && trim($nodeSurname) !== '') {
+                return trim($nodeSurname);
+            }
+        } catch (\Throwable $e) {
+            // Fall back silently
+        }
+
+        return null;
     }
 }

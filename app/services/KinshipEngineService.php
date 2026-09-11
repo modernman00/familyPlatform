@@ -291,10 +291,14 @@ final class KinshipEngineService
         }
 
         // Exclude dismissed users
-        $dStmt = $pdo->prepare("SELECT dismissed_user_id FROM kinship_dismissed WHERE user_id = :u");
-        $dStmt->execute([':u' => $userId]);
-        while ($row = $dStmt->fetch(PDO::FETCH_NUM)) {
-            $excluded[] = (string)$row[0];
+        try {
+            $dStmt = $pdo->prepare("SELECT dismissed_user_id FROM kinship_dismissed WHERE user_id = :u");
+            $dStmt->execute([':u' => $userId]);
+            while ($row = $dStmt->fetch(PDO::FETCH_NUM)) {
+                $excluded[] = (string)$row[0];
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking in case kinship_dismissed table is not yet migrated
         }
 
         return array_unique($excluded);

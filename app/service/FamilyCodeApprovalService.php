@@ -175,12 +175,29 @@ class FamilyCodeApprovalService
     }
 
     /**
-     * Verify approval token matches request ID
+     * Verify approval token matches request ID and check request expiration
      */
     public function verifyApprovalToken(int $requestId, string $token): bool
     {
         $expectedToken = $this->generateApprovalToken($requestId);
-        return hash_equals($expectedToken, $token);
+        if (!hash_equals($expectedToken, $token)) {
+            return false;
+        }
+
+        $request = $this->getApprovalRequest($requestId);
+        if (!$request) {
+            return false;
+        }
+
+        // Enforce 7-day expiration check
+        if (!empty($request['request_expires_at'])) {
+            $expiresAt = strtotime((string)$request['request_expires_at']);
+            if ($expiresAt !== false && $expiresAt < time()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -301,37 +318,103 @@ class FamilyCodeApprovalService
     }
 
     /**
-     * Approve an approval request (link user to family code)
+     * Approve an approval request (link user to family code and grant access atomically)
      */
-    public function approveRequest(int $requestId): bool
+    public function approveRequest(int $requestId, ?string $approverId = null): bool
     {
         $request = $this->getApprovalRequest($requestId);
         if (!$request || $request['status'] !== 'pending') {
             return false;
         }
 
-        $stmt = $this->pdo->prepare(
-            'UPDATE family_approval_requests
-             SET status = "approved", approver_id = ?, approved_at = NOW()
-             WHERE no = ?'
-        );
+        // Resolve approver_id if not provided
+        $effectiveApproverId = $approverId ?: ($request['approver_id'] ?? null);
+        if (!$effectiveApproverId && !empty($request['family_code'])) {
+            $inviter = $this->findMatchingInviter(
+                (string)$request['family_code'],
+                (string)($request['inviter_first_name'] ?? ''),
+                (string)($request['inviter_last_name'] ?? ''),
+                (string)($request['inviter_email_or_mobile'] ?? '')
+            );
+            if ($inviter) {
+                $effectiveApproverId = (string)$inviter['id'];
+            }
+        }
 
-        return $stmt->execute([$request['approver_id'], $requestId]);
+        try {
+            $this->pdo->beginTransaction();
+
+            // 1. Update family_approval_requests
+            $stmt = $this->pdo->prepare(
+                'UPDATE family_approval_requests
+                 SET status = "approved", approver_id = ?, approved_at = NOW()
+                 WHERE no = ? AND status = "pending"'
+            );
+            $stmt->execute([$effectiveApproverId, $requestId]);
+
+            // 2. Link user in code_mgt
+            $userId = (string)$request['id'];
+            $familyCode = (string)$request['family_code'];
+            $stmtCode = $this->pdo->prepare(
+                'INSERT INTO code_mgt (id, code) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
+            );
+            $stmtCode->execute([$userId, $familyCode]);
+
+            // 3. Update user_families status to approved
+            $stmtUserFam = $this->pdo->prepare(
+                "UPDATE user_families SET status = 'approved' WHERE user_id = ? AND family_code = ?"
+            );
+            $stmtUserFam->execute([$userId, $familyCode]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log('[FamilyCodeApprovalService] approveRequest transaction failed: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
-     * Deny an approval request
+     * Deny an approval request atomically
      */
     public function denyRequest(int $requestId): bool
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE family_approval_requests
-             SET status = "denied", approved_at = NOW()
-             WHERE no = ?'
-        );
+        $request = $this->getApprovalRequest($requestId);
+        if (!$request || $request['status'] !== 'pending') {
+            return false;
+        }
 
-        return $stmt->execute([$requestId]);
+        try {
+            $this->pdo->beginTransaction();
+
+            $stmt = $this->pdo->prepare(
+                'UPDATE family_approval_requests
+                 SET status = "denied", approved_at = NOW()
+                 WHERE no = ? AND status = "pending"'
+            );
+            $stmt->execute([$requestId]);
+
+            // Remove pending record from user_families if present
+            $stmtUserFam = $this->pdo->prepare(
+                "DELETE FROM user_families WHERE user_id = ? AND family_code = ? AND status = 'pending'"
+            );
+            $stmtUserFam->execute([(string)$request['id'], (string)$request['family_code']]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log('[FamilyCodeApprovalService] denyRequest transaction failed: ' . $e->getMessage());
+            return false;
+        }
     }
+
 
     /**
      * Get unapproved requests that need reminders (2 days old)
@@ -381,16 +464,152 @@ class FamilyCodeApprovalService
     }
 
     /**
-     * Link approved user to family code (replace temp code with real code)
+     * Link approved user to family code (replace temp code with real code across all tables)
      * @psalm-suppress PossiblyUnusedReturnValue
      */
     public function linkUserToFamily(string $userId, string $familyCode): bool
     {
+        $cleanCode = trim(str_replace('#', '', $familyCode));
+
+        // 1. Update code_mgt
         $stmt = $this->pdo->prepare(
             'INSERT INTO code_mgt (id, code) VALUES (?, ?)
              ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
         );
+        $stmt->execute([$userId, $cleanCode]);
 
-        return $stmt->execute([$userId, $familyCode]);
+        // 2. Update personal table
+        $stmtPersonal = $this->pdo->prepare('UPDATE personal SET famCode = ? WHERE id = ?');
+        $stmtPersonal->execute([$cleanCode, $userId]);
+
+        // 3. Ensure otherFamily record exists without overwriting maternal/maiden otherFamCode
+        $stmtOther = $this->pdo->prepare('INSERT INTO otherFamily (id) VALUES (?) ON DUPLICATE KEY UPDATE id = id');
+        $stmtOther->execute([$userId]);
+
+        // 4. Update or insert into user_families
+        $stmtFam = $this->pdo->prepare(
+            'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")
+             ON DUPLICATE KEY UPDATE status = "approved"'
+        );
+        $stmtFam->execute([$userId, $cleanCode]);
+
+        return true;
+    }
+
+    /**
+     * Generate a unique solo family code based on the surname (exactly 6 characters: 3 letters + 3 digits, e.g. OLA345)
+     */
+    public function generateUniqueSoloFamilyCode(string $surname): string
+    {
+        $cleanedSurname = preg_replace('/[^A-Za-z]/', '', $surname);
+        if (empty($cleanedSurname)) {
+            $cleanedSurname = 'FAM';
+        }
+        $prefix = strtoupper(substr($cleanedSurname, 0, 3));
+        if (strlen($prefix) < 3) {
+            $prefix = str_pad($prefix, 3, 'X');
+        }
+
+        // Generate and verify uniqueness with bounded retry (e.g. OLA345)
+        $attempts = 0;
+        do {
+            $uniqueNumber = mt_rand(100, 999);
+            $candidateCode = $prefix . $uniqueNumber;
+            $attempts++;
+        } while ($this->familyCodeExists($candidateCode) && $attempts < 10);
+
+        if ($this->familyCodeExists($candidateCode)) {
+            $candidateCode = $prefix . mt_rand(100, 999);
+        }
+
+        return $candidateCode;
+    }
+
+    /**
+     * Switch user to a newly generated solo family code in an ACID transaction
+     * @param string $userId
+     * @param string $surname
+     * @param array<string, mixed> $memberData
+     * @return string The newly generated family code
+     */
+    public function switchUserToSoloFamily(string $userId, string $surname, array $memberData = []): string
+    {
+        $newCode = $this->generateUniqueSoloFamilyCode($surname);
+
+        $wasInTransaction = $this->pdo->inTransaction();
+        if (!$wasInTransaction) {
+            $this->pdo->beginTransaction();
+        }
+
+        try {
+            // 1. Update personal table
+            $stmtPersonal = $this->pdo->prepare('UPDATE personal SET famCode = ? WHERE id = ?');
+            $stmtPersonal->execute([$newCode, $userId]);
+
+            // 2. Update code_mgt table
+            $stmtCodeMgt = $this->pdo->prepare(
+                'INSERT INTO code_mgt (id, code) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
+            );
+            $stmtCodeMgt->execute([$userId, $newCode]);
+
+            // 3. Ensure otherFamily record exists without overwriting maternal/maiden otherFamCode
+            $stmtOther = $this->pdo->prepare('INSERT INTO otherFamily (id) VALUES (?) ON DUPLICATE KEY UPDATE id = id');
+            $stmtOther->execute([$userId]);
+
+            // 4. Update user_families
+            $stmtFam = $this->pdo->prepare(
+                'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "admin")
+                 ON DUPLICATE KEY UPDATE status = "approved", role = "admin"'
+            );
+            $stmtFam->execute([$userId, $newCode]);
+
+            // 5. Initialize fresh tree root node in family_nodes for the new code
+            try {
+                \App\services\FamilyClaimService::claimOrInitializeNode($newCode, $userId, $memberData);
+            } catch (\Throwable $nodeEx) {
+                error_log('[FamilyCodeApprovalService] Node init warning: ' . $nodeEx->getMessage());
+            }
+
+            if (!$wasInTransaction) {
+                $this->pdo->commit();
+            }
+
+            return $newCode;
+        } catch (\Throwable $e) {
+            if (!$wasInTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Get active pending request for a user
+     * @return array<string, mixed>|null
+     */
+    public function getPendingRequestForUser(string $userId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT * FROM family_approval_requests
+             WHERE id = ? AND status = "pending" AND (request_expires_at IS NULL OR request_expires_at > NOW())
+             ORDER BY created_at DESC LIMIT 1'
+        );
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) ? $row : null;
+    }
+
+    /**
+     * Cancel an active pending request for a user
+     */
+    public function cancelPendingRequest(string $userId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE family_approval_requests
+             SET status = "denied", updated_at = NOW()
+             WHERE id = ? AND status = "pending"'
+        );
+        return $stmt->execute([$userId]);
     }
 }

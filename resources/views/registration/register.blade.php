@@ -5,13 +5,14 @@
 
 @php
     $inviteFamCode = $registerPostData['famCode'] ?? '';
-    $inviteName = trim(($registerPostData['firstName'] ?? '') . ' ' . ($registerPostData['lastName'] ?? ''));
-    if (!empty($inviteName)) {
-        $pageOgTitle = "Join {$inviteName} on FamilyPlatform";
-        $pageOgDesc = "You've been invited to connect with the {$inviteFamCode} family on FamilyPlatform. Claim your spot, explore our lineage, and preserve memories.";
+    $familySurname = trim((string)($registerPostData['familySurname'] ?? ($registerPostData['lastName'] ?? '')));
+
+    if (!empty($familySurname)) {
+        $pageOgTitle = "Join the {$familySurname} Family on FamilyPlatform";
+        $pageOgDesc = "You've been invited to connect with the {$familySurname} family on FamilyPlatform. Claim your spot, explore our lineage, and preserve memories.";
     } elseif (!empty($inviteFamCode)) {
-        $pageOgTitle = "Join the {$inviteFamCode} Family Tree on FamilyPlatform";
-        $pageOgDesc = "You've been invited to explore our family lineage, connect with relatives, and share cherished memories.";
+        $pageOgTitle = "Join Your Family Tree on FamilyPlatform";
+        $pageOgDesc = "You've been invited to connect with your family on FamilyPlatform. Claim your spot, explore our lineage, and preserve memories.";
     } else {
         $pageOgTitle = "Create Your Family Account | FamilyPlatform";
         $pageOgDesc = "Connect with your relatives, build your interactive family tree, and share memories securely on FamilyPlatform.";
@@ -189,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 @if(!empty($registerPostData['claim_node']))
                 <div class="alert alert-success text-center fw-semibold mb-4" style="background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 10px; padding: 14px;">
-                    <i class="bi bi-tree-fill me-2"></i> <strong>Family Invitation:</strong> You are registering to connect directly with family code <strong>{{ $registerPostData['famCode'] ?? '' }}</strong>!
+                    <i class="bi bi-tree-fill me-2"></i> <strong>Family Invitation:</strong> You are registering to connect directly with {{ !empty($familySurname) ? "the {$familySurname} family" : "family code " . ($registerPostData['famCode'] ?? '') }}!
                 </div>
                 @endif
 

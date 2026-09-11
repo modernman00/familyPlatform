@@ -34,8 +34,11 @@ function keyToBase64(subscription, name) {
 }
 
 async function syncToServer(subscription) {
+  if (!subscription || !subscription.endpoint) return;
+  const token = getCsrfToken();
   const payload = {
     endpoint: subscription.endpoint,
+    token: token,
     keys: {
       p256dh: keyToBase64(subscription, 'p256dh'),
       auth: keyToBase64(subscription, 'auth'),
@@ -44,8 +47,8 @@ async function syncToServer(subscription) {
   await axios.post('/pushNotification/subscription', payload, {
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
-      'X-XSRF-TOKEN': getCsrfToken(),
-          'X-CSRF-TOKEN': getCsrfToken(),
+      'X-XSRF-TOKEN': token,
+      'X-CSRF-TOKEN': token,
     },
   });
 }

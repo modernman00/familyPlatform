@@ -168,10 +168,17 @@ export function upcomingEvents(initialEvents) {
 
         initPusher() {
             try {
-                const key = process.env.MIX_PUSHER_APP_KEY;
-                const cluster = process.env.MIX_PUSHER_APP_CLUSTER;
+                const key = document.querySelector('meta[name="pusher-key"]')?.getAttribute('content')
+                    || (typeof window !== 'undefined' && window.PUSHER_APP_KEY)
+                    || process.env.MIX_PUSHER_APP_KEY;
+                const cluster = document.querySelector('meta[name="pusher-cluster"]')?.getAttribute('content')
+                    || (typeof window !== 'undefined' && window.PUSHER_APP_CLUSTER)
+                    || process.env.MIX_PUSHER_APP_CLUSTER
+                    || 'eu';
                 const famCode = (this.userData?.famCode || '').replace(/[^A-Za-z0-9_-]/g, '');
-                if (!key || !cluster || !famCode) return;
+                if (!key || !cluster || !famCode) {
+                    return;
+                }
 
                 // Per-family private channel — server-authorised in Pusher::authoriseChannel.
                 this.pusher = new Pusher(key, {

@@ -4,6 +4,24 @@
 @push('styles')
     <link rel="stylesheet" href="/public/css/reels.css?v={{ time() }}">
 @endpush
+@push('meta')
+    @if(!empty($ogMeta))
+        <meta property="og:type" content="video.other">
+        <meta property="og:site_name" content="Family Platform">
+        <meta property="og:title" content="{{ $ogMeta['title'] }}">
+        <meta property="og:description" content="{{ $ogMeta['description'] }}">
+        <meta property="og:image" content="{{ $ogMeta['image'] }}">
+        <meta property="og:image:secure_url" content="{{ $ogMeta['image'] }}">
+        <meta property="og:image:type" content="image/jpeg">
+        <meta property="og:image:width" content="720">
+        <meta property="og:image:height" content="1280">
+        <meta property="og:url" content="{{ $ogMeta['url'] }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $ogMeta['title'] }}">
+        <meta name="twitter:description" content="{{ $ogMeta['description'] }}">
+        <meta name="twitter:image" content="{{ $ogMeta['image'] }}">
+    @endif
+@endpush
 @section('content')
 <div class="reels-theater-container" id="reelsTheaterContainer">
 

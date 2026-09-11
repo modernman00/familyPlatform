@@ -16,8 +16,9 @@
   <link rel="apple-touch-icon" href="/public/img/favicon/apple-touch-icon.png" sizes="180x180">
   <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
-  <meta name="theme-color" content="#2563eb">
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
+  <meta name="pusher-key" content="{{ $_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? '' }}">
+  <meta name="pusher-cluster" content="{{ $_ENV['MIX_PUSHER_APP_CLUSTER'] ?? $_SERVER['MIX_PUSHER_APP_CLUSTER'] ?? $_ENV['PUSHER_APP_CLUSTER'] ?? $_SERVER['PUSHER_APP_CLUSTER'] ?? 'eu' }}">
 
   <!-- iOS WebKit App-Store Splash Screen Matrix (Dr. Soren Lindqvist Gate Mandate) -->
   <!-- iPhone 16 Pro Max, 15 Pro Max, 14 Pro Max -->

@@ -8,53 +8,64 @@
             <h3 class="fw-bold" style="font-size: 1.5rem; color: #00bfa5;">
                 <i class="bi bi-shield-check" style="color: #28a745;"></i> Verify Your Invitation
             </h3>
-            <p class="text-muted small">This family code is already registered. Please provide the details of the family member who invited you.</p>
+            <p style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-top: 0.5rem; margin-bottom: 0;">
+                This family code is already registered.
+            </p>
+            <p style="font-size: 0.9rem; color: #475569; margin-top: 0.35rem;">
+                Tell us who invited you so we can notify them to approve your request.
+            </p>
         </div>
+
+        <!-- Section heading -->
+        <p class="fw-bold mb-3" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b;">Who invited you?</p>
 
         <!-- Inviter First Name -->
         <div class="mb-3">
-            <label for="inviter_first_name" class="form-label fw-bold">Inviter's First Name</label>
+            <label for="inviter_first_name" class="form-label fw-semibold">Their First Name</label>
             <input
                 type="text"
                 id="inviter_first_name"
                 name="inviter_first_name"
                 x-model="inviterFirstName"
                 class="form-control"
-                placeholder="e.g., John"
+                placeholder="e.g., Wale"
                 required
             >
         </div>
 
         <!-- Inviter Last Name -->
         <div class="mb-3">
-            <label for="inviter_last_name" class="form-label fw-bold">Inviter's Last Name</label>
+            <label for="inviter_last_name" class="form-label fw-semibold">Their Last Name</label>
             <input
                 type="text"
                 id="inviter_last_name"
                 name="inviter_last_name"
                 x-model="inviterLastName"
                 class="form-control"
-                placeholder="e.g., Doe"
+                placeholder="e.g., Olaogun"
                 required
             >
         </div>
 
         <!-- Inviter Email or Mobile -->
         <div class="mb-4">
-            <label for="inviter_contact" class="form-label fw-bold">Inviter's Email or Mobile</label>
+            <label for="inviter_contact" class="form-label fw-semibold">Their Email or Phone Number</label>
             <input
                 type="text"
                 id="inviter_contact"
                 name="inviter_email_or_mobile"
                 x-model="inviterContact"
                 class="form-control"
-                placeholder="e.g., john@example.com or +1234567890"
+                placeholder="Their email address or phone number"
                 required
             >
+            <div class="form-text text-muted" style="font-size: 0.8rem;">
+                <i class="bi bi-info-circle me-1"></i> Phone number can be entered with or without country code (e.g., 07900123456 or +447900123456).
+            </div>
         </div>
 
         <div class="alert alert-info small mb-4" role="alert">
-            <i class="bi bi-info-circle me-1"></i> Your family member will receive an approval request to confirm you in their family network.
+            <i class="bi bi-bell me-1"></i> They will receive an <strong>email and in-app notification</strong> to approve your request. You'll get access once they confirm.
         </div>
 
         <button
@@ -66,7 +77,7 @@
             x-show="!codeVerified"
         >
             <span x-show="!verifying">
-                <i class="bi bi-check-circle me-2"></i> Verify & Continue
+                <i class="bi bi-check-circle me-2"></i> Verify &amp; Continue
             </span>
             <span x-show="verifying">
                 <i class="bi bi-hourglass-split spinner-border spinner-border-sm me-2"></i> Verifying...

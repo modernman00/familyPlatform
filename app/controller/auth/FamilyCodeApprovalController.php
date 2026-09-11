@@ -4,6 +4,8 @@ namespace App\controller\auth;
 
 use App\service\FamilyCodeApprovalService;
 use App\service\NotificationService;
+use App\classes\PushNotificationClass;
+use Src\Limiter;
 use PDO;
 
 class FamilyCodeApprovalController
@@ -30,6 +32,14 @@ class FamilyCodeApprovalController
     public function checkFamilyCode(): void
     {
         header('Content-Type: application/json');
+
+        try {
+            Limiter::limit($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        } catch (\Throwable $e) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many requests. Please slow down.', 'exists' => false]);
+            return;
+        }
 
         $rawInput = file_get_contents('php://input');
         $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
@@ -72,6 +82,14 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
+        try {
+            Limiter::limit($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        } catch (\Throwable $e) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many verification attempts. Please try again in a few minutes.', 'verified' => false]);
+            return;
+        }
+
         $rawInput = file_get_contents('php://input');
         $input = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : [];
         if (!is_array($input)) $input = [];
@@ -107,8 +125,7 @@ class FamilyCodeApprovalController
 
         echo json_encode([
             'verified' => true,
-            'message' => 'Inviter verified successfully',
-            'inviter_id' => $inviter['id']
+            'message' => 'Inviter verified successfully'
         ]);
     }
 
@@ -211,12 +228,12 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
-        // Verify approval token
+        // Verify approval token (includes 7-day expiration check)
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
         if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
             http_response_code(401);
-            echo json_encode(['error' => 'Invalid or missing approval token']);
+            echo json_encode(['error' => 'Invalid, expired, or missing approval token']);
             return;
         }
 
@@ -235,16 +252,25 @@ class FamilyCodeApprovalController
         }
 
         try {
+            // Execute atomic multi-table approval transaction
             if (!$this->approvalService->approveRequest($id)) {
                 http_response_code(422);
                 echo json_encode(['error' => 'Request could not be approved']);
                 return;
             }
 
-            // Link the user to the family network
-            $this->approvalService->linkUserToFamily($request['id'], $request['family_code']);
+            // Notify the requester — email + in-app push
+            try {
+                $this->notificationService->sendApprovalConfirmationNotification(
+                    (string)$request['id'],
+                    (string)$request['family_code']
+                );
+            } catch (\Throwable $notifyEx) {
+                error_log('[FamilyCodeApprovalController] Confirmation notification failed: ' . $notifyEx->getMessage());
+            }
 
             echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
+
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Failed to approve request: ' . $e->getMessage()]);
@@ -258,12 +284,12 @@ class FamilyCodeApprovalController
     {
         header('Content-Type: application/json');
 
-        // Verify approval token
+        // Verify approval token (includes 7-day expiration check)
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
         if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
             http_response_code(401);
-            echo json_encode(['error' => 'Invalid or missing approval token']);
+            echo json_encode(['error' => 'Invalid, expired, or missing approval token']);
             return;
         }
 
@@ -293,6 +319,7 @@ class FamilyCodeApprovalController
             echo json_encode(['error' => 'Failed to deny request: ' . $e->getMessage()]);
         }
     }
+
 
     /**
      * Get user info by ID

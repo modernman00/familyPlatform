@@ -228,8 +228,10 @@ final class FamilyRequestController extends BaseController
     $_SESSION['preventReload'] = checkInput($appr);
 
     if (isset($req) && isset($appr)) {
-      $requester = checkInput($req);
-      $approver = checkInput($appr);
+      $requesterRaw = checkInput($req);
+      $approverRaw = checkInput($appr);
+      $requester = is_string($requesterRaw) ? $requesterRaw : '';
+      $approver = is_string($approverRaw) ? $approverRaw : '';
       $getDecision = checkInput($dec);
       checkInput($reqCode);
 
@@ -299,8 +301,34 @@ final class FamilyRequestController extends BaseController
 
           $lastInsertedId = Insert::submitFormDynamicLastId(table: 'notification', field: $cleanDataNotification, lastIdCol: 'no');
 
-          // Send push notification to the requester about the decision - Service Manager JS
-          PushNotificationClass::sendPushNotification(userId: $requester, message: $subject);
+          // Send push notification to the requester about the decision
+          try {
+            $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
+            $profileUrl = "{$baseUrl}/allMembers/getProfile?id=" . urlencode((string)$approver);
+            PushNotificationClass::sendPushNotification(
+              userId: (string)$requester,
+              message: $subject,
+              url: $profileUrl,
+              title: 'Family Request Accepted',
+              tag: 'friend-request-approved'
+            );
+          } catch (\Throwable $pushEx) {
+            error_log('[FamilyRequestController] Push notification dispatch warning: ' . $pushEx->getMessage());
+          }
+
+          // Broadcast real-time approval to requester via Pusher
+          try {
+            Pusher::broadcast('friend-request-channel', 'request-approved', [
+              'sender_id' => $approver,
+              'receiver_id' => $requester,
+              'sender_name' => (string)($app['fullName'] ?? 'A family member'),
+              'status' => 'approved',
+              'message' => $subject,
+              'notification' => $cleanDataNotification
+            ]);
+          } catch (\Throwable $pusherEx) {
+            error_log('[FamilyRequestController] Pusher broadcast warning: ' . $pusherEx->getMessage());
+          }
 
           // show the approver what they have just done
           $app['decision'] = $decision;

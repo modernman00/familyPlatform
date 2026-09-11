@@ -4,6 +4,7 @@ import { format } from 'timeago.js';
 import Swal from 'sweetalert2';
 import { extractVideoFromText, cleanPostMessage } from './videoParser';
 import { getCsrfToken } from '../global';
+import { getPostImageUrl, getProfileImageUrl } from '../helper/imageUrls';
 
 export function profileFeed(opts = {}) {
     return {
@@ -13,6 +14,10 @@ export function profileFeed(opts = {}) {
         lightboxOpen: false,
         lightboxImages: [],
         lightboxIndex: 0,
+        lightboxLoading: false,
+        lightboxError: false,
+        touchStartX: 0,
+        touchStartY: 0,
         currentUserId: opts.userId || localStorage.getItem('requesterId') || '',
         currentFamCode: opts.famCode || localStorage.getItem('requesterFamCode') || '',
         commentInputs: {},
@@ -156,10 +161,35 @@ export function profileFeed(opts = {}) {
 
         extractImages(p) {
             if (!p || typeof p !== 'object') return [];
-            return Object.keys(p)
-                .filter(k => k.startsWith('post_img') && p[k] !== null && p[k] !== '' && typeof p[k] === 'string')
-                .map(k => p[k].trim())
-                .filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image'));
+            const collected = [];
+
+            if (Array.isArray(p.images)) {
+                p.images.forEach(img => {
+                    if (img && typeof img === 'string') {
+                        const trimmed = img.trim();
+                        if (trimmed && !collected.includes(trimmed)) collected.push(trimmed);
+                    }
+                });
+            }
+
+            Object.keys(p).forEach(k => {
+                if (k.startsWith('post_img') && p[k] !== null && p[k] !== '' && typeof p[k] === 'string') {
+                    const val = p[k].trim();
+                    if (val && !collected.includes(val)) {
+                        collected.push(val);
+                    }
+                }
+            });
+
+            return collected.filter(img => img && img !== 'null' && img !== 'undefined' && img !== 'none' && !img.includes('no_image'));
+        },
+
+        getPostImageUrl(img) {
+            return getPostImageUrl(img);
+        },
+
+        getProfileImageUrl(img) {
+            return getProfileImageUrl(img);
         },
 
         formatDate(dateStr) {
@@ -626,9 +656,21 @@ export function profileFeed(opts = {}) {
             });
         },
 
-        openLightbox(images, index) {
-            this.lightboxImages = images;
-            this.lightboxIndex = index;
+        openLightbox(images, index = 0) {
+            let imgList = [];
+            if (Array.isArray(images)) {
+                imgList = images.filter(img => img && typeof img === 'string');
+            } else if (typeof images === 'string' && images.trim()) {
+                imgList = [images.trim()];
+            }
+
+            if (imgList.length === 0) return;
+
+            const safeIndex = (index >= 0 && index < imgList.length) ? index : 0;
+            this.lightboxImages = imgList;
+            this.lightboxIndex = safeIndex;
+            this.lightboxLoading = true;
+            this.lightboxError = false;
             this.lightboxOpen = true;
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         },
@@ -637,27 +679,67 @@ export function profileFeed(opts = {}) {
             this.lightboxOpen = false;
             this.lightboxImages = [];
             this.lightboxIndex = 0;
+            this.lightboxLoading = false;
+            this.lightboxError = false;
             document.body.style.overflow = ''; // Restore background scrolling
         },
 
         nextLightboxImage() {
-            if (this.lightboxImages.length > 0) {
+            if (this.lightboxImages.length > 1) {
+                this.lightboxLoading = true;
+                this.lightboxError = false;
                 this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length;
             }
         },
 
         prevLightboxImage() {
-            if (this.lightboxImages.length > 0) {
+            if (this.lightboxImages.length > 1) {
+                this.lightboxLoading = true;
+                this.lightboxError = false;
                 this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
+            }
+        },
+
+        onLightboxTouchStart(e) {
+            if (e.touches && e.touches.length === 1) {
+                this.touchStartX = e.touches[0].clientX;
+                this.touchStartY = e.touches[0].clientY;
+            }
+        },
+
+        onLightboxTouchEnd(e) {
+            if (!this.touchStartX || !e.changedTouches || e.changedTouches.length === 0) return;
+            const diffX = e.changedTouches[0].clientX - this.touchStartX;
+            const diffY = e.changedTouches[0].clientY - this.touchStartY;
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+
+            // Horizontal swipe (> 50px threshold)
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX < 0) {
+                    this.nextLightboxImage();
+                } else {
+                    this.prevLightboxImage();
+                }
+            } else if (Math.abs(diffY) > 120) {
+                // Vertical swipe down to dismiss
+                this.closeLightbox();
             }
         },
 
         initPusher() {
             try {
-                const key = process.env.MIX_PUSHER_APP_KEY;
-                const cluster = process.env.MIX_PUSHER_APP_CLUSTER;
+                const key = document.querySelector('meta[name="pusher-key"]')?.getAttribute('content')
+                    || (typeof window !== 'undefined' && window.PUSHER_APP_KEY)
+                    || process.env.MIX_PUSHER_APP_KEY;
+                const cluster = document.querySelector('meta[name="pusher-cluster"]')?.getAttribute('content')
+                    || (typeof window !== 'undefined' && window.PUSHER_APP_CLUSTER)
+                    || process.env.MIX_PUSHER_APP_CLUSTER
+                    || 'eu';
                 const famCode = (this.currentFamCode || '').replace(/[^A-Za-z0-9_-]/g, '');
-                if (!key || !cluster || !famCode) return;
+                if (!key || !cluster || !famCode) {
+                    return;
+                }
 
                 // One private, per-family channel. The server (Pusher::authoriseChannel)
                 // only signs the subscription if this session belongs to <famCode>,

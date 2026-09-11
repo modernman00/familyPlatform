@@ -51,10 +51,11 @@
     <div class="row g-2 mb-3 px-1">
       <template x-for="(img, idx) in post.images" :key="idx">
         <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
-          <a href="#" @click.prevent="openLightbox(post.images, idx)" style="display:block; overflow:hidden; border-radius:10px;">
-            <img :src="'/resources/images/post/' + encodeURIComponent(img)" 
+          <a href="#" @click.prevent="openLightbox(post.images, idx)" role="button" aria-label="View enlarged photo" style="display:block; overflow:hidden; border-radius:10px;">
+            <img :src="getPostImageUrl(img)" 
                  style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" 
-                 alt="" 
+                 alt="Family post image" 
+                 loading="lazy"
                  onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';"
                  onmouseover="this.style.transform='scale(1.02)';" 
                  onmouseout="this.style.transform='scale(1)';">

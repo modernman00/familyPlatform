@@ -52,9 +52,17 @@ export const showPersonDetails = async (personData) => {
   }
 
   const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
+
+  // Derive the family surname from the last word of the person's name.
+  // e.g. cleanName "Ajibike Olaogun" → familySurname "Olaogun"
+  const nameParts = cleanName.trim().split(' ');
+  const familySurname = nameParts.length >= 2
+    ? nameParts[nameParts.length - 1]
+    : (cleanName || 'our family');
+
   const inviteMessage = encodeURIComponent(
     `🌳 *Family Tree Invitation* 🌳\n\n` +
-    `Hey *${cleanName}*! You've been added to our family tree on FamilyPlatform.\n\n` +
+    `You are invited to connect with the *${familySurname} Family* on FamilyPlatform.\n\n` +
     `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
     `👉 ${inviteLink}`
   );

@@ -269,6 +269,17 @@
         const lightboxImg = document.getElementById('lightboxImg');
         const lightboxCaption = document.getElementById('lightboxCaption');
 
+        function getSafePostImgUrl(img) {
+            if (!img || typeof img !== 'string') return '';
+            let clean = img.trim();
+            if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('blob:') || clean.startsWith('data:')) {
+                return clean;
+            }
+            const parts = clean.split(/[/\\]/);
+            const basename = parts[parts.length - 1];
+            return '/resources/images/post/' + encodeURIComponent(basename);
+        }
+
         function openLightboxByIndex(index) {
             if (!galleryImages || index < 0 || index >= galleryImages.length) return;
             currentLightboxIndex = index;
@@ -276,10 +287,10 @@
             
             lightbox.style.display = "block";
             lightboxImg.style.display = '';
-            lightboxImg.src = '/resources/images/post/' + encodeURIComponent(item.img);
+            lightboxImg.src = getSafePostImgUrl(item.img);
             lightboxImg.onerror = function() {
                 this.onerror = null;
-                this.style.display = 'none';
+                this.alt = 'Image could not be loaded';
             };
 
             let captionText = item.caption || '';
