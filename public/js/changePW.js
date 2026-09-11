@@ -1,1 +1,1 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[392],{837:function(e,n,c){(0,c(5887).tx)({formId:"changePW",route:"/login/changePW",redirect:"/login"})}}]);
+"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[392],{837:function(e,n,c){(0,c(6267).tx)({formId:"changePW",route:"/login/changePW",redirect:"/login"})}}]);
