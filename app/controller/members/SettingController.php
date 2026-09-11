@@ -207,7 +207,9 @@ final class SettingController extends BaseController
                         (string)$approvalData['approval_token']
                     );
 
-                    msgSuccess(200, "Transfer request submitted! An approval request has been sent to {$inviterFirstName} {$inviterLastName}. Your family code will update as soon as they approve.");
+                    $safeInviterName = htmlspecialchars(trim(($inviter['firstName'] ?? '') . ' ' . ($inviter['lastName'] ?? '')), ENT_QUOTES, 'UTF-8');
+                    // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- Human-readable API success message, not a SQL statement.
+                    msgSuccess(200, "Transfer request submitted! An approval request has been sent to {$safeInviterName}. Your family code will refresh as soon as they approve.");
                     return;
                 }
 

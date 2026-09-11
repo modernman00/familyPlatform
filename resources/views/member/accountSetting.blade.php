@@ -1337,18 +1337,19 @@
 
         if (data.status === 200 || data.success) {
           const msg = data.message || (data.data && data.data.message) || 'Secondary family code updated successfully.';
-          const newCode = (codeToSave || '').trim().toUpperCase().replace('#', '');
+          const rawCode = (codeToSave || '').trim().toUpperCase().replace('#', '');
+          const safeCode = rawCode.replace(/[^A-Z0-9]/g, '');
           
           if (otherCodeInput) {
-            otherCodeInput.value = newCode;
+            otherCodeInput.value = safeCode;
           }
 
           if (secStatusBadge) {
-            if (newCode) {
+            if (safeCode) {
               secStatusBadge.style.backgroundColor = '#ecfdf5';
               secStatusBadge.style.color = '#047857';
               secStatusBadge.style.borderColor = '#a7f3d0';
-              secStatusBadge.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Active Link: <strong>${newCode}</strong>`;
+              secStatusBadge.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Active Link: <strong>${safeCode}</strong>`;
               if (btnClearOtherCode) btnClearOtherCode.classList.remove('d-none');
             } else {
               secStatusBadge.style.backgroundColor = '#f1f5f9';
