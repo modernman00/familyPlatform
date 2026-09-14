@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🛡️  MASTER SECURITY & QUALITY SUITE — PartyPlatform
+# 🛡️  MASTER SECURITY & QUALITY SUITE — FamilyPlatform
 # ==============================================================================
 # Single-command runner for ALL security, code quality, SAST, and DAST checks.
 #
@@ -18,7 +18,7 @@
 #
 # Examples:
 #   bash scripts/run-all-security-checks.sh
-#   bash scripts/run-all-security-checks.sh https://staging.partyplatform.co.uk
+#   bash scripts/run-all-security-checks.sh https://staging.myfamilyplatform.com
 #   bash scripts/run-all-security-checks.sh http://localhost:8000 --skip-zap
 # ==============================================================================
 
@@ -40,7 +40,7 @@ NC='\033[0m'
 # Default Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-DEFAULT_PRODUCTION_URL="https://mypartyplatform.com"
+DEFAULT_PRODUCTION_URL="https://myfamilyplatform.com"
 TARGET_URL="$DEFAULT_PRODUCTION_URL"
 SKIP_ZAP=false
 SKIP_IDOR=false
@@ -71,7 +71,7 @@ SKIPPED_CHECKS=0
 
 print_header() {
     echo -e "\n${BLUE}${BOLD}======================================================================${NC}"
-    echo -e "${BLUE}${BOLD}   🛡️  PARTYPLATFORM MASTER SECURITY & QUALITY AUDIT SUITE           ${NC}"
+    echo -e "${BLUE}${BOLD}   🛡️  FAMILYPLATFORM MASTER SECURITY & QUALITY AUDIT SUITE          ${NC}"
     echo -e "${BLUE}${BOLD}======================================================================${NC}"
     echo -e "📅 Date: $(date)"
     echo -e "📁 Directory: $ROOT_DIR"
