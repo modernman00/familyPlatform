@@ -93,9 +93,7 @@ final class OnboardingController
             $statusCode = ($result['status'] === 'success') ? 200 : 400;
             http_response_code($statusCode);
             header('Content-Type: application/json');
-            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
-            // Content-Type application/json prevents XSS interpretation. JSON output is safe.
-            echo json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            echo json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
         } catch (\Throwable $th) {
             http_response_code(400);
             header('Content-Type: application/json');
