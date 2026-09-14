@@ -9,7 +9,7 @@
     // discriminator between the two placements.
     $kinCarousel = ($kinshipWidgetId ?? 'kinshipRadarWidget') === 'kinshipRadarWidgetMobile';
 @endphp
-<div class="card border-0 shadow-sm mb-4 kinship-radar-widget" id="{{ $kinshipWidgetId ?? 'kinshipRadarWidget' }}" style="{{ empty($suggestedKin) ? 'display: none !important;' : '' }} border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid #e2e8f0 !important;">
+<div class="card border-0 shadow-sm mb-4 kinship-radar-widget" id="{{ $kinshipWidgetId ?? 'kinshipRadarWidget' }}" style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid #e2e8f0 !important;">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center gap-2">

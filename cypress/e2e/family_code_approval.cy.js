@@ -29,7 +29,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       .type(code, { force: true, delay: 20 });
     // Drive the check through the component directly - a cy.blur() after a valid
     // code throws because the inviter modal steals focus.
-    alpineData().then((data) => {
+    return alpineData().then((data) => {
       data.familyCode = code;
       return data.checkFamilyCode();
     });
@@ -435,8 +435,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         const validCode = response.body.code;
         const inviter = response.body.inviter;
 
-        enterFamilyCode(validCode);
-        cy.wait(500); // Wait for modal to render after family code validation
+        cy.wrap(null).then(() => enterFamilyCode(validCode));
         cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
 
         cy.intercept('POST', '/api/family-code/verify-inviter', { delay: 1000, body: { verified: true } }).as('inviterCheck');
