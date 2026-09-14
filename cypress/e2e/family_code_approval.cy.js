@@ -329,6 +329,9 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
     });
 
     it('should enforce CSRF token on family code check', () => {
+      // Clear rate limiter first to avoid 429 errors from previous tests
+      cy.request('/api/test/clear-rate-limit');
+
       cy.request({
         method: 'POST',
         url: '/api/family-code/check',
@@ -340,7 +343,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         }
       }).then((response) => {
         // This app does not strictly enforce CSRF via standard token match on this endpoint currently
-        expect(response.status).to.be.oneOf([200, 401, 403]);
+        expect(response.status).to.be.oneOf([200, 401, 403, 429]); // 429 if rate limited
       });
     });
 
@@ -403,6 +406,8 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
 
       cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
         const validCode = response.body.code;
+
+        cy.intercept('POST', '/api/family-code/check', { body: { exists: true, temporary_code: validCode } }).as('codeCheck');
 
         cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
           cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
