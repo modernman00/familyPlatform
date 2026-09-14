@@ -404,14 +404,13 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
       cy.request('/api/test/get-valid-family-code-with-inviter').then((response) => {
         const validCode = response.body.code;
 
-        enterFamilyCode(validCode);
-
-        cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
-
-        // All fields should be visible and not hidden
-        cy.get('#inviter_first_name').should('be.visible');
-        cy.get('#inviter_last_name').should('be.visible');
-        cy.get('#inviter_contact').should('be.visible');
+        cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
+          cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
+          // All fields should be visible and not hidden
+          cy.get('#inviter_first_name').should('be.visible');
+          cy.get('#inviter_last_name').should('be.visible');
+          cy.get('#inviter_contact').should('be.visible');
+        });
       });
     });
   });
@@ -435,18 +434,16 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         const validCode = response.body.code;
         const inviter = response.body.inviter;
 
-        cy.wrap(null).then(() => enterFamilyCode(validCode));
-        cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
-
         cy.intercept('POST', '/api/family-code/verify-inviter', { delay: 1000, body: { verified: true } }).as('inviterCheck');
 
-        verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
-
-        // Button should show loading state
-        cy.get('#inviter-verification-modal').contains('Verifying').should('be.visible');
-
-        cy.wait('@inviterCheck');
-        cy.get('#inviter-verification-modal').contains('Invitation Verified', { timeout: 8000 }).should('be.visible');
+        cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
+          cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
+          verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
+          // Button should show loading state
+          cy.get('#inviter-verification-modal').contains('Verifying').should('be.visible');
+          cy.wait('@inviterCheck');
+          cy.get('#inviter-verification-modal').contains('Invitation Verified', { timeout: 8000 }).should('be.visible');
+        });
       });
     });
   });
