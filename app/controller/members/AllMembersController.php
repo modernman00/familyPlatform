@@ -139,25 +139,27 @@ final class AllMembersController extends AllMembersData
             $apr = is_string($aprClean) ? $aprClean : '';
             $req = is_string($reqClean) ? $reqClean : '';
 
+            $sessionId = (string) \cleanSession((string) $payload['id']);
+            if ($req === '' || $req === 'null' || $req === 'undefined') {
+                $req = $sessionId;
+            }
+            if ($apr === '' || $apr === 'null' || $apr === 'undefined') {
+                $apr = $sessionId;
+            }
+
             // IDOR + authz guard: the caller must be one of the two parties to
             // the connection they're deleting. Without this any logged-in user
             // could wipe arbitrary approver/requester rows by guessing ids.
-            $sessionId = (string) \cleanSession((string) $payload['id']);
             if ($sessionId === '' || (!hash_equals($sessionId, $apr) && !hash_equals($sessionId, $req))) {
                 throw new ForbiddenException('You can only remove your own connections.');
             }
 
-            $query = Delete::formAndMatchQuery(
-                selection: "DELETE_AND",
-                table: 'requestMgt',
-                identifier1: 'approver_id',
-                identifier2: 'requester_id'
+            $db = \Src\Db::connect();
+            $stmt = $db->prepare(
+                "DELETE FROM requestMgt WHERE (approver_id = ? AND requester_id = ?) OR (approver_id = ? AND requester_id = ?)"
             );
-
-            $deleteProfile = Delete::deleteFn(
-                query: $query,
-                bind: [$apr, $req,]
-            );
+            $stmt->execute([$apr, $req, $req, $apr]);
+            $deleteProfile = $stmt->rowCount();
 
             if ($deleteProfile > 0) {
                 msgSuccess(200, "success");

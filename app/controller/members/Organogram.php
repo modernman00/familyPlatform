@@ -60,7 +60,9 @@ final class Organogram extends SingleCustomerData
 
             $graphJson = json_encode($graphData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
-            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson'));
+            $nodeAnalysis = $this->analyzeMissingNodes($orgData, $graphData);
+
+            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -899,5 +901,143 @@ final class Organogram extends SingleCustomerData
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    /**
+     * Analyze family graph and pinpoint missing family nodes dynamically
+     * @param array<string, mixed> $orgData
+     * @param array<string, mixed> $graphData
+     * @return array<string, mixed>
+     */
+    private function analyzeMissingNodes(array $orgData, array $graphData): array
+    {
+        $nodes = is_array($graphData['nodes'] ?? null) ? $graphData['nodes'] : [];
+
+        $hasFather = !empty($orgData['father']['fullName']) || !empty($orgData['father']['name']) || !empty($orgData['father']['first_name']);
+        $hasMother = !empty($orgData['mother']['fullName']) || !empty($orgData['mother']['name']) || !empty($orgData['mother']['first_name']);
+
+        // Count nodes by generation level
+        $grandparentsCount = 0; // level -2
+        $parentsCount = 0;      // level -1
+        $siblingsCount = is_array($orgData['siblings'] ?? null) ? count($orgData['siblings']) : 0;
+        $childrenCount = is_array($orgData['children'] ?? null) ? count($orgData['children']) : 0;
+        $grandchildrenCount = 0; // level 2
+        $hasSpouse = !empty($orgData['spouse']['fullName']) || !empty($orgData['spouse']['name']) || !empty($orgData['spouse']['first_name']);
+
+        foreach ($nodes as $n) {
+            if (!is_array($n)) {
+                continue;
+            }
+            $gen = (int)($n['generation_level'] ?? 0);
+            if ($gen === -2) {
+                $grandparentsCount++;
+            } elseif ($gen === -1) {
+                $parentsCount++;
+            } elseif ($gen === 2) {
+                $grandchildrenCount++;
+            }
+            if (!empty($n['user_id']) && isset($orgData['spouse']['user_id']) && $n['user_id'] === $orgData['spouse']['user_id']) {
+                $hasSpouse = true;
+            }
+        }
+
+        $hasParents = $hasFather || $hasMother || ($parentsCount > 0);
+
+        $missingNodeTypes = [];
+        $missingLabels = [];
+
+        if (!$hasFather && !$hasMother) {
+            $missingNodeTypes[] = 'parents';
+            $missingLabels[] = 'Parents';
+        } elseif (!$hasFather) {
+            $missingNodeTypes[] = 'father';
+            $missingLabels[] = 'Father';
+        } elseif (!$hasMother) {
+            $missingNodeTypes[] = 'mother';
+            $missingLabels[] = 'Mother';
+        }
+
+        if ($grandparentsCount < 4) {
+            $missingNodeTypes[] = 'grandparents';
+            $missingLabels[] = 'Grandparents';
+        }
+
+        if ($siblingsCount === 0) {
+            $missingNodeTypes[] = 'siblings';
+            $missingLabels[] = 'Siblings';
+        }
+
+        if (!$hasSpouse) {
+            $missingNodeTypes[] = 'spouse';
+            $missingLabels[] = 'Spouse / Partner';
+        }
+
+        if ($childrenCount === 0) {
+            $missingNodeTypes[] = 'children';
+            $missingLabels[] = 'Children';
+        } elseif ($grandchildrenCount === 0) {
+            $missingNodeTypes[] = 'grandchildren';
+            $missingLabels[] = 'Grandchildren';
+        }
+
+        // Determine primary priority & recommendations
+        if (!$hasParents) {
+            $primaryMissing = 'parents';
+            $recommendedCtaType = 'parents';
+            $title = 'Build your family tree!';
+            $subtitle = 'Your tree looks a bit empty. Add your Father & Mother to anchor your lineage.';
+        } elseif ($grandparentsCount < 2) {
+            $primaryMissing = 'grandparents';
+            $recommendedCtaType = 'parents';
+            $title = 'Preserve your ancestral heritage!';
+            $subtitle = 'Parents added! Now add your Paternal & Maternal Grandparents to unlock 3 generations.';
+        } elseif ($siblingsCount === 0) {
+            $primaryMissing = 'siblings';
+            $recommendedCtaType = 'sibling';
+            $title = 'Expand your immediate household!';
+            $subtitle = 'Add your brothers and sisters to complete your immediate family branch.';
+        } elseif (!$hasSpouse) {
+            $primaryMissing = 'spouse';
+            $recommendedCtaType = 'partner';
+            $title = 'Add your Partner or Spouse!';
+            $subtitle = 'Connect your spouse or partner to build your current household and family branch.';
+        } elseif ($childrenCount === 0) {
+            $primaryMissing = 'children';
+            $recommendedCtaType = 'child';
+            $title = 'Pass down your legacy!';
+            $subtitle = 'Add your children to extend your lineage into future generations.';
+        } elseif ($grandchildrenCount === 0) {
+            $primaryMissing = 'grandchildren';
+            $recommendedCtaType = 'child';
+            $title = 'Extend your future dynasty!';
+            $subtitle = 'Your children are in the tree. Add your grandchildren to complete 4+ generations.';
+        } else {
+            $primaryMissing = 'flourishing';
+            $recommendedCtaType = 'general';
+            $title = 'Your Family Dynasty is Flourishing!';
+            $subtitle = 'You have connected key family nodes across generations. Keep inviting relatives and capturing memories!';
+        }
+
+        // Calculate completeness score (0 - 100%)
+        $score = 0;
+        if ($hasFather) $score += 20;
+        if ($hasMother) $score += 20;
+        if ($grandparentsCount >= 2) $score += 15;
+        if ($grandparentsCount >= 4) $score += 15;
+        if ($siblingsCount > 0) $score += 10;
+        if ($hasSpouse) $score += 10;
+        if ($childrenCount > 0) $score += 10;
+        $completenessScore = min(100, $score);
+
+        return [
+            'completeness_score'   => $completenessScore,
+            'primary_missing'      => $primaryMissing,
+            'missing_types'        => $missingNodeTypes,
+            'missing_labels'       => $missingLabels,
+            'recommended_cta_type' => $recommendedCtaType,
+            'banner_title'         => $title,
+            'banner_subtitle'      => $subtitle,
+            'is_flourishing'       => ($primaryMissing === 'flourishing')
+        ];
     }
 }

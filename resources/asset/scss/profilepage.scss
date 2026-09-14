@@ -274,29 +274,32 @@
     }
 }
 
-/* Action Bar Refinements */
-.composer-action-bar {
+/* Facebook-Style Composer Box */
+.add-to-post-box {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
     align-items: center;
-    gap: 6px 4px;
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    background-color: var(--bg-color);
-    border-radius: 50px;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+    background-color: var(--bg-color, #f8fafc);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
 
-    // The icon group must shrink/wrap so it never pushes the Post button
-    // outside the modal card on narrow viewports.
-    > .d-flex {
-        flex: 1 1 auto;
-        min-width: 0;
-        flex-wrap: wrap;
-    }
+.submitPost {
+    width: 100% !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+    padding: 10px !important;
+    background-color: var(--primary-color, #4f46e5) !important;
+    border: none !important;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
+    transition: all 0.2s ease !important;
 
-    .submitPost {
-        flex: 0 0 auto;
-        margin-left: auto;
+    &:hover {
+        opacity: 0.92 !important;
+        transform: translateY(-1px) !important;
     }
 }
 

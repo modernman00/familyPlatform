@@ -8,29 +8,30 @@
     <!-- Edit Profile Modal Style overrides -->
     <style>
         #editProfileModal .modal-content {
-            border-radius: 24px;
-            background-color: #121212;
-            border: none;
+            border-radius: 20px;
+            background-color: var(--card-bg, var(--bg-white, #ffffff));
+            color: var(--text-main, #0f172a);
+            border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
         }
         #editProfileModal .modal-header {
-            border-bottom: none;
-            padding: 1rem 1rem 0.25rem;
-            background-color: transparent;
+            border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+            padding: 0.85rem 1.25rem;
+            background-color: var(--card-bg, var(--bg-white, #ffffff));
         }
         #editProfileModal .modal-title {
             font-family: var(--font-family), sans-serif;
-            font-weight: 600;
-            color: #ffffff;
-            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main, #0f172a);
+            font-size: 1.25rem;
             margin: 0;
             display: flex;
             align-items: center;
             gap: 12px;
         }
         #editProfileModal .modal-title .back-btn {
-            color: #ffffff;
+            color: var(--text-main, #0f172a);
             cursor: pointer;
             text-decoration: none;
             background: none;
@@ -38,72 +39,72 @@
             padding: 0;
             display: inline-flex;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
         #editProfileModal .modal-body {
-            padding: 1rem;
-            background-color: transparent;
+            padding: 0.85rem 1rem;
+            background-color: var(--card-bg, var(--bg-white, #ffffff));
         }
         #editProfileModal .form-container-box {
-            background-color: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 20px;
-            padding: 1rem;
+            background-color: var(--bg-light, #f8fafc);
+            border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
+            border-radius: 16px;
+            padding: 0.85rem;
             margin-top: 0.5rem;
         }
         #editProfileModal .form-label {
-            color: #a1a1aa;
-            font-size: 0.75rem;
+            color: var(--text-muted, #64748b);
+            font-size: 0.72rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
         #editProfileModal .form-control, 
         #editProfileModal .form-select {
-            background-color: #27272a;
-            border: 1px solid transparent;
-            color: #ffffff;
-            border-radius: 12px;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.95rem;
+            background-color: var(--bg-white, #ffffff);
+            border: 1px solid var(--border-color, #cbd5e1);
+            color: var(--text-main, #0f172a);
+            border-radius: 10px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.9rem;
             transition: all 0.25s;
         }
         #editProfileModal .form-control:focus, 
         #editProfileModal .form-select:focus {
-            border-color: #4ade80;
-            box-shadow: none;
-            background-color: #27272a;
-            color: #ffffff;
+            border-color: var(--brand-primary, #00bfa5);
+            box-shadow: 0 0 0 3px rgba(0, 191, 165, 0.15);
+            background-color: var(--bg-white, #ffffff);
+            color: var(--text-main, #0f172a);
             outline: none;
         }
         #editProfileModal select.form-select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
         }
         #editProfileModal .section-title {
-            color: #ffffff;
-            font-size: 0.9rem;
+            color: var(--text-main, #0f172a);
+            font-size: 0.82rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.8rem;
-            margin-top: 1rem;
+            letter-spacing: 0.8px;
+            border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+            padding-bottom: 0.35rem;
+            margin-bottom: 0.6rem;
+            margin-top: 0.6rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         #editProfileModal .section-title:first-child {
             margin-top: 0;
         }
         #editProfileModal .section-title i {
-            color: #4ade80;
-            font-size: 1.2rem;
+            color: var(--brand-primary, #00bfa5);
+            font-size: 1rem;
         }
         #editProfileModal .profile-preview-container {
-            width: 120px;
-            height: 120px;
+            width: 88px;
+            height: 88px;
             position: relative;
             margin: 0 auto;
         }
@@ -111,19 +112,19 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid #333;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid var(--brand-primary, #00bfa5);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
             object-fit: cover;
         }
         #editProfileModal .camera-btn {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            width: 36px;
-            height: 36px;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background-color: #4ade80;
-            border: 2px solid #121212;
+            background-color: var(--brand-primary, #00bfa5);
+            border: 2px solid var(--bg-white, #ffffff);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -135,58 +136,58 @@
             transform: scale(1.1);
         }
         #editProfileModal .camera-btn i {
-            color: #000000;
-            font-size: 1.1rem;
+            color: #ffffff;
+            font-size: 0.9rem;
         }
         #editProfileModal .modal-footer {
-            border-top: none;
-            padding: 1.5rem 0 0;
-            background-color: transparent;
+            border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+            padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+            background-color: var(--card-bg, var(--bg-white, #ffffff));
             display: flex;
             justify-content: space-between;
-            gap: 1rem;
+            gap: 0.75rem;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+            margin-top: 0.75rem;
         }
         #editProfileModal .btn-cancel {
             border-radius: 50px;
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
+            padding: 0.55rem 1.25rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #ffffff;
-            border: 1px solid #444;
+            color: var(--text-main, #334155);
+            border: 1px solid var(--border-color, #cbd5e1);
             background-color: transparent;
             transition: all 0.2s;
             flex: 1;
         }
         #editProfileModal .btn-cancel:hover {
-            background-color: #27272a;
-            color: #ffffff;
+            background-color: var(--bg-light, #f1f5f9);
+            color: var(--text-main, #0f172a);
         }
         #editProfileModal .btn-save {
             border-radius: 50px;
-            padding: 0.8rem 2rem;
-            font-size: 1rem;
+            padding: 0.55rem 1.25rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #000000 !important;
-            background-color: #4ade80;
+            color: #ffffff !important;
+            background-color: var(--brand-primary, #00bfa5);
             border: none;
             transition: all 0.2s;
             flex: 1;
         }
         #editProfileModal .btn-save:hover {
-            background-color: #22c55e;
+            background-color: var(--brand-secondary, #004182);
             opacity: 1;
         }
         #editProfileModal .btn-close {
             display: none;
         }
         #editProfileModal .hint-text {
-            color: #a1a1aa;
-            font-size: 0.85rem;
+            color: var(--text-muted, #64748b);
+            font-size: 0.78rem;
             font-weight: 500;
-        }
-        #editProfileModal .modal-body {
-            /* modal-dialog-scrollable makes this the scroll container */
-            padding: 1.5rem;
         }
         #editProfileModal .edit-profile-status:empty,
         #editProfileModal .edit-profile-status > div:empty {
@@ -194,8 +195,8 @@
         }
         #editProfileFormModal_notification {
             border-radius: 12px;
-            padding: 0.85rem 1rem;
-            font-size: 0.9rem;
+            padding: 0.65rem 0.85rem;
+            font-size: 0.88rem;
             font-weight: 500;
         }
         #editProfileFormModal_notification.alert-danger,
@@ -206,6 +207,39 @@
         #editProfileFormModal_notification.alert-success,
         #editProfileFormModal_notification.bg-success {
             background-color: #22c55e !important;
+            color: #ffffff !important;
+        }
+
+        /* Dark mode support */
+        body.dark-mode #editProfileModal .modal-content,
+        body.dark-mode #editProfileModal .modal-header,
+        body.dark-mode #editProfileModal .modal-body,
+        body.dark-mode #editProfileModal .modal-footer {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        body.dark-mode #editProfileModal .modal-title,
+        body.dark-mode #editProfileModal .modal-title .back-btn,
+        body.dark-mode #editProfileModal .section-title {
+            color: #f8fafc !important;
+        }
+        body.dark-mode #editProfileModal .form-container-box {
+            background-color: #0f172a !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        body.dark-mode #editProfileModal .form-control,
+        body.dark-mode #editProfileModal .form-select {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode #editProfileModal .btn-cancel {
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+        }
+        body.dark-mode #editProfileModal .btn-cancel:hover {
+            background-color: #334155 !important;
             color: #ffffff !important;
         }
     </style>
@@ -237,7 +271,7 @@
                     <form id="editProfileFormModal" class="editProfileFormModal" enctype="multipart/form-data">
 
                         <!-- Profile Pic Section -->
-                        <div class="text-center mb-4">
+                        <div class="text-center mb-3">
                             <div class="profile-preview-container">
                                 <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Profile" class="profile-preview-img" id="profilePreview">
                                 <label for="img" class="camera-btn" title="Change Profile Picture">
@@ -245,7 +279,7 @@
                                 </label>
                                 <input type="file" class="form-control" id="img" name="img" style="display: none;" accept="image/*">
                             </div>
-                            <p class="hint-text mt-3 mb-0">Tap the camera to change photo</p>
+                            <p class="hint-text mt-2 mb-0">Tap the camera to change photo</p>
                         </div>
 
                         <div class="form-container-box">
@@ -254,14 +288,14 @@
                                 <i class="bi bi-person"></i> Personal Details
                             </div>
                             
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
                                     <label for="firstName" class="form-label">First Name</label>
                                     <input type="text" class="form-control" id="firstName" name="firstName" value="{{ $data['firstName'] ?? '' }}">
                                     <small id="firstName_error" class="text-danger ps-2 small"></small>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-6">
                                     <label for="lastName" class="form-label">Last Name</label>
                                     <input type="text" class="form-control" id="lastName" name="lastName" value="{{ $data['lastName'] ?? '' }}">
                                     <small id="lastName_error" class="text-danger ps-2 small"></small>
@@ -283,14 +317,14 @@
                                 <i class="bi bi-envelope"></i> Contact Details
                             </div>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
+                            <div class="row g-2">
+                                <div class="col-6">
                                     <label for="country" class="form-label">Country</label>
                                     <input type="text" class="form-control" id="country" name="country" value="{{ $data['country'] ?? '' }}">
                                     <small id="country_error" class="text-danger ps-2 small"></small>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-6">
                                     <label for="mobile" class="form-label">Mobile</label>
                                     <input type="text" class="form-control" id="mobile" name="mobile" value="{{ $data['mobile'] ?? '' }}">
                                     <small id="mobile_error" class="text-danger ps-2 small"></small>

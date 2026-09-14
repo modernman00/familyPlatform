@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\controller\login;
 
-use App\model\AllMembersData as AllMembersDataModel;
-use Exception;
-
 use App\controller\BaseController;
+use App\model\AllMembersData as AllMembersDataModel;
+use App\model\SingleCustomerData;
+use Exception;
 use Src\functionality\LoginFunctionality;
 use Src\functionality\LogoutFunctionality;
 
@@ -18,8 +18,21 @@ final class Login
     public function show(): void
     {
         if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users')) {
-            redirect('/profilePage');
-            return;
+            $userId = $_SESSION['id'] ?? null;
+            if ($userId) {
+                try {
+                    $customerData = (new SingleCustomerData())->getCustomerData((string)$userId, ['personal']);
+                    if (!empty($customerData) && is_array($customerData)) {
+                        redirect('/profilePage');
+                        return;
+                    }
+                } catch (\Throwable $e) {
+                    // Profile resolution failed — fall through to clear stale cookies
+                }
+            }
+            // Stale or orphaned session/cookie: clear and allow clean login
+            destroyCookie();
+            unset($_SESSION['id'], $_SESSION['famCode']);
         }
         try {
 
@@ -32,6 +45,10 @@ final class Login
 
     public function showAdmin(): void
     {
+        if (\class_exists('\App\middleware\AdminGuardMiddleware')) {
+            \App\middleware\AdminGuardMiddleware::enforce();
+        }
+
         if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin')) {
             redirect('/admin/dashboard');
             return;
@@ -39,14 +56,37 @@ final class Login
         try {
             BaseController::viewWithCsp('login/lasu');
         } catch (\Throwable $e) {
-
             showError($e);
         }
+    }
+
+    public function showAdminDisguised(): void
+    {
+        if (\class_exists('\App\middleware\AdminGuardMiddleware')) {
+            \App\middleware\AdminGuardMiddleware::renderDisguised404();
+            return;
+        }
+        if (!headers_sent()) {
+            header('HTTP/1.1 404 Not Found');
+            header('Content-Type: text/html; charset=utf-8');
+        }
+        echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL was not found on this server.</p></body></html>';
+        exit;
     }
 
     public function login(): void
     {
         try {
+            // Check if login is targeting the admin secret route
+            $adminSecretPath = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: '/lasu');
+            $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+            if ($adminSecretPath !== '' && str_contains($requestUri, $adminSecretPath)) {
+                if (\class_exists('\App\middleware\AdminGuardMiddleware')) {
+                    \App\middleware\AdminGuardMiddleware::enforce();
+                    \App\middleware\AdminGuardMiddleware::enforceLoginRateLimit();
+                }
+            }
+
             // reCAPTCHA Enterprise requires a real browser widget to produce a
             // siteKey token — headless cy.request calls (Cypress) and direct
             // API calls never carry one. Bypass the captcha gate on all
@@ -70,13 +110,20 @@ final class Login
 
             $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
 
+            // If an admin logged in, bind session fingerprint for anti-hijacking protection
+            if (\class_exists('\App\middleware\AdminGuardMiddleware') && ($result['role'] ?? '') === 'admin') {
+                \App\middleware\AdminGuardMiddleware::bindSession(
+                    \App\middleware\AdminGuardMiddleware::getClientIp(),
+                    (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown')
+                );
+            }
+
             $getFamCode = AllMembersDataModel::getFamCode($result['id']);
 
             // Store all approved family codes in the session
             $_SESSION['famCodes'] = $getFamCode['famCode'];
 
             msgSuccess(201, $result['message'],  $getFamCode['famCode']);
-
         } catch (\Throwable $th) {
             showError($th);
         }

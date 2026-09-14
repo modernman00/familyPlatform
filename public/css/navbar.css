@@ -104,6 +104,35 @@
   transform: translateY(-1px);
 }
 
+/* Toggler Button & High-Contrast 3-Line Icon */
+.navbar-toggler {
+  padding: 0.45rem 0.65rem !important;
+  border-radius: var(--stitch-radius-md, 12px) !important;
+  background-color: var(--brand-surface, #ffffff) !important;
+  border: 1px solid var(--brand-border, #e2e8f0) !important;
+  color: var(--brand-text-dark, #0f172a) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  cursor: pointer;
+}
+
+.navbar-toggler:hover,
+.navbar-toggler:focus {
+  background-color: var(--brand-primary-container, #eef2ff) !important;
+  border-color: var(--brand-primary, #6366f1) !important;
+  color: var(--brand-primary, #4f46e5) !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+}
+
+.navbar-toggler-icon {
+  width: 1.4em !important;
+  height: 1.4em !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%230f172a' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
 .notification-badge {
   position: absolute;
   top: -2px;
@@ -444,7 +473,23 @@ body.dark-mode .btn-icon-stitch:hover {
 }
 
 body.dark-mode .navbar-toggler {
-  filter: invert(1) hue-rotate(180deg);
+  filter: none !important;
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .navbar-toggler:hover,
+body.dark-mode .navbar-toggler:focus {
+  background-color: #334155 !important;
+  border-color: #818cf8 !important;
+  color: #818cf8 !important;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25) !important;
+}
+
+body.dark-mode .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2.5' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
 }
 
 body.dark-mode .notification-badge {

@@ -26,7 +26,7 @@ final class PostLikeController extends Db
             $userId = \cleanSession((string)($_SESSION['id'] ?? ''));
 
             if (!$postNo || !$userId) {
-                throw new \Exception("Invalid parameters for liking post");
+                msgException(400, "Invalid parameters for liking post");
             }
 
             $pdo = parent::connect2();

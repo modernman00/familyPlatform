@@ -59,7 +59,26 @@ if (maritalSelect) {
   showSpouse();
 }
 
-// URL Hash navigation support for deep-linking (e.g., /accountSetting#family-settings or #parents)
+// URL Hash navigation and direct Family Connections tab scroll support
+const scrollToFormPane = (tabId) => {
+  const formMap = {
+    'v-pills-parents-tab': 'v-pills-parents',
+    'v-pills-children-tab': 'v-pills-children',
+    'v-pills-siblings-tab': 'v-pills-siblings',
+    'v-pills-marital-tab': 'v-pills-marital',
+    'v-pills-familycode-tab': 'v-pills-familycode',
+  };
+  const targetPaneId = formMap[tabId];
+  if (!targetPaneId) return;
+  
+  setTimeout(() => {
+    const pane = id(targetPaneId);
+    if (pane) {
+      pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+};
+
 const handleHashNavigation = () => {
   const hash = window.location.hash;
   if (!hash) return;
@@ -90,9 +109,18 @@ const handleHashNavigation = () => {
       } else {
         tabBtn.click();
       }
+      scrollToFormPane(targetTabId);
     }
   }
 };
+
+// Bind click listeners on Family Connections tabs for instant smooth scrolling directly to form below
+['v-pills-parents-tab', 'v-pills-children-tab', 'v-pills-siblings-tab', 'v-pills-marital-tab', 'v-pills-familycode-tab'].forEach((btnId) => {
+  const btn = id(btnId);
+  if (btn) {
+    btn.addEventListener('click', () => scrollToFormPane(btnId));
+  }
+});
 
 window.addEventListener('DOMContentLoaded', handleHashNavigation);
 window.addEventListener('hashchange', handleHashNavigation);

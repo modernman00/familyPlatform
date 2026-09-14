@@ -103,7 +103,6 @@ final class SettingController extends BaseController
                         'two_factor_auth' => isset($_POST['two_factor_auth']) ? 'on' : 'off',
                         'profile_visibility' => $_POST['profile_visibility'] ?? 'Private',
                         'show_my_profile' => isset($_POST['show_my_profile']) ? 'on' : 'off',
-                        'data_sharing' => isset($_POST['data_sharing']) ? 'on' : 'off',
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
                     msgSuccess(200, "Privacy settings successfully updated.");

@@ -5,6 +5,7 @@ import { qSel, showError } from '@modernman00/shared-js-lib';
 import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
+import { initBackToTop } from './components/backToTop';
 
 import { profileFeed } from './components/profilePage/feedComponent';
 import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';
@@ -20,6 +21,7 @@ window.upcomingEvents = upcomingEvents;
 
 window.pwaManager = new PWAManager();
 initDarkMode();
+initBackToTop();
 let routePromise = Promise.resolve();
 
 // The server occasionally finds the session's CSRF token missing (e.g. session

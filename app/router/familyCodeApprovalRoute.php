@@ -1,7 +1,5 @@
 <?php
 
-use AltoRouter;
-
 /**
  * Family Code Approval API Routes
  * Handles verification and approval workflow for existing family code registrations

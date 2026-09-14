@@ -5,7 +5,8 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
      id="{{ $wId }}"
      style="border-radius: 20px; background-color: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e5e7eb);"
      x-data="memoriesMilestonesWidget('{{ $wId }}')"
-     x-init="initWidget()">
+     x-init="initWidget()"
+     x-show="loaded ? (memories.length > 0 || milestones.length > 0) : true">
     
     <!-- Widget Header -->
     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-3 pb-2 px-3 px-sm-4">

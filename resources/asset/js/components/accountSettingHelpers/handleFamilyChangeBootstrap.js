@@ -60,6 +60,11 @@ export const show = (kids_or_sib, event) => {
         // 🔥 after DOM changes, regenerate ID lists
         syncCheckEmailObj();
 
+        // 🎯 Auto smooth scroll directly to the generated form below
+        setTimeout(() => {
+            container.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 50);
+
     } catch (error) {
         showError(error)
     }

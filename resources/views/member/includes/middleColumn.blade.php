@@ -111,14 +111,12 @@
     </div>
   </div>
 
+  <!-- Mobile Highlights & Events Tray (Facebook Mobile UX: horizontal carousel above feed) -->
+  @includeIf('member.includes.mobileHighlightsTray')
+
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
   <div class="d-lg-none">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
-  </div>
-
-  <!-- Memories & Milestones: Mobile-Only (visible < 992px, desktop shows it in right sidebar) -->
-  <div class="d-lg-none">
-    @includeIf('member.includes.memoriesMilestonesWidget', ['widgetId' => 'memoriesWidgetMobile'])
   </div>
 
   <!-- Reactive Alpine.js Feed -->

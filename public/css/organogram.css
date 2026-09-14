@@ -1670,6 +1670,16 @@ body[data-page-id="organogram"] .legend-item {
 
     .controls-dock {
         bottom: 16px;
-        right: 14px;
+        right: 12px;
+        padding: 5px;
+        gap: 5px;
+        border-radius: 12px;
+    }
+
+    .controls-dock .dock-btn {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        font-size: 0.95rem;
     }
 }

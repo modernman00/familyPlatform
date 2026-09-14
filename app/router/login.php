@@ -15,9 +15,13 @@ $router->map('POST', '/webauthn/register', 'Src\functionality\WebAuthnFunctional
 $router->map('POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunctionality@getLoginOptions', 'WebAuthn Login Options');
 $router->map('POST', '/webauthn/login', 'Src\functionality\WebAuthnFunctionality@login', 'WebAuthn Login');
 
-$router->map('GET', '/lasu', 'App\controller\login\Login@showAdmin', 'Admin Login Page');
+$adminPath = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: '/lasu');
+$router->map('GET', $adminPath, 'App\controller\login\Login@showAdmin', 'Admin Login Page');
+$router->map('POST', $adminPath, 'App\controller\login\Login@login', 'admin_Login');
+if ($adminPath !== '/lasu') {
+    $router->map('GET', '/lasu', 'App\controller\login\Login@showAdminDisguised', 'Disguised Admin Probe');
+}
 
-$router->map('POST', '/lasu', 'App\controller\login\Login@login', 'admin_Login');
 
 // Forgot
 $router->map('GET', '/login/forgot', 'App\controller\login\Forgot@show', 'Forgot');

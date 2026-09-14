@@ -10,13 +10,17 @@
       <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
           <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-primary, #4f46e5); font-size: 0.8rem; letter-spacing: 0.05em;">
-            🛡️ 100% Private &amp; Ad-Free
+            🛡️ 100% Private
           </div>
           <h1 class="hero-title">Private Family Social Network &amp; <br><span>Living Heritage Tree.</span></h1>
           <p class="hero-subtitle">Connect generations, preserve precious memories, and celebrate life milestones in a secure, private haven designed exclusively for your family.</p>
           <div class="d-flex gap-3 flex-column flex-sm-row">
+@if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
+            <a href="/profilePage" class="btn btn-brand btn-lg shadow-sm">Go to Family Dashboard</a>
+@else
             <a href="/register" class="btn btn-brand btn-lg shadow-sm">Create Family Network</a>
             <a href="/login" class="btn btn-brand-outline btn-lg">Log In</a>
+@endif
           </div>
           <div class="d-flex align-items-center gap-4 mt-4 pt-2 text-muted small">
             <div class="d-flex align-items-center gap-1">

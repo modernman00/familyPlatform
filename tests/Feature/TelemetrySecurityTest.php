@@ -91,10 +91,27 @@ final class TelemetrySecurityTest extends SocialFeedTestCase
         ob_start();
         $this->controller->recordEvent();
         $output = ob_get_clean();
+        $this->assertNotFalse($output);
+        $json = json_decode((string)$output, true);
+
+        $this->assertSame('success', $json['status'] ?? null);
+    }
+
+    /**
+     * Test 4: getStats returns aggregated telemetry summary cleanly
+     */
+    public function testGetStatsReturnsAggregatedTelemetryMetrics(): void
+    {
+        ob_start();
+        $this->controller->getStats();
+        $output = ob_get_clean();
 
         $this->assertNotFalse($output);
         $json = json_decode((string)$output, true);
 
         $this->assertSame('success', $json['status'] ?? null);
+        $this->assertArrayHasKey('total_events', $json['data'] ?? []);
+        $this->assertArrayHasKey('rage_clicks_count', $json['data'] ?? []);
+        $this->assertArrayHasKey('dead_clicks_count', $json['data'] ?? []);
     }
 }

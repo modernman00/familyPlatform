@@ -24,8 +24,9 @@
     }
 
     .page-subtitle {
-      color: #64748b;
+      color: #334155;
       font-size: 0.95rem;
+      font-weight: 500;
     }
 
     /* Sidebar Navigation */
@@ -38,7 +39,7 @@
     }
 
     .nav-pills .nav-link {
-      color: #64748b;
+      color: #334155;
       font-weight: 600;
       padding: 12px 20px;
       border-radius: 0;
@@ -52,7 +53,7 @@
 
     .nav-pills .nav-link:hover {
       background-color: #f8fafc;
-      color: #475569;
+      color: #1e293b;
     }
 
     .nav-pills .nav-link.active {
@@ -78,27 +79,28 @@
     .section-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #1e293b;
+      color: #0f172a;
       margin-bottom: 0.25rem;
     }
 
     .section-subtitle {
-      color: #64748b;
+      color: #334155;
       font-size: 0.9rem;
+      font-weight: 500;
       margin-bottom: 20px;
     }
 
     .section-divider {
       height: 1px;
-      background-color: #e2e8f0;
+      background-color: #cbd5e1;
       margin-bottom: 30px;
     }
 
-    /* Form Inputs */
+    /* Form Inputs & High Contrast Visibility */
     .form-label {
-      font-weight: 600;
-      color: #334155;
-      font-size: 0.85rem;
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 0.88rem;
       margin-bottom: 0.4rem;
     }
 
@@ -107,20 +109,45 @@
       border-radius: 8px;
       padding: 10px 14px;
       font-size: 0.95rem;
-      color: #1e293b;
-      background-color: #ffffff;
+      color: #0f172a !important;
+      background-color: #ffffff !important;
       transition: all 0.2s;
+    }
+
+    .form-select option {
+      color: #0f172a !important;
+      background-color: #ffffff !important;
+      font-weight: 500;
+      padding: 8px;
+    }
+
+    .form-control::placeholder, .form-select::placeholder {
+      color: #475569 !important;
+      opacity: 1 !important;
+    }
+
+    .form-text {
+      color: #334155 !important;
+      font-weight: 500;
     }
 
     .form-control:focus, .form-select:focus {
       border-color: #4f46e5;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
       outline: none;
     }
 
     .form-control[readonly] {
-      background-color: #f8fafc;
-      color: #64748b;
+      background-color: #f1f5f9 !important;
+      color: #334155 !important;
+      font-weight: 500;
+    }
+
+    .switch-info p {
+      margin-bottom: 0;
+      font-size: 0.85rem;
+      color: #334155;
+      font-weight: 500;
     }
 
     .password-wrapper {
@@ -736,26 +763,12 @@
                 <div class="custom-switch">
                   <div class="switch-info">
                     <h6>Show My Profile</h6>
-                    <p>Make your profile visible to other attendees.</p>
+                    <p>Allow family members and other verified users to discover your profile in member directory search.</p>
                   </div>
                   <div class="toggle-group">
                     <span class="toggle-label">{{ ($accountData['show_my_profile'] ?? '') === 'on' ? 'ON' : 'OFF' }}</span>
                     <label class="switch">
                       <input type="checkbox" name="show_my_profile" {{ ($accountData['show_my_profile'] ?? '') === 'on' ? 'checked' : '' }}>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <div class="custom-switch">
-                  <div class="switch-info">
-                    <h6>Data Sharing</h6>
-                    <p>Share anonymous usage data to improve the experience.</p>
-                  </div>
-                  <div class="toggle-group">
-                    <span class="toggle-label">{{ ($accountData['data_sharing'] ?? '') === 'on' ? 'ON' : 'OFF' }}</span>
-                    <label class="switch">
-                      <input type="checkbox" name="data_sharing" {{ ($accountData['data_sharing'] ?? '') === 'on' ? 'checked' : '' }}>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -994,6 +1007,16 @@
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // Live update for custom switch ON/OFF labels
+    document.querySelectorAll('.toggle-group .switch input[type="checkbox"]').forEach(function(checkbox) {
+      checkbox.addEventListener('change', function() {
+        const label = this.closest('.toggle-group')?.querySelector('.toggle-label');
+        if (label && label.id !== 'pushPrefLabel') {
+          label.textContent = this.checked ? 'ON' : 'OFF';
+        }
+      });
+    });
 
     // 1. Copy Family Code
     const copyBtn = document.getElementById('copyCurrentFamCodeBtn');

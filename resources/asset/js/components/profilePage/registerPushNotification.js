@@ -58,9 +58,9 @@ if (pushSupported()) {
   navigator.serviceWorker
     .register('/service-worker.js')
     .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
-      if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e));
+      if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
       if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {
-        return doSubscribe(swReg);
+        return doSubscribe(swReg).catch((e) => console.warn('[push] auto-subscribe skipped', e?.response?.data?.message || e.message));
       }
     }))
     .catch((err) => console.warn('[push] SW registration failed', err));

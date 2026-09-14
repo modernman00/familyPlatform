@@ -89,7 +89,12 @@ function bindKinshipRadarContainer(container) {
             if (card) {
                 card.style.opacity = '0';
                 card.style.transform = 'scale(0.95)';
-                setTimeout(() => card.remove(), 250);
+                setTimeout(() => {
+                    card.remove();
+                    if (container.querySelectorAll('.kinship-item-card').length === 0) {
+                        container.style.display = 'none';
+                    }
+                }, 250);
             }
 
             try {

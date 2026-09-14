@@ -439,6 +439,10 @@ class AllMembersData extends InnerJoin
             WHERE
                 p.id != :req_where_not_me
                 AND (
+                    COALESCE(c.show_my_profile, 'on') = 'on'
+                    OR p.famCode = :famCode_privacy
+                )
+                AND (
                     p.firstName LIKE :search_firstName
                     OR p.lastName LIKE :search_lastName
                     OR c.email LIKE :search_email
@@ -468,6 +472,7 @@ class AllMembersData extends InnerJoin
 
             // --- famCode placeholders ---
             $stmt->bindValue(':famCode_case', $famCode, PDO::PARAM_STR);
+            $stmt->bindValue(':famCode_privacy', $famCode, PDO::PARAM_STR);
             $stmt->bindValue(':famCode_order_family', $famCode, PDO::PARAM_STR);
 
             // --- requesterId placeholders used in CASE (relationType) ---

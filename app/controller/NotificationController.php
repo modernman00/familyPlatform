@@ -208,17 +208,21 @@ final class NotificationController extends Select
                 'authKey' => $authKey
             ];
 
-            // Check if subscription already exists for this user and endpoint
-            $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE id = ? AND endpoint = ?', [$userId, $endpoint]);
+            // Check if subscription already exists for this endpoint
+            $existingSubscription = Select::selectFn2('SELECT * FROM pushNotification WHERE endpoint = ?', [$endpoint]);
 
-            if ($existingSubscription) {
+            if (!empty($existingSubscription)) {
                 $update = new Update('pushNotification');
-                $update->makeUpdate($data, ['id', 'endpoint']);
+                $update->makeUpdate($data, 'endpoint');
             } else {
-                Insert::submitFormDynamicLastId('pushNotification', $data, 'id');
+                $db = \Src\Db::connect2();
+                $stmt = $db->prepare('INSERT INTO pushNotification (id, endpoint, p256dhKey, authKey) VALUES (?, ?, ?, ?)');
+                $stmt->execute([$userId, $endpoint, $p256dhKey, $authKey]);
             }
 
             msgSuccess(200, 'Subscription saved successfully');
+        } catch (\Src\Exceptions\HttpException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             error_log('[Push] Subscription registration failed: ' . $e->getMessage());
             msgException(500, 'Failed to save push subscription');

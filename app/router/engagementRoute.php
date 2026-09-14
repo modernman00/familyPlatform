@@ -10,3 +10,4 @@ $router->map('POST', '/api/memories/share', 'App\controller\members\MemoryMilest
 $router->map('GET', '/api/onboarding/state', 'App\controller\members\OnboardingController@getOnboardingState', 'onboarding_state');
 $router->map('POST', '/api/onboarding/step', 'App\controller\members\OnboardingController@completeStep', 'onboarding_step');
 $router->map('POST', '/api/telemetry/event', 'App\controller\members\TelemetryController@recordEvent', 'telemetry_event');
+$router->map('GET', '/api/telemetry/stats', 'App\controller\members\TelemetryController@getStats', 'telemetry_stats');

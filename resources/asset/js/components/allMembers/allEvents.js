@@ -1,12 +1,11 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { id, showError, qSel, msgException, log } from '@shared';
-import { deleteNotification } from '../global.js';
+import { deleteNotification, getCsrfToken } from '../global.js';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar';
 import { friendRequestCard } from '../profilePage/htmlFolder/friendRequestCard';
 
 // Attach a click event listener to the document
-const reqId = localStorage.getItem('requesterId');
 /**
  * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
  it returns the notification details for the approvers tab
@@ -52,29 +51,80 @@ document.onclick = async (e) => {
       // Extract the user ID from the target ID
       const userId = targetId.replace('removeProfile', '');
 
-      const url = `/allMembers/removeProfile/${userId}/${reqId}`;
+      const currentReqId = localStorage.getItem('requesterId') || '';
+      const url = `/allMembers/removeProfile/${userId}/${currentReqId}`;
 
-      // include a console to confirm if they truly want to delete the profile
+      // Confirm with SweetAlert warning modal
       const result = await Swal.fire({
         title: 'Are you sure?',
-        text: 'You will no longer see the profile and associated posts. Are you sure you want to delete the profile?',
+        text: 'You will no longer see this profile and associated posts. Are you sure you want to remove this connection?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: 'Yes, remove connection!'
       });
 
       if (result.isConfirmed) {
-        const notificationHTML = qSel(`.member_profile_${userId}`);
+        const memberCard = qSel(`.member_profile_${userId}`) || id(userId) || (btn ? btn.closest('.member-card') : null);
 
-        const response = await axios.delete(url);
+        try {
+          const response = await axios.delete(url, {
+            headers: {
+              'X-CSRF-TOKEN': getCsrfToken(),
+              'X-XSRF-TOKEN': getCsrfToken()
+            }
+          });
 
-        if (response.data.message === 'success') {
-          // remove a html element with call member_profile
-          notificationHTML.remove();
-        } else {
-          msgException(`Error deleting profile`);
+          if (response.data && (response.data.status === 'success' || response.data.message === 'success')) {
+            if (memberCard) {
+              memberCard.remove();
+            }
+
+            // Update member count badge
+            const container = id('allMembers');
+            if (container) {
+              const remaining = container.querySelectorAll('.member-card').length;
+              const countStr = remaining.toLocaleString();
+              const memberCountBadge = id('memberCount');
+              const memberCountDisplay = id('memberCountDisplay');
+              if (memberCountBadge) memberCountBadge.textContent = countStr;
+              if (memberCountDisplay) memberCountDisplay.textContent = countStr;
+
+              if (remaining === 0) {
+                container.innerHTML = `
+                  <div class="col-12 text-center py-5 bg-white rounded-4 border w-100" style="grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);">
+                      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;">
+                          <i class="bi bi-people"></i>
+                      </div>
+                      <h5 class="fw-bold text-dark mb-1">No Members in View</h5>
+                      <p class="text-muted small mb-3" style="max-width: 440px; margin: 0 auto;">
+                          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.
+                      </p>
+                      <a href="/familyStudio" class="btn btn-primary btn-sm fw-bold px-4 py-2" style="border-radius: var(--stitch-radius-pill);">
+                          <i class="bi bi-plus-circle-fill me-1"></i> Open Family Studio
+                      </a>
+                  </div>
+                `;
+              }
+            }
+
+            Swal.fire({
+              title: 'Removed!',
+              text: 'Member connection has been removed successfully.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          } else {
+            const errText = response.data?.message || 'Error deleting profile';
+            msgException(errText);
+            Swal.fire('Error', errText, 'error');
+          }
+        } catch (err) {
+          showError(err);
+          const errText = err.response?.data?.message || err.message || 'Error deleting profile';
+          Swal.fire('Error', errText, 'error');
         }
       }
     } else if (targetId.includes('seeProfile')) {

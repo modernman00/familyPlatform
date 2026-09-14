@@ -5,21 +5,23 @@
     <div class="modal-dialog">
         <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg);">
 
-            <div class="modal-header border-0 pb-0 px-4 pt-4">
-                <h4 class="modal-title fw-bold" id="postModalLabel" style="font-family: 'Playfair Display', serif; color: var(--text-color);">
+            <div class="modal-header border-bottom py-3 px-4 align-items-center position-relative">
+                <h5 class="modal-title fw-bold w-100 text-center mb-0" id="postModalLabel" style="color: var(--text-color); font-size: 1.15rem;">
                     Create Post
-                </h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
+                </h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
             </div>
 
-            <div class="modal-body px-4 pt-3">
+            <div class="modal-body px-4 pt-3 pb-4">
     
-                <div class="d-flex align-items-center mb-4">
-                        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
-                            class="rounded-circle me-3 shadow-sm" width="48" height="48" style="border: 2px solid var(--primary-color); object-fit: cover;">
+                <div class="d-flex align-items-center mb-3">
+                    <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
+                        class="rounded-circle me-3 shadow-sm" width="44" height="44" style="border: 2px solid var(--primary-color); object-fit: cover;">
                     <div>
-                        <h6 class="mb-0 fw-bold" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
-                        <small class="text-muted"><i class="bi bi-people-fill"></i> Family Members</small>
+                        <h6 class="mb-1 fw-bold fs-6" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
+                        <span class="badge rounded-pill bg-light-subtle text-muted border border-secondary-subtle fw-medium px-2.5 py-1" style="font-size: 0.75rem;">
+                            <i class="bi bi-people-fill me-1 text-primary"></i> Family Members <i class="bi bi-caret-down-fill ms-1 small" style="font-size: 0.65rem;"></i>
+                        </span>
                     </div>
                 </div>
 
@@ -30,9 +32,9 @@
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
 
-                    <textarea class="form-control mb-3 border-0" data-emoji-target
+                    <textarea class="form-control mb-3 border-0 bg-transparent shadow-none px-0" data-emoji-target
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
-                        rows="4" style="background-color: var(--bg-color); border-radius: 15px; font-size: 1.1rem; padding: 15px; resize: none;"></textarea>
+                        rows="4" style="font-size: 1.15rem; color: var(--text-color); resize: none;"></textarea>
 
                     <small id="editPostNotice" class="d-none text-muted d-block mb-2 px-1">Editing text only — images and polls can't be changed here.</small>
 
@@ -49,7 +51,7 @@
                     <span id="postModalImgFileNames" class="invalid-feedback d-block mb-2 text-muted small px-2"></span>
 
                     <!-- Poll Creation UI (Hidden by Default) -->
-                    <div id="pollCreationContainer" class="poll-builder d-none">
+                    <div id="pollCreationContainer" class="poll-builder d-none mb-3">
                         <div class="poll-builder__header">
                             <span class="poll-builder__icon"><i class="bi bi-bar-chart-fill"></i></span>
                             <span class="poll-builder__title">Create a poll</span>
@@ -72,7 +74,7 @@
                         </button>
                     </div>
 
-                    <!-- Video Embed & Cloudflare Stream Direct Upload UI (Hidden by Default) -->
+                    <!-- Video Embed Container (Hidden by Default) -->
                     <div id="videoEmbedContainer" class="video-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center gap-2">
@@ -130,44 +132,50 @@
                         <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
                     </div>
 
-                    <div class="composer-action-bar">
+                    <!-- Facebook-Style "Add to your post" Card -->
+                    <div class="add-to-post-box d-flex align-items-center justify-content-between p-2 mb-3 rounded-3 position-relative"
+                        style="border: 1px solid var(--border-color); background-color: var(--bg-color);">
+                        <span class="fw-semibold small px-2" style="color: var(--text-color);">Add to your post</span>
+                        
                         <div class="d-flex gap-1 align-items-center">
-                            <button type="button" class="btn-composer-action action-emoji" id="emojiPost" title="Add emoji" aria-label="Add emoji">
-                                <i class="bi bi-emoji-smile-fill"></i>
-                            </button>
-
-                            <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach image" style="cursor: pointer;" aria-label="Attach image">
-                                <i class="bi bi-camera-fill"></i>
+                            <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach Photo" style="cursor: pointer;" aria-label="Attach photo">
+                                <i class="bi bi-image-fill"></i>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple hidden>
 
-                            <button type="button" class="btn-composer-action action-video fw-bold" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)" aria-label="Add video">
+                            <button type="button" class="btn-composer-action action-emoji" id="emojiPost" title="Add Emoji" aria-label="Add emoji">
+                                <i class="bi bi-emoji-smile-fill"></i>
+                            </button>
+
+                            <button type="button" class="btn-composer-action action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)" aria-label="Add video">
                                 <i class="bi bi-play-btn-fill"></i>
                             </button>
 
                             <button type="button" class="btn-composer-action action-gif gif-btn" title="Add GIF" aria-label="Add GIF">GIF</button>
-                            <button type="button" class="btn-composer-action action-tag" title="Tags & Stickers" aria-label="Tags and stickers">
+                            
+                            <button type="button" class="btn-composer-action action-tag" title="Tag People / Stickers" aria-label="Tag people">
                                 <i class="bi bi-tag-fill"></i>
                             </button>
-                            <button type="button" class="btn-composer-action action-poll fw-bold" id="addPollBtn" title="Create Poll" aria-label="Create poll">
+                            
+                            <button type="button" class="btn-composer-action action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
                                 <i class="bi bi-bar-chart-fill"></i>
                             </button>
                         </div>
 
                         <div id="emojiPickerContainer"
                             class="d-none position-absolute modern-emoji-picker"
-                            style="z-index: 1000; bottom: 55px; left: 24px;">
+                            style="z-index: 1000; bottom: 55px; right: 10px;">
                             <div class="emoji-picker-caret"></div>
                             <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
                                 id="closeEmojiPicker" aria-label="Close" style="font-size: 0.7rem; z-index: 10;"></button>
                             <div id="emojiListPost" class="mt-2" role="listbox"></div>
                         </div>
-
-                        <button type="button" id="submitPost" name="submit" class="btn text-white fw-semibold px-4 py-2 submitPost"
-                            style="background-color: var(--primary-color); border-radius: 20px; font-size: 0.9rem;">
-                            Post
-                        </button>
                     </div>
+
+                    <!-- Full-Width Facebook-Style Post Submit Button -->
+                    <button type="button" id="submitPost" name="submit" class="btn btn-primary w-100 py-2 fw-semibold submitPost shadow-sm" style="border-radius: 8px; font-size: 0.95rem;">
+                        Post
+                    </button>
 
                 </form>
 

@@ -66,18 +66,58 @@
     <!-- Tree Workspace Container -->
     <div class="organogram-container">
 
-        @if(empty($orgData['father']['fullName']) && empty($orgData['mother']['fullName']) && empty($orgData['father']['name']) && empty($orgData['mother']['name']))
-            <div class="alert alert-info shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); z-index: 10; position: relative;">
-                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3">
-                    <i class="bi bi-diagram-3-fill fs-3 text-primary"></i>
-                    <div>
-                        <h6 class="mb-1 fw-bold text-dark">Build your family tree!</h6>
-                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Your tree looks a bit empty. Add your parents and siblings to start building your lineage.</p>
-                    </div>
+        @php
+            $analysis = $nodeAnalysis ?? [
+                'completeness_score' => 20,
+                'primary_missing' => 'parents',
+                'missing_labels' => ['Parents'],
+                'recommended_cta_type' => 'parents',
+                'banner_title' => 'Build your family tree!',
+                'banner_subtitle' => 'Your tree looks a bit empty. Add your parents and siblings to start building your lineage.',
+                'is_flourishing' => false
+            ];
+        @endphp
+
+        <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; position: relative; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important;">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
+                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
+                    <i class="bi {{ $analysis['is_flourishing'] ? 'bi-stars text-success' : 'bi-diagram-3-fill text-primary' }} fs-4"></i>
                 </div>
-                <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary btn-sm px-3 py-2 fw-bold w-100 w-md-auto" style="border-radius: 8px; white-space: nowrap;">Add Family Members</button>
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
+                        <h6 class="mb-0 fw-bold text-dark">{{ $analysis['banner_title'] }}</h6>
+                        <span class="badge {{ $analysis['completeness_score'] >= 80 ? 'bg-success' : ($analysis['completeness_score'] >= 40 ? 'bg-warning text-dark' : 'bg-primary') }}" style="font-size: 0.75rem;">
+                            {{ $analysis['completeness_score'] }}% Lineage Complete
+                        </span>
+                        @if(!empty($analysis['missing_labels']))
+                            @foreach($analysis['missing_labels'] as $label)
+                                <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
+                                    <i class="bi bi-plus-circle-fill text-info me-1"></i>Missing: {{ $label }}
+                                </span>
+                            @endforeach
+                        @endif
+                    </div>
+                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">{{ $analysis['banner_subtitle'] }}</p>
+                </div>
             </div>
-        @endif
+            <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-center">
+                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary btn-sm px-3 py-2 fw-bold w-100 w-md-auto" style="border-radius: 8px; white-space: nowrap;">
+                    <i class="bi bi-person-plus-fill me-1"></i>
+                    @if($analysis['recommended_cta_type'] === 'parents')
+                        Add Parents
+                    @elseif($analysis['recommended_cta_type'] === 'sibling')
+                        Add Siblings
+                    @elseif($analysis['recommended_cta_type'] === 'partner')
+                        Add Partner
+                    @elseif($analysis['recommended_cta_type'] === 'child')
+                        Add Children
+                    @else
+                        Add Family Members
+                    @endif
+                </button>
+                <button type="button" class="btn-close text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
+            </div>
+        </div>
 
         <!-- Mode 1: Dynamic Canvas View -->
         <div class="tree-container position-relative" id="treeContainer">
@@ -1197,7 +1237,7 @@
         myModal.show();
     });
 
-    function openAddRelativeModalFromBanner() {
+    function openAddRelativeModalFromBanner(relationType) {
         currentBaseNodeName = 'Yourself';
         currentBaseNodeId = getGraphNodeId(window.__ROOT_USER_ID__, currentBaseNodeName);
         
@@ -1205,11 +1245,17 @@
         document.getElementById('partnerBaseNodeId').value = currentBaseNodeId;
         document.getElementById('childBaseNodeId').value = currentBaseNodeId;
 
-        // Reset wizard
+        // Reset wizard steps
         document.getElementById('step1').classList.remove('d-none');
         document.getElementById('step2-partner').classList.add('d-none');
         document.getElementById('step2-child').classList.add('d-none');
+        document.getElementById('step2-parents').classList.add('d-none');
         document.getElementById('addRelativeError').classList.add('d-none');
+
+        const validTypes = ['parents', 'partner', 'child', 'sibling'];
+        if (relationType && validTypes.includes(relationType)) {
+            selectRelativeType(relationType);
+        }
 
         var myModal = new bootstrap.Modal(document.getElementById('addRelativeModal'));
         myModal.show();

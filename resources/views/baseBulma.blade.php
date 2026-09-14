@@ -280,6 +280,8 @@
     {{-- <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/shared-lib.js" defer></script> --}}
 
 
+    @include('partials.back-to-top')
+
 </body>
 
 </html>

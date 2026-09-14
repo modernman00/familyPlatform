@@ -15,12 +15,21 @@
         <li class="nav-item">
           <a class="nav-link {{ $_SERVER['REQUEST_URI'] == '/aboutus' ? 'active' : '' }}" href="/aboutus">About Us</a>
         </li>
+@if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
+        <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+          <a class="btn btn-brand w-100" href="/profilePage">Go to Family Dashboard</a>
+        </li>
+        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+          <a class="btn btn-brand-outline w-100" href="/signout">Sign Out</a>
+        </li>
+@else
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0 loginNav signup_login">
           <a class="btn btn-brand-outline w-100" href="/login">Log In</a>
         </li>
         <li class="nav-item ms-lg-2 mt-2 mt-lg-0 registerNav signup_login">
           <a class="btn btn-brand w-100" href="/register">Join Now</a>
         </li>
+@endif
       </ul>
     </div>
   </div>
