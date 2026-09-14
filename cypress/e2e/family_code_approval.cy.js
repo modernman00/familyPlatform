@@ -284,7 +284,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
           }
         }).then((response) => {
           expect(response.status).to.equal(401);
-          expect(response.body.error).to.include('Invalid or missing approval token');
+          expect(response.body.error).to.include('Invalid, expired, or missing approval token');
         });
       });
     });
@@ -436,6 +436,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         const inviter = response.body.inviter;
 
         enterFamilyCode(validCode);
+        cy.wait(500); // Wait for modal to render after family code validation
         cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
 
         cy.intercept('POST', '/api/family-code/verify-inviter', { delay: 1000, body: { verified: true } }).as('inviterCheck');
