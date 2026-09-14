@@ -330,7 +330,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
 
     it('should enforce CSRF token on family code check', () => {
       // Clear rate limiter first to avoid 429 errors from previous tests
-      cy.request('/api/test/clear-rate-limit');
+      cy.request({ method: 'POST', url: '/tests/clear-rate-limit', failOnStatusCode: false });
 
       cy.request({
         method: 'POST',
