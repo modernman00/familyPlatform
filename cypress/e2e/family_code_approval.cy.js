@@ -434,6 +434,8 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
         const validCode = response.body.code;
         const inviter = response.body.inviter;
 
+        // Intercept both API calls before starting
+        cy.intercept('POST', '/api/family-code/check', { body: { exists: true, temporary_code: validCode } }).as('codeCheck');
         cy.intercept('POST', '/api/family-code/verify-inviter', { delay: 1000, body: { verified: true } }).as('inviterCheck');
 
         cy.wrap(null).then(() => enterFamilyCode(validCode)).then(() => {
