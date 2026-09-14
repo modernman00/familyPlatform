@@ -41,6 +41,9 @@ foreach(($eventData ?? []) as $event) {
         @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => null])
     </div>
 
+    <!-- Family Memories & Milestones Widget -->
+    @includeIf('member.includes.memoriesMilestonesWidget')
+
     <!-- Events Card -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background-color: var(--card-bg);">
         <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-start pt-4 pb-2 px-4" id="eventHeader">

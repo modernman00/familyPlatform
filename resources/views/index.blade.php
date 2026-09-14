@@ -9,11 +9,25 @@
     <div class="container">
       <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
-          <h1 class="hero-title">Connect. Share. <br><span>Grow Together.</span></h1>
-          <p class="hero-subtitle">The ultimate private social network designed exclusively for your family. Strengthen bonds, preserve memories, and explore your family tree in a secure, ad-free environment.</p>
+          <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-primary, #4f46e5); font-size: 0.8rem; letter-spacing: 0.05em;">
+            🛡️ 100% Private &amp; Ad-Free
+          </div>
+          <h1 class="hero-title">Private Family Social Network &amp; <br><span>Living Heritage Tree.</span></h1>
+          <p class="hero-subtitle">Connect generations, preserve precious memories, and celebrate life milestones in a secure, private haven designed exclusively for your family.</p>
           <div class="d-flex gap-3 flex-column flex-sm-row">
-            <a href="/register" class="btn btn-brand btn-lg">Create Family Network</a>
+            <a href="/register" class="btn btn-brand btn-lg shadow-sm">Create Family Network</a>
             <a href="/login" class="btn btn-brand-outline btn-lg">Log In</a>
+          </div>
+          <div class="d-flex align-items-center gap-4 mt-4 pt-2 text-muted small">
+            <div class="d-flex align-items-center gap-1">
+              <i class="bi bi-shield-check text-success"></i> End-to-End Private
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <i class="bi bi-heart-pulse-fill text-danger"></i> Milestone Memories
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <i class="bi bi-diagram-3-fill text-primary"></i> Living Organogram
+            </div>
           </div>
         </div>
         <div class="col-lg-6 text-center">

@@ -27,7 +27,7 @@ const PRECACHE_ASSETS = [
   '/public/css/organogram.css',
   '/public/js/manifest.js',
   '/public/js/vendor.js',
-  '/public/js/vendor/familytree.js',
+  '/public/js/vendor/kinshiptree.js',
   '/public/js/index.js',
   '/public/js/pwa-notifications.js',
   '/public/img/favicon/android-chrome-192x192.png',
@@ -101,10 +101,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // A. Strict Network-Only Gate for FinTech, Auth, Admin & CSRF
+  // A. Strict Network-Only Gate for FinTech, Auth, Admin, CSRF & Private PII
   const isSensitiveEndpoint =
     url.pathname.startsWith('/api/wallet') ||
     url.pathname.startsWith('/api/transaction') ||
+    url.pathname.startsWith('/api/memories') ||
+    url.pathname.startsWith('/api/engagement') ||
+    url.pathname.startsWith('/api/onboarding') ||
+    url.pathname.startsWith('/api/claim-family-node') ||
     url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/login') ||
     url.pathname.startsWith('/register') ||

@@ -6,6 +6,8 @@
 @php
     $inviteFamCode = $registerPostData['famCode'] ?? '';
     $familySurname = trim((string)($registerPostData['familySurname'] ?? ($registerPostData['lastName'] ?? '')));
+    $invitedFirstName = trim((string)($registerPostData['firstName'] ?? ''));
+    $hasInvitation = !empty($inviteFamCode) || !empty($invitedFirstName) || !empty($registerPostData['claim_node']);
 
     if (!empty($familySurname)) {
         $pageOgTitle = "Join the {$familySurname} Family on FamilyPlatform";
@@ -188,9 +190,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 @endif
 
-                @if(!empty($registerPostData['claim_node']))
-                <div class="alert alert-success text-center fw-semibold mb-4" style="background-color: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; border-radius: 10px; padding: 14px;">
-                    <i class="bi bi-tree-fill me-2"></i> <strong>Family Invitation:</strong> You are registering to connect directly with {{ !empty($familySurname) ? "the {$familySurname} family" : "family code " . ($registerPostData['famCode'] ?? '') }}!
+                @if($hasInvitation)
+                <div class="invited-relative-hero mb-4" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius: 18px; padding: 26px; color: #ffffff; box-shadow: 0 16px 36px rgba(49, 46, 129, 0.28); border: 1.5px solid rgba(129, 140, 248, 0.4); position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -30px; right: -30px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                    
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45); font-size: 0.78rem; padding: 5px 12px; border-radius: 999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                            <i class="bi bi-tree-fill me-1"></i> Official Family Dynasty Invitation
+                        </span>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.45); font-size: 0.78rem; padding: 5px 12px; border-radius: 999px; font-weight: 700;">
+                            <i class="bi bi-check-circle-fill me-1"></i> Verified Lineage Spot
+                        </span>
+                    </div>
+
+                    <h2 class="h3 fw-bold mb-2" style="color: #ffffff; letter-spacing: -0.02em;">
+                        @if(!empty($invitedFirstName))
+                            Welcome, {{ htmlspecialchars($invitedFirstName) }}! Claim Your Spot
+                        @else
+                            Claim Your Spot in the {{ htmlspecialchars($familySurname ?: 'Family') }} Dynasty
+                        @endif
+                    </h2>
+
+                    <p style="color: rgba(224, 231, 255, 0.88); font-size: 0.94rem; line-height: 1.55; margin-bottom: 18px; max-width: 620px;">
+                        You have been personally invited to claim your branch on the <strong>{{ htmlspecialchars($familySurname ?: 'Family') }} Family Tree</strong>. Connect directly with your kin, discover ancestral stories, and preserve cherished memories together.
+                    </p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-3" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 12px 18px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="color: #94a3b8; font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Family Code:</span>
+                            <strong style="color: #fbbf24; font-size: 1rem; letter-spacing: 0.06em; font-family: monospace;">{{ htmlspecialchars($inviteFamCode ?: 'PRE-SET') }}</strong>
+                        </div>
+                        <div style="height: 16px; width: 1px; background: rgba(255,255,255,0.2);"></div>
+                        <div class="d-flex align-items-center gap-2" style="color: #c7d2fe; font-size: 0.84rem;">
+                            <i class="bi bi-lightning-charge-fill text-warning"></i>
+                            <span>Fast-Track: Name &amp; Code Pre-Filled Below</span>
+                        </div>
+                    </div>
                 </div>
                 @endif
 

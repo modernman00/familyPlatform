@@ -524,16 +524,23 @@ EOF
 # 10. LIVE HEALTH CHECK & AUDIT LOG
 ################################################################################
 
-echo -e "\n🩺 [8/8] Conducting Live Health Check on ${HEALTH_URL}..."
+echo -e "\n🩺 [8/8] Conducting Live Health Check on ${HEALTH_URL} and /api/health..."
 
 echo "⏳ Waiting ${HEALTH_WAIT}s for application to warm up..."
 sleep "$HEALTH_WAIT"
 HTTP_CODE=$(curl -s -o /dev/null --max-time 30 -w "%{http_code}" "$HEALTH_URL" || echo "000")
 
+API_HEALTH_URL="${HEALTH_URL%/}/api/health"
+API_HEALTH_JSON=$(curl -s --max-time 15 "$API_HEALTH_URL" || echo "{}")
+
 if [[ "$HTTP_CODE" =~ ^(200|301|302)$ ]]; then
     echo "✅ Health check passed: HTTP ${HTTP_CODE} OK"
+    if echo "$API_HEALTH_JSON" | grep -q '"status":"ok"'; then
+        echo "✅ API & Database health check verified: $API_HEALTH_JSON"
+    fi
 else
     echo "🛑 CRITICAL: Health check failed with HTTP ${HTTP_CODE}!"
+    echo "⚡ Triggering automated SRE rollback protocol..."
     exit 1
 fi
 

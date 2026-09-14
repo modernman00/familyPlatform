@@ -1239,3 +1239,437 @@ body.dark-mode .kinship-node-pill {
     align-items: center;
     margin: 0 auto;
 }
+
+/* =======================================================
+   LUXURY CINEMATIC DARK CANVAS THEME (KINSHIPTREE STAGE)
+   ======================================================= */
+body[data-page-id="organogram"] {
+    background: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 50%, #020617 100%) !important;
+    color: #f8fafc !important;
+    min-height: 100vh;
+}
+
+body[data-page-id="organogram"] #mainNavbar {
+    background: rgba(15, 23, 42, 0.88) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+body[data-page-id="organogram"] #mainNavbar .nav-link,
+body[data-page-id="organogram"] #mainNavbar .nav-item {
+    color: #e2e8f0 !important;
+}
+
+body[data-page-id="organogram"] #mainNavbar .nav-link:hover {
+    color: #ffffff !important;
+}
+
+body[data-page-id="organogram"] #mainNavbar .brand-name-family {
+    color: #ffffff !important;
+}
+
+body[data-page-id="organogram"] .organogram-header {
+    background: rgba(15, 23, 42, 0.88) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-page-id="organogram"] .organogram-title {
+    color: #f8fafc !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+body[data-page-id="organogram"] .organogram-subtitle {
+    color: #94a3b8 !important;
+}
+
+body[data-page-id="organogram"] .member-search-input {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #f8fafc !important;
+}
+
+body[data-page-id="organogram"] .member-search-input:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
+}
+
+body[data-page-id="organogram"] .search-dropdown {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+body[data-page-id="organogram"] .search-result-name {
+    color: #f8fafc !important;
+}
+
+body[data-page-id="organogram"] .search-result-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+body[data-page-id="organogram"] .tree-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    height: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+/* Main Canvas Stage */
+#treeStage {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    min-height: 640px;
+    overflow: hidden;
+    border-radius: 24px;
+    background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.85) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+#tree {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+/* Action Buttons Header & Stage */
+.btn-action {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f8fafc;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+}
+
+.btn-action:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.btn-action.btn-gold {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #0f172a !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+.btn-action.btn-gold:hover {
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4) !important;
+}
+
+/* Layout Switcher Segmented Control */
+.layout-segmented-control {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 3px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.layout-segment-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+.layout-segment-btn:hover {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.layout-segment-btn.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.6)) !important;
+    border: 1px solid rgba(129, 140, 248, 0.6) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Active Lineage Banner */
+#lineageBanner {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid #f59e0b;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(245, 158, 11, 0.25);
+    padding: 10px 22px;
+    border-radius: 999px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    animation: bannerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bannerSlideDown {
+    from { opacity: 0; transform: translate(-50%, -20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+#lineageBanner button.close-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    transition: color 0.15s;
+}
+#lineageBanner button.close-btn:hover { color: #ffffff; }
+
+/* Floating Controls Dock */
+.controls-dock {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    z-index: 30;
+}
+
+.dock-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.06);
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.08);
+    color: #ffffff;
+}
+
+.dock-btn:active {
+    transform: scale(0.95);
+}
+
+/* Selected Member Info Modal Card (Floating Left) */
+#personDetailsCard {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 320px;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+    z-index: 35;
+    display: none;
+    animation: cardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+}
+
+.card-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.card-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-top: 4px;
+}
+
+.card-title {
+    font-size: 0.8rem;
+    color: #f59e0b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.card-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-top: 6px;
+}
+
+.card-status-registered {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.card-status-unclaimed {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.card-meta {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+/* Claim Spot Viral Section */
+.claim-spot-section {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1.5px dashed rgba(245, 158, 11, 0.4);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 14px;
+    text-align: center;
+}
+
+.claim-spot-title {
+    color: #fbbf24;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.claim-spot-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    line-height: 1.35;
+}
+
+.claim-spot-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.card-actions {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Dark Legend */
+body[data-page-id="organogram"] .family-legend {
+    background: rgba(15, 23, 42, 0.88) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+body[data-page-id="organogram"] .legend-item {
+    color: #e2e8f0 !important;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    #treeStage {
+        height: 75vh;
+        min-height: 520px;
+        border-radius: 16px;
+    }
+
+    #personDetailsCard {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+        border-bottom: none !important;
+        box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.75) !important;
+        padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+        animation: sheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 60 !important;
+    }
+
+    .controls-dock {
+        bottom: 16px;
+        right: 14px;
+    }
+}

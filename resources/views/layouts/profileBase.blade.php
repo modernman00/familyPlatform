@@ -78,6 +78,8 @@
   <script nonce="{{ $nonce }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v=1.0.0"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
 
   <script>
     if ('serviceWorker' in navigator) {

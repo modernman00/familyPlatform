@@ -13,6 +13,23 @@ $router->map('GET', '/terms', 'App\controller\Index@terms', 'terms');
 
 $router->map('GET', '/contact', 'App\controller\Index@contact', 'Contact');
 
+// --- AUTOMATED DEPLOYMENT & SRE HEALTH CHECK (Item #17) ---
+$router->map('GET', '/api/health', function() {
+    header('Content-Type: application/json; charset=utf-8');
+    $status = ['status' => 'ok', 'app' => $_ENV['APP_NAME'] ?? 'Family Platform', 'time' => time()];
+    try {
+        $db = \Src\Db::connect2();
+        $db->query("SELECT 1");
+        $status['database'] = 'connected';
+        http_response_code(200);
+    } catch (\Throwable $e) {
+        $status['status'] = 'degraded';
+        $status['database'] = 'disconnected';
+        http_response_code(503);
+    }
+    echo json_encode($status);
+});
+
 // --- TEST AUTOMATION ROUTE ---
 // Clears rate limits to unblock Cypress tests.
 $router->map('GET', '/tests/clear-rate-limit', function() {
@@ -26,3 +43,4 @@ $router->map('GET', '/tests/clear-rate-limit', function() {
     header('Content-Type: application/json');
     echo json_encode(['status' => 'success', 'message' => 'Rate limit cleared']);
 });
+

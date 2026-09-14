@@ -78,6 +78,9 @@
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 
+  <!-- 60-Second Onboarding Checklist (Alpine.js - auto hides when complete) -->
+  @includeIf('member.includes.onboardingChecklistWidget')
+
   <!-- Post Composer (kept above the Kinship widget - creating a post is the
        primary action; kin discovery is secondary) -->
   <div class="card post-composer mb-4 border-0 shadow-sm" id="openPostModalTrigger" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);">
@@ -109,22 +112,13 @@
   </div>
 
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
-  <!-- Distinct id from the desktop copy below (rightColumn.blade.php) - both render the
-       same partial and would otherwise share id="kinshipRadarWidget", which left
-       getElementById('kinshipRadarWidget') in kinshipRadar.js always binding to this
-       (frequently hidden) copy instead of whichever one is actually visible. -->
   <div class="d-lg-none">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])
   </div>
 
-  <!-- Memories Section (Hidden until loaded) -->
-  <div id="memories-container" style="display: none; margin-bottom: 24px;">
-    <div class="card border-0 shadow-sm" style="border-radius: 16px; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);">
-      <div class="card-body p-4">
-        <h5 class="fw-bold text-primary mb-3"><i class="fa fa-history me-2"></i> On This Day</h5>
-        <div id="memories-content"></div>
-      </div>
-    </div>
+  <!-- Memories & Milestones: Mobile-Only (visible < 992px, desktop shows it in right sidebar) -->
+  <div class="d-lg-none">
+    @includeIf('member.includes.memoriesMilestonesWidget', ['widgetId' => 'memoriesWidgetMobile'])
   </div>
 
   <!-- Reactive Alpine.js Feed -->

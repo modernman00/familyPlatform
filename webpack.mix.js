@@ -79,6 +79,11 @@ mix.webpackConfig((webpack, config) => {
       },
     },
     resolve: {
+      symlinks: false,
+      modules: [
+        path.resolve(__dirname, "node_modules"),
+        "node_modules"
+      ],
       alias: {
         "@": path.resolve(__dirname, "resources/asset/js"),
         "@scss": path.resolve(__dirname, "resources/asset/scss"),
@@ -90,7 +95,9 @@ mix.webpackConfig((webpack, config) => {
       },
       fallback: {
         "path": false,
-        "fs": false
+        "fs": false,
+        "buffer": false,
+        "process": false
       }
     }
   };
