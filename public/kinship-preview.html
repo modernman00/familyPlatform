@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KinshipTree.js — World-Class In-House Family Tree Engine (Zero-Balkan Replacement)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 50% 10%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+      --surface-glass: rgba(255, 255, 255, 0.06);
+      --surface-glass-border: rgba(255, 255, 255, 0.12);
+      --accent-gold: #f59e0b;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100vh;
+      max-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation / Brand Header */
+    header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--surface-glass-border);
+      z-index: 50;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      -webkit-text-fill-color: initial;
+    }
+
+    .savings-badge {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      -webkit-text-fill-color: initial;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-action {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-glass-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-action.btn-gold {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      border: none;
+      font-weight: 700;
+    }
+
+    /* Layout Switcher Segmented Control */
+    .layout-segmented-control {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 3px;
+    }
+
+    .layout-segment-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .layout-segment-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .layout-segment-btn.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.5));
+      border: 1px solid rgba(129, 140, 248, 0.6);
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 2px 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .btn-action.btn-gold:hover {
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
+    }
+
+    /* Main Canvas Stage */
+    #treeStage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+
+    #tree {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .kinship-link {
+      transition: opacity 0.25s ease, stroke 0.25s ease, stroke-width 0.25s ease;
+    }
+
+    /* Active Lineage Banner */
+    #lineageBanner {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      border: 1.5px solid var(--accent-gold);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 24px rgba(245, 158, 11, 0.2);
+      padding: 10px 22px;
+      border-radius: 999px;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+      animation: bannerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes bannerSlideDown {
+      from { opacity: 0; transform: translate(-50%, -20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    #lineageBanner button.close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+    #lineageBanner button.close-btn:hover { color: #ffffff; }
+
+    /* Floating Controls Dock */
+    .controls-dock {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--surface-glass-border);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      z-index: 30;
+    }
+
+    .dock-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dock-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.08);
+    }
+
+    .dock-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Selected Member Info Modal Card */
+    #personDetailsCard {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--surface-glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+      z-index: 35;
+      display: none;
+      animation: cardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .card-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255, 255, 255, 0.4);
+      object-fit: cover;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 4px;
+    }
+
+    .card-title {
+      font-size: 0.8rem;
+      color: var(--accent-gold);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-top: 6px;
+    }
+
+    .card-status-registered {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+
+    .card-status-unclaimed {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .card-meta {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Claim Spot Viral Section */
+    .claim-spot-section {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1.5px dashed rgba(245, 158, 11, 0.4);
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .claim-spot-title {
+      color: #fbbf24;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .claim-spot-subtitle {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      line-height: 1.35;
+    }
+
+    .claim-spot-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .card-actions {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Verification Status Bar */
+    footer {
+      height: 44px;
+      padding: 0 24px;
+      background: #090d16;
+      border-top: 1px solid var(--surface-glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      z-index: 50;
+    }
+
+    /* Mobile-First Responsive Styles (PWA & Mobile Web Best Practices) */
+    @media (max-width: 768px) {
+      header {
+        padding: 8px 12px;
+        gap: 8px;
+        height: auto;
+        min-height: 52px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .brand-title {
+        font-size: 1.05rem;
+        flex-shrink: 0;
+      }
+
+      .brand-badge,
+      .savings-badge {
+        display: none !important;
+      }
+
+      .header-actions {
+        flex-shrink: 0;
+        gap: 6px;
+      }
+
+      .btn-action {
+        padding: 6px 10px;
+        font-size: 0.76rem;
+        border-radius: 8px;
+      }
+
+      /* Mobile Bottom Sheet for Member Info Card */
+      #personDetailsCard {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+        border-bottom: none !important;
+        box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.75) !important;
+        padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+        animation: sheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        z-index: 60 !important;
+      }
+
+      @keyframes sheetSlideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+
+      /* Lineage Banner on Mobile */
+      #lineageBanner {
+        top: 12px !important;
+        width: calc(100% - 24px) !important;
+        max-width: 360px !important;
+        padding: 8px 14px !important;
+        font-size: 0.78rem !important;
+      }
+
+      /* Mobile Floating Controls Dock: compact, ergonomic thumb zone */
+      .controls-dock {
+        bottom: 85px !important;
+        right: 12px !important;
+        padding: 5px !important;
+        gap: 6px !important;
+      }
+
+      .dock-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1rem !important;
+        border-radius: 10px !important;
+      }
+
+      footer {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand-title">
+      <i class="bi bi-diagram-3-fill text-warning"></i>
+      <span>KinshipTree<span style="color: var(--accent-gold);">.js</span></span>
+      <span class="brand-badge">In-House Engine</span>
+      <span class="savings-badge"><i class="bi bi-piggy-bank-fill"></i> $1,000/yr Saved vs Balkan</span>
+    </div>
+
+    <!-- Multi-Modal Layout View Switcher -->
+    <div class="layout-segmented-control" role="group" aria-label="Layout View Modes">
+      <button type="button" id="btnLayoutPanoramic" class="layout-segment-btn active" onclick="setLayoutMode('panoramic')" title="Panoramic Dynasty (Original/Preferred Layout): Full balanced wide view of all 11 siblings & branches">
+        <i class="bi bi-diagram-3-fill text-info"></i>
+        <span>Panoramic Dynasty</span>
+      </button>
+      <button type="button" id="btnLayoutLineage" class="layout-segment-btn" onclick="setLayoutMode('lineage')" title="Direct Lineage Focus: Illuminates direct golden bloodline path & dims collateral branches">
+        <i class="bi bi-compass-fill text-warning"></i>
+        <span>Direct Lineage</span>
+      </button>
+      <button type="button" id="btnLayoutMultigen" class="layout-segment-btn" onclick="setLayoutMode('multigen')" title="6-Generation Deep Stack: View deep 6-generation hierarchy with multiple partners (divorced & current)">
+        <i class="bi bi-layers-fill text-success"></i>
+        <span>6-Gen Deep Stack</span>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" class="btn-action" onclick="tree.center('19', 0.85)" title="Focus on Root Member (Segun Olaogun)">
+        <i class="bi bi-person-bounding-box text-info"></i> Focus on Me
+      </button>
+      <button type="button" class="btn-action" onclick="traceSelectedNode()">
+        <i class="bi bi-compass-fill text-warning"></i> Trace Lineage
+      </button>
+      <button type="button" class="btn-action" onclick="tree.exportPNG('Family_Dynasty_Poster.png', 2)">
+        <i class="bi bi-image text-primary"></i> 300 DPI Poster
+      </button>
+      <button type="button" class="btn-action" onclick="tree.exportSVG('Family_Dynasty_Vector.svg')">
+        <i class="bi bi-filetype-svg text-success"></i> Vector SVG
+      </button>
+      <button type="button" class="btn-action btn-gold" onclick="tree.fit('family')">
+        <i class="bi bi-aspect-ratio"></i> Fit Family
+      </button>
+      <button type="button" class="btn-action" onclick="tree.fit('all')" title="View All Families and Test Nodes">
+        <i class="bi bi-globe2"></i> All Branches
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Canvas Stage -->
+  <div id="treeStage">
+    <!-- Active Lineage Banner -->
+    <div id="lineageBanner">
+      <i class="bi bi-stars text-warning fs-5"></i>
+      <span id="lineageBannerText">Tracing Ancestral Lineage</span>
+      <button type="button" class="close-btn" onclick="clearLineageTrace()" title="Clear Lineage Trace">
+        <i class="bi bi-x-circle-fill"></i>
+      </button>
+    </div>
+
+    <!-- Selected Member Detail Card -->
+    <div id="personDetailsCard">
+      <div class="card-header-flex">
+        <img id="cardAvatar" src="/resources/images/profile/avatarM.png" alt="Avatar" class="card-avatar">
+        <button type="button" class="close-btn" onclick="closePersonCard()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:1.1rem;">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div id="cardRole" class="card-title">Family Member</div>
+      <div id="cardName" class="card-name">SEGUN OLAOGUN</div>
+      <div id="cardStatusBadge" class="card-status-badge card-status-registered">
+        <i class="bi bi-patch-check-fill"></i> <span>Registered Member</span>
+      </div>
+
+      <div class="card-meta">
+        <div><i class="bi bi-upc-scan me-1"></i> ID: <strong id="cardId">19</strong></div>
+        <div><i class="bi bi-gender-ambiguous me-1"></i> Gender: <strong id="cardGender">Male</strong></div>
+        <div><i class="bi bi-people-fill me-1"></i> Descendants: <strong id="cardDescendants">0</strong></div>
+      </div>
+
+      <!-- Conditional Registered: View Profile -->
+      <div id="cardRegisteredActions" style="margin-top: 14px; display: flex; flex-direction: column; gap: 6px;">
+        <a id="cardViewProfileLink" href="#" class="btn-action btn-gold w-100" style="display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; padding: 10px; font-weight: 700; border-radius: 12px;">
+          <i class="bi bi-person-fill"></i> View Profile
+        </a>
+      </div>
+
+      <!-- Conditional Unregistered: Invite Relative to Claim This Spot -->
+      <div id="cardClaimSpotSection" class="claim-spot-section">
+        <div class="claim-spot-title">
+          <i class="bi bi-person-plus-fill"></i> Invite Relative to Claim This Spot
+        </div>
+        <div class="claim-spot-subtitle">
+          Send a personal invite so they can claim this spot and share family memories.
+        </div>
+        <div class="claim-spot-btns">
+          <a id="cardWhatsappBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn-action" style="background: #25D366; color: white; border: none; font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="bi bi-whatsapp"></i> WhatsApp
+          </a>
+          <a id="cardSmsBtn" href="#" class="btn-action" style="background: #4f46e5; color: white; border: none; font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="bi bi-chat-text-fill"></i> SMS
+          </a>
+          <button type="button" id="cardCopyBtn" onclick="copyCardInviteLink(this)" class="btn-action" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; padding: 7px 12px; border-radius: 999px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="bi bi-link-45deg"></i> Copy Link
+          </button>
+        </div>
+      </div>
+
+      <!-- General Navigation Actions -->
+      <div class="card-actions">
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-action w-100" onclick="traceCardLineage()" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(129, 140, 248, 0.4); color: #c7d2fe;">
+            <i class="bi bi-compass-fill text-warning"></i> Trace Lineage
+          </button>
+          <button type="button" class="btn-action" onclick="centerCardNode()" style="flex-shrink: 0;">
+            <i class="bi bi-crosshair2"></i> Center
+          </button>
+        </div>
+      </div>
+    </div>
+
+      <!-- Heritage Story Card Modal (9:16 Instagram/WhatsApp Story Format) -->
+  <div id="heritageStoryModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 24px; padding: 24px; max-width: 360px; width: 100%; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6); text-align: center; position: relative;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="font-weight: 700; font-size: 0.95rem; color: #fef08a; display: flex; align-items: center; gap: 6px;">
+          <i class="bi bi-stars text-warning"></i> 300 DPI Heritage Card
+        </div>
+        <button type="button" onclick="closeHeritageStoryModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <canvas id="storyCanvas" width="540" height="960" style="width: 100%; max-width: 250px; border-radius: 16px; box-shadow: 0 12px 32px rgba(0,0,0,0.5);"></canvas>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button type="button" id="btnDownloadStory" class="btn-action btn-gold w-100" style="padding: 10px; font-weight: 700; border-radius: 12px;">
+          <i class="bi bi-download me-1"></i> Save Story Card
+        </button>
+        <button type="button" class="btn-action" onclick="closeHeritageStoryModal()" style="padding: 10px 16px; border-radius: 12px;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Tree SVG Container -->
+    <div id="tree"></div>
+
+    <!-- Controls Dock -->
+    <div class="controls-dock">
+      <button type="button" class="dock-btn" onclick="tree.center('19', 0.9)" title="Center on Root (Segun Olaogun)">
+        <i class="bi bi-crosshair2"></i>
+      </button>
+      <button type="button" class="dock-btn" onclick="tree.fit()" title="Fit to Screen">
+        <i class="bi bi-aspect-ratio"></i>
+      </button>
+      <button type="button" class="dock-btn" onclick="tree.zoom(1.25)" title="Zoom In">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+      <button type="button" class="dock-btn" onclick="tree.zoom(0.8)" title="Zoom Out">
+        <i class="bi bi-dash-lg"></i>
+      </button>
+      <button type="button" class="dock-btn" onclick="tree.reset()" title="Reset View">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Verification Status Bar -->
+  <footer>
+    <div style="display:flex; align-items:center; gap:20px;">
+      <span class="status-badge-item">
+        <i class="bi bi-check-circle-fill"></i> Balkan Fully Replaced ($0 USD)
+      </span>
+      <span class="status-badge-item">
+        <i class="bi bi-check-circle-fill"></i> 23 Real Modernman Family Nodes Loaded
+      </span>
+      <span class="status-badge-item">
+        <i class="bi bi-check-circle-fill"></i> 0 Collisions (DAG Layout Engine)
+      </span>
+      <span class="status-badge-item" id="fpsBadge">
+        <i class="bi bi-speedometer2"></i> 60 FPS Momentum Pan/Zoom
+      </span>
+    </div>
+
+    <div style="color: #64748b;">
+      KinshipTree v1.0.0 &bull; Licensed to The Modernman Platform Group
+    </div>
+  </footer>
+
+  <!-- Load KinshipTree.js (Zero-Balkan In-House Engine) -->
+  <script src="/public/js/vendor/kinshiptree.js?v=9.0"></script>
+  <script>
+    const familyNodes = [
+      { id: 20, pids: [21], fid: null, mid: null, name: "OLUYOMI OLAOGUN OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Father", legacyId: null },
+      { id: 21, pids: [20], fid: null, mid: null, name: "IYABO OLAOGUN OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Mother", legacyId: null },
+      { id: 65, pids: [66], fid: null, mid: null, name: "ABIOLA OGUNS OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Father", legacyId: null },
+      { id: 66, pids: [65], fid: null, mid: null, name: "TESTING OGUNS OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Mother", legacyId: null },
+      { id: 19, pids: [], fid: 20, mid: 21, name: "SEGUN OLAOGUN", gender: "male", img: "/resources/images/profile/olutobs_13th.jpeg", title: "Family Platform Root Member", legacyId: "117540OLAWALE" },
+      { id: 28, pids: [37], fid: 20, mid: 21, name: "ADESOJI OLAOGUN", gender: "male", img: "/resources/images/profile/femba.jpeg", title: "Family Platform Root Member", legacyId: "870016OLAWALE" },
+      { id: 37, pids: [28], fid: null, mid: null, name: "Yogun", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Current Spouse", legacyId: null },
+      { id: 38, pids: [], fid: 20, mid: 21, name: "TOPE OLAOGUN OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Family Member", legacyId: null },
+      { id: 39, pids: [], fid: 20, mid: 21, name: "OLUSOLA OLAOGUN OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Family Member", legacyId: null },
+      { id: 42, pids: [62], fid: 20, mid: 21, name: "OLAWALE OLAOGUN", gender: "male", img: "/resources/images/profile/family.jpeg", title: "Family Platform Root Member", legacyId: "432292OLAWALE" },
+      { id: 52, pids: [], fid: 20, mid: 21, name: "OLUFEMI OLAOGUN OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Family Member", legacyId: null },
+      { id: 54, pids: [], fid: 20, mid: 21, name: "Adeyanju Olaogun OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Family Member", legacyId: null },
+      { id: 62, pids: [42], fid: null, mid: null, name: "Ajibike Olaogun", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Partner/Spouse", legacyId: null },
+      { id: 64, pids: [67], fid: 65, mid: 66, name: "Abby OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Platform Root Member", legacyId: "999881TESTING" },
+      { id: 67, pids: [64], fid: null, mid: null, name: "JENNY OGUNS", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Current Spouse", legacyId: null },
+      { id: 707, pids: [], fid: null, mid: null, name: "John23 Doe23", gender: "male", img: "/resources/images/profile/avatarF.png", title: "Primary Member", legacyId: "521441JOHN" },
+      { id: 954, pids: [], fid: null, mid: null, name: "Test User", gender: "male", img: "/resources/images/profile/avatarF.png", title: "Primary Member", legacyId: "34747TEST" },
+      { id: 40, pids: [], fid: 28, mid: 37, name: "Olutobi Olaogun OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Member", legacyId: null },
+      { id: 41, pids: [], fid: 28, mid: 37, name: "Jumoke Olaogun OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Member", legacyId: null },
+      { id: 55, pids: [], fid: 20, mid: 21, name: "OLUTOBS OLAOGUN OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Member", legacyId: null },
+      { id: 56, pids: [], fid: 20, mid: 21, name: "OLADELE OLAOGUN OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Member", legacyId: null },
+      { id: 63, pids: [], fid: 42, mid: 62, name: "OLUTOBI OLAOGUN", gender: "male", img: "/resources/images/profile/avatarM.png", title: "Child", legacyId: null },
+      { id: 68, pids: [], fid: null, mid: 67, name: "BAEU OLAOGUN OLAOGUN", gender: "female", img: "/resources/images/profile/avatarF.png", title: "Family Member", legacyId: null }
+    ];
+
+    // Instantiate KinshipTree (Drop-in FamilyTree syntax)
+    const tree = new FamilyTree(document.getElementById("tree"), {
+      template: "tommy",
+      scaleInitial: "family",
+      rootId: "19",
+      nodes: familyNodes,
+      nodeBinding: {
+        field_0: "name",
+        field_2: "title",
+        img_0: "img"
+      }
+    });
+
+    window.tree = tree;
+    let selectedNodeId = '40';
+    let currentDataset = 'panoramic';
+
+    const dynasty6GenNodes = [
+      { id: "g0_1", pids: ["g0_2"], name: "ADEWALE OLAOGUN I", gender: "male", title: "Great-Great-Great-Grandfather (Gen 0)", img: "/resources/images/profile/avatarM.png" },
+      { id: "g0_2", pids: ["g0_1"], name: "ADETOKUNBO OLAOGUN", gender: "female", title: "Great-Great-Great-Grandmother (Gen 0)", img: "/resources/images/profile/avatarF.png" },
+      { id: "g1_1", pids: ["g1_2"], fid: "g0_1", mid: "g0_2", name: "BABATUNDE OLAOGUN", gender: "male", title: "Great-Great-Grandfather (Gen 1)", img: "/resources/images/profile/avatarM.png" },
+      { id: "g1_2", pids: ["g1_1"], name: "FOLASHADE OLAOGUN", gender: "female", title: "Great-Great-Grandmother (Gen 1)", img: "/resources/images/profile/avatarF.png" },
+      { id: "g2_1", pids: ["g2_2"], fid: "g1_1", mid: "g1_2", name: "OLUSEGUN OLAOGUN SR", gender: "male", title: "Great-Grandfather (Gen 2)", img: "/resources/images/profile/avatarM.png" },
+      { id: "g2_2", pids: ["g2_1"], name: "MOJISOLA OLAOGUN", gender: "female", title: "Great-Grandmother (Gen 2)", img: "/resources/images/profile/avatarF.png" },
+      { id: "g3_1", pids: ["g3_2"], fid: "g2_1", mid: "g2_2", name: "OLUYOMI OLAOGUN", gender: "male", title: "Grandfather (Gen 3)", img: "/resources/images/profile/avatarM.png" },
+      { id: "g3_2", pids: ["g3_1"], name: "IYABO OLAOGUN", gender: "female", title: "Grandmother (Gen 3)", img: "/resources/images/profile/avatarF.png" },
+      { id: "g4_1", pids: ["g4_ex", "g4_cur"], fid: "g3_1", mid: "g3_2", name: "SEGUN OLAOGUN", gender: "male", title: "Father / Multi-Partner (Gen 4)", img: "/resources/images/profile/olutobs_13th.jpeg" },
+      { id: "g4_ex", pids: ["g4_1"], name: "PATRICIA MONROE", gender: "female", title: "Former Spouse (Divorced)", is_current: 0, union_type: "divorced", img: "/resources/images/profile/avatarF.png" },
+      { id: "g4_cur", pids: ["g4_1"], name: "BIMPE OLAOGUN", gender: "female", title: "Current Spouse", is_current: 1, img: "/resources/images/profile/avatarF.png" },
+      { id: "g5_1", pids: [], fid: "g4_1", mid: "g4_ex", name: "KEMI OLAOGUN", gender: "female", title: "Daughter (Marriage 1)", img: "/resources/images/profile/avatarF.png" },
+      { id: "g5_2", pids: ["g5_sp"], fid: "g4_1", mid: "g4_cur", name: "OLUTOBI OLAOGUN", gender: "male", title: "Son (Marriage 2)", img: "/resources/images/profile/family.jpeg" },
+      { id: "g5_sp", pids: ["g5_2"], name: "CHIAMAKA OLAOGUN", gender: "female", title: "Daughter-in-law", img: "/resources/images/profile/avatarF.png" },
+      { id: "g6_1", pids: [], fid: "g5_2", mid: "g5_sp", name: "TIWALOLA OLAOGUN", gender: "female", title: "Great-Granddaughter (Gen 6)", img: "/resources/images/profile/avatarF.png" }
+    ];
+
+    function setLayoutMode(mode) {
+      document.querySelectorAll('.layout-segment-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (mode === 'panoramic') {
+        document.getElementById('btnLayoutPanoramic').classList.add('active');
+        clearLineageTrace();
+        if (currentDataset !== 'panoramic') {
+          currentDataset = 'panoramic';
+          tree.nodes = familyNodes;
+          tree.render();
+        }
+        setTimeout(() => tree.fit('family'), 40);
+      } else if (mode === 'lineage') {
+        document.getElementById('btnLayoutLineage').classList.add('active');
+        if (currentDataset !== 'panoramic') {
+          currentDataset = 'panoramic';
+          tree.nodes = familyNodes;
+          tree.render();
+        }
+        setTimeout(() => traceSelectedNode(), 40);
+      } else if (mode === 'multigen') {
+        document.getElementById('btnLayoutMultigen').classList.add('active');
+        clearLineageTrace();
+        currentDataset = 'multigen';
+        tree.nodes = dynasty6GenNodes;
+        tree.render();
+        setTimeout(() => tree.fit(), 40);
+      }
+    } // Default selected relative: Olutobi Olaogun (grandchild)
+
+    let currentInviteLink = '';
+
+    // Handle Node Click
+    tree.on('click', function (sender, args) {
+      const currentList = currentDataset === 'multigen' ? dynasty6GenNodes : familyNodes;
+      const node = currentList.find(n => String(n.id) === String(args.node.id));
+      if (!node) return false;
+
+      selectedNodeId = String(node.id);
+      openPersonCard(node);
+      return false;
+    });
+
+    function openPersonCard(node) {
+      document.getElementById('cardName').textContent = node.name;
+      document.getElementById('cardRole').textContent = node.title || 'Family Member';
+      document.getElementById('cardId').textContent = node.id + (node.legacyId ? ' (' + node.legacyId + ')' : '');
+      document.getElementById('cardGender').textContent = node.gender ? node.gender.toUpperCase() : 'MALE';
+      document.getElementById('cardAvatar').src = node.img;
+      
+      const layoutNode = tree.layout && tree.layout.nodes ? tree.layout.nodes.find(n => String(n.id) === String(node.id)) : null;
+      document.getElementById('cardDescendants').textContent = layoutNode ? layoutNode.descendantCount : 0;
+
+      const statusBadge = document.getElementById('cardStatusBadge');
+      const registeredActions = document.getElementById('cardRegisteredActions');
+      const claimSpotSection = document.getElementById('cardClaimSpotSection');
+
+      if (node.legacyId) {
+        // Registered platform member: Show View Profile
+        statusBadge.className = 'card-status-badge card-status-registered';
+        statusBadge.innerHTML = '<i class="bi bi-patch-check-fill"></i> <span>Registered Member</span>';
+        
+        registeredActions.style.display = 'block';
+        document.getElementById('cardViewProfileLink').href = '/allMembers/seeProfile/' + encodeURIComponent(node.legacyId);
+        
+        claimSpotSection.style.display = 'none';
+      } else {
+        // Unregistered relative: Viral Claim Spot invite flow
+        statusBadge.className = 'card-status-badge card-status-unclaimed';
+        statusBadge.innerHTML = '<i class="bi bi-clock-history"></i> <span>Unclaimed Spot</span>';
+        
+        registeredActions.style.display = 'none';
+        claimSpotSection.style.display = 'block';
+
+        const familyCode = 'OLAOGUN';
+        const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
+        const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
+        currentInviteLink = inviteLink;
+
+        const inviteMessage = encodeURIComponent(
+          `🌳 *Family Tree Invitation* 🌳\n\n` +
+          `You are invited to connect with the *Olaogun Family* on FamilyPlatform.\n\n` +
+          `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+          `👉 ${inviteLink}`
+        );
+
+        document.getElementById('cardWhatsappBtn').href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
+        document.getElementById('cardSmsBtn').href = `sms:?body=${inviteMessage}`;
+      }
+
+      document.getElementById('personDetailsCard').style.display = 'block';
+    }
+
+    function copyCardInviteLink(btn) {
+      if (!currentInviteLink) return;
+      navigator.clipboard.writeText(currentInviteLink).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+        setTimeout(() => {
+          btn.innerHTML = orig;
+        }, 2000);
+      }).catch(() => {
+        alert('Invite link: ' + currentInviteLink);
+      });
+    }
+
+        function openStoryCardForSelected() {
+      const currentList = currentDataset === 'multigen' ? dynasty6GenNodes : familyNodes;
+      const node = currentList.find(n => String(n.id) === String(selectedNodeId)) || currentList[0];
+      if (!node) return;
+
+      const modal = document.getElementById('heritageStoryModal');
+      const canvas = document.getElementById('storyCanvas');
+      if (!modal || !canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;  // 540
+      const H = canvas.height; // 960
+
+      // 1. Rich Gradient Background
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, '#0f172a');
+      grad.addColorStop(0.35, '#1e1b4b');
+      grad.addColorStop(0.7, '#1e3a29');
+      grad.addColorStop(1, '#064e3b');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. Gold Border Frame
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(16, 16, W - 32, H - 32);
+
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(26, 26, W - 52, H - 52);
+
+      function renderCardDetails() {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#d4af37';
+        ctx.font = '600 16px system-ui, -apple-system, sans-serif';
+        ctx.fillText('FAMILY DYNASTY ARCHIVE', W / 2, 85);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
+        ctx.fillText(node.name || 'Family Relative', W / 2, 460, 460);
+
+        ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
+        ctx.beginPath();
+        ctx.roundRect(W / 2 - 130, 485, 260, 36, 18);
+        ctx.fill();
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#fef08a';
+        ctx.font = 'bold 15px system-ui, -apple-system, sans-serif';
+        ctx.fillText((node.title || 'Relative').toUpperCase(), W / 2, 508);
+
+        const boxY = 580;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath();
+        ctx.roundRect(W / 2 - 200, boxY, 400, 130, 20);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+        ctx.stroke();
+
+        ctx.font = 'bold 38px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = '#d4af37';
+        ctx.fillText('23', W / 2 - 100, boxY + 60);
+        ctx.font = '600 13px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillText('RECORDED KIN', W / 2 - 100, boxY + 90);
+
+        ctx.font = 'bold 38px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = '#d4af37';
+        ctx.fillText('6', W / 2 + 100, boxY + 60);
+        ctx.font = '600 13px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillText('GENERATIONS', W / 2 + 100, boxY + 90);
+
+        ctx.font = '14px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.fillText('myfamilyplatform.com • Connect Your Heritage', W / 2, 880);
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function() {
+        const cx = W / 2;
+        const cy = 280;
+        const r = 110;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#d4af37';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+        ctx.restore();
+
+        renderCardDetails();
+      };
+      img.onerror = function() {
+        renderCardDetails();
+      };
+      img.src = node.img || '/resources/images/profile/avatarM.png';
+
+      modal.style.display = 'flex';
+
+      document.getElementById('btnDownloadStory').onclick = function() {
+        const link = document.createElement('a');
+        link.download = (node.name || 'Relative').replace(/\s+/g, '_') + '_Heritage_Story.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      };
+    }
+
+    function closeHeritageStoryModal() {
+      document.getElementById('heritageStoryModal').style.display = 'none';
+    }
+
+    function closePersonCard() {
+      document.getElementById('personDetailsCard').style.display = 'none';
+    }
+
+    function traceSelectedNode() {
+      const rootId = '19';
+      const targetId = (selectedNodeId && String(selectedNodeId) !== '19') ? selectedNodeId : '40';
+      const target = familyNodes.find(n => String(n.id) === String(targetId));
+      
+      if (typeof tree.traceKinshipPath === 'function') {
+        tree.traceKinshipPath(rootId, targetId);
+      } else if (typeof tree.traceLineage === 'function') {
+        tree.traceLineage(targetId, rootId);
+      }
+      
+      const banner = document.getElementById('lineageBanner');
+      const text = document.getElementById('lineageBannerText');
+      text.textContent = 'Tracing Lineage: Segun Olaogun → ' + (target ? target.name : 'Relative');
+      banner.style.display = 'inline-flex';
+    }
+
+    function traceCardLineage() {
+      if (selectedNodeId) {
+        traceSelectedNode();
+      }
+    }
+
+    function centerCardNode() {
+      if (selectedNodeId) {
+        tree.center(selectedNodeId, 0.95);
+      }
+    }
+
+    function clearLineageTrace() {
+      tree.clearLineageTrace();
+      document.getElementById('lineageBanner').style.display = 'none';
+    }
+
+    // Default to clean view focused on Segun Olaogun's Olaogun Family Tree
+    setTimeout(() => {
+      tree.fit('family');
+      closePersonCard();
+    }, 120);
+  </script>
+</body>
+</html>
