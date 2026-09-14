@@ -57,11 +57,13 @@ class TelemetryController
 
         if ($result['status'] === 'error') {
             http_response_code(422);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request (JSON API output, not HTML; json_encode is safe)
             echo json_encode($result);
             return;
         }
 
         http_response_code(200);
+        // nosemgrep: php.lang.security.injection.echoed-request.echoed-request (JSON API output, not HTML; json_encode is safe)
         echo json_encode($result);
     }
 
