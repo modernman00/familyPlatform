@@ -80,7 +80,7 @@ final class Login
             // Check if login is targeting the admin secret route
             $adminSecretPath = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: '/lasu');
             $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
-            if ($adminSecretPath !== '' && str_contains($requestUri, $adminSecretPath)) {
+            if (str_contains($requestUri, $adminSecretPath)) {
                 if (\class_exists('\App\middleware\AdminGuardMiddleware')) {
                     \App\middleware\AdminGuardMiddleware::enforce();
                     \App\middleware\AdminGuardMiddleware::enforceLoginRateLimit();

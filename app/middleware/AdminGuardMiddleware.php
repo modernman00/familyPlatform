@@ -27,7 +27,7 @@ final class AdminGuardMiddleware
 
         if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && is_string($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-            $first = trim($parts[0] ?? '');
+            $first = trim($parts[0]);
             if (filter_var($first, FILTER_VALIDATE_IP)) {
                 return $first;
             }
@@ -52,9 +52,9 @@ final class AdminGuardMiddleware
             }
         }
 
-        // Gate 2: General Admin Throughput Limiter (120 reqs/min)
+        // Gate 2: General Admin Throughput Limiter
         try {
-            Limiter::limit('admin_traffic:' . $ip, 120, 60);
+            Limiter::limit('admin_traffic:' . $ip, 'default');
         } catch (\Throwable $e) {
             error_log("[AdminGuard] High-frequency admin traffic throttled for IP={$ip}: " . $e->getMessage());
             Utility::msgException(429, 'Too Many Requests. Please slow down.');
@@ -80,9 +80,7 @@ final class AdminGuardMiddleware
     {
         $ip = self::getClientIp();
         try {
-            $maxAttempts = (int) ($_ENV['ADMIN_MAX_LOGIN_ATTEMPTS'] ?? getenv('ADMIN_MAX_LOGIN_ATTEMPTS') ?: 3);
-            $lockoutSecs = (int) ($_ENV['ADMIN_LOCKOUT_SECONDS'] ?? getenv('ADMIN_LOCKOUT_SECONDS') ?: 900);
-            Limiter::limit('admin_login:' . $ip, $maxAttempts, $lockoutSecs);
+            Limiter::limit('admin_login:' . $ip, 'login');
         } catch (\Throwable $e) {
             error_log("[AdminGuard] Brute-force login lockout triggered for IP={$ip}: " . $e->getMessage());
             Utility::msgException(429, 'Too Many Failed Login Attempts. Administrative access locked for 15 minutes.');

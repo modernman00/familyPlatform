@@ -33,7 +33,7 @@ final class AdminErasureController
             ORDER BY id DESC
             LIMIT 50
         ");
-        $erasedAccounts = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+        $erasedAccounts = ($stmt instanceof \PDOStatement) ? $stmt->fetchAll(\PDO::FETCH_ASSOC) : [];
 
         BaseController::viewWithCsp('admin/erasure', [
             'erasedAccounts' => $erasedAccounts,
