@@ -139,12 +139,8 @@ final class Register extends Db
     public function createFamilyCode(): void
     {
         try {
-
-            if ($_SESSION['register']) {
-                view('registration/familyCode');
-            }
+            view('registration/familyCode');
         } catch (\Throwable $e) {
-
             showError($e);
         }
     }
