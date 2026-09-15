@@ -136,15 +136,6 @@ final class Register extends Db
         }
     }
 
-    public function createFamilyCode(): void
-    {
-        try {
-            view('registration/familyCode');
-        } catch (\Throwable $e) {
-            showError($e);
-        }
-    }
-
     // public function nextStep(): void
     // {
     //     try {
