@@ -31,10 +31,12 @@ describe('IDOR sweep — cross-family access is refused', () => {
         });
     });
 
-    it('family tree: allows own family, refuses another family (even a connection)', () => {
+    it('family tree: allows own family and approved connection, refuses unconnected member', () => {
         req({ url: '/organogram/397755OLUSOLA' }).then((r) => expect(r.status).to.eq(200));
-        req({ url: '/organogram/432292OLAWALE' }).then((r) => expect(r.status).to.eq(403));
-        req({ url: '/member/organogram/data/432292OLAWALE' }).then((r) => expect(r.status).to.eq(403));
+        req({ url: '/organogram/432292OLAWALE' }).then((r) => expect(r.status).to.eq(200));
+        req({ url: '/member/organogram/data/432292OLAWALE' }).then((r) => expect(r.status).to.eq(200));
+        req({ url: '/organogram/964649OLAWALE' }).then((r) => expect(r.status).to.eq(403));
+        req({ url: '/member/organogram/data/964649OLAWALE' }).then((r) => expect(r.status).to.eq(403));
     });
 
     it('organogram node details: refuses a node in another family', () => {

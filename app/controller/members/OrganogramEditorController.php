@@ -523,7 +523,10 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $nodeId = (int)($_POST['node_id'] ?? 0);
+            $rawInput = file_get_contents('php://input') ?: '';
+            $jsonInput = json_decode($rawInput, true) ?: [];
+
+            $nodeId = (int)($_POST['node_id'] ?? ($jsonInput['node_id'] ?? 0));
             if ($nodeId <= 0) {
                 msgException(400, 'Invalid Node ID');
                 return;
@@ -547,17 +550,18 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            $firstName = trim((string)($_POST['first_name'] ?? ''));
-            $lastName = trim((string)($_POST['last_name'] ?? ''));
-            $maidenName = trim((string)($_POST['maiden_name'] ?? ''));
-            $email = trim((string)($_POST['email'] ?? ''));
-            $mobile = trim((string)($_POST['mobile'] ?? ''));
-            $gender = trim((string)($_POST['gender'] ?? ''));
-            $location = trim((string)($_POST['location'] ?? ''));
-            $occupation = trim((string)($_POST['occupation'] ?? ''));
-            $bio = trim((string)($_POST['bio'] ?? ''));
-            $isDeceased = (isset($_POST['is_deceased']) && ($_POST['is_deceased'] === '1' || $_POST['is_deceased'] === 'yes')) ? 1 : 0;
-            $birthDate = !empty($_POST['birth_date']) ? trim((string)$_POST['birth_date']) : null;
+            $firstName = trim((string)($_POST['first_name'] ?? ($jsonInput['first_name'] ?? '')));
+            $lastName = trim((string)($_POST['last_name'] ?? ($jsonInput['last_name'] ?? '')));
+            $maidenName = trim((string)($_POST['maiden_name'] ?? ($jsonInput['maiden_name'] ?? '')));
+            $email = trim((string)($_POST['email'] ?? ($jsonInput['email'] ?? '')));
+            $mobile = trim((string)($_POST['mobile'] ?? ($jsonInput['mobile'] ?? '')));
+            $gender = trim((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')));
+            $location = trim((string)($_POST['location'] ?? ($jsonInput['location'] ?? '')));
+            $occupation = trim((string)($_POST['occupation'] ?? ($jsonInput['occupation'] ?? '')));
+            $bio = trim((string)($_POST['bio'] ?? ($jsonInput['bio'] ?? '')));
+            $isDeceased = (isset($_POST['is_deceased']) && ($_POST['is_deceased'] === '1' || $_POST['is_deceased'] === 'yes'))
+                || (isset($jsonInput['is_deceased']) && ($jsonInput['is_deceased'] === '1' || $jsonInput['is_deceased'] === 'yes' || $jsonInput['is_deceased'] === 1 || $jsonInput['is_deceased'] === true)) ? 1 : 0;
+            $birthDate = !empty($_POST['birth_date']) ? trim((string)$_POST['birth_date']) : (!empty($jsonInput['birth_date']) ? trim((string)$jsonInput['birth_date']) : null);
 
             if (empty($firstName)) {
                 msgException(400, 'First Name is required.');
@@ -601,4 +605,114 @@ final class OrganogramEditorController extends BaseController
             showError($th);
         }
     }
+
+    /**
+     * Remove / Delete a relative from the family tree
+     */
+    public function deleteNode(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input') ?: '';
+            $jsonInput = json_decode($rawInput, true) ?: [];
+            $nodeId = (int)($_POST['node_id'] ?? ($jsonInput['node_id'] ?? 0));
+
+            if ($nodeId <= 0) {
+                msgException(400, 'Invalid Node ID');
+                return;
+            }
+
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            $sessionUserId = (string)($_SESSION['id'] ?? '');
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            $db = Db::connect2();
+
+            // Verify node belongs to this user's family
+            $stmt = $db->prepare("SELECT id, user_id, first_name, last_name, email FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$nodeId, $familyCode]);
+            $node = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$node) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            // Self-deletion Guard: User cannot delete their own root node
+            if (!empty($sessionUserId) && !empty($node['user_id']) && (string)$node['user_id'] === $sessionUserId) {
+                msgException(400, 'You cannot remove yourself from your family tree.');
+                return;
+            }
+
+            // TRANSACTION START (David's Structural Mandate)
+            $db->beginTransaction();
+
+            try {
+                // 1. Remove this node from child links (when this node is a child of any union)
+                $delChildLinks = $db->prepare("DELETE FROM family_node_children WHERE child_id = ?");
+                $delChildLinks->execute([$nodeId]);
+
+                // 2. Find all unions where this node is partner 1 or partner 2
+                $findUnions = $db->prepare("SELECT id FROM family_unions WHERE family_code = ? AND (partner_1_id = ? OR partner_2_id = ?)");
+                $findUnions->execute([$familyCode, $nodeId, $nodeId]);
+                $unions = $findUnions->fetchAll(\PDO::FETCH_ASSOC);
+
+                if (!empty($unions)) {
+                    $unionIds = array_column($unions, 'id');
+                    $placeholders = implode(',', array_fill(0, count($unionIds), '?'));
+
+                    // Remove child links belonging to these deleted unions
+                    $delUnionChildren = $db->prepare("DELETE FROM family_node_children WHERE union_id IN ($placeholders)");
+                    $delUnionChildren->execute($unionIds);
+
+                    // Delete the unions
+                    $delUnions = $db->prepare("DELETE FROM family_unions WHERE id IN ($placeholders)");
+                    $delUnions->execute($unionIds);
+                }
+
+                // 3. Delete the node itself
+                $delNode = $db->prepare("DELETE FROM family_nodes WHERE id = ? AND family_code = ?");
+                $delNode->execute([$nodeId, $familyCode]);
+
+                // 4. Synchronize & clean up legacy tables if applicable (sibling, children, otherFamily)
+                if (!empty($sessionUserId)) {
+                    $nodeEmail = trim((string)($node['email'] ?? ''));
+                    $firstName = trim((string)($node['first_name'] ?? ''));
+                    $lastName = trim((string)($node['last_name'] ?? ''));
+                    $fullName = trim($firstName . ' ' . $lastName);
+
+                    if (!empty($nodeEmail)) {
+                        $db->prepare("DELETE FROM sibling WHERE id = ? AND sibling_email = ?")->execute([$sessionUserId, $nodeEmail]);
+                        $db->prepare("DELETE FROM children WHERE id = ? AND children_email = ?")->execute([$sessionUserId, $nodeEmail]);
+                        $db->prepare("DELETE FROM otherFamily WHERE id = ? AND (spouse_email = ? OR father_email = ? OR mother_email = ?)")->execute([$sessionUserId, $nodeEmail, $nodeEmail, $nodeEmail]);
+                    }
+                    if (!empty($fullName)) {
+                        $db->prepare("DELETE FROM sibling WHERE id = ? AND sibling_name = ?")->execute([$sessionUserId, $fullName]);
+                        $db->prepare("DELETE FROM children WHERE id = ? AND children_name = ?")->execute([$sessionUserId, $fullName]);
+                        $db->prepare("DELETE FROM otherFamily WHERE id = ? AND (spouse_name = ? OR father_name = ? OR mother_name = ?)")->execute([$sessionUserId, $fullName, $fullName, $fullName]);
+                    }
+                }
+
+                $db->commit();
+                msgSuccess(200, [
+                    "message" => "Relative removed from family tree successfully.",
+                    "node_id" => $nodeId
+                ]);
+            } catch (\Exception $e) {
+                $db->rollBack();
+                throw $e;
+            }
+
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 }
+

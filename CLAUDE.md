@@ -573,13 +573,18 @@ To eliminate rushed coding and prevent Gatewatchers from blindly rubber-stamping
 *   **1. The "Think Before You Type" Mandate (RFC Protocol):** No developer (James, Ryan) or agent is allowed to write functional code for a Tier 2 task immediately. The developer MUST first generate an `implementation_plan.md` (Request for Comments) detailing the files to be touched, potential side effects, and testing strategy. Code submitted without a prior approved plan will be instantly rejected.
 *   **2. The "Hands-On Audit" Mandate (No Rubber Stamping):** Governance members (David, Isla, Kieran, Marcus) are STRICTLY FORBIDDEN from approving code based purely on reading the logic. David/Kieran MUST autonomously execute a dry-run or run `phpstan`/linters in their sandbox before voting. Isla MUST request a screenshot, HTML render, or visual verification artifact before approving UI changes.
 *   **3. The "Zero-Error Proof" Artifact:** When a developer submits code to the TAT Board, they must include a "Proof of Execution" block (e.g., terminal output showing `0 errors`, passing test logs, or database query execution times). If the proof is missing, the Gatewatchers will immediately veto the deployment.
-*   **4. Zero-Error PHP Proof Gate ⚡ NEW: 2026-07-23:** No PHP class file may be presented to the TAT Board without a terminal output block proving PHPStan Level 8 returned 0 errors on that specific file. The writing developer MUST run this locally first:
+*   **4. Deterministic Pre-Flight Gate ⚡ NEW: 2026-09-15:** No code may be presented to the TAT Board, committed, or deployed without running the full unified pre-flight suite:
     ```bash
-    vendor/bin/phpstan analyse app/Services/MyClass.php --level=8
-    # Expected: [OK] No errors
+    bash scripts/preflight.sh
+    # Expected: 🏆 ALL PRE-FLIGHT GATES CLEARED! (Syntax + PHPStan L8 + Semgrep + PHPUnit)
     ```
-    David's Hands-On Audit (Mandate 10.2) MUST then independently replicate this exact command in his own sandbox — reading the developer's pasted output is NOT sufficient and constitutes rubber-stamping. If either step is missing, the submission is instantly rejected.
-*   **5. The Executive Accountability Mandate (No Rubber Stamping) ⚡ NEW:** Executive Board Members (Helena, Olutobi) and all TAT members MUST NOT provide unverified approvals. When granting an approval, they MUST explicitly document the specific "rigorous checks" they performed and provide a "tested rationale" for their decision. Approvals lacking detailed, case-specific justification are invalid and must be rejected by Jumoke. They must act with full understanding of the importance of their role and the impact of their decision.
+    If `preflight.sh` returns anything other than Exit Code 0, the task is strictly blocked from TAT review and deployment.
+
+*   **5. The Re-Armed Red Team PoC Mandate ⚡ NEW: 2026-09-15:** On all Tier 2 and Tier 3 tasks, Marcus and Ghost Reinholt MUST provide raw, executable `curl`/`bash` attack payloads. Generic advice ("ensure auth is checked") is forbidden. Code is blocked from approval until an automated test or verification proves the exploit returns `401 Unauthorized` or `403 Forbidden`.
+
+*   **6. Silas Thorne's Contrarian Veto & Dialectic Challenge Loop ⚡ NEW: 2026-09-15:** Dr. Silas Thorne must explicitly challenge standard industry assumptions and supply a radical 10x alternative. Debates must feature dynamic back-and-forth counter-challenges grounded in real research, case studies, and industry precedents (e.g. Stripe, Instagram, Monzo, WhatsApp, Figma). If Silas issues a generic or bland agreement, the TAT Chair will veto the submission and order an immediate re-hearing.
+
+*   **7. The Executive Accountability Mandate (No Rubber Stamping) ⚡ NEW:** Executive Board Members (Helena, Olutobi) and all TAT members MUST NOT provide unverified approvals. When granting an approval, they MUST explicitly document the specific "rigorous checks" they performed and provide a "tested rationale" for their decision. Approvals lacking detailed, case-specific justification are invalid and must be rejected by Jumoke. They must act with full understanding of the importance of their role and the impact of their decision.
 
 ---
 

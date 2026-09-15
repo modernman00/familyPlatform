@@ -29,16 +29,19 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
-            // IDOR guard: a family tree is only viewable by members of that family.
-            if (!BaseController::sessionSharesFamily($familyCode)) {
-                throw new ForbiddenException('You can only view your own family tree.');
+            // Access control: viewable by members of that family OR approved connected kin.
+            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
+                throw new ForbiddenException('You can only view trees of your own family or approved connections.');
             }
+
+            $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
 
             // Fetch 6-generation graph data
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            $graphData['isReadOnly'] = $isReadOnly;
 
             // Backwards-compatible orgData for existing templates
             $spouse = $this->fetchRelationsData($idStr, 'otherFamily', 'spouse');
@@ -62,7 +65,7 @@ final class Organogram extends SingleCustomerData
 
             $nodeAnalysis = $this->analyzeMissingNodes($orgData, $graphData);
 
-            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis'));
+            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis', 'isReadOnly'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -87,14 +90,17 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
-            // IDOR guard: a family tree is only viewable by members of that family.
-            if (!BaseController::sessionSharesFamily($familyCode)) {
-                throw new ForbiddenException('You can only view your own family tree.');
+            // Access control: viewable by members of that family OR approved connected kin.
+            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
+                throw new ForbiddenException('You can only view family studios of your own family or approved connections.');
             }
+
+            $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
 
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            $graphData['isReadOnly'] = $isReadOnly;
 
             // Backwards-compatible orgData
             $spouse = $this->fetchRelationsData($idStr, 'otherFamily', 'spouse');
@@ -172,7 +178,7 @@ final class Organogram extends SingleCustomerData
 
             $graphJson = json_encode($graphData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
-            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId'));
+            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId', 'isReadOnly'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -191,13 +197,14 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
-            // IDOR guard: graph data is family-scoped.
-            if (!BaseController::sessionSharesFamily($familyCode)) {
-                throw new ForbiddenException('You can only view your own family tree.');
+            // Access control: viewable by members of that family OR approved connected kin.
+            if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
+                throw new ForbiddenException('You can only view trees of your own family or approved connections.');
             }
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
+            $graphData['isReadOnly'] = !BaseController::sessionSharesFamily($familyCode);
 
             msgSuccess(200, $graphData);
         } catch (\Throwable $th) {
@@ -215,11 +222,25 @@ final class Organogram extends SingleCustomerData
             $db = Db::connect2();
 
             if (is_numeric($id)) {
-                $stmt = $db->prepare("SELECT * FROM family_nodes WHERE id = ?");
+                $stmt = $db->prepare("
+                    SELECT fn.*,
+                           COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
+                           COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name
+                    FROM family_nodes fn
+                    LEFT JOIN personal p ON fn.user_id = p.id
+                    WHERE fn.id = ?
+                ");
                 $stmt->execute([(int)$id]);
             } else {
                 $familyCode = $_SESSION['famCode'] ?? '';
-                $stmt = $db->prepare("SELECT * FROM family_nodes WHERE user_id = ? AND family_code = ?");
+                $stmt = $db->prepare("
+                    SELECT fn.*,
+                           COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
+                           COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name
+                    FROM family_nodes fn
+                    LEFT JOIN personal p ON fn.user_id = p.id
+                    WHERE fn.user_id = ? AND fn.family_code = ?
+                ");
                 $stmt->execute([$id, $familyCode]);
             }
 
@@ -230,12 +251,29 @@ final class Organogram extends SingleCustomerData
                 return;
             }
 
-            // IDOR guard: the numeric-id branch above is unscoped, so confirm the
-            // node's family is one the session belongs to before returning it
-            // (name, contact details, unions).
-            if (!BaseController::sessionSharesFamily((string) ($node['family_code'] ?? ''))) {
+            $nodeFamCode = (string) ($node['family_code'] ?? '');
+            $nodeUserId = (string) ($node['user_id'] ?? '');
+
+            // Access control: viewable by members of that family OR approved connected kin.
+            if (!BaseController::sessionSharesFamily($nodeFamCode) && !BaseController::sessionCanViewMember($nodeUserId, $nodeFamCode)) {
                 msgException(404, 'Node not found');
                 return;
+            }
+
+            $isReadOnly = !BaseController::sessionSharesFamily($nodeFamCode);
+            $node['isReadOnly'] = $isReadOnly;
+
+            if ($isReadOnly) {
+                // Privacy redaction for connected kin: mask contact and exact birth dates of living nodes
+                $node['email'] = '';
+                $node['mobile'] = '';
+                if (empty($node['is_deceased']) && !empty($node['birth_date'])) {
+                    // Only show birth year to connected kin for privacy
+                    $birthTs = strtotime((string) $node['birth_date']);
+                    if ($birthTs !== false) {
+                        $node['birth_date'] = date('Y', $birthTs);
+                    }
+                }
             }
 
             $nodeIdInt = (int) $node['id'];
@@ -345,9 +383,11 @@ final class Organogram extends SingleCustomerData
     {
         $db = Db::connect2();
 
-        // 1. Fetch all nodes for this family
+        // 1. Fetch all nodes for this family (joining personal to always show live registered account names)
         $stmt = $db->prepare("
             SELECT fn.*, 
+                   COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
+                   COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name,
                    CASE 
                        WHEN pp.img IS NOT NULL AND pp.img != '' AND pp.img NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', pp.img)
                        WHEN pp.img IS NOT NULL AND pp.img != '' THEN pp.img
@@ -355,6 +395,7 @@ final class Organogram extends SingleCustomerData
                        ELSE fn.avatar_url
                    END AS avatar_url 
             FROM family_nodes fn 
+            LEFT JOIN personal p ON fn.user_id = p.id
             LEFT JOIN profilePics pp ON fn.user_id = pp.id 
             WHERE fn.family_code = ? 
             ORDER BY fn.generation_level ASC, fn.id ASC
@@ -484,6 +525,18 @@ final class Organogram extends SingleCustomerData
         $existingRootId = $checkStmt->fetchColumn();
 
         if ($existingRootId) {
+            // Keep first_name and last_name in sync with latest personal profile
+            $firstName = trim((string)($memberData['firstName'] ?? ''));
+            $lastName = trim((string)($memberData['lastName'] ?? ''));
+            if (!empty($firstName)) {
+                $upd = $db->prepare("
+                    UPDATE family_nodes 
+                    SET first_name = ?, 
+                        last_name = ?
+                    WHERE id = ?
+                ");
+                $upd->execute([$firstName, $lastName, $existingRootId]);
+            }
             return; // Already initialized
         }
 

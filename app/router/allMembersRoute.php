@@ -10,6 +10,7 @@ $router->map('GET', '/allMembers/setProfile/[a:id]', 'App\controller\members\All
 $router->map('GET', '/allMembers/seeProfile/[a:id]', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_SEE');
 $router->map('GET', '/member/seeProfile/[a:id]', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_SEE_MEMBER');
 
+$router->map('DELETE', '/allMembers/removeProfile/[a:apr]', 'App\controller\members\AllMembersController@removeProfile', 'REMOVE_MEMBERS_PROFILE_SINGLE');
 $router->map('DELETE', '/allMembers/removeProfile/[a:apr]/[a:req]', 'App\controller\members\AllMembersController@removeProfile', 'REMOVE_MEMBERS_PROFILE_SET');
 
 $router->map('GET', '/allMembers/getProfile', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_GET');

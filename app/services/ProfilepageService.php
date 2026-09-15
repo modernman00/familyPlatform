@@ -42,7 +42,7 @@ final class ProfilepageService
             'friendRequests' => DataAll::getFriendRequestData($userId, "Request sent"),
             'posts' => $this->feedRepo->getFeedPostsAsArray($userId, (array)$famCodes, 50, 0),
             'comments' => Post::getAllCommentProfilePics(),
-            'events' => DataAll::getEventDataByFamCode($famCode),
+            'events' => DataAll::getEventDataByFamCode((array)$famCodes),
             'post2Id' => Post::postLink2Id($userId),
             'pics' => Post::getAllPostPics($userId),
             'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),

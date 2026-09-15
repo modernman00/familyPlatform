@@ -60,6 +60,11 @@
             </ul>
 
             <div class="d-flex align-items-center gap-2">
+                <!-- Recommend FamilyPlatform Button -->
+                <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.85rem;" type="button">
+                    <i class="bi bi-star-fill text-warning"></i> <span>Recommend</span>
+                </button>
+
                 <!-- Notification Component -->
                 <div class="notification-wrapper position-relative">
                     <button class="btn btn-icon-stitch" id="notificationBtn" title="Notifications" type="button">
@@ -99,6 +104,11 @@
                         <span class="fw-semibold text-truncate" style="max-width: 140px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
+                        <li>
+                            <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal">
+                                <i class="bi bi-stars me-2 text-warning"></i> Recommend to Friends
+                            </a>
+                        </li>
                         <li class="profileNav">
                             <a class="dropdown-item py-2 px-3 fw-medium" href="/profile" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                                 <i class="bi bi-pencil-square me-2 text-primary"></i> Edit Profile

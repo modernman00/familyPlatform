@@ -16,8 +16,10 @@ $router->map('POST', '/member/organogram/editor/child', 'App\controller\members\
 $router->map('POST', '/member/organogram/editor/parents', 'App\controller\members\OrganogramEditorController@addParents', 'MEMBER_ORGANOGRAM_ADD_PARENTS');
 $router->map('POST', '/member/organogram/editor/sibling', 'App\controller\members\OrganogramEditorController@addSibling', 'MEMBER_ORGANOGRAM_ADD_SIBLING');
 $router->map('POST', '/member/organogram/editor/update', 'App\controller\members\OrganogramEditorController@updateNode', 'MEMBER_ORGANOGRAM_UPDATE_NODE');
+$router->map('POST', '/member/organogram/editor/delete', 'App\controller\members\OrganogramEditorController@deleteNode', 'MEMBER_ORGANOGRAM_DELETE_NODE');
 $router->map('POST', '/api/claim-family-node', 'App\controller\members\Organogram@claimNode', 'API_CLAIM_FAMILY_NODE');
 $router->map('POST', '/api/dismiss-claim-node', 'App\controller\members\Organogram@dismissClaimNode', 'API_DISMISS_CLAIM_NODE');
 $router->map('GET', '/member/organogram/export-poster/[*:id]', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER');
 $router->map('GET', '/member/organogram/export-poster', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER_DEFAULT');
+
 

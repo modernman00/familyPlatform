@@ -127,19 +127,61 @@ final class AllMembersController extends AllMembersData
     }
 
     // /allMembers/removeProfile?removeProfile
-    public function removeProfile(mixed $apr, mixed $req): bool
+    public function removeProfile(mixed $apr = null, mixed $req = null): bool
     {
         try {
-            CheckToken::tokenCheck();
-            $payload = SignIn::verify('users');
+            // Defensively validate CSRF token (supports X-XSRF-TOKEN, X-CSRF-TOKEN, headers, cookie, POST/GET)
+            $sessionToken = $_SESSION['token'] ?? '';
+            $headerToken = $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_CSRF_TOKEN'] ?? '';
+            if (empty($headerToken) && function_exists('getallheaders')) {
+                $headers = getallheaders();
+                $headerToken = $headers['X-XSRF-TOKEN'] ?? $headers['X-CSRF-TOKEN'] ?? $headers['X-XSRF-Token'] ?? $headers['X-CSRF-Token'] ?? $headers['x-xsrf-token'] ?? $headers['x-csrf-token'] ?? '';
+            }
+
+            $isTokenValid = false;
+            if (!empty($sessionToken)) {
+                if (!empty($headerToken) && hash_equals($sessionToken, $headerToken)) {
+                    $isTokenValid = true;
+                } elseif (!empty($_POST['token']) && hash_equals($sessionToken, (string)$_POST['token'])) {
+                    $isTokenValid = true;
+                } elseif (!empty($_GET['token']) && hash_equals($sessionToken, (string)$_GET['token'])) {
+                    $isTokenValid = true;
+                } elseif (!empty($_COOKIE['XSRF-TOKEN']) && hash_equals($sessionToken, (string)$_COOKIE['XSRF-TOKEN'])) {
+                    $isTokenValid = true;
+                }
+            }
+
+            if (!$isTokenValid) {
+                CheckToken::tokenCheck();
+            }
+
+            $sessionId = (string) ($_SESSION['id'] ?? '');
+            if ($sessionId === '') {
+                $payload = SignIn::verify('users');
+                $sessionId = (string) \cleanSession((string) $payload['id']);
+            }
 
             // Sanitize inputs
-            $aprClean = checkInput($apr);
-            $reqClean = checkInput($req);
+            $aprClean = $apr !== null ? checkInput($apr) : '';
+            $reqClean = $req !== null ? checkInput($req) : '';
             $apr = is_string($aprClean) ? $aprClean : '';
             $req = is_string($reqClean) ? $reqClean : '';
 
-            $sessionId = (string) \cleanSession((string) $payload['id']);
+            // If only one ID is passed (the target member), pair it with current session ID
+            if ($apr !== '' && ($req === '' || $req === 'null' || $req === 'undefined')) {
+                if ($apr === $sessionId) {
+                    msgException(400, 'Target member ID required.');
+                    return false;
+                }
+                $req = $sessionId;
+            } elseif ($req !== '' && ($apr === '' || $apr === 'null' || $apr === 'undefined')) {
+                if ($req === $sessionId) {
+                    msgException(400, 'Target member ID required.');
+                    return false;
+                }
+                $apr = $sessionId;
+            }
+
             if ($req === '' || $req === 'null' || $req === 'undefined') {
                 $req = $sessionId;
             }
@@ -154,21 +196,84 @@ final class AllMembersController extends AllMembersData
                 throw new ForbiddenException('You can only remove your own connections.');
             }
 
-            $db = \Src\Db::connect();
-            $stmt = $db->prepare(
+            $targetId = hash_equals($sessionId, $apr) ? $req : $apr;
+            $db = \Src\Db::connect2();
+
+            $removed = false;
+
+            // 1. Delete cross-family connection in requestMgt
+            $stmtReq = $db->prepare(
                 "DELETE FROM requestMgt WHERE (approver_id = ? AND requester_id = ?) OR (approver_id = ? AND requester_id = ?)"
             );
-            $stmt->execute([$apr, $req, $req, $apr]);
-            $deleteProfile = $stmt->rowCount();
+            $stmtReq->execute([$apr, $req, $req, $apr]);
+            if ($stmtReq->rowCount() > 0) {
+                $removed = true;
+            }
 
-            if ($deleteProfile > 0) {
+            // 2. Check if caller and target share a family code or user_families association
+            $caller = BaseController::findMemberById($sessionId);
+            $target = BaseController::findMemberById($targetId);
+
+            $callerFamCode = strtoupper(trim(str_replace('#', '', (string)($caller['famCode'] ?? ''))));
+            $targetFamCode = strtoupper(trim(str_replace('#', '', (string)($target['famCode'] ?? ''))));
+
+            // Also check user_families table for shared family codes
+            $famStmt = $db->prepare("SELECT family_code FROM user_families WHERE user_id = ?");
+            $famStmt->execute([$sessionId]);
+            $callerFamCodes = array_map(fn($r) => strtoupper(trim(str_replace('#', '', (string)$r['family_code']))), $famStmt->fetchAll(\PDO::FETCH_ASSOC) ?: []);
+            if ($callerFamCode !== '' && !in_array($callerFamCode, $callerFamCodes, true)) {
+                $callerFamCodes[] = $callerFamCode;
+            }
+
+            // Check if target is in any of caller's family codes
+            $isSameFamily = ($callerFamCode !== '' && $callerFamCode === $targetFamCode);
+            if (!$isSameFamily && !empty($callerFamCodes)) {
+                $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
+                $targetFamCheck = $db->prepare("SELECT COUNT(*) FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                $targetFamCheck->execute(array_merge([$targetId], $callerFamCodes));
+                if (((int)$targetFamCheck->fetchColumn()) > 0) {
+                    $isSameFamily = true;
+                }
+            }
+
+            if ($isSameFamily) {
+                // Delete user_families records linking target to any of caller's family codes
+                if (!empty($callerFamCodes)) {
+                    $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
+                    $delFamStmt = $db->prepare("DELETE FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                    $delFamStmt->execute(array_merge([$targetId], $callerFamCodes));
+                }
+
+                // If target's primary personal.famCode matches caller's family code, isolate target to new solo family code
+                if ($targetFamCode !== '' && in_array($targetFamCode, $callerFamCodes, true)) {
+                    try {
+                        $approvalService = new \App\service\FamilyCodeApprovalService($db);
+                        $targetSurname = (string)($target['lastName'] ?? 'Member');
+                        $approvalService->switchUserToSoloFamily($targetId, $targetSurname, $target);
+                    } catch (\Throwable $switchEx) {
+                        error_log('[removeProfile] Solo family switch warning: ' . $switchEx->getMessage());
+                    }
+                }
+
+                // Clean up any pending approval requests
+                try {
+                    $delReq = $db->prepare("DELETE FROM family_approval_requests WHERE (id = ? AND approver_id = ?) OR (id = ? AND approver_id = ?)");
+                    $delReq->execute([$targetId, $sessionId, $sessionId, $targetId]);
+                } catch (\Throwable $reqEx) {
+                    error_log('[removeProfile] Approval request cleanup warning: ' . $reqEx->getMessage());
+                }
+
+                $removed = true;
+            }
+
+            if ($removed) {
                 msgSuccess(200, "success");
                 return true;
             } else {
-                msgException(500, "Database update failed");
+                msgException(404, "No active connection or family relationship found to remove");
                 return false;
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             showError($e);
             return false;
         }

@@ -19,3 +19,6 @@ $router->map('POST', '/register', 'App\controller\register\Register@processForm'
 $router->map('POST', '/register/contactNewMember', 'App\controller\General@sendEmailToMember', 'contact other members');
 
 $router->map('POST', '/register/checkContact', 'App\controller\register\Register@checkContact', 'check if contact exists');
+
+$router->map('GET', '/join', 'App\controller\members\RecommendationController@joinLanding', 'joinRecommendation');
+

@@ -100,14 +100,19 @@ class FamilyClaimService
             }
 
             if ($isMatch) {
+                $sex = (($memberData['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
+                $rootAvatar = (string)($memberData['img'] ?? "/resources/images/profile/{$sex}");
                 $upd = $db->prepare("
                     UPDATE family_nodes 
                     SET user_id = ?, 
+                        first_name = COALESCE(NULLIF(?, ''), first_name),
+                        last_name = COALESCE(NULLIF(?, ''), last_name),
+                        avatar_url = COALESCE(NULLIF(?, ''), avatar_url),
                         email = COALESCE(NULLIF(?, ''), email),
                         mobile = COALESCE(NULLIF(?, ''), mobile)
                     WHERE id = ?
                 ");
-                $upd->execute([$userId, $email, $mobile, $candId]);
+                $upd->execute([$userId, $firstName, $lastName, $rootAvatar, $email, $mobile, $candId]);
                 return $candId;
             }
         }

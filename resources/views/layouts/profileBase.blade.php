@@ -68,6 +68,7 @@
   {{-- Rendered before the app scripts so the profile-page chunk (which may execute
        from prefetch cache before the parser gets here) always finds this markup. --}}
   @includeIf('member.modals.editProfile')
+  @includeIf('member.modals.recommendModal')
 
   <!-- Mobile PWA Bottom Tab Navigation (Native App Parity) -->
   @include('layouts.bottom_nav')

@@ -9,6 +9,7 @@ use App\model\SingleCustomerData;
 use Exception;
 use Src\functionality\LoginFunctionality;
 use Src\functionality\LogoutFunctionality;
+use Src\Utility;
 
 final class Login
 {
@@ -110,20 +111,40 @@ final class Login
 
             $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
 
-            // If an admin logged in, bind session fingerprint for anti-hijacking protection
-            if (\class_exists('\App\middleware\AdminGuardMiddleware') && ($result['role'] ?? '') === 'admin') {
-                \App\middleware\AdminGuardMiddleware::bindSession(
-                    \App\middleware\AdminGuardMiddleware::getClientIp(),
-                    (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown')
-                );
+            // Fetch extra admin columns defensively if present
+            $adminId = (int) ($result['id'] ?? 0);
+            $userRole = (string) ($result['role'] ?? '');
+
+            if ($adminId > 0 && ($userRole === 'admin' || str_contains(strtolower($_SERVER['REQUEST_URI'] ?? ''), 'portal_'))) {
+                $totpCode = trim((string) ($_POST['totp_code'] ?? ''));
+                $totpSecret = (string) ($result['totp_secret'] ?? '');
+                $totpEnabled = !empty($result['totp_enabled']);
+
+                $totpRequiredEnv = (string) ($_ENV['ADMIN_TOTP_REQUIRED'] ?? getenv('ADMIN_TOTP_REQUIRED') ?: 'false');
+                $isTotpRequired = filter_var($totpRequiredEnv, FILTER_VALIDATE_BOOLEAN) || $totpEnabled;
+
+                if ($isTotpRequired && !empty($totpSecret)) {
+                    if (empty($totpCode) || !\App\services\TotpService::verifyCode($totpSecret, $totpCode)) {
+                        Utility::msgException(401, 'Invalid or missing Google Authenticator 6-digit 2-FA code.');
+                        return;
+                    }
+                }
+
+                if (\class_exists('\App\middleware\AdminGuardMiddleware')) {
+                    \App\middleware\AdminGuardMiddleware::bindSession(
+                        \App\middleware\AdminGuardMiddleware::getClientIp(),
+                        (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown')
+                    );
+                }
             }
 
-            $getFamCode = AllMembersDataModel::getFamCode($result['id']);
+            $getFamCode = AllMembersDataModel::getFamCode($adminId);
+            $famCode = $getFamCode['famCode'] ?? '';
 
             // Store all approved family codes in the session
-            $_SESSION['famCodes'] = $getFamCode['famCode'];
+            $_SESSION['famCodes'] = $famCode;
 
-            msgSuccess(201, $result['message'],  $getFamCode['famCode']);
+            msgSuccess(201, $result['message'] ?? 'Login successful', $famCode);
         } catch (\Throwable $th) {
             showError($th);
         }

@@ -24,7 +24,13 @@ final class DataErasureService
      * Executes account erasure inside a single atomic PDO transaction.
      *
      * @param string $performedBy Admin ID or 'CLI'
-     * @return array{success: bool, message: string, erased_tables: array<string>}
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     erased_tables: array<string>,
+     *     failed_tables: array<string>,
+     *     errors: array<string, string>
+     * }
      */
     public function erase(string $performedBy = 'system'): array
     {
@@ -32,6 +38,8 @@ final class DataErasureService
         $db->beginTransaction();
 
         $erasedTables = [];
+        $failedTables = [];
+        $errors = [];
 
         try {
             // 1. Fetch account email before wiping credentials
@@ -45,6 +53,8 @@ final class DataErasureService
                     'success' => false,
                     'message' => "Account ID {$this->userId} not found.",
                     'erased_tables' => [],
+                    'failed_tables' => [],
+                    'errors' => ['account' => 'Account not found.'],
                 ];
             }
 
@@ -79,7 +89,9 @@ final class DataErasureService
                     $del->execute([$this->userId]);
                     $erasedTables[] = $table;
                 } catch (\Throwable $e) {
-                    error_log("[DataErasure] Table {$table} delete skipped: " . $e->getMessage());
+                    $failedTables[] = $table;
+                    $errors[$table] = $e->getMessage();
+                    error_log("[DataErasure] Critical Table {$table} delete failed: " . $e->getMessage());
                 }
             }
 
@@ -98,16 +110,20 @@ final class DataErasureService
                     $del->execute([$this->userId]);
                     $erasedTables[] = $table;
                 } catch (\Throwable $e) {
-                    error_log("[DataErasure] Table {$table} delete skipped: " . $e->getMessage());
+                    $failedTables[] = $table;
+                    $errors[$table] = $e->getMessage();
+                    error_log("[DataErasure] Activity Table {$table} delete skipped: " . $e->getMessage());
                 }
             }
 
-            // Purge notifications received by this user
+            // Purge notifications received or sent by this user
             try {
                 $delNotif = $db->prepare('DELETE FROM `notification` WHERE receiver_id = ? OR sender_id = ?');
                 $delNotif->execute([$this->userId, $this->userId]);
                 $erasedTables[] = 'notification';
             } catch (\Throwable $e) {
+                $failedTables[] = 'notification';
+                $errors['notification'] = $e->getMessage();
                 error_log("[DataErasure] Table notification delete skipped: " . $e->getMessage());
             }
 
@@ -117,6 +133,8 @@ final class DataErasureService
                 $delReq->execute([$this->userId, $this->userId]);
                 $erasedTables[] = 'requestMgt';
             } catch (\Throwable $e) {
+                $failedTables[] = 'requestMgt';
+                $errors['requestMgt'] = $e->getMessage();
                 error_log("[DataErasure] Table requestMgt delete skipped: " . $e->getMessage());
             }
 
@@ -133,7 +151,9 @@ final class DataErasureService
                     $del->execute([$this->userId]);
                     $erasedTables[] = $table;
                 } catch (\Throwable $e) {
-                    error_log("[DataErasure] Table {$table} delete skipped: " . $e->getMessage());
+                    $failedTables[] = $table;
+                    $errors[$table] = $e->getMessage();
+                    error_log("[DataErasure] Interaction Table {$table} delete skipped: " . $e->getMessage());
                 }
             }
 
@@ -154,6 +174,8 @@ final class DataErasureService
                 $anonNode->execute([$this->userId]);
                 $erasedTables[] = 'family_nodes';
             } catch (\Throwable $e) {
+                $failedTables[] = 'family_nodes';
+                $errors['family_nodes'] = $e->getMessage();
                 error_log("[DataErasure] family_nodes anonymisation skipped: " . $e->getMessage());
             }
 
@@ -170,6 +192,8 @@ final class DataErasureService
                 $anonPost->execute([$this->userId]);
                 $erasedTables[] = 'post';
             } catch (\Throwable $e) {
+                $failedTables[] = 'post';
+                $errors['post'] = $e->getMessage();
                 error_log("[DataErasure] post anonymisation skipped: " . $e->getMessage());
             }
 
@@ -184,6 +208,8 @@ final class DataErasureService
                 $anonComment->execute([$this->userId]);
                 $erasedTables[] = 'comment';
             } catch (\Throwable $e) {
+                $failedTables[] = 'comment';
+                $errors['comment'] = $e->getMessage();
                 error_log("[DataErasure] comment anonymisation skipped: " . $e->getMessage());
             }
 
@@ -197,6 +223,8 @@ final class DataErasureService
                 $anonReelComment->execute([$this->userId]);
                 $erasedTables[] = 'family_reel_comments';
             } catch (\Throwable $e) {
+                $failedTables[] = 'family_reel_comments';
+                $errors['family_reel_comments'] = $e->getMessage();
                 error_log("[DataErasure] family_reel_comments anonymisation skipped: " . $e->getMessage());
             }
 
@@ -206,12 +234,17 @@ final class DataErasureService
                 try {
                     $imgStmt = $db->prepare("SELECT path FROM `{$table}` WHERE id = ?");
                     $imgStmt->execute([$this->userId]);
+                    /** @var list<mixed> $paths */
                     $paths = $imgStmt->fetchAll(\PDO::FETCH_COLUMN);
                     foreach ($paths as $path) {
                         if (is_string($path) && $path !== '' && str_starts_with($path, '/') && !str_contains($path, '..')) {
                             $fullPath = BASE_PATH . $path;
                             if (file_exists($fullPath) && is_file($fullPath)) {
-                                @unlink($fullPath);
+                                $real = realpath($fullPath);
+                                if ($real !== false && str_starts_with($real, BASE_PATH)) {
+                                    // nosemgrep: php.lang.security.unlink-use.unlink-use
+                                    @unlink($real);
+                                }
                             }
                         }
                     }
@@ -219,11 +252,14 @@ final class DataErasureService
                     $delImg->execute([$this->userId]);
                     $erasedTables[] = $table;
                 } catch (\Throwable $e) {
+                    $failedTables[] = $table;
+                    $errors[$table] = $e->getMessage();
                     error_log("[DataErasure] Table {$table} file removal skipped: " . $e->getMessage());
                 }
             }
 
             // 9. Record Audit Log
+            $failedSummary = !empty($failedTables) ? ' Failed tables: ' . implode(', ', $failedTables) : '';
             try {
                 $audit = $db->prepare('
                     INSERT INTO audit_logs (email, action, details, created_at)
@@ -231,7 +267,7 @@ final class DataErasureService
                 ');
                 $audit->execute([
                     $email,
-                    "Account ID {$this->userId} erased by {$performedBy}. Anonymised email: {$anonEmail}."
+                    "Account ID {$this->userId} erased by {$performedBy}. Anonymised email: {$anonEmail}.{$failedSummary}"
                 ]);
                 $erasedTables[] = 'audit_logs';
             } catch (\Throwable $e) {
@@ -242,7 +278,7 @@ final class DataErasureService
                     ');
                     $auditFallback->execute([
                         $email,
-                        "GDPR_ARTICLE_17_ERASURE: Account ID {$this->userId} erased by {$performedBy}."
+                        "GDPR_ARTICLE_17_ERASURE: Account ID {$this->userId} erased by {$performedBy}.{$failedSummary}"
                     ]);
                     $erasedTables[] = 'audit_logs';
                 } catch (\Throwable $e2) {
@@ -251,12 +287,18 @@ final class DataErasureService
             }
 
             $db->commit();
-            error_log("[DataErasure] Account ID {$this->userId} ({$email}) erased successfully by {$performedBy}.");
+            error_log("[DataErasure] Account ID {$this->userId} ({$email}) erased by {$performedBy} with " . count($failedTables) . " skipped tables.");
+
+            $hasCriticalFailures = count(array_intersect($failedTables, ['personal', 'contact', 'work', 'children', 'sibling'])) > 0;
 
             return [
-                'success' => true,
-                'message' => "Account ID {$this->userId} ({$email}) successfully erased and anonymised.",
+                'success' => !$hasCriticalFailures,
+                'message' => $hasCriticalFailures
+                    ? "Account ID {$this->userId} partially erased with critical table warnings: " . implode(', ', $failedTables)
+                    : "Account ID {$this->userId} ({$email}) successfully erased and anonymised.",
                 'erased_tables' => array_values(array_unique($erasedTables)),
+                'failed_tables' => array_values(array_unique($failedTables)),
+                'errors' => $errors,
             ];
         } catch (\Throwable $e) {
             $db->rollBack();
@@ -265,6 +307,8 @@ final class DataErasureService
                 'success' => false,
                 'message' => 'Erasure failed: ' . $e->getMessage(),
                 'erased_tables' => [],
+                'failed_tables' => ['account'],
+                'errors' => ['critical' => $e->getMessage()],
             ];
         }
     }

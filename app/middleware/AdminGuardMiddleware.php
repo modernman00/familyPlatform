@@ -62,7 +62,10 @@ final class AdminGuardMiddleware
         }
 
         // Gate 3: Anti-Session Hijacking Fingerprint Check
-        if (session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['id']) && ($_SESSION['role'] ?? '') === 'admin') {
+        $bindFingerprintRaw = (string) ($_ENV['ADMIN_BIND_SESSION_FINGERPRINT'] ?? getenv('ADMIN_BIND_SESSION_FINGERPRINT') ?: 'true');
+        $bindFingerprintEnabled = filter_var($bindFingerprintRaw, FILTER_VALIDATE_BOOLEAN);
+
+        if ($bindFingerprintEnabled && session_status() === PHP_SESSION_ACTIVE && !empty($_SESSION['id']) && ($_SESSION['role'] ?? '') === 'admin') {
             $expectedFingerprint = self::generateFingerprint($ip, $userAgent);
             $currentFingerprint = (string) ($_SESSION['admin_fingerprint'] ?? '');
 

@@ -33,24 +33,6 @@ mix.webpackConfig((webpack, config) => {
           },
         },
       ],
-    }),
-    new ImageminPlugin({
-      test: /\.(jpe?g|png|gif|svg)$/i,
-      pngquant: {
-        quality: "70-90",
-      },
-      jpegtran: {
-        progressive: true,
-      },
-      gifsicle: {
-        optimizationLevel: 3,
-      },
-      svgo: {
-        plugins: [
-          { removeViewBox: false },
-          { removeDimensions: true },
-        ],
-      },
     })
   );
   return {

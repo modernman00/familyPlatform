@@ -89,7 +89,19 @@ export const renderHtml = (el) => {
             </div>
 
             <div class="member-interests">
-                ${relType !== 'other' ? `
+                ${relType === 'family' ? `
+                <button class="btn-stitch-primary" id="seeProfile${idSafe}">
+                    <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile
+                </button>
+                <div class="d-flex gap-2">
+                    <button class="btn-stitch-tonal flex-grow-1" id="familyTree${idSafe}" title="View in Family Tree">
+                        <i class="bi bi-diagram-3-fill" style="pointer-events: none;"></i> Tree
+                    </button>
+                    <button class="btn-stitch-danger flex-grow-1" id="removeProfile${idSafe}" title="Remove from Family">
+                        <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove
+                    </button>
+                </div>
+                ` : (relType === 'approved_you' || relType === 'you_approved') ? `
                 <button class="btn-stitch-primary" id="seeProfile${idSafe}">
                     <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile
                 </button>

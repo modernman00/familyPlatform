@@ -527,7 +527,11 @@
                             <a href="/organogram?highlight={{ $fatherNode['id'] }}" class="btn btn-sm btn-light border text-muted px-3 d-flex align-items-center" title="View in Tree" style="border-radius: var(--stitch-radius-md);">
                                 <i class="bi bi-diagram-3"></i>
                             </a>
+                            <button type="button" class="btn btn-sm btn-light border text-danger px-3 d-flex align-items-center" onclick="deleteStudioRelative({{ $fatherNode['id'] }}, '{{ addslashes($fatherNode['first_name'] ?? 'Father') }}')" title="Remove from Tree" style="border-radius: var(--stitch-radius-md);">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </div>
+
                     </div>
                 @else
                     <div class="btn-add-stitch-card" onclick="selectStudioRelativeType('parents')">
@@ -590,7 +594,11 @@
                             <a href="/organogram?highlight={{ $motherNode['id'] }}" class="btn btn-sm btn-light border text-muted px-3 d-flex align-items-center" title="View in Tree" style="border-radius: var(--stitch-radius-md);">
                                 <i class="bi bi-diagram-3"></i>
                             </a>
+                            <button type="button" class="btn btn-sm btn-light border text-danger px-3 d-flex align-items-center" onclick="deleteStudioRelative({{ $motherNode['id'] }}, '{{ addslashes($motherNode['first_name'] ?? 'Mother') }}')" title="Remove from Tree" style="border-radius: var(--stitch-radius-md);">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </div>
+
                     </div>
                 @else
                     <div class="btn-add-stitch-card" onclick="selectStudioRelativeType('parents')">
@@ -714,6 +722,9 @@
                             <a href="/organogram?highlight={{ $member['id'] }}" class="btn btn-sm btn-light border text-muted px-3 d-flex align-items-center" title="View in Tree" style="border-radius: var(--stitch-radius-md);">
                                 <i class="bi bi-diagram-3"></i>
                             </a>
+                            <button type="button" class="btn btn-sm btn-light border text-danger px-3 d-flex align-items-center" onclick="deleteStudioRelative({{ $member['id'] }}, '{{ addslashes($member['first_name'] ?? 'Relative') }}')" title="Remove from Tree" style="border-radius: var(--stitch-radius-md);">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -787,7 +798,11 @@
                             <a href="/organogram?highlight={{ $child['id'] }}" class="btn btn-sm btn-light border text-muted px-3 d-flex align-items-center" title="View in Tree" style="border-radius: var(--stitch-radius-md);">
                                 <i class="bi bi-diagram-3"></i>
                             </a>
+                            <button type="button" class="btn btn-sm btn-light border text-danger px-3 d-flex align-items-center" onclick="deleteStudioRelative({{ $child['id'] }}, '{{ addslashes($child['first_name'] ?? 'Child') }}')" title="Remove from Tree" style="border-radius: var(--stitch-radius-md);">
+                                <i class="bi bi-trash3"></i>
+                            </button>
                         </div>
+
                     </div>
                 </div>
             @empty
@@ -1094,9 +1109,13 @@
                         </label>
                     </div>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 align-items-center">
+                        <button type="button" class="btn btn-outline-danger" id="studioDeleteRelativeBtn" onclick="deleteCurrentStudioRelative()" style="display: none;">
+                            <i class="bi bi-trash3-fill me-1"></i> Remove
+                        </button>
+                        <div class="flex-grow-1"></div>
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="studioSaveEditBtn" class="btn btn-primary flex-grow-1">Save Changes</button>
+                        <button type="submit" id="studioSaveEditBtn" class="btn btn-primary px-4">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -1174,6 +1193,12 @@
                     document.getElementById('editGender').value = n.gender || 'Male';
                     document.getElementById('editIsDeceased').checked = (n.is_deceased == 1);
 
+                    const isRoot = (String(n.id) === String({{ $rootNodeId ?? 1 }}));
+                    const delBtn = document.getElementById('studioDeleteRelativeBtn');
+                    if (delBtn) {
+                        delBtn.style.display = isRoot ? 'none' : 'inline-flex';
+                    }
+
                     var editModal = new bootstrap.Modal(document.getElementById('studioEditModal'));
                     editModal.show();
                 } else {
@@ -1189,6 +1214,112 @@
                 alert('A network error occurred while loading relative details.');
             });
     }
+
+    function deleteCurrentStudioRelative() {
+        const nodeId = document.getElementById('editNodeId').value;
+        const firstName = document.getElementById('editFirstName').value || 'Relative';
+        deleteStudioRelative(nodeId, firstName);
+    }
+
+    function deleteStudioRelative(nodeId, name) {
+        if (!nodeId) return;
+
+        if (String(nodeId) === String({{ $rootNodeId ?? 1 }})) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Action Not Allowed', 'You cannot remove yourself from your family tree.', 'warning');
+            } else {
+                alert('You cannot remove yourself from your family tree.');
+            }
+            return;
+        }
+
+        const performDelete = () => {
+            const formData = new FormData();
+            formData.append('node_id', nodeId);
+
+            fetch('/member/organogram/editor/delete', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const isOk = (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200);
+                if (isOk) {
+                    // Close edit modal if open
+                    const modalEl = document.getElementById('studioEditModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
+
+                    // Animate and remove card container from DOM
+                    const cardContainer = document.getElementById('relative-card-node-' + nodeId);
+                    if (cardContainer) {
+                        cardContainer.style.transition = 'all 0.35s ease';
+                        cardContainer.style.opacity = '0';
+                        cardContainer.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            cardContainer.remove();
+                        }, 350);
+                    }
+
+                    // Decrement total stats
+                    const statTotal = document.getElementById('statTotalMembers');
+                    if (statTotal) {
+                        const cur = parseInt(statTotal.textContent) || 1;
+                        statTotal.textContent = Math.max(1, cur - 1);
+                    }
+
+                    if (typeof window.showAppToast === 'function') {
+                        window.showAppToast(`${name || 'Relative'} removed from family tree.`, 'success');
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Removed!',
+                            text: `${name || 'Relative'} has been removed from your family tree.`,
+                            icon: 'success',
+                            timer: 1600,
+                            showConfirmButton: false
+                        });
+                    }
+                } else {
+                    const err = data.message || data.error || 'Failed to remove relative.';
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error', typeof err === 'object' ? JSON.stringify(err) : err, 'error');
+                    } else {
+                        alert(typeof err === 'object' ? JSON.stringify(err) : err);
+                    }
+                }
+            })
+            .catch(err => {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Error', 'A network error occurred while removing relative.', 'error');
+                } else {
+                    alert('A network error occurred while removing relative.');
+                }
+            });
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `Remove ${name || 'Relative'}?`,
+                text: 'Are you sure you want to remove this relative from your family tree? This will unlink their tree connections.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, remove from tree',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    performDelete();
+                }
+            });
+        } else {
+            if (confirm(`Are you sure you want to remove ${name || 'this relative'} from your family tree?`)) {
+                performDelete();
+            }
+        }
+    }
+
 
     // Edit form submission (Real-Time In-Place DOM Update)
     document.getElementById('studioEditForm')?.addEventListener('submit', function(e) {
@@ -1368,9 +1499,13 @@
                     <a href="/organogram?highlight=${node.id}" class="btn btn-sm btn-light border text-muted px-3 d-flex align-items-center" title="View in Tree" style="border-radius: var(--stitch-radius-md);">
                         <i class="bi bi-diagram-3"></i>
                     </a>
+                    <button type="button" class="btn btn-sm btn-light border text-danger px-3 d-flex align-items-center" onclick="deleteStudioRelative(${node.id}, '${fullName.replace(/'/g, "\\'")}')" title="Remove from Tree" style="border-radius: var(--stitch-radius-md);">
+                        <i class="bi bi-trash3"></i>
+                    </button>
                 </div>
             </div>
         </div>`;
+
     }
 
     // AJAX Form submissions for Add relative (Real-Time In-Place DOM Insertion)

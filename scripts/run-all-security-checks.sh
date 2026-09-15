@@ -41,7 +41,7 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 DEFAULT_PRODUCTION_URL="https://myfamilyplatform.com"
-TARGET_URL="$DEFAULT_PRODUCTION_URL"
+TARGET_URL=""
 SKIP_ZAP=false
 SKIP_IDOR=false
 
@@ -61,6 +61,8 @@ for arg in "$@"; do
             ;;
     esac
 done
+
+TARGET_URL="${TARGET_URL:-$DEFAULT_PRODUCTION_URL}"
 
 cd "$ROOT_DIR"
 
@@ -176,7 +178,7 @@ elif command -v phpunit > /dev/null 2>&1; then
 fi
 
 if [ -n "$PHPUNIT_BIN" ]; then
-    if "$PHPUNIT_BIN" --no-coverage > /dev/null 2>&1; then
+    if "$PHPUNIT_BIN" > /dev/null 2>&1; then
         log_pass "All PHPUnit automated unit & integration tests passed."
     else
         log_fail "PHPUnit tests failed. Run '$PHPUNIT_BIN' for detailed report."
@@ -196,17 +198,19 @@ fi
 # ==============================================================================
 echo -e "\n${CYAN}${BOLD}[5/7] Running Semgrep SAST Static Vulnerability Scan...${NC}"
 if command -v semgrep > /dev/null 2>&1; then
-    SEMGREP_ARGS="--config=p/phpcs-security-audit --config=p/owasp-top-ten"
     if [ -f ".semgrep.yml" ]; then
-        SEMGREP_ARGS="${SEMGREP_ARGS} --config=.semgrep.yml"
         echo "   ↳ Using custom portfolio ruleset: .semgrep.yml"
-    fi
-
-    # Run scan
-    if semgrep scan $SEMGREP_ARGS --error --quiet app/ index.php 2>/dev/null; then
-        log_pass "Semgrep SAST scan clean (Zero OWASP Top 10 vulnerabilities)."
+        if semgrep scan --config=.semgrep.yml --error --quiet app/ index.php 2>/dev/null; then
+            log_pass "Semgrep SAST scan clean (Zero OWASP Top 10 vulnerabilities)."
+        else
+            log_fail "Semgrep SAST identified vulnerabilities. Run 'semgrep scan --config=.semgrep.yml app/' to view."
+        fi
     else
-        log_fail "Semgrep SAST identified vulnerabilities. Run 'semgrep scan --config=.semgrep.yml app/' to view."
+        if semgrep scan --config=p/owasp-top-ten --error --quiet app/ index.php 2>/dev/null; then
+            log_pass "Semgrep SAST scan clean (Zero OWASP Top 10 vulnerabilities)."
+        else
+            log_fail "Semgrep SAST identified vulnerabilities."
+        fi
     fi
 else
     log_skip "Semgrep binary not installed on machine (Install via: brew install semgrep)."

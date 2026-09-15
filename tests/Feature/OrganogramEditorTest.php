@@ -262,4 +262,84 @@ final class OrganogramEditorTest extends OrganogramTestCase
         $this->assertSame(400, (int) ($response['code'] ?? 0));
         $this->assertCount(1, $this->familyNodes(), 'Only the seeded base node should exist.');
     }
+
+    // ---- deleteNode ----------------------------------------------------
+
+    public function test_delete_node_removes_node_and_associated_unions_and_children(): void
+    {
+        $dadId = $this->seedNode('Dad', 'Smith', 'Male', 1);
+        $mumId = $this->seedNode('Mum', 'Smith', 'Female', 1);
+        $unionId = $this->seedUnion($dadId, $mumId);
+
+        $kidId = $this->seedNode('Kid', 'Smith', 'Male', 2);
+        $this->pdo->prepare(
+            'INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, "biological")'
+        )->execute([$unionId, $kidId]);
+
+        $_POST = ['node_id' => (string) $dadId];
+
+        $response = $this->captureJsonOutput(fn () => $this->controller()->deleteNode());
+
+        $this->assertSame('success', $response['status'] ?? null);
+        $this->assertSame('Relative removed from family tree successfully.', $response['message']['message'] ?? null);
+
+        // Dad should be gone
+        $remainingNodeIds = array_map(static fn ($n) => (int) $n['id'], $this->familyNodes());
+        $this->assertNotContains($dadId, $remainingNodeIds);
+        $this->assertContains($mumId, $remainingNodeIds);
+        $this->assertContains($kidId, $remainingNodeIds);
+
+        // Associated union and child links for that union should be cleaned up
+        $this->assertCount(0, $this->childrenOfUnion($unionId));
+        $this->assertNull($this->latestUnion());
+    }
+
+    public function test_delete_node_rejects_self_deletion_of_root_user(): void
+    {
+        $myUserId = 'USER_ME_123';
+        $_SESSION['id'] = $myUserId;
+        $myNodeId = $this->seedNode('Self', 'Root', 'Male', 0, $myUserId);
+
+        $_POST = ['node_id' => (string) $myNodeId];
+
+        $response = $this->captureJsonOutput(fn () => $this->controller()->deleteNode());
+
+        $this->assertSame('error', $response['status'] ?? null);
+        $this->assertSame(400, (int) ($response['code'] ?? 0));
+        $this->assertStringContainsStringIgnoringCase('cannot remove yourself', (string) ($response['message'] ?? ''));
+
+        // Node should still exist
+        $this->assertCount(1, $this->familyNodes());
+    }
+
+    public function test_delete_node_rejects_node_from_another_family(): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO family_nodes (family_code, first_name, last_name, gender) VALUES (?, ?, ?, ?)'
+        );
+        $stmt->execute(['PHPUNIT_OTHERFAM', 'Foreign', 'Person', 'Male']);
+        $foreignId = (int) $this->pdo->lastInsertId();
+
+        try {
+            $_POST = ['node_id' => (string) $foreignId];
+
+            $response = $this->captureJsonOutput(fn () => $this->controller()->deleteNode());
+
+            $this->assertSame('error', $response['status'] ?? null);
+            $this->assertSame(403, (int) ($response['code'] ?? 0));
+        } finally {
+            $this->pdo->prepare('DELETE FROM family_nodes WHERE id = ?')->execute([$foreignId]);
+        }
+    }
+
+    public function test_delete_node_requires_valid_node_id(): void
+    {
+        $_POST = ['node_id' => '0'];
+
+        $response = $this->captureJsonOutput(fn () => $this->controller()->deleteNode());
+
+        $this->assertSame('error', $response['status'] ?? null);
+        $this->assertSame(400, (int) ($response['code'] ?? 0));
+    }
 }
+

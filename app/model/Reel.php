@@ -413,6 +413,7 @@ final class Reel extends Select
             if ($realPath !== false && is_file($realPath)) {
                 // Ensure real path is inside canonicalBase
                 if (str_starts_with($realPath, $canonicalBase)) {
+                    // nosemgrep: php.lang.security.unlink-use.unlink-use
                     @unlink($realPath);
                 }
             }

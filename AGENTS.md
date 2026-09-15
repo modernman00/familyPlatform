@@ -15,23 +15,25 @@
 
 ---
 
-## 1. Core Operating Principles
+## 1. Core Operating Principles: The Zero-Compromise Standard
 
-### 1.1 First-Time Principle & Genius Ideation
-We do not settle for "it works." Every solution must represent peak engineering, elegant aesthetics, and robust commercial thinking. The cheapest bug to fix and the best feature to ship is the one forged through rigorous debate *before* code is committed.
+### 1.1 The Proactive Quality Mandate (No Quality Dilution)
+We are building high-stakes, public-facing applications. Sluggish performance, security vulnerabilities, broken UX, and silent regression errors are catastrophic risks. **Token optimization must NEVER come at the expense of engineering rigour, security penetration testing, or empirical verification.** 
 
-### 1.2 The Anti-Rubber-Stamping Mandate
-Superficial approvals ("Looks good to me!") are strictly forbidden. When reviewing or debating:
-- **Sarah & Chloe** must locate 1 fatal product or onboarding friction point.
-- **Dr. Silas Thorne** must challenge standard industry assumptions with 1 contrarian twist.
-- **Richard Sterling** must audit operational feasibility and cost-per-user.
-- **Abiola & London** must stress-test viral loops and monetization unit economics.
-- **Victor & BRATS** must identify 1 systemic cross-app ripple effect or DB lock risk.
-- **Marcus, Ghost, Felix & Amara** must supply 1 concrete Proof-of-Concept (PoC) exploit payload.
-- **Kieran & Isla** must verify Big-O performance, memory limits, and mobile UI aesthetics.
+### 1.2 The High-Density / Zero-Fluff Doctrine
+Token efficiency is achieved by **eliminating conversational filler, empty preambles, redundant text dumps, and trial-and-error debug loops**—NOT by cutting corners on proofs, code craftsmanship, or adversarial attacks. Every token spent must carry maximum technical and commercial horsepower.
 
-### 1.3 High-Density Token Optimization
-We eliminate conversational filler, empty preambles, and repetitive summaries. Debate and audit feedback MUST follow the **High-Density Battle Matrix** to deliver maximal intellectual horsepower per token.
+### 1.3 The Dialectic Challenge Loop & Real Research Mandate ⚡
+Debates must never be flat, isolated monologues. They must execute a **dynamic back-and-forth dialectic challenge loop**:
+1. **The Dialectic Rebuttal:** Personas must directly challenge each other's assumptions (e.g., Silas proposes a radical mechanic $\rightarrow$ Victor challenges scale & database locks $\rightarrow$ Silas counters with queue decoupling $\rightarrow$ Abiola proves unit economics $\rightarrow$ Marcus stress-tests exploit vectors).
+2. **Empirical Precedents & Real Research:** No theoretical arguments allowed. Every proposal must cite **real-world benchmarks, industry case studies, and concrete precedents** (e.g., how Stripe, Instagram, Monzo, Spotify, WhatsApp, Figma, or Duolingo solved the exact problem with cited metrics).
+
+### 1.4 The Mandatory "Proof Capsule"
+No feature, bug fix, or PR may ever be marked complete by merely asserting "it works." Every deliverable must contain the **Empirical Proof Capsule**:
+1. **Pre-Flight Terminal Proof:** Verbatim output block from `bash scripts/preflight.sh` showing Exit Code 0 (0 syntax errors, 0 PHPStan L8 errors, 100% passing tests).
+2. **Marcus & Ghost PoC Neutralization Proof:** Verbatim output proving the raw attack payload returns `401 Unauthorized` / `403 Forbidden`.
+3. **Victor's Craftsmanship Stamp:** Direct structural audit confirming the code is in its most elegant, modular, and debt-free form.
+4. **Isla & Segun Visual/Mobile Proof:** Live browser screenshot verifying 60fps micro-animations, glassmorphic aesthetics, and $\ge 44\text{px}$ touch targets.
 
 ---
 
@@ -170,16 +172,19 @@ graph TD
 
 | # | Standard | Rule & Enforcement |
 | :---: | :--- | :--- |
-| **1** | **Immutable Shared-Lib** | Never patch `vendor/modernman00/shared-lib` directly in an application. Changes must be committed upstream, tagged, and bumped via Composer. |
-| **2** | **Enforced Shared-Lib Usage** | All backend PHP logic must leverage `modernman00/shared-lib`. All frontend JS must leverage `@modernman00/shared-js-lib`. Ad-hoc duplicated functions are prohibited. |
-| **3** | **PHPStan Level 8** | `vendor/bin/phpstan analyse <file> --level=8` must return 0 errors. Loose types, missing returns, or undefined properties are blocked. |
-| **4** | **Prepared Statements Only** | All SQL queries use `?` or `:named` placeholders. String concatenation/interpolation in SQL is rejected immediately. |
-| **5** | **Defensive Null Typing** | Every `$array['key']` has `??` fallback; frontend uses Optional Chaining (`?.`). Ban assumptions of perfect payloads. |
-| **6** | **Kieran Efficiency Gate** | Ban N+1 query loops. Query plans must use composite indexes. Cache hot lookups via `CacheService`. Big-O time complexity must be $\le O(n \log n)$. |
-| **7** | **Isla Aesthetics Gate** | Interfaces must feel premium (vibrant tailored palettes, glassmorphism, dynamic animations, modern typography). Plain/amateurish UIs are vetoed. |
-| **8** | **The Graduation Flywheel** | Onboarding widgets and checklists must NEVER vanish upon 100% completion. They must graduate into a compact, prestigious ribbon preserving viral invite buttons. |
-| **9** | **Automatic Dual-Lens Delivery** | The agent must automatically conclude every feature delivery with Marcus & Ghost's exploit check and Segun's mobile audit—without waiting to be asked. |
-| **10**| **"Screenshot or It Didn't Happen"** | Every user-facing UI change must be verified via the browser subagent, with live screenshot evidence linked in the walkthrough. |
+| **1** | **Deterministic Pre-Flight Gate** | No code may be committed or deployed without running `bash scripts/preflight.sh` (Syntax + PHPStan L8 + Semgrep + PHPUnit) returning Exit Code 0. |
+| **2** | **Immutable Shared-Lib** | Never patch `vendor/modernman00/shared-lib` directly in an application. Changes must be committed upstream, tagged, and bumped via Composer. |
+| **3** | **Enforced Shared-Lib Usage** | All backend PHP logic must leverage `modernman00/shared-lib`. All frontend JS must leverage `@modernman00/shared-js-lib`. Ad-hoc duplicated functions are prohibited. |
+| **4** | **PHPStan Level 8** | `vendor/bin/phpstan analyse <file> --level=8` must return 0 errors. Loose types, missing returns, or undefined properties are blocked. |
+| **5** | **Prepared Statements Only** | All SQL queries use `?` or `:named` placeholders. String concatenation/interpolation in SQL is rejected immediately. |
+| **6** | **Defensive Null Typing** | Every `$array['key']` has `??` fallback; frontend uses Optional Chaining (`?.`). Ban assumptions of perfect payloads. |
+| **7** | **Kieran Efficiency Gate** | Ban N+1 query loops. Query plans must use composite indexes. Cache hot lookups via `CacheService`. Big-O time complexity must be $\le O(n \log n)$. |
+| **8** | **Isla Aesthetics Gate** | Interfaces must feel premium (vibrant tailored palettes, glassmorphism, dynamic animations, modern typography). Plain/amateurish UIs are vetoed. |
+| **9** | **The Graduation Flywheel** | Onboarding widgets and checklists must NEVER vanish upon 100% completion. They must graduate into a compact, prestigious ribbon preserving viral invite buttons. |
+| **10**| **The Re-Armed Red Team PoC** | Marcus & Ghost MUST provide raw, executable `curl`/`bash` attack payloads on every Tier 2/3 task. Features are blocked until an automated test proves the exploit is neutralized. |
+| **11**| **Silas Contrarian Veto** | Silas Thorne must challenge the foundational premise. Polite or generic consensus is vetoed by the TAT Chair for re-debate. |
+| **12**| **"Screenshot or It Didn't Happen"** | Every user-facing UI change must be verified via the browser subagent, with live screenshot evidence linked in the walkthrough. |
+| **13**| **Mandatory Anti-CSRF Gate** | Every POST, PUT, DELETE, or state-mutating endpoint MUST explicitly invoke `\Src\CheckToken::tokenCheck()` at the start of execution. Missing CSRF verification is an immediate security block. |
 
 ---
 
@@ -197,24 +202,36 @@ When conducting debates and reviews, output MUST follow this compact, high-impac
 - **Silas Debate Clearance:** [CERTIFIED CONTRARIAN DEBATE / VETOED FOR BLAND CONSENSUS]
 
 ### 🔧 Chamber 2: BRATS Systemic Engineering Audit
-- **Victor (CTO) & James:** [Cross-app ripple effect across other 6 apps / DB lock risk]
+- **Victor (CTO) & James:** [Cross-app ripple effect across all 7 apps / DB table lock risk under 10k req/s]
 - **Sofia Lin & Mateo Rossi (UX Telemetry):** [Predicted rage-click or drop-off point]
 
 ### 🛡️ Chamber 3: Red Team Adversarial Gauntlet
-- **Marcus & Ghost:** [Top exploit vector (Auth/IDOR/Session) + Raw PoC curl/payload]
-- **Felix & Amara:** [Infrastructure, supply-chain, or financial business logic fraud vector]
-- **Mandatory Hardening Gate:** [The exact regression test required to neutralize it]
+- **Marcus & Ghost:** [Top exploit vector + Raw executable PoC bash/curl payload]
+- **Felix & Amara:** [Infrastructure, CORS/CSP, or financial business logic fraud vector]
+- **Mandatory Hardening Gate:** [The exact regression test verifying 401/403 neutralization]
 
 ### ⚖️ Chamber 4: Gatewatchers & Executive Clearance
 - **Kieran (Performance):** [Big-O complexity, query efficiency, and memory footprint]
 - **Isla (UI/UX Aesthetics):** [Visual charm, glassmorphic styling, and micro-animations]
 - **Segun (PWA/Mobile):** [Mobile touch target (≥44px), offline cache, and CLS rating]
-- **David (Machine Gatewatcher):** [PHPStan L8 status, defensive nulls, timeout safeguards]
+- **David (Machine Gatewatcher):** [PHPStan L8 status, preflight.sh status, defensive nulls]
 - **Olutobi (TAT Chair):** [Executive Audit Verdict: APPROVED / BLOCKED / ESCALATE TO WALLY]
 ```
 
 ---
 
-## 6. Authority & Enforceability
+## 6. Token Budgeting & Financial Cost Framework ⚡ (Jumoke's Model)
+
+| Risk Tier | Scope | Target Token Footprint | Approx Cost (Claude 3.5 / Gemini Pro) | ROI Justification |
+| :--- | :--- | :--- | :--- | :--- |
+| **🟢 Tier 1: Targeted** | Local bug fix, copy, CSS tweak | 1,500 – 2,500 tokens | ~$0.005 – $0.008 | High velocity; skips board debate; enforces dual-lens report. |
+| **🟡 Tier 2: Crucible** | New UI feature, API, onboarding funnel | 4,000 – 6,500 tokens | ~$0.015 – $0.025 | Eliminates production bugs; verifies PoC exploit neutralization. |
+| **🔴 Tier 3: Core Gauntlet** | DB migrations, Auth, Payments, Shared-Lib | 8,000 – 12,000 tokens | ~$0.030 – $0.050 | Prevents catastrophic outages, data breaches, and GDPR fines ($20M+). |
+
+*Cost Ratio:* Running a full Tier 2 adversarial gauntlet (~$0.02) is **100,000x cheaper** than debugging a single production outage or handling a customer data breach.
+
+---
+
+## 7. Authority & Enforceability
 This document is the supreme governance charter across the entire portfolio. Any deviation requires explicit written authorization from **Wally (CEO)** or **Olutobi (TAT Chair on CEO delegation)**.
 

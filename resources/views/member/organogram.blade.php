@@ -32,9 +32,11 @@
                     <button type="button" class="btn-action btn-gold" onclick="fitTreeScreen()" title="Fit Family to Viewport">
                         <i class="bi bi-aspect-ratio"></i> Fit Family
                     </button>
+                    @if(empty($isReadOnly))
                     <a href="/familyStudio" id="configureFamilyBtn" class="btn-action" title="Open Lineage Studio">
                         <i class="bi bi-stars text-warning"></i> Lineage Studio
                     </a>
+                    @endif
                     <div class="search-box-wrapper" id="memberSearchWrapper" style="min-width: 240px;">
                         <i class="bi bi-search search-icon"></i>
                         <input type="text" id="memberSearchInput" class="member-search-input w-100" placeholder="Find relative in tree..." autocomplete="off">
@@ -78,6 +80,7 @@
             ];
         @endphp
 
+        @if(empty($isReadOnly))
         <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; position: relative; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important;">
             <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
                 <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
@@ -118,6 +121,7 @@
                 <button type="button" class="btn-close text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
             </div>
         </div>
+        @endif
 
         <!-- Mode 1: Dynamic Canvas View -->
         <div class="tree-container position-relative" id="treeContainer">
@@ -222,8 +226,14 @@
                                 <i class="bi bi-crosshair2"></i> Center
                             </button>
                         </div>
+                        <div id="cardRemoveActionWrapper" style="margin-top: 8px; display: none;">
+                            <button type="button" class="btn-action w-100" id="cardRemoveNodeBtn" onclick="removeSelectedCardNode()" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; border-radius: 10px; font-weight: 600; font-size: 0.85rem;">
+                                <i class="bi bi-trash3-fill text-danger"></i> Remove from Tree
+                            </button>
+                        </div>
                     </div>
                 </div>
+
 
                 <!-- Tree SVG Container -->
                 <div id="tree"></div>
@@ -293,11 +303,17 @@
                 <div class="modal-body" id="modalBody">
                     <!-- Populated dynamically via JS -->
                 </div>
-                <div class="modal-footer p-3 border-top bg-light">
-                    <button class="btn btn-sm btn-primary w-100 fw-bold" id="openAddRelativeModalBtn">
+                <div class="modal-footer p-3 border-top bg-light d-flex gap-2">
+                    @if(empty($isReadOnly))
+                    <button class="btn btn-sm btn-primary flex-grow-1 fw-bold" id="openAddRelativeModalBtn">
                         <i class="bi bi-person-plus-fill"></i> Add Family Member
                     </button>
+                    <button class="btn btn-sm btn-outline-danger fw-bold" id="modalRemoveNodeBtn" style="display: none;" onclick="removeCurrentModalNode()">
+                        <i class="bi bi-trash3-fill"></i> Remove
+                    </button>
+                    @endif
                 </div>
+
             </div>
         </div>
 
@@ -335,6 +351,7 @@
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__FAMILY_CODE__ = '{{ $data['famCode'] ?? '' }}';
+    window.__IS_READ_ONLY__ = {{ !empty($isReadOnly) ? 'true' : 'false' }};
     
     const graphData = {!! $graphJson ?? '{}' !!};
 
@@ -438,6 +455,8 @@
             const NODE_H = isMobileScreen ? 175 : 232;
             const CX = NODE_W / 2;
 
+            const initialRootId = String(graphData.root_node_id || getGraphNodeId(window.__ROOT_USER_ID__, '') || (familyTreeNodes[0] ? familyTreeNodes[0].id : ''));
+
             // Initialize KinshipTree (Drop-in FamilyTree engine in Luxury Dark Mode)
             var family = new FamilyTree(document.getElementById("tree"), {
                 template: "tommy",
@@ -445,7 +464,7 @@
                 enableSearch: false,
                 mouseScrool: FamilyTree.action.zoom,
                 scaleInitial: "family",
-                rootId: String(window.__ROOT_USER_ID__ || '19'),
+                rootId: initialRootId,
                 nodeBinding: {
                     field_0: "name",
                     field_1: "nameL2",
@@ -475,6 +494,13 @@
                     // 2. Also keep mobile bottom sheet synced for smaller phone screens
                     if (window.innerWidth <= 768 && typeof window.showPersonDetails === 'function') {
                         const rawNode = graphData.nodes.find(n => String(n.id) === String(args.node.id));
+                        const rootGraphId = getGraphNodeId(window.__ROOT_USER_ID__, '');
+                        const isRoot = (String(nodeData.id) === String(rootGraphId)) || (String(nodeData.legacyId) === String(window.__ROOT_USER_ID__));
+                        const isReadOnlyTree = Boolean(window.__IS_READ_ONLY__) || (graphData && graphData.isReadOnly);
+                        const modalRemoveBtn = document.getElementById('modalRemoveNodeBtn');
+                        if (modalRemoveBtn) {
+                            modalRemoveBtn.style.display = (isRoot || isReadOnlyTree) ? 'none' : 'inline-block';
+                        }
                         
                         window.showPersonDetails({
                             fullName: nodeData.name,
@@ -488,9 +514,11 @@
                             occupation: rawNode ? rawNode.occupation : '',
                             country: rawNode ? rawNode.country_of_residence : '',
                             isDeceased: rawNode ? rawNode.is_deceased : false,
-                            isRegistered: !!nodeData.legacyId
+                            isRegistered: !!nodeData.legacyId,
+                            isReadOnly: isReadOnlyTree
                         });
                     }
+
                 }
                 return false; 
             });
@@ -633,6 +661,8 @@
             : null;
         if (descendantsEl) descendantsEl.textContent = layoutNode ? layoutNode.descendantCount : 0;
 
+        const isReadOnlyTree = Boolean(window.__IS_READ_ONLY__) || (typeof graphData !== 'undefined' && graphData && graphData.isReadOnly);
+
         if (node.legacyId) {
             if (statusBadge) {
                 statusBadge.className = 'card-status-badge card-status-registered';
@@ -648,28 +678,130 @@
                 statusBadge.innerHTML = '<i class="bi bi-clock-history"></i> <span>Unclaimed Spot</span>';
             }
             if (registeredActions) registeredActions.style.display = 'none';
-            if (claimSpotSection) claimSpotSection.style.display = 'block';
+            if (claimSpotSection) claimSpotSection.style.display = isReadOnlyTree ? 'none' : 'block';
 
-            const familyCode = window.__FAMILY_CODE__ || 'OLAOGUN';
-            const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
-            const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
-            currentInviteLink = inviteLink;
+            if (!isReadOnlyTree) {
+                const familyCode = window.__FAMILY_CODE__ || 'OLAOGUN';
+                const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
+                const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
+                currentInviteLink = inviteLink;
 
-            const inviteMessage = encodeURIComponent(
-                `🌳 *Family Tree Invitation* 🌳\n\n` +
-                `You are invited to connect with the *${familyCode} Family* on FamilyPlatform.\n\n` +
-                `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
-                `👉 ${inviteLink}`
-            );
+                const inviteMessage = encodeURIComponent(
+                    `🌳 *Family Tree Invitation* 🌳\n\n` +
+                    `You are invited to connect with the *${familyCode} Family* on FamilyPlatform.\n\n` +
+                    `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+                    `👉 ${inviteLink}`
+                );
 
-            const whatsappBtn = document.getElementById('cardWhatsappBtn');
-            const smsBtn = document.getElementById('cardSmsBtn');
-            if (whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
-            if (smsBtn) smsBtn.href = `sms:?body=${inviteMessage}`;
+                const whatsappBtn = document.getElementById('cardWhatsappBtn');
+                const smsBtn = document.getElementById('cardSmsBtn');
+                if (whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
+                if (smsBtn) smsBtn.href = `sms:?body=${inviteMessage}`;
+            }
+        }
+
+        const isRootUser = (String(node.legacyId) === String(window.__ROOT_USER_ID__)) || 
+                           (String(node.id) === String(getGraphNodeId(window.__ROOT_USER_ID__, '')));
+        const removeWrapper = document.getElementById('cardRemoveActionWrapper');
+        if (removeWrapper) {
+            removeWrapper.style.display = (isRootUser || isReadOnlyTree) ? 'none' : 'block';
         }
 
         card.style.display = 'block';
     };
+
+    window.removeSelectedCardNode = function() {
+        if (!window.selectedNodeId) return;
+        const node = familyTreeNodes.find(n => String(n.id) === String(window.selectedNodeId));
+        const name = node ? node.name : 'this relative';
+        window.confirmRemovePerson(window.selectedNodeId, name);
+    };
+
+    window.removeCurrentModalNode = function() {
+        if (!currentBaseNodeId) return;
+        window.confirmRemovePerson(currentBaseNodeId, currentBaseNodeName || 'this relative');
+    };
+
+    window.confirmRemovePerson = function(nodeId, nodeName) {
+        if (!nodeId) return;
+        
+        const rootGraphId = getGraphNodeId(window.__ROOT_USER_ID__, '');
+        if (String(nodeId) === String(rootGraphId) || String(nodeId) === String(window.__ROOT_USER_ID__)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Action Not Allowed', 'You cannot remove yourself from your family tree.', 'warning');
+            } else {
+                alert('You cannot remove yourself from your family tree.');
+            }
+            return;
+        }
+
+        const performDelete = () => {
+            const formData = new FormData();
+            formData.append('node_id', nodeId);
+
+            fetch('/member/organogram/editor/delete', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const isOk = (data.ok === true || data.status === 200 || data.status === 'success' || data.statusCode === 200);
+                if (isOk) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Removed!',
+                            text: `${nodeName || 'Relative'} has been removed from your family tree.`,
+                            icon: 'success',
+                            timer: 1600,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert(`${nodeName || 'Relative'} has been removed.`);
+                        window.location.reload();
+                    }
+                } else {
+                    const err = (data.message || data.error || 'Failed to remove relative.');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error', typeof err === 'object' ? JSON.stringify(err) : err, 'error');
+                    } else {
+                        alert(typeof err === 'object' ? JSON.stringify(err) : err);
+                    }
+                }
+            })
+            .catch(err => {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Error', 'A network error occurred while removing relative.', 'error');
+                } else {
+                    alert('A network error occurred while removing relative.');
+                }
+            });
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: `Remove ${nodeName || 'Relative'}?`,
+                text: 'Are you sure you want to remove this relative from your family tree? This will unlink their tree connections.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, remove from tree',
+                cancelButtonText: 'Cancel'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    performDelete();
+                }
+            });
+        } else {
+            if (confirm(`Are you sure you want to remove ${nodeName || 'this relative'} from your family tree?`)) {
+                performDelete();
+            }
+        }
+    };
+
 
     window.closePersonCard = function() {
         const card = document.getElementById('personDetailsCard');
@@ -679,7 +811,7 @@
     window.traceCardLineage = function() {
         if (!window.selectedNodeId) return;
         const target = familyTreeNodes.find(n => String(n.id) === String(window.selectedNodeId));
-        const rootId = String(window.__ROOT_USER_ID__ || '19');
+        const rootId = String(graphData.root_node_id || getGraphNodeId(window.__ROOT_USER_ID__, '') || (familyTreeNodes[0] ? familyTreeNodes[0].id : ''));
         
         if (window.family && typeof window.family.traceLineage === 'function') {
             window.family.traceLineage(window.selectedNodeId, rootId);
@@ -870,8 +1002,18 @@
 
         currentBaseNodeName = rawNode.full_name || `${rawNode.first_name || ''} ${rawNode.last_name || ''}`.trim();
         currentBaseNodeId = rawNode.id;
+        selectedNodeId = String(rawNode.id);
+
+        const isReadOnlyTree = Boolean(window.__IS_READ_ONLY__) || (typeof graphData !== 'undefined' && graphData && graphData.isReadOnly);
+        const rootGraphId = getGraphNodeId(window.__ROOT_USER_ID__, '');
+        const isRoot = (String(rawNode.id) === String(rootGraphId)) || (String(rawNode.user_id) === String(window.__ROOT_USER_ID__));
+        const modalRemoveBtn = document.getElementById('modalRemoveNodeBtn');
+        if (modalRemoveBtn) {
+            modalRemoveBtn.style.display = (isRoot || isReadOnlyTree) ? 'none' : 'inline-block';
+        }
 
         if (typeof window.showPersonDetails === 'function') {
+
             window.showPersonDetails({
                 fullName: currentBaseNodeName,
                 img: rawNode.avatar_url || (rawNode.gender === 'Female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png'),
@@ -884,7 +1026,8 @@
                 country: rawNode.country_of_residence || '',
                 nodeId: rawNode.id,
                 isDeceased: rawNode.is_deceased || false,
-                isRegistered: !!rawNode.user_id
+                isRegistered: !!rawNode.user_id,
+                isReadOnly: isReadOnlyTree
             });
         }
     };

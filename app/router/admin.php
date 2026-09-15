@@ -29,3 +29,8 @@ $router->map('POST', '/admin/erasure/process', 'App\controller\admin\AdminErasur
 
 // TELEMETRY & RUM FRICTION DASHBOARD
 $router->map('GET', '/admin/telemetry', 'App\controller\admin\AdminTelemetryController@index', 'admin_telemetry');
+
+// GOOGLE AUTHENTICATOR (TOTP) 2-FA SETUP
+$router->map('GET', '/admin/setup-2fa', 'App\controller\admin\TotpSetupController@show', 'admin_totp_setup');
+$router->map('POST', '/admin/setup-2fa', 'App\controller\admin\TotpSetupController@save', 'admin_totp_save');
+$router->map('POST', '/admin/disable-2fa', 'App\controller\admin\TotpSetupController@disable', 'admin_totp_disable');

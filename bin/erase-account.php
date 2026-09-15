@@ -25,8 +25,11 @@ if (isset($options['help']) || empty($options['account-id'])) {
     exit(0);
 }
 
-$accountId = (string) $options['account-id'];
-$reason = (string) ($options['reason'] ?? 'CLI Admin Erasure');
+$rawAccountId = $options['account-id'];
+$accountId = is_string($rawAccountId) ? $rawAccountId : (string) ($rawAccountId[0] ?? '');
+
+$rawReason = $options['reason'] ?? 'CLI Admin Erasure';
+$reason = is_string($rawReason) ? $rawReason : (is_array($rawReason) ? (string) ($rawReason[0] ?? 'CLI Admin Erasure') : 'CLI Admin Erasure');
 
 echo "--------------------------------------------------------\n";
 echo "       GDPR Art. 17 Account Erasure Execution          \n";
@@ -43,8 +46,20 @@ if ($result['success']) {
     echo "SUCCESS: " . $result['message'] . "\n";
     echo "Erased Tables Count: " . count($result['erased_tables']) . "\n";
     echo "Erased Tables List : " . implode(', ', $result['erased_tables']) . "\n";
+    if (!empty($result['failed_tables'])) {
+        echo "WARNING - Non-Critical Skipped Tables: " . implode(', ', $result['failed_tables']) . "\n";
+    }
     exit(0);
 } else {
     fwrite(STDERR, "FAILURE: " . $result['message'] . "\n");
+    if (!empty($result['failed_tables'])) {
+        fwrite(STDERR, "Failed Tables: " . implode(', ', $result['failed_tables']) . "\n");
+    }
+    if (!empty($result['errors'])) {
+        fwrite(STDERR, "Errors:\n");
+        foreach ($result['errors'] as $tbl => $err) {
+            fwrite(STDERR, "  - {$tbl}: {$err}\n");
+        }
+    }
     exit(1);
 }

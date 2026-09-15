@@ -50,9 +50,7 @@ document.onclick = async (e) => {
     } else if (targetId.includes('removeProfile')) {
       // Extract the user ID from the target ID
       const userId = targetId.replace('removeProfile', '');
-
-      const currentReqId = localStorage.getItem('requesterId') || '';
-      const url = `/allMembers/removeProfile/${userId}/${currentReqId}`;
+      const url = `/allMembers/removeProfile/${userId}`;
 
       // Confirm with SweetAlert warning modal
       const result = await Swal.fire({
@@ -69,10 +67,18 @@ document.onclick = async (e) => {
         const memberCard = qSel(`.member_profile_${userId}`) || id(userId) || (btn ? btn.closest('.member-card') : null);
 
         try {
+          const csrfToken = getCsrfToken();
           const response = await axios.delete(url, {
             headers: {
-              'X-CSRF-TOKEN': getCsrfToken(),
-              'X-XSRF-TOKEN': getCsrfToken()
+              'X-CSRF-TOKEN': csrfToken,
+              'X-XSRF-TOKEN': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            params: {
+              token: csrfToken
+            },
+            data: {
+              token: csrfToken
             }
           });
 

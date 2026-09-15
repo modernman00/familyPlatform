@@ -29,6 +29,21 @@ final class FamilyRequestFlowTest extends FamilyRequestTestCase
         $_SESSION['id'] = $id;
         $_SESSION['token'] = $token;
         $_SERVER['HTTP_X_XSRF_TOKEN'] = $token;
+
+        $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token';
+        $jwtKey = $_ENV['JWT_KEY'] ?? 'test-jwt-key';
+        $payload = [
+            'iss' => 'familyPlatform',
+            'aud' => 'users',
+            'iat' => time(),
+            'exp' => time() + 3600,
+            'data' => [
+                'id' => $id,
+                'email' => 'test@example.com',
+                'role' => 'users',
+            ]
+        ];
+        $_COOKIE[$tokenName] = \Firebase\JWT\JWT::encode($payload, $jwtKey, 'HS256');
     }
 
     private function sendFriendRequest(array $approver): array
@@ -184,5 +199,92 @@ final class FamilyRequestFlowTest extends FamilyRequestTestCase
         $this->assertSame('success', $response['status'] ?? null);
         $ids = array_column($response['message'], 'id');
         $this->assertContains($requesterId, $ids, 'The pending requester should show up on the approver\'s incoming-requests list.');
+    }
+
+    public function test_remove_profile_as_approver_removes_connection(): void
+    {
+        $requesterId = $this->testMemberId('requester');
+        $approverId = $this->testMemberId('approver');
+        $this->seedMember($requesterId, 'REQFAM', 'Requester', 'Person');
+        $this->seedMember($approverId, 'APPFAM', 'Approver', 'Person');
+
+        $this->pdo->prepare(
+            'INSERT INTO requestMgt (approver_id, requester_id, status, requesterCode, approverCode) VALUES (?, ?, ?, ?, ?)'
+        )->execute([$approverId, $requesterId, 'approved', 'REQFAM', 'APPFAM']);
+
+        $this->authenticateAs($approverId);
+
+        $controller = new \App\controller\members\AllMembersController();
+        $response = $this->captureJsonOutput(fn() => $controller->removeProfile($requesterId));
+
+        $this->assertSame('success', $response['status'] ?? null);
+        $this->assertNull($this->requestMgtRow($approverId, $requesterId), 'The requestMgt row should be deleted after removeProfile.');
+    }
+
+    public function test_remove_profile_as_requester_removes_connection(): void
+    {
+        $requesterId = $this->testMemberId('requester');
+        $approverId = $this->testMemberId('approver');
+        $this->seedMember($requesterId, 'REQFAM', 'Requester', 'Person');
+        $this->seedMember($approverId, 'APPFAM', 'Approver', 'Person');
+
+        $this->pdo->prepare(
+            'INSERT INTO requestMgt (approver_id, requester_id, status, requesterCode, approverCode) VALUES (?, ?, ?, ?, ?)'
+        )->execute([$approverId, $requesterId, 'approved', 'REQFAM', 'APPFAM']);
+
+        $this->authenticateAs($requesterId);
+
+        $controller = new \App\controller\members\AllMembersController();
+        $response = $this->captureJsonOutput(fn() => $controller->removeProfile($approverId));
+
+        $this->assertSame('success', $response['status'] ?? null);
+        $this->assertNull($this->requestMgtRow($approverId, $requesterId), 'The requestMgt row should be deleted after removeProfile.');
+    }
+
+    public function test_remove_profile_same_family_member_removes_from_family(): void
+    {
+        $adminId = $this->testMemberId('admin');
+        $memberId = $this->testMemberId('member');
+        $familyCode = 'SAMEFAM123';
+        $this->seedMember($adminId, $familyCode, 'Admin', 'Olaogun');
+        $this->seedMember($memberId, $familyCode, 'Test', 'Member');
+
+        $this->pdo->prepare(
+            'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")'
+        )->execute([$memberId, $familyCode]);
+
+        $this->authenticateAs($adminId);
+
+        $controller = new \App\controller\members\AllMembersController();
+        $response = $this->captureJsonOutput(fn() => $controller->removeProfile($memberId));
+
+        $this->assertSame('success', $response['status'] ?? null);
+
+        // Verify member is no longer in user_families for this code
+        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM user_families WHERE user_id = ? AND family_code = ?');
+        $stmt->execute([$memberId, $familyCode]);
+        $this->assertSame(0, (int)$stmt->fetchColumn(), 'Target member should be deleted from user_families.');
+
+        // Verify target member's personal famCode was isolated away from SAMEFAM123
+        $stmtPersonal = $this->pdo->prepare('SELECT famCode FROM personal WHERE id = ?');
+        $stmtPersonal->execute([$memberId]);
+        $newFamCode = $stmtPersonal->fetchColumn();
+        $this->assertNotSame($familyCode, $newFamCode, 'Target member should be switched to their own solo family code.');
+    }
+
+    public function test_remove_profile_non_existent_connection_returns_404(): void
+    {
+        $requesterId = $this->testMemberId('requester');
+        $approverId = $this->testMemberId('approver');
+        $this->seedMember($requesterId, 'REQFAM', 'Requester', 'Person');
+        $this->seedMember($approverId, 'APPFAM', 'Approver', 'Person');
+
+        $this->authenticateAs($requesterId);
+
+        $controller = new \App\controller\members\AllMembersController();
+        $response = $this->captureJsonOutput(fn() => $controller->removeProfile($approverId));
+
+        $this->assertSame(404, http_response_code());
+        $this->assertSame('No active connection or family relationship found to remove', $response['message'] ?? null);
     }
 }

@@ -33,7 +33,10 @@ export const showPersonDetails = async (personData) => {
   if (!targetModal || !targetModalBody) return;
 
   // Clean duplicate repeated words in full name (e.g. "AJIBIKE OLAOGUN OLAOGUN" -> "Ajibike Olaogun")
+  const isSelf = (personId && String(personId) === String(window.__ROOT_USER_ID__)) || 
+                 (nodeId && typeof window.getGraphNodeId === 'function' && String(nodeId) === String(window.getGraphNodeId(window.__ROOT_USER_ID__, '')));
   let cleanName = (fullName || 'Family Member').trim().replace(/\s+/g, ' ');
+
   const parts = cleanName.split(' ');
   if (parts.length >= 2) {
     const deduped = [];
@@ -67,7 +70,9 @@ export const showPersonDetails = async (personData) => {
     `👉 ${inviteLink}`
   );
 
-  const claimSpotHtml = !isRegistered ? `
+  const isReadOnly = Boolean(personData?.isReadOnly) || Boolean(window.__IS_READ_ONLY__) || (typeof window.graphData !== 'undefined' && Boolean(window.graphData?.isReadOnly));
+
+  const claimSpotHtml = (!isRegistered && !isReadOnly) ? `
     <div class="claim-spot-section mt-4" style="background: var(--gold-light); padding: 18px; border-radius: 18px; text-align: center; border: 1px dashed var(--gold-accent);">
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join and share family memories.</p>
@@ -156,6 +161,11 @@ export const showPersonDetails = async (personData) => {
     ${claimSpotHtml}
 
     <div class="modal-actions mt-4" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+      ${(!isSelf && nodeId && !isReadOnly) ? `
+        <button type="button" class="btn" onclick="if(window.confirmRemovePerson) window.confirmRemovePerson('${esc(String(nodeId))}', '${esc(cleanName)}')" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 8px 16px; font-weight: 600;">
+          <i class="bi bi-trash3-fill text-danger me-1"></i> Remove from Tree
+        </button>
+      ` : ''}
       <button type="button" class="btn" onclick="if(window.openHeritageStoryModal) window.openHeritageStoryModal('${esc(cleanName)}', '${esc(relation)}', '${esc(img)}', ${isDeceased ? 'true' : 'false'})" style="background: linear-gradient(135deg, var(--gold-accent), #b45309); color: white; border-radius: 14px; padding: 8px 16px; font-weight: 600; border: none;">
         <i class="bi bi-stars"></i> Story Card
       </button>
@@ -168,6 +178,7 @@ export const showPersonDetails = async (personData) => {
         Close
       </button>
     </div>
+
   `;
 
   // Attach close handlers

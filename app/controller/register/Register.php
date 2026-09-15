@@ -280,6 +280,22 @@ final class Register extends Db
                     }
                 }
 
+                // Check if user came via a friend recommendation referral
+                $pendingRef = $_SESSION['pending_referral'] ?? null;
+                if (is_array($pendingRef) && !empty($pendingRef['inviter_id']) && !empty($pendingRef['token'])) {
+                    try {
+                        \App\services\FamilyRecommendationService::recordSuccessfulRecommendation(
+                            (string) $pendingRef['inviter_id'],
+                            (string) $cleanData['id'],
+                            (string) $cleanData['famCode'],
+                            (string) $pendingRef['token']
+                        );
+                        unset($_SESSION['pending_referral']);
+                    } catch (\Throwable $refEx) {
+                        error_log('[Register.php] Recommendation record warning: ' . $refEx->getMessage());
+                    }
+                }
+
                 SendEmailFunctionality::email("msg/appSub","We have received your application", $cleanData, 'member');
 
                 if (isset($_SESSION['oauth_pending'])) {

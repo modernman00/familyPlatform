@@ -20,11 +20,9 @@ final class Dashboard extends BaseController
     public function index(): void
     {
         try {
-                parent::viewWithCsp('admin/ReviewApps');
+            parent::viewWithCsp('admin/dashboard');
         } catch (\Throwable $th) {
             Utility::showError($th);
         }
-    
-  
     }
 }

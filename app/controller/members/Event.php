@@ -5,6 +5,7 @@ namespace App\controller\members;
 
 use App\classes\{ AllFunctionalities, Insert, Select, PushNotificationClass, Pusher };
 use App\model\{EmailData, AllMembersData};
+use App\services\NotificationOrchestrator;
 use Src\CheckToken;
 use Src\Exceptions\ForbiddenException;
 use Src\Exceptions\ValidationException;
@@ -107,31 +108,31 @@ final class Event extends AllMembersData
 
     public static function PostEventNotificationBar(): void
     {
-
         try {
-            $cleanData = LoginUtility::getSanitisedInputData( $_POST);
+            $cleanData = LoginUtility::getSanitisedInputData($_POST);
             $cleanData['id'] = checkInput(data: $_SESSION['id']);
-            $id = $cleanData['id'];
+            $id = is_scalar($cleanData['id']) ? (string)$cleanData['id'] : '';
 
             // GET THE SENDER'S NAME 
-
-            $senderName =  self::getSenderName();
+            $senderName = self::getSenderName();
+            $senderNameStr = is_string($senderName) && $senderName !== '' ? $senderName : 'A family member';
             $eventFamCode = self::generateFamCode();
-            $eventName = $cleanData['eventName'];
+            $eventFamCodeStr = is_string($eventFamCode) ? $eventFamCode : '';
+            $eventName = is_string($cleanData['eventName'] ?? null) ? (string)$cleanData['eventName'] : 'Family Event';
+            $eventDate = is_string($cleanData['eventDate'] ?? null) ? (string)$cleanData['eventDate'] : '';
+            $eventType = is_string($cleanData['eventType'] ?? null) ? (string)$cleanData['eventType'] : 'Event';
+            $eventDescription = is_string($cleanData['eventDescription'] ?? null) ? (string)$cleanData['eventDescription'] : '';
 
-
-            // insert to the notification table
-            // Update the notification tab
-
+            // Insert to legacy notification table for backward compatibility
             $cleanDataNotification = [
                 'sender_id' => $id,
-                'receiver_id' => $eventFamCode,
-                'sender_name' => $senderName,
+                'receiver_id' => $eventFamCodeStr,
+                'sender_name' => $senderNameStr,
                 'notification_name' => $eventName,
-                'notification_date' => $cleanData['eventDate'],
+                'notification_date' => $eventDate,
                 'receiver' => 'everyone filtered',
-                'notification_type' => $cleanData['eventType'],
-                'notification_content' => $cleanData['eventDescription'],
+                'notification_type' => $eventType,
+                'notification_content' => $eventDescription,
                 'notification_status' => 'new'
             ];
 
@@ -141,11 +142,56 @@ final class Event extends AllMembersData
                 lastIdCol: 'no'
             );
 
-            // // activate the email notification 
-            //TODO i DON'T THINK i SHOULD NEED THIS AT ALL
-            // self::sendReminder();
+            // Multi-channel notification dispatch across the family network
+            if ($eventFamCodeStr !== '') {
+                $membersToNotify = self::filterMemberByFamCode($eventFamCodeStr);
+                $formattedDate = $eventDate !== '' ? dateFormat($eventDate) : '';
 
-            // Send push notification to the receiver about the new event
+                // 1. Dispatch via Unified NotificationOrchestrator (In-App real-time toast + WebPush OS banner + sync)
+                foreach ($membersToNotify as $member) {
+                    $targetUid = is_scalar($member['id'] ?? null) ? (string)$member['id'] : '';
+                    if ($targetUid !== '') {
+                        NotificationOrchestrator::dispatch(
+                            userId: $targetUid,
+                            category: 'social',
+                            priority: 'medium',
+                            title: "🎉 New Event: {$eventName}",
+                            body: "{$senderNameStr} added '{$eventName}' on {$formattedDate}",
+                            actionUrl: '/profilePage#eventHeader',
+                            tag: 'event-' . ($lastInsertedId ?: 'new'),
+                            familyCode: $eventFamCodeStr,
+                            metadata: [
+                                'sender_id' => $id,
+                                'sender_name' => $senderNameStr,
+                                'event_no' => $lastInsertedId,
+                                'eventName' => $eventName,
+                                'eventDate' => $eventDate,
+                                'eventType' => $eventType,
+                                'eventDescription' => $eventDescription,
+                            ]
+                        );
+                    }
+                }
+
+                // 2. Dispatch HTML Email Notification to family network
+                $emailsToNotify = array_values(array_filter(array_map('strval', array_column($membersToNotify, 'email')), fn($e) => $e !== ''));
+                if (!empty($emailsToNotify)) {
+                    $emailPayload = [
+                        'eventName' => $eventName,
+                        'eventDate' => $eventDate,
+                        'eventType' => $eventType,
+                        'eventDescription' => $eventDescription,
+                        'firstName' => $senderNameStr,
+                        'lastName' => '',
+                        'emailHTMLContent' => "{$senderNameStr} has added a new upcoming family event: {$eventName} scheduled for {$formattedDate}.",
+                    ];
+                    self::sendBulkNotification(
+                        data: $emailPayload,
+                        subject: "New Family Event: {$eventName}",
+                        email: $emailsToNotify
+                    );
+                }
+            }
 
             msgSuccess(code: 200, msg: $lastInsertedId);
         } catch (\Throwable $th) {
@@ -163,19 +209,22 @@ final class Event extends AllMembersData
     public static function GetEventNotificationBar()
     {
         try {
-
             $notificationNo = self::asString(checkInput(data: $_GET['notificationNo']));
-            // $query = SelectFn::sel(selection: 'SELECT_ONE', table: 'notification', identifier1: 'no');
-            // $result = SelectFn::selectFn2(query: $query, bind: [$notificationNo]);
-
             $allNotification = SelectFn::selectAllRowsById('notification', 'no', $notificationNo);
 
-            // The notification bar is polled by its owner, so push it to that
-            // viewer's own private channel — never a world-readable one.
             $viewerId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
             if ($viewerId !== '') {
                 Pusher::broadcast(
                     theChannel: Pusher::userChannel($viewerId),
+                    theEvent: 'new-notification',
+                    theData: $allNotification
+                );
+            }
+
+            $eventFamCode = self::generateFamCode();
+            if (is_string($eventFamCode) && $eventFamCode !== '') {
+                Pusher::broadcast(
+                    theChannel: Pusher::familyChannel($eventFamCode),
                     theEvent: 'new-notification',
                     theData: $allNotification
                 );

@@ -262,26 +262,32 @@ class AllMembersData extends InnerJoin
     }
 
     /**
-     * @param array|null|string $famCode
+     * @param array<int, string>|string|null $famCode
+     * @return array<int, array<string, mixed>>
      */
     public static function getEventDataByFamCode(array|string|null $famCode): array
     {
         try {
+            $codes = is_array($famCode) ? $famCode : ($famCode !== null && $famCode !== '' ? [$famCode] : []);
+            $cleanedCodes = array_values(array_filter(array_map('strval', $codes), fn($c) => $c !== ''));
+
+            if (empty($cleanedCodes)) {
+                return [];
+            }
+
+            $inPlaceholders = implode(',', array_fill(0, count($cleanedCodes), '?'));
             $query = "SELECT events.no, events.id, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode
-        FROM events
-        INNER JOIN personal ON events.id = personal.id
-        WHERE (personal.famCode = :famCode)
-        AND events.deleted_at IS NULL
-        AND (
-            events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
-            OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
-            OR events.eventDate = CURDATE()
-        )
-        ORDER BY events.eventDate ASC";
+                FROM events
+                INNER JOIN personal ON events.id = personal.id
+                WHERE (personal.famCode IN ($inPlaceholders) OR events.eventCode IN ($inPlaceholders))
+                AND events.deleted_at IS NULL
+                AND events.eventDate >= CURDATE()
+                ORDER BY events.eventDate ASC
+                LIMIT 30";
 
             $conn = parent::connect2();
             $result = $conn->prepare($query);
-            $result->execute(['famCode' => $famCode]);
+            $result->execute([...$cleanedCodes, ...$cleanedCodes]);
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);

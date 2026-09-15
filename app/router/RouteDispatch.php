@@ -64,7 +64,8 @@ final class RouteDispatch
             'App\controller\ServeImgController',
             'App\controller\auth\FamilyCodeApprovalController',
             'App\controller\test\E2ETestController',
-            'App\controller\members\TelemetryController'
+            'App\controller\members\TelemetryController',
+            'App\controller\members\RecommendationController'
         ];
 
         if (!in_array($controller, $publicControllers, true)) {
