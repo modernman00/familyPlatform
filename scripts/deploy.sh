@@ -364,7 +364,7 @@ fi
 copy_item() {
     local item="$1"
     if [ -e "$item" ]; then
-        cp -R "$item" "$SANDBOX/"
+        cp -RL "$item" "$SANDBOX/"
     fi
 }
 
@@ -421,7 +421,7 @@ echo -e "\n🚀 [6/8] Synchronizing Application Directly to ${REMOTE_ROOT}..."
 # Briefly activate maintenance flag during rsync to avoid partial file execution
 ssh -p "$SSH_PORT" "${SSH_USER}@${SSH_HOST}" "touch '${REMOTE_ROOT}/.maintenance' 2>/dev/null || true"
 
-rsync -az --delete \
+rsync -azL --delete \
     --timeout=120 \
     -e "ssh -p ${SSH_PORT}" \
     --exclude='.env' \
@@ -451,6 +451,8 @@ rsync -az --delete \
     --exclude='bootstrap/cache/*' \
     --exclude='bootstrap/log/*.log' \
     --exclude='bootstrap/log/*' \
+    --exclude='vendor/bootstrap' \
+    --exclude='vendor/bootstrap/*' \
     --exclude='scripts' \
     --exclude='releases' \
     --exclude='backups' \
