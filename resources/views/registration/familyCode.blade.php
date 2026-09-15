@@ -53,19 +53,23 @@
 
   <img src={{ getenv('IMG_CONTRACT2')}} alt="logo" class="mb-4 form__login__logo" style="margin-left:43%; margin-bottom:5rem;">
 
-  @php
+    <div class="content mb-5">
+    <h2 class="title is-4">Generate Your Family Code</h2>
+    <p>Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you haven't received a Family Code from a registered family member, worry not! You can create one below to bring your family together:</p>
+  </div>
 
-  $formArray = [
-  'Your experience on the Family Platform becomes even more enriching with the Family Code feature, which enables seamless connections among all members of your family. If you havent received a Family Code from a registered family member, worry not! You can create one below to bring your family together:' => 'title',
+  <div class="field mb-4">
+    <label class="label">Family Surname</label>
+    <div class="control">
+      <input class="input" type="text" id="surname" placeholder="Enter your family surname">
+    </div>
+  </div>
 
-  'surname' => 'text',
-
-  'Generate your family code' => 'button'
-  ];
-
-  $form = new App\classes\BuildFormBulma($formArray);
-  $form->genForm();
-  @endphp
+  <div class="field">
+    <div class="control">
+      <button type="button" id="btnFamCode" class="button is-primary is-large is-fullwidth">Generate Family Code</button>
+    </div>
+  </div>
 
   <br>
 
