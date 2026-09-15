@@ -48,10 +48,14 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
                 const $cards = $body.find('#kinshipRadarWidget .kinship-item-card');
                 if ($cards.length > 0) {
                     const initialCount = $cards.length;
-                    // Click the dismiss button on the first card
-                    cy.get('.btn-dismiss-kin').first().click();
-                    // Card should be removed (with animation)
-                    cy.wait(500);
+                    // Click the dismiss button on the first card in the desktop
+                    // widget. Scoped to #kinshipRadarWidget — the mobile
+                    // feed-column copy shares the .btn-dismiss-kin class but is
+                    // CSS-hidden (d-lg-none) at this viewport, so a bare
+                    // .first() resolves to an invisible element.
+                    cy.get('#kinshipRadarWidget .btn-dismiss-kin').first().click();
+                    // Card is removed after a 250ms animation; retry until the
+                    // count drops below the initial value.
                     cy.get('#kinshipRadarWidget .kinship-item-card')
                         .should('have.length.lt', initialCount);
                 }
@@ -64,10 +68,13 @@ describe('Kinship Suggestion Engine (People You May Know)', () => {
                 const $cards = $body.find('#kinshipRadarWidget .kinship-item-card');
                 if ($cards.length > 0) {
                     cy.intercept('POST', '/members/familyRequestMgt').as('connectReq');
-                    cy.get('.btn-connect-kin').first().click();
-                    // Button should change to "Connecting..." or "Request Sent"
-                    cy.get('.btn-connect-kin').first().should('contain.text', 'Connect')
-                        .or('contain.text', 'Request Sent');
+                    cy.get('#kinshipRadarWidget .btn-connect-kin').first().click();
+                    // Wait for the request to actually fire, then assert the
+                    // button reaches its success state. (`.or()` is not a
+                    // Cypress chainer.)
+                    cy.wait('@connectReq');
+                    cy.get('#kinshipRadarWidget .btn-connect-kin').first()
+                        .should('contain.text', 'Request Sent');
                 }
             });
         });
