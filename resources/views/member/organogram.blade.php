@@ -683,20 +683,46 @@
             if (!isReadOnlyTree) {
                 const familyCode = window.__FAMILY_CODE__ || 'OLAOGUN';
                 const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
-                const inviteLink = `${window.location.origin}/register?famCode=${encodeURIComponent(familyCode)}&name=${encodeURIComponent(cleanName)}`;
-                currentInviteLink = inviteLink;
 
-                const inviteMessage = encodeURIComponent(
-                    `🌳 *Family Tree Invitation* 🌳\n\n` +
-                    `You are invited to connect with the *${familyCode} Family* on FamilyPlatform.\n\n` +
-                    `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
-                    `👉 ${inviteLink}`
-                );
+                // Generate opaque invite token via AJAX — zero PII in the URL
+                fetch('/api/invite/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        family_code: familyCode,
+                        first_name: cleanName.split(' ')[0] || '',
+                        last_name: cleanName.split(' ').slice(1).join(' ') || '',
+                        node_id: node.id || null,
+                        type: 'organogram'
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success' && data.invite_url) {
+                        const inviteLink = data.invite_url;
+                        currentInviteLink = inviteLink;
 
-                const whatsappBtn = document.getElementById('cardWhatsappBtn');
-                const smsBtn = document.getElementById('cardSmsBtn');
-                if (whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
-                if (smsBtn) smsBtn.href = `sms:?body=${inviteMessage}`;
+                        const inviteMessage = encodeURIComponent(
+                            `🌳 *Family Tree Invitation* 🌳\n\n` +
+                            `You are invited to connect with the *${familyCode} Family* on FamilyPlatform.\n\n` +
+                            `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+                            `👉 ${inviteLink}`
+                        );
+
+                        const whatsappBtn = document.getElementById('cardWhatsappBtn');
+                        const smsBtn = document.getElementById('cardSmsBtn');
+                        if (whatsappBtn) whatsappBtn.href = `https://api.whatsapp.com/send?text=${inviteMessage}`;
+                        if (smsBtn) smsBtn.href = `sms:?body=${inviteMessage}`;
+                    } else {
+                        console.error('[organogram] invite token generation failed', data);
+                    }
+                })
+                .catch(err => {
+                    console.error('[organogram] invite token generation error:', err);
+                });
             }
         }
 

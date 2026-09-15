@@ -51,7 +51,11 @@ final class OnboardingSecurityTest extends SocialFeedTestCase
         $this->assertArrayHasKey('invite_data', $state);
         $this->assertSame($this->famCode, $state['invite_data']['family_code']);
         $this->assertStringContainsString('whatsapp.com/send', $state['invite_data']['whatsapp_url']);
-        $this->assertStringContainsString(urlencode($this->famCode), $state['invite_data']['whatsapp_url']);
+        // Invite URL should contain opaque token (/register?invite=...) not PII
+        $this->assertStringContainsString('/register?invite=', $state['invite_data']['invite_url']);
+        // The WhatsApp URL text parameter should contain the register URL (URL-encoded)
+        // It's encoded as 'register%3Finvite%3D' in the URL
+        $this->assertStringContainsString('%2Fregister%3Finvite%3D', $state['invite_data']['whatsapp_url']);
     }
 
     /**

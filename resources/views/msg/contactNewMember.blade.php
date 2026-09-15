@@ -26,13 +26,12 @@
 </p>
 
 @php
-    $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
-    $queryParams = array_filter([
-        'famCode' => $data['familyCode'] ?? ($data['famCode'] ?? ''),
-        'name'    => $data['name'] ?? '',
-        'email'   => $data['email'] ?? '',
-    ]);
-    $registerUrl = $baseUrl . '/register' . (!empty($queryParams) ? '?' . http_build_query($queryParams) : '');
+    // invite_url must be pre-computed by the calling code via InviteTokenService.
+    // It contains an opaque token — zero PII in the URL.
+    $baseUrl    = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/');
+    $registerUrl = !empty($data['invite_url'])
+        ? (string)$data['invite_url']
+        : $baseUrl . '/register';
 @endphp
 
 <div style="text-align: center;">

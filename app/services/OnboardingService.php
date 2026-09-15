@@ -6,6 +6,7 @@ namespace App\services;
 use PDO;
 use PDOException;
 use Src\Db;
+use App\services\InviteTokenService;
 
 /**
  * OnboardingService
@@ -120,6 +121,7 @@ class OnboardingService
 
     /**
      * Generates a viral, high-converting invite payload for 1-tap WhatsApp and WebShare.
+     * Uses an opaque invite token — zero PII in the URL.
      *
      * @param string $userId
      * @param string $famCode
@@ -127,23 +129,38 @@ class OnboardingService
      */
     public function generateInviteData(string $userId, string $famCode): array
     {
-        $appUrl = rtrim((string)(getenv('APP_URL') ?: (getenv('MIX_APP_URL') ?: 'https://myfamilyplatform.com')), '/');
-        
-        // Fetch user's and family's surname
+        // Fetch family's surname for display (not for URL)
         $surname = $this->getFamilySurname($userId, $famCode);
-        
-        $inviteUrl = "{$appUrl}/register?famCode=" . urlencode($famCode) . "&familySurname=" . urlencode($surname);
-        
-        $inviteText = "👋 Hey! I've just set up our private {$surname} Family Network & Heritage Tree on FamilyPlatform. Claim your branch, explore our lineage, and share memories with us here: {$inviteUrl}";
-        
-        $whatsappUrl = "https://api.whatsapp.com/send?text=" . urlencode($inviteText);
+
+        // Create an opaque invite token (max 50 uses — general shareable family link)
+        try {
+            $token     = InviteTokenService::create(
+                $famCode,
+                ['invited_by' => $userId],
+                'onboarding',
+                null,  // uses default TTL_LONG (30 days)
+                50     // general family link — up to 50 people can use
+            );
+            $inviteUrl = InviteTokenService::getRegisterUrl($token);
+        } catch (\Throwable $e) {
+            error_log('[OnboardingService] InviteTokenService failed: ' . $e->getMessage());
+            // Graceful fallback — still no PII, just the bare register page
+            $appUrl    = rtrim((string)(getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/');
+            $inviteUrl = $appUrl . '/register';
+        }
+
+        // WhatsApp: share URL only so the OG card renders the branded 1200×630 preview
+        $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($inviteUrl);
+
+        $inviteText = "👋 Hey! I've just set up our private {$surname} Family Network & Heritage Tree on FamilyPlatform. "
+            . "Claim your branch, explore our lineage, and share memories with us here: {$inviteUrl}";
 
         return [
-            'invite_url' => $inviteUrl,
+            'invite_url'   => $inviteUrl,
             'whatsapp_url' => $whatsappUrl,
-            'invite_text' => $inviteText,
-            'family_code' => $famCode,
-            'surname' => $surname,
+            'invite_text'  => $inviteText,
+            'family_code'  => $famCode,
+            'surname'      => $surname,
         ];
     }
 

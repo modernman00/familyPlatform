@@ -4,6 +4,34 @@
 
 @section('data-page-id', 'joinRecommendation')
 
+@section('og_tags')
+    {{-- Referral landing page: personalised rich-preview card for WhatsApp / iMessage / Telegram --}}
+    @php
+        $ogInviter  = !empty($inviterName) ? htmlspecialchars(strip_tags($inviterName), ENT_QUOTES, 'UTF-8') : null;
+        $ogTitle    = $ogInviter
+            ? "{$ogInviter} invited you to FamilyPlatform 🔒"
+            : 'Start Your Private Family Sanctuary — FamilyPlatform';
+        $ogDesc     = 'Your own 100% private family network — secure family tree, milestone vault, and memories. Zero public feeds. Zero algorithms.';
+        $ogImageUrl = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/public/img/og-invite.jpg';
+        $ogUrl      = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/join' . (!empty($refToken) ? '?ref=' . urlencode($refToken) : '');
+    @endphp
+    <meta property="og:type"         content="website">
+    <meta property="og:site_name"    content="FamilyPlatform">
+    <meta property="og:title"        content="{{ $ogTitle }}">
+    <meta property="og:description"  content="{{ $ogDesc }}">
+    <meta property="og:image"        content="{{ $ogImageUrl }}">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"    content="FamilyPlatform — Your Private Family Sanctuary">
+    <meta property="og:url"          content="{{ $ogUrl }}">
+    {{-- Twitter / X --}}
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
+    <meta name="twitter:image"       content="{{ $ogImageUrl }}">
+    <meta name="twitter:image:alt"   content="FamilyPlatform — Your Private Family Sanctuary">
+@endsection
+
 @section('content')
 
 <style>

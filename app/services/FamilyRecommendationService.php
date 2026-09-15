@@ -114,12 +114,16 @@ final class FamilyRecommendationService
 
         $firstName = explode(' ', trim($userName))[0] ?: 'A family member';
 
+        // WhatsApp rich-preview strategy: share the URL only so WhatsApp's link
+        // scraper picks up the og:image / og:title from the /join page and renders
+        // the branded 1200×630 card. Encoding a full text message suppresses the preview.
+        $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($shareUrl);
+
+        // SMS / clipboard fallback: personalised text with the link appended
         $message = "🔒 *Private Family Sanctuary*\n\n" .
             "Hey! {$firstName} uses FamilyPlatform to preserve private family trees, milestones, and memories away from public social media.\n\n" .
             "Start your OWN private family network here — 100% walled and private (only connected kins and approved family can see through the wall):\n" .
             "👉 {$shareUrl}";
-
-        $whatsappUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($message);
 
         return [
             'share_url'    => $shareUrl,

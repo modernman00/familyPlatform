@@ -22,6 +22,8 @@
 @endphp
 @section('og_title', $pageOgTitle)
 @section('og_description', $pageOgDesc)
+@section('og_image', rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/') . '/public/img/og-invite.jpg')
+@section('og_url', rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/') . ($_SERVER['REQUEST_URI'] ?? '/'))
 
 @section('extra_js')
 @include('components.auth.family-code-script')
@@ -161,6 +163,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h1 class="register-title h2">Join Your Family Network</h1>
                     <p class="register-subtitle">Complete the steps below to create your secure family account</p>
                 </div>
+
+                @if (!empty($inviteTokenError))
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="background-color: #fee2e2; border: 1.5px solid #fca5a5; color: #7f1d1d; border-radius: 10px; padding: 16px;">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.3rem; flex-shrink: 0;"></i>
+                        <div>
+                            <h5 class="alert-heading" style="margin-bottom: 6px; color: #7f1d1d; font-weight: 700;">Invite Link Issue</h5>
+                            <p style="margin-bottom: 0; font-size: 0.95rem;">{{ htmlspecialchars($inviteTokenError) }}</p>
+                            <hr style="border-color: rgba(0,0,0,0.1); margin: 10px 0;">
+                            <p style="margin-bottom: 0; font-size: 0.9rem; color: #991b1b;">
+                                <strong>What to do:</strong> Ask your family member to send you a new invite link, or proceed to register with your family code directly.
+                            </p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                @endif
 
                 @include('partials.loader', ['notificationId'=> 'register'])
 

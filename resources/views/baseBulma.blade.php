@@ -21,23 +21,27 @@
     <meta name="author" content="Olawale Olaogun">
     <meta name="language" content="English">
 
-    <!-- OpenGraph meta tags for better sharing on social media -->
-    <!-- OpenGraph meta tags for better sharing on social media -->
-    <meta property="og:title" content="OUR FAMILY NETWORK">
-    <meta property="og:description"
-        content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="{{ getenv('IMG_CONTRACT') }}">
-    <!-- Replace with the URL to your website's logo or featured image -->
-    <meta property="og:url" content="{{ getenv('APP_URL') }}"> <!-- Replace with your website URL -->
+    @hasSection('og_tags')
+        {{-- Child page provides its own OG block (e.g. /join referral landing page) --}}
+        @yield('og_tags')
+    @else
+        {{-- Default site-wide OpenGraph tags --}}
+        <meta property="og:title" content="OUR FAMILY NETWORK">
+        <meta property="og:description"
+            content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="{{ rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') }}/public/img/og-invite.jpg">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:url" content="{{ getenv('APP_URL') }}">
 
-
-    <!-- Twitter Card meta tags for better sharing on Twitter -->
-    <meta name="twitter:title" content="OUR FAMILY NETWORK">
-    <meta name="twitter:description"
-        content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
-    <meta name="twitter:image" content="{{ getenv('IMG_CONTRACT') }}">
-    <meta name="twitter:card" content="summary_large_image">
+        {{-- Twitter / X Card --}}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="OUR FAMILY NETWORK">
+        <meta name="twitter:description"
+            content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
+        <meta name="twitter:image" content="{{ rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') }}/public/img/og-invite.jpg">
+    @endif
 
 
     <title>@yield('title')</title>

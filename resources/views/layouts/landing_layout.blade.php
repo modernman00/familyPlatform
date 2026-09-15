@@ -13,6 +13,8 @@
 
   @php
     $appUrl = rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/');
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    $ogUrl = $appUrl . $requestUri;
     $defaultOgImage = $appUrl . '/public/img/og-invite.jpg';
   @endphp
   <!-- OpenGraph & Social Sharing Meta Tags -->
@@ -25,7 +27,7 @@
   <meta property="og:image:type" content="image/jpeg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:url" content="@yield('og_url', $appUrl)">
+  <meta property="og:url" content="@yield('og_url', $ogUrl)">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">

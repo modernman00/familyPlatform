@@ -44,7 +44,29 @@ final class Register extends Db
                 view('registration/register', ['registerPostData' => $registerPostData]);
             } else {
                 $registerPostData = [];
-                if (!empty($_GET['invite_token'])) {
+                $inviteTokenError = null;
+
+                // Handle new opaque invite token (InviteTokenService)
+                if (!empty($_GET['invite'])) {
+                    try {
+                        $tokenData = \App\services\InviteTokenService::peek((string)$_GET['invite']);
+                        if ($tokenData) {
+                            $registerPostData['famCode'] = $tokenData['family_code'];
+                            $registerPostData['firstName'] = $tokenData['first_name'] ?? '';
+                            $registerPostData['lastName'] = $tokenData['last_name'] ?? '';
+                            $registerPostData['email'] = $tokenData['email'] ?? '';
+                            $registerPostData['claim_node'] = $tokenData['node_id'] ?? null;
+                        } else {
+                            $inviteTokenError = 'This invite link has expired or is invalid. Please ask your family member to send a new one.';
+                        }
+                    } catch (\Throwable $e) {
+                        error_log('[Register] Invite token error: ' . $e->getMessage());
+                        $inviteTokenError = 'This invite link has expired or is invalid. Please ask your family member to send a new one.';
+                    }
+                }
+
+                // Fallback: Handle legacy signed invite_token (FamilyClaimService)
+                if (empty($registerPostData) && !empty($_GET['invite_token'])) {
                     $tokenData = \App\services\FamilyClaimService::verifySignedInviteToken((string)$_GET['invite_token']);
                     if ($tokenData) {
                         $registerPostData['famCode'] = $tokenData['family_code'];
@@ -55,10 +77,12 @@ final class Register extends Db
                     }
                 }
 
-                if (!empty($_GET['famCode']) && empty($registerPostData['famCode'])) {
+                // Fallback: 30-day backward compat for PII-bearing ?famCode=&name= URLs
+                if (empty($registerPostData['famCode']) && !empty($_GET['famCode'])) {
+                    error_log('[Register] Deprecated PII URL format used: ?famCode=&name=. Will be removed 2026-10-15.');
                     $registerPostData['famCode'] = checkInput((string)$_GET['famCode']);
                 }
-                if (!empty($_GET['name']) && empty($registerPostData['firstName'])) {
+                if (empty($registerPostData['firstName']) && !empty($_GET['name'])) {
                     $rawName = trim((string)$_GET['name']);
                     $parts = explode(' ', $rawName, 2);
                     $registerPostData['firstName'] = checkInput($parts[0]);
@@ -104,7 +128,7 @@ final class Register extends Db
                         'year' => '1990',
                     ];
                 }
-                view('registration/register', ['registerPostData' => $registerPostData]);
+                view('registration/register', ['registerPostData' => $registerPostData, 'inviteTokenError' => $inviteTokenError]);
             }
         } catch (\Throwable $e) {
 
