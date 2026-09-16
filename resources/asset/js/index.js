@@ -141,6 +141,18 @@ if (window.location.pathname === '/register') {
   )
     .then((module) => module.default)
     .catch((err) => showError(err));
+} else if (
+  window.location.pathname.startsWith('/portal_') ||
+  window.location.pathname.startsWith('/admin-') ||
+  (window.location.pathname.includes('/2fa') && !window.location.pathname.startsWith('/login'))
+) {
+  // Dynamic ADMIN_SECRET_PATH routes — load adminAuth component
+  routePromise = import(
+    /* webpackChunkName: 'adminAuth' */
+    './components/acctMgt/adminAuth'
+  )
+    .then((module) => module.default)
+    .catch((err) => showError(err));
 } else if (window.location.pathname === '/login/forgot') {
   if (qSel('.signup_login')) qSel('.signup_login').style.display = 'none'; // navbar mgt
 

@@ -40,7 +40,7 @@
     "altorouter/altorouter": "^2.0",
     "pusher/pusher-php-server": "^7.0",
     "ryangjchandler/blade-capture-directive": "^1.1",
-    "modernman00/shared-lib": "^1.9",
+    "modernman00/shared-lib": "^1.9.34",
     "minishlink/web-push": "^9.0",
     "league/oauth2-google": "^5.0",
     "league/oauth2-facebook": "^2.2"

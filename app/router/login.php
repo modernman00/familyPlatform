@@ -16,11 +16,12 @@ $router->map('POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunct
 $router->map('POST', '/webauthn/login', 'Src\functionality\WebAuthnFunctionality@login', 'WebAuthn Login');
 
 $adminPath = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: '/lasu');
-$router->map('GET', $adminPath, 'App\controller\login\Login@showAdmin', 'Admin Login Page');
-$router->map('POST', $adminPath, 'App\controller\login\Login@login', 'admin_Login');
+// Admin auth routes are registered in admin.php (showLogin + login + 2fa + setup + forgot + reset + logout)
+// Keep only the /lasu disguise fallback here so legacy probes still get a 404
 if ($adminPath !== '/lasu') {
     $router->map('GET', '/lasu', 'App\controller\login\Login@showAdminDisguised', 'Disguised Admin Probe');
 }
+
 
 
 // Forgot

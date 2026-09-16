@@ -65,7 +65,9 @@ final class RouteDispatch
             'App\controller\auth\FamilyCodeApprovalController',
             'App\controller\test\E2ETestController',
             'App\controller\members\TelemetryController',
-            'App\controller\members\RecommendationController'
+            'App\controller\members\RecommendationController',
+            // Admin Auth routes handle their own session state — must be public
+            'App\controller\admin\AdminAuthController',
         ];
 
         if (!in_array($controller, $publicControllers, true)) {

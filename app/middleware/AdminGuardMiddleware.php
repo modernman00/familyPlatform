@@ -99,7 +99,7 @@ final class AdminGuardMiddleware
         }
     }
 
-    private static function generateFingerprint(string $ip, string $userAgent): string
+    public static function generateFingerprint(string $ip, string $userAgent): string
     {
         if (str_contains($ip, ':')) {
             $parts = explode(':', $ip);

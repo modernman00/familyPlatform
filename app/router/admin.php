@@ -1,10 +1,27 @@
 <?php
 
+// ── Zero-Trust Administrative Auth Routes (ADMIN_SECRET_PATH) ──────────────
+$adminSecretPath = '/' . trim((string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin'), '/');
+
+$router->map('GET',  $adminSecretPath,                            'App\controller\admin\AdminAuthController@showLogin',       'admin_secret_root');
+$router->map('GET',  $adminSecretPath . '/login',                 'App\controller\admin\AdminAuthController@showLogin',       'admin_login_show');
+$router->map('POST', $adminSecretPath . '/login',                 'App\controller\admin\AdminAuthController@login',           'admin_login_post');
+$router->map('GET',  $adminSecretPath . '/2fa',                   'App\controller\admin\AdminAuthController@show2fa',         'admin_2fa_show');
+$router->map('POST', $adminSecretPath . '/2fa',                   'App\controller\admin\AdminAuthController@verify2fa',       'admin_2fa_post');
+$router->map('GET',  $adminSecretPath . '/2fa/setup',             'App\controller\admin\AdminAuthController@show2faSetup',    'admin_2fa_setup_show');
+$router->map('POST', $adminSecretPath . '/2fa/setup',             'App\controller\admin\AdminAuthController@save2faSetup',    'admin_2fa_setup_post');
+$router->map('GET',  $adminSecretPath . '/forgot-password',       'App\controller\admin\AdminAuthController@showForgotPassword', 'admin_forgot_show');
+$router->map('POST', $adminSecretPath . '/forgot-password',       'App\controller\admin\AdminAuthController@sendResetLink',   'admin_forgot_post');
+$router->map('GET',  $adminSecretPath . '/reset-password',        'App\controller\admin\AdminAuthController@showResetPassword', 'admin_reset_show');
+$router->map('POST', $adminSecretPath . '/reset-password',        'App\controller\admin\AdminAuthController@updatePassword',  'admin_reset_post');
+$router->map('GET',  $adminSecretPath . '/logout',                'App\controller\admin\AdminAuthController@logout',          'admin_logout');
+
 // Enforce Zero-Trust Administrative Security (IP Gating, Rate Limiting, Fingerprint Check)
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
 if (str_starts_with($requestUri, '/admin') && \class_exists('\App\middleware\AdminGuardMiddleware')) {
     \App\middleware\AdminGuardMiddleware::enforce();
 }
+
 
 // NEW APPLICATION
 $router->map('GET', '/admin/reviewApps', 'App\controller\admin\ReviewApps@get', 'NEW APPLICATION');
