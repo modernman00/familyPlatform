@@ -2288,3 +2288,18 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/services/ProfilepageService.php
+
+		-
+			message: '#^Call to function is_string\(\) with non-falsy-string will always evaluate to true\.$#'
+			count: 3
+			path: app/controller/register/Register.php
+
+		-
+			message: '#^Call to function is_string\(\) with false will always evaluate to false\.$#'
+			count: 1
+			path: app/controller/register/Register.php
+
+		-
+			message: "#^Strict comparison using !== between non-falsy-string and '' will always evaluate to true\\.$#"
+			count: 1
+			path: app/controller/register/Register.php
