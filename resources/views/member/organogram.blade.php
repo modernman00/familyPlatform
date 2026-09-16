@@ -532,30 +532,32 @@
         // Check view mode preference on initial load
         try {
             const savedMode = localStorage.getItem('fp_tree_view_mode');
-            if (savedMode) {
-                // User has a saved preference
-                if (savedMode === 'pedigree') switchTreeViewMode('pedigree');
-                else if (savedMode === 'lineage') switchTreeViewMode('lineage');
+            let shouldAutoDetect = false;
+
+            // Only use saved mode if it's explicitly pedigree or lineage
+            if (savedMode === 'pedigree') {
+                switchTreeViewMode('pedigree');
+            } else if (savedMode === 'lineage') {
+                switchTreeViewMode('lineage');
             } else {
-                // Auto-detect optimal view based on tree structure
+                // Auto-detect for missing, stale ('canvas'), or unrecognized modes
+                shouldAutoDetect = true;
+            }
+
+            if (shouldAutoDetect) {
                 if (window.innerWidth <= 480) {
                     // Always use pedigree on mobile
                     switchTreeViewMode('pedigree');
                 } else if (familyTreeNodes && familyTreeNodes.length > 0) {
                     // For desktop, detect if tree is wide (many siblings)
-                    // Count nodes per generation to estimate spread
-                    const nodesByGeneration = {};
-                    familyTreeNodes.forEach(n => {
-                        const key = n.fid ? 'has_parents' : (n.pids && n.pids.length ? 'has_partners' : 'orphan');
-                        nodesByGeneration[key] = (nodesByGeneration[key] || 0) + 1;
-                    });
-
-                    // If many siblings or household members, pedigree is better
                     const householdNodes = familyTreeNodes.filter(n => !n.fid && !n.mid);
-                    if (householdNodes.length > 8 || familyTreeNodes.length > 30) {
+                    const totalNodes = familyTreeNodes.length;
+
+                    // If many siblings (>8) or large family (>30 nodes), use pedigree
+                    if (householdNodes.length > 8 || totalNodes > 30) {
                         switchTreeViewMode('pedigree');
                     }
-                    // Otherwise use default panoramic (canvas)
+                    // Otherwise keep default panoramic (canvas) — no explicit switch needed
                 }
             }
         } catch(_) {}
@@ -621,6 +623,7 @@
             if (btnPedigree) btnPedigree.classList.remove('active');
             if (btnCanvas) btnCanvas.classList.remove('active');
             if (btnLineage) btnLineage.classList.add('active');
+            try { localStorage.setItem('fp_tree_view_mode', 'lineage'); } catch(_) {}
         } else {
             if (typeof window.clearLineageTrace === 'function') window.clearLineageTrace();
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
