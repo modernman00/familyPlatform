@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FA Verification | FamilyPlatform Admin</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(30,41,59,0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .lock-badge {
+            width: 64px;
+            height: 64px;
+            background: rgba(59,130,246,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .lock-badge svg {
+            width: 32px;
+            height: 32px;
+            color: var(--accent);
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .otp-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(15,23,42,0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 12px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .otp-input:focus {
+            border-color: var(--accent);
+        }
+        .otp-input::placeholder {
+            color: #334155;
+            letter-spacing: 4px;
+            font-size: 18px;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 6px;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-primary:active {
+            transform: scale(0.99);
+        }
+        .cancel-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .cancel-link:hover {
+            color: var(--danger);
+        }
+        .alert {
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid;
+            text-align: left;
+        }
+        .alert-danger {
+            background: rgba(239,68,68,0.12);
+            border-color: rgba(239,68,68,0.35);
+            color: #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="lock-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+        </div>
+
+        <div class="brand">Google Authenticator Required</div>
+        <p class="subtitle">Enter the 6-digit security code generated by your Google Authenticator app.</p>
+
+        <?php if (!empty($formError)): ?>
+        <div class="alert alert-danger">
+            <?= htmlspecialchars($formError, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="POST" action="{{ $adminPrefix }}/2fa" autocomplete="off">
+            <input type="hidden" name="_token" value="{{ htmlspecialchars($_SESSION['token'] ?? '', ENT_QUOTES, 'UTF-8') }}">
+
+            <div class="form-group">
+                <label for="otp">Authenticator Code</label>
+                <input
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    class="otp-input"
+                    placeholder="000000"
+                    maxlength="6"
+                    inputmode="numeric"
+                    pattern="[0-9]{6}"
+                    required
+                    autofocus
+                    autocomplete="one-time-code"
+                >
+            </div>
+
+            <button type="submit" class="btn-primary">Verify &amp; Continue</button>
+        </form>
+
+        <a href="{{ $adminPrefix }}/logout" class="cancel-link">Cancel &amp; Sign Out</a>
+    </div>
+</body>
+</html>

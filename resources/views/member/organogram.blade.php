@@ -532,8 +532,31 @@
         // Check view mode preference on initial load
         try {
             const savedMode = localStorage.getItem('fp_tree_view_mode');
-            if (savedMode === 'pedigree' || (!savedMode && window.innerWidth <= 480)) {
-                switchTreeViewMode('pedigree');
+            if (savedMode) {
+                // User has a saved preference
+                if (savedMode === 'pedigree') switchTreeViewMode('pedigree');
+                else if (savedMode === 'lineage') switchTreeViewMode('lineage');
+            } else {
+                // Auto-detect optimal view based on tree structure
+                if (window.innerWidth <= 480) {
+                    // Always use pedigree on mobile
+                    switchTreeViewMode('pedigree');
+                } else if (familyTreeNodes && familyTreeNodes.length > 0) {
+                    // For desktop, detect if tree is wide (many siblings)
+                    // Count nodes per generation to estimate spread
+                    const nodesByGeneration = {};
+                    familyTreeNodes.forEach(n => {
+                        const key = n.fid ? 'has_parents' : (n.pids && n.pids.length ? 'has_partners' : 'orphan');
+                        nodesByGeneration[key] = (nodesByGeneration[key] || 0) + 1;
+                    });
+
+                    // If many siblings or household members, pedigree is better
+                    const householdNodes = familyTreeNodes.filter(n => !n.fid && !n.mid);
+                    if (householdNodes.length > 8 || familyTreeNodes.length > 30) {
+                        switchTreeViewMode('pedigree');
+                    }
+                    // Otherwise use default panoramic (canvas)
+                }
             }
         } catch(_) {}
     });

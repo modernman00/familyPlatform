@@ -29,6 +29,10 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
+            if (empty($familyCode)) {
+                throw new ForbiddenException('Invalid family context');
+            }
+
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
                 throw new ForbiddenException('You can only view trees of your own family or approved connections.');
@@ -197,6 +201,10 @@ final class Organogram extends SingleCustomerData
             $data = BaseController::findMemberById($idStr);
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
+            if (empty($familyCode)) {
+                throw new ForbiddenException('Invalid family context.');
+            }
+
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
                 throw new ForbiddenException('You can only view trees of your own family or approved connections.');
@@ -254,9 +262,19 @@ final class Organogram extends SingleCustomerData
             $nodeFamCode = (string) ($node['family_code'] ?? '');
             $nodeUserId = (string) ($node['user_id'] ?? '');
 
+            // IDOR Protection: Validate node belongs to an accessible family
+            if (empty($nodeFamCode)) {
+                msgException(403, 'Invalid node context');
+                return;
+            }
+
             // Access control: viewable by members of that family OR approved connected kin.
-            if (!BaseController::sessionSharesFamily($nodeFamCode) && !BaseController::sessionCanViewMember($nodeUserId, $nodeFamCode)) {
-                msgException(404, 'Node not found');
+            // Must pass BOTH checks: either same family OR (has valid connection AND user not empty)
+            $isOwnFamily = BaseController::sessionSharesFamily($nodeFamCode);
+            $isApprovedConnection = !empty($nodeUserId) && BaseController::sessionCanViewMember($nodeUserId, $nodeFamCode);
+
+            if (!$isOwnFamily && !$isApprovedConnection) {
+                msgException(403, 'Access denied: You do not have permission to view this node');
                 return;
             }
 
