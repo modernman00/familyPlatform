@@ -30,14 +30,16 @@ final class Organogram extends SingleCustomerData
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
             if (empty($familyCode)) {
-                msgException(403, 'Invalid family context');
-                return;
+                http_response_code(403);
+                echo json_encode(['error' => 'Invalid family context']);
+                exit;
             }
 
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
-                msgException(403, 'You can only view trees of your own family or approved connections.');
-                return;
+                http_response_code(403);
+                echo json_encode(['error' => 'You can only view trees of your own family or approved connections.']);
+                exit;
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
@@ -204,14 +206,16 @@ final class Organogram extends SingleCustomerData
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
             if (empty($familyCode)) {
-                msgException(403, 'Invalid family context.');
-                return;
+                http_response_code(403);
+                echo json_encode(['error' => 'Invalid family context.']);
+                exit;
             }
 
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
-                msgException(403, 'You can only view trees of your own family or approved connections.');
-                return;
+                http_response_code(403);
+                echo json_encode(['error' => 'You can only view trees of your own family or approved connections.']);
+                exit;
             }
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);

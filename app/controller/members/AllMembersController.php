@@ -82,8 +82,9 @@ final class AllMembersController extends AllMembersData
             // shared family or an approved connection. Otherwise a logged-in
             // user could read any member's profile, relatives and DOB by id.
             if (!BaseController::sessionCanViewMember($id, (string) ($data['famCode'] ?? ''))) {
-                msgException(403, 'You can only view profiles within your family or approved connections.');
-                return;
+                http_response_code(403);
+                echo json_encode(['error' => 'You can only view profiles within your family or approved connections.']);
+                exit;
             }
 
             $query = Select::formAndMatchQuery(selection: "SELECT_ONE", table: 'images', identifier1: "id");
@@ -194,8 +195,9 @@ final class AllMembersController extends AllMembersData
             // the connection they're deleting. Without this any logged-in user
             // could wipe arbitrary approver/requester rows by guessing ids.
             if ($sessionId === '' || (!hash_equals($sessionId, $apr) && !hash_equals($sessionId, $req))) {
-                msgException(403, 'You can only remove your own connections.');
-                return false;
+                http_response_code(403);
+                echo json_encode(['error' => 'You can only remove your own connections.']);
+                exit;
             }
 
             $targetId = hash_equals($sessionId, $apr) ? $req : $apr;
