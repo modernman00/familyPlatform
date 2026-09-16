@@ -379,10 +379,10 @@ final class Register extends Db
     private function dataToCheck(): array
     {
         return [
-            'min' => [2, 2, 2, 7, 7, 7, 4, 2],
-            'max' => [35, 35, 30, 16, 50, 50, 20, 35],
+            'min' => [2, 2, 2, 7, 7, 7, 4],
+            'max' => [35, 35, 30, 16, 50, 50, 20],
             'data' => [
-                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode', 'familySurname'
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
             ]
         ];
     }
