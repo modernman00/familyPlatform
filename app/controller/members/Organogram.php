@@ -30,12 +30,14 @@ final class Organogram extends SingleCustomerData
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
             if (empty($familyCode)) {
-                throw new ForbiddenException('Invalid family context');
+                msgException(403, 'Invalid family context');
+                return;
             }
 
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
-                throw new ForbiddenException('You can only view trees of your own family or approved connections.');
+                msgException(403, 'You can only view trees of your own family or approved connections.');
+                return;
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
@@ -202,12 +204,14 @@ final class Organogram extends SingleCustomerData
             $familyCode = (string)($data['famCode'] ?? ($_SESSION['famCode'] ?? ''));
 
             if (empty($familyCode)) {
-                throw new ForbiddenException('Invalid family context.');
+                msgException(403, 'Invalid family context.');
+                return;
             }
 
             // Access control: viewable by members of that family OR approved connected kin.
             if (!BaseController::sessionCanViewMember($idStr, $familyCode)) {
-                throw new ForbiddenException('You can only view trees of your own family or approved connections.');
+                msgException(403, 'You can only view trees of your own family or approved connections.');
+                return;
             }
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
