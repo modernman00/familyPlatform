@@ -16,4 +16,5 @@ $router->map('DELETE', '/api/test/setup', 'App\controller\test\E2ETestController
 $router->map('POST', '/api/test/teardown', 'App\controller\test\E2ETestController@teardown', 'test-teardown-post');
 $router->map('POST', '/tests/clear-rate-limit', 'App\controller\test\E2ETestController@clearRateLimit', 'test-clear-rate-limit');
 $router->map('POST', '/tests/seed-test-user', 'App\controller\test\E2ETestController@seedTestUser', 'test-seed-user');
+$router->map('POST', '/tests/create-invite-token', 'App\controller\test\E2ETestController@createInviteToken', 'test-create-invite-token');
 

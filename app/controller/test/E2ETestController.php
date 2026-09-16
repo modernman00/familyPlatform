@@ -190,6 +190,48 @@ class E2ETestController
         exit;
     }
 
+    public function createInviteToken(): never
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('HTTP/1.1 405 Method Not Allowed');
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Method Not Allowed']);
+            exit;
+        }
+
+        try {
+            $input = json_decode((string)file_get_contents('php://input'), true) ?? [];
+            $familyCode = (string)($input['family_code'] ?? '');
+            $firstName = (string)($input['first_name'] ?? '');
+            $lastName = (string)($input['last_name'] ?? '');
+
+            if (!$familyCode || !$firstName) {
+                header('HTTP/1.1 400 Bad Request');
+                header('Content-Type: application/json');
+                echo json_encode(['error' => 'Missing family_code or first_name']);
+                exit;
+            }
+
+            $token = \App\services\InviteTokenService::create(
+                $familyCode,
+                [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'invited_by' => 'cypress_test'
+                ],
+                'organogram'
+            );
+
+            header('Content-Type: application/json');
+            echo json_encode(['token' => $token, 'success' => true]);
+        } catch (\Throwable $e) {
+            header('HTTP/1.1 500 Internal Server Error');
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
     public function setup(): never
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

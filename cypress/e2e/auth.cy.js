@@ -78,28 +78,41 @@ describe('Authentication Flow', () => {
     });
 
     it('verifies registration page loads with invite params and submit button is ready and active', () => {
-        cy.visit('/register?famCode=OLA60446&name=Ajibike%20Olaogun', {
-            onBeforeLoad(win) {
-                Object.defineProperty(win, 'grecaptcha', {
-                    value: {
-                        enterprise: {
-                            ready: (cb) => { if (typeof cb === 'function') cb(); },
-                            execute: () => Promise.resolve('mock-cypress-token'),
+        // Create an invite token via test endpoint
+        cy.request({
+            method: 'POST',
+            url: '/tests/create-invite-token',
+            body: {
+                family_code: 'OLA60446',
+                first_name: 'Ajibike',
+                last_name: 'Olaogun'
+            },
+            failOnStatusCode: false
+        }).then((response) => {
+            const token = response.body.token;
+            cy.visit(`/register?invite=${token}`, {
+                onBeforeLoad(win) {
+                    Object.defineProperty(win, 'grecaptcha', {
+                        value: {
+                            enterprise: {
+                                ready: (cb) => { if (typeof cb === 'function') cb(); },
+                                execute: () => Promise.resolve('mock-cypress-token'),
+                            },
                         },
-                    },
-                    writable: false,
-                    configurable: true,
-                });
-            }
+                        writable: false,
+                        configurable: true,
+                    });
+                }
+            });
+
+            cy.get('form#register').should('be.visible');
+            cy.get('input#firstName').should('have.value', 'Ajibike');
+            cy.get('input#lastName').should('have.value', 'Olaogun');
+            cy.get('input#famCode').should('have.value', 'OLA60446');
+
+            // Verify button is marked ready and click fires validation
+            cy.get('button#btnSubmit[data-ready="true"]', { timeout: 15000 }).should('exist');
         });
-
-        cy.get('form#register').should('be.visible');
-        cy.get('input#firstName').should('have.value', 'Ajibike');
-        cy.get('input#lastName').should('have.value', 'Olaogun');
-        cy.get('input#famCode').should('have.value', 'OLA60446');
-
-        // Verify button is marked ready and click fires validation
-        cy.get('button#btnSubmit[data-ready="true"]', { timeout: 15000 }).should('exist');
     });
 
     it('successfully submits a forgot password request', () => {
