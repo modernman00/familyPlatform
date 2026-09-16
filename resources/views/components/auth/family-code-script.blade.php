@@ -16,6 +16,7 @@
             inviterContact: '{{ old("inviter_email_or_mobile", "") }}',
             debounceTimer: null,
             lastCheckedCode: '',
+            isCreating: false,
 
             init() {
                 const self = this;
