@@ -10,6 +10,7 @@ use Exception;
 use Src\functionality\LoginFunctionality;
 use Src\functionality\LogoutFunctionality;
 use Src\Utility;
+use Src\Auth\TotpService;
 
 final class Login
 {
@@ -124,7 +125,7 @@ final class Login
                 $isTotpRequired = filter_var($totpRequiredEnv, FILTER_VALIDATE_BOOLEAN) || $totpEnabled;
 
                 if ($isTotpRequired && !empty($totpSecret)) {
-                    if (empty($totpCode) || !\App\services\TotpService::verifyCode($totpSecret, $totpCode)) {
+                    if (empty($totpCode) || !TotpService::verifyCode($totpSecret, $totpCode)) {
                         Utility::msgException(401, 'Invalid or missing Google Authenticator 6-digit 2-FA code.');
                         return;
                     }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\controller\admin;
 
 use App\controller\BaseController;
-use App\services\TotpService;
+use Src\Auth\TotpService;
 use Src\Update;
 use Src\Utility;
 
@@ -45,7 +45,8 @@ final class TotpSetupController extends BaseController
 
             $secret  = $_SESSION['totp_pending_secret'];
             $account = (string) ($this->jwt['email'] ?? $this->jwt['id'] ?? 'admin');
-            $qrUri   = TotpService::getQrCodeUrl($account, $secret, 'FamilyPlatform Admin');
+            $provisioningUri = TotpService::getProvisioningUri($account, $secret, 'FamilyPlatform Admin');
+            $qrUri   = TotpService::getQrCodeDataUri($provisioningUri);
 
             parent::viewWithCsp('admin/totp_setup', [
                 'secret' => $secret,
