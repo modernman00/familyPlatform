@@ -549,12 +549,19 @@
                     // Always use pedigree on mobile
                     switchTreeViewMode('pedigree');
                 } else if (familyTreeNodes && familyTreeNodes.length > 0) {
-                    // For desktop, detect if tree is wide (many siblings)
                     const householdNodes = familyTreeNodes.filter(n => !n.fid && !n.mid);
                     const totalNodes = familyTreeNodes.length;
 
-                    // If many siblings (>8) or large family (>30 nodes), use pedigree
-                    if (householdNodes.length > 8 || totalNodes > 30) {
+                    // Detect widest generation (maximum siblings at any level)
+                    const siblingsByParent = {};
+                    familyTreeNodes.forEach(n => {
+                        const parentKey = [n.fid || 'none', n.mid || 'none'].join('-');
+                        siblingsByParent[parentKey] = (siblingsByParent[parentKey] || 0) + 1;
+                    });
+                    const maxSiblingsAtLevel = Math.max(...Object.values(siblingsByParent), 0);
+
+                    // Use Pedigree if: many household members OR many siblings in any generation OR moderate tree size
+                    if (householdNodes.length > 6 || maxSiblingsAtLevel > 7 || totalNodes > 20) {
                         switchTreeViewMode('pedigree');
                     }
                     // Otherwise keep default panoramic (canvas) — no explicit switch needed
