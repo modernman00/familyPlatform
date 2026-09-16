@@ -145,15 +145,19 @@ final class InviteController
 
             $inviteUrl = InviteTokenService::getRegisterUrl($token);
 
-            // Redirect to QR-code image (no local image generation dependency)
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . rawurlencode($inviteUrl);
+            // Construct QR-code URL with safe URL parameter encoding (not SQL, false positive)
+            $encodedUrl = rawurlencode($inviteUrl);
+            // nosemgrep: php.lang.security.injection.tainted-sql-string
+            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . $encodedUrl;
 
-            header('Content-Type: application/json');
-            echo json_encode([
+            $response = [
                 'status' => 'success',
                 'qr_url' => $qrUrl,
                 'invite_url' => $inviteUrl,
-            ]);
+            ];
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
 
         } catch (\Throwable $e) {
             error_log('[InviteController::qrCode] ' . $e->getMessage());
