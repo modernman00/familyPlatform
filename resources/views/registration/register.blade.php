@@ -32,13 +32,140 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form.register');
     if (!form) return;
 
-    form.addEventListener('submit', () => {
+    const hasInvitation = @json($hasInvitation);
+    const familySurnameInput = form.querySelector('input[name="familySurname"]');
+    const famCodeInput = form.querySelector('input[name="famCode"]');
+    const radioJoin = form.querySelector('input[name="account_type"][value="join"]');
+    const radioCreate = form.querySelector('input[name="account_type"][value="create"]');
+
+    if (!familySurnameInput || !famCodeInput) return;
+
+    // Get the field containers by ID (more reliable than label text parsing)
+    let familySurnameField = form.querySelector('#familySurname_div');
+    let famCodeField = form.querySelector('#famCode_div');
+
+    const toggleFields = () => {
+        const isCreating = radioCreate.checked;
+
+        if (familySurnameField) {
+            familySurnameField.style.display = isCreating ? 'block' : 'none';
+            familySurnameInput.required = isCreating;
+        }
+
+        if (famCodeField) {
+            famCodeField.style.display = isCreating ? 'none' : 'block';
+            famCodeInput.required = !isCreating;
+        }
+    };
+
+    // Set initial state
+    if (hasInvitation) {
+        radioJoin.checked = true;
+    } else {
+        radioCreate.checked = true;
+    }
+
+    // Attach listeners to radio buttons
+    if (radioJoin) radioJoin.addEventListener('change', toggleFields);
+    if (radioCreate) radioCreate.addEventListener('change', toggleFields);
+
+    // Initial toggle
+    toggleFields();
+
+    // Handle form submission — intercept JSON responses for code modal
+    form.addEventListener('submit', async (e) => {
         const btn = form.querySelector('#btnSubmit');
         if (btn) {
             btn.classList.add('is-loading');
             btn.disabled = true;
         }
+
+        // Set account_type before submit
+        const accountTypeValue = document.querySelector('input[name="account_type"]:checked')?.value === 'create' ? 'true' : 'false';
+        const accountTypeHidden = document.querySelector('#account_type_hidden');
+        if (accountTypeHidden) {
+            accountTypeHidden.value = accountTypeValue;
+        }
     });
+
+    // Monitor fetch/XHR to catch JSON responses from registration
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+        const response = await originalFetch.apply(window, args);
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+            const cloned = response.clone();
+            try {
+                const json = await cloned.json();
+                if (json.show_code_modal && json.family_code) {
+                    showFamilyCodeModal(json.family_code, json.redirect || '/login');
+                    // Consume the response so normal flow doesn't execute
+                    return new Response(JSON.stringify({status: 'handled'}), {status: 200, headers: {'Content-Type': 'application/json'}});
+                }
+            } catch (e) {
+                // Not JSON, continue normally
+            }
+        }
+        return response;
+    };
+
+    function showFamilyCodeModal(code, redirectUrl) {
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+            <div class="modal is-active" id="family-code-modal" style="z-index: 9999;">
+                <div class="modal-background"></div>
+                <div class="modal-card" style="max-width: 500px;">
+                    <div class="modal-card-body" style="text-align: center; padding: 3rem 2rem;">
+                        <h2 class="title is-3 mb-4">🎉 Family Created!</h2>
+                        <p class="subtitle is-6 mb-5">Your family code is:</p>
+                        <div class="box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+                            <p style="font-size: 3.5rem; font-weight: bold; color: white; font-family: monospace; letter-spacing: 2px; margin: 0;" id="code-display">
+                                ${code}
+                            </p>
+                        </div>
+                        <button id="copy-code-btn" class="button is-primary mt-4" style="width: 100%;">
+                            <span class="icon"><i class="fas fa-copy"></i></span>
+                            <span>Copy Code</span>
+                        </button>
+                        <p class="text-muted small mt-4">Share this code with family members so they can join your network.</p>
+                        <p style="font-size: 0.9rem; color: #999; margin-top: 1rem;">Redirecting in <span id="countdown">6</span> seconds...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        // Copy button handler
+        const copyBtn = document.getElementById('copy-code-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(code);
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '<span class="icon"><i class="fas fa-check"></i></span><span>Copied!</span>';
+                    copyBtn.classList.remove('is-primary');
+                    copyBtn.classList.add('is-success');
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                        copyBtn.classList.add('is-primary');
+                        copyBtn.classList.remove('is-success');
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            });
+        }
+
+        let countdown = 6;
+        const countdownEl = document.getElementById('countdown');
+        const interval = setInterval(() => {
+            countdown--;
+            if (countdownEl) countdownEl.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(interval);
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    }
 });
 </script>
 @endsection
@@ -248,28 +375,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 @endif
 
-                <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" x-data="familyCodeApprovalForm()">
+                <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" x-data="familyCodeApprovalForm()" x-init="isCreating = $el.dataset.isCreating === 'true'" :data-is-creating="isCreating">
                     @if(!empty($registerPostData['claim_node']))
                     <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
                     @endif
+
+                    <!-- Create vs Join Toggle -->
+                    <div class="field mb-4" style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 20px;">
+                        <label style="color: #cbd5e1; font-weight: 600; font-size: 0.95rem; display: block; margin-bottom: 12px;">What would you like to do?</label>
+                        <div class="d-flex gap-4">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                <input type="radio" name="account_type" value="join" x-model="isCreating" :value="false" style="cursor: pointer;">
+                                <span>Join existing family (have a code?)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #e2e8f0;">
+                                <input type="radio" name="account_type" value="create" x-model="isCreating" :value="true" style="cursor: pointer;">
+                                <span>Create new family</span>
+                            </label>
+                        </div>
+                    </div>
 
                     @php
                     $formArray = [
                     'Personal Information' => 'title',
                     'name' => [
                     'mixed',
-                    'label' => ['first Name', 'last Name', 'Family code <button type="button" id="generateFamilyCode" class="button is-small is-primary ms-2 js-modal-trigger" data-target="modal-familyCode" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; vertical-align: middle;">Generate</button>'],
-                    'attribute' => ['firstName', 'lastName', 'famCode'],
-                    'placeholder' => ['Toyin', 'Edwars', 'check your email for the code '],
-                    'inputType' => ['text', 'text', 'text'],
+                    'label' => ['first Name', 'last Name', 'Family Surname', 'Family code <button type="button" id="generateFamilyCode" class="button is-small is-primary ms-2 js-modal-trigger" data-target="modal-familyCode" style="font-size: 0.7rem; padding: 0.2rem 0.5rem; vertical-align: middle;">Generate</button>'],
+                    'attribute' => ['firstName', 'lastName', 'familySurname', 'famCode'],
+                    'placeholder' => ['Toyin', 'Edwars', 'e.g. Olaogun', 'check your email for the code '],
+                    'inputType' => ['text', 'text', 'text', 'text'],
                     'value' => [
                     isset($registerPostData['firstName']) ? $registerPostData['firstName'] : '',
                     isset($registerPostData['lastName']) ? $registerPostData['lastName'] : '',
+                    isset($registerPostData['familySurname']) ? $registerPostData['familySurname'] : '',
                     isset($registerPostData['famCode']) ? $registerPostData['famCode'] : ''
                     ],
                     'icon' => [
                     '<i class="fas fa-user"></i>',
                     '<i class="fas fa-user"></i>',
+                    '<i class="fas fa-home"></i>',
                     '<i class="fas fa-barcode"></i>'
                     ]
                     ],
@@ -346,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">Submit form</button>
                     </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
+                    <input type="hidden" name="account_type" id="account_type_hidden">
 
                 </form>
 

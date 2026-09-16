@@ -59,6 +59,61 @@ final class OnboardingSecurityTest extends SocialFeedTestCase
     }
 
     /**
+     * Test: Family code auto-generation from surname (Create new family flow)
+     */
+    public function testFamilyCodeAutoGenerationFromSurname(): void
+    {
+        // Test that a surname like "Olaogun" generates codes like "OLA###"
+        $testCases = [
+            'Olaogun' => 'OLA',
+            'Smith' => 'SMI',
+            'Lee' => 'LEE',
+            'X' => 'XXX',  // Single letter pads to XXX
+            'Jo' => 'JOX', // Two letters pad to JOX
+        ];
+
+        foreach ($testCases as $surname => $expectedPrefix) {
+
+            $cleaned = \preg_replace('/[^A-Za-z]/', '', $surname);
+            $prefix = \mb_strtoupper((string)$cleaned);
+            if (\mb_strlen($prefix) < 3) {
+                $prefix = \str_pad($prefix, 3, 'X', \STR_PAD_RIGHT);
+            } else {
+                $prefix = \mb_substr($prefix, 0, 3);
+            }
+
+            $this->assertSame($expectedPrefix, $prefix, "Surname '$surname' should generate prefix '$expectedPrefix'");
+            // Verify it's a valid 3-letter code that can be combined with digits
+            $this->assertSame(3, \mb_strlen($prefix));
+        }
+    }
+
+    /**
+     * Test: Join existing family flow still works (referral via WhatsApp token)
+     */
+    public function testJoinExistingFamilyViaOpaqueToken(): void
+    {
+        // Create an opaque token for an existing family
+        $token = \App\services\InviteTokenService::create(
+            $this->famCode,
+            [
+                'first_name' => 'Alice',
+                'last_name' => 'Smith',
+                'email' => 'alice@example.com',
+                'invited_by' => $this->authorId,
+            ],
+            'organogram'
+        );
+
+        // Peek the token (verify it exists)
+        $tokenData = \App\services\InviteTokenService::peek($token);
+        $this->assertNotNull($tokenData);
+        $this->assertSame($this->famCode, $tokenData['family_code']);
+        $this->assertSame('Alice', $tokenData['first_name']);
+        $this->assertSame('alice@example.com', $tokenData['email']);
+    }
+
+    /**
      * Marcus & Ghost PoC #1: Invalid Step Key Tampering
      * An attacker attempts to inject invalid keys or arbitrary state.
      */

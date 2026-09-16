@@ -160,9 +160,23 @@ final class Register extends Db
         try {
             $input = GetRequestData::getRequestData();
             Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
-            unset($input['action'], $input['siteKey']);  
-            
-            // set application id 
+            unset($input['action'], $input['siteKey']);
+
+            // Auto-generate family code if creating a new family (familySurname provided, no famCode)
+            if (empty($input['famCode']) && !empty($input['familySurname'])) {
+                $rawSurname = (string)$input['familySurname'];
+                $cleaned = preg_replace('/[^A-Za-z]/', '', $rawSurname);
+                $prefix = mb_strtoupper((string)$cleaned);
+                if (mb_strlen($prefix) < 3) {
+                    $prefix = str_pad($prefix, 3, 'X', STR_PAD_RIGHT);
+                } else {
+                    $prefix = mb_substr($prefix, 0, 3);
+                }
+                $randomDigits = (string)rand(100, 999);
+                $input['famCode'] = $prefix . $randomDigits;
+            }
+
+            // set application id
             $generateId = $this->setId($input, "firstName", 'account');
             $data = $this->dataToCheck();
 
@@ -311,20 +325,30 @@ final class Register extends Db
 
                 if (isset($_SESSION['oauth_pending'])) {
                     unset($_SESSION['oauth_pending']);
-                    
+
                     sessSet('manager_id', $cleanData['id']);
                     sessSet('famCode', $cleanData['famCode']);
-                    
+
                     \Src\JwtHandler::issueLoginCookie(['id' => $cleanData['id'], 'role' => 'users']);
-                    
+
                     msgSuccess(200, "Registration complete. Redirecting to your profile...", "/profilePage");
                 } else {
                     if ($joiningViaInvitation) {
                         $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. Once they approve, you'll have access to the family network.";
+                        msgSuccess(200, $successMsg, "/login");
                     } else {
-                        $successMsg = "Hello $firstName - Your registration is complete! Please log in to verify your email and access your account.";
+                        // Creating a new family — show the code in a modal before redirecting
+                        header('Content-Type: application/json');
+                        http_response_code(200);
+                        echo json_encode([
+                            'status' => 'success',
+                            'message' => "Hello $firstName - Your family has been created!",
+                            'family_code' => (string)$cleanData['famCode'],
+                            'show_code_modal' => true,
+                            'redirect' => '/login'
+                        ]);
+                        return;
                     }
-                    msgSuccess(200, $successMsg, "/login");
                 }
 
 
@@ -348,10 +372,10 @@ final class Register extends Db
     private function dataToCheck(): array
     {
         return [
-            'min' => [2, 2, 2, 7, 7, 7, 4],
-            'max' => [35, 35, 30, 16, 50, 50, 20],
+            'min' => [2, 2, 2, 7, 7, 7, 4, 2],
+            'max' => [35, 35, 30, 16, 50, 50, 20, 35],
             'data' => [
-                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode', 'familySurname'
             ]
         ];
     }
