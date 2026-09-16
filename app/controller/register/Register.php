@@ -48,6 +48,19 @@ final class Register extends Db
 
                 // Handle new opaque invite token (InviteTokenService)
                 if (!empty($_GET['invite'])) {
+                    // Rate-limit invite token enumeration (use REMOTE_ADDR to prevent header spoofing)
+                    $clientIp = (string)($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+                    try {
+                        Limiter::limit('invite_token_' . $clientIp);
+                    } catch (\Src\Exceptions\TooManyRequestsException $e) {
+                        $inviteTokenError = 'Too many invite link attempts. Please try again later.';
+                        view('registration/register', [
+                            'registerPostData' => [],
+                            'inviteTokenError' => $inviteTokenError
+                        ]);
+                        return;
+                    }
+
                     try {
                         $tokenData = \App\services\InviteTokenService::peek((string)$_GET['invite']);
                         if ($tokenData) {
@@ -77,19 +90,8 @@ final class Register extends Db
                     }
                 }
 
-                // Fallback: 30-day backward compat for PII-bearing ?famCode=&name= URLs
-                if (empty($registerPostData['famCode']) && !empty($_GET['famCode'])) {
-                    error_log('[Register] Deprecated PII URL format used: ?famCode=&name=. Will be removed 2026-10-15.');
-                    $registerPostData['famCode'] = checkInput((string)$_GET['famCode']);
-                }
-                if (empty($registerPostData['firstName']) && !empty($_GET['name'])) {
-                    $rawName = trim((string)$_GET['name']);
-                    $parts = explode(' ', $rawName, 2);
-                    $registerPostData['firstName'] = checkInput($parts[0]);
-                    if (!empty($parts[1])) {
-                        $registerPostData['lastName'] = checkInput($parts[1]);
-                    }
-                }
+                // Deprecated ?famCode= parameter removed (2026-09-16): Security risk.
+                // Use opaque invite tokens (?invite=) or re-invite only.
 
                 if (!empty($registerPostData['famCode'])) {
                     $famCodeRaw = $registerPostData['famCode'];
@@ -172,8 +174,9 @@ final class Register extends Db
                 } else {
                     $prefix = mb_substr($prefix, 0, 3);
                 }
-                $randomDigits = (string)rand(100, 999);
-                $input['famCode'] = $prefix . $randomDigits;
+                $randomBytes = bin2hex(random_bytes(4));
+                $randomDigits = (int)hexdec(mb_substr($randomBytes, 0, 4)) % 10000;
+                $input['famCode'] = $prefix . str_pad((string)$randomDigits, 4, '0', STR_PAD_LEFT);
             }
 
             // set application id
@@ -195,13 +198,13 @@ final class Register extends Db
             );
 
             // Determine initial family status.
-            // If the new user is joining an EXISTING family code via invitation,
-            // they start as 'pending' — the inviter must approve before they gain
-            // family-scoped access. Users creating a brand-new family code are
-            // 'approved' immediately (they ARE the founding member).
-            $joiningViaInvitation = !empty($input['joining_via_invitation']) && $input['joining_via_invitation'] === 'true';
+            // Server-side gate: If joining existing family (not creating), MUST be pending.
+            // Do NOT trust client-side joining_via_invitation flag—verify by checking
+            // if the family code was PRE-POPULATED (from invite token or existing family).
             $existingFamCode = !empty($cleanData['famCode']);
-            $cleanData['familyStatus'] = ($joiningViaInvitation && $existingFamCode) ? 'pending' : 'approved';
+            $wasInviteParameter = !empty($_GET['invite']) || !empty($_GET['invite_token']);
+            $joiningViaInvitation = $existingFamCode && ($wasInviteParameter || !empty($input['temporary_code']));
+            $cleanData['familyStatus'] = $joiningViaInvitation ? 'pending' : 'approved';
 
             // create sessions and some variables
            sessSet('id',$cleanData['id']);
@@ -325,6 +328,10 @@ final class Register extends Db
 
                 if (isset($_SESSION['oauth_pending'])) {
                     unset($_SESSION['oauth_pending']);
+
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_regenerate_id(true);
+                    }
 
                     sessSet('manager_id', $cleanData['id']);
                     sessSet('famCode', $cleanData['famCode']);
