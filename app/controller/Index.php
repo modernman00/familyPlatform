@@ -51,7 +51,7 @@ final class Index
         $secretKey = (string) (getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? ''));
         if (empty($secretKey)) {
             // Fail closed if APP_KEY is missing to avoid weak signature validation
-            $secretKey = 'SECURE_ENV_MUST_DEFINE_APP_KEY_' . md5(__FILE__);
+            $secretKey = 'SECURE_ENV_MUST_DEFINE_APP_KEY_' . hash('sha256', __FILE__);
         }
 
         $isValid = false;
