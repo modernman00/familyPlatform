@@ -39,7 +39,7 @@ function authenticate(email, password, attempt = 1, maxAttempts = 3) {
     // Clear rate limiter before attempting login
     cy.request({
         method: 'POST',
-        url: '/tests/clear-rate-limit',
+        url: '/api/test/clear-rate-limit',
         failOnStatusCode: false,
         headers: { 'X-Cypress-Test': 'true' }
     }).then((clearRes) => {

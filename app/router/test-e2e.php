@@ -14,7 +14,11 @@ $router->map('GET', '/api/test/get-approval-request/[i:id]', 'App\controller\tes
 $router->map('POST', '/api/test/setup', 'App\controller\test\E2ETestController@setup', 'test-setup');
 $router->map('DELETE', '/api/test/setup', 'App\controller\test\E2ETestController@teardown', 'test-teardown');
 $router->map('POST', '/api/test/teardown', 'App\controller\test\E2ETestController@teardown', 'test-teardown-post');
+$router->map('POST', '/api/test/clear-rate-limit', 'App\controller\test\E2ETestController@clearRateLimit', 'api-test-clear-rate-limit');
+$router->map('POST', '/api/test/seed-test-user', 'App\controller\test\E2ETestController@seedTestUser', 'api-test-seed-user');
+$router->map('POST', '/api/test/create-invite-token', 'App\controller\test\E2ETestController@createInviteToken', 'api-test-create-invite-token');
 $router->map('POST', '/tests/clear-rate-limit', 'App\controller\test\E2ETestController@clearRateLimit', 'test-clear-rate-limit');
 $router->map('POST', '/tests/seed-test-user', 'App\controller\test\E2ETestController@seedTestUser', 'test-seed-user');
 $router->map('POST', '/tests/create-invite-token', 'App\controller\test\E2ETestController@createInviteToken', 'test-create-invite-token');
+
 

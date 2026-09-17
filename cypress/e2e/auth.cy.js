@@ -9,13 +9,13 @@ describe('Authentication Flow', () => {
         cy.clearCookies();
         cy.clearLocalStorage();
         cy.request({
-            url: '/tests/clear-rate-limit',
+            url: '/api/test/clear-rate-limit',
             failOnStatusCode: false
         });
         // Seed test user if it doesn't exist
         cy.request({
             method: 'POST',
-            url: '/tests/seed-test-user',
+            url: '/api/test/seed-test-user',
             failOnStatusCode: false
         });
         // Warm the /login route (PHP opcache, session, DB pool) so the first real
@@ -81,7 +81,7 @@ describe('Authentication Flow', () => {
         // Create an invite token via test endpoint
         cy.request({
             method: 'POST',
-            url: '/tests/create-invite-token',
+            url: '/api/test/create-invite-token',
             body: {
                 family_code: 'OLA60446',
                 first_name: 'Ajibike',

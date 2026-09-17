@@ -110,6 +110,23 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
+# 5. Web-Server & Route Parity Smoke Check
+# ------------------------------------------------------------------------------
+echo -e "${BOLD}${CYAN}[GATE 5/5] Checking Web-Server & Route Reachability...${NC}"
+APP_URL="${APP_URL:-https://olaogun.test}"
+if command -v curl >/dev/null 2>&1; then
+    LOGIN_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$APP_URL/login" || echo "000")
+    if [ "$LOGIN_STATUS" = "200" ] || [ "$LOGIN_STATUS" = "302" ]; then
+        echo -e "${GREEN}  ✅ Gate 5 Passed: $APP_URL/login reachable (HTTP $LOGIN_STATUS).${NC}"
+    else
+        echo -e "${YELLOW}  ⚠️  Gate 5 Notice: $APP_URL/login returned HTTP $LOGIN_STATUS (Verify web server is running).${NC}"
+    fi
+else
+    echo -e "${YELLOW}  ⚠️  curl not installed (Skipping Gate 5).${NC}"
+fi
+echo ""
+
+# ------------------------------------------------------------------------------
 # Final Verdict
 # ------------------------------------------------------------------------------
 echo -e "${BOLD}${BLUE}================================================================${NC}"

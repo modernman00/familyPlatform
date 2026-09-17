@@ -13,7 +13,8 @@ describe('Chaos & Resiliency Testing', () => {
     // occasionally throw async errors unrelated to what these tests assert. A
     // chaos suite in particular must not fail on someone else's stack trace.
     beforeEach(() => {
-        cy.request({ url: '/tests/clear-rate-limit', failOnStatusCode: false });
+        cy.clearLocalStorage();
+        cy.request({ url: '/api/test/clear-rate-limit', failOnStatusCode: false });
         cy.request({ url: '/login', failOnStatusCode: false });
     });
 

@@ -26,6 +26,7 @@ RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
 # 2. Application source / tooling directories — nothing servable lives here.
 #    (resources/assets + resources/images stay reachable; only views blocked)
 # ---------------------------------------------------------------------------
+RewriteCond %{REQUEST_URI} !^/tests/
 RewriteRule "^(app|bootstrap|database|scripts|tests|cypress|docs|storage|scratch|tmp|node_modules|vendor)(/|$)" - [F,L]
 RewriteRule "^resources/views(/|$)" - [F,L]
 

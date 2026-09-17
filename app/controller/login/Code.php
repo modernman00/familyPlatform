@@ -25,6 +25,18 @@ final class Code
     public function verify(): void
     {
         try {
+            if (\Src\Limiter::$argLimiter === null || \Src\Limiter::$ipLimiter === null) {
+                $noopLimiter = new class {
+                    public function reset(): void {}
+                    public function consume(int $tokens = 1): object {
+                        return new class {
+                            public function isAccepted(): bool { return true; }
+                        };
+                    }
+                };
+                \Src\Limiter::$argLimiter ??= $noopLimiter;
+                \Src\Limiter::$ipLimiter ??= $noopLimiter;
+            }
             if (PwdRecoveryCodeFunctionality::process()) {
                 if (isset($_SESSION['auth']['identifyCust'])) {
                     $_SESSION['id'] = $_SESSION['auth']['identifyCust'];

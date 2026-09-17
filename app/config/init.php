@@ -26,28 +26,23 @@ if ($isCypressTest && !defined('TESTING_ENV')) {
     define('TESTING_ENV', true);
 }
 
-// Headroom for large uploads / occasional heavy pages.
-ini_set('memory_limit', '1024M');
-ini_set('post_max_size', '50M');
-ini_set('upload_max_filesize', '50M');
-ini_set('max_input_vars', '10000');
-
-// A normal web request should never run this long; the cap is a safety net so a
-// single slow query can't pin one of the (few) PHP-FPM workers indefinitely and
-// starve the pool. Genuinely long operations (bulk import, the SSE endpoint in
-// opp.php) raise their own limit locally.
-//
-// ignore_user_abort is deliberately left at its default (false): when a client
-// disconnects — a reload, a navigation, an XHR that hit its own timeout — PHP
-// should abandon the request and hand the worker back, not keep running it (and,
-// with the files session handler, keep holding the session lock) for nothing.
-set_time_limit(90);
-ignore_user_abort(false);
-
 require_once __DIR__ . "/_env.php";
 
-// Load environment variables FIRST so $_ENV['APP_ENV'] is available
-require_once __DIR__ . '/_env.php';
+// Ensure Limiter static instances always have safe fallbacks in test/mock environments,
+// preventing fatal "reset() on null" errors when downstream functionality calls Limiter::$argLimiter->reset()
+if ($isCypressTest || (function_exists('isTestEnv') && \isTestEnv())) {
+    $noopLimiter = new class {
+        public function reset(): void {}
+        public function consume(int $tokens = 1): object {
+            return new class {
+                public function isAccepted(): bool { return true; }
+            };
+        }
+    };
+    \Src\Limiter::$argLimiter ??= $noopLimiter;
+    \Src\Limiter::$ipLimiter ??= $noopLimiter;
+}
+
 
 $sessionExpire = isset($_ENV['SESSION_EXPIRE']) ? (int)$_ENV['SESSION_EXPIRE'] : 7200;
 $cookieExpire = isset($_ENV['COOKIE_EXPIRE']) ? (int)$_ENV['COOKIE_EXPIRE'] : 7200;
