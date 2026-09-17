@@ -29,13 +29,19 @@ let assetCacheWarmed = false;
 // server bounces us (e.g. a transient 401 from a session-regeneration race)
 // rather than letting a single blip fail an unrelated spec.
 function authenticate(email, password, attempt = 1, maxAttempts = 3) {
-    cy.request({ url: '/tests/clear-rate-limit', failOnStatusCode: false });
+    cy.request({
+        method: 'POST',
+        url: '/tests/clear-rate-limit',
+        failOnStatusCode: false,
+        headers: { 'X-Cypress-Test': 'true' }
+    });
 
     cy.request({
         method: 'POST',
         url: '/login',
         body: { email, password },
         failOnStatusCode: false,
+        headers: { 'X-Cypress-Test': 'true' }
     }).then((credRes) => {
         const credOk = [200, 201].includes(credRes.status);
 
@@ -59,6 +65,7 @@ function authenticate(email, password, attempt = 1, maxAttempts = 3) {
                 url: '/login/code',
                 body: { code },
                 failOnStatusCode: false,
+                headers: { 'X-Cypress-Test': 'true' }
             }).then((codeRes) => {
                 if (![200, 201].includes(codeRes.status)) {
                     if (attempt >= maxAttempts) {
@@ -83,7 +90,12 @@ export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD) {
 
             // Confirm the session actually reached an authenticated state before
             // it gets cached.
-            cy.request({ url: '/profilePage', failOnStatusCode: false, followRedirect: false })
+            cy.request({
+                url: '/profilePage',
+                failOnStatusCode: false,
+                followRedirect: false,
+                headers: { 'X-Cypress-Test': 'true' }
+            })
                 .its('status')
                 .should('eq', 200);
         },
@@ -91,7 +103,12 @@ export function loginFully(email = DEFAULT_EMAIL, password = DEFAULT_PASSWORD) {
             validate() {
                 // A live, authenticated session serves /profilePage directly; a dead
                 // one 302s to /login. followRedirect:false makes that unambiguous.
-                cy.request({ url: '/profilePage', failOnStatusCode: false, followRedirect: false })
+                cy.request({
+                    url: '/profilePage',
+                    failOnStatusCode: false,
+                    followRedirect: false,
+                    headers: { 'X-Cypress-Test': 'true' }
+                })
                     .its('status')
                     .should('eq', 200);
             },

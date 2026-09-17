@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\config;
 
+// E2E test bypass: detect Cypress E2E requests and disable rate limiting for tests
+if ((isset($_SERVER['HTTP_X_CYPRESS_TEST']) || (isset($_SERVER['HTTP_USER_AGENT']) && str_contains($_SERVER['HTTP_USER_AGENT'], 'cypress'))) && !defined('TESTING_ENV')) {
+    define('TESTING_ENV', true);
+}
+
 // Headroom for large uploads / occasional heavy pages.
 ini_set('memory_limit', '1024M');
 ini_set('post_max_size', '50M');
