@@ -56,7 +56,7 @@ async function syncToServer(subscription) {
 // ---- import-time bootstrap: keep an existing grant in sync -----------------
 if (pushSupported()) {
   navigator.serviceWorker
-    .register('/service-worker.js')
+    .register('/sw.js')
     .then((swReg) => swReg.pushManager.getSubscription().then((sub) => {
       if (sub) return syncToServer(sub).catch((e) => console.warn('[push] resync failed', e?.response?.data?.message || e.message));
       if (Notification.permission === 'granted' && VAPID_PUBLIC_KEY) {

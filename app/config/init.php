@@ -37,6 +37,13 @@ $isProd = ($_ENV['APP_ENV'] ?? 'production') === 'production';
 $isHttps = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
     (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
+if (!isset($_SERVER['SERVER_PORT']) || $_SERVER['SERVER_PORT'] === '') {
+    $_SERVER['SERVER_PORT'] = $isHttps ? '443' : '80';
+}
+if (!isset($_SERVER['SERVER_NAME']) || $_SERVER['SERVER_NAME'] === '') {
+    $_SERVER['SERVER_NAME'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+}
+
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start([
         'cookie_httponly' => true, // prevents XSS attacks from accessing the session cookie

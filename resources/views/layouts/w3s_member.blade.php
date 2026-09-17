@@ -61,7 +61,7 @@ function myFunction(id) {
 
 
 // if ('serviceWorker' in navigator && 'PushManager' in window) {
-//     navigator.serviceWorker.register('/service-worker.js').then((swReg) => {
+//     navigator.serviceWorker.register('/sw.js').then((swReg) => {
 
 //         // Check if the user is already subscribed
 //         swReg.pushManager.getSubscription().then((subscription) => {

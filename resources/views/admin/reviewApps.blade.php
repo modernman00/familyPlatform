@@ -43,7 +43,7 @@
                  <td> {{ $data['email'] }} </td>
 
                    <td>
-                    <a href="/admin/reviewApps/approval?id={{ $data['id'] }}"
+                    <a href="{{ $adminPrefix ?? '/admin' }}/reviewApps/approval?id={{ $data['id'] }}"
                     data-toggle="tooltip"
                               onClick="event.preventDefault(); Swal.fire({title: 'Are you sure you want to approve this application?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, approve it!'}).then((result) => { if (result.isConfirmed) window.location.href = this.href; });"
                               title="Approve">                               <i class="far fa-thumbs-up fa-lg" style="color:#264A0A">
@@ -51,13 +51,13 @@
                             </a>
                         </td>
                           <td>
-                              <a href="/admin/reviewApps/decline?id={{ $data['id'] }}" data-toggle="tooltip"
+                              <a href="{{ $adminPrefix ?? '/admin' }}/reviewApps/decline?id={{ $data['id'] }}" data-toggle="tooltip"
                               onClick="event.preventDefault(); Swal.fire({title: 'Are you sure you want to decline this application?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, decline it!'}).then((result) => { if (result.isConfirmed) window.location.href = this.href; });"
                               title="Decline">
                             <i class="far fa-thumbs-up fa-lg fa-rotate-180" style="color:#A21016"></i>
                                 </a>
                         </td>
-                          <td><a href="/admin/reviewApps/cancel?id={{ $data['id'] }}"
+                          <td><a href="{{ $adminPrefix ?? '/admin' }}/reviewApps/cancel?id={{ $data['id'] }}"
                           data-toggle="tooltip"
                               onClick="event.preventDefault(); Swal.fire({title: 'Are you sure you want to cancel this application?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, cancel it!'}).then((result) => { if (result.isConfirmed) window.location.href = this.href; });"
                               title="Cancel">
@@ -65,7 +65,7 @@
                           </a>
                         </td>
                         <td>
-                          <a href="/admin/reviewApps/delete?id={{ $data['id'] }}" data-toggle="tooltip"
+                          <a href="{{ $adminPrefix ?? '/admin' }}/reviewApps/delete?id={{ $data['id'] }}" data-toggle="tooltip"
                               onClick="event.preventDefault(); Swal.fire({title: 'Are you sure you want to delete this application?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, delete it!'}).then((result) => { if (result.isConfirmed) window.location.href = this.href; });"
                               title="Delete">
                             <i class="fas fa-trash-alt fa-lg" style="color:#F00A0A"></i>

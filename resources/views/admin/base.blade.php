@@ -65,8 +65,14 @@
         </div>
 
         <div id="navbarBasicExample" class="navbar-menu">
+            @php
+                if (empty($adminPrefix)) {
+                    $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin');
+                    $adminPrefix = '/' . trim((string)$adminSecretPath, '/');
+                }
+            @endphp
             <div class="navbar-start">
-                <a href="/admin/dashboard" class="navbar-item">
+                <a href="{{ $adminPrefix }}/dashboard" class="navbar-item">
                     Dashboard
                 </a>
 
@@ -85,12 +91,16 @@
 
                 @endphp
 
-                <a href="/admin/reviewApps" class="navbar-item">
+                <a href="{{ $adminPrefix }}/reviewApps" class="navbar-item">
                     Application(<span id='newApp'>{{ $result }}</span>)
                 </a>
 
-                <a href="/admin/allMembers" class="navbar-item">
+                <a href="{{ $adminPrefix }}/allMembers" class="navbar-item">
                     All Members
+                </a>
+
+                <a href="{{ $adminPrefix }}/telemetry" class="navbar-item">
+                    Telemetry
                 </a>
 
             </div>
@@ -98,7 +108,7 @@
             <div class="navbar-end">
                 <div class="navbar-item">
                     <div class="buttons">
-                        <a href="/admin/signout" class="button is-primary">
+                        <a href="{{ $adminPrefix }}/logout" class="button is-primary">
                             <strong>Sign Out</strong>
                         </a>
 

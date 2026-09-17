@@ -114,7 +114,15 @@
         <table class="main">
             <tr>
                 <td class="header">
-                    <div class="logo-circle">C</div>
+                    @php
+                        $appLogo = getenv('APP_LOGO') ?: (getenv('APP_URL') ? rtrim(getenv('APP_URL'), '/') . '/public/assets/images/logo.png' : '');
+                        $appName = getenv('APP_NAME') ?: 'Family Platform';
+                    @endphp
+                    @if (!empty($appLogo))
+                        <img src="{{ $appLogo }}" alt="{{ $appName }} Logo" style="display: block; margin: 0 auto 15px auto; height: 50px; width: auto;" />
+                    @else
+                        <div class="logo-circle">{{ substr($appName, 0, 1) }}</div>
+                    @endif
                     <h1 class="title">@yield('title', 'Notification')</h1>
                     <p class="subtitle">@yield('subtitle', 'Updates from your family network')</p>
                 </td>
@@ -136,8 +144,23 @@
             </tr>
             <tr>
                 <td class="footer">
-                    <p>You received this email because you have an account with Family Platform.</p>
-                    <p>If you didn't request this, you can safely ignore it.</p>
+                    <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">
+                        Questions? Contact Customer Support at <strong style="color: #495057;">{{ getenv('BIZ_NO') ?: '+44 (0) 800 123 4567' }}</strong> or email <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
+                    </p>
+                    @if (isset($isFunctional) && $isFunctional)
+                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #6c757d;">
+                            <strong>Mandatory Service Notification:</strong> This email is essential to fulfill your account requests or security operations. Unsubscribe is not available for transactional security notifications.
+                        </p>
+                    @else
+                        <p style="margin: 0 0 10px 0; font-size: 12px; color: #6c757d;">
+                            You received this email because you have an active account with {{ getenv('APP_NAME') ?: 'Family Platform' }}.<br/>
+                            <a href="{{ getenv('APP_URL') ?: '#' }}/email/unsubscribe?email={{ urlencode($email ?? '') }}&token={{ $unsubscribeToken ?? '' }}" style="color: #6c757d; text-decoration: underline;">Unsubscribe</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/settings/notifications" style="color: #6c757d; text-decoration: underline;">Manage Notification Preferences</a>
+                        </p>
+                    @endif
+                    <p style="margin: 10px 0 0 0; font-size: 11px; color: #adb5bd;">
+                        &copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }} Ltd. Registered Office: 128 City Road, London, EC1V 2NX, United Kingdom.<br/>
+                        Company Reg No: 12345678 | ICO Reg: ZB123456 | <a href="{{ getenv('APP_URL') ?: '#' }}/privacy" style="color: #adb5bd; text-decoration: underline;">Privacy Policy</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/terms" style="color: #adb5bd; text-decoration: underline;">Terms of Service</a>
+                    </p>
                 </td>
             </tr>
         </table>

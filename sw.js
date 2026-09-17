@@ -213,12 +213,31 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
   return cachedResponse || fetchPromise;
 }
 
+// Helper: 3000ms Timeout Promise Race (Safari & Weak Mobile Network White Screen Protection)
+function fetchWithTimeout(request, timeoutMs = 3000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error('[SW] Navigation network timeout (3000ms) exceeded'));
+    }, timeoutMs);
+
+    fetch(request)
+      .then((response) => {
+        clearTimeout(timer);
+        resolve(response);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
 /**
- * Strategy: Network-First with /offline.html Fallback
+ * Strategy: Network-First with /offline.html Fallback & 3000ms Navigation Timeout Race
  */
 async function networkFirstWithFallback(request) {
   try {
-    const networkResponse = await fetch(request);
+    const networkResponse = await fetchWithTimeout(request, 3000);
     if (networkResponse && networkResponse.status === 200) {
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
@@ -229,8 +248,9 @@ async function networkFirstWithFallback(request) {
     if (cachedResponse) {
       return cachedResponse;
     }
-    const offlinePage = await caches.match('/offline.html');
+    const offlinePage = await caches.match('/offline.html') || await caches.match('/public/offline.html');
     return offlinePage || new Response('<h1>Offline</h1><p>Please check your connection.</p>', {
+      status: 503,
       headers: { 'Content-Type': 'text/html' }
     });
   }

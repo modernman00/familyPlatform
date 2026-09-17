@@ -60,9 +60,9 @@
             </ul>
 
             <div class="d-flex align-items-center gap-2">
-                <!-- Recommend FamilyPlatform Button -->
+                <!-- Recommend / Invite Others Button -->
                 <button class="btn btn-sm d-flex align-items-center gap-1 px-3 py-1 fw-bold text-white rounded-pill shadow-sm" id="btnOpenRecommendModal" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); font-size: 0.85rem;" type="button">
-                    <i class="bi bi-star-fill text-warning"></i> <span>Recommend</span>
+                    <i class="bi bi-person-plus-fill text-warning"></i> <span>Invite Others</span>
                 </button>
 
                 <!-- Notification Component -->
@@ -106,7 +106,7 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>
                             <a class="dropdown-item py-2 px-3 fw-medium text-primary" href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#recommendFriendsModal">
-                                <i class="bi bi-stars me-2 text-warning"></i> Recommend to Friends
+                                <i class="bi bi-person-plus-fill me-2 text-warning"></i> Invite Others
                             </a>
                         </li>
                         <li class="profileNav">

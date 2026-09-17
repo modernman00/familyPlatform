@@ -13,6 +13,8 @@ $router->map('GET', '/terms', 'App\controller\Index@terms', 'terms');
 
 $router->map('GET', '/contact', 'App\controller\Index@contact', 'Contact');
 
+$router->map('GET|POST', '/email/unsubscribe', 'App\controller\Index@unsubscribe', 'email_unsubscribe');
+
 // --- AUTOMATED DEPLOYMENT & SRE HEALTH CHECK (Item #17) ---
 $router->map('GET', '/api/health', function() {
     header('Content-Type: application/json; charset=utf-8');

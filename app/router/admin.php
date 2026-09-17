@@ -18,36 +18,52 @@ $router->map('GET',  $adminSecretPath . '/logout',                'App\controlle
 
 // Enforce Zero-Trust Administrative Security (IP Gating, Rate Limiting, Fingerprint Check)
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-if (str_starts_with($requestUri, '/admin') && \class_exists('\App\middleware\AdminGuardMiddleware')) {
+if ((str_starts_with($requestUri, '/admin') || str_starts_with($requestUri, $adminSecretPath)) && \class_exists('\App\middleware\AdminGuardMiddleware')) {
     \App\middleware\AdminGuardMiddleware::enforce();
 }
 
-
 // NEW APPLICATION
 $router->map('GET', '/admin/reviewApps', 'App\controller\admin\ReviewApps@get', 'NEW APPLICATION');
+$router->map('GET', $adminSecretPath . '/reviewApps', 'App\controller\admin\ReviewApps@get', 'NEW APPLICATION SECRET');
 
 $router->map('GET', '/admin/reviewApps/approval', 'App\controller\admin\ReviewApps@approve', 'NEW APPLICATION APPROVED');
+$router->map('GET', $adminSecretPath . '/reviewApps/approval', 'App\controller\admin\ReviewApps@approve', 'NEW APPLICATION APPROVED SECRET');
 
 $router->map('GET', '/admin/reviewApps/delete', 'App\controller\admin\ReviewApps@delete', 'NEW APPLICATION DELETED');
+$router->map('GET', $adminSecretPath . '/reviewApps/delete', 'App\controller\admin\ReviewApps@delete', 'NEW APPLICATION DELETED SECRET');
 
 $router->map('GET', '/admin/reviewApps/decline', 'App\controller\admin\ReviewApps@decline', 'NEW APPLICATION DECLINED');
+$router->map('GET', $adminSecretPath . '/reviewApps/decline', 'App\controller\admin\ReviewApps@decline', 'NEW APPLICATION DECLINED SECRET');
 
 $router->map('GET', '/admin/reviewApps/cancel', 'App\controller\admin\ReviewApps@cancel', 'NEW APPLICATION CANCEL');
+$router->map('GET', $adminSecretPath . '/reviewApps/cancel', 'App\controller\admin\ReviewApps@cancel', 'NEW APPLICATION CANCEL SECRET');
 
 $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard');
+$router->map('GET', $adminSecretPath . '/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard_secret');
+
+$router->map('POST', '/admin/create-admin', 'App\controller\admin\AdminAuthController@createSuperAdmin', 'create_admin');
+$router->map('POST', $adminSecretPath . '/create-admin', 'App\controller\admin\AdminAuthController@createSuperAdmin', 'create_admin_secret');
 
 // BLOG MANAGEMENT
 $router->map('GET', '/admin/blog/create', 'App\controller\admin\AdminBlogController@create', 'admin_blog_create');
+$router->map('GET', $adminSecretPath . '/blog/create', 'App\controller\admin\AdminBlogController@create', 'admin_blog_create_secret');
 $router->map('POST', '/admin/blog/store', 'App\controller\admin\AdminBlogController@store', 'admin_blog_store');
+$router->map('POST', $adminSecretPath . '/blog/store', 'App\controller\admin\AdminBlogController@store', 'admin_blog_store_secret');
 
 // GDPR DATA ERASURE MANAGEMENT
 $router->map('GET', '/admin/erasure', 'App\controller\admin\AdminErasureController@index', 'admin_erasure_index');
+$router->map('GET', $adminSecretPath . '/erasure', 'App\controller\admin\AdminErasureController@index', 'admin_erasure_index_secret');
 $router->map('POST', '/admin/erasure/process', 'App\controller\admin\AdminErasureController@process', 'admin_erasure_process');
+$router->map('POST', $adminSecretPath . '/erasure/process', 'App\controller\admin\AdminErasureController@process', 'admin_erasure_process_secret');
 
 // TELEMETRY & RUM FRICTION DASHBOARD
 $router->map('GET', '/admin/telemetry', 'App\controller\admin\AdminTelemetryController@index', 'admin_telemetry');
+$router->map('GET', $adminSecretPath . '/telemetry', 'App\controller\admin\AdminTelemetryController@index', 'admin_telemetry_secret');
 
 // GOOGLE AUTHENTICATOR (TOTP) 2-FA SETUP
 $router->map('GET', '/admin/setup-2fa', 'App\controller\admin\TotpSetupController@show', 'admin_totp_setup');
+$router->map('GET', $adminSecretPath . '/setup-2fa', 'App\controller\admin\TotpSetupController@show', 'admin_totp_setup_secret');
 $router->map('POST', '/admin/setup-2fa', 'App\controller\admin\TotpSetupController@save', 'admin_totp_save');
+$router->map('POST', $adminSecretPath . '/setup-2fa', 'App\controller\admin\TotpSetupController@save', 'admin_totp_save_secret');
 $router->map('POST', '/admin/disable-2fa', 'App\controller\admin\TotpSetupController@disable', 'admin_totp_disable');
+$router->map('POST', $adminSecretPath . '/disable-2fa', 'App\controller\admin\TotpSetupController@disable', 'admin_totp_disable_secret');

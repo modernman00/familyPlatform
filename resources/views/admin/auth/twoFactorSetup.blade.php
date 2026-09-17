@@ -212,16 +212,16 @@
         </ol>
 
         <div class="qr-box">
-            @if(str_starts_with(trim($qrCodeSvg), 'data:'))
-                <img src="{{ $qrCodeSvg }}" alt="Google Authenticator QR Code">
-            @else
+            @if(str_starts_with(trim($qrCodeSvg), '<svg') || str_starts_with(trim($qrCodeSvg), '<?xml'))
                 {!! $qrCodeSvg !!}
+            @else
+                <img src="{{ $qrCodeSvg }}" alt="Google Authenticator QR Code" style="width:180px; height:180px; display:block; margin:0 auto;">
             @endif
         </div>
 
         <div class="secret-box">
             <div class="label">Manual Entry Key</div>
-            <div class="secret-key">{{ $secretKey }}</div>
+            <div class="secret-key">{{ $secretKey ?? $secret ?? '' }}</div>
         </div>
 
         <form method="POST" action="{{ $adminPrefix }}/2fa/setup" autocomplete="off">

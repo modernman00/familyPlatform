@@ -54,6 +54,11 @@ foreach ($_ENV as $envKey => $envValue) {
     }
 }
 
+if (in_array(($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production'), ['local', 'development', 'testing'], true) && !isset($_ENV['LOGGER_EMAIL_ALERTS'])) {
+    $_ENV['LOGGER_EMAIL_ALERTS'] = 'false';
+    putenv('LOGGER_EMAIL_ALERTS=false');
+}
+
 $logger = LoggerFactory::createWithMailer();
 $handler = new \Monolog\ErrorHandler($logger);
 $handler->registerExceptionHandler();

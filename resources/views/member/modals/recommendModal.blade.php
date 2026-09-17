@@ -11,7 +11,7 @@
           </div>
           <div>
             <h5 class="modal-title fw-bold mb-0" id="recommendFriendsModalLabel" style="font-size: 1.25rem;">
-              Recommend FamilyPlatform
+              Invite Others to FamilyPlatform
             </h5>
             <small style="color: #c7d2fe; font-size: 0.85rem;">Invite in-laws & friends to launch their own family hub</small>
           </div>
@@ -50,7 +50,7 @@
 
         <!-- Copyable Link Field -->
         <div class="mb-3">
-          <label for="inputShareLink" class="form-label text-muted fw-semibold small mb-1">Your Personal Recommendation Link</label>
+          <label for="inputShareLink" class="form-label text-muted fw-semibold small mb-1">Your Personal Invite Link</label>
           <div class="input-group">
             <input type="text" id="inputShareLink" class="form-control" readonly style="background: #f8fafc; font-size: 0.9rem; font-family: monospace;" value="Generating link...">
             <button class="btn btn-primary px-3 fw-semibold" id="btnCopyShareLink" type="button" style="border-radius: 0 8px 8px 0;">

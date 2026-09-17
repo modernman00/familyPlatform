@@ -56,7 +56,7 @@ class PWAManager {
 
     window.addEventListener('load', () => {
       navigator.serviceWorker
-        .register('/service-worker.js', { scope: '/' })
+        .register('/sw.js', { scope: '/' })
         .then((registration) => {
           // Check for SW updates
           registration.addEventListener('updatefound', () => {

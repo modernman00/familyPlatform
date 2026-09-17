@@ -107,7 +107,7 @@
                 <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary btn-sm px-3 py-2 fw-bold w-100 w-md-auto" style="border-radius: 8px; white-space: nowrap;">
                     <i class="bi bi-person-plus-fill me-1"></i>
                     @if($analysis['recommended_cta_type'] === 'parents')
-                        Add Parents
+                        Add your family
                     @elseif($analysis['recommended_cta_type'] === 'sibling')
                         Add Siblings
                     @elseif($analysis['recommended_cta_type'] === 'partner')

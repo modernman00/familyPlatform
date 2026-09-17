@@ -1,71 +1,83 @@
-# -------------------------------------------------------
-# SECRETS DIRECTORY (.env from /home/bestiias/private)
-# -------------------------------------------------------
+# =============================================================================
+#  FamilyPlatform — hardened .htaccess
+#  Revised 2026-09-17  ·  branch: main
+#  Owner: Felix Dreyden (Red Team – Infra) / Oladele (Deployment)
+# =============================================================================
+
+RewriteEngine On
+
+# ---------------------------------------------------------------------------
+# 0. Secrets directory. app/config/_env.php reads .env from APP_ENV_DIR if that
+#    directory holds a readable .env, otherwise it falls back to the project
+#    root — so a wrong/missing path is harmless. Set the production value here;
+#    it is a filesystem path, not a secret.
+# ---------------------------------------------------------------------------
 <IfModule mod_env.c>
     SetEnv APP_ENV_DIR /home/bestiias/private
 </IfModule>
 
-# -------------------------------------------------------
-# BLOCK DIRECT ACCESS TO SENSITIVE FILES (TAT HOTFIX)
-# -------------------------------------------------------
-<FilesMatch "(^\.env|composer\.(json|lock)|package\.json|package-lock\.json|\.gitignore|phpunit\.xml|phpstan\.neon|\.sql|\.sh|\.bash|\.log)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
+# ---------------------------------------------------------------------------
+# 1. Dot-files and dot-directories — .git, .env*, .htaccess, .gitignore …
+#    (exception: /.well-known/ for ACME + app links)
+# ---------------------------------------------------------------------------
+RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
 
-# SEC — the only PHP the web server may execute directly is the front controller.
-# Everything else (dev scripts, ad-hoc migrations, diagnostics, test harnesses)
-# is denied even if it is left in the deploy. index.php is granted back below.
+# ---------------------------------------------------------------------------
+# 2. Application source / tooling directories — nothing servable lives here.
+#    (resources/assets + resources/images stay reachable; only views blocked)
+# ---------------------------------------------------------------------------
+RewriteRule "^(app|bootstrap|database|scripts|tests|cypress|docs|storage|scratch|tmp|node_modules|vendor)(/|$)" - [F,L]
+RewriteRule "^resources/views(/|$)" - [F,L]
+
+# ---------------------------------------------------------------------------
+# 3. PHP execution lock-down — only the front controller runs.
+# ---------------------------------------------------------------------------
 <FilesMatch "\.php$">
     Require all denied
 </FilesMatch>
-<Files "index.php">
+<FilesMatch "^index\.php$">
     Require all granted
-</Files>
+</FilesMatch>
 
-# Remove the question mark from the request but maintain the query string
-RewriteEngine On
+# ---------------------------------------------------------------------------
+# 4. Sensitive files by name / extension.
+#    robots.txt and sitemap.xml are intentionally NOT matched.
+# ---------------------------------------------------------------------------
+<FilesMatch "(composer\.(json|lock)|package\.json|package-lock\.json|phpunit\.xml|phpstan\.neon|phpstan-baseline\.neon|phpcs\.xml|webpack\.mix\.js|vitest\.config\.js|cypress\.config\.js|crontab\.txt|\.(env|sql|sh|bash|log|lock|neon|dist|bak|orig|save|swp|cache|md)$)">
+    Require all denied
+</FilesMatch>
 
-# Canonical domain enforcement (redirect www.myfamilyplatform.com -> myfamilyplatform.com)
-RewriteCond %{HTTP_HOST} ^www\.myfamilyplatform\.com$ [NC]
-RewriteRule ^(.*)$ https://myfamilyplatform.com/$1 [L,R=301]
+# ---------------------------------------------------------------------------
+# 5. Security response headers
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(self)"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+    Header always unset X-Powered-By
+    Header unset X-Powered-By
 
-# If requested file or directory does not exist, redirect to index.php
+    # HSTS: all HTTPS environments
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # CORP: Prevents cross-origin resource theft
+    Header always set Cross-Origin-Resource-Policy "cross-origin"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# 6. Front-controller routing
+# ---------------------------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
 
+Options -Indexes
 
-
-
-
-# Remove the question mark from the request but maintain the query string
-# RewriteCond %{THE_REQUEST} \?(.*)\ HTTP/
-# RewriteRule ^(.*)$ /$1?%1 [L,R=301]
-
-
-<IfModule mod_headers.c>
-  # Src\SecurityHandler::applyGlobalHeaders() already sets X-Frame-Options,
-  # X-Content-Type-Options, Referrer-Policy and HSTS on PHP responses. These
-  # lines re-assert them on static assets (which bypass PHP) and fix/add the
-  # two the shared-lib gets wrong or omits (SEC-3).
-  Header setifempty X-Frame-Options "SAMEORIGIN"
-  Header setifempty X-Content-Type-Options "nosniff"
-  Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
-  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-  # Deprecated, and its filter is itself an XSS vector on legacy engines. The
-  # shared-lib still emits "1; mode=block" from PHP — unset it then force off.
-  Header unset X-XSS-Protection
-  Header set X-XSS-Protection "0"
-  # Deny powerful features the app never uses.
-  Header set Permissions-Policy "accelerometer=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
-  # NOTE (SEC-2): the response CSP is built per-request by the shared-lib (nonce'd,
-  # currently Report-Only). Flipping it to enforced is staged separately — do not
-  # add a static CSP here, it would collide with the nonce'd one.
-</IfModule>
-
-
-
+# ---------------------------------------------------------------------------
+# 7. Static asset caching
+# ---------------------------------------------------------------------------
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/jpg "access plus 1 year"
@@ -74,20 +86,7 @@ RewriteRule ^ index.php [L]
   ExpiresByType image/png "access plus 1 year"
   ExpiresByType text/css "access plus 1 month"
   ExpiresByType application/pdf "access plus 1 month"
-  ExpiresByType application/javascript "access plus 1 month"
-  ExpiresByType application/x-shockwave-flash "access plus 1 month"
+  ExpiresByType text/x-javascript "access plus 1 month"
   ExpiresByType image/x-icon "access plus 1 year"
-  # Removed ExpiresDefault "access plus 2 days" as it causes aggressive caching of dynamic PHP routes
+  ExpiresDefault "access plus 2 days"
 </IfModule>
-
-# Ensure Service Worker is NEVER cached by the browser or proxies
-<FilesMatch "^service-worker\.js$">
-    FileETag None
-    <IfModule mod_headers.c>
-        Header unset ETag
-        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
-        Header set Pragma "no-cache"
-        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
-    </IfModule>
-</FilesMatch>
-

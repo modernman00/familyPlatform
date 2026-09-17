@@ -38,7 +38,15 @@
                     <!-- Header -->
                     <tr>
                         <td align="center" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); padding: 40px 20px;">
-                            <img src="{{ $_ENV['APP_LOGO'] ?? '' }}" alt="Family Platform Logo" style="display: block; height: 50px; width: auto; filter: brightness(0) invert(1);" />
+                            @php
+                                $appLogo = getenv('APP_LOGO') ?: (getenv('APP_URL') ? rtrim(getenv('APP_URL'), '/') . '/public/assets/images/logo.png' : '');
+                                $appName = getenv('APP_NAME') ?: 'Family Platform';
+                            @endphp
+                            @if (!empty($appLogo))
+                                <img src="{{ $appLogo }}" alt="{{ $appName }} Logo" style="display: block; height: 50px; width: auto; filter: brightness(0) invert(1);" />
+                            @else
+                                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 0.5px;">{{ $appName }}</h1>
+                            @endif
                         </td>
                     </tr>
 
@@ -78,15 +86,34 @@
                     
                 </table>
 
-                <!-- Outside Footer -->
+                <!-- Outside Footer & Legal Small Print -->
                 <table border="0" cellpadding="0" cellspacing="0" width="600" class="email-container" style="margin-top: 30px;">
                     <tr>
                         <td align="center" style="padding: 0 20px;">
                             <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b; line-height: 1.5; text-align: center;">
-                                If you have any questions regarding your account, please contact our Customer Services Team at <strong style="color: #475569;">{{ getenv('BIZ_NO') }}</strong>.
+                                If you have any questions regarding your account, please contact Customer Services at <strong style="color: #475569;">{{ getenv('BIZ_NO') ?: '+44 (0) 800 123 4567' }}</strong> or email <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
                             </p>
-                            <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
-                                This message is confidential and intended solely for the addressee. We will never ask you to supply sensitive security details via email. 
+
+                            @if (isset($isFunctional) && $isFunctional)
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
+                                    <strong>Mandatory Service Notice:</strong> This is a transactional notification regarding your account integrity or security. Because this email is necessary to deliver your requested service, you cannot opt out of critical security messages.
+                                </p>
+                            @else
+                                <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
+                                    You received this message because you opted in to activity and community updates from {{ getenv('APP_NAME') ?: 'Family Platform' }}.<br/>
+                                    If you no longer wish to receive non-essential updates, you can <a href="{{ getenv('APP_URL') ?: '#' }}/email/unsubscribe?email={{ urlencode($email ?? '') }}&token={{ $unsubscribeToken ?? '' }}" style="color: #64748b; text-decoration: underline;">Unsubscribe from these emails</a> or <a href="{{ getenv('APP_URL') ?: '#' }}/settings/notifications" style="color: #64748b; text-decoration: underline;">Manage Notification Preferences</a>.
+                                </p>
+                            @endif
+
+                            @php
+                                $companyName = getenv('COMPANY_NAME') ?: (getenv('APP_NAME') ?: 'Family Platform') . ' Ltd';
+                                $registeredOffice = getenv('COMPANY_ADDRESS') ?: '128 City Road, London, EC1V 2NX, United Kingdom';
+                                $companyReg = getenv('COMPANY_REG') ?: '12345678';
+                                $icoReg = getenv('ICO_REG') ?: 'ZB123456';
+                            @endphp
+                            <p style="margin: 10px 0 0 0; font-size: 11px; color: #cbd5e1; line-height: 1.4; text-align: center;">
+                                &copy; {{ date('Y') }} {{ $companyName }}. Registered Office: {{ $registeredOffice }}.<br/>
+                                Company Reg No: {{ $companyReg }} | ICO Reg: {{ $icoReg }} | <a href="{{ getenv('APP_URL') ?: '#' }}/privacy" style="color: #cbd5e1; text-decoration: underline;">Privacy Policy</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/terms" style="color: #cbd5e1; text-decoration: underline;">Terms of Service</a>
                             </p>
                         </td>
                     </tr>

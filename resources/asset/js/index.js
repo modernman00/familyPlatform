@@ -1,7 +1,7 @@
 'use strict';
 import axios from 'axios';
 import Alpine from 'alpinejs';
-import { qSel, showError } from '@modernman00/shared-js-lib';
+import { qSel, showError } from "@modernman00/shared-js-lib";
 import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
@@ -10,6 +10,7 @@ import './components/recommendModal';
 
 import { profileFeed } from './components/profilePage/feedComponent';
 import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';
+
 
 window.Swal = Swal;
 window.Alpine = Alpine;
