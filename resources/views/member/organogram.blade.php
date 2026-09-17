@@ -440,7 +440,8 @@
                     gender: (node.gender || 'Male').toLowerCase(),
                     img: node.avatar_url || (node.gender === 'Male' ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png'),
                     title: node.bio || 'Family Member',
-                    legacyId: node.user_id
+                    legacyId: node.user_id,
+                    generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined
                 });
             });
         }
@@ -848,7 +849,11 @@
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#64748b',
                 confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Yes, remove from tree',
-                cancelButtonText: 'Cancel'
+                cancelButtonText: 'Cancel',
+                didOpen: (modal) => {
+                    const container = document.querySelector('.swal2-container');
+                    if (container) container.style.zIndex = '100000';
+                }
             }).then(result => {
                 if (result.isConfirmed) {
                     performDelete();

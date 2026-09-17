@@ -46,6 +46,7 @@ final class Organogram extends SingleCustomerData
 
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
 
             // Fetch 6-generation graph data
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
@@ -107,6 +108,7 @@ final class Organogram extends SingleCustomerData
 
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = $isReadOnly;
 
@@ -219,6 +221,7 @@ final class Organogram extends SingleCustomerData
             }
 
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
+            $this->repairOrphanedFamilyGraph($familyCode, $idStr);
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
             $graphData['isReadOnly'] = !BaseController::sessionSharesFamily($familyCode);
 
@@ -658,6 +661,119 @@ final class Organogram extends SingleCustomerData
 
                 $targetUnion = $currentUnionId ?? $parentUnionId;
                 $insChild->execute([$targetUnion, $chNodeId]);
+            }
+        }
+    }
+
+    /**
+     * Auto-heal disconnected or legacy families where nodes exist across generations
+     * but DAG unions and child links are missing (e.g. from partial legacy sync or imported data).
+     */
+    private function repairOrphanedFamilyGraph(string $familyCode, string $rootUserId): void
+    {
+        if (empty($familyCode)) {
+            return;
+        }
+
+        $db = Db::connect2();
+
+        // 1. Fast-path check: if family already has valid unions, no healing required
+        $checkUnions = $db->prepare("SELECT COUNT(*) FROM family_unions WHERE family_code = ?");
+        $checkUnions->execute([$familyCode]);
+        if ((int)$checkUnions->fetchColumn() > 0) {
+            return;
+        }
+
+        // 2. Check if family has multiple nodes that need hierarchical reconnection
+        $checkNodes = $db->prepare("SELECT COUNT(*) FROM family_nodes WHERE family_code = ?");
+        $checkNodes->execute([$familyCode]);
+        if ((int)$checkNodes->fetchColumn() <= 1) {
+            return;
+        }
+
+        // Fetch all nodes for this family ordered by generation level
+        $stmt = $db->prepare("SELECT * FROM family_nodes WHERE family_code = ? ORDER BY generation_level ASC, id ASC");
+        $stmt->execute([$familyCode]);
+        /** @var array<int, array<string, mixed>> $nodes */
+        $nodes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (empty($nodes)) {
+            return;
+        }
+
+        // Identify parent nodes (Gen -1 or bio Father/Mother)
+        $father = null;
+        $mother = null;
+        foreach ($nodes as $n) {
+            $lvl = (int)($n['generation_level'] ?? 0);
+            $bio = strtolower((string)($n['bio'] ?? ''));
+            if ($lvl === -1 || str_contains($bio, 'father')) {
+                if (($n['gender'] ?? '') === 'Male' && !$father) {
+                    $father = $n;
+                }
+            }
+            if ($lvl === -1 || str_contains($bio, 'mother')) {
+                if (($n['gender'] ?? '') === 'Female' && !$mother) {
+                    $mother = $n;
+                }
+            }
+        }
+
+        $insUnion = $db->prepare("
+            INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+            VALUES (?, ?, ?, 'married', 1)
+        ");
+        $insChild = $db->prepare("
+            INSERT INTO family_node_children (union_id, child_id, relationship_type)
+            VALUES (?, ?, 'biological')
+        ");
+
+        $parentUnionId = null;
+        if ($father && $mother) {
+            $insUnion->execute([$familyCode, (int)$father['id'], (int)$mother['id']]);
+            $parentUnionId = (int)$db->lastInsertId();
+        } elseif ($father) {
+            $insUnion->execute([$familyCode, (int)$father['id'], (int)$father['id']]);
+            $parentUnionId = (int)$db->lastInsertId();
+        } elseif ($mother) {
+            $insUnion->execute([$familyCode, (int)$mother['id'], (int)$mother['id']]);
+            $parentUnionId = (int)$db->lastInsertId();
+        }
+
+        // Connect all Generation 0 siblings & primary members to parent union
+        if ($parentUnionId) {
+            foreach ($nodes as $n) {
+                if ((int)($n['generation_level'] ?? 0) === 0) {
+                    $insChild->execute([$parentUnionId, (int)$n['id']]);
+                }
+            }
+        }
+
+        // Find primary root user node to connect Generation 1 children
+        $rootNode = null;
+        foreach ($nodes as $n) {
+            if (($n['user_id'] ?? '') === $rootUserId) {
+                $rootNode = $n;
+                break;
+            }
+        }
+        if (!$rootNode) {
+            foreach ($nodes as $n) {
+                if ((int)($n['generation_level'] ?? 0) === 0) {
+                    $rootNode = $n;
+                    break;
+                }
+            }
+        }
+
+        // Connect Generation 1 children
+        $gen1Children = array_filter($nodes, fn($n) => (int)($n['generation_level'] ?? 0) === 1);
+        if ($rootNode && !empty($gen1Children)) {
+            $insUnion->execute([$familyCode, (int)$rootNode['id'], (int)$rootNode['id']]);
+            $rootUnionId = (int)$db->lastInsertId();
+
+            foreach ($gen1Children as $ch) {
+                $insChild->execute([$rootUnionId, (int)$ch['id']]);
             }
         }
     }

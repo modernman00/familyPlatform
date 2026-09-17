@@ -8,4 +8,6 @@ declare(strict_types=1);
 require_once __DIR__ . '/../app/config/_env.php';
 require_once __DIR__ . '/Support/shims.php';
 
+date_default_timezone_set('Europe/London');
+
 $_SESSION = [];
