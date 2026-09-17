@@ -29,11 +29,23 @@ let assetCacheWarmed = false;
 // server bounces us (e.g. a transient 401 from a session-regeneration race)
 // rather than letting a single blip fail an unrelated spec.
 function authenticate(email, password, attempt = 1, maxAttempts = 3) {
+    // Exponential backoff delay before retry (skipped on first attempt)
+    const delayMs = attempt > 1 ? Math.pow(2, attempt - 1) * 1000 : 0;
+    if (delayMs > 0) {
+        cy.log(`Waiting ${delayMs}ms before retry attempt ${attempt}`);
+        cy.wait(delayMs);
+    }
+
+    // Clear rate limiter before attempting login
     cy.request({
         method: 'POST',
         url: '/tests/clear-rate-limit',
         failOnStatusCode: false,
         headers: { 'X-Cypress-Test': 'true' }
+    }).then((clearRes) => {
+        if (clearRes.status !== 200) {
+            cy.log(`Warning: clear-rate-limit returned ${clearRes.status}`);
+        }
     });
 
     cy.request({

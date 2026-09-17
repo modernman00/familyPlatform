@@ -17,7 +17,7 @@ describe('Family Platform Recommendation & Walled Sanctuary Spawning', () => {
             cy.get('#recommendFriendsModal').should('have.class', 'show');
 
             // Verify Walled Sanctuary USP copy is present in the modal
-            cy.get('#recommendFriendsModal').should('contain.text', 'Recommend FamilyPlatform');
+            cy.get('#recommendFriendsModal').should('contain.text', 'Invite Others to FamilyPlatform');
             cy.get('#recommendFriendsModal').should('contain.text', 'The Walled Sanctuary Guarantee');
             cy.get('#recommendFriendsModal').should('contain.text', 'own independent family network');
             cy.get('#recommendFriendsModal').should('contain.text', 'strictly private');
