@@ -70,6 +70,16 @@ final class RouteDispatch
             'App\controller\admin\AdminAuthController',
         ];
 
+        if (\class_exists('\Src\functionality\SignIn')) {
+            \Src\functionality\SignIn::rehydrateSession();
+        }
+
+        if (!empty($_SESSION['id']) && empty($_SESSION['famCode'])) {
+            $stmt = \Src\Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ?");
+            $stmt->execute([$_SESSION['id']]);
+            $_SESSION['famCode'] = (string) $stmt->fetchColumn();
+        }
+
         if (!in_array($controller, $publicControllers, true)) {
             if (empty($_SESSION['id'])) {
                 $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token';

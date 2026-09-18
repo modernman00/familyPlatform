@@ -19,6 +19,10 @@ final class Login
 
     public function show(): void
     {
+        if (\class_exists('\Src\functionality\SignIn')) {
+            \Src\functionality\SignIn::rehydrateSession();
+        }
+
         if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users')) {
             $userId = $_SESSION['id'] ?? null;
             if ($userId) {

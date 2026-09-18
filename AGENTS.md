@@ -49,10 +49,18 @@ No feature, bug fix, or PR may ever be marked complete by merely asserting "it w
   - *Responsibilities:* Operational logistics, vendor procurement, cloud infrastructure budgets, and cross-company execution feasibility.
 - **Isabella Chen** | Senior Social Media & Growth Adviser to the CEO
   - *Responsibilities:* Viral mechanics, celebration energy, participatory gamification, and social graph invitation loops across all products.
+- **Maya Lin-Vance** | Senior Adviser for Experiential UX & Celebration Design (Social & Lifestyle Cluster)
+  - *Responsibilities:* Recruited by Isabella Chen for `PartyPlatform` & `FamilyPlatform`. Focuses on event micro-moments, viral celebration dynamics, interactive invitation funnels, visual delight, and emotional family connection UX.
+- **Kai Thorne** | Senior Adviser for Creator Growth & Viral Content Strategy (Social & Lifestyle Cluster)
+  - *Responsibilities:* Recruited by Isabella Chen for `PartyPlatform` & `FamilyPlatform`. Specializes in organic viral growth flywheels, short-form content hooks, user-generated content (UGC) loops, and community advocacy.
 - **London** | Senior Business Transformation & Growth Adviser (Social & Lifestyle Cluster)
   - *Responsibilities:* Viral network loops, consumer retention economics, community monetization, and brand ecosystem expansion.
 - **Abiola** | Senior Business Transformation & Growth Adviser (FinTech & Utilities Cluster)
   - *Responsibilities:* LTV:CAC unit economics, financial workflow ergonomics, regulatory monetization, and conversion pricing strategy.
+- **Dr. Tariq Al-Mansoor** | Senior Adviser for FinTech Growth & Consumer Credit Strategy (FinTech & Utilities Cluster)
+  - *Responsibilities:* Recruited by Jumoke Olaogun for `LoanEasyFinance` & `iAccountApp`. Specializes in loan application conversion ergonomics, frictionless KYC/verification flows, credit growth loops, and risk-balanced subscriber yield optimization.
+- **Siobhan O'Connor** | Senior Adviser for Financial Content, Trust & UI Clarity (FinTech & Utilities Cluster)
+  - *Responsibilities:* Recruited by Jumoke Olaogun for `LoanEasyFinance` & `iAccountApp`. Focuses on financial microcopy simplification, regulatory UX transparency, trust-building design patterns, and high-intent account management retention.
 - **Dr. Silas Thorne** | Non-Executive Director (Contrarian & Innovation) & Champion of Debates ⚡
   - *Responsibilities:* **Official Champion of Board Debates.** The "crazy" out-of-the-box thinker mandated to break consensus, challenge standard industry orthodoxy, and ensure authentic, high-friction debate has occurred. Holds the **Chamber 1 Contrarian Gate**—no strategic proposal moves to engineering without Silas certifying that conventional assumptions were killed and bold alternatives explored.
 - **Elena Rostova & Marcus Vance** | Non-Executive Directors (Scale & GTM)
@@ -67,6 +75,8 @@ No feature, bug fix, or PR may ever be marked complete by merely asserting "it w
 - **Richard Sterling** | COO — Operations & Infrastructure Efficiency
 - **Abiola & London** | Cluster Growth Advisers — Commercial Monetization & Viral Flywheels
 - **Isabella Chen** | Social & Celebration Flywheel Adviser
+- **Maya Lin-Vance & Kai Thorne** | Social & Lifestyle Experiential UX, Content & Viral Growth Advisers
+- **Dr. Tariq Al-Mansoor & Siobhan O'Connor** | FinTech Growth, Credit Strategy & Financial Trust Advisers
 - **Dr. Silas Thorne** | Contrarian NED & Champion of Debates (Must issue **Contrarian Debate Clearance**)
 - **Relevant Product & Marketing Directors** (e.g. Noah Brooks & Isabella Torres for FamilyPlatform)
 
