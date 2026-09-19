@@ -1,6 +1,6 @@
 // resources/js/allMembers/handleInput.js
 import { id, msgException, showNotification, checkBox } from "@modernman00/shared-js-lib";
-import { esc } from "../global";
+import { esc, getCsrfToken } from "../global";
 import axios from "axios";
 
 /**
@@ -94,7 +94,12 @@ const renderInviteBlock = (container, rawQuery) => {
       };
 
       try {
-        const response = await axios.post("/register/contactNewMember", postObj);
+        const response = await axios.post("/register/contactNewMember", postObj, {
+          headers: {
+            "X-CSRF-TOKEN": getCsrfToken(),
+            "X-XSRF-TOKEN": getCsrfToken()
+          }
+        });
         showNotification("allMembers", "is-success", response.data.message);
         helpMsg.textContent = "";
       } catch (error) {

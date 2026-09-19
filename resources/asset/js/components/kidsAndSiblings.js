@@ -1,5 +1,5 @@
 import { checkEmailObj } from "../data/checkEmailObj";
-import { id, showError } from "../components/global";
+import { id, showError, getCsrfToken } from "./global";
 import { checkBox } from "./helper/general";
 import { emailIsRegistered } from "./api/index";
 import axios from "axios";
@@ -129,7 +129,12 @@ export const processKidsSiblings = (firstName, famCode = null) => {
         subject: `${firstName} wants you to join the family network`,
       };
 
-      const response = await axios.post("/register/contactNewMember", postObj);
+      const response = await axios.post("/register/contactNewMember", postObj, {
+        headers: {
+          "X-CSRF-TOKEN": getCsrfToken(),
+          "X-XSRF-TOKEN": getCsrfToken()
+        }
+      });
       helpEl.innerHTML = response.data.message || "Invite sent";
 
       setTimeout(() => {

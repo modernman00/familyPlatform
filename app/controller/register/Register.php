@@ -193,9 +193,24 @@ final class Register extends Db
                 } else {
                     $prefix = mb_substr($prefix, 0, 3);
                 }
-                $randomBytes = bin2hex(random_bytes(4));
-                $randomDigits = (int)hexdec(mb_substr($randomBytes, 0, 4)) % 10000;
-                $input['famCode'] = $prefix . str_pad((string)$randomDigits, 4, '0', STR_PAD_LEFT);
+
+                $dbCheck = self::connect2();
+                $attempts = 0;
+                do {
+                    $randomBytes = bin2hex(random_bytes(4));
+                    $randomDigits = (int)hexdec(mb_substr($randomBytes, 0, 4)) % 10000;
+                    $candidateCode = $prefix . str_pad((string)$randomDigits, 4, '0', STR_PAD_LEFT);
+                    if ($attempts >= 3) {
+                        // Expand to alphanumeric suffix if collisions persist
+                        $candidateCode = $prefix . strtoupper(bin2hex(random_bytes(2)));
+                    }
+                    $checkStmt = $dbCheck->prepare('SELECT COUNT(*) FROM personal WHERE famCode = ?');
+                    $checkStmt->execute([$candidateCode]);
+                    $codeExists = ((int)$checkStmt->fetchColumn()) > 0;
+                    $attempts++;
+                } while ($codeExists && $attempts < 10);
+
+                $input['famCode'] = $candidateCode;
             }
 
             // set application id
@@ -252,6 +267,8 @@ final class Register extends Db
                     $getTableData['account']['google_id'] = $providerId;
                 } else if ($provider === 'facebook') {
                     $getTableData['account']['facebook_id'] = $providerId;
+                } else if ($provider === 'apple') {
+                    $getTableData['account']['apple_id'] = $providerId;
                 }
                 // Optional: make password null, but we prefilled a secure random one so it's fine.
             }
@@ -305,6 +322,23 @@ final class Register extends Db
                             $inviterLastName,
                             $inviterContact
                         );
+
+                        // Fallback to family founder / manager if specific inviter is not matched
+                        if (!$inviter) {
+                            $stmtManager = $dbConnection->prepare(
+                                "SELECT a.id, p.firstName, p.lastName, c.email
+                                 FROM personal p
+                                 JOIN account a ON a.id = p.id
+                                 LEFT JOIN contact c ON c.id = p.id
+                                 WHERE p.famCode = ? AND a.deleted_at IS NULL
+                                 ORDER BY p.id ASC LIMIT 1"
+                            );
+                            $stmtManager->execute([(string)$cleanData['famCode']]);
+                            $foundManager = $stmtManager->fetch(\PDO::FETCH_ASSOC);
+                            if (is_array($foundManager) && !empty($foundManager['id'])) {
+                                $inviter = $foundManager;
+                            }
+                        }
 
                         if ($inviter) {
                             $newUserInfo = [
@@ -363,7 +397,23 @@ final class Register extends Db
                         $successMsg = "Hello $firstName - Your registration is complete! An approval request has been sent to your family member. Once they approve, you'll have access to the family network.";
                         msgSuccess(200, $successMsg, "/login");
                     } else {
-                        // Creating a new family — show the code in a modal before redirecting
+                        // Creating a new family — auto-login immediately and redirect to dashboard
+                        if (session_status() === PHP_SESSION_ACTIVE) {
+                            session_regenerate_id(true);
+                        }
+
+                        sessSet('id', (string)$cleanData['id']);
+                        sessSet('manager_id', (string)$cleanData['id']);
+                        sessSet('famCode', (string)$cleanData['famCode']);
+                        sessSet('loggedIn', true);
+
+                        \Src\JwtHandler::issueLoginCookie([
+                            'id' => (string)$cleanData['id'],
+                            'email' => (string)($cleanData['email'] ?? ''),
+                            'role' => 'users',
+                            'token_version' => 1
+                        ]);
+
                         header('Content-Type: application/json');
                         http_response_code(200);
                         echo json_encode([
@@ -371,7 +421,7 @@ final class Register extends Db
                             'message' => "Hello $firstName - Your family has been created!",
                             'family_code' => (string)$cleanData['famCode'],
                             'show_code_modal' => true,
-                            'redirect' => '/login'
+                            'redirect' => '/profilePage'
                         ]);
                         return;
                     }

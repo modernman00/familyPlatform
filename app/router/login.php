@@ -8,6 +8,9 @@ $router->map('GET', '/auth/google', 'App\controller\login\OAuthController@google
 $router->map('GET', '/auth/google/callback', 'App\controller\login\OAuthController@googleCallback', 'googleCallback');
 $router->map('GET', '/auth/facebook', 'App\controller\login\OAuthController@facebookRedirect', 'facebookAuth');
 $router->map('GET', '/auth/facebook/callback', 'App\controller\login\OAuthController@facebookCallback', 'facebookCallback');
+$router->map('GET', '/auth/apple', 'App\controller\login\OAuthController@appleRedirect', 'appleAuth');
+$router->map('POST', '/auth/apple/callback', 'App\controller\login\OAuthController@appleCallback', 'appleCallbackPost');
+$router->map('GET', '/auth/apple/callback', 'App\controller\login\OAuthController@appleCallback', 'appleCallbackGet');
 
 // WebAuthn Routes
 $router->map('POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');

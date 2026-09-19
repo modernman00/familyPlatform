@@ -84,6 +84,17 @@
             </span>
         </button>
 
+        <div class="text-center mt-3" x-show="!codeVerified">
+            <button
+                type="button"
+                @click="requestAdminApproval()"
+                class="btn btn-link text-decoration-none small text-muted p-0"
+                style="font-size: 0.84rem;"
+            >
+                <i class="fas fa-shield-alt me-1"></i> Don't know their exact details? Send request to Family Admin
+            </button>
+        </div>
+
         <!-- Verified Badge (shown after inviter is verified) -->
         <div x-show="codeVerified" x-transition class="alert alert-success mt-3">
             <i class="bi bi-check-circle-fill me-2"></i>

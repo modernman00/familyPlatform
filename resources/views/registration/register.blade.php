@@ -119,8 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="icon"><i class="fas fa-copy"></i></span>
                             <span>Copy Code</span>
                         </button>
+                        <a id="dashboard-btn" href="${redirectUrl}" class="button is-success mt-2" style="width: 100%; font-weight: 600;">
+                            <span class="icon"><i class="fas fa-arrow-right"></i></span>
+                            <span>Go to Family Dashboard</span>
+                        </a>
                         <p class="text-muted small mt-4">Share this code with family members so they can join your network.</p>
-                        <p style="font-size: 0.9rem; color: #999; margin-top: 1rem;">Redirecting in <span id="countdown">6</span> seconds...</p>
+                        <p style="font-size: 0.9rem; color: #999; margin-top: 1rem;">Redirecting to your dashboard in <span id="countdown">6</span> seconds...</p>
                     </div>
                 </div>
             </div>
@@ -236,6 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
         transform: translateY(-1px);
     }
 
+    .stitch-social-btn.apple {
+        background-color: #000000;
+        color: #ffffff;
+        border: 1.5px solid #000000;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .stitch-social-btn.apple:hover {
+        background-color: #1f2937;
+        border-color: #1f2937;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
     .stitch-divider {
         display: flex;
         align-items: center;
@@ -304,7 +322,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 @include('partials.loader', ['notificationId'=> 'register'])
 
                 @if (!isset($_SESSION['oauth_pending']))
-                <a href="/auth/google" class="stitch-social-btn google">
+                @php
+                    $oauthParams = [];
+                    if (!empty($_GET['invite'])) {
+                        $oauthParams['invite'] = (string)$_GET['invite'];
+                    }
+                    if (!empty($_GET['ref'])) {
+                        $oauthParams['ref'] = (string)$_GET['ref'];
+                    }
+                    if (!empty($_GET['claim_node'])) {
+                        $oauthParams['claim_node'] = (string)$_GET['claim_node'];
+                    }
+                    $oauthQueryStr = !empty($oauthParams) ? '?' . http_build_query($oauthParams) : '';
+                @endphp
+
+                <!-- Webview Alert for WhatsApp / Facebook / Instagram in-app browsers -->
+                <div id="webview-alert" class="alert alert-warning mb-3" style="display: none; background-color: #fffbeb; border: 1.5px solid #fde68a; color: #92400e; border-radius: 10px; padding: 12px 16px; font-size: 0.88rem;">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fas fa-external-link-alt" style="font-size: 1.1rem; flex-shrink: 0; color: #d97706;"></i>
+                        <div>
+                            <strong>Browsing inside WhatsApp or Facebook?</strong>
+                            <span class="d-block" style="font-size: 0.82rem; color: #78350f;">For fastest 1-tap sign-in with Google, tap the menu (<strong>⋮</strong> or <strong>⋯</strong>) and choose <strong>"Open in Browser"</strong>.</span>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    (function() {
+                        const ua = navigator.userAgent || navigator.vendor || window.opera;
+                        if (ua && (ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('Instagram') || ua.includes('WhatsApp'))) {
+                            const el = document.getElementById('webview-alert');
+                            if (el) el.style.display = 'block';
+                        }
+                    })();
+                </script>
+
+                <a href="/auth/google{{ $oauthQueryStr }}" class="stitch-social-btn google">
                     <svg width="20" height="20" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
                         <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
@@ -313,7 +365,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     </svg>
                     <span>Continue with Google</span>
                 </a>
-                <a href="/auth/facebook" class="stitch-social-btn facebook">
+
+                <a href="/auth/apple{{ $oauthQueryStr }}" class="stitch-social-btn apple">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.65-.8 1.1-1.92.97-3.05-1 .04-2.16.67-2.84 1.47-.6.69-1.12 1.82-.98 2.92 1.12.09 2.21-.55 2.85-1.34z"/>
+                    </svg>
+                    <span>Continue with Apple</span>
+                </a>
+
+                <a href="/auth/facebook{{ $oauthQueryStr }}" class="stitch-social-btn facebook">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
                         <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                     </svg>
