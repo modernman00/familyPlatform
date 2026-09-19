@@ -36,15 +36,17 @@
         </div>
     </div>
     <div class="w3-col l3 m6 w3-margin-bottom">
-        <div class="w3-container w3-orange w3-text-white w3-padding-16 w3-round shadow-sm">
-            <div class="w3-left"><i class="fa fa-id-card w3-xxxlarge"></i></div>
-            <div class="w3-right">
-                <h3>{{ $resultMetrics['pending_approvals'] ?? 0 }}</h3>
+        <a href="{{ $adminPrefix }}/new-registrations" style="text-decoration:none;">
+            <div class="w3-container w3-orange w3-text-white w3-padding-16 w3-round shadow-sm">
+                <div class="w3-left"><i class="fa fa-user-plus w3-xxxlarge"></i></div>
+                <div class="w3-right">
+                    <h3>{{ $resultMetrics['pending_approvals'] ?? 0 }}</h3>
+                </div>
+                <div class="w3-clear"></div>
+                <h4>New Registrations</h4>
+                <small class="w3-text-white" style="opacity:0.9;">Action Required &bull; View &rarr;</small>
             </div>
-            <div class="w3-clear"></div>
-            <h4>Pending Approvals</h4>
-            <small class="w3-text-white" style="opacity:0.9;">Action Required</small>
-        </div>
+        </a>
     </div>
     <div class="w3-col l3 m6 w3-margin-bottom">
         <div class="w3-container w3-teal w3-padding-16 w3-round shadow-sm">
@@ -75,24 +77,34 @@
     <div class="w3-card-4 w3-white w3-padding-16 w3-round">
         <h4 class="w3-border-bottom w3-padding-16"><b><i class="fa fa-cogs"></i> Administrative Quick Actions</b></h4>
         <div class="w3-row-padding">
-            <div class="w3-quarter w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/reviewApps" class="w3-button w3-block w3-blue w3-padding-large w3-round">
-                    <i class="fa fa-check-circle"></i> Review Applications
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
+                <a href="{{ $adminPrefix }}/new-registrations" class="w3-button w3-block w3-orange w3-text-white w3-padding-large w3-round">
+                    <i class="fa fa-user-plus"></i><br><b>New Registrations</b>
                 </a>
             </div>
-            <div class="w3-quarter w3-margin-bottom">
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
+                <a href="{{ $adminPrefix }}/members" class="w3-button w3-block w3-blue w3-padding-large w3-round">
+                    <i class="fa fa-users"></i><br><b>Registered Users</b>
+                </a>
+            </div>
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
+                <a href="{{ $adminPrefix }}/online-users" class="w3-button w3-block w3-teal w3-padding-large w3-round">
+                    <i class="fa fa-signal"></i><br><b>Online Now</b>
+                </a>
+            </div>
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
                 <a href="{{ $adminPrefix }}/setup-2fa" class="w3-button w3-block w3-purple w3-padding-large w3-round">
-                    <i class="fa fa-shield"></i> Set Up Google 2-FA
+                    <i class="fa fa-shield"></i><br><b>Google 2-FA</b>
                 </a>
             </div>
-            <div class="w3-quarter w3-margin-bottom">
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
                 <a href="{{ $adminPrefix }}/telemetry" class="w3-button w3-block w3-dark-grey w3-padding-large w3-round">
-                    <i class="fa fa-line-chart"></i> View Telemetry
+                    <i class="fa fa-line-chart"></i><br><b>Telemetry</b>
                 </a>
             </div>
-            <div class="w3-quarter w3-margin-bottom">
+            <div class="w3-col l2 m4 s6 w3-margin-bottom">
                 <a href="{{ $adminPrefix }}/erasure" class="w3-button w3-block w3-red w3-padding-large w3-round">
-                    <i class="fa fa-user-times"></i> GDPR Erasure
+                    <i class="fa fa-user-times"></i><br><b>GDPR Erasure</b>
                 </a>
             </div>
         </div>

@@ -719,18 +719,24 @@
                 const cleanName = (node.name || 'Relative').replace(/\s+/g, ' ').trim();
 
                 // Generate opaque invite token via AJAX — zero PII in the URL
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                  document.querySelector('input[name="token"]')?.value || '';
+
                 fetch('/api/invite/generate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
+                        'X-XSRF-TOKEN': csrfToken,
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify({
                         family_code: familyCode,
                         first_name: cleanName.split(' ')[0] || '',
                         last_name: cleanName.split(' ').slice(1).join(' ') || '',
                         node_id: node.id || null,
-                        type: 'organogram'
+                        type: 'organogram',
+                        token: csrfToken
                     })
                 })
                 .then(r => r.json())

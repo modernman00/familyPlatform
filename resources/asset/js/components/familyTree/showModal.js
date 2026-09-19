@@ -77,13 +77,13 @@ export const showPersonDetails = async (personData) => {
       <h4 style="color: var(--primary-color); font-size: 1rem; font-weight: 700; margin-bottom: 6px;">Invite Relative to Claim This Spot</h4>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">Send a personal invitation so they can join and share family memories.</p>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <a href="https://api.whatsapp.com/send?text=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'whatsapp' })" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
+        <a id="treeClaimWhatsappBtn" href="https://api.whatsapp.com/send?text=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'whatsapp' })" target="_blank" rel="noopener noreferrer" class="btn" style="background: #25D366; color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-whatsapp"></i> WhatsApp
         </a>
-        <a href="sms:?body=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'sms' })" class="btn" style="background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
+        <a id="treeClaimSmsBtn" href="sms:?body=${inviteMessage}" onclick="if(window.trackTreeAnalytics) window.trackTreeAnalytics('tree_invite_claim', null, { method: 'sms' })" class="btn" style="background: var(--primary-color); color: white; border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; text-decoration: none; font-weight: 600;">
           <i class="bi bi-chat-text"></i> SMS
         </a>
-        <button type="button" onclick="if(window.copyInviteToClipboard) window.copyInviteToClipboard('${inviteLink}', this)" class="btn btn-secondary" style="border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; font-weight: 600;">
+        <button type="button" id="treeClaimCopyBtn" data-invite-url="${inviteLink}" onclick="if(window.copyInviteToClipboard) window.copyInviteToClipboard(this.getAttribute('data-invite-url') || '${inviteLink}', this)" class="btn btn-secondary" style="border-radius: 20px; padding: 8px 18px; font-size: 0.86rem; font-weight: 600;">
           <i class="bi bi-clipboard-check"></i> Copy Link
         </button>
       </div>
@@ -189,6 +189,49 @@ export const showPersonDetails = async (personData) => {
 
   // Display modal
   targetModal.style.display = 'flex';
+
+  // Asynchronously upgrade invite links to opaque zero-PII tokens if available
+  if (familyCode && !isReadOnly && !isRegistered) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                      document.querySelector('input[name="token"]')?.value || '';
+
+    fetch('/api/invite/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-XSRF-TOKEN': csrfToken,
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify({
+        family_code: familyCode,
+        first_name: cleanName.split(' ')[0] || '',
+        last_name: cleanName.split(' ').slice(1).join(' ') || '',
+        node_id: nodeId || null,
+        type: 'organogram',
+        token: csrfToken
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success' && data.invite_url) {
+        const freshUrl = data.invite_url;
+        const freshMsg = encodeURIComponent(
+          `🌳 *Family Tree Invitation* 🌳\n\n` +
+          `You are invited to connect with the *${familySurname} Family* on FamilyPlatform.\n\n` +
+          `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
+          `👉 ${freshUrl}`
+        );
+        const wBtn = id('treeClaimWhatsappBtn');
+        const sBtn = id('treeClaimSmsBtn');
+        const cBtn = id('treeClaimCopyBtn');
+        if (wBtn) wBtn.href = `https://api.whatsapp.com/send?text=${freshMsg}`;
+        if (sBtn) sBtn.href = `sms:?body=${freshMsg}`;
+        if (cBtn) cBtn.setAttribute('data-invite-url', freshUrl);
+      }
+    })
+    .catch(() => {});
+  }
 };
 
 // Global modal close handlers

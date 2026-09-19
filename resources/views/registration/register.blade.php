@@ -79,13 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('is-loading');
             btn.disabled = true;
         }
-
-        // Set account_type before submit
-        const accountTypeValue = document.querySelector('input[name="account_type"]:checked')?.value === 'create' ? 'true' : 'false';
-        const accountTypeHidden = document.querySelector('#account_type_hidden');
-        if (accountTypeHidden) {
-            accountTypeHidden.value = accountTypeValue;
-        }
     });
 
     // Monitor fetch/XHR to catch JSON responses from registration
@@ -490,7 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button type="submit" name="submit" id="btnSubmit" data-ready="true" class="button is-primary is-fullwidth">Submit form</button>
                     </div>
                     <input type="hidden" name="token" id="token" value="{{ $_SESSION['token'] ?? '' }}">
-                    <input type="hidden" name="account_type" id="account_type_hidden">
 
                 </form>
 

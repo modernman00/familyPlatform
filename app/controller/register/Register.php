@@ -90,8 +90,27 @@ final class Register extends Db
                     }
                 }
 
-                // Deprecated ?famCode= parameter removed (2026-09-16): Security risk.
-                // Use opaque invite tokens (?invite=) or re-invite only.
+                // Backward compatibility: Support legacy ?famCode=&name= URLs from WhatsApp/SMS shares
+                if (empty($registerPostData['famCode']) && !empty($_GET['famCode'])) {
+                    $rawCode = is_string($_GET['famCode'])
+                        ? $_GET['famCode']
+                        : (is_array($_GET['famCode']) && is_string(reset($_GET['famCode'])) ? (string)reset($_GET['famCode']) : '');
+                    $sanitizedCode = (string)preg_replace('/[^A-Za-z0-9]/', '', $rawCode);
+                    if ($sanitizedCode !== '') {
+                        $registerPostData['famCode'] = $sanitizedCode;
+                    }
+                }
+                if (empty($registerPostData['firstName']) && !empty($_GET['name']) && is_string($_GET['name'])) {
+                    $cleaned = checkInput($_GET['name']);
+                    $rawName = is_string($cleaned) ? trim($cleaned) : '';
+                    if ($rawName !== '') {
+                        $parts = explode(' ', $rawName, 2);
+                        $registerPostData['firstName'] = $parts[0];
+                        if (isset($parts[1]) && $parts[1] !== '') {
+                            $registerPostData['lastName'] = $parts[1];
+                        }
+                    }
+                }
 
                 if (!empty($registerPostData['famCode'])) {
                     $famCodeRaw = $registerPostData['famCode'];
@@ -116,7 +135,7 @@ final class Register extends Db
                 }
 
                 $env = getenv('APP_ENV');
-                if (($env === 'development' || $env === 'local') && empty($registerPostData)) {
+                if (($env === 'development' || $env === 'local') && empty($registerPostData) && empty($_GET)) {
                     $registerPostData = [
                         'firstName' => 'John',
                         'lastName' => 'Doe',
@@ -162,7 +181,7 @@ final class Register extends Db
         try {
             $input = GetRequestData::getRequestData();
             Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
-            unset($input['action'], $input['siteKey']);
+            unset($input['action'], $input['siteKey'], $input['account_type'], $input['checkbox']);
 
             // Auto-generate family code if creating a new family (familySurname provided, no famCode)
             if (empty($input['famCode']) && !empty($input['familySurname'])) {
@@ -202,7 +221,7 @@ final class Register extends Db
             // Do NOT trust client-side joining_via_invitation flag—verify by checking
             // if the family code was PRE-POPULATED (from invite token or existing family).
             $existingFamCode = !empty($cleanData['famCode']);
-            $wasInviteParameter = !empty($_GET['invite']) || !empty($_GET['invite_token']);
+            $wasInviteParameter = !empty($_GET['invite']) || !empty($_GET['invite_token']) || !empty($_GET['famCode']);
             $joiningViaInvitation = $existingFamCode && ($wasInviteParameter || !empty($input['temporary_code']));
             $cleanData['familyStatus'] = $joiningViaInvitation ? 'pending' : 'approved';
 

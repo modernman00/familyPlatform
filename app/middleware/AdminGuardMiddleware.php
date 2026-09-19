@@ -113,6 +113,12 @@ final class AdminGuardMiddleware
         return hash_hmac('sha256', $subnet . '|' . $userAgent, $secretKey);
     }
 
+    public static function getSecretAdminPath(): string
+    {
+        $path = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin');
+        return '/' . ltrim($path, '/');
+    }
+
     public static function renderDisguised404(): void
     {
         if (!headers_sent()) {

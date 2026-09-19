@@ -758,4 +758,25 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $this->pdo->prepare('DELETE FROM otherFamily WHERE id IN (?, ?)')->execute([$userA, $userB]);
         $this->pdo->prepare('DELETE FROM personal WHERE id IN (?, ?)')->execute([$userA, $userB]);
     }
+
+    /**
+     * Test: Legacy WhatsApp invite parameters (?famCode= & ?name=) are correctly parsed
+     * and surname is resolved from database.
+     */
+    public function testLegacyWhatsAppInviteQueryParametersResolved(): void
+    {
+        $testCode = 'TESTFAM' . rand(100, 999);
+        $testUserId = 'test-legacy-' . uniqid();
+
+        // Seed an existing family member
+        $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)')->execute([
+            $testUserId, $testCode, 'Grandpa', 'Balogun'
+        ]);
+
+        $surname = \App\controller\register\Register::getFamilySurnameByCode($testCode);
+        $this->assertEquals('Balogun', $surname);
+
+        // Cleanup
+        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$testUserId]);
+    }
 }

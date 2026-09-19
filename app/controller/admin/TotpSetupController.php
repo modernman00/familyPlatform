@@ -52,6 +52,7 @@ final class TotpSetupController extends BaseController
                 'secret' => $secret,
                 'qrUri'  => $qrUri,
                 'account' => $account,
+                'adminPrefix' => '/' . trim((string)($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin'), '/'),
             ]);
         } catch (\Throwable $th) {
             Utility::showError($th);

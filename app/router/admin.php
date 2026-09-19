@@ -38,6 +38,16 @@ $router->map('GET', $adminSecretPath . '/reviewApps/decline', 'App\controller\ad
 $router->map('GET', '/admin/reviewApps/cancel', 'App\controller\admin\ReviewApps@cancel', 'NEW APPLICATION CANCEL');
 $router->map('GET', $adminSecretPath . '/reviewApps/cancel', 'App\controller\admin\ReviewApps@cancel', 'NEW APPLICATION CANCEL SECRET');
 
+// MEMBER MANAGEMENT & PLATFORM DIRECTORY
+$router->map('GET', '/admin/new-registrations', 'App\controller\admin\AdminMembersController@newRegistrations', 'admin_new_registrations');
+$router->map('GET', $adminSecretPath . '/new-registrations', 'App\controller\admin\AdminMembersController@newRegistrations', 'admin_new_registrations_secret');
+
+$router->map('GET', '/admin/members', 'App\controller\admin\AdminMembersController@registeredUsers', 'admin_registered_users');
+$router->map('GET', $adminSecretPath . '/members', 'App\controller\admin\AdminMembersController@registeredUsers', 'admin_registered_users_secret');
+
+$router->map('GET', '/admin/online-users', 'App\controller\admin\AdminMembersController@onlineUsers', 'admin_online_users');
+$router->map('GET', $adminSecretPath . '/online-users', 'App\controller\admin\AdminMembersController@onlineUsers', 'admin_online_users_secret');
+
 $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard');
 $router->map('GET', $adminSecretPath . '/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard_secret');
 
