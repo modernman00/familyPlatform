@@ -343,8 +343,9 @@ self.addEventListener('push', (event) => {
             payload: data
           });
         });
-        // Silent completion - no noisy OS banner needed
-        return;
+        if (data.isSilent) {
+          return;
+        }
       }
 
       // App is in background/locked: Show native OS notification

@@ -17,6 +17,7 @@
   <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
+  <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? '' }}">
   <meta name="pusher-key" content="{{ $_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? '' }}">
   <meta name="pusher-cluster" content="{{ $_ENV['MIX_PUSHER_APP_CLUSTER'] ?? $_SERVER['MIX_PUSHER_APP_CLUSTER'] ?? $_ENV['PUSHER_APP_CLUSTER'] ?? $_SERVER['PUSHER_APP_CLUSTER'] ?? 'eu' }}">
 
