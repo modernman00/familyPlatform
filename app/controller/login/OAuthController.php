@@ -5,6 +5,9 @@ namespace App\controller\login;
 
 use League\OAuth2\Client\Provider\Google;
 use League\OAuth2\Client\Provider\Facebook;
+use Firebase\JWT\JWT;
+use Firebase\JWT\JWK;
+use Firebase\JWT\Key;
 use Src\Db;
 
 class OAuthController
@@ -208,36 +211,132 @@ class OAuthController
             exit('Missing Apple ID token.');
         }
 
-        // Apple sends id_token as a JWT: header.payload.signature
-        $parts = explode('.', $idToken);
-        if (count($parts) !== 3) {
-            http_response_code(400);
-            exit('Malformed Apple ID token.');
-        }
+        // Cryptographically verify ID token against Apple's live JWKS public keys
+        $verifiedClaims = $this->verifyAndParseAppleIdToken($idToken);
 
-        $payloadJson = base64_decode(strtr($parts[1], '-_', '+/'));
-        $claims = json_decode($payloadJson, true);
-        if (!is_array($claims) || empty($claims['sub'])) {
-            http_response_code(400);
-            exit('Invalid Apple ID token payload.');
-        }
+        $appleUserId = $verifiedClaims['sub'];
+        $email = $verifiedClaims['email'];
+        $emailVerified = $verifiedClaims['email_verified'];
 
-        $appleUserId = (string)$claims['sub'];
-        $email = isset($claims['email']) ? (string)$claims['email'] : null;
-        $emailVerified = !empty($claims['email_verified']) && ($claims['email_verified'] === true || $claims['email_verified'] === 'true');
-
-        // User object is only sent by Apple on first authorization
+        // User name object is only sent by Apple on first authorization
         $firstName = null;
         $lastName = null;
         if (!empty($_POST['user']) && is_string($_POST['user'])) {
             $userObj = json_decode($_POST['user'], true);
-            if (is_array($userObj) && !empty($userObj['name'])) {
-                $firstName = $userObj['name']['firstName'] ?? null;
-                $lastName = $userObj['name']['lastName'] ?? null;
+            if (is_array($userObj) && !empty($userObj['name']) && is_array($userObj['name'])) {
+                $firstName = isset($userObj['name']['firstName']) && is_string($userObj['name']['firstName']) ? $userObj['name']['firstName'] : null;
+                $lastName = isset($userObj['name']['lastName']) && is_string($userObj['name']['lastName']) ? $userObj['name']['lastName'] : null;
             }
         }
 
         $this->handleSocialLogin($email, $firstName, $lastName, $appleUserId, 'apple', $emailVerified, $context);
+    }
+
+    /**
+     * Cryptographically verifies Apple ID Token using Apple's JWKS public keys.
+     *
+     * @return array{sub: string, email: ?string, email_verified: bool}
+     */
+    private function verifyAndParseAppleIdToken(string $idToken): array
+    {
+        $keys = $this->getApplePublicKeys();
+        if (empty($keys)) {
+            error_log('[OAuth apple sec-ops] Failed to fetch or parse Apple JWKS public keys.');
+            http_response_code(502);
+            exit('Unable to verify Apple credentials at this time. Please try again.');
+        }
+
+        try {
+            // Decodes JWT, validates signature against matching kid in JWKS, checks exp/nbf/iat
+            $decoded = JWT::decode($idToken, $keys);
+            $claims = (array)$decoded;
+        } catch (\Throwable $e) {
+            error_log('[OAuth apple sec-ops] Apple ID token verification failed: ' . $e->getMessage());
+            http_response_code(401);
+            exit('Apple authentication failed: invalid token signature or claims.');
+        }
+
+        // Validate standard Apple OpenID claims
+        $iss = (string)($claims['iss'] ?? '');
+        if ($iss !== 'https://appleid.apple.com') {
+            error_log('[OAuth apple sec-ops] Invalid Apple issuer: ' . $iss);
+            http_response_code(401);
+            exit('Apple authentication failed: invalid token issuer.');
+        }
+
+        $expectedAud = (string)($_ENV['APPLE_CLIENT_ID'] ?? getenv('APPLE_CLIENT_ID') ?: '');
+        if ($expectedAud !== '' && isset($claims['aud'])) {
+            $aud = is_array($claims['aud']) ? $claims['aud'] : [(string)$claims['aud']];
+            if (!in_array($expectedAud, $aud, true)) {
+                error_log('[OAuth apple sec-ops] Apple audience mismatch. Expected: ' . $expectedAud . ', Got: ' . json_encode($claims['aud']));
+                http_response_code(401);
+                exit('Apple authentication failed: audience mismatch.');
+            }
+        }
+
+        if (empty($claims['sub']) || !is_string($claims['sub'])) {
+            error_log('[OAuth apple sec-ops] Apple ID token missing sub claim.');
+            http_response_code(401);
+            exit('Apple authentication failed: missing subject identifier.');
+        }
+
+        $email = isset($claims['email']) && is_string($claims['email']) ? $claims['email'] : null;
+        $emailVerified = !empty($claims['email_verified']) && ($claims['email_verified'] === true || $claims['email_verified'] === 'true');
+
+        return [
+            'sub'            => (string)$claims['sub'],
+            'email'          => $email,
+            'email_verified' => $emailVerified,
+        ];
+    }
+
+    /**
+     * @return array<string, Key>
+     */
+    private function getApplePublicKeys(): array
+    {
+        $cacheFile = __DIR__ . '/../../../bootstrap/cache/apple_jwks.json';
+        $jwks = null;
+
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 86400)) {
+            $cachedContent = @file_get_contents($cacheFile);
+            if (is_string($cachedContent)) {
+                $jwks = json_decode($cachedContent, true);
+            }
+        }
+
+        if (!is_array($jwks) || empty($jwks['keys'])) {
+            $ch = curl_init('https://appleid.apple.com/auth/keys');
+            if ($ch !== false) {
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT        => 5,
+                    CURLOPT_CONNECTTIMEOUT => 3,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_USERAGENT      => 'FamilyPlatform-OAuth/2.0',
+                ]);
+                /** @var string|false $res */
+                $res = curl_exec($ch);
+                if (is_string($res)) {
+                    $parsed = json_decode($res, true);
+                    if (is_array($parsed) && !empty($parsed['keys'])) {
+                        $jwks = $parsed;
+                        @file_put_contents($cacheFile, $res);
+                    }
+                }
+            }
+        }
+
+        if (!is_array($jwks) || empty($jwks['keys'])) {
+            return [];
+        }
+
+        try {
+            return JWK::parseKeySet($jwks, 'RS256');
+        } catch (\Throwable $e) {
+            error_log('[OAuth apple sec-ops] JWK parseKeySet failed: ' . $e->getMessage());
+            return [];
+        }
     }
 
     /**
