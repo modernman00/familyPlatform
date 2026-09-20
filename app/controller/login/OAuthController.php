@@ -31,6 +31,26 @@ class OAuthController
         ]);
     }
 
+    private function getStateSecret(): string
+    {
+        $candidates = [
+            $_ENV['JWT_SECRET'] ?? null,
+            $_ENV['APP_SECRET'] ?? null,
+            $_ENV['APP_KEY'] ?? null,
+            getenv('JWT_SECRET') ?: null,
+            getenv('APP_SECRET') ?: null,
+            getenv('APP_KEY') ?: null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && $candidate !== '') {
+                return $candidate;
+            }
+        }
+
+        return 'family-oauth-state-secret';
+    }
+
     private function buildSignedState(): string
     {
         $invite = is_string($_GET['invite'] ?? null) ? trim((string)$_GET['invite']) : (is_string($_SESSION['invite_token'] ?? null) ? (string)$_SESSION['invite_token'] : null);
@@ -47,7 +67,7 @@ class OAuthController
 
         $json = (string)json_encode($payload, JSON_UNESCAPED_SLASHES);
         $encoded = rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
-        $secret = (string)(getenv('JWT_SECRET') ?: getenv('APP_SECRET') ?: getenv('APP_KEY') ?: 'family-oauth-state-secret');
+        $secret = $this->getStateSecret();
         $sig = hash_hmac('sha256', $encoded, $secret);
 
         return $encoded . '.' . $sig;
@@ -58,56 +78,74 @@ class OAuthController
      */
     private function assertAndUnpackState(): array
     {
-        $sessionState = $_SESSION['oauth2state'] ?? '';
         $requestState = is_string($_GET['state'] ?? null) ? (string)$_GET['state'] : (is_string($_POST['state'] ?? null) ? (string)$_POST['state'] : '');
-        unset($_SESSION['oauth2state']); // single use, whatever the outcome
+        if ($requestState === '') {
+            http_response_code(400);
+            exit('Missing OAuth state parameter. Please start sign-in again.');
+        }
 
-        if ($sessionState === '' || $requestState === '' || !hash_equals($sessionState, $requestState)) {
+        // 1. Signed HMAC State (Cryptographically authenticated & stateless)
+        if (str_contains($requestState, '.')) {
+            [$encoded, $sig] = explode('.', $requestState, 2);
+            $secret = $this->getStateSecret();
+            $expectedSig = hash_hmac('sha256', $encoded, $secret);
+            if (!hash_equals($expectedSig, $sig)) {
+                error_log('[OAuth SecOps] Tampered OAuth state signature detected.');
+                http_response_code(400);
+                exit('Invalid or tampered OAuth state. Please start sign-in again.');
+            }
+
+            $decodedJson = base64_decode(strtr($encoded, '-_', '+/'));
+            $data = json_decode((string)$decodedJson, true);
+            if (!is_array($data)) {
+                return ['invite_token' => null, 'ref_token' => null, 'claim_node' => null];
+            }
+
+            // Verify TTL (15 minutes expiration to prevent replay attacks)
+            $iat = isset($data['iat']) && is_numeric($data['iat']) ? (int)$data['iat'] : 0;
+            if ($iat > 0 && (time() - $iat > 900)) {
+                error_log('[OAuth SecOps] Expired OAuth state (age > 900s).');
+                http_response_code(400);
+                exit('Sign-in session expired. Please start sign-in again.');
+            }
+
+            // Restore pending referral in session if valid
+            if (!empty($data['ref_token'])) {
+                $refToken = (string)$data['ref_token'];
+                $resolved = \App\services\FamilyRecommendationService::verifyAndResolveReferralToken($refToken);
+                if ($resolved !== null) {
+                    $_SESSION['pending_referral'] = [
+                        'inviter_id'   => $resolved['inviter_id'],
+                        'inviter_name' => $resolved['inviter_name'],
+                        'token'        => $refToken,
+                    ];
+                }
+            }
+
+            // Restore invite token in session
+            if (!empty($data['invite_token'])) {
+                $_SESSION['invite_token'] = (string)$data['invite_token'];
+            }
+
+            unset($_SESSION['oauth2state']);
+
+            return [
+                'invite_token' => !empty($data['invite_token']) ? (string)$data['invite_token'] : null,
+                'ref_token'    => !empty($data['ref_token']) ? (string)$data['ref_token'] : null,
+                'claim_node'   => !empty($data['claim_node']) ? (int)$data['claim_node'] : null,
+            ];
+        }
+
+        // 2. Legacy Stateful Fallback (Session check)
+        $sessionState = $_SESSION['oauth2state'] ?? '';
+        unset($_SESSION['oauth2state']);
+
+        if ($sessionState === '' || !hash_equals($sessionState, $requestState)) {
             http_response_code(400);
             exit('Invalid or missing OAuth state. Please start sign-in again.');
         }
 
-        if (!str_contains($requestState, '.')) {
-            return ['invite_token' => null, 'ref_token' => null, 'claim_node' => null];
-        }
-
-        [$encoded, $sig] = explode('.', $requestState, 2);
-        $secret = (string)(getenv('JWT_SECRET') ?: getenv('APP_SECRET') ?: getenv('APP_KEY') ?: 'family-oauth-state-secret');
-        $expectedSig = hash_hmac('sha256', $encoded, $secret);
-        if (!hash_equals($expectedSig, $sig)) {
-            http_response_code(400);
-            exit('Tampered OAuth state signature.');
-        }
-
-        $decodedJson = base64_decode(strtr($encoded, '-_', '+/'));
-        $data = json_decode((string)$decodedJson, true);
-        if (!is_array($data)) {
-            return ['invite_token' => null, 'ref_token' => null, 'claim_node' => null];
-        }
-
-        // Restore pending referral in session if valid
-        if (!empty($data['ref_token'])) {
-            $refToken = (string)$data['ref_token'];
-            $resolved = \App\services\FamilyRecommendationService::verifyAndResolveReferralToken($refToken);
-            if ($resolved !== null) {
-                $_SESSION['pending_referral'] = [
-                    'inviter_id'   => $resolved['inviter_id'],
-                    'inviter_name' => $resolved['inviter_name'],
-                    'token'        => $refToken,
-                ];
-            }
-        }
-
-        // Restore invite token in session
-        if (!empty($data['invite_token'])) {
-            $_SESSION['invite_token'] = (string)$data['invite_token'];
-        }
-
-        return [
-            'invite_token' => !empty($data['invite_token']) ? (string)$data['invite_token'] : null,
-            'ref_token'    => !empty($data['ref_token']) ? (string)$data['ref_token'] : null,
-            'claim_node'   => !empty($data['claim_node']) ? (int)$data['claim_node'] : null,
-        ];
+        return ['invite_token' => null, 'ref_token' => null, 'claim_node' => null];
     }
 
     public function googleRedirect(): void
