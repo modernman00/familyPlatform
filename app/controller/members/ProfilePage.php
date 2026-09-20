@@ -222,7 +222,7 @@ final class ProfilePage extends ProcessImg
                 // must never turn a successful post into a failed response.
                 try {
                     \App\controller\members\PostMessage::getNewPostAndEmail($result);
-                    \App\controller\members\PostMessage::getNewPostPusher();
+                    \App\controller\members\PostMessage::getNewPostPusher($result);
                 } catch (\Throwable $th) {
                     error_log((string) $th);
                 }

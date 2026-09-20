@@ -83,6 +83,7 @@
   <script nonce="{{ $nonce }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
   <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
+  <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
 
   <script>
     if ('serviceWorker' in navigator) {

@@ -69,10 +69,10 @@ class PushNotificationClass extends VapidClass
         }
 
         $userIds = is_array($userId) ? $userId : [$userId];
-        $publicKey = (string) (getenv('VAPID_PUBLIC_KEY') ?: '');
-        $privateKey = (string) (getenv('VAPID_PRIVATE_KEY') ?: '');
-        $subject = (string) (getenv('VAPID_SUBJECT') ?: 'mailto:support@myfamilyplatform.com');
-        $appLogo = (string) (getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png');
+        $publicKey = trim((string) ($_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? (getenv('VAPID_PUBLIC_KEY') ?: ($_ENV['MIX_VAPID_PUBLIC_KEY'] ?? ''))), "'\"");
+        $privateKey = trim((string) ($_ENV['VAPID_PRIVATE_KEY'] ?? $_SERVER['VAPID_PRIVATE_KEY'] ?? (getenv('VAPID_PRIVATE_KEY') ?: ($_ENV['MIX_VAPID_PRIVATE_KEY'] ?? ''))), "'\"");
+        $subject = trim((string) ($_ENV['VAPID_SUBJECT'] ?? $_SERVER['VAPID_SUBJECT'] ?? (getenv('VAPID_SUBJECT') ?: 'mailto:support@myfamilyplatform.com')), "'\"");
+        $appLogo = trim((string) ($_ENV['APP_LOGO'] ?? $_SERVER['APP_LOGO'] ?? (getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png')), "'\"");
 
         if (empty($publicKey) || empty($privateKey)) {
             error_log('[PushNotification] VAPID keys not configured in environment.');

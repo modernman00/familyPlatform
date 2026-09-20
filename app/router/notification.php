@@ -22,7 +22,21 @@ $router->map(
 
 $router->map(
   method: 'GET', 
-  route: '/member/notifications/id/[a:id]/[a:famCode]', 
+  route: '/member/notifications/user', 
+  target: 'App\controller\NotificationController@notificationById',
+  name: 'session notification by id'
+);
+
+$router->map(
+  method: 'GET', 
+  route: '/api/notifications', 
+  target: 'App\controller\NotificationController@notificationById',
+  name: 'api notification by id'
+);
+
+$router->map(
+  method: 'GET', 
+  route: '/member/notifications/id/[**:id]/[**:famCode]', 
   target: 'App\controller\NotificationController@notificationById',
   name: 'all notification by id'
 );

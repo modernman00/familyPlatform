@@ -200,10 +200,24 @@ final class PostMessage
      * @return void
      */
 
-    public static function getNewPostPusher()
+    public static function getNewPostPusher(int|string|null $postNoOverride = null)
     {
-        $id = \cleanSession((string)$_SESSION['id']);
-        $famCode = checkInput($_SESSION['famCode']);
+        $id = \cleanSession((string)($_SESSION['id'] ?? ''));
+        $famCode = checkInput($_SESSION['famCode'] ?? '');
+
+        if ($postNoOverride !== null) {
+            $post = Post::postByNo($postNoOverride);
+            if (!empty($post)) {
+                $targetFamCode = !empty($post['postFamCode']) ? (string)$post['postFamCode'] : (is_string($famCode) ? $famCode : '');
+                try {
+                    Pusher::broadcastToFamily($targetFamCode, 'new-post', [$post]);
+                } catch (\Throwable $th) {
+                    error_log("Pusher post broadcast failed: " . $th->getMessage());
+                }
+                return;
+            }
+        }
+
         $newPost = self::fetchNewMsg(
             fetchFunction: [AllMembersData::class, 'getUnpublishedPostByFamCode'],
             params: [$famCode, $id]
@@ -262,8 +276,8 @@ final class PostMessage
 
             self::notifyMembersByPushNotification(
                 results: $results,
-                postId: $newComment[0]['id'],
-                postOriginName: $newComment[0]['fullName'],
+                postId: (string)$newComment[0]['id'],
+                postOriginName: (string)($newComment[0]['fullName'] ?? 'A member'),
                 url: $url,
                 notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
             );
@@ -603,11 +617,37 @@ final class PostMessage
             $memberData['postOriginName'] = $postOriginName;
             $memberData['url'] = $url;
             $memberData['img'] = $getPostProfilePics;
-            // Send push notification to all members WITH THE FAMILY CODE
+            $targetUserId = (string)($memberData['id'] ?? '');
+            if ($targetUserId === '') {
+                continue;
+            }
+
+            // 1. Insert into in-app notification table so navbar bell & dropdown reflect the new post
+            try {
+                $db = \Src\Db::connect2();
+                $stmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, 'Post', ?, 'new', NOW())
+                ");
+                $stmt->execute([
+                    $postId,
+                    $targetUserId,
+                    $postOriginName,
+                    "New update from {$postOriginName}",
+                    $notificationMsg
+                ]);
+            } catch (\Throwable $e) {
+                error_log('[PostMessage] In-app notification write failed: ' . $e->getMessage());
+            }
+
+            // 2. Send push notification to member
             PushNotificationClass::sendPushNotification(
-                userId: $memberData['id'],
+                userId: $targetUserId,
                 message: $notificationMsg,
-                url: $url
+                url: $url,
+                title: 'Family Platform Update',
+                tag: 'post-' . $postId
             );
         }
     }

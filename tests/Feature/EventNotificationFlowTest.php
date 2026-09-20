@@ -147,4 +147,69 @@ final class EventNotificationFlowTest extends SocialFeedTestCase
         $this->assertSame('Annual Summer BBQ', $row['notification_name'] ?? '');
         $this->assertSame('new', $row['notification_status'] ?? '');
     }
+
+    public function testAllMembersEmailByFamCodeResolvesUserFamiliesMembers(): void
+    {
+        $joinedUserId = 'PU_JOINED_' . bin2hex(random_bytes(4));
+        $joinedEmail = "joined_{$joinedUserId}@example.test";
+
+        // Seed account and personal with different primary famCode
+        $this->pdo->prepare("
+            INSERT INTO account (id, email, password, status) VALUES (?, ?, 'test_password_hash', 'active')
+        ")->execute([$joinedUserId, $joinedEmail]);
+
+        $this->pdo->prepare("
+            INSERT INTO personal (id, firstName, lastName, famCode)
+            VALUES (?, 'Joined', 'Member', 'PRIMARY_FAM_CODE')
+        ")->execute([$joinedUserId]);
+
+        // Link to $this->famCode via user_families table
+        $this->pdo->prepare("
+            INSERT INTO user_families (user_id, family_code, status, role)
+            VALUES (?, ?, 'approved', 'member')
+        ")->execute([$joinedUserId, $this->famCode]);
+
+        $this->seededMemberIds[] = $joinedUserId;
+
+        $results = AllMembersData::AllMembersEmailByFamCode($this->famCode);
+        $emails = array_column($results, 'email');
+
+        $this->assertContains($joinedEmail, $emails, 'Multi-family member must receive notifications for joined family code');
+
+        // Cleanup user_families record
+        $this->pdo->prepare("DELETE FROM user_families WHERE user_id = ?")->execute([$joinedUserId]);
+        $this->pdo->prepare("DELETE FROM account WHERE id = ?")->execute([$joinedUserId]);
+    }
+
+    public function testNotificationOrchestratorDispatchPersistsDurableNotification(): void
+    {
+        $targetUserId = 'PU_ORCH_TARGET_' . bin2hex(random_bytes(4));
+        $this->seededMemberIds[] = $targetUserId;
+
+        $notifId = \App\services\NotificationOrchestrator::dispatch(
+            userId: $targetUserId,
+            category: 'social',
+            priority: 'medium',
+            title: 'Test Notification Title',
+            body: 'Test Notification Body Content',
+            actionUrl: '/profilePage',
+            tag: 'test-tag',
+            familyCode: $this->famCode,
+            metadata: [
+                'sender_id' => $this->authorId,
+                'sender_name' => 'AuthorTester'
+            ]
+        );
+
+        $this->assertNotEmpty($notifId);
+
+        // Verify row in notification table
+        $stmt = $this->pdo->prepare("SELECT * FROM notification WHERE receiver_id = ? AND notification_name = ?");
+        $stmt->execute([$targetUserId, 'Test Notification Title']);
+        $row = $stmt->fetch();
+
+        $this->assertNotEmpty($row, 'NotificationOrchestrator::dispatch must write to notification table');
+        $this->assertSame('Test Notification Title', $row['notification_name'] ?? '');
+        $this->assertSame('new', $row['notification_status'] ?? '');
+    }
 }

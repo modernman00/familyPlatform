@@ -97,17 +97,22 @@ export const addToNotificationTab = (data) => {
     }
 };
 
-const yourId = localStorage.getItem('requesterId');
-const famCode = localStorage.getItem('requesterFamCode');
-const notificationURL = `/member/notifications/id/${yourId}/${famCode}`;
+const fetchUserNotifications = () => {
+    const yourId = localStorage.getItem('requesterId');
+    const famCode = localStorage.getItem('requesterFamCode');
+    const notificationURL = (yourId && famCode && yourId !== 'null' && famCode !== 'null')
+        ? `/member/notifications/id/${encodeURIComponent(yourId)}/${encodeURIComponent(famCode)}`
+        : '/member/notifications/user';
 
-if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
     axios.get(notificationURL)
         .then(res => {
             const data = res.data.message;
-            if (data && data.length > 0) {
+            if (data && Array.isArray(data) && data.length > 0) {
                 sessionStorage.setItem('notificationCount', data.length);
                 updateNotificationBadge(data.length);
+
+                const tab = qSel('.notification_tab');
+                if (tab) tab.innerHTML = '';
 
                 data.forEach(element => {
                     addToNotificationTab(element);
@@ -118,7 +123,7 @@ if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
                     render(updateNotificationTiming);
                 }
             } else {
-                sessionStorage.setItem('notificationCount', 0);
+                sessionStorage.setItem('notificationCount', '0');
                 updateNotificationBadge(0);
 
                 const tab = qSel('.notification_tab');
@@ -132,9 +137,14 @@ if (yourId && famCode && yourId !== 'null' && famCode !== 'null') {
             }
         })
         .catch(error => {
-            showError(error);
+            // Silently handle error if session expired
+            if (error?.response?.status !== 401) {
+                showError(error);
+            }
         });
-}
+};
+
+fetchUserNotifications();
 
 // Dropdown controls
 const notificationBtn = id('notificationBtn');

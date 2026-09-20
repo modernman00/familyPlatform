@@ -68,6 +68,21 @@ class NotificationService
 
         // In-app push notification to the approver
         try {
+            // Write to durable notification table for in-app navbar bell & dropdown
+            $requesterName = $emailData['requesterName'] ?: 'Someone';
+            $stmt = $this->pdo->prepare("
+                INSERT INTO notification 
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
+                VALUES (?, ?, ?, ?, 'Family Request', ?, 'new', NOW())
+            ");
+            $stmt->execute([
+                $newUserInfo['id'] ?? 'system',
+                $approverId,
+                $requesterName,
+                "Family Join Request",
+                "{$requesterName} wants to join your {$familyCode} family network."
+            ]);
+
             \App\classes\PushNotificationClass::sendPushNotification(
                 userId: $approverId,
                 message: ($emailData['requesterName'] ?: 'Someone') . " wants to join your {$familyCode} family network. Tap to approve or deny.",
@@ -117,8 +132,18 @@ class NotificationService
             error_log('[NotificationService] Confirmation email failed: ' . $e->getMessage());
         }
 
-        // In-app push
+        // In-app push & notification table write
         try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO notification 
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
+                VALUES ('system', ?, 'Family Platform', 'Membership Approved', 'Family Request', ?, 'new', NOW())
+            ");
+            $stmt->execute([
+                $userId,
+                "Great news! You've been approved to join the {$familyCode} family network."
+            ]);
+
             \App\classes\PushNotificationClass::sendPushNotification(
                 userId: $userId,
                 message: "Great news! You've been approved to join the {$familyCode} family network. Visit your profile to get started.",
