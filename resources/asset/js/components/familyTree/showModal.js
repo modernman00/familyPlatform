@@ -1,5 +1,5 @@
 import { id } from "@modernman00/shared-js-lib";
-import { esc } from '../global';
+import { esc, getCsrfToken } from '../global';
 
 const personModal = id('personModal');
 const modalBody = id('modalBody');
@@ -192,13 +192,13 @@ export const showPersonDetails = async (personData) => {
 
   // Asynchronously upgrade invite links to opaque zero-PII tokens if available
   if (familyCode && !isReadOnly && !isRegistered) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                      document.querySelector('input[name="token"]')?.value || '';
+    const csrfToken = getCsrfToken();
 
     fetch('/api/invite/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
         'X-XSRF-TOKEN': csrfToken,
         'X-CSRF-TOKEN': csrfToken
@@ -207,6 +207,7 @@ export const showPersonDetails = async (personData) => {
         family_code: familyCode,
         first_name: cleanName.split(' ')[0] || '',
         last_name: cleanName.split(' ').slice(1).join(' ') || '',
+        email: email || '',
         node_id: nodeId || null,
         type: 'organogram',
         token: csrfToken
@@ -214,7 +215,7 @@ export const showPersonDetails = async (personData) => {
     })
     .then(r => r.json())
     .then(data => {
-      if (data.status === 'success' && data.invite_url) {
+      if (data && data.status === 'success' && data.invite_url) {
         const freshUrl = data.invite_url;
         const freshMsg = encodeURIComponent(
           `🌳 *Family Tree Invitation* 🌳\n\n` +
@@ -230,7 +231,9 @@ export const showPersonDetails = async (personData) => {
         if (cBtn) cBtn.setAttribute('data-invite-url', freshUrl);
       }
     })
-    .catch(() => {});
+    .catch((err) => {
+      console.warn('[showModal] Invite token fetch fallback:', err);
+    });
   }
 };
 

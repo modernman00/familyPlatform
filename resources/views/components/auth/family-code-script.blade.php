@@ -3,10 +3,18 @@
 <script>
 (function() {
     function familyCodeApprovalComponent() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasDirectInvite = Boolean(
+            urlParams.get('invite') || 
+            urlParams.get('invite_token') || 
+            urlParams.get('claim_node') || 
+            (urlParams.get('famCode') && (urlParams.get('name') || urlParams.get('firstName')))
+        );
+
         return {
             familyCode: '{{ old("famCode", "") }}',
             codeExists: false,
-            codeVerified: false,
+            codeVerified: hasDirectInvite,
             showInviterModal: false,
             checkingCode: false,
             verifying: false,
