@@ -6,6 +6,7 @@
 @endpush
 @push('meta')
     @if(!empty($ogMeta))
+        <meta property="fb:app_id" content="{{ $_ENV['FACEBOOK_APP_ID'] ?? $_ENV['FB_APP_ID'] ?? '' }}">
         <meta property="og:type" content="video.other">
         <meta property="og:site_name" content="Family Platform">
         <meta property="og:title" content="{{ $ogMeta['title'] }}">

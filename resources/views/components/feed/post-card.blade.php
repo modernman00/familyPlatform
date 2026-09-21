@@ -51,15 +51,31 @@
     <div class="row g-2 mb-3 px-1">
       <template x-for="(img, idx) in post.images" :key="idx">
         <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
-          <a href="#" @click.prevent="openLightbox(post.images, idx)" role="button" aria-label="View enlarged photo" style="display:block; overflow:hidden; border-radius:10px;">
-            <img :src="getPostImageUrl(img)" 
-                 style="width:100%; border-radius: 10px; max-height: 380px; object-fit: cover; transition: transform 0.2s ease; cursor: pointer;" 
-                 alt="Family post image" 
-                 loading="lazy"
-                 onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';"
-                 onmouseover="this.style.transform='scale(1.02)';" 
-                 onmouseout="this.style.transform='scale(1)';">
-          </a>
+          <div class="position-relative overflow-hidden" style="border-radius:10px;">
+            <a href="#" 
+               @click.prevent="openLightbox(post.images, idx)" 
+               @dblclick.prevent.stop="triggerHeartBurst(post, idx)"
+               role="button" 
+               aria-label="View enlarged photo or double tap to like" 
+               style="display:block; overflow:hidden; border-radius:10px; position:relative;">
+              <img :src="getPostImageUrl(img)" 
+                   class="post-media-first-img w-100"
+                   style="border-radius: 10px; max-height: 380px; object-fit: cover; cursor: pointer;" 
+                   alt="Family post image" 
+                   loading="lazy"
+                   onerror="this.onerror=null; const c = this.closest('.post-img-col'); if(c) c.style.display='none';">
+            </a>
+
+            <!-- Floating Spring Heart Burst (Instagram Standard) -->
+            <div class="feed-heart-burst" 
+                 x-show="heartBursts[post.post_no + '_' + idx]" 
+                 x-cloak 
+                 aria-hidden="true">
+              <svg class="heart-burst-svg" viewBox="0 0 24 24" width="76" height="76" fill="#ff2d55" stroke="#ffffff" stroke-width="1.2">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </div>
+          </div>
         </div>
       </template>
     </div>

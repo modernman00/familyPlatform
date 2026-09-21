@@ -150,6 +150,28 @@ describe('Social Feed Interactions', () => {
         });
     });
 
+    it('opens and closes the image lightbox when clicking on a post picture', () => {
+        // Wait for feed-posts-container to mount, then open the lightbox
+        cy.get('.feed-posts-container', { timeout: 10000 }).should('exist').then(($el) => {
+            cy.window().then((win) => {
+                const feed = win.Alpine?.$data($el[0]);
+                expect(feed).to.exist;
+                feed.openLightbox(['avatarM.png'], 0);
+            });
+        });
+
+        // Lightbox overlay must open and be positioned full-viewport fixed
+        cy.get('.lightbox-overlay').should('be.visible')
+            .and('have.css', 'position', 'fixed')
+            .and('have.css', 'z-index', '99999');
+
+        // Click the close button
+        cy.get('.lightbox-overlay button[aria-label="Close photo view"]').click();
+
+        // Lightbox must close
+        cy.get('.lightbox-overlay').should('not.be.visible');
+    });
+
     // ── Pusher private-channel authorisation (cross-family realtime leak) ──────
     // The feed/events channels are now `private-family-<code>` and /pusher/auth
     // must only sign a subscription the session actually belongs to. Test user

@@ -15,6 +15,7 @@
         $ogImageUrl = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/public/img/og-invite.jpg';
         $ogUrl      = rtrim(getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/') . '/join' . (!empty($refToken) ? '?ref=' . urlencode($refToken) : '');
     @endphp
+    <meta property="fb:app_id"        content="{{ $_ENV['FACEBOOK_APP_ID'] ?? $_ENV['FB_APP_ID'] ?? '' }}">
     <meta property="og:type"         content="website">
     <meta property="og:site_name"    content="FamilyPlatform">
     <meta property="og:title"        content="{{ $ogTitle }}">

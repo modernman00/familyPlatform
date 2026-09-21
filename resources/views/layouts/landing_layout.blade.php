@@ -18,6 +18,7 @@
     $defaultOgImage = $appUrl . '/public/img/og-invite.jpg';
   @endphp
   <!-- OpenGraph & Social Sharing Meta Tags -->
+  <meta property="fb:app_id" content="{{ $_ENV['FACEBOOK_APP_ID'] ?? $_ENV['FB_APP_ID'] ?? '' }}">
   <meta property="og:site_name" content="Family Platform">
   <meta property="og:type" content="website">
   <meta property="og:title" content="@yield('og_title', 'Family Platform')">

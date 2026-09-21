@@ -41,3 +41,26 @@
         <span class="pwa-tab-label">Alerts</span>
     </a>
 </nav>
+
+<script>
+(function() {
+    try {
+        var p = window.location.pathname.toLowerCase();
+        var nav = document.getElementById('pwaBottomNav');
+        if (!nav) return;
+        var tabs = nav.querySelectorAll('.pwa-tab-item');
+        tabs.forEach(function(t) {
+            var dt = t.dataset.tab;
+            if (dt === 'tree' && p.indexOf('/organogram') !== -1) {
+                t.classList.add('active');
+            } else if (dt === 'reels' && (p.indexOf('/reels') !== -1 || p.indexOf('/familystudio') !== -1)) {
+                t.classList.add('active');
+            } else if (dt === 'members' && p.indexOf('/allmembers') !== -1) {
+                t.classList.add('active');
+            } else if (dt === 'feed' && (p.indexOf('/profilepage') !== -1 || p === '/' || p === '')) {
+                t.classList.add('active');
+            }
+        });
+    } catch(e) {}
+})();
+</script>

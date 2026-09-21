@@ -166,10 +166,10 @@
       </template>
     </div>
     
-    <!-- Premium Alpine Lightbox Modal -->
+    <!-- Premium Alpine Lightbox Modal with Drag-to-Dismiss Gesture -->
     <div x-cloak x-show="lightboxOpen" 
          class="lightbox-overlay"
-         style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.92); z-index: 99999; backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center;"
+         :style="getLightboxOverlayStyle()"
          x-transition:enter="transition ease-out duration-250"
          x-transition:enter-start="opacity-0 scale-95"
          x-transition:enter-end="opacity-100 scale-100"
@@ -180,7 +180,9 @@
          @keydown.right.window="nextLightboxImage()"
          @keydown.left.window="prevLightboxImage()"
          @touchstart.passive="onLightboxTouchStart($event)"
-         @touchend.passive="onLightboxTouchEnd($event)"
+         @touchmove="onLightboxTouchMove($event)"
+         @touchend="onLightboxTouchEnd($event)"
+         @touchcancel="onLightboxTouchCancel()"
          @click="closeLightbox()">
         
         <!-- Close Button (High contrast, 48px touch target) -->
@@ -200,9 +202,9 @@
             <i class="bi bi-chevron-left"></i>
         </button>
 
-        <!-- Main Image Container -->
+        <!-- Main Image Container with Drag Translation -->
         <div class="lightbox-image-container" 
-             style="position: relative; max-width: 92vw; max-height: 86vh; display: flex; align-items: center; justify-content: center; user-select: none;" 
+             :style="getLightboxImageStyle()"
              @click.stop>
             
             <!-- Loading Spinner -->

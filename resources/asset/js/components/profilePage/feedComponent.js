@@ -18,6 +18,11 @@ export function profileFeed(opts = {}) {
         lightboxError: false,
         touchStartX: 0,
         touchStartY: 0,
+        heartBursts: {},
+        lastTapTime: {},
+        tapTimeout: null,
+        lightboxDragY: 0,
+        lightboxDragging: false,
         currentUserId: opts.userId || localStorage.getItem('requesterId') || '',
         currentFamCode: opts.famCode || localStorage.getItem('requesterFamCode') || '',
         commentInputs: {},
@@ -656,12 +661,61 @@ export function profileFeed(opts = {}) {
             });
         },
 
+        triggerHeartBurst(post, idx = 0) {
+            if (!post || !post.post_no) return;
+            const key = `${post.post_no}_${idx}`;
+            this.heartBursts = { ...this.heartBursts, [key]: true };
+
+            // Trigger haptic vibration if supported (Instagram tactile feel)
+            if (typeof window.triggerHaptic === 'function') {
+                window.triggerHaptic('impact');
+            }
+
+            // Automatically like with 'love' reaction if not already reacted
+            if (!post.user_reaction) {
+                this.onPostLikeClick(post.post_no, 'love');
+            }
+
+            setTimeout(() => {
+                const updated = { ...this.heartBursts };
+                delete updated[key];
+                this.heartBursts = updated;
+            }, 900);
+        },
+
+        handleImageTap(post, images, idx = 0, event) {
+            const now = Date.now();
+            const postKey = String(post?.post_no || '0');
+            const lastTap = this.lastTapTime[postKey] || 0;
+            const timeDiff = now - lastTap;
+
+            if (timeDiff > 0 && timeDiff < 320) {
+                // Double tap confirmed! Cancel pending single tap lightbox open
+                if (this.tapTimeout) {
+                    clearTimeout(this.tapTimeout);
+                    this.tapTimeout = null;
+                }
+                this.lastTapTime[postKey] = 0;
+                this.triggerHeartBurst(post, idx);
+            } else {
+                // First tap: buffer slightly to distinguish between single tap & double tap
+                this.lastTapTime[postKey] = now;
+                if (this.tapTimeout) clearTimeout(this.tapTimeout);
+                this.tapTimeout = setTimeout(() => {
+                    this.openLightbox(images, idx);
+                    this.tapTimeout = null;
+                }, 260);
+            }
+        },
+
         openLightbox(images, index = 0) {
             let imgList = [];
             if (Array.isArray(images)) {
-                imgList = images.filter(img => img && typeof img === 'string');
+                imgList = Array.from(images).filter(img => img && typeof img === 'string');
             } else if (typeof images === 'string' && images.trim()) {
-                imgList = [images.trim()];
+                imgList = images.split(',').map(s => s.trim()).filter(Boolean);
+            } else if (images && typeof images === 'object') {
+                imgList = Object.values(images).filter(img => img && typeof img === 'string');
             }
 
             if (imgList.length === 0) return;
@@ -671,6 +725,8 @@ export function profileFeed(opts = {}) {
             this.lightboxIndex = safeIndex;
             this.lightboxLoading = true;
             this.lightboxError = false;
+            this.lightboxDragY = 0;
+            this.lightboxDragging = false;
             this.lightboxOpen = true;
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
         },
@@ -681,6 +737,8 @@ export function profileFeed(opts = {}) {
             this.lightboxIndex = 0;
             this.lightboxLoading = false;
             this.lightboxError = false;
+            this.lightboxDragY = 0;
+            this.lightboxDragging = false;
             document.body.style.overflow = ''; // Restore background scrolling
         },
 
@@ -704,27 +762,74 @@ export function profileFeed(opts = {}) {
             if (e.touches && e.touches.length === 1) {
                 this.touchStartX = e.touches[0].clientX;
                 this.touchStartY = e.touches[0].clientY;
+                this.lightboxDragY = 0;
+                this.lightboxDragging = false;
+            }
+        },
+
+        onLightboxTouchMove(e) {
+            if (!this.touchStartY || !e.touches || e.touches.length === 0) return;
+            const diffX = e.touches[0].clientX - this.touchStartX;
+            const diffY = e.touches[0].clientY - this.touchStartY;
+
+            // When vertical swipe movement is initiated
+            if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+                this.lightboxDragging = true;
+                this.lightboxDragY = diffY;
+                if (e.cancelable) e.preventDefault();
             }
         },
 
         onLightboxTouchEnd(e) {
-            if (!this.touchStartX || !e.changedTouches || e.changedTouches.length === 0) return;
+            if (!this.touchStartX || !e.changedTouches || e.changedTouches.length === 0) {
+                this.resetLightboxDrag();
+                return;
+            }
             const diffX = e.changedTouches[0].clientX - this.touchStartX;
             const diffY = e.changedTouches[0].clientY - this.touchStartY;
             this.touchStartX = 0;
             this.touchStartY = 0;
 
-            // Horizontal swipe (> 50px threshold)
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+            // Vertical drag-to-dismiss threshold (≥ 80px dismisses lightbox with native velocity feel)
+            if (this.lightboxDragging && Math.abs(diffY) >= 80) {
+                this.closeLightbox();
+                return;
+            }
+
+            // Snap back smoothly if below threshold
+            this.resetLightboxDrag();
+
+            // Horizontal swipe (> 50px threshold for photo gallery cycling)
+            if (!this.lightboxDragging && Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
                 if (diffX < 0) {
                     this.nextLightboxImage();
                 } else {
                     this.prevLightboxImage();
                 }
-            } else if (Math.abs(diffY) > 120) {
-                // Vertical swipe down to dismiss
-                this.closeLightbox();
             }
+        },
+
+        onLightboxTouchCancel() {
+            this.resetLightboxDrag();
+        },
+
+        resetLightboxDrag() {
+            this.lightboxDragging = false;
+            this.lightboxDragY = 0;
+        },
+
+        getLightboxOverlayStyle() {
+            if (!this.lightboxDragging || this.lightboxDragY === 0) return '';
+            const progress = Math.min(Math.abs(this.lightboxDragY) / 260, 0.75);
+            const alpha = Math.max(0.18, 0.94 * (1 - progress));
+            const blurPx = Math.max(2, Math.round(14 * (1 - progress)));
+            return `background-color: rgba(0, 0, 0, ${alpha}) !important; backdrop-filter: blur(${blurPx}px) !important;`;
+        },
+
+        getLightboxImageStyle() {
+            if (!this.lightboxDragging || this.lightboxDragY === 0) return '';
+            const scale = Math.max(0.72, 1 - Math.abs(this.lightboxDragY) / 850);
+            return `transform: translateY(${this.lightboxDragY}px) scale(${scale}); transition: none;`;
         },
 
         initPusher() {

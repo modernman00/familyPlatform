@@ -26,6 +26,7 @@
         @yield('og_tags')
     @else
         {{-- Default site-wide OpenGraph tags --}}
+        <meta property="fb:app_id" content="{{ $_ENV['FACEBOOK_APP_ID'] ?? $_ENV['FB_APP_ID'] ?? '' }}">
         <meta property="og:title" content="OUR FAMILY NETWORK">
         <meta property="og:description"
             content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
