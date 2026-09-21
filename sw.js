@@ -313,17 +313,30 @@ self.addEventListener('push', (event) => {
     return;
   }
 
+  const pushPromises = [];
+
   // B. Web Badging API Sync (iOS 16.4+ Standalone & Android PWA)
-  if ('setAppBadge' in navigator && typeof data.badgeCount === 'number') {
-    if (data.badgeCount > 0) {
-      navigator.setAppBadge(data.badgeCount).catch(() => {});
+  if ('setAppBadge' in navigator) {
+    let count = null;
+    if (typeof data.badgeCount === 'number') {
+      count = Math.max(0, Math.floor(data.badgeCount));
+    } else if (data.badgeCount !== null && data.badgeCount !== undefined && !isNaN(parseInt(data.badgeCount, 10))) {
+      count = Math.max(0, parseInt(data.badgeCount, 10));
+    }
+
+    if (count !== null) {
+      pushPromises.push(
+        count > 0 
+          ? navigator.setAppBadge(count).catch(() => {}) 
+          : navigator.clearAppBadge().catch(() => {})
+      );
     } else {
-      navigator.clearAppBadge().catch(() => {});
+      pushPromises.push(navigator.setAppBadge(1).catch(() => {}));
     }
   }
 
   // C. Intelligent Foreground Check: Suppress OS noise if app is focused & open
-  event.waitUntil(
+  pushPromises.push(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       const isAppFocused = clientList.some(
         (client) => client.visibilityState === 'visible' && client.focused
@@ -370,6 +383,8 @@ self.addEventListener('push', (event) => {
       return self.registration.showNotification(data.title, options);
     })
   );
+
+  event.waitUntil(Promise.all(pushPromises));
 });
 
 /**
