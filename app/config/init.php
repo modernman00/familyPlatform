@@ -184,3 +184,6 @@ switch ($env) {
         ini_set('error_log', __DIR__ . '/../../bootstrap/log/ini.log');
         break;
 }
+
+\Src\ErrorHandler::register();
+

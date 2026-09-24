@@ -370,6 +370,10 @@ copy_item() {
 
 copy_item app
 copy_item bootstrap
+if [ -f "scripts/stamp_version.php" ]; then
+    echo "🏷️ Stamping public/version.json with latest release metadata..."
+    php scripts/stamp_version.php || true
+fi
 copy_item public
 copy_item resources
 copy_item vendor
