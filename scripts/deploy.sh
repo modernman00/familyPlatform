@@ -370,6 +370,11 @@ copy_item() {
 
 copy_item app
 copy_item bootstrap
+copy_item cron
+mkdir -p "$SANDBOX/scripts"
+if [ -f "cron/memory_milestone_cron.php" ]; then
+    cp "cron/memory_milestone_cron.php" "$SANDBOX/scripts/memory_milestone_cron.php"
+fi
 if [ -f "scripts/stamp_version.php" ]; then
     echo "🏷️ Stamping public/version.json with latest release metadata..."
     php scripts/stamp_version.php || true
@@ -457,7 +462,7 @@ rsync -azL --delete \
     --exclude='bootstrap/log/*' \
     --exclude='vendor/bootstrap' \
     --exclude='vendor/bootstrap/*' \
-    --exclude='scripts' \
+    --exclude='scripts/*.sh' \
     --exclude='releases' \
     --exclude='backups' \
     --exclude='shared' \
@@ -497,6 +502,13 @@ mkdir -p "${REMOTE_ROOT}/storage/framework/views"
 mkdir -p "${REMOTE_ROOT}/bootstrap/cache"
 mkdir -p "${REMOTE_ROOT}/bootstrap/log"
 mkdir -p "${REMOTE_ROOT}/public/uploads"
+mkdir -p "${REMOTE_ROOT}/cron"
+mkdir -p "${REMOTE_ROOT}/scripts"
+
+# Alias cron file if legacy crontab targets scripts/memory_milestone_cron.php
+if [ -f "${REMOTE_ROOT}/cron/memory_milestone_cron.php" ]; then
+    cp -f "${REMOTE_ROOT}/cron/memory_milestone_cron.php" "${REMOTE_ROOT}/scripts/memory_milestone_cron.php" 2>/dev/null || true
+fi
 
 # Permissions Hardening
 find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -not -path "*/.maintenance" -type d \
@@ -507,6 +519,8 @@ find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -type f \
 chmod -R 775 "${REMOTE_ROOT}/storage" 2>/dev/null || true
 chmod -R 775 "${REMOTE_ROOT}/bootstrap/log" 2>/dev/null || true
 chmod 775 "${REMOTE_ROOT}/bootstrap/cache" 2>/dev/null || true
+chmod 755 "${REMOTE_ROOT}/cron" 2>/dev/null || true
+chmod 755 "${REMOTE_ROOT}/scripts" 2>/dev/null || true
 
 # Invalidate template and file caches
 rm -rf "${REMOTE_ROOT}/storage/framework/views/"* 2>/dev/null || true

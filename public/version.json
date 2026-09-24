@@ -1,0 +1,11 @@
+{
+    "version": "v1.5.7",
+    "title": "General security update",
+    "notes": [
+        "General security update",
+        "Ux/ui redesign",
+        "Xx"
+    ],
+    "released_at": "2026-09-24",
+    "commit": "45bb16f"
+}
