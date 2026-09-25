@@ -15,6 +15,17 @@ $router->map('GET', '/contact', 'App\controller\Index@contact', 'Contact');
 
 $router->map('GET|POST', '/email/unsubscribe', 'App\controller\Index@unsubscribe', 'email_unsubscribe');
 
+// --- ROBOTS.TXT ROUTE HANDLER ---
+$router->map('GET', '/robots.txt', function() {
+    header('Content-Type: text/plain; charset=utf-8');
+    $robotsFile = __DIR__ . '/../../public/robots.txt';
+    if (file_exists($robotsFile)) {
+        readfile($robotsFile);
+    } else {
+        echo "User-agent: *\nAllow: /\nDisallow: /app/\nDisallow: /api/\nDisallow: /cron/\nDisallow: /storage/\nSitemap: https://familyplatform.app/sitemap.xml\n";
+    }
+});
+
 // --- AUTOMATED DEPLOYMENT & SRE HEALTH CHECK (Item #17) ---
 $router->map('GET', '/api/health', function() {
     header('Content-Type: application/json; charset=utf-8');

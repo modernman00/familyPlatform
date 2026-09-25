@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "General update",
+    "title": "Add robots.txt for search crawler policy",
     "notes": [
+        "Add robots.txt for search crawler policy",
         "General update",
-        "Fix(deploy): preserve cron directory and add scripts cron alias in deployment pipeline",
-        "General security update"
+        "Fix(deploy): preserve cron directory and add scripts cron alias in deployment pipeline"
     ],
-    "released_at": "2026-09-24",
-    "commit": "d38ea02"
+    "released_at": "2026-09-25",
+    "commit": "ee7cdf1"
 }
