@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(deploy): preserve cron directory and add scripts cron alias in deployment pipeline",
+    "title": "General update",
     "notes": [
+        "General update",
         "Fix(deploy): preserve cron directory and add scripts cron alias in deployment pipeline",
-        "General security update",
-        "Ux/ui redesign"
+        "General security update"
     ],
     "released_at": "2026-09-24",
-    "commit": "8143d2d"
+    "commit": "d38ea02"
 }
