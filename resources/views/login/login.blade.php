@@ -276,6 +276,12 @@
         <button type="button" class="stitch-submit" id="button">
             Sign In <i class="bi bi-arrow-right"></i>
         </button>
+
+        <button type="button" id="btn-passkey-login"
+                style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; color: #4B5563; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 11px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+            <svg style="width: 20px; height: 20px; color: var(--brand-primary, #004182);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
+            Sign in with Biometrics
+        </button>
     </form>
 
     <div class="stitch-footer">
@@ -283,5 +289,131 @@
     </div>
 
 </div>
+
+<script nonce="{{ $nonce }}">
+document.addEventListener("DOMContentLoaded", function() {
+    const passkeyBtn = document.getElementById('btn-passkey-login');
+    if (passkeyBtn) {
+        const base64URLToBuffer = (base64URL) => {
+            const base64 = base64URL.replace(/-/g, '+').replace(/_/g, '/');
+            const padLength = (4 - (base64.length % 4)) % 4;
+            const padded = base64.padEnd(base64.length + padLength, '=');
+            const binary = atob(padded);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        };
+
+        const bufferToBase64URL = (buffer) => {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        };
+
+        passkeyBtn.addEventListener('click', async () => {
+            const originalHtml = passkeyBtn.innerHTML;
+            const emailInput = document.getElementById('email');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const csrfToken = document.querySelector('input[name="token"]')?.value || '';
+
+            try {
+                if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    throw new Error('Biometric authentication requires a secure connection (HTTPS).');
+                }
+                if (!window.PublicKeyCredential) {
+                    throw new Error('Passkeys are not supported on this browser or device.');
+                }
+
+                passkeyBtn.disabled = true;
+                passkeyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Authenticating...';
+
+                // 1. Fetch challenge
+                const res = await fetch('/webauthn/login/options', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({ token: csrfToken, email: email })
+                });
+                const optionsData = await res.json();
+
+                if (optionsData.status !== 'success' && optionsData.status !== 200) {
+                    throw new Error(optionsData.message || 'Failed to initialize biometric challenge.');
+                }
+
+                const options = optionsData.token || optionsData.data;
+
+                // 2. Format challenge
+                const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname);
+                const publicKey = {
+                    challenge: base64URLToBuffer(options.challenge),
+                    userVerification: options.userVerification || 'preferred',
+                    timeout: options.timeout || 60000
+                };
+                if (!isIp && window.location.hostname !== 'localhost') {
+                    publicKey.rpId = window.location.hostname;
+                }
+
+                if (Array.isArray(options.allowCredentials) && options.allowCredentials.length > 0) {
+                    publicKey.allowCredentials = options.allowCredentials.map(c => ({
+                        type: 'public-key',
+                        id: base64URLToBuffer(c.id)
+                    }));
+                }
+
+                // 3. Prompt Biometric hardware
+                const assertion = await navigator.credentials.get({ publicKey });
+                if (!assertion) {
+                    throw new Error('No credential received.');
+                }
+
+                passkeyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+
+                // 4. Verify assertion
+                const verifyRes = await fetch('/webauthn/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        token: csrfToken,
+                        id: assertion.id,
+                        rawId: bufferToBase64URL(assertion.rawId),
+                        type: assertion.type,
+                        response: {
+                            clientDataJSON: bufferToBase64URL(assertion.response.clientDataJSON),
+                            authenticatorData: bufferToBase64URL(assertion.response.authenticatorData),
+                            signature: bufferToBase64URL(assertion.response.signature)
+                        }
+                    })
+                });
+                const verifyData = await verifyRes.json();
+
+                if (verifyData.status === 'success' || verifyData.status === 200) {
+                    passkeyBtn.innerHTML = '✓ Success! Redirecting...';
+                    window.location.href = verifyData.data?.redirect || '/profilePage';
+                } else {
+                    throw new Error(verifyData.message || 'Biometric authentication failed.');
+                }
+            } catch (err) {
+                console.warn(err);
+                passkeyBtn.disabled = false;
+                passkeyBtn.innerHTML = originalHtml;
+                const msg = (err.name === 'NotAllowedError') 
+                    ? 'Biometric prompt was canceled or timed out.' 
+                    : (err.message || 'Biometric login failed. Please use your password.');
+                alert(msg);
+            }
+        });
+    }
+});
+</script>
 
 @endsection

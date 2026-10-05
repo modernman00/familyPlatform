@@ -22,9 +22,15 @@ final class SettingController extends BaseController
             $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
             $pendingFamilyRequest = $approvalService->getPendingRequestForUser((string)$accountData['id']);
 
+            $passkeys = (new \Src\Select())->selectFn1(
+                "SELECT id, credential_id, device_name, created_at, last_used_at FROM user_passkeys WHERE user_id = ? ORDER BY created_at DESC",
+                [(string)$accountData['id']]
+            );
+
             Utility::view('/member/accountSetting', [
                 'accountData' => $accountData,
-                'pendingFamilyRequest' => $pendingFamilyRequest
+                'pendingFamilyRequest' => $pendingFamilyRequest,
+                'passkeys' => $passkeys
             ]);
 
         } catch (\Throwable $th) {

@@ -777,6 +777,46 @@
                 <button type="button" id="privacyBtn" class="btn-save mt-3">Save Privacy Settings</button>
               </form>
 
+              <!-- Biometric Passkeys Card -->
+              <div class="mt-5 pt-4 border-top">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h6 class="fw-bold mb-1"><i class="bi bi-fingerprint text-primary me-2"></i>Biometric Passkeys</h6>
+                    <p class="text-muted small mb-0">Log in securely using Face ID, Touch ID, or Windows Hello without passwords.</p>
+                  </div>
+                  <button type="button" id="btn-register-passkey" class="btn-save btn-sm px-3" style="font-size: 0.85rem;">
+                    <i class="bi bi-plus-circle me-1"></i> Register This Device
+                  </button>
+                </div>
+
+                <div id="passkey-status-msg" style="display: none;" class="alert small mb-3"></div>
+
+                @if(!empty($passkeys) && count($passkeys) > 0)
+                  <div class="d-flex flex-column gap-2 mt-3">
+                    @foreach($passkeys as $pk)
+                      <div class="d-flex justify-content-between align-items-center p-3 rounded-3 border" style="background-color: #f8fafc;">
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                            <i class="bi bi-laptop"></i>
+                          </div>
+                          <div>
+                            <div class="fw-bold small text-dark">{{ $pk['device_name'] ?: 'Biometric Device' }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">Added {{ date('M j, Y', strtotime($pk['created_at'])) }}</div>
+                          </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 btn-revoke-passkey" data-id="{{ $pk['credential_id'] }}">
+                          Revoke
+                        </button>
+                      </div>
+                    @endforeach
+                  </div>
+                @else
+                  <div class="p-3 text-center border rounded-3 text-muted small" style="background-color: #f8fafc;">
+                    No biometric devices registered yet. Click "Register This Device" above to enable passkey sign in.
+                  </div>
+                @endif
+              </div>
+
               <div class="section-divider mt-4"></div>
               <div class="switch-info">
                 <h6>Your data</h6>
@@ -1444,6 +1484,161 @@
         }
       });
     }
+
+    // WebAuthn Passkey Registration & Revocation Handlers
+    const regPasskeyBtn = document.getElementById('btn-register-passkey');
+    const passkeyStatusMsg = document.getElementById('passkey-status-msg');
+
+    const showPasskeyMsg = (text, isSuccess) => {
+      if (!passkeyStatusMsg) return;
+      passkeyStatusMsg.style.display = 'block';
+      passkeyStatusMsg.className = isSuccess ? 'alert alert-success small mb-3' : 'alert alert-danger small mb-3';
+      passkeyStatusMsg.textContent = text;
+    };
+
+    const base64URLToBuffer = (base64URL) => {
+      const base64 = base64URL.replace(/-/g, '+').replace(/_/g, '/');
+      const padLength = (4 - (base64.length % 4)) % 4;
+      const padded = base64.padEnd(base64.length + padLength, '=');
+      const binary = atob(padded);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes.buffer;
+    };
+
+    const bufferToBase64URL = (buffer) => {
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
+
+    if (regPasskeyBtn) {
+      regPasskeyBtn.addEventListener('click', async () => {
+        const originalHtml = regPasskeyBtn.innerHTML;
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          showPasskeyMsg('Passkey registration requires a secure connection (HTTPS).', false);
+          return;
+        }
+        if (!window.PublicKeyCredential) {
+          showPasskeyMsg('Passkeys are not supported on this browser or platform.', false);
+          return;
+        }
+
+        try {
+          regPasskeyBtn.disabled = true;
+          regPasskeyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Authorizing...';
+          showPasskeyMsg('', true);
+          if (passkeyStatusMsg) passkeyStatusMsg.style.display = 'none';
+
+          const res = await fetch('/webauthn/register/options', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const data = await res.json();
+          if (data.status !== 'success' && data.status !== 200) {
+            throw new Error(data.message || 'Failed to initialize biometric challenge.');
+          }
+
+          const options = data.data || data.token;
+          const isIp = /^(\d{1,3}\.){3}\d{1,3}$/.test(window.location.hostname);
+          const rpConfig = { name: 'FamilyPlatform' };
+          if (!isIp && window.location.hostname !== 'localhost') {
+            rpConfig.id = window.location.hostname;
+          }
+
+          const publicKey = {
+            challenge: base64URLToBuffer(options.challenge),
+            rp: rpConfig,
+            user: {
+              id: base64URLToBuffer(options.user.id),
+              name: options.user.name,
+              displayName: options.user.displayName
+            },
+            pubKeyCredParams: options.pubKeyCredParams,
+            authenticatorSelection: options.authenticatorSelection || {
+              authenticatorAttachment: 'platform',
+              userVerification: 'preferred'
+            },
+            timeout: options.timeout || 60000,
+            attestation: options.attestation || 'none'
+          };
+
+          const credential = await navigator.credentials.create({ publicKey });
+          if (!credential) {
+            throw new Error('Passkey creation was canceled.');
+          }
+
+          const verifyRes = await fetch('/webauthn/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: credential.id,
+              rawId: bufferToBase64URL(credential.rawId),
+              type: credential.type,
+              response: {
+                clientDataJSON: bufferToBase64URL(credential.response.clientDataJSON),
+                attestationObject: bufferToBase64URL(credential.response.attestationObject)
+              }
+            })
+          });
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.status === 'success' || verifyData.status === 200) {
+            showPasskeyMsg('✓ Biometric device registered successfully!', true);
+            setTimeout(() => window.location.reload(), 1200);
+          } else {
+            throw new Error(verifyData.message || 'Device registration failed on server.');
+          }
+        } catch (err) {
+          console.warn(err);
+          const msg = (err.name === 'NotAllowedError') 
+            ? 'Biometric prompt was canceled or timed out.' 
+            : (err.message || 'Could not register biometric device.');
+          showPasskeyMsg(msg, false);
+        } finally {
+          regPasskeyBtn.disabled = false;
+          regPasskeyBtn.innerHTML = originalHtml;
+        }
+      });
+    }
+
+    // Revocation Handlers
+    document.querySelectorAll('.btn-revoke-passkey').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const credentialId = btn.getAttribute('data-id');
+        if (!confirm('Are you sure you want to revoke this biometric device?')) return;
+
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Revoking...';
+
+        try {
+          const res = await fetch('/webauthn/revoke', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential_id: credentialId })
+          });
+          const data = await res.json();
+          if (data.status === 'success' || data.status === 200) {
+            window.location.reload();
+          } else {
+            alert(data.message || 'Failed to revoke device.');
+            btn.disabled = false;
+            btn.textContent = originalText;
+          }
+        } catch (e) {
+          alert('Network error while revoking device.');
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      });
+    });
   });
   </script>
         </div>

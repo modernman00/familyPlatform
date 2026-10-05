@@ -2316,16 +2316,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v2.0.3",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "19663f8e52d6b12bcea8ac411903d2f06d03524c"
+                "reference": "35089ab146476a6718b2e842aa3b4c37510d8d75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/19663f8e52d6b12bcea8ac411903d2f06d03524c",
-                "reference": "19663f8e52d6b12bcea8ac411903d2f06d03524c",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/35089ab146476a6718b2e842aa3b4c37510d8d75",
+                "reference": "35089ab146476a6718b2e842aa3b4c37510d8d75",
                 "shasum": ""
             },
             "require": {
@@ -2341,6 +2341,7 @@
                 "pelago/emogrifier": "^7.3",
                 "phpmailer/phpmailer": "^6.9",
                 "pusher/pusher-php-server": "^7.0",
+                "smalot/pdfparser": "^2.11",
                 "spatie/image-optimizer": "^1.6",
                 "sunspikes/clamav-validator": "^3.0",
                 "symfony/mailer": "^7.3",
@@ -2382,10 +2383,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v2.0.3",
+                "source": "https://github.com/modernman00/shared-lib/tree/v2.3.0",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2026-09-24T08:04:00+00:00"
+            "time": "2026-10-05T20:56:04+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -4145,6 +4146,57 @@
                 }
             ],
             "time": "2026-06-11T10:37:24+00:00"
+        },
+        {
+            "name": "smalot/pdfparser",
+            "version": "v2.12.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/smalot/pdfparser.git",
+                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/2cfa0d92bd557875c9f52a75fde0e8392302a354",
+                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354",
+                "shasum": ""
+            },
+            "require": {
+                "ext-iconv": "*",
+                "ext-zlib": "*",
+                "php": ">=7.1",
+                "symfony/polyfill-mbstring": "^1.18"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Smalot\\PdfParser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastien MALOT",
+                    "email": "sebastien@malot.fr"
+                }
+            ],
+            "description": "Pdf parser library. Can read and extract information from pdf file.",
+            "homepage": "https://www.pdfparser.org",
+            "keywords": [
+                "extract",
+                "parse",
+                "parser",
+                "pdf",
+                "text"
+            ],
+            "support": {
+                "issues": "https://github.com/smalot/pdfparser/issues",
+                "source": "https://github.com/smalot/pdfparser/tree/v2.12.5"
+            },
+            "time": "2026-04-17T11:37:58+00:00"
         },
         {
             "name": "spatie/image-optimizer",

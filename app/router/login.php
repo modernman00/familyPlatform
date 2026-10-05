@@ -13,10 +13,11 @@ $router->map('POST', '/auth/apple/callback', 'App\controller\login\OAuthControll
 $router->map('GET', '/auth/apple/callback', 'App\controller\login\OAuthController@appleCallback', 'appleCallbackGet');
 
 // WebAuthn Routes
-$router->map('POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');
+$router->map('GET|POST', '/webauthn/register/options', 'Src\functionality\WebAuthnFunctionality@getRegistrationOptions', 'WebAuthn Register Options');
 $router->map('POST', '/webauthn/register', 'Src\functionality\WebAuthnFunctionality@registerDevice', 'WebAuthn Register');
-$router->map('POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunctionality@getLoginOptions', 'WebAuthn Login Options');
+$router->map('GET|POST', '/webauthn/login/options', 'Src\functionality\WebAuthnFunctionality@getLoginOptions', 'WebAuthn Login Options');
 $router->map('POST', '/webauthn/login', 'Src\functionality\WebAuthnFunctionality@login', 'WebAuthn Login');
+$router->map('POST', '/webauthn/revoke', 'Src\functionality\WebAuthnFunctionality@revokeDevice', 'WebAuthn Revoke');
 
 $adminPath = (string) ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: '/lasu');
 // Admin auth routes are registered in admin.php (showLogin + login + 2fa + setup + forgot + reset + logout)
