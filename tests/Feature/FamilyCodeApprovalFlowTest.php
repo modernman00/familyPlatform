@@ -779,4 +779,60 @@ class FamilyCodeApprovalFlowTest extends TestCase
         // Cleanup
         $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$testUserId]);
     }
+
+    /**
+     * Test: Empty auxiliary fields (familySurname, inviter modal fields, claim_node, etc.)
+     * do not trigger "The <FIELD> field is required" validation exceptions.
+     */
+    public function testRegistrationWithEmptyAuxiliaryFieldsDoesNotThrowRequiredValidation(): void
+    {
+        $payload = [
+            'id' => 'PU_TEST_' . bin2hex(random_bytes(4)),
+            'firstName' => 'Olusola',
+            'lastName' => 'Olaogun',
+            'familySurname' => '',
+            'famCode' => 'OLA060446',
+            'country' => 'United Kingdom',
+            'mobile' => '+447809650814',
+            'email' => 'sola@example.com',
+            'password' => 'SecurePass123!',
+            'confirm_password' => 'SecurePass123!',
+            'day' => '15',
+            'month' => 'Jan',
+            'year' => '1990',
+            'inviter_first_name' => '',
+            'inviter_last_name' => '',
+            'inviter_email_or_mobile' => '',
+            'temporary_code' => '',
+            'joining_via_invitation' => 'true',
+            'claim_node' => '',
+            'website_hp' => '',
+        ];
+
+        $optionalFields = [
+            'familySurname',
+            'inviter_first_name',
+            'inviter_last_name',
+            'inviter_email_or_mobile',
+            'temporary_code',
+            'joining_via_invitation',
+            'claim_node',
+            'website_hp',
+        ];
+
+        $dataToCheck = [
+            'min' => [2, 2, 2, 7, 7, 7, 4],
+            'max' => [35, 35, 30, 16, 50, 50, 20],
+            'data' => [
+                'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
+            ]
+        ];
+
+        $cleanData = \Src\LoginUtility::getSanitisedInputData($payload, $dataToCheck, $optionalFields);
+        $this->assertIsArray($cleanData);
+        $this->assertSame('Olusola', $cleanData['firstName']);
+        $this->assertSame('Olaogun', $cleanData['lastName']);
+        $this->assertSame('', $cleanData['familySurname']);
+        $this->assertSame('', $cleanData['inviter_first_name']);
+    }
 }

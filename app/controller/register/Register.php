@@ -183,9 +183,9 @@ final class Register extends Db
             Recaptcha::verifyCaptchaEnterprise($input, 'SUBMIT');
             unset($input['action'], $input['siteKey'], $input['account_type'], $input['checkbox']);
 
-            // Auto-generate family code if creating a new family (familySurname provided, no famCode)
-            if (empty($input['famCode']) && !empty($input['familySurname'])) {
-                $rawSurname = (string)$input['familySurname'];
+            // Auto-generate family code if creating a new family (familySurname or lastName provided, no famCode)
+            if (empty($input['famCode']) && (!empty($input['familySurname']) || !empty($input['lastName']))) {
+                $rawSurname = !empty($input['familySurname']) ? (string)$input['familySurname'] : (string)$input['lastName'];
                 $cleaned = preg_replace('/[^A-Za-z]/', '', $rawSurname);
                 $prefix = mb_strtoupper((string)$cleaned);
                 if (mb_strlen($prefix) < 3) {
@@ -217,8 +217,20 @@ final class Register extends Db
             $generateId = $this->setId($input, "firstName", 'account');
             $data = $this->dataToCheck();
 
+            // Registration optional/auxiliary fields that must not trigger required-field validation in Sanitise
+            $optionalFields = [
+                'familySurname',
+                'inviter_first_name',
+                'inviter_last_name',
+                'inviter_email_or_mobile',
+                'temporary_code',
+                'joining_via_invitation',
+                'claim_node',
+                'website_hp',
+            ];
+
             // Sanitise the data and get the cleaned data
-            $cleanData = LoginUtility::getSanitisedInputData($generateId, $data);
+            $cleanData = LoginUtility::getSanitisedInputData($generateId, $data, $optionalFields);
 
             // hash the password and confirm_password fields
             $cleanData = hashPasswordsInArray($cleanData);

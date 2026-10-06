@@ -68,6 +68,7 @@ final class RouteDispatch
             'App\controller\members\RecommendationController',
             // Admin Auth routes handle their own session state — must be public
             'App\controller\admin\AdminAuthController',
+            'Src\functionality\WebAuthnFunctionality',
         ];
 
         if (\class_exists('\Src\functionality\SignIn')) {

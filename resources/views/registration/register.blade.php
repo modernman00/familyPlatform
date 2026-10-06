@@ -531,6 +531,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <input type="hidden" id="joining_via_invitation" :value="codeVerified ? 'true' : 'false'" name="joining_via_invitation">
                     <input type="hidden" id="temporary_code" name="temporary_code" x-model="temporaryCode">
 
+                    {{-- Zero-Friction Honeypot Trap --}}
+                    <div style="display: none !important; position: absolute !important; left: -9999px !important;" aria-hidden="true">
+                        <input type="text" name="website_hp" tabindex="-1" autocomplete="off" value="">
+                    </div>
+
                     <div class="field mt-4">
                         <label class="checkbox">
                             <input type="checkbox" name="checkbox" id="checkbox" required>

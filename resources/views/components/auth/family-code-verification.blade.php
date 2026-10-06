@@ -29,7 +29,7 @@
                 x-model="inviterFirstName"
                 class="form-control"
                 placeholder="e.g., Wale"
-                required
+                :required="showInviterModal && !codeVerified"
             >
         </div>
 
@@ -43,7 +43,7 @@
                 x-model="inviterLastName"
                 class="form-control"
                 placeholder="e.g., Olaogun"
-                required
+                :required="showInviterModal && !codeVerified"
             >
         </div>
 
@@ -57,7 +57,7 @@
                 x-model="inviterContact"
                 class="form-control"
                 placeholder="Their email address or phone number"
-                required
+                :required="showInviterModal && !codeVerified"
             >
             <div class="form-text text-muted" style="font-size: 0.8rem;">
                 <i class="bi bi-info-circle me-1"></i> Phone number can be entered with or without country code (e.g., 07900123456 or +447900123456).

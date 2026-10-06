@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Add robots.txt for search crawler policy",
+    "title": "Add fallback /robots.txt router handler",
     "notes": [
+        "Add fallback /robots.txt router handler",
         "Add robots.txt for search crawler policy",
-        "General update",
-        "Fix(deploy): preserve cron directory and add scripts cron alias in deployment pipeline"
+        "General update"
     ],
     "released_at": "2026-09-25",
-    "commit": "ee7cdf1"
+    "commit": "64b3001"
 }
