@@ -79,7 +79,7 @@ final class Index
             $isValid = hash_equals($expectedToken, $token);
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isValid && !empty($email)) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isValid) {
             $db = \Src\Db::connect2();
             $stmt = $db->prepare('UPDATE account SET email_unsubscribed = 1 WHERE email = ?');
             $stmt->execute([(string) $email]);
