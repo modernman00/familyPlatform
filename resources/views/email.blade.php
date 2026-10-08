@@ -57,7 +57,7 @@
                                 $rawLogo = (string)($_ENV['APP_LOGO_EMAIL'] ?? getenv('APP_LOGO_EMAIL') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/assets/images/logo-white.png'));
                                 $rawLogo = trim($rawLogo, "'\"");
 
-                                if (empty($rawLogo) || str_contains($rawLogo, 'favicon')) {
+                                if (empty($rawLogo) || str_contains($rawLogo, 'favicon') || str_contains($rawLogo, '/img/logo/')) {
                                     $rawLogo = '/public/assets/images/logo-white.png';
                                 }
 

@@ -48,6 +48,13 @@ class ProcessImg extends AllFunctionalities
             
             $sanitizedFileName = $uploadResult['sanitisedData']['profile']['profileImageFile'] ?? $fileName;
 
+            // Prevent path divergence between resources/images/profile and public/img/profile
+            if (!empty($sanitizedFileName) && file_exists('resources/images/profile/' . $sanitizedFileName)) {
+                if (is_dir('public/img/profile') && !file_exists('public/img/profile/' . $sanitizedFileName)) {
+                    @copy('resources/images/profile/' . $sanitizedFileName, 'public/img/profile/' . $sanitizedFileName);
+                }
+            }
+
             UpdateFn::makeUpdateFn('profilePics',[
                 'img'=> $sanitizedFileName, 
                 'id'=> $_SESSION['id']], 

@@ -147,6 +147,13 @@ final class FamilyRequestController extends BaseController
         $requesterPayload = $requesterData;
         unset($requesterPayload['email']);
 
+        $requesterImg = $requesterData['profileImg']
+          ?? $requesterData['profilePics']
+          ?? (!empty($requesterData['img']) ? basename($requesterData['img']) : '')
+          ?: (($requesterData['gender'] ?? '') === 'Female' ? 'avatarF.png' : 'avatarM.png');
+        $requesterPayload['profileImg'] = $requesterImg;
+        $requesterPayload['profilePics'] = $requesterImg;
+
         $emailViewPath = $dataFromJs['emailPath'] ?? 'msg.request';
 
         if (!empty($approverEmail)) {
