@@ -68,6 +68,7 @@
    <br>
 
    <form action="/photos/postImages" method="POST" enctype="multipart/form-data">
+    @include('csrf')
 
      <div class="custom-file-container" data-upload-id="myUniqueUploadId">
 

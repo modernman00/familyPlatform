@@ -13,6 +13,7 @@
                 </div>
                 <div class="card-body p-4">
                     <form action="" method="POST" id="lasu" class="lasu styleForm" enctype="multipart/form-data">
+    @include('csrf')
                         @php
                             $formArray = [
                                 'lasu_notification' => 'showError',

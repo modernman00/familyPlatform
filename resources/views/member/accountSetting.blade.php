@@ -929,6 +929,7 @@
                   </div>
 
                   <form id="secondaryFamCodeForm" onsubmit="return false;">
+    @include('csrf')
                     <div class="row g-3 align-items-center">
                       <div class="col-md-7">
                         <label class="form-label small fw-bold text-muted text-uppercase" for="otherFamCodeInput">Maternal / Maiden Family Code</label>
@@ -973,6 +974,7 @@
                       </p>
 
                       <form id="staySoloForm" onsubmit="return false;">
+    @include('csrf')
                         <div class="mb-3">
                           <label class="form-label" for="soloSurname">Family Surname (Optional)</label>
                           <input type="text" name="surname" id="soloSurname" class="form-control" placeholder="{{ $lastName ?: 'Surname' }}" value="{{ $lastName }}">
@@ -1006,6 +1008,7 @@
                       </p>
 
                       <form id="joinFamilyForm" onsubmit="return false;">
+    @include('csrf')
                         <div class="mb-2">
                           <label class="form-label" for="targetFamCode">Target Family Code *</label>
                           <input type="text" name="family_code" id="targetFamCode" class="form-control text-uppercase fw-bold" placeholder="e.g. OLA345" maxlength="10" required>

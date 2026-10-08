@@ -144,6 +144,7 @@ input[type="file"] {
 
     <form method='post' enctype='multipart/form-data' id="formProfilePics"
       style="display: none;">
+    @include('csrf')
       <p id="profilePicsNotification"></p>
 
      

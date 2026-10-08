@@ -20,6 +20,7 @@
       <p id="formPostMessageModal_notification"></p>
 
     <form class="w3-container" id='formPostMessageModal' method="post" enctype='multipart/form-data'>
+    @include('csrf')
 
       <div class="w3-section">
 

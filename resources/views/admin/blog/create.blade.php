@@ -67,6 +67,7 @@
 
 <div class="blog-editor-container">
     <form id="blogForm" action="/admin/blog/store" method="POST" enctype="multipart/form-data">
+    @include('csrf')
         <div class="form-group">
             <label for="title">Blog Title</label>
             <input type="text" id="title" name="title" class="input-control" required placeholder="Enter a catchy title...">

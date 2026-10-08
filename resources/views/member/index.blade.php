@@ -122,6 +122,7 @@
 								<section>
 									<h2>Get in touch</h2>
 									<form method="post" action="#">
+    @include('csrf')
 										<div class="fields">
 											<div class="field half">
 												<input type="text" name="name" id="name" placeholder="Name" />

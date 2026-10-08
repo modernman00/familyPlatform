@@ -12,6 +12,7 @@
         </button>
       </div>
       <form class="modal-body" id="modalBody" action="/register" method="POST">
+    @include('csrf')
       
       </form>
       <div class="modal-footer">

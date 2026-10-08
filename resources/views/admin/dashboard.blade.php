@@ -408,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $adminPrefix = '/' . trim((string)$adminSecretPath, '/');
         @endphp
         <form action="{{ $adminPrefix }}/create-admin" method="POST" class="w3-container w3-padding-16">
+    @include('csrf')
             <p>
                 <label class="w3-text-grey"><b>Full Name</b></label>
                 <input class="w3-input w3-border w3-round" type="text" name="name" placeholder="e.g. Sarah Jenkins" required>

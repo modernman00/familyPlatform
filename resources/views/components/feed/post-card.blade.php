@@ -236,6 +236,7 @@
         </div>
 
         <form @submit.prevent="submitComment(post.post_no)" class="d-flex gap-2 align-items-center">
+    @include('csrf')
           <!-- Emoji toggle button -->
           <button type="button"
                   @click="toggleCommentEmoji(post.post_no)"
@@ -272,6 +273,7 @@
             <!-- Inline Comment Edit -->
             <template x-if="editingCommentNo === c.comment_no">
               <form @submit.prevent="saveCommentEdit(c.comment_no)" class="d-flex gap-2 align-items-center" style="max-width: 90%;">
+    @include('csrf')
                 <input type="text" class="form-control form-control-sm rounded-pill" x-model="editCommentText" required
                        style="font-size: 0.875rem; background-color: #f0f2f5; border: none; padding: 6px 14px;">
                 <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3" style="font-size: 0.78rem; flex-shrink:0;">Save</button>

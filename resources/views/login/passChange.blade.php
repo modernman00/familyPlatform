@@ -158,6 +158,7 @@
         <p class="stitch-subtitle">Choose a strong password you haven't used before.</p>
 
         <form action="" id="changePW" class="styleform_form changePW">
+    @include('csrf')
             @php
                 $formArray = [
                     'changePW_notification' => 'showError',

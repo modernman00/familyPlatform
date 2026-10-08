@@ -900,6 +900,7 @@
                 <!-- Step 2 Forms -->
                 <div id="studioStep2-partner" class="d-none">
                     <form id="studioPartnerForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-heart-fill me-2 text-danger"></i>Partner / Spouse Details</h6>
                         <div class="mb-3">
@@ -934,6 +935,7 @@
 
                 <div id="studioStep2-child" class="d-none">
                     <form id="studioChildForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <h6 class="fw-bold mb-3 text-success"><i class="bi bi-emoji-smile-fill me-2"></i>Child Details</h6>
                         <div class="mb-3">
@@ -964,6 +966,7 @@
 
                 <div id="studioStep2-sibling" class="d-none">
                     <form id="studioSiblingForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <h6 class="fw-bold mb-3 text-warning"><i class="bi bi-people-fill me-2"></i>Sibling Details</h6>
                         <div class="mb-3">
@@ -994,6 +997,7 @@
 
                 <div id="studioStep2-parents" class="d-none">
                     <form id="studioParentsForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i>Parents Details</h6>
                         <div class="row g-2 mb-3">
@@ -1043,6 +1047,7 @@
                 <div id="studioEditError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
 
                 <form id="studioEditForm">
+    @include('csrf')
                     <input type="hidden" name="node_id" id="editNodeId" value="">
                     
                     <div class="row g-2 mb-3">

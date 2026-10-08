@@ -18,6 +18,7 @@
             </div>
 
             <form id="createReelForm" enctype="multipart/form-data">
+    @include('csrf')
                 <input type="hidden" id="reelThumbnailDataInput" name="thumbnail_data">
                 <div class="modal-body px-4 py-3">
                     

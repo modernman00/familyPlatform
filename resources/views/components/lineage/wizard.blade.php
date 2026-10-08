@@ -59,6 +59,7 @@
                 <!-- Step 2: Partner Form -->
                 <div id="step2-partner" class="d-none">
                     <form id="addPartnerForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" id="partnerBaseNodeId">
                         
                         <div class="mb-3">
@@ -120,6 +121,7 @@
                 <!-- Step 2: Child Form -->
                 <div id="step2-child" class="d-none">
                     <form id="addChildForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" id="childBaseNodeId">
                         
                         <div class="alert alert-warning small py-2">
@@ -173,6 +175,7 @@
                 <!-- Step 2: Parents Form -->
                 <div id="step2-parents" class="d-none">
                     <form id="addParentsForm">
+    @include('csrf')
                         <input type="hidden" name="base_node_id" id="parentsBaseNodeId">
                         
                         <div class="alert alert-info small py-2">

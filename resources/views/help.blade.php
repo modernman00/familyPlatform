@@ -8,6 +8,7 @@
 <body>
 
 <form id="uploadForm" enctype="multipart/form-data">
+    @include('csrf')
   <input type="file" id="fileInput" name="files[]" multiple style="display: none;">
   <button type="button" id="uploadButton">Choose Files</button>
   <span id="fileNames"></span>

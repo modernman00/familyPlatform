@@ -150,6 +150,7 @@
         <p class="stitch-subtitle">Please enter your email address to receive a 6-digit security code.</p>
 
         <form id="forgot" class="styleform_form">
+    @include('csrf')
             @php
                 $formArray = [
                     'forgot_notification' => 'showError',

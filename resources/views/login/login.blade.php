@@ -252,6 +252,7 @@
 
     <!-- Email Form -->
     <form id="login" class="styleform_form">
+    @include('csrf')
         @php
         $formArray = [
         'login_notification' => 'showError',

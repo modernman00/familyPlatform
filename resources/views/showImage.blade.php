@@ -37,6 +37,7 @@
     <div class="showImageContainer__form">
 
       <form action="/postCommentProfile" method="post">
+    @include('csrf')
 
         <textarea placeholder="Write a comment" @isset($comment['post_no']) id="{{ $comment['post_no'] }}" @endisset name='comment'>  </textarea>
 

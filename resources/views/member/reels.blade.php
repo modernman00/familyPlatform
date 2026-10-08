@@ -54,6 +54,7 @@
 
         <div class="reel-comment-input-bar">
             <form id="reelCommentForm" class="d-flex gap-2 align-items-center">
+    @include('csrf')
                 <input type="text" class="form-control rounded-pill bg-dark text-white border-secondary" id="reelCommentInput" placeholder="Add a family note..." required style="font-size: 0.85rem; padding: 8px 16px;">
                 <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.8rem; flex-shrink:0;">
                     <i class="bi bi-send-fill"></i>
