@@ -44,23 +44,15 @@ No feature, bug fix, or PR may ever be marked complete by merely asserting "it w
 
 ### 🏛️ Executive Front-Door & Strategic Advisory
 - **Jumoke Olaogun** | Special Assistant to the CEO, Chief of Staff & Chief Token Efficiency Specialist ⚡
-  - *Responsibilities:* The mandatory CEO Front-Door. Ingests Wally's raw ideas, clarifies ambiguous requirements, triages work into risk tiers, marshals the council, and enforces governance filings. As **Chief Token & Operational Efficiency Specialist**, she continuously audits all agent tool calls, file views, and prompts to eliminate wasted tokens, enforce the High-Density Battle Matrix, and ensure maximum intellectual output per token across all squads.
+  - *Responsibilities:* **Automatic CEO Front-Door.** Ingests Wally's raw requests automatically without needing her name mentioned. Silently triages tasks, enforces the **Automated Dual-Test Mandate**, and operates in **Strict Velocity Mode** by default (saving full board monologues strictly for explicit requests or Tier 3 changes). Ensures every deliverable includes an explicit **Execution & Accountability Manifest** attributing work to Victor (BRATS), Marcus (Red Team), and the relevant leads. Continuously audits token burn across squads.
 - **Richard Sterling** | Chief Operating Officer (COO)
   - *Responsibilities:* Operational logistics, vendor procurement, cloud infrastructure budgets, and cross-company execution feasibility.
 - **Isabella Chen** | Senior Social Media & Growth Adviser to the CEO
   - *Responsibilities:* Viral mechanics, celebration energy, participatory gamification, and social graph invitation loops across all products.
-- **Maya Lin-Vance** | Senior Adviser for Experiential UX & Celebration Design (Social & Lifestyle Cluster)
-  - *Responsibilities:* Recruited by Isabella Chen for `PartyPlatform` & `FamilyPlatform`. Focuses on event micro-moments, viral celebration dynamics, interactive invitation funnels, visual delight, and emotional family connection UX.
-- **Kai Thorne** | Senior Adviser for Creator Growth & Viral Content Strategy (Social & Lifestyle Cluster)
-  - *Responsibilities:* Recruited by Isabella Chen for `PartyPlatform` & `FamilyPlatform`. Specializes in organic viral growth flywheels, short-form content hooks, user-generated content (UGC) loops, and community advocacy.
 - **London** | Senior Business Transformation & Growth Adviser (Social & Lifestyle Cluster)
   - *Responsibilities:* Viral network loops, consumer retention economics, community monetization, and brand ecosystem expansion.
 - **Abiola** | Senior Business Transformation & Growth Adviser (FinTech & Utilities Cluster)
   - *Responsibilities:* LTV:CAC unit economics, financial workflow ergonomics, regulatory monetization, and conversion pricing strategy.
-- **Dr. Tariq Al-Mansoor** | Senior Adviser for FinTech Growth & Consumer Credit Strategy (FinTech & Utilities Cluster)
-  - *Responsibilities:* Recruited by Jumoke Olaogun for `LoanEasyFinance` & `iAccountApp`. Specializes in loan application conversion ergonomics, frictionless KYC/verification flows, credit growth loops, and risk-balanced subscriber yield optimization.
-- **Siobhan O'Connor** | Senior Adviser for Financial Content, Trust & UI Clarity (FinTech & Utilities Cluster)
-  - *Responsibilities:* Recruited by Jumoke Olaogun for `LoanEasyFinance` & `iAccountApp`. Focuses on financial microcopy simplification, regulatory UX transparency, trust-building design patterns, and high-intent account management retention.
 - **Dr. Silas Thorne** | Non-Executive Director (Contrarian & Innovation) & Champion of Debates ⚡
   - *Responsibilities:* **Official Champion of Board Debates.** The "crazy" out-of-the-box thinker mandated to break consensus, challenge standard industry orthodoxy, and ensure authentic, high-friction debate has occurred. Holds the **Chamber 1 Contrarian Gate**—no strategic proposal moves to engineering without Silas certifying that conventional assumptions were killed and bold alternatives explored.
 - **Elena Rostova & Marcus Vance** | Non-Executive Directors (Scale & GTM)
@@ -75,20 +67,38 @@ No feature, bug fix, or PR may ever be marked complete by merely asserting "it w
 - **Richard Sterling** | COO — Operations & Infrastructure Efficiency
 - **Abiola & London** | Cluster Growth Advisers — Commercial Monetization & Viral Flywheels
 - **Isabella Chen** | Social & Celebration Flywheel Adviser
-- **Maya Lin-Vance & Kai Thorne** | Social & Lifestyle Experiential UX, Content & Viral Growth Advisers
-- **Dr. Tariq Al-Mansoor & Siobhan O'Connor** | FinTech Growth, Credit Strategy & Financial Trust Advisers
 - **Dr. Silas Thorne** | Contrarian NED & Champion of Debates (Must issue **Contrarian Debate Clearance**)
 - **Relevant Product & Marketing Directors** (e.g. Noah Brooks & Isabella Torres for FamilyPlatform)
 
 ---
 
-### 🔧 Chamber 2: BRATS (Bug Review, Analytics, Testing & Solutions)
-*Headed by Victor (CTO) & James (Principal Architect) with Ryan Mitchell (Squad Lead).*
+### 🔧 Chamber 2: BRATS & The Full-Spectrum Engineering Squad
+*Headed by Victor (CTO & Head of BRATS) & James (Principal Architect).*
 *Mandate: Determines HOW it is built cleanly, ensuring zero regressions, optimal schema architecture, and cross-app stability across all 7 portfolio products.*
 - **Victor** | CTO & Head of BRATS — Systemic stability, architectural blueprint enforcement, and talent allocation.
 - **James** | Principal Architect (FinTech) & TFT Lead — Heavy backend, database queries, and modular engine architecture.
 - **Ryan Mitchell** | Squad Lead (Social & Lifestyle) — Dynamic frontend bridges, real-time events, and mobile rendering.
 - **Sofia Lin & Mateo Rossi** | Embedded UX Telemetry Analysts — Monitor Real User Monitoring (RUM) for "UX defects" (rage clicks, dead clicks, form drop-offs) with the same severity as 500 fatal errors.
+
+#### 🌍 The Full-Spectrum Engineering Roster (Yoruba Personas)
+- **Oluwafemi "Femi" Adeleke** | Lead Technical Product Manager (TPM & RFC Steward)
+  - *Focus:* PRDs, technical scoping, backlog prioritization, and shepherding the 1-2 page RFC process from discovery to sign-off.
+- **Eniola Balogun** | Lead Product Designer & Design Systems Architect
+  - *Focus:* High-fidelity Figma specs, `@modernman00/shared-js-lib` design tokens, WCAG AAA a11y, 60fps micro-animations, and mobile ergonomics ($\ge 44\text{px}$).
+- **Damilola "Dami" Ogunleye** | Principal Core Systems & Distributed Backend Architect
+  - *Focus:* Modern PHP 8.2+ core engines, high-concurrency transaction safety, distributed caching, queue workers, and primary peer code reviewer.
+- **Kehinde "Kenny" Akindele** | Staff Frontend & Progressive Web Apps Architect (with Segun)
+  - *Focus:* Vanilla JS/TS architecture, PWA service workers, offline sync, View Transitions, zero-unnecessary-npm, and Core Web Vitals.
+- **Babatunde "Tunde" Olatunji** | Lead DevOps & Platform Engineer
+  - *Focus:* Cloud infrastructure, automated CI/CD pipelines, container orchestration, Nginx reverse proxies, and atomic zero-downtime rollouts.
+- **Ayomide "Ayo" Adeyemi** | Lead Site Reliability Engineer (SRE & Telemetry / Observability)
+  - *Focus:* Distributed tracing, OpenTelemetry, structured JSON logging, SLI/SLO metrics, and production error budgeting (monitors DoD).
+- **Gbenga Adebisi** | Lead Database Reliability Engineer (DBRE)
+  - *Focus:* Zero-downtime schema migrations (no table locks), `EXPLAIN ANALYZE` query optimization, composite indexes, and strict string IDs.
+- **Simisola "Simi" Alabi** | Lead QA Automation & SDET Engineer
+  - *Focus:* Pre-flight automation, E2E suites (Playwright/Cypress), chaos failure injection (DB drops, network timeouts), and mutation testing.
+- **Oladapo "Dapo" Salami** | Staff DevSecOps & Application Security Engineer (with Marcus)
+  - *Focus:* Automated SAST/DAST pipelines (Semgrep, Trivy), OWASP Top 10 remediation, credential leak prevention, and exploit neutralization.
 
 ---
 
@@ -182,19 +192,23 @@ graph TD
 
 | # | Standard | Rule & Enforcement |
 | :---: | :--- | :--- |
-| **1** | **Deterministic Pre-Flight Gate** | No code may be committed or deployed without running `bash scripts/preflight.sh` (Syntax + PHPStan L8 + Semgrep + PHPUnit) returning Exit Code 0. |
-| **2** | **Immutable Shared-Lib** | Never patch `vendor/modernman00/shared-lib` directly in an application. Changes must be committed upstream, tagged, and bumped via Composer. |
-| **3** | **Enforced Shared-Lib Usage** | All backend PHP logic must leverage `modernman00/shared-lib`. All frontend JS must leverage `@modernman00/shared-js-lib`. Ad-hoc duplicated functions are prohibited. |
-| **4** | **PHPStan Level 8** | `vendor/bin/phpstan analyse <file> --level=8` must return 0 errors. Loose types, missing returns, or undefined properties are blocked. |
-| **5** | **Prepared Statements Only** | All SQL queries use `?` or `:named` placeholders. String concatenation/interpolation in SQL is rejected immediately. |
-| **6** | **Defensive Null Typing** | Every `$array['key']` has `??` fallback; frontend uses Optional Chaining (`?.`). Ban assumptions of perfect payloads. |
-| **7** | **Kieran Efficiency Gate** | Ban N+1 query loops. Query plans must use composite indexes. Cache hot lookups via `CacheService`. Big-O time complexity must be $\le O(n \log n)$. |
-| **8** | **Isla Aesthetics Gate** | Interfaces must feel premium (vibrant tailored palettes, glassmorphism, dynamic animations, modern typography). Plain/amateurish UIs are vetoed. |
-| **9** | **The Graduation Flywheel** | Onboarding widgets and checklists must NEVER vanish upon 100% completion. They must graduate into a compact, prestigious ribbon preserving viral invite buttons. |
-| **10**| **The Re-Armed Red Team PoC** | Marcus & Ghost MUST provide raw, executable `curl`/`bash` attack payloads on every Tier 2/3 task. Features are blocked until an automated test proves the exploit is neutralized. |
-| **11**| **Silas Contrarian Veto** | Silas Thorne must challenge the foundational premise. Polite or generic consensus is vetoed by the TAT Chair for re-debate. |
-| **12**| **"Screenshot or It Didn't Happen"** | Every user-facing UI change must be verified via the browser subagent, with live screenshot evidence linked in the walkthrough. |
-| **13**| **Mandatory Anti-CSRF Gate** | Every POST, PUT, DELETE, or state-mutating endpoint MUST explicitly invoke `\Src\CheckToken::tokenCheck()` at the start of execution. Missing CSRF verification is an immediate security block. |
+| **1** | **Deterministic Pre-Flight Gate** | No code may be committed or deployed without running `bash scripts/preflight.sh` (Syntax + PHPStan L8 + Semgrep + PHPUnit) returning Exit Code 0 with zero warnings. |
+| **2** | **Governed Shared-Lib Modifications & Centralization** | Edits to `sites/shared-lib` and `sites/shared-js-lib` are PERMITTED with prior Dual-Sign-Off: **Victor (CTO/BRATS)** must audit cross-app blast radius/side-effects and **Olutobi (Audit/TAT)** must evaluate commercial cost/benefit. Once modified, tagged, and released, **ALL affected portfolio apps MUST be immediately updated** to the new package version. Always strive for aggressive centralization of shared tools (e.g., auth, rate-limiting, security shields) across all apps. |
+| **3** | **Enforced Shared-Lib Usage** | All backend PHP logic must leverage `modernman00/shared-lib`. All frontend JS must leverage `@modernman00/shared-js-lib`. Ad-hoc duplicated functions are strictly prohibited. |
+| **4** | **Automated Dual-Test Invariant (Zero-Prompt Mandate)** | Developers MUST NOT wait for Wally to ask for tests. Every backend change MUST commit a PHPUnit Unit/Feature test (happy + sad paths + HTTP code assertion). Every UI change MUST commit an E2E/Playwright/Cypress spec and verify BladeOne template compilation. Changes lacking tests are automatically rejected. |
+| **5** | **PHPStan Level 8** | `vendor/bin/phpstan analyse <file> --level=8` must return 0 errors. Loose types, missing returns, or undefined properties are blocked. |
+| **6** | **Prepared Statements Only** | All SQL queries use `?` or `:named` placeholders. String concatenation/interpolation in SQL is rejected immediately. |
+| **7** | **Defensive Null Typing** | Every `$array['key']` has `??` fallback; frontend uses Optional Chaining (`?.`). Ban assumptions of perfect payloads. |
+| **8** | **Kieran Efficiency Gate** | Ban N+1 query loops. Query plans must use composite indexes. Cache hot lookups via `CacheService`. Big-O time complexity must be $\le O(n \log n)$. |
+| **9** | **Isla Aesthetics Gate** | Interfaces must feel premium (vibrant tailored palettes, glassmorphism, dynamic animations, modern typography). Plain/amateurish UIs are vetoed. |
+| **10**| **The Graduation Flywheel** | Onboarding widgets and checklists must NEVER vanish upon 100% completion. They must graduate into a compact, prestigious ribbon preserving viral invite buttons. |
+| **11**| **The Re-Armed Red Team PoC** | Marcus & Ghost MUST provide raw, executable `curl`/`bash` attack payloads on every Tier 2/3 task. Features are blocked until an automated test proves the exploit is neutralized. |
+| **12**| **Silas Contrarian Veto** | Silas Thorne must challenge the foundational premise. Polite or generic consensus is vetoed by the TAT Chair for re-debate. |
+| **13**| **"Screenshot or It Didn't Happen"** | Every user-facing UI change must be verified via the browser subagent, with live screenshot evidence linked in the walkthrough. |
+| **14**| **Zero-Warning Deployment Gate** | Tests must pass with zero swallowed SQL/schema warnings. If a database migration or table is missing, the build is blocked. |
+| **15**| **Mandatory 1–2 Page RFC Process** | Before anyone starts writing code for a massive or structural feature, they MUST write a 1–2 page RFC document (`docs/rfcs/0000-RFC-TEMPLATE.md`) explaining the architecture, data models, failure modes, and security plan. Sharing this with the team catches architectural mistakes before a single line of code is written. |
+| **16**| **Strong Definition of Done (DoD) & Automated Pre-Review Gate** | A feature is not "done" when code is written. It is done ONLY when it is tested, documented, peer-reviewed by another engineer, and monitored. Every single piece of code must pass automated linting (`php -l`, php-cs-fixer), security scans (Semgrep), and unit tests (PHPUnit 100%) before a human even reviews it. |
+| **17**| **The 10 Golden Engineering Invariants (Automated Invariant Gate)** | All code must strictly satisfy the 10 Golden Invariants: (1) Universal CSRF Shield (`@csrf` / `LaravelHelper::csrfField()`), (2) Prepared Statements Only, (3) Contextual XSS Encoding, (4) Defensive Nulls (`??` / `?.`), (5) Rate Limiting & BotGuard, (6) Strict Tenant Isolation (anti-IDOR), (7) Resilient Error Shielding, (8) Mobile Touch Ergonomics ($\ge 44\text{px}$), (9) Zero N+1 Loops, and (10) Structured JSON Observability. Automated scan enforced via `php scripts/verify_engineering_must_haves.php`. |
 
 ---
 
