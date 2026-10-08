@@ -21,6 +21,8 @@ psalm
 resources/views/layouts/achive
 resources/images
 public/img
+!public/img/logo
+!public/img/logo/**
 public/js
 olaogun.test-key.pem
 olaogun.test.pem 

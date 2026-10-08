@@ -115,14 +115,28 @@
             <tr>
                 <td class="header">
                     @php
-                        $appLogo = getenv('APP_LOGO') ?: (getenv('APP_URL') ? rtrim(getenv('APP_URL'), '/') . '/public/assets/images/logo.png' : '');
-                        $appName = getenv('APP_NAME') ?: 'Family Platform';
+                        $rawBaseUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
+                        $baseUrl = rtrim($rawBaseUrl, '/');
+                        $assetBase = rtrim((string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: $baseUrl), '/');
+
+                        $rawLogo = (string)($_ENV['APP_LOGO_COLOR'] ?? getenv('APP_LOGO_COLOR') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo.png'));
+                        $rawLogo = trim($rawLogo, "'\"");
+
+                        if (empty($rawLogo) || str_contains($rawLogo, 'favicon')) {
+                            $rawLogo = '/public/img/logo/logo.png';
+                        }
+
+                        if (!str_starts_with($rawLogo, 'http://') && !str_starts_with($rawLogo, 'https://')) {
+                            $logoUrl = $assetBase . '/' . ltrim($rawLogo, '/');
+                        } else {
+                            $logoUrl = $rawLogo;
+                        }
+
+                        $appName = (string)($_ENV['APP_NAME'] ?? getenv('APP_NAME') ?: 'Family Platform');
                     @endphp
-                    @if (!empty($appLogo))
-                        <img src="{{ $appLogo }}" alt="{{ $appName }} Logo" style="display: block; margin: 0 auto 15px auto; height: 50px; width: auto;" />
-                    @else
-                        <div class="logo-circle">{{ substr($appName, 0, 1) }}</div>
-                    @endif
+                    <a href="{{ $baseUrl }}" target="_blank" style="text-decoration: none; display: inline-block;">
+                        <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="200" style="display: block; margin: 0 auto 15px auto; width: 200px; max-width: 220px; height: auto; border: 0; outline: none; text-decoration: none; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 22px; font-weight: 700; color: #1c1e21;" />
+                    </a>
                     <h1 class="title">@yield('title', 'Notification')</h1>
                     <p class="subtitle">@yield('subtitle', 'Updates from your family network')</p>
                 </td>

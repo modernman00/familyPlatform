@@ -7,6 +7,25 @@ final class Index
 {
     public function index(): void
     {
+        if (\class_exists('\Src\functionality\SignIn')) {
+            \Src\functionality\SignIn::rehydrateSession();
+        }
+
+        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true))
+            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
+
+        if ($isAdmin) {
+            redirect('/admin/dashboard');
+            return;
+        }
+
+        $isUser = (!empty($_SESSION['id']) && !empty($_SESSION['auth']['identifyCust']))
+            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'));
+
+        if ($isUser) {
+            redirect('/profilePage');
+            return;
+        }
 
         try {
             Utility::view('index');

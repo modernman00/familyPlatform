@@ -10,4 +10,9 @@ require_once __DIR__ . '/Support/shims.php';
 
 date_default_timezone_set('Europe/London');
 
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    @session_start();
+}
+
 $_SESSION = [];
+

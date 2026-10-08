@@ -23,3 +23,22 @@ if (!function_exists(__NAMESPACE__ . '\\showError')) {
         \Src\Utility::showError($th);
     }
 }
+
+namespace App\controller;
+
+if (!function_exists(__NAMESPACE__ . '\\redirect')) {
+    function redirect(string $path): void
+    {
+        $GLOBALS['__testRedirect'] = $path;
+    }
+}
+
+namespace App\controller\login;
+
+if (!function_exists(__NAMESPACE__ . '\\redirect')) {
+    function redirect(string $path): void
+    {
+        $GLOBALS['__testRedirect'] = $path;
+    }
+}
+

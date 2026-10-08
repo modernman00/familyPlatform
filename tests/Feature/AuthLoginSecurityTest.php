@@ -128,4 +128,62 @@ final class AuthLoginSecurityTest extends TestCase
         $this->assertIsArray($decoded);
         $this->assertStringContainsStringIgnoringCase('session expired', (string) ($decoded['message'] ?? ''));
     }
+
+    // ---- Auto-Redirect Alignment (Index & Login) -----------------------
+
+    public function test_authenticated_member_on_root_is_redirected_to_profile_page(): void
+    {
+        $_SESSION['id'] = $this->userId;
+        $_SESSION['auth'] = [
+            'identifyCust' => $this->userId,
+            'type' => 'member',
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        (new \App\controller\Index())->index();
+
+        $this->assertSame('/profilePage', $GLOBALS['__testRedirect'] ?? null);
+    }
+
+    public function test_authenticated_admin_on_root_is_redirected_to_admin_dashboard(): void
+    {
+        $_SESSION['id'] = $this->userId;
+        $_SESSION['auth'] = [
+            'identifyCust' => $this->userId,
+            'type' => 'super_admin',
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        (new \App\controller\Index())->index();
+
+        $this->assertSame('/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
+    }
+
+    public function test_authenticated_member_on_login_is_redirected_to_profile_page(): void
+    {
+        $_SESSION['id'] = $this->userId;
+        $_SESSION['auth'] = [
+            'identifyCust' => $this->userId,
+            'type' => 'member',
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        (new \App\controller\login\Login())->show();
+
+        $this->assertSame('/profilePage', $GLOBALS['__testRedirect'] ?? null);
+    }
+
+    public function test_authenticated_admin_on_login_is_redirected_to_admin_dashboard(): void
+    {
+        $_SESSION['id'] = $this->userId;
+        $_SESSION['auth'] = [
+            'identifyCust' => $this->userId,
+            'type' => 'admin',
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        (new \App\controller\login\Login())->show();
+
+        $this->assertSame('/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
+    }
 }

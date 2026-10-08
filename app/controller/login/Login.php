@@ -23,28 +23,25 @@ final class Login
             \Src\functionality\SignIn::rehydrateSession();
         }
 
-        if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users')) {
-            $userId = $_SESSION['id'] ?? null;
-            if ($userId) {
-                try {
-                    $customerData = (new SingleCustomerData())->getCustomerData((string)$userId, ['personal']);
-                    if (!empty($customerData) && is_array($customerData)) {
-                        redirect('/profilePage');
-                        return;
-                    }
-                } catch (\Throwable $e) {
-                    // Profile resolution failed — fall through to clear stale cookies
-                }
-            }
-            // Stale or orphaned session/cookie: clear and allow clean login
-            destroyCookie();
-            unset($_SESSION['id'], $_SESSION['famCode']);
-        }
-        try {
+        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true))
+            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
 
+        if ($isAdmin) {
+            redirect('/admin/dashboard');
+            return;
+        }
+
+        $isUser = (!empty($_SESSION['id']) && !empty($_SESSION['auth']['identifyCust']))
+            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'));
+
+        if ($isUser) {
+            redirect('/profilePage');
+            return;
+        }
+
+        try {
             BaseController::viewWithCsp('login/login');
         } catch (\Throwable $e) {
-
             showError($e);
         }
     }

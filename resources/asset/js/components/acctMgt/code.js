@@ -49,6 +49,8 @@ const initOtp = () => {
     hiddenCodeInput.value = normalizeDigits(raw);
   };
 
+  let isAutoSubmitting = false;
+
   const fillFromString = (value) => {
     const code = normalizeDigits(value).substring(0, otpInputs.length);
     if (!code.length) return;
@@ -57,14 +59,29 @@ const initOtp = () => {
     });
     updateHiddenInput();
     otpInputs[Math.min(code.length - 1, otpInputs.length - 1)].focus();
+
+    if (code.length === 6 && !isAutoSubmitting) {
+      isAutoSubmitting = true;
+      setTimeout(() => id('button')?.click(), 150);
+    }
   };
 
   otpInputs.forEach((input, index) => {
     input.addEventListener('input', (e) => {
       const clean = normalizeDigits(e.target.value);
+      if (clean.length > 1) {
+        fillFromString(clean);
+        return;
+      }
       e.target.value = clean ? clean.slice(-1) : '';
-      if (clean && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+      if (clean && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
       updateHiddenInput();
+      if (hiddenCodeInput.value.length === 6 && !isAutoSubmitting) {
+        isAutoSubmitting = true;
+        setTimeout(() => id('button')?.click(), 150);
+      }
     });
 
     input.addEventListener('keydown', (e) => {
@@ -75,14 +92,41 @@ const initOtp = () => {
 
     input.addEventListener('paste', (e) => {
       e.preventDefault();
-      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      const pasted = (e.clipboardData || window.clipboardData)?.getData('text') || '';
       fillFromString(pasted);
     });
   });
 
+  // URL query parameter magic link (?code=123456)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlCode = urlParams.get('code');
+    if (urlCode) {
+      fillFromString(urlCode);
+      if (window.history && window.history.replaceState) {
+        urlParams.delete('code');
+        const cleanUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    }
+  } catch (_) {}
+
+  // Tab focus / resume clipboard check
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      const current = Array.from(otpInputs).map((i) => i.value).join('');
+      if (current.length === 6) return;
+      try {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          const clean = normalizeDigits(text.trim());
+          if (clean.length === 6) fillFromString(clean);
+        }
+      } catch (_) {}
+    }
+  });
+
   // All submission goes through the shared library's click handler on #button.
-  // Never let the form submit natively (e.g. Enter key) as a bare GET — route
-  // it back through the button once the 6 digits are in.
   if (otpForm) {
     otpForm.addEventListener('submit', (e) => {
       e.preventDefault();

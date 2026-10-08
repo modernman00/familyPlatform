@@ -37,16 +37,30 @@
                     
                     <!-- Header -->
                     <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); padding: 40px 20px;">
+                        <td align="center" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); padding: 36px 20px;">
                             @php
-                                $appLogo = getenv('APP_LOGO') ?: (getenv('APP_URL') ? rtrim(getenv('APP_URL'), '/') . '/public/assets/images/logo.png' : '');
-                                $appName = getenv('APP_NAME') ?: 'Family Platform';
+                                $rawBaseUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
+                                $baseUrl = rtrim($rawBaseUrl, '/');
+                                $assetBase = rtrim((string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: $baseUrl), '/');
+
+                                $rawLogo = (string)($_ENV['APP_LOGO_EMAIL'] ?? getenv('APP_LOGO_EMAIL') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo-white.png'));
+                                $rawLogo = trim($rawLogo, "'\"");
+
+                                if (empty($rawLogo) || str_contains($rawLogo, 'favicon')) {
+                                    $rawLogo = '/public/img/logo/logo-white.png';
+                                }
+
+                                if (!str_starts_with($rawLogo, 'http://') && !str_starts_with($rawLogo, 'https://')) {
+                                    $logoUrl = $assetBase . '/' . ltrim($rawLogo, '/');
+                                } else {
+                                    $logoUrl = $rawLogo;
+                                }
+
+                                $appName = (string)($_ENV['APP_NAME'] ?? getenv('APP_NAME') ?: 'Family Platform');
                             @endphp
-                            @if (!empty($appLogo))
-                                <img src="{{ $appLogo }}" alt="{{ $appName }} Logo" style="display: block; height: 50px; width: auto; filter: brightness(0) invert(1);" />
-                            @else
-                                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 0.5px;">{{ $appName }}</h1>
-                            @endif
+                            <a href="{{ $baseUrl }}" target="_blank" style="text-decoration: none; display: inline-block;">
+                                <img src="{{ $logoUrl }}" alt="{{ $appName }}" width="220" class="header-logo" style="display: block; width: 220px; max-width: 240px; height: auto; border: 0; outline: none; text-decoration: none; font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 24px; font-weight: 700; color: #ffffff;" />
+                            </a>
                         </td>
                     </tr>
 

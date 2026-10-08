@@ -212,8 +212,8 @@
             @for ($i = 1; $i <= 6; $i++)
                 <input type="text"
                        class="otp-input"
-                       maxlength="1"
-                       inputmode="text"
+                       maxlength="{{ $i === 1 ? '6' : '1' }}"
+                       inputmode="numeric"
                        pattern="[a-zA-Z0-9]*"
                        aria-label="Digit {{ $i }} of 6"
                        autocomplete="{{ $i === 1 ? 'one-time-code' : 'off' }}">
