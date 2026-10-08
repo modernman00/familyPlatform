@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /api/
+Disallow: /cron/
+Disallow: /storage/
+Sitemap: https://familyplatform.app/sitemap.xml

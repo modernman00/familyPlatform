@@ -383,17 +383,33 @@
             if (graphData.children) {
                 graphData.children.forEach(child => {
                     const unionId = child.union_id;
-                    const union = graphData.unions.find(u => u.id === unionId);
+                    const union = graphData.unions.find(u => String(u.id) === String(unionId));
                     if (union) {
-                        const p1 = graphData.nodes.find(n => n.id === union.partner_1_id);
-                        const p2 = graphData.nodes.find(n => n.id === union.partner_2_id);
+                        const p1 = graphData.nodes.find(n => String(n.id) === String(union.partner_1_id));
+                        const p2 = graphData.nodes.find(n => String(n.id) === String(union.partner_2_id));
                         
                         let fid = null, mid = null;
-                        if (p1 && p1.gender === 'Male') fid = p1.id;
-                        if (p1 && p1.gender === 'Female') mid = p1.id;
-                        
-                        if (p2 && p2.gender === 'Male') fid = p2.id;
-                        if (p2 && p2.gender === 'Female') mid = p2.id;
+                        const p1Gender = p1 ? String(p1.gender || '').toLowerCase() : '';
+                        const p2Gender = p2 ? String(p2.gender || '').toLowerCase() : '';
+
+                        if (p1) {
+                            if (p1Gender === 'male') fid = p1.id;
+                            else if (p1Gender === 'female') mid = p1.id;
+                        }
+                        if (p2) {
+                            if (p2Gender === 'male') fid = p2.id;
+                            else if (p2Gender === 'female') mid = p2.id;
+                        }
+
+                        // Defensive fallback: assign opposites if one gender was unspecified
+                        if (!fid && p1 && p2) {
+                            if (mid === p2.id && p1Gender !== 'female') fid = p1.id;
+                            else if (mid === p1.id && p2Gender !== 'female') fid = p2.id;
+                        }
+                        if (!mid && p1 && p2) {
+                            if (fid === p2.id && p1Gender !== 'male') mid = p1.id;
+                            else if (fid === p1.id && p2Gender !== 'male') mid = p2.id;
+                        }
                         
                         childToParents[child.child_id] = { fid, mid };
                     }
@@ -404,10 +420,14 @@
             const nodeToPids = {};
             if (graphData.unions) {
                 graphData.unions.forEach(u => {
-                    if (!nodeToPids[u.partner_1_id]) nodeToPids[u.partner_1_id] = [];
-                    if (!nodeToPids[u.partner_2_id]) nodeToPids[u.partner_2_id] = [];
-                    nodeToPids[u.partner_1_id].push(u.partner_2_id);
-                    nodeToPids[u.partner_2_id].push(u.partner_1_id);
+                    const p1 = u.partner_1_id;
+                    const p2 = u.partner_2_id;
+                    if (p1 && p2) {
+                        if (!nodeToPids[p1]) nodeToPids[p1] = [];
+                        if (!nodeToPids[p2]) nodeToPids[p2] = [];
+                        if (!nodeToPids[p1].includes(p2)) nodeToPids[p1].push(p2);
+                        if (!nodeToPids[p2].includes(p1)) nodeToPids[p2].push(p1);
+                    }
                 });
             }
 

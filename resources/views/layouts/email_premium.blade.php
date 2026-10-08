@@ -117,13 +117,23 @@
                     @php
                         $rawBaseUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
                         $baseUrl = rtrim($rawBaseUrl, '/');
-                        $assetBase = rtrim((string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: $baseUrl), '/');
 
-                        $rawLogo = (string)($_ENV['APP_LOGO_COLOR'] ?? getenv('APP_LOGO_COLOR') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo.png'));
+                        // For email assets: email clients fetch images via public proxies.
+                        // If the app is running on a local testing domain (.test, localhost, 127.0.0.1), those proxies cannot reach local URLs.
+                        $configuredAssetBase = (string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: '');
+                        if (!empty($configuredAssetBase)) {
+                            $assetBase = rtrim($configuredAssetBase, '/');
+                        } elseif (preg_match('/(\.test|\.local|localhost|127\.0\.0\.1)/i', $baseUrl)) {
+                            $assetBase = 'https://myfamilyplatform.com';
+                        } else {
+                            $assetBase = $baseUrl;
+                        }
+
+                        $rawLogo = (string)($_ENV['APP_LOGO_COLOR'] ?? getenv('APP_LOGO_COLOR') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/assets/images/logo.png'));
                         $rawLogo = trim($rawLogo, "'\"");
 
                         if (empty($rawLogo) || str_contains($rawLogo, 'favicon')) {
-                            $rawLogo = '/public/img/logo/logo.png';
+                            $rawLogo = '/public/assets/images/logo.png';
                         }
 
                         if (!str_starts_with($rawLogo, 'http://') && !str_starts_with($rawLogo, 'https://')) {
@@ -159,21 +169,51 @@
             <tr>
                 <td class="footer">
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #6c757d;">
-                        Questions? Contact Customer Support at <strong style="color: #495057;">{{ getenv('BIZ_NO') ?: '+44 (0) 800 123 4567' }}</strong> or email <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
+                        Questions? Contact Customer Support at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
                     </p>
-                    @if (isset($isFunctional) && $isFunctional)
+                    @php
+                        $recipientEmail = (string)($email ?? ($data['email'] ?? ($data['mail'] ?? '')));
+
+                        $checkFunctional = !empty($isFunctional) || !empty($data['isFunctional']);
+                        if (!$checkFunctional) {
+                            $pageTitle = (string)($this->yieldContent('title') ?: ($title ?? ($data['title'] ?? '')));
+                            $pageSub = (string)($this->yieldContent('subtitle') ?: ($subtitle ?? ($data['subtitle'] ?? '')));
+                            $combined = strtoupper($pageTitle . ' ' . $pageSub);
+                            if (str_contains($combined, 'PASSWORD') ||
+                                str_contains($combined, 'SECURITY') ||
+                                str_contains($combined, 'TOKEN') ||
+                                str_contains($combined, 'VERIF') ||
+                                str_contains($combined, '2FA') ||
+                                str_contains($combined, 'ALERT')) {
+                                $checkFunctional = true;
+                            }
+                        }
+
+                        $secretKey = (string)($_ENV['APP_KEY'] ?? getenv('APP_KEY') ?: '');
+                        if (empty($secretKey)) {
+                            $secretKey = 'SECURE_ENV_MUST_DEFINE_APP_KEY_' . hash('sha256', __FILE__);
+                        }
+                        $activeToken = (string)($unsubscribeToken ?? ($data['unsubscribeToken'] ?? ''));
+                        if (empty($activeToken) && !empty($recipientEmail)) {
+                            $activeToken = hash_hmac('sha256', $recipientEmail, $secretKey);
+                        }
+                        $unsubscribeUrl = $baseUrl . '/email/unsubscribe?email=' . urlencode($recipientEmail) . '&token=' . urlencode($activeToken);
+                        $preferencesUrl = $baseUrl . '/settings/notifications';
+                    @endphp
+
+                    @if ($checkFunctional)
                         <p style="margin: 0 0 10px 0; font-size: 12px; color: #6c757d;">
                             <strong>Mandatory Service Notification:</strong> This email is essential to fulfill your account requests or security operations. Unsubscribe is not available for transactional security notifications.
                         </p>
                     @else
                         <p style="margin: 0 0 10px 0; font-size: 12px; color: #6c757d;">
                             You received this email because you have an active account with {{ getenv('APP_NAME') ?: 'Family Platform' }}.<br/>
-                            <a href="{{ getenv('APP_URL') ?: '#' }}/email/unsubscribe?email={{ urlencode($email ?? '') }}&token={{ $unsubscribeToken ?? '' }}" style="color: #6c757d; text-decoration: underline;">Unsubscribe</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/settings/notifications" style="color: #6c757d; text-decoration: underline;">Manage Notification Preferences</a>
+                            <a href="{{ $unsubscribeUrl }}" style="color: #6c757d; text-decoration: underline;">Unsubscribe</a> | <a href="{{ $preferencesUrl }}" style="color: #6c757d; text-decoration: underline;">Manage Notification Preferences</a>
                         </p>
                     @endif
                     <p style="margin: 10px 0 0 0; font-size: 11px; color: #adb5bd;">
-                        &copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }} Ltd. Registered Office: 128 City Road, London, EC1V 2NX, United Kingdom.<br/>
-                        Company Reg No: 12345678 | ICO Reg: ZB123456 | <a href="{{ getenv('APP_URL') ?: '#' }}/privacy" style="color: #adb5bd; text-decoration: underline;">Privacy Policy</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/terms" style="color: #adb5bd; text-decoration: underline;">Terms of Service</a>
+                        &copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }} Ltd.<br/>
+                        <a href="{{ $baseUrl }}/privacy" style="color: #adb5bd; text-decoration: underline;">Privacy Policy</a> | <a href="{{ $baseUrl }}/terms" style="color: #adb5bd; text-decoration: underline;">Terms of Service</a>
                     </p>
                 </td>
             </tr>

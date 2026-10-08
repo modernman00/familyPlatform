@@ -1,5 +1,9 @@
 @extends('email')
 
+@php
+    $isFunctional = true;
+@endphp
+
 @section('title', 'Password Changed')
 @section('subject', 'Security Alert: Password Changed')
 

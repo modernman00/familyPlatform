@@ -41,13 +41,24 @@
                             @php
                                 $rawBaseUrl = (string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com');
                                 $baseUrl = rtrim($rawBaseUrl, '/');
-                                $assetBase = rtrim((string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: $baseUrl), '/');
 
-                                $rawLogo = (string)($_ENV['APP_LOGO_EMAIL'] ?? getenv('APP_LOGO_EMAIL') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo-white.png'));
+                                // For email assets: email clients (Gmail, Apple Mail, Outlook) fetch images via public proxies.
+                                // If the app is running on a local testing domain (.test, localhost, 127.0.0.1), those proxies cannot reach local URLs.
+                                // Use APP_ASSET_URL if explicitly set, or fall back to public production domain if asset base is a local host.
+                                $configuredAssetBase = (string)($_ENV['APP_ASSET_URL'] ?? getenv('APP_ASSET_URL') ?: '');
+                                if (!empty($configuredAssetBase)) {
+                                    $assetBase = rtrim($configuredAssetBase, '/');
+                                } elseif (preg_match('/(\.test|\.local|localhost|127\.0\.0\.1)/i', $baseUrl)) {
+                                    $assetBase = 'https://myfamilyplatform.com';
+                                } else {
+                                    $assetBase = $baseUrl;
+                                }
+
+                                $rawLogo = (string)($_ENV['APP_LOGO_EMAIL'] ?? getenv('APP_LOGO_EMAIL') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/assets/images/logo-white.png'));
                                 $rawLogo = trim($rawLogo, "'\"");
 
                                 if (empty($rawLogo) || str_contains($rawLogo, 'favicon')) {
-                                    $rawLogo = '/public/img/logo/logo-white.png';
+                                    $rawLogo = '/public/assets/images/logo-white.png';
                                 }
 
                                 if (!str_starts_with($rawLogo, 'http://') && !str_starts_with($rawLogo, 'https://')) {
@@ -105,29 +116,59 @@
                     <tr>
                         <td align="center" style="padding: 0 20px;">
                             <p style="margin: 0 0 10px 0; font-size: 13px; color: #64748b; line-height: 1.5; text-align: center;">
-                                If you have any questions regarding your account, please contact Customer Services at <strong style="color: #475569;">{{ getenv('BIZ_NO') ?: '+44 (0) 800 123 4567' }}</strong> or email <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
+                                If you have any questions regarding your account, please contact Customer Services at <a href="mailto:{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}" style="color: #00bfa5; text-decoration: none;">{{ getenv('APP_EMAIL') ?: 'support@myfamilyplatform.com' }}</a>.
                             </p>
 
-                            @if (isset($isFunctional) && $isFunctional)
+                            @php
+                                $recipientEmail = (string)($email ?? ($data['email'] ?? ($data['mail'] ?? '')));
+
+                                // Auto-detect functional/transactional notifications (security alerts, passwords, verification codes)
+                                $checkFunctional = !empty($isFunctional) || !empty($data['isFunctional']);
+                                if (!$checkFunctional) {
+                                    $yieldSub = is_callable([$this, 'yieldContent']) ? (string)$this->yieldContent('subject') : '';
+                                    $yieldTitle = is_callable([$this, 'yieldContent']) ? (string)$this->yieldContent('title') : '';
+                                    $pageSubject = $yieldSub ?: ($yieldTitle ?: (string)($subject ?? ($data['subject'] ?? '')));
+                                    $subjectUpper = strtoupper($pageSubject);
+                                    if (str_contains($subjectUpper, 'PASSWORD') ||
+                                        str_contains($subjectUpper, 'SECURITY') ||
+                                        str_contains($subjectUpper, 'TOKEN') ||
+                                        str_contains($subjectUpper, 'VERIF') ||
+                                        str_contains($subjectUpper, '2FA') ||
+                                        str_contains($subjectUpper, 'ALERT')) {
+                                        $checkFunctional = true;
+                                    }
+                                }
+
+                                // Cryptographic HMAC-SHA256 signature generation for unsubscribe URL
+                                $secretKey = (string)($_ENV['APP_KEY'] ?? getenv('APP_KEY') ?: '');
+                                if (empty($secretKey)) {
+                                    $secretKey = 'SECURE_ENV_MUST_DEFINE_APP_KEY_' . hash('sha256', __FILE__);
+                                }
+                                $activeToken = (string)($unsubscribeToken ?? ($data['unsubscribeToken'] ?? ''));
+                                if (empty($activeToken) && !empty($recipientEmail)) {
+                                    $activeToken = hash_hmac('sha256', $recipientEmail, $secretKey);
+                                }
+                                $unsubscribeUrl = $baseUrl . '/email/unsubscribe?email=' . urlencode($recipientEmail) . '&token=' . urlencode($activeToken);
+                                $preferencesUrl = $baseUrl . '/settings/notifications';
+                            @endphp
+
+                            @if ($checkFunctional)
                                 <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
                                     <strong>Mandatory Service Notice:</strong> This is a transactional notification regarding your account integrity or security. Because this email is necessary to deliver your requested service, you cannot opt out of critical security messages.
                                 </p>
                             @else
                                 <p style="margin: 0 0 10px 0; font-size: 12px; color: #94a3b8; line-height: 1.5; text-align: center;">
                                     You received this message because you opted in to activity and community updates from {{ getenv('APP_NAME') ?: 'Family Platform' }}.<br/>
-                                    If you no longer wish to receive non-essential updates, you can <a href="{{ getenv('APP_URL') ?: '#' }}/email/unsubscribe?email={{ urlencode($email ?? '') }}&token={{ $unsubscribeToken ?? '' }}" style="color: #64748b; text-decoration: underline;">Unsubscribe from these emails</a> or <a href="{{ getenv('APP_URL') ?: '#' }}/settings/notifications" style="color: #64748b; text-decoration: underline;">Manage Notification Preferences</a>.
+                                    If you no longer wish to receive non-essential updates, you can <a href="{{ $unsubscribeUrl }}" style="color: #64748b; text-decoration: underline;">Unsubscribe from these emails</a> or <a href="{{ $preferencesUrl }}" style="color: #64748b; text-decoration: underline;">Manage Notification Preferences</a>.
                                 </p>
                             @endif
 
                             @php
                                 $companyName = getenv('COMPANY_NAME') ?: (getenv('APP_NAME') ?: 'Family Platform') . ' Ltd';
-                                $registeredOffice = getenv('COMPANY_ADDRESS') ?: '128 City Road, London, EC1V 2NX, United Kingdom';
-                                $companyReg = getenv('COMPANY_REG') ?: '12345678';
-                                $icoReg = getenv('ICO_REG') ?: 'ZB123456';
                             @endphp
                             <p style="margin: 10px 0 0 0; font-size: 11px; color: #cbd5e1; line-height: 1.4; text-align: center;">
-                                &copy; {{ date('Y') }} {{ $companyName }}. Registered Office: {{ $registeredOffice }}.<br/>
-                                Company Reg No: {{ $companyReg }} | ICO Reg: {{ $icoReg }} | <a href="{{ getenv('APP_URL') ?: '#' }}/privacy" style="color: #cbd5e1; text-decoration: underline;">Privacy Policy</a> | <a href="{{ getenv('APP_URL') ?: '#' }}/terms" style="color: #cbd5e1; text-decoration: underline;">Terms of Service</a>
+                                &copy; {{ date('Y') }} {{ $companyName }}.<br/>
+                                <a href="{{ $baseUrl }}/privacy" style="color: #cbd5e1; text-decoration: underline;">Privacy Policy</a> | <a href="{{ $baseUrl }}/terms" style="color: #cbd5e1; text-decoration: underline;">Terms of Service</a>
                             </p>
                         </td>
                     </tr>

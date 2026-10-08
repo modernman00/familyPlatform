@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Add fallback /robots.txt router handler",
+    "title": "Fix(phpstan): eliminate redundant empty email check in Index controller",
     "notes": [
-        "Add fallback /robots.txt router handler",
-        "Add robots.txt for search crawler policy",
-        "General update"
+        "Fix(phpstan): eliminate redundant empty email check in Index controller",
+        "Xx",
+        "Fixing the bug"
     ],
-    "released_at": "2026-09-25",
-    "commit": "64b3001"
+    "released_at": "2026-10-08",
+    "commit": "9ee6871"
 }
