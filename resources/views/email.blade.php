@@ -163,12 +163,10 @@
                                 </p>
                             @endif
 
-                            @php
-                                $companyName = getenv('COMPANY_NAME') ?: (getenv('APP_NAME') ?: 'Family Platform') . ' Ltd';
-                            @endphp
-                            <p style="margin: 10px 0 0 0; font-size: 11px; color: #cbd5e1; line-height: 1.4; text-align: center;">
-                                &copy; {{ date('Y') }} {{ $companyName }}.<br/>
-                                <a href="{{ $baseUrl }}/privacy" style="color: #cbd5e1; text-decoration: underline;">Privacy Policy</a> | <a href="{{ $baseUrl }}/terms" style="color: #cbd5e1; text-decoration: underline;">Terms of Service</a>
+                            <p style="margin: 10px 0 0 0; font-size: 11px; color: #94a3b8; line-height: 1.6; text-align: center;">
+                                Internet communications are not secure, and therefore we do not accept legal responsibility for the contents of this message. This message is confidential and intended for the addressee only.<br/>
+                                &copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }}. All rights reserved.<br/>
+                                <a href="{{ $baseUrl }}/privacy" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a> | <a href="{{ $baseUrl }}/terms" style="color: #94a3b8; text-decoration: underline;">Terms of Service</a>
                             </p>
                         </td>
                     </tr>

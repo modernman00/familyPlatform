@@ -422,7 +422,7 @@ final class SettingController extends BaseController
                     $cols = array_values(array_intersect($allowedCols, array_keys($cleanOtherFamily)));
                     $values = array_map(static fn(string $c): mixed => $cleanOtherFamily[$c], $cols);
                     $placeholders = array_fill(0, count($cols), '?');
-                    $sql = "INSERT INTO otherFamily (" . implode(', ', $cols) . ") VALUES (" . implode(', ', $placeholders) . ")"; // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- column names from fixed $allowedCols allowlist; values bound via placeholders
+                    $sql = sprintf('INSERT INTO otherFamily (%s) VALUES (%s)', implode(', ', $cols), implode(', ', $placeholders)); // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string
                     $insStmt = $db->prepare($sql); // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable -- $sql built from allowlist, not request data
                     $insStmt->execute($values);
                 }

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(phpstan): eliminate redundant empty email check in Index controller",
+    "title": "Fix(mail): resolve requester avatar display and harden email asset domain whitelisting",
     "notes": [
-        "Fix(phpstan): eliminate redundant empty email check in Index controller",
-        "Xx",
-        "Fixing the bug"
+        "Fix(mail): resolve requester avatar display and harden email asset domain whitelisting",
+        "Fix(organogram): enforce spousal cluster adjacency, coordinate immutability and defensive child matching",
+        "Fix(phpstan): eliminate redundant empty email check in Index controller"
     ],
     "released_at": "2026-10-08",
-    "commit": "9ee6871"
+    "commit": "8af0cfd"
 }
