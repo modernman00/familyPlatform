@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(mail): resolve requester avatar display and harden email asset domain whitelisting",
+    "title": "Build(assets): compile production assets for deployment",
     "notes": [
-        "Fix(mail): resolve requester avatar display and harden email asset domain whitelisting",
-        "Fix(organogram): enforce spousal cluster adjacency, coordinate immutability and defensive child matching",
-        "Fix(phpstan): eliminate redundant empty email check in Index controller"
+        "Build(assets): compile production assets for deployment",
+        "Test(governance): add automated engineering must haves unit test",
+        "Email template changes"
     ],
-    "released_at": "2026-10-08",
-    "commit": "8af0cfd"
+    "released_at": "2026-10-09",
+    "commit": "693a31e"
 }
