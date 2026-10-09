@@ -17,9 +17,9 @@ $router->map('POST', '/api/family-code/verify-inviter', 'App\controller\auth\Fam
 $router->map('POST', '/api/family-code/complete-registration', 'App\controller\auth\FamilyCodeApprovalController@completeRegistration', 'FAMILY_CODE_COMPLETE_REGISTRATION');
 
 // Approve a family code request
-$router->map('POST', '/api/family-code/approve/:requestId', 'App\controller\auth\FamilyCodeApprovalController@approveRequest', 'FAMILY_CODE_APPROVE');
+$router->map('GET|POST', '/api/family-code/approve/[i:requestId]', 'App\controller\auth\FamilyCodeApprovalController@approveRequest', 'FAMILY_CODE_APPROVE');
 
 // Deny a family code request
-$router->map('POST', '/api/family-code/deny/:requestId', 'App\controller\auth\FamilyCodeApprovalController@denyRequest', 'FAMILY_CODE_DENY');
+$router->map('GET|POST', '/api/family-code/deny/[i:requestId]', 'App\controller\auth\FamilyCodeApprovalController@denyRequest', 'FAMILY_CODE_DENY');
 
 return $router;

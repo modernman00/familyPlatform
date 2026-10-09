@@ -9,6 +9,98 @@
   }
 </style>
 <div class="feed-column">
+  @if(!empty($pendingFamilyRequests))
+    @foreach($pendingFamilyRequests as $joinReq)
+      <div class="card mb-4 border-0 shadow-sm family-join-request-card" id="familyJoinReq-{{ $joinReq['no'] }}" style="border-radius: 16px; background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%); border-left: 5px solid #00bfa5 !important;">
+        <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: #ccfbf1; color: #0f766e; font-size: 1.3rem;">
+              <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1 text-dark" style="font-size: 1rem;">
+                👋 <strong>{{ htmlspecialchars($joinReq['requesterName'] ?? 'New Member') }}</strong> wants to join your <strong>{{ htmlspecialchars($joinReq['family_code'] ?? '') }}</strong> family network
+              </h6>
+              <p class="mb-0 text-muted" style="font-size: 0.88rem;">
+                Requested to connect on FamilyPlatform. Approve to grant immediate access to your family tree and updates.
+              </p>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm text-white rounded-pill px-3 py-2 fw-semibold" 
+                    id="btnApproveJoin-{{ $joinReq['no'] }}"
+                    style="background-color: #00bfa5; min-height: 44px;" 
+                    onclick="handleJoinRequestAction({{ (int)$joinReq['no'] }}, '{{ htmlspecialchars($joinReq['approval_token'] ?? '') }}', 'approve')">
+              <i class="bi bi-check-lg me-1"></i> Approve Request
+            </button>
+            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold" 
+                    id="btnDenyJoin-{{ $joinReq['no'] }}"
+                    style="min-height: 44px;"
+                    onclick="handleJoinRequestAction({{ (int)$joinReq['no'] }}, '{{ htmlspecialchars($joinReq['approval_token'] ?? '') }}', 'deny')">
+              <i class="bi bi-x-lg me-1"></i> Deny
+            </button>
+          </div>
+        </div>
+      </div>
+    @endforeach
+
+    <script>
+      function handleJoinRequestAction(requestId, token, action) {
+        const approveBtn = document.getElementById('btnApproveJoin-' + requestId);
+        const denyBtn = document.getElementById('btnDenyJoin-' + requestId);
+        const card = document.getElementById('familyJoinReq-' + requestId);
+
+        if (approveBtn) approveBtn.disabled = true;
+        if (denyBtn) denyBtn.disabled = true;
+
+        if (action === 'approve' && approveBtn) {
+          approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Approving...';
+        } else if (action === 'deny' && denyBtn) {
+          denyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Denying...';
+        }
+
+        const endpoint = `/api/family-code/${action}/${requestId}?token=${encodeURIComponent(token)}`;
+
+        fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            if (card) {
+              const actionMsg = action === 'approve' 
+                ? 'Successfully approved! Member has been connected to your family network.' 
+                : 'Request denied.';
+              const alertColor = action === 'approve' ? 'text-success' : 'text-danger';
+              const iconClass = action === 'approve' ? 'bi-check-circle-fill' : 'bi-dash-circle-fill';
+              
+              card.innerHTML = `<div class="card-body p-3 text-center ${alertColor} fw-bold"><i class="bi ${iconClass} me-2"></i> ${actionMsg}</div>`;
+              setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease';
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 500);
+              }, 2000);
+            }
+          } else {
+            alert(data.error || 'Failed to process request.');
+            if (approveBtn) { approveBtn.disabled = false; approveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Approve Request'; }
+            if (denyBtn) { denyBtn.disabled = false; denyBtn.innerHTML = '<i class="bi bi-x-lg me-1"></i> Deny'; }
+          }
+        })
+        .catch(err => {
+          console.error('Error handling join request:', err);
+          alert('A network error occurred. Please try again.');
+          if (approveBtn) { approveBtn.disabled = false; approveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Approve Request'; }
+          if (denyBtn) { denyBtn.disabled = false; denyBtn.innerHTML = '<i class="bi bi-x-lg me-1"></i> Deny'; }
+        });
+      }
+    </script>
+  @endif
+
   @if(!empty($unclaimedMatch))
   <div class="card mb-4 border-0 shadow-sm unclaimed-match-card" id="unclaimedMatchBanner" style="border-radius: 16px; background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border-left: 5px solid #2563eb !important;">
     <div class="card-body p-4 d-flex align-items-center justify-content-between flex-wrap gap-3">

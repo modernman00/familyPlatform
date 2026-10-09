@@ -835,4 +835,56 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $this->assertSame('', $cleanData['familySurname']);
         $this->assertSame('', $cleanData['inviter_first_name']);
     }
+
+    /**
+     * Test: Pending approvals with details surfaced for profile page
+     */
+    public function testPendingApprovalsWithDetailsSurfacing(): void
+    {
+        $inviterId   = $_SESSION['test_inviter_id'];
+        $familyCode  = $_SESSION['test_family_code'];
+        $newUserId   = 'test-surfacing-' . uniqid();
+
+        // Create personal and contact entry for new user
+        $this->pdo->prepare(
+            'INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, "Iyabo", "Olaogun", "TEMP123")'
+        )->execute([$newUserId]);
+
+        $res = $this->service->createApprovalRequest(
+            $newUserId,
+            $familyCode,
+            'Test',
+            'Inviter',
+            'inviter@test.com'
+        );
+
+        $requestId = $res['request_id'];
+        $this->service->setApproverId($requestId, $inviterId);
+
+        $pending = $this->service->getPendingApprovalsWithDetails($inviterId, $familyCode);
+        $this->assertNotEmpty($pending);
+        
+        $found = null;
+        foreach ($pending as $item) {
+            if ((int)$item['no'] === $requestId) {
+                $found = $item;
+                break;
+            }
+        }
+
+        $this->assertNotNull($found, 'Created request should be found in pending approvals');
+        $this->assertSame('Iyabo Olaogun', $found['requesterName']);
+        $this->assertNotEmpty($found['approval_token']);
+    }
+
+    /**
+     * Test: Family approval email template does not expose requester email
+     */
+    public function testEmailApprovalTemplateOmitsRequesterEmail(): void
+    {
+        $viewFile = __DIR__ . '/../../resources/views/msg/familyApprovalRequest.blade.php';
+        $content = file_get_contents($viewFile);
+        $this->assertStringNotContainsString('requesterEmail', $content);
+    }
 }
+

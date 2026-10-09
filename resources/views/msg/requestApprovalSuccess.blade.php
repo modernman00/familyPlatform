@@ -244,10 +244,14 @@
                 </svg>
             </div>
 
-            <h1 class="heading">You're Now Connected!</h1>
+            <h1 class="heading">{{ $app['title'] ?? "You're Now Connected!" }}</h1>
             <p class="subheading">
-                You've successfully accepted the kinship request from <strong>{{ $requesterName }}</strong>. 
-                Your family network just got stronger. 🎉
+                @if(!empty($app['message']))
+                    {{ $app['message'] }}
+                @else
+                    You've successfully accepted the kinship request from <strong>{{ $requesterName }}</strong>. 
+                    Your family network just got stronger. 🎉
+                @endif
             </p>
 
             {{-- Connection visual --}}
@@ -269,10 +273,14 @@
                 </svg>
             </div>
 
-            <h1 class="heading">Request Declined</h1>
+            <h1 class="heading">{{ $app['title'] ?? 'Request Declined' }}</h1>
             <p class="subheading">
-                You've declined the kinship request from <strong>{{ $requesterName }}</strong>. 
-                No worries — you can always connect later from the app.
+                @if(!empty($app['message']))
+                    {{ $app['message'] }}
+                @else
+                    You've declined the kinship request from <strong>{{ $requesterName }}</strong>. 
+                    No worries — you can always connect later from the app.
+                @endif
             </p>
         @endif
 

@@ -36,6 +36,14 @@ final class ProfilepageService
         $famCode = is_string($famCodeClean) ? $famCodeClean : '';
         $famCodes = $_SESSION['famCodes'] ?? ($famCode !== '' ? [$famCode] : []);
 
+        $pendingFamilyRequests = [];
+        try {
+            $pendingFamilyRequests = (new \App\service\FamilyCodeApprovalService(\Src\Db::connect2()))
+                ->getPendingApprovalsWithDetails($userId, $famCode);
+        } catch (\Throwable $e) {
+            error_log('[ProfilepageService] Failed to load pending family requests: ' . $e->getMessage());
+        }
+
         return [
             'memberData' => $memberData,
             'famCode' => $famCode,
@@ -47,6 +55,7 @@ final class ProfilepageService
             'pics' => Post::getAllPostPics($userId),
             'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),
             'unclaimedMatch' => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData),
+            'pendingFamilyRequests' => $pendingFamilyRequests,
         ];
     }
 }

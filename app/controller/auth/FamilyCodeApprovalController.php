@@ -184,6 +184,9 @@ class FamilyCodeApprovalController
             );
 
             if ($inviter) {
+                // Persist approver_id immediately so the inviter can see and manage it on their profile page
+                $this->approvalService->setApproverId($approvalData['request_id'], (string)$inviter['id']);
+
                 // Get new user's info for notification
                 $newUserInfo = $this->getUserInfo($userId);
 
@@ -226,12 +229,25 @@ class FamilyCodeApprovalController
      */
     public function approveRequest(int $id): void
     {
-        header('Content-Type: application/json');
+        $wantsHtml = (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET')
+            && (!isset($_SERVER['HTTP_ACCEPT']) || str_contains($_SERVER['HTTP_ACCEPT'], 'text/html'));
 
         // Verify approval token (includes 7-day expiration check)
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
         if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'Invalid or Expired Link',
+                    'message' => 'This family approval link is invalid or has expired. Please log in to your profile to manage requests.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(401);
             echo json_encode(['error' => 'Invalid, expired, or missing approval token']);
             return;
@@ -240,12 +256,36 @@ class FamilyCodeApprovalController
         $request = $this->approvalService->getApprovalRequest($id);
 
         if (!$request) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'Request Not Found',
+                    'message' => 'This family join request could not be found.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(404);
             echo json_encode(['error' => 'Approval request not found']);
             return;
         }
 
         if ($request['status'] !== 'pending') {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => ($request['status'] === 'approved' ? 'approved' : 'declined'),
+                    'title' => 'Request Already Processed',
+                    'message' => 'This family join request has already been ' . $request['status'] . '.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => trim(($request['inviter_first_name'] ?? '') . ' ' . ($request['inviter_last_name'] ?? '')) ?: 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(422);
             echo json_encode(['error' => 'This request has already been ' . $request['status']]);
             return;
@@ -254,6 +294,18 @@ class FamilyCodeApprovalController
         try {
             // Execute atomic multi-table approval transaction
             if (!$this->approvalService->approveRequest($id)) {
+                if ($wantsHtml) {
+                    $app = [
+                        'decision' => 'declined',
+                        'title' => 'Approval Failed',
+                        'message' => 'Could not approve request at this time. Please try again from your profile.',
+                        'firstName' => 'Family Member',
+                        'requesterName' => 'Family Member'
+                    ];
+                    view('msg/requestApprovalSuccess', compact('app'));
+                    return;
+                }
+                header('Content-Type: application/json');
                 http_response_code(422);
                 echo json_encode(['error' => 'Request could not be approved']);
                 return;
@@ -269,9 +321,34 @@ class FamilyCodeApprovalController
                 error_log('[FamilyCodeApprovalController] Confirmation notification failed: ' . $notifyEx->getMessage());
             }
 
+            if ($wantsHtml) {
+                $requester = $this->getUserInfo((string)$request['id']);
+                $approver = !empty($request['approver_id']) ? $this->getUserInfo((string)$request['approver_id']) : null;
+                $app = [
+                    'decision' => 'approved',
+                    'firstName' => $approver['firstName'] ?? ($request['inviter_first_name'] ?? 'Family Member'),
+                    'requesterName' => trim(($requester['firstName'] ?? '') . ' ' . ($requester['lastName'] ?? '')) ?: 'New Member',
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+
+            header('Content-Type: application/json');
             echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
 
         } catch (\Throwable $e) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'System Error',
+                    'message' => 'An unexpected error occurred while processing the approval.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(500);
             echo json_encode(['error' => 'Failed to approve request: ' . $e->getMessage()]);
         }
@@ -282,12 +359,25 @@ class FamilyCodeApprovalController
      */
     public function denyRequest(int $id): void
     {
-        header('Content-Type: application/json');
+        $wantsHtml = (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET')
+            && (!isset($_SERVER['HTTP_ACCEPT']) || str_contains($_SERVER['HTTP_ACCEPT'], 'text/html'));
 
         // Verify approval token (includes 7-day expiration check)
         $token = $_GET['token'] ?? $_POST['token'] ?? '';
         $tokenStr = is_string($token) ? $token : '';
         if (!$tokenStr || !$this->approvalService->verifyApprovalToken($id, $tokenStr)) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'Invalid or Expired Link',
+                    'message' => 'This family approval link is invalid or has expired. Please log in to your profile to manage requests.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(401);
             echo json_encode(['error' => 'Invalid, expired, or missing approval token']);
             return;
@@ -296,12 +386,36 @@ class FamilyCodeApprovalController
         $request = $this->approvalService->getApprovalRequest($id);
 
         if (!$request) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'Request Not Found',
+                    'message' => 'This family join request could not be found.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(404);
             echo json_encode(['error' => 'Approval request not found']);
             return;
         }
 
         if ($request['status'] !== 'pending') {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => ($request['status'] === 'approved' ? 'approved' : 'declined'),
+                    'title' => 'Request Already Processed',
+                    'message' => 'This family join request has already been ' . $request['status'] . '.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => trim(($request['inviter_first_name'] ?? '') . ' ' . ($request['inviter_last_name'] ?? '')) ?: 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(422);
             echo json_encode(['error' => 'This request has already been ' . $request['status']]);
             return;
@@ -309,12 +423,50 @@ class FamilyCodeApprovalController
 
         try {
             if (!$this->approvalService->denyRequest($id)) {
+                if ($wantsHtml) {
+                    $app = [
+                        'decision' => 'declined',
+                        'title' => 'Decline Failed',
+                        'message' => 'Could not deny request at this time. Please try again from your profile.',
+                        'firstName' => 'Family Member',
+                        'requesterName' => 'Family Member'
+                    ];
+                    view('msg/requestApprovalSuccess', compact('app'));
+                    return;
+                }
+                header('Content-Type: application/json');
                 http_response_code(422);
                 echo json_encode(['error' => 'Request could not be denied']);
                 return;
             }
+
+            if ($wantsHtml) {
+                $requester = $this->getUserInfo((string)$request['id']);
+                $approver = !empty($request['approver_id']) ? $this->getUserInfo((string)$request['approver_id']) : null;
+                $app = [
+                    'decision' => 'declined',
+                    'firstName' => $approver['firstName'] ?? ($request['inviter_first_name'] ?? 'Family Member'),
+                    'requesterName' => trim(($requester['firstName'] ?? '') . ' ' . ($requester['lastName'] ?? '')) ?: 'New Member',
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+
+            header('Content-Type: application/json');
             echo json_encode(['success' => true, 'message' => 'Request denied successfully']);
         } catch (\Throwable $e) {
+            if ($wantsHtml) {
+                $app = [
+                    'decision' => 'declined',
+                    'title' => 'System Error',
+                    'message' => 'An unexpected error occurred while processing the request.',
+                    'firstName' => 'Family Member',
+                    'requesterName' => 'Family Member'
+                ];
+                view('msg/requestApprovalSuccess', compact('app'));
+                return;
+            }
+            header('Content-Type: application/json');
             http_response_code(500);
             echo json_encode(['error' => 'Failed to deny request: ' . $e->getMessage()]);
         }

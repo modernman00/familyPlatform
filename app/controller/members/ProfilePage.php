@@ -82,6 +82,7 @@ final class ProfilePage extends ProcessImg
                 'requestData' => $data['friendRequests'],
                 'totalFamilyMembers' => $data['totalFamilyMembers'],
                 'unclaimedMatch' => $data['unclaimedMatch'] ?? null,
+                'pendingFamilyRequests' => $data['pendingFamilyRequests'] ?? [],
                 'recentReels' => $recentReels,
                 'suggestedKin' => $suggestedKin
             ]);

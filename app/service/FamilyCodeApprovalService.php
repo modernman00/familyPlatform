@@ -290,18 +290,83 @@ class FamilyCodeApprovalService
     }
 
     /**
+     * Set the approver ID on an approval request
+     */
+    public function setApproverId(int $requestId, string $approverId): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE family_approval_requests SET approver_id = ? WHERE no = ?');
+        return $stmt->execute([$approverId, $requestId]);
+    }
+
+    /**
      * Get approval requests for a user (for the inviter to approve)
      * @return array<int, array<string, mixed>>
      */
-    public function getPendingApprovalsForUser(string $userId): array
+    public function getPendingApprovalsForUser(string $userId, ?string $familyCode = null): array
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT * FROM family_approval_requests
-             WHERE approver_id = ? AND status = "pending"
-             ORDER BY created_at DESC'
-        );
-        $stmt->execute([$userId]);
+        if ($familyCode) {
+            $stmt = $this->pdo->prepare(
+                'SELECT * FROM family_approval_requests
+                 WHERE (approver_id = ? OR (approver_id IS NULL AND UPPER(TRIM(REPLACE(family_code, "#", ""))) = UPPER(TRIM(REPLACE(?, "#", "")))))
+                 AND status = "pending"
+                 ORDER BY created_at DESC'
+            );
+            $stmt->execute([$userId, $familyCode]);
+        } else {
+            $stmt = $this->pdo->prepare(
+                'SELECT * FROM family_approval_requests
+                 WHERE approver_id = ? AND status = "pending"
+                 ORDER BY created_at DESC'
+            );
+            $stmt->execute([$userId]);
+        }
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Get pending approval requests with requester details (for display on Profile Page)
+     * @return array<int, array<string, mixed>>
+     */
+    public function getPendingApprovalsWithDetails(string $userId, ?string $familyCode = null): array
+    {
+        if ($familyCode) {
+            $stmt = $this->pdo->prepare(
+                'SELECT far.*, p.firstName AS reqFirstName, p.lastName AS reqLastName, pp.img AS reqImg
+                 FROM family_approval_requests far
+                 LEFT JOIN personal p ON p.id = far.id
+                 LEFT JOIN profilePics pp ON pp.id = far.id
+                 WHERE (far.approver_id = ? OR (far.approver_id IS NULL AND UPPER(TRIM(REPLACE(far.family_code, "#", ""))) = UPPER(TRIM(REPLACE(?, "#", "")))))
+                   AND far.status = "pending"
+                 ORDER BY far.created_at DESC'
+            );
+            $stmt->execute([$userId, $familyCode]);
+        } else {
+            $stmt = $this->pdo->prepare(
+                'SELECT far.*, p.firstName AS reqFirstName, p.lastName AS reqLastName, pp.img AS reqImg
+                 FROM family_approval_requests far
+                 LEFT JOIN personal p ON p.id = far.id
+                 LEFT JOIN profilePics pp ON pp.id = far.id
+                 WHERE far.approver_id = ? AND far.status = "pending"
+                 ORDER BY far.created_at DESC'
+            );
+            $stmt->execute([$userId]);
+        }
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $results = [];
+
+        foreach ($rows as $row) {
+            $reqName = trim(($row['reqFirstName'] ?? '') . ' ' . ($row['reqLastName'] ?? ''));
+            if ($reqName === '') {
+                $reqName = 'New Member';
+            }
+            $row['requesterName'] = $reqName;
+            $row['img'] = $row['reqImg'] ?? 'avatarM.png';
+            $row['approval_token'] = $this->generateApprovalToken((int)$row['no']);
+            $results[] = $row;
+        }
+
+        return $results;
     }
 
     /**

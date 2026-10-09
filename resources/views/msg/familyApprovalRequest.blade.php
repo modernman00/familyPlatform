@@ -21,7 +21,6 @@
     <tr>
         <td valign="top">
             <h2 style="margin: 0 0 5px 0; font-size: 18px; font-weight: 700; color: #1e293b;">{{ $data['requesterName'] ?? 'New Member' }}</h2>
-            <p style="margin: 0 0 6px 0; font-size: 14px; color: #64748b;">{{ $data['requesterEmail'] ?? '' }}</p>
             <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #334155;">
                 Is requesting to connect with your family on FamilyPlatform.
             </p>
