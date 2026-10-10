@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(e2e): eliminate modal timing race in family_code_approval spec",
+    "title": "Build(assets): compile production bundles with Laravel Mix",
     "notes": [
-        "Test(e2e): eliminate modal timing race in family_code_approval spec",
-        "Fix(secops): neutralize echoed parameters in KinshipApiController for strict Semgrep compliance",
-        "Feat(kinship): implement KinshipCore engine, ego-centric DAG calculator, inseparable couple docking, entity deduplication, and governed API key architecture"
+        "Build(assets): compile production bundles with Laravel Mix",
+        "Fix(router): whitelist KinshipApiController for API key authentication in RouteDispatch",
+        "Test(e2e): eliminate modal timing race in family_code_approval spec"
     ],
     "released_at": "2026-10-10",
-    "commit": "f62d797"
+    "commit": "0b56f79"
 }
