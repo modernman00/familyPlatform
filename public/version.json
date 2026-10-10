@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(family-code): resolve email privacy, email link approval routing, and surface join requests on profile page",
+    "title": "Test(e2e): eliminate modal timing race in family_code_approval spec",
     "notes": [
-        "Fix(family-code): resolve email privacy, email link approval routing, and surface join requests on profile page",
-        "Build(assets): compile production assets for deployment",
-        "Test(governance): add automated engineering must haves unit test"
+        "Test(e2e): eliminate modal timing race in family_code_approval spec",
+        "Fix(secops): neutralize echoed parameters in KinshipApiController for strict Semgrep compliance",
+        "Feat(kinship): implement KinshipCore engine, ego-centric DAG calculator, inseparable couple docking, entity deduplication, and governed API key architecture"
     ],
-    "released_at": "2026-10-09",
-    "commit": "0bd0a8a"
+    "released_at": "2026-10-10",
+    "commit": "f62d797"
 }
