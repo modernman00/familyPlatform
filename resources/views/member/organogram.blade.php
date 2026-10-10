@@ -459,7 +459,8 @@
                     nameL2: nameLines[1],
                     gender: (node.gender || 'Male').toLowerCase(),
                     img: node.avatar_url || (node.gender === 'Male' ? '/resources/images/profile/avatarM.png' : '/resources/images/profile/avatarF.png'),
-                    title: node.bio || 'Family Member',
+                    title: node.ego_relation || node.bio || 'Family Member',
+                    ego_relation: node.ego_relation || '',
                     legacyId: node.user_id,
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined
                 });
@@ -487,7 +488,7 @@
                 scaleInitial: "family",
                 rootId: initialRootId,
                 nodeBinding: {
-                    field_0: "name",
+                    field_0: "nameL1",
                     field_1: "nameL2",
                     field_2: "title",
                     img_0: "img"

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Build(assets): compile production assets for deployment",
+    "title": "Fix(family-code): resolve email privacy, email link approval routing, and surface join requests on profile page",
     "notes": [
+        "Fix(family-code): resolve email privacy, email link approval routing, and surface join requests on profile page",
         "Build(assets): compile production assets for deployment",
-        "Test(governance): add automated engineering must haves unit test",
-        "Email template changes"
+        "Test(governance): add automated engineering must haves unit test"
     ],
     "released_at": "2026-10-09",
-    "commit": "693a31e"
+    "commit": "0bd0a8a"
 }

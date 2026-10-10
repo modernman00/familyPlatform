@@ -149,15 +149,17 @@ export function profileFeed(opts = {}) {
 
         normalizeComment(c) {
             const img = c?.img || c?.profileImg;
+            const timeVal = c?.post_time || c?.comment_time || c?.date_created || '';
             return {
                 comment_no: c?.comment_no,
                 post_no: c?.post_no,
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
-                profileImg: img ? `/resources/images/profile/${img}` : '/public/avatar/avatarM.png',
+                profileImg: img ? ((img.startsWith('/') || img.startsWith('http')) ? img : `/resources/images/profile/${img}`) : '/public/avatar/avatarM.png',
                 comment: c?.comment || '',
                 date_created: c?.date_created || '',
-                comment_time: c?.comment_time || c?.date_created || '',
+                post_time: c?.post_time || '',
+                comment_time: timeVal,
                 reactions: c?.reactions?.counts ?? {},
                 totalReactions: c?.reactions?.counts?.totalReactions ?? 0,
                 userReaction: c?.user_reaction || null,
@@ -200,6 +202,9 @@ export function profileFeed(opts = {}) {
         formatDate(dateStr) {
             if (!dateStr) return '';
             try {
+                if (typeof dateStr === 'number' || (typeof dateStr === 'string' && /^\d+$/.test(dateStr.trim()))) {
+                    return format(Number(dateStr));
+                }
                 return format(dateStr);
             } catch (e) {
                 return dateStr;
@@ -224,12 +229,36 @@ export function profileFeed(opts = {}) {
                 });
 
                 if (response?.data?.status === 'success' || response?.status === 200) {
-                    // Don't append an optimistic local copy here: the Pusher
-                    // 'new-comment' handler (initPusher, below) already adds the
-                    // real broadcast comment in real time. Since that one carries
-                    // the real comment_no (this one only has a fake Date.now()
-                    // placeholder), the dedup check never matches and both stayed
-                    // on screen — one labeled "You", one with the real name.
+                    const respData = response?.data?.message;
+                    const commentNo = (respData && typeof respData === 'object' && respData.comment_no)
+                        ? respData.comment_no
+                        : (typeof respData === 'number' || (typeof respData === 'string' && /^\d+$/.test(respData)))
+                            ? parseInt(respData, 10)
+                            : Date.now();
+
+                    const post = this.posts.find(p => String(p.post_no) === String(postNo));
+                    if (post) {
+                        if (!Array.isArray(post.comments)) {
+                            post.comments = [];
+                        }
+                        if (!post.comments.some(c => String(c.comment_no) === String(commentNo))) {
+                            const newComment = this.normalizeComment({
+                                comment_no: commentNo,
+                                post_no: postNo,
+                                id: this.currentUserId,
+                                fullName: (respData && typeof respData === 'object' && respData.fullName) || 'You',
+                                profileImg: (respData && typeof respData === 'object' && respData.profileImg) || '',
+                                comment: commentText,
+                                post_time: (respData && typeof respData === 'object' && respData.post_time) || Date.now().toString(),
+                                comment_time: (respData && typeof respData === 'object' && respData.comment_time) || Date.now().toString(),
+                                date_created: (respData && typeof respData === 'object' && respData.date_created) || new Date().toISOString(),
+                                reactions: {},
+                                user_reaction: null
+                            });
+                            post.comments.push(newComment);
+                        }
+                    }
+
                     this.commentInputs[postNo] = '';
                 }
             } catch (err) {

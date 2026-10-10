@@ -6,7 +6,7 @@
   <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
   <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
   <meta name="robots" content="index, follow">
-  <meta name="author" content="Olawale Olaogun">
+  <meta name="author" content="Family Platform Team">
   <meta name="language" content="English">
   <title>@yield('title') | OUR FAMILY NETWORK</title>
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">

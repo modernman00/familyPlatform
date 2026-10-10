@@ -138,11 +138,16 @@ final class SettingController extends BaseController
 
                 // 5. Request to Join Another Family Network
                 if ($action === 'requestJoinFamily') {
-                    $userId = (string)$_POST['id'];
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
                     $targetCode = trim((string)($_POST['family_code'] ?? ''));
                     $inviterFirstName = trim((string)($_POST['inviter_first_name'] ?? ''));
                     $inviterLastName = trim((string)($_POST['inviter_last_name'] ?? ''));
                     $inviterContact = trim((string)($_POST['inviter_email_or_mobile'] ?? ''));
+
+                    if ($userId === '') {
+                        msgException(401, "Unauthorized: Please log in to request a family transfer.");
+                        return;
+                    }
 
                     if (empty($targetCode) || empty($inviterFirstName) || empty($inviterLastName) || empty($inviterContact)) {
                         msgException(400, "All fields are required to join another family network.");
@@ -194,6 +199,9 @@ final class SettingController extends BaseController
                         $inviterContact
                     );
 
+                    // Persist approver_id immediately so the inviter can see and manage it on their profile page
+                    $approvalService->setApproverId((int)$approvalData['request_id'], (string)$inviter['id']);
+
                     // Dispatch notification to inviter
                     $notificationService = new \App\service\NotificationService($pdo);
                     $newUserInfo = [
@@ -220,7 +228,7 @@ final class SettingController extends BaseController
 
                 // 6. Cancel pending family join/transfer request
                 if ($action === 'cancelFamilyRequest') {
-                    $userId = (string)$_POST['id'];
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
                     $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
                     $approvalService->cancelPendingRequest($userId);
 
@@ -230,7 +238,7 @@ final class SettingController extends BaseController
 
                 // 7. Update Secondary / Maternal / Maiden Family Code (otherFamCode)
                 if ($action === 'updateSecondaryFamilyCode') {
-                    $userId = (string)$_POST['id'];
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
                     $rawCode = trim((string)($_POST['otherFamCode'] ?? ''));
                     $cleanCode = strtoupper(trim(str_replace('#', '', $rawCode)));
 

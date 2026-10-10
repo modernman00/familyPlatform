@@ -47,6 +47,7 @@ final class Organogram extends SingleCustomerData
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
             $this->repairOrphanedFamilyGraph($familyCode, $idStr);
+            \App\services\KinshipEntityResolver::healDuplicateNodes($familyCode);
 
             // Fetch 6-generation graph data
             $graphData = $this->buildSixGenGraphData($familyCode, $idStr);
@@ -527,7 +528,7 @@ final class Organogram extends SingleCustomerData
             ];
         }
 
-        return [
+        $rawGraph = [
             'family_code' => $familyCode,
             'root_node_id' => $rootNode ? (int) $rootNode['id'] : 0,
             'nodes' => array_values($formattedNodes),
@@ -536,6 +537,14 @@ final class Organogram extends SingleCustomerData
             'total_generations' => 6,
             'total_members' => count($formattedNodes)
         ];
+
+        // Decorate with dynamic ego-centric kinship titles
+        if ($rootNode) {
+            $annotatedNodes = \App\services\KinshipCalculatorService::calculateEgoKinship($rawGraph, (int)$rootNode['id']);
+            $rawGraph['nodes'] = array_values($annotatedNodes);
+        }
+
+        return $rawGraph;
     }
 
     /**

@@ -295,7 +295,7 @@
 
             <!-- Comment Meta + Like Button with Reaction Bar -->
             <div class="d-flex align-items-center gap-3 ps-2 mt-1">
-              <small class="text-muted" style="font-size: 0.75rem;" x-text="formatDate(c.comment_time || c.date_created)"></small>
+              <small class="text-muted" style="font-size: 0.75rem;" x-text="formatDate(c.comment_time || c.post_time || c.date_created)"></small>
 
               <!-- Comment Like/React button -->
               <div class="position-relative"

@@ -211,6 +211,67 @@ class FamilyCodeApprovalFlowTest extends TestCase
     }
 
     /**
+     * Test: Approving a request updates personal.famCode, code_mgt, and user_families
+     * (Fix for: new code did not show, old code persisted after successful approval)
+     */
+    public function testApproveRequestUpdatesPersonalFamCodeAcrossAllTables(): void
+    {
+        $targetFamilyCode = $_SESSION['test_family_code'];
+        $userId = 'test-transfer-' . uniqid();
+        $oldFamilyCode = 'OLDFAM' . random_int(100, 999);
+
+        // Seed user with old family code in personal table
+        $this->pdo->prepare(
+            'INSERT INTO account (id, email, password, status) VALUES (?, ?, ?, "active")'
+        )->execute([$userId, $userId . '@test.com', password_hash('pw123', PASSWORD_BCRYPT)]);
+
+        $this->pdo->prepare(
+            'INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, "John", "Doe", ?)'
+        )->execute([$userId, $oldFamilyCode]);
+
+        $this->pdo->prepare(
+            'INSERT INTO code_mgt (id, code) VALUES (?, ?)'
+        )->execute([$userId, $oldFamilyCode]);
+
+        // Submit approval request to join targetFamilyCode
+        $result = $this->service->createApprovalRequest(
+            $userId,
+            $targetFamilyCode,
+            'Test',
+            'Inviter',
+            'inviter@test.com'
+        );
+        $requestId = $result['request_id'];
+
+        // Approve request
+        $approved = $this->service->approveRequest($requestId);
+        $this->assertTrue($approved, 'Approval must return true');
+
+        // 1. Verify personal table has the NEW family code (no longer old code)
+        $stmtP = $this->pdo->prepare('SELECT famCode FROM personal WHERE id = ?');
+        $stmtP->execute([$userId]);
+        $updatedCode = $stmtP->fetchColumn();
+        $this->assertEquals($targetFamilyCode, $updatedCode, 'personal.famCode must be updated to target family code');
+
+        // 2. Verify code_mgt has the NEW family code
+        $stmtC = $this->pdo->prepare('SELECT code FROM code_mgt WHERE id = ?');
+        $stmtC->execute([$userId]);
+        $this->assertEquals($targetFamilyCode, $stmtC->fetchColumn(), 'code_mgt.code must be updated to target family code');
+
+        // 3. Verify user_families has approved status for NEW family code
+        $stmtUF = $this->pdo->prepare('SELECT status FROM user_families WHERE user_id = ? AND family_code = ?');
+        $stmtUF->execute([$userId, $targetFamilyCode]);
+        $this->assertEquals('approved', $stmtUF->fetchColumn(), 'user_families must have approved status for target code');
+
+        // Clean up
+        $this->pdo->prepare('DELETE FROM code_mgt WHERE id = ?')->execute([$userId]);
+        $this->pdo->prepare('DELETE FROM user_families WHERE user_id = ?')->execute([$userId]);
+        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$userId]);
+        $this->pdo->prepare('DELETE FROM account WHERE id = ?')->execute([$userId]);
+        $this->pdo->prepare('DELETE FROM family_approval_requests WHERE id = ?')->execute([$userId]);
+    }
+
+    /**
      * Test: Deny request
      */
     public function testDenyRequest(): void
@@ -885,6 +946,61 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $viewFile = __DIR__ . '/../../resources/views/msg/familyApprovalRequest.blade.php';
         $content = file_get_contents($viewFile);
         $this->assertStringNotContainsString('requesterEmail', $content);
+    }
+
+    /**
+     * Test: Family approval in-app notifications are dispatched to inviter AND other family members
+     */
+    public function testFamilyApprovalInAppNotificationDispatchedToAllFamilyMembers(): void
+    {
+        $inviterId   = $_SESSION['test_inviter_id'];
+        $familyCode  = $_SESSION['test_family_code'];
+        $secondMemberId = 'test-fam-member-' . uniqid();
+
+        // Insert second member in same family network (like Iyabo in OLA60446)
+        $this->pdo->prepare(
+            'INSERT INTO account (id, email, password, status) VALUES (?, ?, ?, "active")'
+        )->execute([$secondMemberId, 'second-' . uniqid() . '@test.com', 'password123']);
+
+        $this->pdo->prepare(
+            'INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, "Iyabo", "Olaogun", ?)'
+        )->execute([$secondMemberId, $familyCode]);
+
+        $notificationService = new \App\service\NotificationService($this->pdo);
+
+        $newUserInfo = [
+            'id' => 'test-requester-' . uniqid(),
+            'firstName' => 'Temitope',
+            'lastName' => 'Olaogun',
+            'email' => 'temitope@test.com'
+        ];
+
+        $notificationService->sendFamilyApprovalNotification(
+            $inviterId,
+            $newUserInfo,
+            99999,
+            $familyCode,
+            'test-token'
+        );
+
+        // Verify in-app notifications exist for both inviter AND second member
+        $stmt = $this->pdo->prepare(
+            'SELECT receiver_id, notification_name, notification_content, notification_status 
+             FROM notification 
+             WHERE receiver_id IN (?, ?) 
+             ORDER BY created_at DESC'
+        );
+        $stmt->execute([$inviterId, $secondMemberId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $notifiedReceivers = array_column($rows, 'receiver_id');
+        $this->assertContains($inviterId, $notifiedReceivers, 'Inviter must receive in-app notification');
+        $this->assertContains($secondMemberId, $notifiedReceivers, 'Other family members must also receive in-app notification');
+
+        // Cleanup
+        $this->pdo->prepare('DELETE FROM notification WHERE receiver_id IN (?, ?)')->execute([$inviterId, $secondMemberId]);
+        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$secondMemberId]);
+        $this->pdo->prepare('DELETE FROM account WHERE id = ?')->execute([$secondMemberId]);
     }
 }
 

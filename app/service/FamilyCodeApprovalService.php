@@ -417,22 +417,64 @@ class FamilyCodeApprovalService
             );
             $stmt->execute([$effectiveApproverId, $requestId]);
 
-            // 2. Link user in code_mgt
+            // 2. Link user in code_mgt, personal table, otherFamily, and user_families
             $userId = (string)$request['id'];
             $familyCode = (string)$request['family_code'];
-            $stmtCode = $this->pdo->prepare(
-                'INSERT INTO code_mgt (id, code) VALUES (?, ?)
-                 ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
-            );
-            $stmtCode->execute([$userId, $familyCode]);
+            $cleanCode = strtoupper(trim(str_replace('#', '', $familyCode)));
 
-            // 3. Update user_families status to approved
-            $stmtUserFam = $this->pdo->prepare(
-                "UPDATE user_families SET status = 'approved' WHERE user_id = ? AND family_code = ?"
+            $stmtChkCode = $this->pdo->prepare('SELECT no FROM code_mgt WHERE id = ? LIMIT 1');
+            $stmtChkCode->execute([$userId]);
+            if ($stmtChkCode->fetch()) {
+                $stmtCode = $this->pdo->prepare('UPDATE code_mgt SET code = ?, updated_at = NOW() WHERE id = ?');
+                $stmtCode->execute([$cleanCode, $userId]);
+            } else {
+                $stmtCode = $this->pdo->prepare('INSERT INTO code_mgt (id, code) VALUES (?, ?)');
+                $stmtCode->execute([$userId, $cleanCode]);
+            }
+
+            // 3. Update personal table (the primary source of truth for famCode across the platform)
+            $stmtPersonal = $this->pdo->prepare('UPDATE personal SET famCode = ? WHERE id = ?');
+            $stmtPersonal->execute([$cleanCode, $userId]);
+
+            // 4. Ensure otherFamily record exists without overwriting maternal/maiden otherFamCode
+            $stmtOther = $this->pdo->prepare('INSERT INTO otherFamily (id) VALUES (?) ON DUPLICATE KEY UPDATE id = id');
+            $stmtOther->execute([$userId]);
+
+            // 5. Update or insert into user_families
+            $stmtFam = $this->pdo->prepare(
+                'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")
+                 ON DUPLICATE KEY UPDATE status = "approved"'
             );
-            $stmtUserFam->execute([$userId, $familyCode]);
+            $stmtFam->execute([$userId, $cleanCode]);
 
             $this->pdo->commit();
+
+            // 6. Refresh active session if the approved user is the current session user
+            if (isset($_SESSION['id']) && (string)$_SESSION['id'] === $userId) {
+                $_SESSION['famCode'] = $cleanCode;
+                $currentCodes = $_SESSION['famCodes'] ?? [];
+                if (!is_array($currentCodes)) {
+                    $currentCodes = [$cleanCode];
+                } elseif (!in_array($cleanCode, $currentCodes, true)) {
+                    $currentCodes[] = $cleanCode;
+                }
+                $_SESSION['famCodes'] = $currentCodes;
+            }
+
+            // 7. Auto-claim or initialize tree node for the user in the new family
+            try {
+                $memberData = [];
+                $stmtMember = $this->pdo->prepare('SELECT * FROM personal WHERE id = ?');
+                $stmtMember->execute([$userId]);
+                $pRow = $stmtMember->fetch(PDO::FETCH_ASSOC);
+                if (is_array($pRow)) {
+                    $memberData = $pRow;
+                }
+                \App\services\FamilyClaimService::claimOrInitializeNode($cleanCode, $userId, $memberData);
+            } catch (\Throwable $nodeEx) {
+                error_log('[FamilyCodeApprovalService] Node auto-claim warning: ' . $nodeEx->getMessage());
+            }
+
             return true;
         } catch (\Throwable $e) {
             if ($this->pdo->inTransaction()) {
@@ -534,14 +576,18 @@ class FamilyCodeApprovalService
      */
     public function linkUserToFamily(string $userId, string $familyCode): bool
     {
-        $cleanCode = trim(str_replace('#', '', $familyCode));
+        $cleanCode = strtoupper(trim(str_replace('#', '', $familyCode)));
 
         // 1. Update code_mgt
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO code_mgt (id, code) VALUES (?, ?)
-             ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
-        );
-        $stmt->execute([$userId, $cleanCode]);
+        $stmtChkCode = $this->pdo->prepare('SELECT no FROM code_mgt WHERE id = ? LIMIT 1');
+        $stmtChkCode->execute([$userId]);
+        if ($stmtChkCode->fetch()) {
+            $stmtCode = $this->pdo->prepare('UPDATE code_mgt SET code = ?, updated_at = NOW() WHERE id = ?');
+            $stmtCode->execute([$cleanCode, $userId]);
+        } else {
+            $stmtCode = $this->pdo->prepare('INSERT INTO code_mgt (id, code) VALUES (?, ?)');
+            $stmtCode->execute([$userId, $cleanCode]);
+        }
 
         // 2. Update personal table
         $stmtPersonal = $this->pdo->prepare('UPDATE personal SET famCode = ? WHERE id = ?');
@@ -557,6 +603,32 @@ class FamilyCodeApprovalService
              ON DUPLICATE KEY UPDATE status = "approved"'
         );
         $stmtFam->execute([$userId, $cleanCode]);
+
+        // 5. Refresh active session if the linked user is the current session user
+        if (isset($_SESSION['id']) && (string)$_SESSION['id'] === $userId) {
+            $_SESSION['famCode'] = $cleanCode;
+            $currentCodes = $_SESSION['famCodes'] ?? [];
+            if (!is_array($currentCodes)) {
+                $currentCodes = [$cleanCode];
+            } elseif (!in_array($cleanCode, $currentCodes, true)) {
+                $currentCodes[] = $cleanCode;
+            }
+            $_SESSION['famCodes'] = $currentCodes;
+        }
+
+        // 6. Auto-claim or initialize tree node for the user in the new family
+        try {
+            $memberData = [];
+            $stmtMember = $this->pdo->prepare('SELECT * FROM personal WHERE id = ?');
+            $stmtMember->execute([$userId]);
+            $pRow = $stmtMember->fetch(PDO::FETCH_ASSOC);
+            if (is_array($pRow)) {
+                $memberData = $pRow;
+            }
+            \App\services\FamilyClaimService::claimOrInitializeNode($cleanCode, $userId, $memberData);
+        } catch (\Throwable $nodeEx) {
+            error_log('[FamilyCodeApprovalService] Node auto-claim warning: ' . $nodeEx->getMessage());
+        }
 
         return true;
     }
@@ -612,11 +684,15 @@ class FamilyCodeApprovalService
             $stmtPersonal->execute([$newCode, $userId]);
 
             // 2. Update code_mgt table
-            $stmtCodeMgt = $this->pdo->prepare(
-                'INSERT INTO code_mgt (id, code) VALUES (?, ?)
-                 ON DUPLICATE KEY UPDATE code = VALUES(code), updated_at = NOW()'
-            );
-            $stmtCodeMgt->execute([$userId, $newCode]);
+            $stmtChkCode = $this->pdo->prepare('SELECT no FROM code_mgt WHERE id = ? LIMIT 1');
+            $stmtChkCode->execute([$userId]);
+            if ($stmtChkCode->fetch()) {
+                $stmtCodeMgt = $this->pdo->prepare('UPDATE code_mgt SET code = ?, updated_at = NOW() WHERE id = ?');
+                $stmtCodeMgt->execute([$newCode, $userId]);
+            } else {
+                $stmtCodeMgt = $this->pdo->prepare('INSERT INTO code_mgt (id, code) VALUES (?, ?)');
+                $stmtCodeMgt->execute([$userId, $newCode]);
+            }
 
             // 3. Ensure otherFamily record exists without overwriting maternal/maiden otherFamCode
             $stmtOther = $this->pdo->prepare('INSERT INTO otherFamily (id) VALUES (?) ON DUPLICATE KEY UPDATE id = id');

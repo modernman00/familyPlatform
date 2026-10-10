@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2023-{{ date('Y') }} {{ getenv('APP_NAME') }}. Developed by Olawale Olaogun. All rights reserved.</p>
+      <p>&copy; 2023-{{ date('Y') }} {{ getenv('APP_NAME') }}. All rights reserved.</p>
     </div>
   </div>
 </footer>

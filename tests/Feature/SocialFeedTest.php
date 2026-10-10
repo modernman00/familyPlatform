@@ -149,4 +149,43 @@ final class SocialFeedTest extends SocialFeedTestCase
 
         $this->assertSame(0, $this->commentReactionCount($commentNo), 'Re-sending the same reaction removes it.');
     }
+
+    public function test_post_comment_returns_full_comment_data_with_epoch_post_time(): void
+    {
+        $postNo = $this->seedPost('Testing comment submission payload');
+        $_SERVER['CONTENT_TYPE'] = 'multipart/form-data';
+        $_POST = [
+            'post_no' => (string) $postNo,
+            'comment' => 'Instant comment from family member',
+        ];
+
+        $controller = $this->makeWithoutConstructor(ProfilePage::class);
+        $response = $this->captureLastJson(fn () => $controller->postComment());
+
+        $this->assertSame('success', $response['status'] ?? null);
+        $payload = $response['message'] ?? null;
+        $this->assertIsArray($payload);
+        $this->assertGreaterThan(0, $payload['comment_no'] ?? 0);
+        $this->assertSame((string) $postNo, $payload['post_no'] ?? null);
+        $this->assertSame($this->authorId, $payload['id'] ?? null);
+        $this->assertSame('Feed Tester', $payload['fullName'] ?? null);
+        $this->assertSame('Instant comment from family member', $payload['comment'] ?? null);
+
+        // Verify post_time is a valid numeric string of epoch milliseconds (at least 13 digits)
+        $this->assertNotEmpty($payload['post_time'] ?? null);
+        $this->assertMatchesRegularExpression('/^\d{13,}$/', (string) $payload['post_time']);
+        $this->assertSame($payload['post_time'], $payload['comment_time']);
+
+        // Verify the comment row is persisted in the database
+        $stmt = $this->pdo->prepare("SELECT comment_no, post_no, post_time, comment FROM comment WHERE comment_no = ?");
+        $stmt->execute([(int) $payload['comment_no']]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $this->assertNotEmpty($row);
+        $this->assertSame((string) $postNo, (string) $row['post_no']);
+        $this->assertSame($payload['post_time'], (string) $row['post_time']);
+
+        // Clean up
+        $this->pdo->prepare("DELETE FROM comment WHERE comment_no = ?")->execute([(int) $payload['comment_no']]);
+    }
 }
+

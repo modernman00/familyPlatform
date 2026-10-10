@@ -874,6 +874,13 @@
                       <h3 class="fw-bolder text-primary mb-1 mt-1" id="currentFamCodeText" style="letter-spacing: 1px;">
                         <i class="bi bi-hash text-muted"></i><span id="currentFamCodeValue">{{ $accountData['famCode'] ?? 'NOT ASSIGNED' }}</span>
                       </h3>
+                      @if(!empty($pendingFamilyRequest))
+                        <div class="mt-2 mb-2" id="currentFamCodePendingContainer">
+                          <span class="badge rounded-pill px-3 py-1.5 fw-semibold" style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
+                            <i class="bi bi-hourglass-split me-1"></i> Transfer to <strong>#{{ $pendingFamilyRequest['family_code'] }}</strong> pending approval
+                          </span>
+                        </div>
+                      @endif
                       <p class="text-muted small mb-0">
                         This code links your profile, personal memories, family tree, and shared feed with other verified family members.
                       </p>
@@ -1051,6 +1058,26 @@
   document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+    // Tab persistence: activate tab from URL hash (e.g. #v-pills-familycode)
+    const activeHash = window.location.hash;
+    if (activeHash) {
+      const targetTrigger = document.querySelector(`button[data-bs-target="${activeHash}"]`);
+      if (targetTrigger && window.bootstrap && window.bootstrap.Tab) {
+        const tabInst = window.bootstrap.Tab.getOrCreateInstance(targetTrigger);
+        tabInst.show();
+      }
+    }
+
+    // Keep URL hash updated when switching tabs
+    document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(function(pillBtn) {
+      pillBtn.addEventListener('shown.bs.tab', function(e) {
+        const target = e.target.getAttribute('data-bs-target');
+        if (target && history.replaceState) {
+          history.replaceState(null, null, target);
+        }
+      });
+    });
+
     // Live update for custom switch ON/OFF labels
     document.querySelectorAll('.toggle-group .switch input[type="checkbox"]').forEach(function(checkbox) {
       checkbox.addEventListener('change', function() {
@@ -1140,7 +1167,8 @@
             btnStaySolo.disabled = false;
             btnStaySolo.innerHTML = origHtml;
 
-            if (data.status === 200 || data.success) {
+            const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
+            if (isSuccess) {
               const newCode = (data.data && data.data.family_code) || 'Updated';
               const valSpan = document.getElementById('currentFamCodeValue');
               if (valSpan) valSpan.textContent = newCode;
@@ -1153,10 +1181,12 @@
                   html: 'Your new solo Family Code is <strong>' + newCode + '</strong>.<br><br>Your profile has been transitioned to your new private family tree.',
                   confirmButtonColor: '#4f46e5'
                 }).then(() => {
+                  window.location.hash = 'v-pills-familycode';
                   window.location.reload();
                 });
               } else {
                 alert('Success! Your new Family Code is: ' + newCode);
+                window.location.hash = 'v-pills-familycode';
                 window.location.reload();
               }
             } else {
@@ -1238,6 +1268,10 @@
         fd.append('inviter_first_name', fName);
         fd.append('inviter_last_name', lName);
         fd.append('inviter_email_or_mobile', contact);
+        const currentUserId = document.getElementById('userId')?.value || '{{ $_SESSION["id"] ?? "" }}';
+        if (currentUserId) {
+          fd.append('id', currentUserId);
+        }
         if (csrfToken) {
           fd.append('token', csrfToken);
         }
@@ -1256,19 +1290,22 @@
           btnRequestJoin.disabled = false;
           btnRequestJoin.innerHTML = origHtml;
 
-          if (data.status === 200 || data.success) {
+          const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
+          if (isSuccess) {
             const msg = data.message || (data.data && data.data.message) || 'Transfer request submitted successfully.';
             if (window.Swal) {
               window.Swal.fire({
                 icon: 'success',
-                title: 'Request Sent!',
-                text: msg,
+                title: 'Transfer Request Sent!',
+                html: msg + '<br><br><span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-hourglass-split me-1"></i> Awaiting Inviter Approval</span><br><small class="text-muted mt-2 d-block">Your primary family code will automatically switch once your inviter approves the transfer request.</small>',
                 confirmButtonColor: '#10b981'
               }).then(() => {
+                window.location.hash = 'v-pills-familycode';
                 window.location.reload();
               });
             } else {
               alert(msg);
+              window.location.hash = 'v-pills-familycode';
               window.location.reload();
             }
           } else {
@@ -1320,9 +1357,12 @@
             cancelBtn.disabled = false;
             cancelBtn.innerHTML = origHtml;
 
-            if (data.status === 200 || data.success) {
+            const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
+            if (isSuccess) {
               const alertBox = document.getElementById('pendingRequestAlert');
               if (alertBox) alertBox.style.display = 'none';
+              const pendingContainer = document.getElementById('currentFamCodePendingContainer');
+              if (pendingContainer) pendingContainer.style.display = 'none';
 
               if (window.Swal) {
                 window.Swal.fire({
@@ -1401,7 +1441,8 @@
         if (btnSaveOtherCode) btnSaveOtherCode.disabled = false;
         if (btnClearOtherCode) btnClearOtherCode.disabled = false;
 
-        if (data.status === 200 || data.success) {
+        const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
+        if (isSuccess) {
           const msg = data.message || (data.data && data.data.message) || 'Secondary family code updated successfully.';
           const rawCode = (codeToSave || '').trim().toUpperCase().replace('#', '');
           const safeCode = rawCode.replace(/[^A-Z0-9]/g, '');

@@ -334,7 +334,11 @@ class FamilyCodeApprovalController
             }
 
             header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'message' => 'Request approved successfully']);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Request approved successfully',
+                'family_code' => strtoupper(trim(str_replace('#', '', (string)$request['family_code'])))
+            ]);
 
         } catch (\Throwable $e) {
             if ($wantsHtml) {

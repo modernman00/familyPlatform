@@ -208,24 +208,19 @@ final class OrganogramEditorController extends BaseController
             $db->beginTransaction();
 
             try {
-                // 1. Insert New Child Node
-                $insNode = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Child', ?, ?)
-                ");
-                $insNode->execute([
-                    $familyCode, $firstName, $lastName, $gender, $childGenLevel, $avatar,
+                // 1. Resolve or Create Child Node using KinshipEntityResolver
+                $resolution = \App\services\KinshipEntityResolver::resolveOrCreateChild(
+                    $familyCode,
+                    $unionId,
+                    $firstName,
+                    $lastName,
+                    $gender,
                     !empty($email) ? $email : null,
-                    !empty($mobile) ? $mobile : null
-                ]);
-                $childId = (int)$db->lastInsertId();
-
-                // 2. Link Child to Union
-                $insChild = $db->prepare("
-                    INSERT INTO family_node_children (union_id, child_id, relationship_type)
-                    VALUES (?, ?, 'biological')
-                ");
-                $insChild->execute([$unionId, $childId]);
+                    !empty($mobile) ? $mobile : null,
+                    $avatar,
+                    $childGenLevel
+                );
+                $childId = $resolution['node_id'];
 
                 $db->commit();
                 msgSuccess(200, [

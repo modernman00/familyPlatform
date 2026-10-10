@@ -263,6 +263,10 @@ final class PostMessage
 
             try {
                 Pusher::broadcastToFamily($famCode, 'new-comment', $newComment);
+                $senderFamCode = checkInput($_SESSION['famCode'] ?? '');
+                if (is_string($senderFamCode) && $senderFamCode !== '' && $senderFamCode !== $famCode) {
+                    Pusher::broadcastToFamily($senderFamCode, 'new-comment', $newComment);
+                }
             } catch (\Throwable $th) {
                 error_log("Pusher comment broadcast failed: " . $th->getMessage());
             }
@@ -656,6 +660,6 @@ final class PostMessage
     private static function getProfilePicsForPostAndComment(string $postId): string|null
     {
         $result = Post::getProfilePics($postId);
-        return $result[0]["img"];
+        return isset($result[0]['img']) && is_string($result[0]['img']) ? $result[0]['img'] : null;
     }
 }

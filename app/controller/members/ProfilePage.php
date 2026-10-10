@@ -265,7 +265,7 @@ final class ProfilePage extends ProcessImg
             $newInput = [
                 'id' => $id,
                 'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
-                'profileImg' => Post::getProfilePicsById($id),
+                'profileImg' => Post::getProfilePicsById($id) ?: 'avatarM.png',
                 'post_time' => milliSeconds()
             ];
             $result = SubmitPostData::submitToOneTablenImage(
@@ -279,7 +279,19 @@ final class ProfilePage extends ProcessImg
                 // Trigger background notifications server-side
                 \App\controller\members\PostMessage::getNewCommentPusher();
 
-                msgSuccess(200, $result);
+                $commentData = [
+                    'comment_no' => (int) $result,
+                    'post_no' => (string) ($_POST['post_no'] ?? ''),
+                    'id' => $id,
+                    'fullName' => (string) $newInput['fullName'],
+                    'profileImg' => (string) $newInput['profileImg'],
+                    'comment' => \checkInput((string) ($_POST['comment'] ?? '')),
+                    'post_time' => (string) $newInput['post_time'],
+                    'comment_time' => (string) $newInput['post_time'],
+                    'date_created' => date('Y-m-d H:i:s'),
+                ];
+
+                msgSuccess(200, $commentData);
             }
         } catch (\Throwable $th) {
   

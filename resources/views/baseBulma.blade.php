@@ -18,7 +18,7 @@
     <meta name="keywords"
         content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="Olawale Olaogun">
+    <meta name="author" content="Family Platform Team">
     <meta name="language" content="English">
 
     @hasSection('og_tags')
@@ -259,7 +259,7 @@
     <div class="footer">
         <div class="content has-text-centered">
 
-            <p>Website developed and maintained by Olawale Olaogun </p>
+            <p>&copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }}. All rights reserved.</p>
             <button id="subscribeButton">Subscribe to Notifications</button>
 
 

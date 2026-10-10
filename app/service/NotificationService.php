@@ -66,22 +66,38 @@ class NotificationService
             error_log('[NotificationService] Email send failed: ' . $e->getMessage());
         }
 
-        // In-app push notification to the approver
+        // In-app push notification to the approver & all active family members
         try {
             // Write to durable notification table for in-app navbar bell & dropdown
             $requesterName = $emailData['requesterName'] ?: 'Someone';
+
+            $cleanCode = strtoupper(trim(str_replace('#', '', $familyCode)));
+            $approvalService = new \App\service\FamilyCodeApprovalService($this->pdo);
+            $familyMembers = $approvalService->getFamilyMembersForCode($cleanCode);
+
+            $targetRecipients = [$approverId];
+            foreach ($familyMembers as $member) {
+                if (!empty($member['id'])) {
+                    $targetRecipients[] = (string)$member['id'];
+                }
+            }
+            $targetRecipients = array_values(array_unique(array_filter($targetRecipients)));
+
             $stmt = $this->pdo->prepare("
                 INSERT INTO notification 
                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
                 VALUES (?, ?, ?, ?, 'Family Request', ?, 'new', NOW())
             ");
-            $stmt->execute([
-                $newUserInfo['id'] ?? 'system',
-                $approverId,
-                $requesterName,
-                "Family Join Request",
-                "{$requesterName} wants to join your {$familyCode} family network."
-            ]);
+
+            foreach ($targetRecipients as $recipientId) {
+                $stmt->execute([
+                    $newUserInfo['id'] ?? 'system',
+                    $recipientId,
+                    $requesterName,
+                    "Family Join Request",
+                    "{$requesterName} wants to join your {$familyCode} family network."
+                ]);
+            }
 
             \App\classes\PushNotificationClass::sendPushNotification(
                 userId: $approverId,
@@ -90,6 +106,20 @@ class NotificationService
                 title: "New Family Join Request",
                 tag: "family-approval-request-{$requestId}"
             );
+
+            // Broadcast real-time update to family channel via Pusher if available
+            try {
+                if (class_exists(\App\classes\Pusher::class)) {
+                    \App\classes\Pusher::broadcastToFamily($cleanCode, 'new-family-request', [
+                        'requestId' => $requestId,
+                        'requesterName' => $requesterName,
+                        'familyCode' => $familyCode,
+                        'message' => "{$requesterName} wants to join your {$familyCode} family network."
+                    ]);
+                }
+            } catch (\Throwable $pusherErr) {
+                // non-blocking
+            }
         } catch (\Throwable $e) {
             error_log('[NotificationService] Push notification failed: ' . $e->getMessage());
         }

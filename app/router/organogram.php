@@ -22,4 +22,9 @@ $router->map('POST', '/api/dismiss-claim-node', 'App\controller\members\Organogr
 $router->map('GET', '/member/organogram/export-poster/[*:id]', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER');
 $router->map('GET', '/member/organogram/export-poster', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER_DEFAULT');
 
+// Headless Kinship REST API (API-Key Protected)
+$router->map('GET', '/api/v1/kinship/tree/[*:id]', 'App\controller\api\KinshipApiController@getTree', 'API_V1_KINSHIP_TREE');
+$router->map('GET', '/api/v1/kinship/tree', 'App\controller\api\KinshipApiController@getTree', 'API_V1_KINSHIP_TREE_DEFAULT');
+$router->map('POST', '/api/v1/admin/api-keys', 'App\controller\api\KinshipApiController@provisionKey', 'API_V1_ADMIN_PROVISION_KEY');
+
 

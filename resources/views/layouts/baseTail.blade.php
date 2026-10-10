@@ -271,7 +271,7 @@
         <div class="footer">
         <div class="content has-text-centered">
 
-            <p>Website developed and maintained by Olawale Olaogun </p>
+            <p>&copy; {{ date('Y') }} {{ getenv('APP_NAME') ?: 'Family Platform' }}. All rights reserved.</p>
             <button id="subscribeButton">Subscribe to Notifications</button>
 
 
