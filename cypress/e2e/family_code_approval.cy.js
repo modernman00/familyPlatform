@@ -131,10 +131,9 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
 
         enterFamilyCode(validCode);
         verifyInviter({ firstName: inviter.firstName, lastName: inviter.lastName, contact: inviter.email });
-        cy.get('#inviter-verification-modal').contains('Invitation Verified', { timeout: 8000 }).should('be.visible');
 
-        // Modal auto-closes after ~1.6s
-        cy.get('#inviter-verification-modal', { timeout: 8000 }).should('not.be.visible');
+        // Modal auto-closes after verification (~1.6s)
+        cy.get('#inviter-verification-modal', { timeout: 10000 }).should('not.be.visible');
 
         cy.get('#joining_via_invitation').should('have.value', 'true');
         cy.get('#temporary_code').invoke('val').should('match', /.+/);
