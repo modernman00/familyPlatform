@@ -17,6 +17,10 @@ final class ReelsTest extends TestCase
     {
         // Ensure test user exists in personal table
         $pdo = Select::connect2();
+        $pdo->prepare("DELETE FROM family_reel_comments WHERE user_id = :uid")->execute([':uid' => self::$testUserId]);
+        $pdo->prepare("DELETE FROM family_reel_reactions WHERE user_id = :uid")->execute([':uid' => self::$testUserId]);
+        $pdo->prepare("DELETE FROM family_reels WHERE user_id = :uid")->execute([':uid' => self::$testUserId]);
+
         $stmt = $pdo->prepare("
             INSERT INTO personal (id, firstName, lastName, famCode)
             VALUES (:id, 'Test', 'ReelsUser', :famCode)

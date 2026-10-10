@@ -194,18 +194,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     .stitch-social-btn {
         width: 100%;
-        border-radius: 10px;
-        padding: 12px 16px;
-        font-size: 1rem;
-        font-weight: 600;
+        border-radius: 12px;
+        padding: 0.55rem 1rem;
+        min-height: 44px;
+        font-size: 0.9rem;
+        font-weight: 550;
+        letter-spacing: -0.01em;
         cursor: pointer;
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.85rem;
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        gap: 0.65rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         text-decoration: none;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .stitch-social-btn:active {
+        transform: scale(0.98);
     }
 
     .stitch-social-btn svg {
@@ -215,13 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .stitch-social-btn.google {
         background-color: #ffffff;
         color: #374151;
-        border: 1.5px solid #E5E7EB;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #E5E7EB;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     }
     .stitch-social-btn.google:hover {
         background-color: #F9FAFB;
         border-color: #D1D5DB;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         color: #111827;
         transform: translateY(-1px);
     }
@@ -229,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .stitch-social-btn.facebook {
         background-color: #1877F2;
         color: #ffffff;
-        border: 1.5px solid #1877F2;
-        box-shadow: 0 2px 6px rgba(24, 119, 242, 0.25);
+        border: 1px solid #1877F2;
+        box-shadow: 0 2px 6px rgba(24, 119, 242, 0.22);
     }
     .stitch-social-btn.facebook:hover {
         background-color: #166FE5;
         border-color: #166FE5;
-        box-shadow: 0 4px 10px rgba(24, 119, 242, 0.35);
+        box-shadow: 0 4px 10px rgba(24, 119, 242, 0.32);
         color: #ffffff;
         transform: translateY(-1px);
     }
@@ -243,13 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .stitch-social-btn.apple {
         background-color: #000000;
         color: #ffffff;
-        border: 1.5px solid #000000;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        border: 1px solid #000000;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
     }
     .stitch-social-btn.apple:hover {
         background-color: #1f2937;
         border-color: #1f2937;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.32);
         color: #ffffff;
         transform: translateY(-1px);
     }

@@ -137,6 +137,32 @@ describe('Social Feed Interactions', () => {
         cy.get('body').should('contain.text', commentContent);
     });
 
+    it('can like a comment and updates reaction badge and state', () => {
+        const commentContent = `Cypress Like Comment ${Date.now()}`;
+        createFreshPost(`Cypress Comment Like Target ${Date.now()}`);
+
+        cy.contains('button', 'Comment').first().click();
+        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first()
+            .should('be.visible').type(`${commentContent}{enter}`);
+
+        cy.contains(commentContent, { timeout: 10000 }).should('be.visible');
+
+        cy.intercept('POST', '**/api/reactions/add').as('commentReactionReq');
+
+        // Find the comment container and click the like button
+        cy.contains(commentContent).parents('.align-items-start').within(() => {
+            cy.contains('button', 'Like').click();
+        });
+
+        cy.wait('@commentReactionReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
+
+        // Assert reaction badge preview appears with count
+        cy.contains(commentContent).parents('.align-items-start').within(() => {
+            cy.get('.reaction-count-pill', { timeout: 5000 }).should('be.visible').and('contain.text', '1');
+            cy.contains('button', 'Like').should('have.class', 'text-primary');
+        });
+    });
+
     it('denies empty comments', () => {
         createFreshPost(`Cypress Empty Comment Target ${Date.now()}`);
 

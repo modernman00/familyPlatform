@@ -59,19 +59,23 @@ final class CommentReactionController
 
       // ── Verify the comment belongs to this user's family ───────────────
       $stmt = $pdo->prepare(
-        "SELECT cr.comment_no FROM comment cr
+        "SELECT cr.comment_no, cr.post_no, p.postFamCode FROM comment cr
          INNER JOIN post p ON cr.post_no = p.post_no
          WHERE cr.comment_no = :commentNo AND p.postFamCode = :famCode
          LIMIT 1"
       );
       $stmt->execute(['commentNo' => $commentNo, 'famCode' => $famCode]);
+      $commentRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
-      if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+      if (!$commentRow) {
         http_response_code(403);
         header('Content-Type: application/json');
         echo json_encode(['status' => 'error', 'message' => 'Comment not found in your family.']);
         return;
       }
+
+      $postNo = (int) ($commentRow['post_no'] ?? 0);
+      $postFamCode = (string) ($commentRow['postFamCode'] ?? $famCode);
 
       // ── Toggle: if same reaction exists, remove it (un-react) ──────────
       $existing = $pdo->prepare(
@@ -81,11 +85,13 @@ final class CommentReactionController
       $existing->execute(['commentNo' => $commentNo, 'userId' => $userId]);
       $row = $existing->fetch(PDO::FETCH_ASSOC);
 
+      $action = 'added';
       if ($row) {
         if ($row['label'] === $reactionType) {
           // Same emoji → toggle off
           $pdo->prepare("DELETE FROM comment_reactions WHERE id = :id AND comment_no = :commentNo")
               ->execute(['id' => $userId, 'commentNo' => $commentNo]);
+          $action = 'removed';
         } else {
           // Different emoji → update. `updated_at` auto-bumps ON UPDATE.
           $pdo->prepare(
@@ -97,6 +103,7 @@ final class CommentReactionController
             'id'        => $userId,
             'commentNo' => $commentNo,
           ]);
+          $action = 'updated';
         }
       } else {
         // New reaction → insert. `created_at` defaults to CURRENT_TIMESTAMP.
@@ -109,11 +116,37 @@ final class CommentReactionController
           'reaction'  => $reactionType,
           'label'     => $reactionType,
         ]);
+        $action = 'added';
       }
 
       // ── Return refreshed counts to the client ──────────────────────────
       $counts = self::fetchReactions($commentNo, false);
-      \msgSuccess(200, ['status' => 'success', 'counts' => $counts]);
+      $reactionCounts = is_array($counts) && isset($counts['counts']) && is_array($counts['counts'])
+        ? $counts['counts']
+        : [];
+
+      // Broadcast reaction update to family channel via Pusher
+      try {
+        $broadcastData = [
+          'postNo'         => $postNo,
+          'commentNo'      => $commentNo,
+          'userId'         => $userId,
+          'reactionType'   => $reactionType,
+          'action'         => $action,
+          'reactions'      => $reactionCounts,
+          'totalReactions' => (int) ($reactionCounts['totalReactions'] ?? 0),
+        ];
+
+        Pusher::broadcastToFamily($postFamCode, 'comment-reaction', $broadcastData);
+        $cleanFamCode = (string) $famCode;
+        if ($cleanFamCode !== $postFamCode) {
+          Pusher::broadcastToFamily($cleanFamCode, 'comment-reaction', $broadcastData);
+        }
+      } catch (\Throwable $pusherEx) {
+        \error_log('[CommentReactionController] Pusher broadcast warning: ' . $pusherEx->getMessage());
+      }
+
+      \msgSuccess(200, ['status' => 'success', 'counts' => $counts, 'action' => $action]);
 
     } catch (\Throwable $e) {
       \showError($e);

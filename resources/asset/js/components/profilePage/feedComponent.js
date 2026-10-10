@@ -49,8 +49,13 @@ export function profileFeed(opts = {}) {
         },
 
         commentEmojiMap: {
-            like:  '👍', love: '❤️', haha: '😄',
-            wow:   '😮', sad:  '😢', angry: '😠',
+            like:  '👍',
+            likes: '👍',
+            love:  '❤️',
+            haha:  '😄',
+            wow:   '😮',
+            sad:   '😢',
+            angry: '😠',
         },
 
         async init() {
@@ -530,18 +535,21 @@ export function profileFeed(opts = {}) {
             const isSame = comment.userReaction === reactionType;
             const wasReaction = comment.userReaction;
 
+            const targetKey = (reactionType === 'like' || reactionType === 'likes') ? 'likes' : reactionType;
+            const wasKey = (wasReaction === 'like' || wasReaction === 'likes') ? 'likes' : wasReaction;
+
             if (isSame) {
                 // Toggle off
-                comment.reactions[reactionType] = Math.max(0, (comment.reactions[reactionType] || 1) - 1);
+                comment.reactions[targetKey] = Math.max(0, (comment.reactions[targetKey] || 1) - 1);
                 comment.totalReactions = Math.max(0, comment.totalReactions - 1);
                 comment.userReaction = null;
             } else {
                 // Remove old reaction from counts if switching
-                if (wasReaction && comment.reactions[wasReaction]) {
-                    comment.reactions[wasReaction] = Math.max(0, comment.reactions[wasReaction] - 1);
+                if (wasReaction && wasKey && comment.reactions[wasKey]) {
+                    comment.reactions[wasKey] = Math.max(0, comment.reactions[wasKey] - 1);
                     comment.totalReactions = Math.max(0, comment.totalReactions - 1);
                 }
-                comment.reactions[reactionType] = (comment.reactions[reactionType] || 0) + 1;
+                comment.reactions[targetKey] = (comment.reactions[targetKey] || 0) + 1;
                 comment.totalReactions += 1;
                 comment.userReaction = reactionType;
             }
@@ -578,7 +586,7 @@ export function profileFeed(opts = {}) {
             if (!reactions || typeof reactions !== 'object') return [];
             const map = this.commentEmojiMap;
             return Object.entries(reactions)
-                .filter(([k, v]) => !['comment_no', 'total', 'totalReactions'].includes(k) && Number(v) > 0)
+                .filter(([k, v]) => !['comment_no', 'total', 'totalReactions'].includes(k) && Number(v) > 0 && !(k === 'like' && reactions.likes !== undefined))
                 .sort(([, a], [, b]) => Number(b) - Number(a))
                 .slice(0, 3)
                 .map(([label, count]) => ({ emoji: map[label] ?? '👍', count: Number(count) }));
@@ -937,10 +945,42 @@ export function profileFeed(opts = {}) {
                     if (comment) comment.comment = data?.comment ?? comment.comment;
                 });
 
+                channel.bind('comment-reaction', (data) => {
+                    if (!data) return;
+                    const postNo = data.postNo ?? data.post_no;
+                    const commentNo = data.commentNo ?? data.comment_no;
+                    if (!commentNo) return;
+
+                    let post = postNo ? this.posts.find(p => String(p.post_no) === String(postNo)) : null;
+                    if (!post) {
+                        post = this.posts.find(p => Array.isArray(p.comments) && p.comments.some(c => String(c.comment_no) === String(commentNo)));
+                    }
+                    if (post && Array.isArray(post.comments)) {
+                        const comment = post.comments.find(c => String(c.comment_no) === String(commentNo));
+                        if (comment) {
+                            if (data.reactions && typeof data.reactions === 'object') {
+                                comment.reactions = { ...data.reactions };
+                            }
+                            if (data.totalReactions !== undefined) {
+                                comment.totalReactions = parseInt(data.totalReactions, 10);
+                            }
+                            // Cross-tab / cross-device sync if triggered by current user
+                            if (data.userId && String(data.userId) === String(this.currentUserId)) {
+                                if (data.action === 'removed') {
+                                    comment.userReaction = null;
+                                } else if (data.reactionType) {
+                                    comment.userReaction = data.reactionType;
+                                }
+                            }
+                        }
+                    }
+                });
+
                 channel.bind('like-event', (data) => {
                     if (Array.isArray(data)) {
                         data.forEach(item => {
-                            const post = this.posts.find(p => String(p.post_no) === String(item?.post_no));
+                            const postNo = item?.post_no ?? (item?.likeHtmlId ? String(item.likeHtmlId).replace('likeCounter', '') : null);
+                            const post = this.posts.find(p => String(p.post_no) === String(postNo));
                             if (post && item?.likeCounter !== undefined) {
                                 post.post_likes = parseInt(item.likeCounter, 10);
                             }

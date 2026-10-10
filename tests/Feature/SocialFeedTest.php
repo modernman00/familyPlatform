@@ -119,6 +119,8 @@ final class SocialFeedTest extends SocialFeedTestCase
         $this->assertSame(1, $this->commentReactionCount($commentNo));
         $this->assertSame('love', $this->reactionLabel($commentNo, $this->authorId));
         $this->assertSame('success', $response['status'] ?? null);
+        $this->assertSame('added', $response['message']['action'] ?? null);
+        $this->assertSame(1, $response['message']['counts']['counts']['totalReactions'] ?? null);
     }
 
     public function test_add_reaction_replaces_an_existing_reaction_with_a_different_one(): void
@@ -127,10 +129,12 @@ final class SocialFeedTest extends SocialFeedTestCase
         $commentNo = $this->seedComment($postNo, 'our comment');
 
         $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'like'];
-        $this->captureOutput(fn () => CommentReactionController::addReaction());
+        $res1 = $this->captureLastJson(fn () => CommentReactionController::addReaction());
+        $this->assertSame('added', $res1['message']['action'] ?? null);
 
         $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'angry'];
-        $this->captureOutput(fn () => CommentReactionController::addReaction());
+        $res2 = $this->captureLastJson(fn () => CommentReactionController::addReaction());
+        $this->assertSame('updated', $res2['message']['action'] ?? null);
 
         $this->assertSame(1, $this->commentReactionCount($commentNo), 'Still one row — the reaction was updated, not duplicated.');
         $this->assertSame('angry', $this->reactionLabel($commentNo, $this->authorId));
@@ -142,10 +146,12 @@ final class SocialFeedTest extends SocialFeedTestCase
         $commentNo = $this->seedComment($postNo, 'our comment');
 
         $_POST = ['comment_no' => (string) $commentNo, 'reaction' => 'like'];
-        $this->captureOutput(fn () => CommentReactionController::addReaction()); // react
+        $res1 = $this->captureLastJson(fn () => CommentReactionController::addReaction()); // react
         $this->assertSame(1, $this->commentReactionCount($commentNo));
+        $this->assertSame('added', $res1['message']['action'] ?? null);
 
-        $this->captureOutput(fn () => CommentReactionController::addReaction()); // same emoji again → un-react
+        $res2 = $this->captureLastJson(fn () => CommentReactionController::addReaction()); // same emoji again → un-react
+        $this->assertSame('removed', $res2['message']['action'] ?? null);
 
         $this->assertSame(0, $this->commentReactionCount($commentNo), 'Re-sending the same reaction removes it.');
     }

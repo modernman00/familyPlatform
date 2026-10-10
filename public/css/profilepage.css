@@ -141,12 +141,26 @@ body {
   background: transparent;
   border: none;
   color: var(--text-color);
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 550;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .reaction-buttons button:hover {
   background-color: var(--hover-color);
+  transform: translateY(-1px);
+}
+
+.reaction-buttons button:active {
+  transform: scale(0.97);
 }
 
 .event-card {
@@ -165,6 +179,11 @@ body {
 .rsvp-buttons .btn {
   flex: 1;
   margin: 0 3px;
+  border-radius: 10px;
+  padding: 0.42rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 550;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .comment-section {
@@ -363,6 +382,9 @@ body {
   .reaction-buttons button {
     flex: 1 0 33%;
     text-align: center;
+    min-height: 40px;
+    padding: 6px 8px;
+    font-size: 0.82rem;
   }
 }
 
@@ -398,6 +420,9 @@ body {
 
   .rsvp-buttons .btn {
     margin: 2px 0;
+    min-height: 40px;
+    padding: 0.42rem 0.85rem;
+    border-radius: 8px;
   }
 
   /* Kinship Radar Widget - Mobile */
@@ -660,18 +685,25 @@ body {
 .reaction-button {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.2s;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 13px;
   color: #65676b;
-  font-weight: 600;
+  font-weight: 550;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .reaction-button:hover {
-  background-color: #f2f2f2;
+  background-color: var(--hover-color, #f2f2f2);
+  transform: translateY(-1px);
+}
+
+.reaction-button:active {
+  transform: scale(0.97);
 }
 
 .reaction-button.active {

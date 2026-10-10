@@ -288,18 +288,31 @@
 
 .submitPost {
     width: 100% !important;
-    border-radius: 8px !important;
+    border-radius: 12px !important;
     font-weight: 600 !important;
-    font-size: 0.95rem !important;
-    padding: 10px !important;
-    background-color: var(--primary-color, #4f46e5) !important;
+    font-size: 0.92rem !important;
+    letter-spacing: -0.01em !important;
+    padding: 0.55rem 1rem !important;
+    min-height: 44px;
+    background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%) !important;
     border: none !important;
-    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25) !important;
-    transition: all 0.2s ease !important;
+    box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 
     &:hover {
-        opacity: 0.92 !important;
+        background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%) !important;
         transform: translateY(-1px) !important;
+        box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32) !important;
+    }
+
+    &:active {
+        transform: scale(0.98) !important;
     }
 }
 

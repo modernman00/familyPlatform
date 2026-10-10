@@ -307,33 +307,41 @@ body {
 
 .btn-stitch-primary {
     width: 100%;
-    padding: 0.6rem 1.25rem;
-    border-radius: var(--stitch-radius-md);
+    padding: 0.48rem 1rem;
+    min-height: 40px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 0.85rem;
+    letter-spacing: -0.01em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: var(--stitch-primary);
     color: #ffffff;
     border: 1px solid transparent;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.22);
     text-decoration: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-stitch-primary:hover {
     background: var(--stitch-primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.32);
     color: #ffffff;
+}
+.btn-stitch-primary:active {
+    transform: scale(0.98);
 }
 
 .btn-stitch-tonal {
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--stitch-radius-md);
-    font-weight: 600;
+    padding: 0.42rem 0.8rem;
+    min-height: 38px;
+    border-radius: 10px;
+    font-weight: 550;
     font-size: 0.8rem;
     display: inline-flex;
     align-items: center;
@@ -342,19 +350,26 @@ body {
     background: var(--stitch-primary-container);
     color: var(--stitch-on-primary-container);
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     text-decoration: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-stitch-tonal:hover {
     background: #e0e7ff;
     color: #312e81;
+    transform: translateY(-1px);
+}
+.btn-stitch-tonal:active {
+    transform: scale(0.98);
 }
 
 .btn-stitch-danger {
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--stitch-radius-md);
-    font-weight: 600;
+    padding: 0.42rem 0.8rem;
+    min-height: 38px;
+    border-radius: 10px;
+    font-weight: 550;
     font-size: 0.8rem;
     display: inline-flex;
     align-items: center;
@@ -363,33 +378,47 @@ body {
     background: #fff1f2;
     color: #be123c;
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-stitch-danger:hover {
     background: #ffe4e6;
     color: #9f1239;
+    transform: translateY(-1px);
+}
+.btn-stitch-danger:active {
+    transform: scale(0.98);
 }
 
 .btn-stitch-connect {
     width: 100%;
-    padding: 0.6rem 1.25rem;
-    border-radius: var(--stitch-radius-md);
+    padding: 0.48rem 1rem;
+    min-height: 40px;
+    border-radius: 10px;
     font-weight: 600;
     font-size: 0.85rem;
+    letter-spacing: -0.01em;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: #059669;
     color: #ffffff;
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .btn-stitch-connect:hover {
     background: #047857;
     color: #ffffff;
+    transform: translateY(-1px);
+}
+.btn-stitch-connect:active {
+    transform: scale(0.98);
 }
 
 /* Loader */

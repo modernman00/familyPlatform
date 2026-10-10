@@ -69,35 +69,60 @@ body {
 }
 
 .btn-brand {
-    background-color: var(--brand-primary);
-    color: #fff;
-    border-radius: 24px;
-    padding: 0.5rem 1.5rem;
+    background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
+    color: #fff !important;
+    border-radius: 12px;
+    padding: 0.5rem 1.25rem;
     font-weight: 600;
-    transition: all 0.2s ease;
-    border: none;
+    letter-spacing: -0.01em;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-brand:hover {
-    background-color: var(--brand-secondary);
-    color: #fff;
+    background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+    color: #fff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(10, 102, 194, 0.2);
+    box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+}
+
+.btn-brand:active {
+    transform: scale(0.98);
 }
 
 .btn-brand-outline {
-    background-color: transparent;
-    color: var(--brand-primary);
-    border: 1px solid var(--brand-primary);
-    border-radius: 24px;
-    padding: 0.5rem 1.5rem;
+    background-color: rgba(0, 191, 165, 0.04);
+    color: var(--brand-primary) !important;
+    border: 1.5px solid var(--brand-primary);
+    border-radius: 12px;
+    padding: 0.5rem 1.25rem;
     font-weight: 600;
-    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-brand-outline:hover {
-    background-color: rgba(10, 102, 194, 0.05);
-    color: var(--brand-secondary);
+    background-color: rgba(0, 191, 165, 0.1);
+    color: var(--brand-primary-dark, #00897b) !important;
+    border-color: var(--brand-primary-dark, #00897b);
+    transform: translateY(-1px);
+}
+
+.btn-brand-outline:active {
+    transform: scale(0.98);
 }
 
 /* --- Hero Section --- */
@@ -495,4 +520,46 @@ body.dark-theme .back-to-top-btn:hover {
     background: var(--brand-primary, #00bfa5);
     color: #ffffff;
 }
+
+/* ==========================================================================
+   Isla Sleek & Non-Bulky Mobile Button Ergonomics (Landing & Auth Pages)
+   ========================================================================== */
+.btn, .button {
+    font-family: inherit;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+    border-radius: 10px;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active, .button:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+    .btn, .button, .stitch-social-btn, .btn-brand, .btn-brand-outline, .btn-gradient, .btn-coral-glow {
+        min-height: 44px;
+        padding: 0.44rem 0.95rem !important;
+        font-size: 0.88rem !important;
+        border-radius: 10px !important;
+        letter-spacing: -0.01em;
+    }
+
+    .btn-lg, .button.is-large {
+        min-height: 46px;
+        padding: 0.52rem 1.15rem !important;
+        font-size: 0.92rem !important;
+        border-radius: 10px !important;
+    }
+
+    .btn-sm, .button.is-small {
+        min-height: 36px;
+        padding: 0.28rem 0.65rem !important;
+        font-size: 0.78rem !important;
+        border-radius: 8px !important;
+    }
+}
+
 

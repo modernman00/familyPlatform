@@ -82,6 +82,7 @@ final class PostLikeController extends Db
                     }
 
                     $byFamily[$famCode][] = [
+                        'post_no' => $postNo,
                         'origin' => getenv("APP_URL2") ?: 'default_value', // Set a default value if not set
                         'likeCounter' => $postLikes['post_likes'],
                         'likeHtmlId' => "likeCounter$postNo",

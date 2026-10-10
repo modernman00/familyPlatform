@@ -17,6 +17,12 @@ final class RecommendationControllerTest extends TestCase
 
     public static function setUpBeforeClass(): void
     {
+        $suffix = (string) time();
+        self::$inviterId = '777101INV_' . $suffix;
+        self::$inviteeId = '777102INV_' . $suffix;
+        self::$inviterCode = 'IN' . substr($suffix, -4);
+        self::$inviteeCode = 'NW' . substr($suffix, -4);
+
         $pdo = Db::connect2();
 
         // Create inviter user
