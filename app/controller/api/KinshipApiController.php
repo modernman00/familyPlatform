@@ -36,6 +36,9 @@ final class KinshipApiController extends BaseController
         header('Content-Type: application/json; charset=UTF-8');
 
         try {
+            // 1. Authenticate API Key Fail-Closed
+            $keyRecord = ApiKeyAuthService::authenticate('tree:read');
+
             $rawId = is_string($id) ? trim($id) : (string)($_GET['id'] ?? '');
 
             if (empty($rawId)) {
@@ -49,7 +52,7 @@ final class KinshipApiController extends BaseController
 
             $db = Db::connect2();
 
-            // 1. Resolve Family Context and Ego Node
+            // 2. Resolve Family Context and Ego Node
             $familyCode = null;
             $rootUserId = null;
             $egoNodeId = 0;
@@ -95,10 +98,22 @@ final class KinshipApiController extends BaseController
                 return;
             }
 
-            // 2. Authenticate API Key & Verify Tenant Permissions
-            $keyRecord = ApiKeyAuthService::authenticate('tree:read', $familyCode);
+            // 3. Verify Tenant Isolation for Resolved Family Code
+            $allowedFamilies = json_decode((string)($keyRecord['family_codes'] ?? '["*"]'), true);
+            if (!is_array($allowedFamilies)) {
+                $allowedFamilies = ['*'];
+            }
 
-            // 3. Heal duplicate nodes if any exist
+            if (!in_array('*', $allowedFamilies, true) && !in_array($familyCode, $allowedFamilies, true)) {
+                http_response_code(403);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Forbidden: API key does not have access to family '{$familyCode}'."
+                ]);
+                return;
+            }
+
+            // 4. Heal duplicate nodes if any exist
             KinshipEntityResolver::healDuplicateNodes($familyCode);
 
             // 4. Fetch Nodes, Unions, and Children

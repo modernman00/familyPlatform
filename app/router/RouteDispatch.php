@@ -69,6 +69,8 @@ final class RouteDispatch
             // Admin Auth routes handle their own session state — must be public
             'App\controller\admin\AdminAuthController',
             'Src\functionality\WebAuthnFunctionality',
+            // Headless Kinship REST API handles API key authentication
+            'App\controller\api\KinshipApiController',
         ];
 
         if (\class_exists('\Src\functionality\SignIn')) {
