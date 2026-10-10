@@ -90,7 +90,7 @@ final class KinshipApiController extends BaseController
                 http_response_code(404);
                 echo json_encode([
                     'success' => false,
-                    'error' => "Family tree not found for identifier '{$rawId}'."
+                    'error' => 'Family tree not found for the specified identifier.'
                 ]);
                 return;
             }
@@ -273,16 +273,14 @@ final class KinshipApiController extends BaseController
                 (string)($_SESSION['id'] ?? 'admin')
             );
 
-            http_response_code(201);
-            echo json_encode([
-                'success' => true,
+            msgSuccess(201, [
                 'message' => 'API Key provisioned successfully. Save this raw key securely; it will not be displayed again.',
                 'api_key' => $result['raw_key'],
                 'key_id' => $result['id'],
-                'name' => $result['name'],
+                'name' => htmlspecialchars($result['name'], ENT_QUOTES, 'UTF-8'),
                 'prefix' => $result['prefix'],
                 'scopes' => $result['scopes']
-            ], JSON_PRETTY_PRINT);
+            ]);
 
         } catch (\Throwable $th) {
             http_response_code(500);
