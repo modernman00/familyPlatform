@@ -25,16 +25,52 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.get('.stitch-submit').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44); // Segun & Apple touch target >= 44px
-            expect(height).to.be.lessThan(56); // Less bulky (not clunky 56px+ slab)
+            expect(height).to.be.lessThan(52); // Sleek, non-bulky (under 52px)
         });
 
         cy.get('.stitch-social-btn.google').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44);
-            expect(height).to.be.lessThan(56);
+            expect(height).to.be.lessThan(52);
+        });
+
+        cy.get('#btn-passkey-login').should('be.visible').then(($btn) => {
+            const height = $btn.outerHeight();
+            expect(height).to.be.at.least(44);
+            expect(height).to.be.lessThan(52);
         });
 
         cy.screenshot('button_login_mobile');
+    });
+
+    it('verifies forgot password page buttons on mobile', () => {
+        cy.viewport(390, 844);
+        cy.visit('/login/forgot?verify=1');
+
+        cy.get('.stitch-submit').should('be.visible').then(($btn) => {
+            const height = $btn.outerHeight();
+            expect(height).to.be.at.least(44);
+            expect(height).to.be.lessThan(52);
+            const borderRadius = parseFloat($btn.css('border-radius'));
+            expect(borderRadius).to.be.at.least(10);
+        });
+
+        cy.screenshot('button_forgot_mobile');
+    });
+
+    it('verifies sanctuary recommendation page button on mobile', () => {
+        cy.viewport(390, 844);
+        cy.visit('/join');
+
+        cy.get('.btn-sanctuary-primary').should('be.visible').then(($btn) => {
+            const height = $btn.outerHeight();
+            expect(height).to.be.at.least(44); // Segun touch target >= 44px
+            expect(height).to.be.lessThan(50); // Sleek and streamlined, not bulky
+            const borderRadius = parseFloat($btn.css('border-radius'));
+            expect(borderRadius).to.be.at.least(10);
+        });
+
+        cy.screenshot('button_join_mobile');
     });
 
     it('verifies registration page buttons on mobile', () => {
@@ -44,7 +80,7 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.get('.stitch-social-btn.google').should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44);
-            expect(height).to.be.lessThan(56);
+            expect(height).to.be.lessThan(52);
         });
 
         cy.screenshot('button_register_mobile');
@@ -57,7 +93,7 @@ describe('Button Sleekness, Modernity and Mobile Touch Ergonomics', () => {
         cy.get('.hero-section .btn-brand').first().should('be.visible').then(($btn) => {
             const height = $btn.outerHeight();
             expect(height).to.be.at.least(44); // Meets touch target >= 44px
-            expect(height).to.be.lessThan(56); // Sleek and less bulky (not bulky 60px)
+            expect(height).to.be.lessThan(52); // Sleek and less bulky (under 52px)
         });
 
         cy.screenshot('button_landing_mobile');

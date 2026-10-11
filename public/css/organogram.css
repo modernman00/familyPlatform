@@ -1677,9 +1677,52 @@ body[data-page-id="organogram"] .legend-item {
     }
 
     .controls-dock .dock-btn {
-        width: 35px;
-        height: 35px;
-        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
         font-size: 0.95rem;
+        touch-action: manipulation;
+    }
+
+    .header-actions {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .header-actions .btn-action {
+        flex: 1 1 calc(50% - 8px);
+        min-height: 42px;
+        max-height: 46px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+        justify-content: center;
+        white-space: nowrap;
+        touch-action: manipulation;
+    }
+
+    .layout-segmented-control {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        justify-content: center;
+        padding: 4px;
+        gap: 4px;
+        border-radius: 12px;
+    }
+
+    .layout-segment-btn {
+        padding: 6px 10px;
+        font-size: 0.76rem;
+        border-radius: 10px;
+        gap: 4px;
+        touch-action: manipulation;
+    }
+
+    .btn, .button, .btn-action, .filter-pill-btn, .btn-tonal-action {
+        border-radius: 10px;
+        touch-action: manipulation;
     }
 }

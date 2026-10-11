@@ -37,7 +37,7 @@
 
         <!-- 1-Tap WhatsApp Share Button -->
         <div class="mb-3">
-          <a href="#" target="_blank" id="btnShareWhatsApp" class="btn w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold" style="background: #25D366; color: #ffffff; border-radius: 12px; font-size: 1.05rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); text-decoration: none;">
+          <a href="#" target="_blank" id="btnShareWhatsApp" class="btn w-100 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold" style="background: #25D366; color: #ffffff; border-radius: 12px; min-height: 44px; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); text-decoration: none;">
             <i class="bi bi-whatsapp fs-5"></i> Share via WhatsApp
           </a>
         </div>
@@ -52,8 +52,8 @@
         <div class="mb-3">
           <label for="inputShareLink" class="form-label text-muted fw-semibold small mb-1">Your Personal Invite Link</label>
           <div class="input-group">
-            <input type="text" id="inputShareLink" class="form-control" readonly style="background: #f8fafc; font-size: 0.9rem; font-family: monospace;" value="Generating link...">
-            <button class="btn btn-primary px-3 fw-semibold" id="btnCopyShareLink" type="button" style="border-radius: 0 8px 8px 0;">
+            <input type="text" id="inputShareLink" class="form-control" readonly style="background: #f8fafc; font-size: 0.9rem; font-family: monospace; border-radius: 10px 0 0 10px;" value="Generating link...">
+            <button class="btn btn-primary px-3 fw-semibold" id="btnCopyShareLink" type="button" style="border-radius: 0 10px 10px 0; min-height: 38px;">
               <i class="bi bi-clipboard me-1"></i> Copy
             </button>
           </div>
@@ -72,7 +72,7 @@
 
       <!-- Modal Footer -->
       <div class="modal-footer border-0 pt-0 px-4 pb-3">
-        <button type="button" class="btn btn-light w-100 fw-semibold text-secondary" data-bs-dismiss="modal">
+        <button type="button" class="btn btn-light w-100 fw-semibold text-secondary" style="border-radius: 12px; min-height: 42px;" data-bs-dismiss="modal">
           Done
         </button>
       </div>

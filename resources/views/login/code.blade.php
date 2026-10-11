@@ -91,45 +91,65 @@
 
     .stitch-submit {
         width: 100%;
-        background-color: var(--brand-primary, #7b03fc);
+        background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
         color: #ffffff;
         border: none;
-        border-radius: 999px;
-        padding: 13px 16px;
-        font-size: 1rem;
-        font-weight: 700;
+        border-radius: 12px;
+        padding: 0.6rem 1.25rem;
+        min-height: 44px;
+        max-height: 48px;
+        font-size: 0.92rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
         cursor: pointer;
-        transition: background 0.2s, transform 0.2s;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 0.5rem;
-        box-shadow: 0 6px 16px rgba(123, 3, 252, 0.25);
+        box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .stitch-submit:hover {
-        background-color: #6a02da;
+        background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
         transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+    }
+
+    .stitch-submit:active {
+        transform: scale(0.98);
     }
 
     .stitch-paste-btn {
         background: #ffffff;
         border: 1px solid #D1D5DB;
-        border-radius: 999px;
-        padding: 8px 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
+        border-radius: 10px;
+        padding: 6px 16px;
+        min-height: 38px;
+        font-size: 0.82rem;
+        font-weight: 550;
         color: #374151;
         cursor: pointer;
-        transition: all 0.18s ease;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .stitch-paste-btn:hover {
-        border-color: #7b03fc;
-        color: #7b03fc;
+        border-color: var(--brand-primary, #00bfa5);
+        color: var(--brand-primary, #00bfa5);
+        background: #F9FAFB;
+        transform: translateY(-1px);
+    }
+
+    .stitch-paste-btn:active {
+        transform: scale(0.98);
     }
 
     .stitch-link {

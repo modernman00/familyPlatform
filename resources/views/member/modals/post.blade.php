@@ -173,7 +173,7 @@
                     </div>
 
                     <!-- Full-Width Facebook-Style Post Submit Button -->
-                    <button type="button" id="submitPost" name="submit" class="btn btn-primary w-100 py-2 fw-semibold submitPost shadow-sm" style="border-radius: 8px; font-size: 0.95rem;">
+                    <button type="button" id="submitPost" name="submit" class="btn btn-primary w-100 fw-semibold submitPost shadow-sm" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem; letter-spacing: -0.01em;">
                         Post
                     </button>
 

@@ -128,7 +128,7 @@
                     </div>
                 </div>
                 <template x-if="!state.steps?.explore_tree?.done">
-                    <a href="/organogram" 
+                    <a href="/organogram?mode=canvas" 
                        class="btn btn-sm btn-light rounded-pill px-3 fw-bold text-primary shadow-sm"
                        style="font-size: 0.78rem; min-height: 32px;"
                        @click="markStep('explore_tree')">

@@ -9,7 +9,7 @@
     </a>
 
     <!-- Family Tree -->
-    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}" class="pwa-tab-item" data-tab="tree" title="Family Tree">
+    <a href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas" class="pwa-tab-item" data-tab="tree" title="Family Tree">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-diagram-3-fill"></i>
         </div>

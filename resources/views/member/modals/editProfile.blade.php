@@ -152,34 +152,50 @@
             margin-top: 0.75rem;
         }
         #editProfileModal .btn-cancel {
-            border-radius: 50px;
-            padding: 0.55rem 1.25rem;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            min-height: 42px;
+            font-size: 0.88rem;
             font-weight: 600;
             color: var(--text-main, #334155);
             border: 1px solid var(--border-color, #cbd5e1);
             background-color: transparent;
-            transition: all 0.2s;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             flex: 1;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         #editProfileModal .btn-cancel:hover {
             background-color: var(--bg-light, #f1f5f9);
             color: var(--text-main, #0f172a);
+            transform: translateY(-1px);
+        }
+        #editProfileModal .btn-cancel:active {
+            transform: scale(0.98);
         }
         #editProfileModal .btn-save {
-            border-radius: 50px;
-            padding: 0.55rem 1.25rem;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            min-height: 42px;
+            font-size: 0.88rem;
             font-weight: 600;
             color: #ffffff !important;
-            background-color: var(--brand-primary, #00bfa5);
+            background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
             border: none;
-            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22);
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             flex: 1;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         #editProfileModal .btn-save:hover {
-            background-color: var(--brand-secondary, #004182);
+            background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+            box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+            transform: translateY(-1px);
             opacity: 1;
+        }
+        #editProfileModal .btn-save:active {
+            transform: scale(0.98);
         }
         #editProfileModal .btn-close {
             display: none;

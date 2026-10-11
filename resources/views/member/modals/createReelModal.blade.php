@@ -82,8 +82,8 @@
                 </div>
 
                 <div class="modal-footer border-0 px-4 pb-4 pt-1">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fw-bold rounded-pill px-4" id="btnSubmitReel">
+                    <button type="button" class="btn btn-light px-3 py-2 fw-semibold" style="border-radius: 12px; min-height: 42px;" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary fw-semibold px-4 py-2 shadow-sm" style="border-radius: 12px; min-height: 42px;" id="btnSubmitReel">
                         <i class="bi bi-camera-video-fill me-1"></i> Publish Reel
                     </button>
                 </div>

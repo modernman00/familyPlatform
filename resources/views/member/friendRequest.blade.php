@@ -88,31 +88,62 @@
         }
 
         .btn-confirm {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color, #1877f2) 0%, #166fe5 100%);
             color: white;
             flex: 1;
             border: none;
-            border-radius: 6px;
-            padding: 8px 0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            min-height: 42px;
+            font-size: 0.9rem;
             font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 2px 6px rgba(24, 119, 242, 0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-confirm:hover {
-            background-color: #166fe5;
+            background: #166fe5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+        }
+
+        .btn-confirm:active {
+            transform: scale(0.98);
         }
 
         .btn-delete {
-            background-color: #e4e6eb;
-            color: var(--text-color);
+            background-color: #f1f5f9;
+            color: #475569;
             flex: 1;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            min-height: 42px;
+            font-size: 0.9rem;
             font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-delete:hover {
-            background-color: #d8dadf;
+            background-color: #e2e8f0;
+            color: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete:active {
+            transform: scale(0.98);
         }
 
         @media (max-width: 768px) {

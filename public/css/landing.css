@@ -539,12 +539,13 @@ body.dark-theme .back-to-top-btn:hover {
 }
 
 @media (max-width: 768px) {
-    .btn, .button, .stitch-social-btn, .btn-brand, .btn-brand-outline, .btn-gradient, .btn-coral-glow {
+    .btn, .button, .stitch-social-btn, .btn-brand, .btn-brand-outline, .btn-gradient, .btn-coral-glow, .btn-sanctuary-primary {
         min-height: 44px;
         padding: 0.44rem 0.95rem !important;
         font-size: 0.88rem !important;
         border-radius: 10px !important;
         letter-spacing: -0.01em;
+        white-space: nowrap;
     }
 
     .btn-lg, .button.is-large {

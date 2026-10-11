@@ -435,3 +435,44 @@ body {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Mobile Responsive Button Ergonomics */
+@media (max-width: 768px) {
+    .btn-stitch-primary, .btn-stitch-connect {
+        min-height: 42px;
+        max-height: 46px;
+        border-radius: 10px;
+        font-size: 0.84rem;
+        padding: 0.44rem 0.85rem;
+        touch-action: manipulation;
+    }
+
+    .btn-stitch-tonal, .btn-stitch-danger {
+        min-height: 40px;
+        max-height: 44px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+        touch-action: manipulation;
+    }
+
+    .filter-pill-btn {
+        min-height: 38px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        padding: 6px 12px;
+        touch-action: manipulation;
+    }
+
+    .filter-nav-pills {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+    }
+
+    .search-input-stitch {
+        width: 100% !important;
+        min-height: 42px;
+    }
+}

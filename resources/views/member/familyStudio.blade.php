@@ -402,10 +402,10 @@
                     Curate your family dynasty, document generational stories, and manage relatives with complete ease.
                 </p>
                 <div class="d-flex flex-wrap gap-2">
-                    <a href="/organogram" class="btn btn-light fw-bold text-primary px-4 py-2" style="border-radius: var(--stitch-radius-pill); box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <a href="/organogram?mode=canvas" class="btn btn-light fw-bold text-primary px-3 px-sm-4 py-2" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                         <i class="bi bi-diagram-3-fill me-2"></i>View Interactive Tree
                     </a>
-                    <button type="button" class="btn btn-outline-light fw-bold px-4 py-2" onclick="openStudioAddModal()" style="border-radius: var(--stitch-radius-pill);">
+                    <button type="button" class="btn btn-outline-light fw-bold px-3 px-sm-4 py-2" onclick="openStudioAddModal()" style="border-radius: 12px; min-height: 44px; font-size: 0.9rem;">
                         <i class="bi bi-person-plus-fill me-2"></i>Add Family Member
                     </button>
                 </div>

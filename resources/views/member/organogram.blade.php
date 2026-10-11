@@ -626,45 +626,31 @@
         // Render Pedigree Outline if data is present
         renderPedigreeOutline();
 
-        // Check view mode preference on initial load
+        // Check view mode preference on initial load:
+        // Default MUST be Panoramic Dynasty (canvas). Users can manually switch to Pedigree or Direct Lineage.
         try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlMode = (urlParams.get('mode') || urlParams.get('view') || '').toLowerCase();
             const savedMode = localStorage.getItem('fp_tree_view_mode');
-            let shouldAutoDetect = false;
 
-            // Only use saved mode if it's explicitly pedigree or lineage
-            if (savedMode === 'pedigree') {
+            if (urlMode === 'pedigree' || urlMode === 'outline') {
                 switchTreeViewMode('pedigree');
+            } else if (urlMode === 'lineage') {
+                switchTreeViewMode('lineage');
+            } else if (urlMode === 'canvas' || urlMode === 'panoramic') {
+                switchTreeViewMode('canvas');
             } else if (savedMode === 'lineage') {
+                // Preserve user's manual selection of Direct Lineage during their session
                 switchTreeViewMode('lineage');
             } else {
-                // Auto-detect for missing, stale ('canvas'), or unrecognized modes
-                shouldAutoDetect = true;
+                // Always default to Panoramic Dynasty (canvas) when entering the Family Tree.
+                // Overwrite any legacy auto-forced 'pedigree' in localStorage so clicking Family Tree
+                // reliably presents Panoramic Dynasty.
+                switchTreeViewMode('canvas');
             }
-
-            if (shouldAutoDetect) {
-                if (window.innerWidth <= 480) {
-                    // Always use pedigree on mobile
-                    switchTreeViewMode('pedigree');
-                } else if (familyTreeNodes && familyTreeNodes.length > 0) {
-                    const householdNodes = familyTreeNodes.filter(n => !n.fid && !n.mid);
-                    const totalNodes = familyTreeNodes.length;
-
-                    // Detect widest generation (maximum siblings at any level)
-                    const siblingsByParent = {};
-                    familyTreeNodes.forEach(n => {
-                        const parentKey = [n.fid || 'none', n.mid || 'none'].join('-');
-                        siblingsByParent[parentKey] = (siblingsByParent[parentKey] || 0) + 1;
-                    });
-                    const maxSiblingsAtLevel = Math.max(...Object.values(siblingsByParent), 0);
-
-                    // Use Pedigree if: many household members OR many siblings in any generation OR moderate tree size
-                    if (householdNodes.length > 6 || maxSiblingsAtLevel > 7 || totalNodes > 20) {
-                        switchTreeViewMode('pedigree');
-                    }
-                    // Otherwise keep default panoramic (canvas) — no explicit switch needed
-                }
-            }
-        } catch(_) {}
+        } catch(_) {
+            switchTreeViewMode('canvas');
+        }
     });
 
     /* =======================================================

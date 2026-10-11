@@ -89,7 +89,7 @@
     <div class="container text-center py-5">
       <h2 class="fw-bold mb-3">Ready to bring your family closer?</h2>
       <p class="fs-5 mb-4 text-white-50">Join thousands of families who have already made the switch to a better network.</p>
-      <a href="/register" class="btn btn-light btn-lg px-5 fw-bold" style="color: var(--brand-secondary); border-radius: 24px;">Get Started Free</a>
+      <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary); border-radius: 12px;">Get Started Free</a>
     </div>
   </section>
 @endsection

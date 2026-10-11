@@ -6,7 +6,7 @@
                 <span class="text-[10px] font-medium mt-0.5">Home</span>
             </a>
             <a class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
-                href="/organogram/{{$_SESSION['id'] }}">
+                href="/organogram/{{$_SESSION['id'] }}?mode=canvas">
                 <span class="material-icons-round text-2xl">family_restroom</span>
                 <span class="text-[10px] font-medium mt-0.5">Tree</span>
             </a>

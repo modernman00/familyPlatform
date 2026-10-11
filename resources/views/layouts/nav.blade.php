@@ -34,7 +34,7 @@
     </a>
 
     @isset($data)
-      <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button nav-link familyTreeNav w3-hide-small w3-mobile" title="Family Tree">
+      <a href="/organogram?id={{ $data['id'] }}&mode=canvas" class="w3-bar-item w3-button nav-link familyTreeNav w3-hide-small w3-mobile" title="Family Tree">
         <i class="fa fa-tree"></i>
         <span class="nav-link-text">Family Tree</span>
       </a>
@@ -84,7 +84,7 @@
   </a>
   
   @isset($data)
-    <a href="/organogram?id={{ $data['id'] }}" class="w3-bar-item w3-button w3-padding-16">
+    <a href="/organogram?id={{ $data['id'] }}&mode=canvas" class="w3-bar-item w3-button w3-padding-16">
       <i class="fa fa-tree w3-margin-right"></i>Family Tree
     </a>
     

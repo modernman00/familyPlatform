@@ -202,6 +202,18 @@
             transform: translateY(0);
         }
 
+        @media (max-width: 600px) {
+            .cta-btn {
+                padding: 10px 20px;
+                font-size: 14.5px;
+                min-height: 44px;
+                max-height: 48px;
+                width: 100%;
+                justify-content: center;
+                border-radius: 10px;
+            }
+        }
+
         .cta-btn i {
             font-size: 18px;
         }

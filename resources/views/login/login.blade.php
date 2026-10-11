@@ -298,7 +298,7 @@
         </button>
 
         <button type="button" id="btn-passkey-login"
-                style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; color: #4B5563; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 11px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                style="margin-top: 0.75rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #ffffff; color: #374151; border: 1px solid #E5E7EB; border-radius: 12px; min-height: 44px; padding: 0.55rem 1rem; font-size: 0.9rem; font-weight: 550; letter-spacing: -0.01em; cursor: pointer; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
             <svg style="width: 20px; height: 20px; color: var(--brand-primary, #004182);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 00.99 7.132"></path></svg>
             Sign in with Biometrics
         </button>

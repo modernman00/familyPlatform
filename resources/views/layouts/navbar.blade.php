@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <li class="nav-item familyTreeNav">
-                    <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}">
+                    <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas">
                         <i class="bi bi-diagram-3-fill me-1"></i> Family Tree
                     </a>
                 </li>

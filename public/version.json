@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(pwa): harden unread notification count endpoint, universal PWA badging sync and organogram relative management",
+    "title": "Fix(pwa): bridge pending family join approvals into notification bell and pwa badging",
     "notes": [
+        "Fix(pwa): bridge pending family join approvals into notification bell and pwa badging",
         "Feat(pwa): harden unread notification count endpoint, universal PWA badging sync and organogram relative management",
-        "Feat(feed): sync comment reactions and like events in real time via Pusher private channels",
-        "Build(assets): compile production bundles with Laravel Mix"
+        "Feat(feed): sync comment reactions and like events in real time via Pusher private channels"
     ],
     "released_at": "2026-10-11",
-    "commit": "4d021b4"
+    "commit": "5ed0c47"
 }

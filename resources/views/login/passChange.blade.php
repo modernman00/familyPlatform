@@ -104,21 +104,35 @@
         }
 
         .stitch-submit {
-            background-color: var(--brand-primary);
+            background: linear-gradient(135deg, var(--brand-primary, #00bfa5) 0%, var(--brand-primary-dark, #00897b) 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 700;
+            border-radius: 12px;
+            padding: 0.6rem 1.25rem;
+            min-height: 44px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             margin-bottom: 1.25rem;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0, 191, 165, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .stitch-submit:hover {
-            background-color: #004182;
+            background: linear-gradient(135deg, var(--brand-primary-light, #33c9b2) 0%, var(--brand-primary, #00bfa5) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(0, 191, 165, 0.32);
+        }
+
+        .stitch-submit:active {
+            transform: scale(0.98);
         }
 
         .stitch-checkbox-group {
