@@ -85,7 +85,7 @@ const notificationHTML = (data) => {
             <span>${emoji}</span>
         </div>
         
-        <a href="#linkNotification${no}" class="notif-details-link flex-grow-1 text-decoration-none">
+        <a href="${data.action_url || ('#linkNotification' + no)}" class="notif-details-link flex-grow-1 text-decoration-none">
             <h6 class="notif-item-title">${formattedTitle}</h6>
             <p class="notif-item-desc">${notification_content || ''}</p>
             <span class="notif-item-time">${timeAgoStr}</span>

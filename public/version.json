@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): sync comment reactions and like events in real time via Pusher private channels",
+    "title": "Feat(pwa): harden unread notification count endpoint, universal PWA badging sync and organogram relative management",
     "notes": [
+        "Feat(pwa): harden unread notification count endpoint, universal PWA badging sync and organogram relative management",
         "Feat(feed): sync comment reactions and like events in real time via Pusher private channels",
-        "Build(assets): compile production bundles with Laravel Mix",
-        "Fix(router): whitelist KinshipApiController for API key authentication in RouteDispatch"
+        "Build(assets): compile production bundles with Laravel Mix"
     ],
-    "released_at": "2026-10-10",
-    "commit": "df65727"
+    "released_at": "2026-10-11",
+    "commit": "4d021b4"
 }

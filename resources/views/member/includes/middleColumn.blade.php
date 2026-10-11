@@ -71,6 +71,11 @@
         .then(res => res.json())
         .then(data => {
           if (data.success) {
+            const currentNotifCount = Math.max(0, parseInt(sessionStorage.getItem('notificationCount') || '1') - 1);
+            sessionStorage.setItem('notificationCount', currentNotifCount);
+            window.dispatchEvent(new CustomEvent('pwa:badge-updated', { detail: { count: currentNotifCount } }));
+            window.dispatchEvent(new CustomEvent('pwa:notification-received'));
+
             if (card) {
               const actionMsg = action === 'approve' 
                 ? 'Successfully approved! Member has been connected to your family network.' 

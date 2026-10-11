@@ -1002,5 +1002,48 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$secondMemberId]);
         $this->pdo->prepare('DELETE FROM account WHERE id = ?')->execute([$secondMemberId]);
     }
+
+    /**
+     * Test: Pending approval requests are synthesized into notification bell items
+     */
+    public function testPendingApprovalRequestSynthesizedInNotification(): void
+    {
+        $inviterId   = $_SESSION['test_inviter_id'];
+        $familyCode  = $_SESSION['test_family_code'];
+        $requesterId = 'req-' . uniqid();
+
+        // Create a pending approval request with approver_id = NULL
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO family_approval_requests (id, family_code, approver_id, inviter_first_name, inviter_last_name, inviter_email_or_mobile, temporary_code, status, request_expires_at, created_at)
+             VALUES (?, ?, NULL, "Test", "Inviter", "test@test.com", "TEMP999", "pending", DATE_ADD(NOW(), INTERVAL 7 DAY), NOW())'
+        );
+        $stmt->execute([$requesterId, $familyCode]);
+        $reqNo = (int)$this->pdo->lastInsertId();
+
+        // Seed personal record for requester so requesterName is resolved
+        $this->pdo->prepare(
+            'INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, "Abimbola", "Tester", ?)'
+        )->execute([$requesterId, $familyCode]);
+
+        // Query pending approvals via FamilyCodeApprovalService
+        $service = new \App\service\FamilyCodeApprovalService($this->pdo);
+        $approvals = $service->getPendingApprovalsWithDetails($inviterId, $familyCode);
+
+        $this->assertNotEmpty($approvals);
+        $match = null;
+        foreach ($approvals as $a) {
+            if ((int)$a['no'] === $reqNo) {
+                $match = $a;
+                break;
+            }
+        }
+        $this->assertNotNull($match, 'Approval request must be returned in pending approvals for family members');
+        $this->assertSame('Abimbola Tester', $match['requesterName']);
+
+        // Cleanup
+        $this->pdo->prepare('DELETE FROM family_approval_requests WHERE no = ?')->execute([$reqNo]);
+        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$requesterId]);
+    }
 }
+
 

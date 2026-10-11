@@ -51,6 +51,7 @@ final class NotificationController extends Select
                 return null;
             }
 
+            $approvals = self::getPendingApprovalNotifications($userId);
             $receivers = self::sessionReceiverIds($userId);
 
             // Read-only: drop the session lock so this does not block the profile
@@ -63,10 +64,11 @@ final class NotificationController extends Select
                 AND notification_status = ?
                 ORDER BY created_at ASC";
             $result = Select::selectFn2($query, [...$receivers, 'new']);
+            $merged = array_merge($approvals, $result);
 
-            msgSuccess(200, $result);
+            msgSuccess(200, $merged);
 
-            return $result;
+            return $merged;
         } catch (\Throwable $e) {
             showError($e);
             return null;
@@ -86,6 +88,7 @@ final class NotificationController extends Select
                 return;
             }
 
+            $approvals = self::getPendingApprovalNotifications($userId);
             $receivers = self::sessionReceiverIds($userId);
             \releaseSessionLock();
 
@@ -95,17 +98,73 @@ final class NotificationController extends Select
                 AND notification_status = ?
                 ORDER BY created_at ASC";
             $result = Select::selectFn2($query, [...$receivers, 'new']);
-            $count = count($result);
+            $merged = array_merge($approvals, $result);
+            $count = count($merged);
 
             msgSuccess(200, [
                 'status' => 'success',
                 'unread_count' => $count,
                 'count' => $count,
-                'notifications' => $result,
-                'message' => $result
+                'notifications' => $merged,
+                'message' => $merged
             ]);
         } catch (\Throwable $e) {
             msgSuccess(200, ['status' => 'success', 'unread_count' => 0, 'count' => 0, 'message' => []]);
+        }
+    }
+
+    /**
+     * Synthesize notification items for pending family approval requests so
+     * that navbar bell, dropdown, and PWA counters seamlessly reflect them.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function getPendingApprovalNotifications(string $userId): array
+    {
+        try {
+            $famCode = (string)($_SESSION['famCode'] ?? '');
+            if ($famCode === '' && !empty($_SESSION['famCodes']) && is_array($_SESSION['famCodes'])) {
+                $firstCode = reset($_SESSION['famCodes']);
+                if (is_string($firstCode)) {
+                    $famCode = $firstCode;
+                }
+            }
+
+            $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
+            $requests = $approvalService->getPendingApprovalsWithDetails($userId, $famCode !== '' ? $famCode : null);
+
+            $dismissed = isset($_SESSION['dismissed_far']) && is_array($_SESSION['dismissed_far']) 
+                ? $_SESSION['dismissed_far'] 
+                : [];
+            $notifications = [];
+
+            foreach ($requests as $req) {
+                $farNo = 'far_' . ($req['no'] ?? '');
+                if (in_array($farNo, $dismissed, true)) {
+                    continue;
+                }
+
+                $requesterName = (string)($req['requesterName'] ?? 'New Member');
+                $code = (string)($req['family_code'] ?? '');
+
+                $notifications[] = [
+                    'no' => $farNo,
+                    'sender_id' => (string)($req['id'] ?? 'system'),
+                    'sender_name' => $requesterName,
+                    'notification_name' => 'Family Join Request',
+                    'notification_type' => 'Family Request',
+                    'notification_content' => "{$requesterName} wants to join your {$code} family network.",
+                    'notification_status' => 'new',
+                    'notification_date' => (string)($req['created_at'] ?? date('Y-m-d H:i:s')),
+                    'created_at' => (string)($req['created_at'] ?? date('Y-m-d H:i:s')),
+                    'action_url' => '/profilePage#familyJoinReq-' . ($req['no'] ?? ''),
+                ];
+            }
+
+            return $notifications;
+        } catch (\Throwable $e) {
+            error_log('[NotificationController] Failed to get pending approval notifications: ' . $e->getMessage());
+            return [];
         }
     }
 
@@ -154,6 +213,15 @@ final class NotificationController extends Select
 
             $userId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
             if ($userId === '') throw new NotFoundException('Unauthorized');
+
+            if (str_starts_with($no, 'far_')) {
+                if (!isset($_SESSION['dismissed_far']) || !is_array($_SESSION['dismissed_far'])) {
+                    $_SESSION['dismissed_far'] = [];
+                }
+                $_SESSION['dismissed_far'][] = $no;
+                msgSuccess(200, 'Notification marked as read');
+                return;
+            }
 
             // Only dismiss a row the session is actually a recipient of — by
             // user id or by one of its approved family codes.
