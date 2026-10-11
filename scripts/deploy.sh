@@ -296,7 +296,7 @@ if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
         if [ -n "${CYPRESS_BASE_URL:-}" ]; then
             E2E_TARGET="$CYPRESS_BASE_URL"
         elif [ -f "cypress.config.js" ]; then
-            E2E_TARGET=$(grep -E "baseUrl:\s*['\"][^'\"]+['\"]" cypress.config.js | sed -E "s/.*baseUrl:\s*['\"]([^'\"]+)['\"].*/\1/" | head -1)
+            E2E_TARGET=$(grep -E "baseUrl:[[:space:]]*['\"][^'\"]+['\"]" cypress.config.js | sed -E "s/.*baseUrl:[[:space:]]*['\"]([^'\"]+)['\"].*/\1/" | head -1)
         elif [ -f "cypress.json" ]; then
             E2E_TARGET=$(grep -E '"baseUrl":\s*"[^"]+"' cypress.json | sed -E 's/.*"baseUrl":\s*"([^"]+)".*/\1/' | head -1)
         fi
