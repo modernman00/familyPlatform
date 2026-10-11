@@ -65,6 +65,14 @@
                 <i class="bi bi-list-nested text-success"></i>
                 <span>Pedigree Outline</span>
             </button>
+            <button type="button" id="btnModeFanChart" class="layout-segment-btn" onclick="switchTreeViewMode('fanchart')" title="Radial 360° Fan: Concentric pedigree wheel with color-coded ancestral quadrants">
+                <i class="bi bi-pie-chart-fill text-warning"></i>
+                <span>Radial 360° Fan</span>
+            </button>
+            <button type="button" id="btnModeGlobe" class="layout-segment-btn" onclick="switchTreeViewMode('globe')" title="3D Dynasty Globe: Spatial migration & global diaspora across continents">
+                <i class="bi bi-globe-americas text-info"></i>
+                <span>Dynasty Globe</span>
+            </button>
         </div>
     </div>
 
@@ -219,6 +227,38 @@
                         </div>
                     </div>
 
+                    <!-- Living Voice Capsule Section -->
+                    <div id="cardVoiceCapsuleSection" style="margin-top: 14px; padding: 12px; border-radius: 14px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-mic-fill text-warning fs-6"></i>
+                                <span class="fw-bold text-white" style="font-size: 0.82rem; letter-spacing: 0.02em;">LIVING VOICE CAPSULE</span>
+                            </div>
+                            <span id="voiceCapsuleStatusBadge" class="badge" style="font-size: 0.7rem; background: rgba(255,255,255,0.1); color: #cbd5e1;">None</span>
+                        </div>
+                        
+                        <!-- When audio capsule is present -->
+                        <div id="cardVoicePlayerWrapper" style="display: none;">
+                            <audio id="cardVoiceAudio" controls preload="none" style="width: 100%; height: 32px; border-radius: 8px; margin-bottom: 6px;"></audio>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn-action w-100" onclick="openVoiceCapsuleModal(window.selectedNodeId)" style="font-size: 0.75rem; padding: 4px 8px; background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: #fbbf24;">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Replace Voice
+                                </button>
+                                <button type="button" class="btn-action" onclick="deleteVoiceCapsule(window.selectedNodeId)" style="font-size: 0.75rem; padding: 4px 8px; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;" title="Delete Voice Capsule">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- When audio capsule is not yet recorded -->
+                        <div id="cardVoiceEmptyWrapper">
+                            <p class="text-white-50 mb-2" style="font-size: 0.75rem; line-height: 1.3;">Preserve spoken memories, laughter, and family oral history for eternity.</p>
+                            <button type="button" class="btn-action w-100" onclick="openVoiceCapsuleModal(window.selectedNodeId)" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.4)); border-color: rgba(245, 158, 11, 0.6); color: #fef3c7; font-weight: 700; font-size: 0.78rem; padding: 6px 12px; justify-content: center;">
+                                <i class="bi bi-mic-fill text-warning me-1"></i> Record / Upload Voice Capsule
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Navigation Actions inside card -->
                     <div class="card-actions">
                         <div style="display: flex; gap: 8px;">
@@ -240,6 +280,29 @@
 
                 <!-- Tree SVG Container -->
                 <div id="tree"></div>
+
+                <!-- Mode 1 Enhancement: Generational Time Slider (Chronological Dynasty Flow) -->
+                <div id="timeSliderDock" style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 32; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 999px; padding: 10px 22px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; align-items: center; gap: 14px; max-width: 90vw;">
+                    <button type="button" id="btnPlayTimeSlider" onclick="toggleTimeSliderPlay()" class="btn btn-sm btn-gold d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border-radius: 50%; padding: 0;" title="Play Dynasty Chronology">
+                        <i class="bi bi-play-fill fs-5" id="timeSliderPlayIcon"></i>
+                    </button>
+                    <div class="d-flex flex-column" style="min-width: 180px;">
+                        <div class="d-flex justify-content-between text-white" style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+                            <span id="timeSliderLabel">ALL GENERATIONS</span>
+                            <span class="text-warning" id="timeSliderEra">Present Era</span>
+                        </div>
+                        <input type="range" class="form-range custom-gold-range" id="dynastyTimeSlider" min="-3" max="2" step="1" value="2" oninput="onTimeSliderChange(this.value)" style="cursor: pointer; height: 6px;">
+                        <div class="d-flex justify-content-between text-white-50" style="font-size: 0.65rem; margin-top: -3px;">
+                            <span>Great-Grands</span>
+                            <span>Parents</span>
+                            <span>You</span>
+                            <span>Grandchildren</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill py-0 px-2" onclick="resetTimeSlider()" style="font-size: 0.7rem; height: 26px;" title="Reset to Full Dynasty View">
+                        Reset
+                    </button>
+                </div>
 
                 <!-- Floating Controls Dock (Kinship Controls) -->
                 <div class="controls-dock">
@@ -271,6 +334,95 @@
         <!-- Mode 2: Pedigree Outline Container (Thumb-First Mobile Mode) -->
         <div class="pedigree-outline-container d-none" id="pedigreeOutlineContainer">
             <!-- Dynamically populated via JS from graphData -->
+        </div>
+
+        <!-- Mode 3: Radial 360° Fan Chart Container (Concentric Pedigree Wheel) -->
+        <div class="fan-chart-wrapper d-none position-relative" id="fanChartContainer" style="min-height: 720px; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <div>
+                    <h4 class="text-white fw-bold mb-1"><i class="bi bi-pie-chart-fill text-warning me-2"></i>360° Radial Ahnentafel Fan Chart</h4>
+                    <p class="text-white-50 mb-0" style="font-size: 0.85rem;">Concentric ancestral wheel mapping 4 generations of direct pedigree by maternal & paternal lineage quadrants.</p>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-light active" id="btnFanSpan360" onclick="setFanChartSpan(360)">360° Full Wheel</button>
+                        <button type="button" class="btn btn-outline-light" id="btnFanSpan180" onclick="setFanChartSpan(180)">180° Half Arc</button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-warning" onclick="resetFanChartZoom()" title="Reset Fan Zoom">
+                        <i class="bi bi-arrows-angle-contract"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quadrant Color Legend -->
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-3 p-2 rounded-pill" style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); width: fit-content; margin: 0 auto; font-size: 0.8rem;">
+                <div class="d-flex align-items-center gap-1 text-white">
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #3b82f6; display: inline-block;"></span>
+                    <span>Paternal Grandfather</span>
+                </div>
+                <div class="d-flex align-items-center gap-1 text-white">
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #60a5fa; display: inline-block;"></span>
+                    <span>Paternal Grandmother</span>
+                </div>
+                <div class="d-flex align-items-center gap-1 text-white">
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #ec4899; display: inline-block;"></span>
+                    <span>Maternal Grandfather</span>
+                </div>
+                <div class="d-flex align-items-center gap-1 text-white">
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #f472b6; display: inline-block;"></span>
+                    <span>Maternal Grandmother</span>
+                </div>
+                <div class="d-flex align-items-center gap-1 text-white">
+                    <span style="width: 12px; height: 12px; border-radius: 3px; background: #f59e0b; display: inline-block;"></span>
+                    <span>Focal Person (Ego)</span>
+                </div>
+            </div>
+
+            <!-- Interactive SVG Canvas for Fan Wheel -->
+            <div id="fanChartSvgContainer" style="width: 100%; height: 600px; display: flex; align-items: center; justify-content: center; position: relative; cursor: grab;">
+                <!-- SVG dynamically injected by renderRadialFanChart() -->
+            </div>
+        </div>
+
+        <!-- Mode 4: 3D Dynasty Migration Globe Container (Spatial Lineage & Diaspora) -->
+        <div class="dynasty-globe-wrapper d-none position-relative" id="dynastyGlobeContainer" style="min-height: 720px; background: radial-gradient(circle at center, #090d16 0%, #030712 100%); border-radius: 24px; padding: 24px; box-shadow: 0 20px 48px rgba(0,0,0,0.5); border: 1px solid rgba(59, 130, 246, 0.25); overflow: hidden;">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <div>
+                    <h4 class="text-white fw-bold mb-1"><i class="bi bi-globe-americas text-info me-2"></i>3D Dynasty Migration Globe</h4>
+                    <p class="text-white-50 mb-0" style="font-size: 0.85rem;">Spatial visualization of ancestral birthplaces, migration trajectories, and living diaspora across the world.</p>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-info" id="btnToggleGlobeRotation" onclick="toggleGlobeAutoRotation()">
+                        <i class="bi bi-arrow-repeat me-1" id="globeRotationIcon"></i> Pause Rotation
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="resetGlobeView()">
+                        <i class="bi bi-compass"></i> Reset View
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4 align-items-center">
+                <!-- 3D Canvas Container -->
+                <div class="col-lg-8 position-relative text-center">
+                    <canvas id="dynastyGlobeCanvas" width="600" height="520" style="max-width: 100%; width: 560px; height: 500px; border-radius: 20px; cursor: grab; background: transparent;"></canvas>
+                    <div class="position-absolute bottom-0 start-50 translate-middle-x pb-2 text-white-50 small">
+                        <i class="bi bi-hand-index-thumb me-1"></i> Drag to spin globe • Scroll to zoom • Click hubs for relatives
+                    </div>
+                </div>
+
+                <!-- Living Diaspora Hubs Card -->
+                <div class="col-lg-4">
+                    <div class="p-3 rounded-4" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px);">
+                        <h6 class="text-white fw-bold mb-3 d-flex align-items-center justify-content-between">
+                            <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> Global Dynasty Hubs</span>
+                            <span class="badge bg-primary rounded-pill" id="globeHubCount">0 Cities</span>
+                        </h6>
+                        <div id="globeHubsList" style="max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Legend (Canvas mode) -->
@@ -369,6 +521,85 @@
                                 Close
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Living Voice Capsule Recording & Upload Modal -->
+        <div class="modal fade" id="voiceCapsuleModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a; color: #ffffff; border: 1px solid rgba(245, 158, 11, 0.3);">
+                    <div class="modal-header border-bottom border-secondary py-3 px-4" style="background: rgba(15, 23, 42, 0.95);">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
+                                <i class="bi bi-mic-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-white mb-0 fs-6">Living Voice Capsule</h5>
+                                <small class="text-white-50" id="voiceCapsuleTargetName">Preserve spoken heritage for this member</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Navigation Tabs: Record vs Upload -->
+                        <ul class="nav nav-pills nav-fill mb-3 p-1 rounded-pill" style="background: rgba(255,255,255,0.06);" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active rounded-pill text-white py-1" id="tabVoiceRecord" data-bs-toggle="pill" data-bs-target="#panelVoiceRecord" type="button" role="tab" style="font-size: 0.82rem; font-weight: 600;">
+                                    <i class="bi bi-record-circle me-1 text-danger"></i> Record Mic
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link rounded-pill text-white py-1" id="tabVoiceUpload" data-bs-toggle="pill" data-bs-target="#panelVoiceUpload" type="button" role="tab" style="font-size: 0.82rem; font-weight: 600;">
+                                    <i class="bi bi-upload me-1 text-info"></i> Upload File
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- Tab 1: Live In-Browser Mic Recording -->
+                            <div class="tab-pane fade show active text-center" id="panelVoiceRecord" role="tabpanel">
+                                <div class="py-3">
+                                    <div id="micRecordPulse" class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 90px; height: 90px; background: rgba(239, 68, 68, 0.15); border: 2px dashed rgba(239, 68, 68, 0.5); transition: all 0.3s ease;">
+                                        <i class="bi bi-mic-fill fs-1 text-danger" id="micRecordIcon"></i>
+                                    </div>
+                                    <div class="fw-bold fs-4 mb-1" id="recordTimer">00:00</div>
+                                    <p class="text-white-50 small mb-3" id="recordInstructions">Click "Start Recording" to capture voice memories directly in your browser.</p>
+
+                                    <!-- Recorded Preview Player -->
+                                    <div id="recordedPreviewSection" class="d-none mb-3">
+                                        <audio id="recordedAudioPreview" controls style="width: 100%; height: 36px; border-radius: 8px;"></audio>
+                                    </div>
+
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button type="button" id="btnStartRecord" onclick="startVoiceRecording()" class="btn btn-danger px-4 py-2 fw-bold" style="border-radius: 50px;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.65rem;"></i> Start Recording
+                                        </button>
+                                        <button type="button" id="btnStopRecord" onclick="stopVoiceRecording()" class="btn btn-warning px-4 py-2 fw-bold d-none" style="border-radius: 50px;">
+                                            <i class="bi bi-stop-fill me-1"></i> Stop Recording
+                                        </button>
+                                        <button type="button" id="btnSaveRecord" onclick="saveRecordedVoiceCapsule()" class="btn btn-success px-4 py-2 fw-bold d-none" style="border-radius: 50px;">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Save to Tree
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2: Audio File Upload -->
+                            <div class="tab-pane fade" id="panelVoiceUpload" role="tabpanel">
+                                <form id="voiceUploadForm" onsubmit="handleVoiceFileUpload(event)" class="py-2">
+                                    <div class="mb-3">
+                                        <label for="voiceAudioFile" class="form-label text-white-50 small mb-1">Select Audio File (MP3, WAV, OGG, M4A, WEBM - max 10MB)</label>
+                                        <input type="file" class="form-control" id="voiceAudioFile" name="audio" accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm" required style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: white;">
+                                    </div>
+                                    <button type="submit" id="btnUploadVoiceFile" class="btn btn-gold w-100 fw-bold py-2" style="border-radius: 12px;">
+                                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload & Attach Voice Capsule
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="voiceCapsuleAlert" class="alert d-none mt-3 mb-0 small" role="alert"></div>
                     </div>
                 </div>
             </div>
@@ -493,7 +724,9 @@
                     title: node.ego_relation || node.bio || 'Family Member',
                     ego_relation: node.ego_relation || '',
                     legacyId: node.user_id,
-                    generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined
+                    generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined,
+                    voice_capsule_url: node.voice_capsule_url || null,
+                    raw: node
                 });
             });
         }
@@ -680,15 +913,55 @@
     window.switchTreeViewMode = function(mode) {
         const canvasContainer = document.getElementById('treeContainer');
         const pedigreeContainer = document.getElementById('pedigreeOutlineContainer');
+        const fanChartContainer = document.getElementById('fanChartContainer');
+        const globeContainer = document.getElementById('dynastyGlobeContainer');
         const legend = document.getElementById('familyLegend');
         const btnCanvas = document.getElementById('btnModeCanvas');
         const btnLineage = document.getElementById('btnModeLineage');
         const btnPedigree = document.getElementById('btnModePedigree');
+        const btnFanChart = document.getElementById('btnModeFanChart');
+        const btnGlobe = document.getElementById('btnModeGlobe');
 
         window.trackTreeAnalytics('tree_view_mode_switched', null, { mode: mode });
 
-        if (mode === 'pedigree') {
+        if (mode === 'globe') {
             if (canvasContainer) canvasContainer.classList.add('d-none');
+            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+            if (fanChartContainer) fanChartContainer.classList.add('d-none');
+            if (legend) legend.classList.add('d-none');
+            if (globeContainer) {
+                globeContainer.classList.remove('d-none');
+                if (typeof window.initDynastyGlobe === 'function') {
+                    window.initDynastyGlobe();
+                }
+            }
+            if (btnCanvas) btnCanvas.classList.remove('active');
+            if (btnLineage) btnLineage.classList.remove('active');
+            if (btnPedigree) btnPedigree.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.add('active');
+            try { localStorage.setItem('fp_tree_view_mode', 'globe'); } catch(_) {}
+        } else if (mode === 'fanchart') {
+            if (canvasContainer) canvasContainer.classList.add('d-none');
+            if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+            if (globeContainer) globeContainer.classList.add('d-none');
+            if (legend) legend.classList.add('d-none');
+            if (fanChartContainer) {
+                fanChartContainer.classList.remove('d-none');
+                if (typeof window.renderRadialFanChart === 'function') {
+                    window.renderRadialFanChart();
+                }
+            }
+            if (btnCanvas) btnCanvas.classList.remove('active');
+            if (btnLineage) btnLineage.classList.remove('active');
+            if (btnPedigree) btnPedigree.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.add('active');
+            try { localStorage.setItem('fp_tree_view_mode', 'fanchart'); } catch(_) {}
+        } else if (mode === 'pedigree') {
+            if (canvasContainer) canvasContainer.classList.add('d-none');
+            if (fanChartContainer) fanChartContainer.classList.add('d-none');
+            if (globeContainer) globeContainer.classList.add('d-none');
             if (legend) legend.classList.add('d-none');
             if (pedigreeContainer) {
                 pedigreeContainer.classList.remove('d-none');
@@ -696,10 +969,14 @@
             }
             if (btnCanvas) btnCanvas.classList.remove('active');
             if (btnLineage) btnLineage.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnPedigree) btnPedigree.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'pedigree'); } catch(_) {}
         } else if (mode === 'lineage') {
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+            if (fanChartContainer) fanChartContainer.classList.add('d-none');
+            if (globeContainer) globeContainer.classList.add('d-none');
             if (canvasContainer) {
                 canvasContainer.classList.remove('d-none');
                 if (window.family && typeof window.family.traceLineage === 'function') {
@@ -711,12 +988,16 @@
             }
             if (legend) legend.classList.remove('d-none');
             if (btnPedigree) btnPedigree.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnCanvas) btnCanvas.classList.remove('active');
             if (btnLineage) btnLineage.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'lineage'); } catch(_) {}
         } else {
             if (typeof window.clearLineageTrace === 'function') window.clearLineageTrace();
             if (pedigreeContainer) pedigreeContainer.classList.add('d-none');
+            if (fanChartContainer) fanChartContainer.classList.add('d-none');
+            if (globeContainer) globeContainer.classList.add('d-none');
             if (canvasContainer) {
                 canvasContainer.classList.remove('d-none');
                 if (window.family) {
@@ -725,6 +1006,8 @@
             }
             if (legend) legend.classList.remove('d-none');
             if (btnPedigree) btnPedigree.classList.remove('active');
+            if (btnFanChart) btnFanChart.classList.remove('active');
+            if (btnGlobe) btnGlobe.classList.remove('active');
             if (btnLineage) btnLineage.classList.remove('active');
             if (btnCanvas) btnCanvas.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'canvas'); } catch(_) {}
@@ -827,11 +1110,14 @@
                         const inviteLink = data.invite_url;
                         currentInviteLink = inviteLink;
 
+                        const relativeRole = node.title || node.ego_relation || 'Family Relative';
                         const inviteMessage = encodeURIComponent(
-                            `🌳 *Family Tree Invitation* 🌳\n\n` +
-                            `You are invited to connect with the *${familyCode} Family* on FamilyPlatform.\n\n` +
-                            `Click below to claim your spot, explore our lineage, and connect with the family:\n` +
-                            `👉 ${inviteLink}`
+                            `🌳 *Family Heritage Invitation for ${cleanName}* 🌳\n\n` +
+                            `Hello ${cleanName},\n\n` +
+                            `You have been honored as our *${relativeRole}* in the *${familyCode} Dynasty Family Tree* on FamilyPlatform.\n\n` +
+                            `✨ Claim your spot on the live family tree, share photos, record your living voice capsule, and preserve our ancestral heritage:\n\n` +
+                            `👉 ${inviteLink}\n\n` +
+                            `Welcome to our living family legacy!`
                         );
 
                         const whatsappBtn = document.getElementById('cardWhatsappBtn');
@@ -846,6 +1132,39 @@
                     console.error('[organogram] invite token generation error:', err);
                 });
             }
+        }
+
+        // Living Voice Capsule synchronization
+        const voiceSection = document.getElementById('cardVoiceCapsuleSection');
+        const voiceBadge = document.getElementById('voiceCapsuleStatusBadge');
+        const voicePlayerWrapper = document.getElementById('cardVoicePlayerWrapper');
+        const voiceEmptyWrapper = document.getElementById('cardVoiceEmptyWrapper');
+        const voiceAudio = document.getElementById('cardVoiceAudio');
+
+        const voiceUrl = node.voice_capsule_url || (node.raw ? node.raw.voice_capsule_url : null);
+        if (voiceUrl) {
+            if (voiceBadge) {
+                voiceBadge.className = 'badge bg-warning text-dark';
+                voiceBadge.innerHTML = '<i class="bi bi-soundwave me-1"></i> Recorded';
+            }
+            if (voiceAudio) {
+                voiceAudio.src = voiceUrl;
+            }
+            if (voicePlayerWrapper) voicePlayerWrapper.style.display = 'block';
+            if (voiceEmptyWrapper) voiceEmptyWrapper.style.display = 'none';
+        } else {
+            if (voiceBadge) {
+                voiceBadge.className = 'badge';
+                voiceBadge.style.background = 'rgba(255,255,255,0.1)';
+                voiceBadge.style.color = '#cbd5e1';
+                voiceBadge.textContent = 'None';
+            }
+            if (voiceAudio) {
+                voiceAudio.pause();
+                voiceAudio.removeAttribute('src');
+            }
+            if (voicePlayerWrapper) voicePlayerWrapper.style.display = 'none';
+            if (voiceEmptyWrapper) voiceEmptyWrapper.style.display = 'block';
         }
 
         const isRootUser = (String(node.legacyId) === String(window.__ROOT_USER_ID__)) || 
@@ -1845,5 +2164,1009 @@
             });
         }
     });
+
+    /* =======================================================
+       RADIAL 360° AHNENTAFEL FAN CHART ENGINE
+       ======================================================= */
+    window.fanChartState = {
+        spanAngle: 360,
+        zoom: 1.0,
+        panX: 0,
+        panY: 0,
+        isPanning: false,
+        startX: 0,
+        startY: 0
+    };
+
+    window.setFanChartSpan = function(angle) {
+        window.fanChartState.spanAngle = angle;
+        const btn360 = document.getElementById('btnFanSpan360');
+        const btn180 = document.getElementById('btnFanSpan180');
+        if (angle === 360) {
+            btn360?.classList.add('active');
+            btn180?.classList.remove('active');
+        } else {
+            btn180?.classList.add('active');
+            btn360?.classList.remove('active');
+        }
+        window.renderRadialFanChart();
+    };
+
+    window.resetFanChartZoom = function() {
+        window.fanChartState.zoom = 1.0;
+        window.fanChartState.panX = 0;
+        window.fanChartState.panY = 0;
+        window.renderRadialFanChart();
+    };
+
+    window.renderRadialFanChart = function() {
+        const container = document.getElementById('fanChartSvgContainer');
+        if (!container) return;
+
+        const ahnentafel = (window.graphData && window.graphData.ahnentafel) ? window.graphData.ahnentafel : null;
+        if (!ahnentafel) {
+            container.innerHTML = '<div class="text-white-50 p-4 text-center">Radial fan chart requires ancestral pedigree links. Build lineage in Panoramic Dynasty first.</div>';
+            return;
+        }
+
+        const width = container.clientWidth || 800;
+        const height = container.clientHeight || 600;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        const spanAngle = window.fanChartState.spanAngle || 360;
+        const isSemiCircle = (spanAngle === 180);
+
+        // Radii configuration for 4 generations:
+        // Gen 0 (Ego): Center circle
+        // Gen 1 (Parents): Ring 1
+        // Gen 2 (Grandparents): Ring 2
+        // Gen 3 (Great-Grandparents): Ring 3
+        const r0 = 55;
+        const ringStep = 75;
+        const maxR = r0 + ringStep * 3;
+
+        const colors = {
+            ego: '#f59e0b',
+            paternal_gf: '#3b82f6',
+            paternal_gm: '#60a5fa',
+            maternal_gf: '#ec4899',
+            maternal_gm: '#f472b6'
+        };
+
+        const polarToCart = (r, deg) => {
+            const rad = (deg - 90) * Math.PI / 180.0;
+            return {
+                x: cx + (r * Math.cos(rad)),
+                y: cy + (r * Math.sin(rad))
+            };
+        };
+
+        const makeArcD = (innerR, outerR, startAngle, endAngle) => {
+            const startOuter = polarToCart(outerR, startAngle);
+            const endOuter = polarToCart(outerR, endAngle);
+            const startInner = polarToCart(innerR, endAngle);
+            const endInner = polarToCart(innerR, startAngle);
+
+            const arcSweep = (endAngle - startAngle <= 180) ? 0 : 1;
+
+            return [
+                `M ${startOuter.x} ${startOuter.y}`,
+                `A ${outerR} ${outerR} 0 ${arcSweep} 1 ${endOuter.x} ${endOuter.y}`,
+                `L ${startInner.x} ${startInner.y}`,
+                `A ${innerR} ${innerR} 0 ${arcSweep} 0 ${endInner.x} ${endInner.y}`,
+                'Z'
+            ].join(' ');
+        };
+
+        let svgHtml = `<svg id="fanChartSvg" width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="overflow: visible; user-select: none;">`;
+        svgHtml += `<g transform="translate(${window.fanChartState.panX}, ${window.fanChartState.panY}) scale(${window.fanChartState.zoom})" style="transform-origin: ${cx}px ${cy}px; transition: transform 0.15s ease-out;">`;
+
+        // Render generation wedges:
+        // Generation 0: Ego (Center Circle)
+        const egoSlot = ahnentafel[1] || null;
+        const egoNode = egoSlot ? egoSlot.node : null;
+        const egoName = egoNode ? (egoNode.full_name || egoNode.first_name || 'You') : 'You';
+        const egoColor = colors.ego;
+
+        svgHtml += `
+            <g class="fan-wedge ego-wedge" style="cursor: pointer;" onclick="onFanWedgeClick('1')">
+                <circle cx="${cx}" cy="${cy}" r="${r0}" fill="${egoColor}" stroke="#ffffff" stroke-width="2.5" opacity="0.95" filter="drop-shadow(0px 4px 10px rgba(0,0,0,0.5))"/>
+                <text x="${cx}" y="${cy - 8}" text-anchor="middle" fill="#0f172a" font-weight="800" font-size="12" font-family="Plus Jakarta Sans, sans-serif">${egoName.split(' ')[0]}</text>
+                <text x="${cx}" y="${cy + 8}" text-anchor="middle" fill="#0f172a" font-weight="700" font-size="10" font-family="Plus Jakarta Sans, sans-serif">${egoName.split(' ').slice(1).join(' ')}</text>
+                <text x="${cx}" y="${cy + 22}" text-anchor="middle" fill="#1e293b" font-weight="600" font-size="8.5" font-family="Plus Jakarta Sans, sans-serif">Focal Person</text>
+            </g>
+        `;
+
+        // Generations 1, 2, 3
+        const baseAngle = isSemiCircle ? -90 : 0;
+        const totalSpan = isSemiCircle ? 180 : 360;
+
+        for (let gen = 1; gen <= 3; gen++) {
+            const slotsInGen = Math.pow(2, gen);
+            const startSlot = Math.pow(2, gen);
+            const endSlot = startSlot + slotsInGen - 1;
+            const wedgeSpan = totalSpan / slotsInGen;
+
+            const innerR = r0 + (gen - 1) * ringStep;
+            const outerR = innerR + ringStep;
+
+            for (let slot = startSlot; slot <= endSlot; slot++) {
+                const slotIdx = slot - startSlot;
+                const startDeg = baseAngle + slotIdx * wedgeSpan;
+                const endDeg = startDeg + wedgeSpan;
+                const midDeg = (startDeg + endDeg) / 2;
+
+                const slotData = ahnentafel[slot] || null;
+                const node = slotData ? slotData.node : null;
+                const quad = slotData ? slotData.quadrant : 'paternal_gf';
+                const fillColor = colors[quad] || '#64748b';
+                const opacity = node ? '0.9' : '0.25';
+
+                const pathD = makeArcD(innerR, outerR, startDeg, endDeg);
+                const textPos = polarToCart((innerR + outerR) / 2, midDeg);
+
+                const displayName = node ? (node.full_name || node.first_name || 'Relative') : 'Empty';
+                const parts = displayName.split(' ');
+                const l1 = parts[0] || '';
+                const l2 = parts.slice(1).join(' ') || '';
+
+                // Rotated text for radial legibility
+                let rotAngle = midDeg;
+                if (rotAngle > 90 && rotAngle < 270) {
+                    rotAngle += 180;
+                }
+
+                svgHtml += `
+                    <g class="fan-wedge" style="cursor: pointer;" onclick="onFanWedgeClick('${slot}')">
+                        <path d="${pathD}" fill="${fillColor}" fill-opacity="${opacity}" stroke="#0f172a" stroke-width="2" class="fan-arc-path" />
+                        <g transform="translate(${textPos.x}, ${textPos.y}) rotate(${rotAngle})">
+                            <text x="0" y="-3" text-anchor="middle" fill="#ffffff" font-weight="700" font-size="${gen === 3 ? '8.5' : '10.5'}" font-family="Plus Jakarta Sans, sans-serif">${l1}</text>
+                            ${l2 ? `<text x="0" y="8" text-anchor="middle" fill="#e2e8f0" font-weight="600" font-size="${gen === 3 ? '7.5' : '9'}" font-family="Plus Jakarta Sans, sans-serif">${l2}</text>` : ''}
+                        </g>
+                    </g>
+                `;
+            }
+        }
+
+        svgHtml += `</g></svg>`;
+        container.innerHTML = svgHtml;
+
+        // Attach smooth zoom & pan drag listeners
+        const svgEl = document.getElementById('fanChartSvg');
+        if (svgEl) {
+            svgEl.onwheel = function(e) {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                window.fanChartState.zoom = Math.max(0.4, Math.min(3.0, window.fanChartState.zoom * delta));
+                window.renderRadialFanChart();
+            };
+
+            svgEl.onmousedown = function(e) {
+                window.fanChartState.isPanning = true;
+                window.fanChartState.startX = e.clientX - window.fanChartState.panX;
+                window.fanChartState.startY = e.clientY - window.fanChartState.panY;
+                svgEl.style.cursor = 'grabbing';
+            };
+
+            window.onmousemove = function(e) {
+                if (!window.fanChartState.isPanning) return;
+                window.fanChartState.panX = e.clientX - window.fanChartState.startX;
+                window.fanChartState.panY = e.clientY - window.fanChartState.startY;
+                const group = svgEl.querySelector('g');
+                if (group) {
+                    group.setAttribute('transform', `translate(${window.fanChartState.panX}, ${window.fanChartState.panY}) scale(${window.fanChartState.zoom})`);
+                }
+            };
+
+            window.onmouseup = function() {
+                if (window.fanChartState.isPanning) {
+                    window.fanChartState.isPanning = false;
+                    if (svgEl) svgEl.style.cursor = 'grab';
+                }
+            };
+        }
+    };
+
+    window.onFanWedgeClick = function(slotNumber) {
+        const ahnentafel = (window.graphData && window.graphData.ahnentafel) ? window.graphData.ahnentafel : null;
+        if (!ahnentafel) return;
+
+        const slot = ahnentafel[slotNumber] || null;
+        if (!slot) return;
+
+        if (slot.node) {
+            const rawNode = slot.node;
+            const treeNode = (window.familyTreeNodes || []).find(n => String(n.id) === String(rawNode.id));
+            if (typeof window.openPersonCard === 'function') {
+                window.openPersonCard(treeNode || rawNode);
+            }
+        } else {
+            // Empty ancestral slot -> prompt to add ancestor
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Empty Ancestral Slot',
+                    text: `Ahnentafel slot #${slotNumber} is currently vacant. Switch to Panoramic Dynasty to add your parent or ancestor.`,
+                    icon: 'info',
+                    confirmButtonText: 'Switch to Tree'
+                }).then((r) => {
+                    if (r.isConfirmed) {
+                        window.switchTreeViewMode('canvas');
+                    }
+                });
+            }
+        }
+    };
+
+    /* =======================================================
+       LIVING VOICE CAPSULE RECORDING & UPLOAD HANDLERS
+       ======================================================= */
+    window.voiceRecorderState = {
+        mediaRecorder: null,
+        audioChunks: [],
+        recordedBlob: null,
+        stream: null,
+        timerInterval: null,
+        recordSeconds: 0,
+        targetNodeId: null
+    };
+
+    window.openVoiceCapsuleModal = function(nodeId) {
+        if (!nodeId) return;
+        window.voiceRecorderState.targetNodeId = String(nodeId);
+
+        const node = (window.familyTreeNodes || []).find(n => String(n.id) === String(nodeId));
+        const nameEl = document.getElementById('voiceCapsuleTargetName');
+        if (nameEl) {
+            nameEl.textContent = `Preserving voice for: ${node ? node.name : 'Family Relative'}`;
+        }
+
+        // Reset recorder UI
+        const btnStart = document.getElementById('btnStartRecord');
+        const btnStop = document.getElementById('btnStopRecord');
+        const btnSave = document.getElementById('btnSaveRecord');
+        const timerEl = document.getElementById('recordTimer');
+        const previewSec = document.getElementById('recordedPreviewSection');
+        const alertEl = document.getElementById('voiceCapsuleAlert');
+
+        if (btnStart) btnStart.classList.remove('d-none');
+        if (btnStop) btnStop.classList.add('d-none');
+        if (btnSave) btnSave.classList.add('d-none');
+        if (timerEl) timerEl.textContent = '00:00';
+        if (previewSec) previewSec.classList.add('d-none');
+        if (alertEl) alertEl.classList.add('d-none');
+
+        const modalEl = document.getElementById('voiceCapsuleModal');
+        if (modalEl) {
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+        }
+    };
+
+    window.startVoiceRecording = function() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Audio recording is not supported in this browser. Please upload an audio file instead.');
+            return;
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                window.voiceRecorderState.stream = stream;
+                window.voiceRecorderState.audioChunks = [];
+                window.voiceRecorderState.recordedBlob = null;
+                window.voiceRecorderState.recordSeconds = 0;
+
+                const mediaRecorder = new MediaRecorder(stream);
+                window.voiceRecorderState.mediaRecorder = mediaRecorder;
+
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) {
+                        window.voiceRecorderState.audioChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(window.voiceRecorderState.audioChunks, { type: 'audio/webm' });
+                    window.voiceRecorderState.recordedBlob = audioBlob;
+
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const previewAudio = document.getElementById('recordedAudioPreview');
+                    const previewSec = document.getElementById('recordedPreviewSection');
+                    if (previewAudio) previewAudio.src = audioUrl;
+                    if (previewSec) previewSec.classList.remove('d-none');
+
+                    document.getElementById('btnSaveRecord')?.classList.remove('d-none');
+                    document.getElementById('btnStartRecord')?.classList.remove('d-none');
+                };
+
+                mediaRecorder.start();
+
+                // UI Pulsing feedback
+                const pulse = document.getElementById('micRecordPulse');
+                if (pulse) pulse.style.borderColor = '#ef4444';
+
+                document.getElementById('btnStartRecord')?.classList.add('d-none');
+                document.getElementById('btnStopRecord')?.classList.remove('d-none');
+                document.getElementById('btnSaveRecord')?.classList.add('d-none');
+
+                window.voiceRecorderState.timerInterval = setInterval(() => {
+                    window.voiceRecorderState.recordSeconds++;
+                    const m = String(Math.floor(window.voiceRecorderState.recordSeconds / 60)).padStart(2, '0');
+                    const s = String(window.voiceRecorderState.recordSeconds % 60).padStart(2, '0');
+                    const timerEl = document.getElementById('recordTimer');
+                    if (timerEl) timerEl.textContent = `${m}:${s}`;
+                }, 1000);
+            })
+            .catch(err => {
+                console.error('Microphone access denied:', err);
+                alert('Microphone access was denied. Please allow microphone access or upload an audio file.');
+            });
+    };
+
+    window.stopVoiceRecording = function() {
+        if (window.voiceRecorderState.mediaRecorder && window.voiceRecorderState.mediaRecorder.state !== 'inactive') {
+            window.voiceRecorderState.mediaRecorder.stop();
+        }
+        if (window.voiceRecorderState.stream) {
+            window.voiceRecorderState.stream.getTracks().forEach(t => t.stop());
+        }
+        if (window.voiceRecorderState.timerInterval) {
+            clearInterval(window.voiceRecorderState.timerInterval);
+        }
+
+        document.getElementById('btnStopRecord')?.classList.add('d-none');
+        const pulse = document.getElementById('micRecordPulse');
+        if (pulse) pulse.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+    };
+
+    window.saveRecordedVoiceCapsule = function() {
+        if (!window.voiceRecorderState.recordedBlob) return;
+        const nodeId = window.voiceRecorderState.targetNodeId;
+        if (!nodeId) return;
+
+        const btnSave = document.getElementById('btnSaveRecord');
+        const origText = btnSave ? btnSave.innerHTML : 'Save';
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+        }
+
+        const formData = new FormData();
+        formData.append('node_id', nodeId);
+        formData.append('audio', window.voiceRecorderState.recordedBlob, `voice_${nodeId}.webm`);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        formData.append('token', csrfToken);
+
+        fetch('/member/organogram/node/voice-capsule', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' || data.ok) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Living Voice Capsule Saved!',
+                        text: 'Voice capsule attached successfully.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => window.location.reload());
+                } else {
+                    alert('Living Voice Capsule Saved!');
+                    window.location.reload();
+                }
+            } else {
+                const alertEl = document.getElementById('voiceCapsuleAlert');
+                if (alertEl) {
+                    alertEl.className = 'alert alert-danger mt-3 mb-0 small';
+                    alertEl.textContent = data.message || 'Failed to save voice capsule.';
+                    alertEl.classList.remove('d-none');
+                }
+                if (btnSave) {
+                    btnSave.disabled = false;
+                    btnSave.innerHTML = origText;
+                }
+            }
+        })
+        .catch(err => {
+            const alertEl = document.getElementById('voiceCapsuleAlert');
+            if (alertEl) {
+                alertEl.className = 'alert alert-danger mt-3 mb-0 small';
+                alertEl.textContent = 'Network error while saving voice capsule.';
+                alertEl.classList.remove('d-none');
+            }
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = origText;
+            }
+        });
+    };
+
+    window.handleVoiceFileUpload = function(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('voiceAudioFile');
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
+
+        const nodeId = window.voiceRecorderState.targetNodeId;
+        if (!nodeId) return;
+
+        const btnUpload = document.getElementById('btnUploadVoiceFile');
+        const origText = btnUpload ? btnUpload.innerHTML : 'Upload';
+        if (btnUpload) {
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Uploading...';
+        }
+
+        const formData = new FormData();
+        formData.append('node_id', nodeId);
+        formData.append('audio', fileInput.files[0]);
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        formData.append('token', csrfToken);
+
+        fetch('/member/organogram/node/voice-capsule', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' || data.ok) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Voice Capsule Uploaded!',
+                        text: 'Audio file attached to family member.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => window.location.reload());
+                } else {
+                    alert('Voice Capsule Uploaded!');
+                    window.location.reload();
+                }
+            } else {
+                const alertEl = document.getElementById('voiceCapsuleAlert');
+                if (alertEl) {
+                    alertEl.className = 'alert alert-danger mt-3 mb-0 small';
+                    alertEl.textContent = data.message || 'Failed to upload voice capsule.';
+                    alertEl.classList.remove('d-none');
+                }
+                if (btnUpload) {
+                    btnUpload.disabled = false;
+                    btnUpload.innerHTML = origText;
+                }
+            }
+        })
+        .catch(err => {
+            const alertEl = document.getElementById('voiceCapsuleAlert');
+            if (alertEl) {
+                alertEl.className = 'alert alert-danger mt-3 mb-0 small';
+                alertEl.textContent = 'Network error during upload.';
+                alertEl.classList.remove('d-none');
+            }
+            if (btnUpload) {
+                btnUpload.disabled = false;
+                btnUpload.innerHTML = origText;
+            }
+        });
+    };
+
+    window.deleteVoiceCapsule = function(nodeId) {
+        if (!nodeId) return;
+
+        const proceed = () => {
+            const formData = new FormData();
+            formData.append('node_id', nodeId);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            formData.append('token', csrfToken);
+
+            fetch('/member/organogram/node/delete-voice-capsule', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' || data.ok) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to delete voice capsule.');
+                }
+            })
+            .catch(() => alert('Network error while deleting voice capsule.'));
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Delete Voice Capsule?',
+                text: 'This will remove the recorded audio memories for this member.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'Yes, delete audio'
+            }).then(r => {
+                if (r.isConfirmed) proceed();
+            });
+        } else if (confirm('Delete this voice capsule?')) {
+            proceed();
+        }
+    };
+
+    /* =======================================================
+       GENERATIONAL TIME SLIDER CHRONOLOGICAL ENGINE
+       ======================================================= */
+    window.timeSliderInterval = null;
+    window.isTimeSliderPlaying = false;
+
+    window.eraDescriptions = {
+        '-3': { label: 'GREAT-GRANDPARENTS', era: 'Ancestral Roots (c. 1900-1940)' },
+        '-2': { label: 'GRANDPARENTS', era: 'Foundational Matriarchs & Patriarchs' },
+        '-1': { label: 'PARENTS & UNCLES', era: 'Second Generation Pioneers' },
+        '0':  { label: 'EGO & SIBLINGS', era: 'Living Core Generation' },
+        '1':  { label: 'CHILDREN GENERATION', era: 'Flourishing Heirs' },
+        '2':  { label: 'ALL GENERATIONS', era: 'Full Modern Living Dynasty' }
+    };
+
+    window.onTimeSliderChange = function(maxLevel) {
+        maxLevel = Number(maxLevel);
+        const info = window.eraDescriptions[String(maxLevel)] || { label: 'GENERATION ' + maxLevel, era: '' };
+
+        const labelEl = document.getElementById('timeSliderLabel');
+        const eraEl = document.getElementById('timeSliderEra');
+        if (labelEl) labelEl.textContent = info.label;
+        if (eraEl) eraEl.textContent = info.era;
+
+        const stage = document.getElementById('tree');
+        if (!stage || !window.family) return;
+
+        // Semantic time filtering: dynamically adjust opacity and scale of nodes based on generation
+        const svgNodes = stage.querySelectorAll('.kinship-node');
+        svgNodes.forEach(nodeG => {
+            const nodeId = nodeG.getAttribute('data-id');
+            const dataNode = (window.familyTreeNodes || []).find(n => String(n.id) === String(nodeId));
+            if (!dataNode) return;
+
+            const genLevel = (typeof dataNode.generation_level !== 'undefined') ? Number(dataNode.generation_level) : 0;
+            if (genLevel <= maxLevel) {
+                nodeG.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                nodeG.style.opacity = '1';
+                nodeG.style.pointerEvents = 'auto';
+            } else {
+                nodeG.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                nodeG.style.opacity = '0.08';
+                nodeG.style.pointerEvents = 'none';
+            }
+        });
+
+        if (window.trackTreeAnalytics) {
+            window.trackTreeAnalytics('time_slider_scrubbed', null, { maxLevel: maxLevel });
+        }
+    };
+
+    window.toggleTimeSliderPlay = function() {
+        const icon = document.getElementById('timeSliderPlayIcon');
+        const slider = document.getElementById('dynastyTimeSlider');
+        if (!slider) return;
+
+        if (window.isTimeSliderPlaying) {
+            // Stop playing
+            clearInterval(window.timeSliderInterval);
+            window.isTimeSliderPlaying = false;
+            if (icon) {
+                icon.className = 'bi bi-play-fill fs-5';
+            }
+        } else {
+            // Start chronological playback from oldest to newest
+            window.isTimeSliderPlaying = true;
+            if (icon) {
+                icon.className = 'bi bi-pause-fill fs-5';
+            }
+
+            let curr = Number(slider.value);
+            if (curr >= 2) {
+                curr = -3;
+                slider.value = -3;
+                window.onTimeSliderChange(-3);
+            }
+
+            window.timeSliderInterval = setInterval(() => {
+                let val = Number(slider.value) + 1;
+                if (val > 2) {
+                    val = 2;
+                    clearInterval(window.timeSliderInterval);
+                    window.isTimeSliderPlaying = false;
+                    if (icon) icon.className = 'bi bi-play-fill fs-5';
+                }
+                slider.value = val;
+                window.onTimeSliderChange(val);
+            }, 1800);
+        }
+    };
+
+    window.resetTimeSlider = function() {
+        if (window.isTimeSliderPlaying) {
+            clearInterval(window.timeSliderInterval);
+            window.isTimeSliderPlaying = false;
+            const icon = document.getElementById('timeSliderPlayIcon');
+            if (icon) icon.className = 'bi bi-play-fill fs-5';
+        }
+        const slider = document.getElementById('dynastyTimeSlider');
+        if (slider) {
+            slider.value = 2;
+            window.onTimeSliderChange(2);
+        }
+    };
+
+    /* =======================================================
+       3D DYNASTY MIGRATION GLOBE ENGINE (SPATIAL LINEAGE)
+       ======================================================= */
+    window.globeState = {
+        canvas: null,
+        ctx: null,
+        rotationX: 0.25,
+        rotationY: -0.35,
+        targetRotationX: 0.25,
+        targetRotationY: -0.35,
+        zoom: 1.0,
+        isDragging: false,
+        lastMouseX: 0,
+        lastMouseY: 0,
+        isAutoRotating: true,
+        animationFrameId: null,
+        hubs: [],
+        arcs: []
+    };
+
+    // Standard Geo Coordinates for Major Diaspora & Ancestral Hubs
+    window.cityCoordinates = {
+        'lagos': { lat: 6.5244, lon: 3.3792, name: 'Lagos, Nigeria' },
+        'nigeria': { lat: 9.0820, lon: 8.6753, name: 'Nigeria' },
+        'ibadan': { lat: 7.3775, lon: 3.9470, name: 'Ibadan, Nigeria' },
+        'abuja': { lat: 9.0765, lon: 7.3986, name: 'Abuja, Nigeria' },
+        'london': { lat: 51.5074, lon: -0.1278, name: 'London, UK' },
+        'uk': { lat: 55.3781, lon: -3.4360, name: 'United Kingdom' },
+        'united kingdom': { lat: 55.3781, lon: -3.4360, name: 'United Kingdom' },
+        'manchester': { lat: 53.4808, lon: -2.2426, name: 'Manchester, UK' },
+        'new york': { lat: 40.7128, lon: -74.0060, name: 'New York, USA' },
+        'usa': { lat: 37.0902, lon: -95.7129, name: 'United States' },
+        'united states': { lat: 37.0902, lon: -95.7129, name: 'United States' },
+        'atlanta': { lat: 33.7490, lon: -84.3880, name: 'Atlanta, USA' },
+        'houston': { lat: 29.7604, lon: -95.3698, name: 'Houston, USA' },
+        'toronto': { lat: 43.6532, lon: -79.3832, name: 'Toronto, Canada' },
+        'canada': { lat: 56.1304, lon: -106.3468, name: 'Canada' },
+        'dublin': { lat: 53.3498, lon: -6.2603, name: 'Dublin, Ireland' },
+        'ireland': { lat: 53.1424, lon: -7.6921, name: 'Ireland' }
+    };
+
+    window.initDynastyGlobe = function() {
+        const canvas = document.getElementById('dynastyGlobeCanvas');
+        if (!canvas) return;
+        window.globeState.canvas = canvas;
+        window.globeState.ctx = canvas.getContext('2d');
+
+        // Extract and cluster geographic nodes from graphData
+        window.extractGlobeDynastyData();
+
+        // Attach user mouse & touch interaction handlers
+        window.setupGlobeInteractions();
+
+        // Start 60fps render loop
+        if (!window.globeState.animationFrameId) {
+            window.renderGlobeFrame();
+        }
+    };
+
+    window.extractGlobeDynastyData = function() {
+        if (!window.graphData || !window.graphData.nodes) return;
+
+        const hubMap = new Map();
+        const rootNode = window.graphData.nodes.find(n => String(n.user_id) === String(window.__ROOT_USER_ID__)) || window.graphData.nodes[0];
+        const defaultOrigin = { lat: 6.5244, lon: 3.3792, name: 'Lagos, Nigeria' };
+
+        window.graphData.nodes.forEach(node => {
+            const locStr = String(node.location || node.country_of_residence || node.birth_place || '').trim().toLowerCase();
+            let geo = null;
+
+            for (const key in window.cityCoordinates) {
+                if (locStr.includes(key)) {
+                    geo = window.cityCoordinates[key];
+                    break;
+                }
+            }
+
+            if (!geo) {
+                // If unspecified or family origin, map to ancestral seat (Lagos, Nigeria)
+                geo = defaultOrigin;
+            }
+
+            const hubKey = `${geo.lat.toFixed(2)},${geo.lon.toFixed(2)}`;
+            if (!hubMap.has(hubKey)) {
+                hubMap.set(hubKey, {
+                    name: geo.name,
+                    lat: geo.lat,
+                    lon: geo.lon,
+                    members: []
+                });
+            }
+            hubMap.get(hubKey).members.push(node);
+        });
+
+        window.globeState.hubs = Array.from(hubMap.values());
+
+        // Build migration trajectory arcs from ancestral origin (hub with most elders or default origin)
+        const originHub = window.globeState.hubs.find(h => h.name.includes('Nigeria') || h.name.includes('Lagos')) || window.globeState.hubs[0];
+        window.globeState.arcs = [];
+
+        if (originHub) {
+            window.globeState.hubs.forEach(hub => {
+                if (hub !== originHub) {
+                    window.globeState.arcs.push({
+                        from: originHub,
+                        to: hub,
+                        progress: Math.random() // offset animated trajectory pulses
+                    });
+                }
+            });
+        }
+
+        // Populate side list
+        const listEl = document.getElementById('globeHubsList');
+        const countBadge = document.getElementById('globeHubCount');
+        if (countBadge) countBadge.textContent = `${window.globeState.hubs.length} Regions`;
+
+        if (listEl) {
+            listEl.innerHTML = window.globeState.hubs.map((hub, idx) => `
+                <div class="p-2 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer;" onclick="focusGlobeOnHub(${hub.lat}, ${hub.lon})">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-size: 0.75rem;">
+                            ${idx + 1}
+                        </span>
+                        <div>
+                            <div class="text-white fw-bold" style="font-size: 0.82rem;">${hub.name}</div>
+                            <div class="text-white-50" style="font-size: 0.72rem;">${hub.members.length} Family Member${hub.members.length > 1 ? 's' : ''}</div>
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right text-muted" style="font-size: 0.75rem;"></i>
+                </div>
+            `).join('');
+        }
+    };
+
+    window.setupGlobeInteractions = function() {
+        const canvas = window.globeState.canvas;
+        if (!canvas) return;
+
+        canvas.onmousedown = function(e) {
+            window.globeState.isDragging = true;
+            window.globeState.lastMouseX = e.clientX;
+            window.globeState.lastMouseY = e.clientY;
+            canvas.style.cursor = 'grabbing';
+        };
+
+        window.addEventListener('mousemove', function(e) {
+            if (!window.globeState.isDragging) return;
+            const dx = e.clientX - window.globeState.lastMouseX;
+            const dy = e.clientY - window.globeState.lastMouseY;
+            window.globeState.lastMouseX = e.clientX;
+            window.globeState.lastMouseY = e.clientY;
+
+            window.globeState.targetRotationY += dx * 0.006;
+            window.globeState.targetRotationX += dy * 0.006;
+            // Clamp pitch to prevent flipping
+            window.globeState.targetRotationX = Math.max(-1.4, Math.min(1.4, window.globeState.targetRotationX));
+        });
+
+        window.addEventListener('mouseup', function() {
+            if (window.globeState.isDragging) {
+                window.globeState.isDragging = false;
+                if (canvas) canvas.style.cursor = 'grab';
+            }
+        });
+
+        canvas.onwheel = function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.92 : 1.08;
+            window.globeState.zoom = Math.max(0.6, Math.min(2.2, window.globeState.zoom * delta));
+        };
+    };
+
+    window.toggleGlobeAutoRotation = function() {
+        window.globeState.isAutoRotating = !window.globeState.isAutoRotating;
+        const icon = document.getElementById('globeRotationIcon');
+        const btn = document.getElementById('btnToggleGlobeRotation');
+        if (btn) {
+            btn.innerHTML = window.globeState.isAutoRotating 
+                ? '<i class="bi bi-arrow-repeat me-1" id="globeRotationIcon"></i> Pause Rotation'
+                : '<i class="bi bi-play-fill me-1" id="globeRotationIcon"></i> Resume Rotation';
+        }
+    };
+
+    window.resetGlobeView = function() {
+        window.globeState.targetRotationX = 0.25;
+        window.globeState.targetRotationY = -0.35;
+        window.globeState.zoom = 1.0;
+    };
+
+    window.focusGlobeOnHub = function(lat, lon) {
+        window.globeState.targetRotationY = -(lon * Math.PI / 180) - (Math.PI / 2);
+        window.globeState.targetRotationX = (lat * Math.PI / 180);
+        window.globeState.zoom = 1.35;
+    };
+
+    window.renderGlobeFrame = function() {
+        const state = window.globeState;
+        const canvas = state.canvas;
+        if (!canvas || !state.ctx) return;
+
+        const ctx = state.ctx;
+        const W = canvas.width;
+        const H = canvas.height;
+        const cx = W / 2;
+        const cy = H / 2;
+        const radius = 175 * state.zoom;
+
+        // Auto-rotation when not dragging
+        if (state.isAutoRotating && !state.isDragging) {
+            state.targetRotationY += 0.0035;
+        }
+
+        // Damped interpolation for rotation
+        state.rotationX += (state.targetRotationX - state.rotationX) * 0.12;
+        state.rotationY += (state.targetRotationY - state.rotationY) * 0.12;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // 1. Atmosphere Glow & Starfield
+        const atmosGrad = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 1.25);
+        atmosGrad.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+        atmosGrad.addColorStop(0.7, 'rgba(30, 58, 138, 0.1)');
+        atmosGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = atmosGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 1.25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Globe Sphere (Dark Oceanic Void)
+        const oceanGrad = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.3, radius * 0.1, cx, cy, radius);
+        oceanGrad.addColorStop(0, '#1e293b');
+        oceanGrad.addColorStop(0.7, '#0f172a');
+        oceanGrad.addColorStop(1, '#020617');
+        ctx.fillStyle = oceanGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Spherical Projection Helper
+        const project = (lat, lon) => {
+            const phi = lat * Math.PI / 180;
+            const theta = (lon * Math.PI / 180) + state.rotationY;
+
+            // 3D coordinates on unit sphere
+            const x = Math.cos(phi) * Math.sin(theta);
+            const y = -Math.sin(phi);
+            const z = Math.cos(phi) * Math.cos(theta);
+
+            // Rotate around X axis (pitch)
+            const cosX = Math.cos(state.rotationX);
+            const sinX = Math.sin(state.rotationX);
+            const rotY = y * cosX - z * sinX;
+            const rotZ = y * sinX + z * cosX;
+
+            return {
+                x: cx + x * radius,
+                y: cy + rotY * radius,
+                z: rotZ,
+                visible: rotZ > 0 // in front hemisphere
+            };
+        };
+
+        // 4. Parallels & Meridians (Glowing Latitude/Longitude Wireframe)
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+        ctx.lineWidth = 1;
+
+        // Latitudes
+        for (let lat = -60; lat <= 60; lat += 30) {
+            ctx.beginPath();
+            let first = true;
+            for (let lon = -180; lon <= 180; lon += 10) {
+                const p = project(lat, lon);
+                if (p.visible) {
+                    if (first) { ctx.moveTo(p.x, p.y); first = false; }
+                    else { ctx.lineTo(p.x, p.y); }
+                } else {
+                    first = true;
+                }
+            }
+            ctx.stroke();
+        }
+
+        // Longitudes
+        for (let lon = -180; lon < 180; lon += 45) {
+            ctx.beginPath();
+            let first = true;
+            for (let lat = -80; lat <= 80; lat += 10) {
+                const p = project(lat, lon);
+                if (p.visible) {
+                    if (first) { ctx.moveTo(p.x, p.y); first = false; }
+                    else { ctx.lineTo(p.x, p.y); }
+                } else {
+                    first = true;
+                }
+            }
+            ctx.stroke();
+        }
+
+        // 5. Animated Golden Migration Arcs (Bezier curves lofting in 3D)
+        state.arcs.forEach(arc => {
+            const pFrom = project(arc.from.lat, arc.from.lon);
+            const pTo = project(arc.to.lat, arc.to.lon);
+
+            if (pFrom.visible || pTo.visible) {
+                // Arc control apex lofted outwards
+                const midLat = (arc.from.lat + arc.to.lat) / 2;
+                const midLon = (arc.from.lon + arc.to.lon) / 2;
+                const pMid = project(midLat, midLon);
+                const loft = 35 * state.zoom;
+                const cpX = (pFrom.x + pTo.x) / 2 + (pMid.x - cx) * 0.25;
+                const cpY = (pFrom.y + pTo.y) / 2 - loft;
+
+                ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(pFrom.x, pFrom.y);
+                ctx.quadraticCurveTo(cpX, cpY, pTo.x, pTo.y);
+                ctx.stroke();
+
+                // Trajectory Pulse Particle
+                arc.progress = (arc.progress + 0.012) % 1.0;
+                const t = arc.progress;
+                const px = (1 - t) * (1 - t) * pFrom.x + 2 * (1 - t) * t * cpX + t * t * pTo.x;
+                const py = (1 - t) * (1 - t) * pFrom.y + 2 * (1 - t) * t * cpY + t * t * pTo.y;
+
+                ctx.fillStyle = '#fef08a';
+                ctx.shadowColor = '#f59e0b';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        // 6. Living Diaspora Hub Markers
+        state.hubs.forEach(hub => {
+            const p = project(hub.lat, hub.lon);
+            if (p.visible) {
+                // Outer ripple
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.35)';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 9 + hub.members.length * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Inner core beacon
+                ctx.fillStyle = '#60a5fa';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // City & Member Count Label
+                ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.textAlign = 'center';
+                ctx.fillText(`${hub.name} (${hub.members.length})`, p.x, p.y - 12);
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        state.animationFrameId = requestAnimationFrame(window.renderGlobeFrame);
+    };
 </script>
 @endsection

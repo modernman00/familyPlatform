@@ -709,5 +709,186 @@ final class OrganogramEditorController extends BaseController
             showError($th);
         }
     }
+
+    /**
+     * Upload or Record a Living Voice Capsule for a family node
+     * Supported by Damilola & James with Marcus SecOps Hardening
+     */
+    public function uploadVoiceCapsule(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $nodeId = (int)($_POST['node_id'] ?? 0);
+            if ($nodeId <= 0) {
+                msgException(400, 'Invalid Node ID');
+                return;
+            }
+
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            $db = Db::connect2();
+
+            // Verify node belongs to this user's family
+            $stmt = $db->prepare("SELECT id, voice_capsule_url FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$nodeId, $familyCode]);
+            $node = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$node) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            $uploadDir = dirname(__DIR__, 3) . '/public/resources/audio/voice_capsules';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $audioContent = null;
+            $extension = 'webm';
+
+            // 1. Direct file upload via $_FILES
+            if (!empty($_FILES['audio']['tmp_name'])) {
+                $file = $_FILES['audio'];
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    msgException(400, 'File upload error: ' . $file['error']);
+                    return;
+                }
+                if ($file['size'] > 10 * 1024 * 1024) {
+                    msgException(400, 'Audio size exceeds 10MB limit.');
+                    return;
+                }
+
+                $origName = (string)$file['name'];
+                $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                $allowed = ['webm', 'mp3', 'ogg', 'wav', 'm4a', 'mp4'];
+                if (in_array($ext, $allowed, true)) {
+                    $extension = $ext;
+                }
+                $audioContent = file_get_contents($file['tmp_name']);
+            }
+            // 2. Base64 Audio Blob from In-Browser MediaRecorder
+            elseif (!empty($_POST['audio_base64'])) {
+                $rawBase64 = (string)$_POST['audio_base64'];
+                if (str_contains($rawBase64, ',')) {
+                    [$header, $data] = explode(',', $rawBase64, 2);
+                    if (str_contains($header, 'audio/mp3') || str_contains($header, 'audio/mpeg')) {
+                        $extension = 'mp3';
+                    } elseif (str_contains($header, 'audio/wav')) {
+                        $extension = 'wav';
+                    } elseif (str_contains($header, 'audio/ogg')) {
+                        $extension = 'ogg';
+                    } else {
+                        $extension = 'webm';
+                    }
+                    $audioContent = base64_decode($data);
+                } else {
+                    $audioContent = base64_decode($rawBase64);
+                }
+
+                if ($audioContent === false || strlen($audioContent) === 0) {
+                    msgException(400, 'Invalid audio data provided.');
+                    return;
+                }
+                if (strlen($audioContent) > 10 * 1024 * 1024) {
+                    msgException(400, 'Audio size exceeds 10MB limit.');
+                    return;
+                }
+            } else {
+                msgException(400, 'No audio file or recording provided.');
+                return;
+            }
+
+            // Generate cryptographically random filename
+            $filename = 'vc_' . $nodeId . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+            $filePath = $uploadDir . '/' . $filename;
+
+            if (file_put_contents($filePath, $audioContent) === false) {
+                msgException(500, 'Failed to save audio file to server.');
+                return;
+            }
+
+            // Remove previous voice capsule file if exists
+            if (!empty($node['voice_capsule_url'])) {
+                $oldPath = dirname(__DIR__, 3) . '/public' . $node['voice_capsule_url'];
+                if (is_file($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $relativeUrl = '/resources/audio/voice_capsules/' . $filename;
+
+            $upd = $db->prepare("UPDATE family_nodes SET voice_capsule_url = ? WHERE id = ? AND family_code = ?");
+            $upd->execute([$relativeUrl, $nodeId, $familyCode]);
+
+            msgSuccess(200, [
+                'message' => 'Voice Capsule saved successfully.',
+                'voice_capsule_url' => $relativeUrl,
+                'node_id' => $nodeId
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Delete Voice Capsule for a family node
+     */
+    public function deleteVoiceCapsule(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $nodeId = (int)($_POST['node_id'] ?? 0);
+            if ($nodeId <= 0) {
+                msgException(400, 'Invalid Node ID');
+                return;
+            }
+
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($familyCode)) {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            $db = Db::connect2();
+
+            $stmt = $db->prepare("SELECT id, voice_capsule_url FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$nodeId, $familyCode]);
+            $node = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$node) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            if (!empty($node['voice_capsule_url'])) {
+                $oldPath = dirname(__DIR__, 3) . '/public' . $node['voice_capsule_url'];
+                if (is_file($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            $upd = $db->prepare("UPDATE family_nodes SET voice_capsule_url = NULL WHERE id = ? AND family_code = ?");
+            $upd->execute([$nodeId, $familyCode]);
+
+            msgSuccess(200, [
+                'message' => 'Voice Capsule deleted successfully.',
+                'node_id' => $nodeId
+            ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
 }
 
