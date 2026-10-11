@@ -788,9 +788,9 @@ final class OrganogramEditorController extends BaseController
                     } else {
                         $extension = 'webm';
                     }
-                    $audioContent = base64_decode($data);
+                    $audioContent = base64_decode($data, true);
                 } else {
-                    $audioContent = base64_decode($rawBase64);
+                    $audioContent = base64_decode($rawBase64, true);
                 }
 
                 if ($audioContent === false || strlen($audioContent) === 0) {
