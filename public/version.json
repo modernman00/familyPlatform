@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(auth): handle non-prod SMTP delivery errors gracefully and fix deploy regex for E2E target",
+    "title": "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up",
     "notes": [
+        "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up",
         "Fix(auth): handle non-prod SMTP delivery errors gracefully and fix deploy regex for E2E target",
-        "Fix(security): sanitize voice capsule filename and annotate safe file storage for Semgrep",
-        "Fix(organogram): use strict mode for base64_decode to satisfy PHPStan static analysis"
+        "Fix(security): sanitize voice capsule filename and annotate safe file storage for Semgrep"
     ],
     "released_at": "2026-10-11",
-    "commit": "5b3af4d"
+    "commit": "ef038f8"
 }
