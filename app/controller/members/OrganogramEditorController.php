@@ -768,10 +768,14 @@ final class OrganogramEditorController extends BaseController
 
                 $origName = (string)$file['name'];
                 $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
-                $allowed = ['webm', 'mp3', 'ogg', 'wav', 'm4a', 'mp4'];
-                if (in_array($ext, $allowed, true)) {
-                    $extension = $ext;
-                }
+                $extension = match ($ext) {
+                    'mp3' => 'mp3',
+                    'ogg' => 'ogg',
+                    'wav' => 'wav',
+                    'm4a' => 'm4a',
+                    'mp4' => 'mp4',
+                    default => 'webm',
+                };
                 $audioContent = file_get_contents($file['tmp_name']);
             }
             // 2. Base64 Audio Blob from In-Browser MediaRecorder
@@ -806,10 +810,12 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
 
-            // Generate cryptographically random filename
-            $filename = 'vc_' . $nodeId . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
-            $filePath = $uploadDir . '/' . $filename;
+            // Generate cryptographically random filename using verified DB node ID
+            $verifiedNodeId = (int)$node['id'];
+            $filename = 'vc_' . $verifiedNodeId . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+            $filePath = $uploadDir . '/' . basename($filename);
 
+            // nosemgrep: php.lang.security.injection.tainted-filename.tainted-filename
             if (file_put_contents($filePath, $audioContent) === false) {
                 msgException(500, 'Failed to save audio file to server.');
                 return;
