@@ -74,6 +74,42 @@ final class NotificationController extends Select
     }
 
     /**
+     * Unread notification feed for PwaManager badging sync and in-app bell counters.
+     * Returns total unread count along with list of unread items.
+     */
+    public static function unread(): void
+    {
+        try {
+            $userId = isset($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+            if ($userId === '') {
+                msgSuccess(200, ['status' => 'success', 'unread_count' => 0, 'count' => 0, 'message' => []]);
+                return;
+            }
+
+            $receivers = self::sessionReceiverIds($userId);
+            \releaseSessionLock();
+
+            $placeholders = implode(',', array_fill(0, count($receivers), '?'));
+            $query = "SELECT * FROM notification
+                WHERE receiver_id IN ($placeholders)
+                AND notification_status = ?
+                ORDER BY created_at ASC";
+            $result = Select::selectFn2($query, [...$receivers, 'new']);
+            $count = count($result);
+
+            msgSuccess(200, [
+                'status' => 'success',
+                'unread_count' => $count,
+                'count' => $count,
+                'notifications' => $result,
+                'message' => $result
+            ]);
+        } catch (\Throwable $e) {
+            msgSuccess(200, ['status' => 'success', 'unread_count' => 0, 'count' => 0, 'message' => []]);
+        }
+    }
+
+    /**
      * The set of receiver_id values the current session is entitled to read:
      * the user's own id plus every approved family code on the session.
      *

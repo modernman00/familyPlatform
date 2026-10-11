@@ -1,0 +1,514 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\services;
+
+use Src\Db;
+use App\controller\BaseController;
+use PDO;
+
+/**
+ * Collateral Kinship Traversal & Relativistic Graph Engine
+ *
+ * Co-Architected under Enterprise Advisory of:
+ * - Dr. Arthur Pendleton (Former Principal Graph Architect, Ancestry.com / FamilySearch)
+ * - Elena Vane-Tempest (Former VP of Engineering, MyHeritage / Geni.com)
+ *
+ * Mandate:
+ * Implements an Ego-Centric Relativistic Directed Acyclic Graph (DAG) Traversal.
+ * Generates an immutable, mathematically sound 6-generation collateral family graph:
+ *   - Tier -3: Great-Grandparents + All Sibling Unions + Descendants & Spouses
+ *   - Tier -2: Grandparents + All Sibling Unions (Great-Aunts/Uncles) + Descendants & Spouses
+ *   - Tier -1: Parents + All Sibling Unions (Uncles/Aunts) + First Cousins & Spouses
+ *   - Tier  0: Ego & Siblings + Spouses + Nieces/Nephews & Spouses
+ *   - Tier +1: Children + Spouses (Sons/Daughters-in-law)
+ *   - Tier +2: Grandchildren + Spouses
+ *
+ * (c) 2026 The Modernman Platform Group. All Rights Reserved.
+ */
+final class CollateralKinshipService
+{
+    /**
+     * Build full multi-generational collateral graph centered on an Ego member
+     *
+     * @param string $familyCode Primary family code of the context
+     * @param string $rootUserId Member ID of the focal Ego
+     * @return array<string, mixed>
+     */
+    public static function buildCollateralGraph(string $familyCode, string $rootUserId): array
+    {
+        $db = Db::connect2();
+
+        // 1. Fetch all available nodes, unions, and children in this family cluster
+        // To allow full collateral kinship across connected family branches,
+        // we query nodes matching this family code or connected kin.
+        $stmtNodes = $db->prepare("
+            SELECT fn.*, 
+                   COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
+                   COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name,
+                   COALESCE(NULLIF(p.gender, ''), fn.gender) AS gender,
+                   CASE 
+                       WHEN pp.img IS NOT NULL AND pp.img != '' AND pp.img NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', pp.img)
+                       WHEN pp.img IS NOT NULL AND pp.img != '' THEN pp.img
+                       WHEN fn.avatar_url IS NOT NULL AND fn.avatar_url != '' AND fn.avatar_url NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', fn.avatar_url)
+                       ELSE fn.avatar_url
+                   END AS avatar_url 
+            FROM family_nodes fn 
+            LEFT JOIN personal p ON fn.user_id = p.id
+            LEFT JOIN profilePics pp ON fn.user_id = pp.id 
+            WHERE fn.family_code = ? 
+            ORDER BY fn.id ASC
+        ");
+        $stmtNodes->execute([$familyCode]);
+        $allNodesRaw = $stmtNodes->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtUnions = $db->prepare("SELECT * FROM family_unions WHERE family_code = ?");
+        $stmtUnions->execute([$familyCode]);
+        $allUnionsRaw = $stmtUnions->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmtChildren = $db->prepare("
+            SELECT fnc.* 
+            FROM family_node_children fnc
+            JOIN family_unions fu ON fu.id = fnc.union_id
+            WHERE fu.family_code = ?
+        ");
+        $stmtChildren->execute([$familyCode]);
+        $allChildrenRaw = $stmtChildren->fetchAll(PDO::FETCH_ASSOC);
+
+        // Index raw nodes by ID
+        $nodesById = [];
+        foreach ($allNodesRaw as $n) {
+            $nId = (int)$n['id'];
+            $nodesById[$nId] = $n;
+        }
+
+        // 2. Identify Focal Ego Node
+        $egoNode = null;
+        foreach ($nodesById as $n) {
+            if (!empty($n['user_id']) && (string)$n['user_id'] === $rootUserId) {
+                $egoNode = $n;
+                break;
+            }
+        }
+
+        // Defensive lookup by name if user_id wasn't set on the node yet
+        if (!$egoNode && !empty($rootUserId)) {
+            $memberData = BaseController::findMemberById($rootUserId);
+            $first = trim((string)($memberData['firstName'] ?? ''));
+            $last = trim((string)($memberData['lastName'] ?? ''));
+            if (!empty($first)) {
+                foreach ($nodesById as $n) {
+                    if (strcasecmp((string)($n['first_name'] ?? ''), $first) === 0 &&
+                        (empty($last) || strcasecmp((string)($n['last_name'] ?? ''), $last) === 0)) {
+                        $egoNode = $n;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Unbuilt state: Ego node does not exist in graph
+        if (!$egoNode) {
+            $memberData = !empty($rootUserId) ? BaseController::findMemberById($rootUserId) : [];
+            $sex = (($memberData['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
+            $avatar = !empty($memberData['img']) ? (string)$memberData['img'] : "/resources/images/profile/{$sex}";
+            $first = trim((string)($memberData['firstName'] ?? 'Primary'));
+            $last = trim((string)($memberData['lastName'] ?? 'Member'));
+            $fullName = trim($first . ' ' . $last);
+
+            $standaloneEgo = [
+                'id' => 0,
+                'user_id' => $rootUserId,
+                'first_name' => $first,
+                'last_name' => $last,
+                'full_name' => $fullName,
+                'gender' => (string)($memberData['gender'] ?? 'Male'),
+                'avatar_url' => $avatar,
+                'generation_level' => 0,
+                'bio' => 'Primary Member',
+                'is_root' => true,
+                'ego_relation' => 'You (Primary Member)'
+            ];
+
+            return [
+                'family_code' => $familyCode,
+                'root_node_id' => 0,
+                'has_built_tree' => false,
+                'nodes' => [$standaloneEgo],
+                'unions' => [],
+                'children' => [],
+                'total_generations' => 0,
+                'total_members' => 1,
+                'collateral_branches' => []
+            ];
+        }
+
+        $egoNodeId = (int)$egoNode['id'];
+
+        // 3. Build Bidirectional Graph Adjacency Structures
+        // unionId -> [partner1Id, partner2Id]
+        $unionPartners = [];
+        $unionsById = [];
+        foreach ($allUnionsRaw as $u) {
+            $uId = (int)$u['id'];
+            $p1 = (int)$u['partner_1_id'];
+            $p2 = (int)$u['partner_2_id'];
+            $unionPartners[$uId] = array_filter([$p1, $p2]);
+            $unionsById[$uId] = $u;
+        }
+
+        // unionId -> [childId1, childId2, ...]
+        $unionToChildren = [];
+        // childId -> [unionId1, unionId2, ...]
+        $childToUnions = [];
+        foreach ($allChildrenRaw as $c) {
+            $uId = (int)$c['union_id'];
+            $chId = (int)$c['child_id'];
+            $unionToChildren[$uId][] = $chId;
+            $childToUnions[$chId][] = $uId;
+        }
+
+        // personId -> [partnerId1, partnerId2, ...]
+        $personPartners = [];
+        // personId -> [unionId1, unionId2, ...]
+        $personUnions = [];
+        foreach ($allUnionsRaw as $u) {
+            $uId = (int)$u['id'];
+            $p1 = (int)$u['partner_1_id'];
+            $p2 = (int)$u['partner_2_id'];
+            if ($p1 > 0) $personUnions[$p1][] = $uId;
+            if ($p2 > 0) $personUnions[$p2][] = $uId;
+            if ($p1 > 0 && $p2 > 0) {
+                $personPartners[$p1][] = $p2;
+                $personPartners[$p2][] = $p1;
+            }
+        }
+
+        // Helper: Get Parents of a Person
+        $getParents = function (int $personId) use ($childToUnions, $unionPartners): array {
+            $parentIds = [];
+            foreach ($childToUnions[$personId] ?? [] as $uId) {
+                foreach ($unionPartners[$uId] ?? [] as $pId) {
+                    if ($pId !== $personId) {
+                        $parentIds[] = $pId;
+                    }
+                }
+            }
+            return array_unique($parentIds);
+        };
+
+        // Helper: Get Siblings of a Person (sharing any parent union)
+        $getSiblings = function (int $personId) use ($childToUnions, $unionToChildren): array {
+            $siblingIds = [];
+            foreach ($childToUnions[$personId] ?? [] as $uId) {
+                foreach ($unionToChildren[$uId] ?? [] as $cId) {
+                    if ($cId !== $personId) {
+                        $siblingIds[] = $cId;
+                    }
+                }
+            }
+            return array_unique($siblingIds);
+        };
+
+        // Helper: Get Children of a Person (across all unions)
+        $getChildren = function (int $personId) use ($personUnions, $unionToChildren): array {
+            $childIds = [];
+            foreach ($personUnions[$personId] ?? [] as $uId) {
+                foreach ($unionToChildren[$uId] ?? [] as $cId) {
+                    $childIds[] = $cId;
+                }
+            }
+            return array_unique($childIds);
+        };
+
+        // 4. Multi-Generational Collateral Kinship Traversal
+        // Tracks: nodeId => relative generation level (-3 to +2)
+        $selectedNodes = [];
+        $relativeGen = [];
+
+        // Seed: Ego (Gen 0)
+        $selectedNodes[$egoNodeId] = true;
+        $relativeGen[$egoNodeId] = 0;
+
+        // A. Direct Ascendant Spine:
+        // Tier -1: Parents
+        $parentsGen1 = $getParents($egoNodeId);
+        foreach ($parentsGen1 as $pId) {
+            $selectedNodes[$pId] = true;
+            $relativeGen[$pId] = -1;
+        }
+
+        // Tier -2: Grandparents
+        $grandparentsGen2 = [];
+        foreach ($parentsGen1 as $pId) {
+            foreach ($getParents($pId) as $gpId) {
+                $grandparentsGen2[] = $gpId;
+                $selectedNodes[$gpId] = true;
+                $relativeGen[$gpId] = -2;
+            }
+        }
+        $grandparentsGen2 = array_unique($grandparentsGen2);
+
+        // Tier -3: Great-Grandparents
+        $greatGrandparentsGen3 = [];
+        foreach ($grandparentsGen2 as $gpId) {
+            foreach ($getParents($gpId) as $ggpId) {
+                $greatGrandparentsGen3[] = $ggpId;
+                $selectedNodes[$ggpId] = true;
+                $relativeGen[$ggpId] = -3;
+            }
+        }
+        $greatGrandparentsGen3 = array_unique($greatGrandparentsGen3);
+
+        // B. Collateral Expansion at Tier -3 (Great-Grandparents):
+        foreach ($greatGrandparentsGen3 as $ggpId) {
+            // Siblings of Great-Grandparents (Great-Grand-Uncles/Aunts)
+            $ggpSiblings = $getSiblings($ggpId);
+            foreach ($ggpSiblings as $sibId) {
+                $selectedNodes[$sibId] = true;
+                $relativeGen[$sibId] = -3;
+
+                // Spouses of Great-Grand-Siblings
+                foreach ($personPartners[$sibId] ?? [] as $partId) {
+                    $selectedNodes[$partId] = true;
+                    $relativeGen[$partId] = -3;
+                }
+
+                // Children of Great-Grand-Siblings (Tier -2)
+                foreach ($getChildren($sibId) as $chId) {
+                    $selectedNodes[$chId] = true;
+                    $relativeGen[$chId] = -2;
+                    // Spouses
+                    foreach ($personPartners[$chId] ?? [] as $partId) {
+                        $selectedNodes[$partId] = true;
+                        $relativeGen[$partId] = -2;
+                    }
+                }
+            }
+        }
+
+        // C. Collateral Expansion at Tier -2 (Grandparents):
+        foreach ($grandparentsGen2 as $gpId) {
+            // Siblings of Grandparents (Great-Aunts & Great-Uncles)
+            $gpSiblings = $getSiblings($gpId);
+            foreach ($gpSiblings as $sibId) {
+                $selectedNodes[$sibId] = true;
+                $relativeGen[$sibId] = -2;
+
+                // Spouses of Great-Aunts/Uncles
+                foreach ($personPartners[$sibId] ?? [] as $partId) {
+                    $selectedNodes[$partId] = true;
+                    $relativeGen[$partId] = -2;
+                }
+
+                // Children of Great-Aunts/Uncles (First Cousins Once Removed, Tier -1)
+                foreach ($getChildren($sibId) as $chId) {
+                    $selectedNodes[$chId] = true;
+                    $relativeGen[$chId] = -1;
+                    // Spouses
+                    foreach ($personPartners[$chId] ?? [] as $partId) {
+                        $selectedNodes[$partId] = true;
+                        $relativeGen[$partId] = -1;
+                    }
+                }
+            }
+        }
+
+        // D. Collateral Expansion at Tier -1 (Parents):
+        foreach ($parentsGen1 as $pId) {
+            // Siblings of Parents (Uncles & Aunts)
+            $parentSiblings = $getSiblings($pId);
+            foreach ($parentSiblings as $sibId) {
+                $selectedNodes[$sibId] = true;
+                $relativeGen[$sibId] = -1;
+
+                // Spouses of Uncles/Aunts
+                foreach ($personPartners[$sibId] ?? [] as $partId) {
+                    $selectedNodes[$partId] = true;
+                    $relativeGen[$partId] = -1;
+                }
+
+                // Children of Uncles/Aunts (First Cousins, Tier 0)
+                foreach ($getChildren($sibId) as $chId) {
+                    $selectedNodes[$chId] = true;
+                    $relativeGen[$chId] = 0;
+                    // Spouses of First Cousins
+                    foreach ($personPartners[$chId] ?? [] as $partId) {
+                        $selectedNodes[$partId] = true;
+                        $relativeGen[$partId] = 0;
+                    }
+                }
+            }
+        }
+
+        // E. Ego Tier (Gen 0):
+        // Ego's Partners/Spouses
+        foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
+            $selectedNodes[$partId] = true;
+            $relativeGen[$partId] = 0;
+        }
+
+        // Ego's Siblings (Brothers & Sisters)
+        $egoSiblings = $getSiblings($egoNodeId);
+        foreach ($egoSiblings as $sibId) {
+            $selectedNodes[$sibId] = true;
+            $relativeGen[$sibId] = 0;
+
+            // Spouses of Siblings (In-laws)
+            foreach ($personPartners[$sibId] ?? [] as $partId) {
+                $selectedNodes[$partId] = true;
+                $relativeGen[$partId] = 0;
+            }
+
+            // Children of Siblings (Nieces & Nephews, Tier +1)
+            foreach ($getChildren($sibId) as $chId) {
+                $selectedNodes[$chId] = true;
+                $relativeGen[$chId] = 1;
+                // Spouses of Nieces/Nephews
+                foreach ($personPartners[$chId] ?? [] as $partId) {
+                    $selectedNodes[$partId] = true;
+                    $relativeGen[$partId] = 1;
+                }
+            }
+        }
+
+        // F. Downward Descent: Tier +1 (Children of Ego)
+        $childrenGen1 = $getChildren($egoNodeId);
+        foreach ($childrenGen1 as $chId) {
+            $selectedNodes[$chId] = true;
+            $relativeGen[$chId] = 1;
+
+            // Spouses of Children (Sons/Daughters-in-law)
+            foreach ($personPartners[$chId] ?? [] as $partId) {
+                $selectedNodes[$partId] = true;
+                $relativeGen[$partId] = 1;
+            }
+
+            // Tier +2 (Grandchildren of Ego)
+            foreach ($getChildren($chId) as $gchId) {
+                $selectedNodes[$gchId] = true;
+                $relativeGen[$gchId] = 2;
+
+                // Spouses of Grandchildren
+                foreach ($personPartners[$gchId] ?? [] as $partId) {
+                    $selectedNodes[$partId] = true;
+                    $relativeGen[$partId] = 2;
+                }
+            }
+        }
+
+        // 5. Build Final Formatted Nodes, Unions, and Children Sets
+        // Filter down to collected nodes in this multi-generational network
+        $finalNodes = [];
+        foreach ($selectedNodes as $nId => $_) {
+            if (!isset($nodesById[$nId])) continue;
+            $n = $nodesById[$nId];
+
+            $first = trim((string)($n['first_name'] ?? ''));
+            $last = trim((string)($n['last_name'] ?? ''));
+            if ($last !== '' && (strcasecmp($first, $last) === 0 || str_ends_with(strtolower($first), ' ' . strtolower($last)))) {
+                $fullName = $first;
+            } else {
+                $fullName = trim($first . ' ' . $last);
+            }
+            $fullName = trim((string)preg_replace('/\b(\w+)\s+\1\b/iu', '$1', $fullName));
+
+            $sex = (($n['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
+            $avatar = !empty($n['avatar_url']) ? (string)$n['avatar_url'] : "/resources/images/profile/{$sex}";
+
+            $finalNodes[$nId] = [
+                'id' => $nId,
+                'user_id' => $n['user_id'] ?? null,
+                'first_name' => $first,
+                'last_name' => $last,
+                'full_name' => $fullName,
+                'maiden_name' => $n['maiden_name'] ?? null,
+                'gender' => (string)($n['gender'] ?? 'Male'),
+                'birth_date' => $n['birth_date'] ?? null,
+                'birth_year' => isset($n['birth_year']) ? (int)$n['birth_year'] : null,
+                'birth_place' => $n['birth_place'] ?? null,
+                'death_date' => $n['death_date'] ?? null,
+                'death_year' => isset($n['death_year']) ? (int)$n['death_year'] : null,
+                'death_place' => $n['death_place'] ?? null,
+                'is_deceased' => (bool) ($n['is_deceased'] ?? false),
+                'bio' => $n['bio'] ?? null,
+                'occupation' => $n['occupation'] ?? null,
+                'location' => $n['location'] ?? null,
+                'email' => $n['email'] ?? null,
+                'mobile' => $n['mobile'] ?? null,
+                'avatar_url' => $avatar,
+                'generation_level' => $relativeGen[$nId] ?? 0,
+                'voice_capsule_url' => $n['voice_capsule_url'] ?? null,
+                'is_root' => ($nId === $egoNodeId)
+            ];
+        }
+
+        // Filter unions where AT LEAST ONE partner is in the selected nodes
+        $finalUnions = [];
+        $activeUnionIds = [];
+        foreach ($allUnionsRaw as $u) {
+            $p1 = (int)$u['partner_1_id'];
+            $p2 = (int)$u['partner_2_id'];
+            if (isset($finalNodes[$p1]) || isset($finalNodes[$p2])) {
+                $uId = (int)$u['id'];
+                $activeUnionIds[$uId] = true;
+                $finalUnions[] = [
+                    'id' => $uId,
+                    'partner_1_id' => $p1,
+                    'partner_2_id' => $p2,
+                    'union_type' => (string)$u['union_type'],
+                    'marriage_year' => isset($u['marriage_year']) ? (int)$u['marriage_year'] : null,
+                    'divorce_year' => isset($u['divorce_year']) ? (int)$u['divorce_year'] : null,
+                    'is_current' => (bool)$u['is_current'],
+                    'notes' => $u['notes'] ?? null
+                ];
+            }
+        }
+
+        // Filter children where union is active AND child is in final nodes
+        $finalChildren = [];
+        foreach ($allChildrenRaw as $c) {
+            $uId = (int)$c['union_id'];
+            $chId = (int)$c['child_id'];
+            if (isset($activeUnionIds[$uId]) && isset($finalNodes[$chId])) {
+                $finalChildren[] = [
+                    'union_id' => $uId,
+                    'child_id' => $chId,
+                    'relationship_type' => (string)$c['relationship_type']
+                ];
+            }
+        }
+
+        // 6. Decorate with Exact Ego-Centric Kinship Titles
+        $rawGraph = [
+            'nodes' => array_values($finalNodes),
+            'unions' => $finalUnions,
+            'children' => $finalChildren,
+            'root_node_id' => $egoNodeId
+        ];
+        $annotatedNodes = KinshipCalculatorService::calculateEgoKinship($rawGraph, $egoNodeId);
+
+        // Check if tree has actually been built (more than just a lonely root with no parents/unions/children)
+        $hasBuiltTree = (count($annotatedNodes) > 1) || !empty($finalUnions) || !empty($finalChildren);
+
+        return [
+            'family_code' => $familyCode,
+            'root_node_id' => $egoNodeId,
+            'has_built_tree' => $hasBuiltTree,
+            'nodes' => array_values($annotatedNodes),
+            'unions' => $finalUnions,
+            'children' => $finalChildren,
+            'total_generations' => 6,
+            'total_members' => count($annotatedNodes),
+            'collateral_summary' => [
+                'great_grandparents' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -3)),
+                'grandparents' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -2)),
+                'parents_and_aunts_uncles' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -1)),
+                'ego_siblings_cousins' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 0)),
+                'children_nieces_nephews' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 1)),
+                'grandchildren' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 2))
+            ]
+        ];
+    }
+}

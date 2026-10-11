@@ -406,145 +406,16 @@ final class Organogram extends SingleCustomerData
     }
 
     /**
-     * Build full 6-generation graph data
+     * Build full multi-generational collateral graph data
+     * Powered by CollateralKinshipService (Ancestry & MyHeritage Enterprise Topology)
+     *
+     * @param string $familyCode Primary family code of the context
+     * @param string $rootUserId Member ID of the focal Ego
      * @return array<string, mixed>
      */
     private function buildSixGenGraphData(string $familyCode, string $rootUserId): array
     {
-        $db = Db::connect2();
-
-        // 1. Fetch all nodes for this family (joining personal to always show live registered account names)
-        $stmt = $db->prepare("
-            SELECT fn.*, 
-                   COALESCE(NULLIF(p.firstName, ''), fn.first_name) AS first_name,
-                   COALESCE(NULLIF(p.lastName, ''), fn.last_name) AS last_name,
-                   CASE 
-                       WHEN pp.img IS NOT NULL AND pp.img != '' AND pp.img NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', pp.img)
-                       WHEN pp.img IS NOT NULL AND pp.img != '' THEN pp.img
-                       WHEN fn.avatar_url IS NOT NULL AND fn.avatar_url != '' AND fn.avatar_url NOT LIKE '%/%' THEN CONCAT('/resources/images/profile/', fn.avatar_url)
-                       ELSE fn.avatar_url
-                   END AS avatar_url 
-            FROM family_nodes fn 
-            LEFT JOIN personal p ON fn.user_id = p.id
-            LEFT JOIN profilePics pp ON fn.user_id = pp.id 
-            WHERE fn.family_code = ? 
-            ORDER BY fn.generation_level ASC, fn.id ASC
-        ");
-        $stmt->execute([$familyCode]);
-        $nodes = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        // 2. Fetch all unions for this family
-        $unionStmt = $db->prepare("SELECT * FROM family_unions WHERE family_code = ?");
-        $unionStmt->execute([$familyCode]);
-        $unions = $unionStmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        // 3. Fetch all children linkages
-        $childStmt = $db->prepare("
-            SELECT fnc.* 
-            FROM family_node_children fnc
-            JOIN family_unions fu ON fu.id = fnc.union_id
-            WHERE fu.family_code = ?
-        ");
-        $childStmt->execute([$familyCode]);
-        $children = $childStmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        // 4. Find Root Node
-        $rootNode = null;
-        foreach ($nodes as $n) {
-            if (($n['user_id'] ?? null) === $rootUserId) {
-                $rootNode = $n;
-                break;
-            }
-        }
-
-        if (!$rootNode && !empty($nodes)) {
-            $rootNode = $nodes[0];
-        }
-
-        // Format nodes for frontend
-        $formattedNodes = [];
-        foreach ($nodes as $node) {
-            $sex = (($node['gender'] ?? 'Male') === 'Male') ? 'avatarM.png' : 'avatarF.png';
-            $avatar = !empty($node['avatar_url']) ? (string)$node['avatar_url'] : "/resources/images/profile/{$sex}";
-
-                $first = trim((string)($node['first_name'] ?? ''));
-                $last = trim((string)($node['last_name'] ?? ''));
-                if ($last !== '' && (strcasecmp($first, $last) === 0 || str_ends_with(strtolower($first), ' ' . strtolower($last)))) {
-                    $fullName = $first;
-                } else {
-                    $fullName = trim($first . ' ' . $last);
-                }
-                $fullName = trim((string)preg_replace('/\b(\w+)\s+\1\b/iu', '$1', $fullName));
-
-                $formattedNodes[$node['id']] = [
-                    'id' => (int) $node['id'],
-                    'user_id' => $node['user_id'] ?? null,
-                    'first_name' => $first,
-                    'last_name' => $last,
-                    'full_name' => $fullName,
-                'maiden_name' => $node['maiden_name'] ?? null,
-                'gender' => (string)($node['gender'] ?? 'Male'),
-                'birth_date' => $node['birth_date'] ?? null,
-                'birth_year' => isset($node['birth_year']) ? (int)$node['birth_year'] : null,
-                'birth_place' => $node['birth_place'] ?? null,
-                'death_date' => $node['death_date'] ?? null,
-                'death_year' => isset($node['death_year']) ? (int)$node['death_year'] : null,
-                'death_place' => $node['death_place'] ?? null,
-                'is_deceased' => (bool) ($node['is_deceased'] ?? false),
-                'bio' => $node['bio'] ?? null,
-                'occupation' => $node['occupation'] ?? null,
-                'location' => $node['location'] ?? null,
-                'email' => $node['email'] ?? null,
-                'mobile' => $node['mobile'] ?? null,
-                'avatar_url' => $avatar,
-                'generation_level' => (int) ($node['generation_level'] ?? 0),
-                'voice_capsule_url' => $node['voice_capsule_url'] ?? null,
-                'is_root' => ($rootNode && (int)$node['id'] === (int)$rootNode['id'])
-            ];
-        }
-
-        // Format unions
-        $formattedUnions = [];
-        foreach ($unions as $u) {
-            $formattedUnions[] = [
-                'id' => (int) $u['id'],
-                'partner_1_id' => (int) $u['partner_1_id'],
-                'partner_2_id' => (int) $u['partner_2_id'],
-                'union_type' => (string) $u['union_type'],
-                'marriage_year' => isset($u['marriage_year']) ? (int)$u['marriage_year'] : null,
-                'divorce_year' => isset($u['divorce_year']) ? (int)$u['divorce_year'] : null,
-                'is_current' => (bool) $u['is_current'],
-                'notes' => $u['notes'] ?? null
-            ];
-        }
-
-        // Format children links
-        $formattedChildren = [];
-        foreach ($children as $c) {
-            $formattedChildren[] = [
-                'union_id' => (int) $c['union_id'],
-                'child_id' => (int) $c['child_id'],
-                'relationship_type' => (string) $c['relationship_type']
-            ];
-        }
-
-        $rawGraph = [
-            'family_code' => $familyCode,
-            'root_node_id' => $rootNode ? (int) $rootNode['id'] : 0,
-            'nodes' => array_values($formattedNodes),
-            'unions' => $formattedUnions,
-            'children' => $formattedChildren,
-            'total_generations' => 6,
-            'total_members' => count($formattedNodes)
-        ];
-
-        // Decorate with dynamic ego-centric kinship titles
-        if ($rootNode) {
-            $annotatedNodes = \App\services\KinshipCalculatorService::calculateEgoKinship($rawGraph, (int)$rootNode['id']);
-            $rawGraph['nodes'] = array_values($annotatedNodes);
-        }
-
-        return $rawGraph;
+        return \App\services\CollateralKinshipService::buildCollateralGraph($familyCode, $rootUserId);
     }
 
     /**
@@ -557,46 +428,35 @@ final class Organogram extends SingleCustomerData
 
         $db = Db::connect2();
 
-        // Check if root user node already exists
-        $checkStmt = $db->prepare("SELECT id FROM family_nodes WHERE family_code = ? AND user_id = ?");
+        // 1. Resolve or initialize root node for this user
+        $checkStmt = $db->prepare("SELECT id, generation_level, gender FROM family_nodes WHERE family_code = ? AND user_id = ? LIMIT 1");
         $checkStmt->execute([$familyCode, $userId]);
-        $existingRootId = $checkStmt->fetchColumn();
+        $rootRow = $checkStmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($existingRootId) {
+        if ($rootRow) {
+            $rootNodeId = (int)$rootRow['id'];
+            $genLevel = (int)($rootRow['generation_level'] ?? 0);
+            $userGender = (string)($rootRow['gender'] ?? 'Male');
+
             // Keep first_name and last_name in sync with latest personal profile
             $firstName = trim((string)($memberData['firstName'] ?? ''));
             $lastName = trim((string)($memberData['lastName'] ?? ''));
             if (!empty($firstName)) {
-                $upd = $db->prepare("
-                    UPDATE family_nodes 
-                    SET first_name = ?, 
-                        last_name = ?
-                    WHERE id = ?
-                ");
-                $upd->execute([$firstName, $lastName, $existingRootId]);
+                $upd = $db->prepare("UPDATE family_nodes SET first_name = ?, last_name = ? WHERE id = ?");
+                $upd->execute([$firstName, $lastName, $rootNodeId]);
             }
-            return; // Already initialized
+        } else {
+            $rootNodeId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberData);
+            if ($rootNodeId <= 0) {
+                return;
+            }
+            $checkStmt->execute([$familyCode, $userId]);
+            $rootRow = $checkStmt->fetch(\PDO::FETCH_ASSOC);
+            $genLevel = (int)($rootRow['generation_level'] ?? 0);
+            $userGender = (string)($rootRow['gender'] ?? 'Male');
         }
 
-        // AUTO-CLAIM & NODE INITIALIZATION VIA UNIFIED SERVICE
-        $rootNodeId = \App\services\FamilyClaimService::claimOrInitializeNode($familyCode, $userId, $memberData);
-        if ($rootNodeId <= 0) {
-            return;
-        }
-
-        // If the node was claimed from an existing parent/sibling placeholder, stop further legacy duplication
-        $claimedCheck = $db->prepare("SELECT COUNT(*) FROM family_node_children WHERE child_id = ?");
-        $claimedCheck->execute([$rootNodeId]);
-        if ((int)$claimedCheck->fetchColumn() > 0) {
-            return;
-        }
-
-        // Fetch parent union if exists for linking legacy siblings/children
-        $findPUnion = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ? LIMIT 1");
-        $findPUnion->execute([$rootNodeId]);
-        $parentUnionId = (int)$findPUnion->fetchColumn();
-
-        // Reusable inserts for the union + child links built below.
+        // Reusable inserts
         $insUnion = $db->prepare("
             INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
             VALUES (?, ?, ?, 'married', 1)
@@ -606,70 +466,214 @@ final class Organogram extends SingleCustomerData
             VALUES (?, ?, 'biological')
         ");
 
-        // 4. Spouse & Multiple Partners
-        $spouseName = (string)($memberData['spouse_name'] ?? '');
-        $currentUnionId = null;
-        if (!empty($spouseName)) {
-            $insSpouse = $db->prepare("
-                INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio)
-                VALUES (?, ?, '', 'Female', 0, '/resources/images/profile/avatarF.png', 'Current Spouse')
-            ");
-            $insSpouse->execute([$familyCode, $spouseName]);
-            $currentSpouseId = (int) $db->lastInsertId();
-
-            $insUnion->execute([$familyCode, $rootNodeId, $currentSpouseId]);
-            $currentUnionId = (int) $db->lastInsertId();
-        }
-
-        // 5. Siblings from legacy table
-        $siblings = SelectFn::selectAllRowsById('sibling', 'id', $userId);
-        if (!empty($siblings)) {
-            foreach ($siblings as $sib) {
-                $sibName = (string)($sib['sibling_name'] ?? 'Sibling');
-                $sibGender = (string)($sib['sibling_gender'] ?? 'Male');
-                $sibSex = ($sibGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
-
-                $insSib = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, email)
-                    VALUES (?, ?, ?, ?, 0, ?, ?)
-                ");
-                $insSib->execute([
-                    $familyCode,
-                    $sibName,
-                    (string)($memberData['lastName'] ?? ''),
-                    $sibGender,
-                    "/resources/images/profile/{$sibSex}",
-                    $sib['sibling_email'] ?? null
-                ]);
-                $sibNodeId = (int) $db->lastInsertId();
-                $insChild->execute([$parentUnionId, $sibNodeId]);
+        // 2. Sync Spouse / Partner for this user
+        $spouseName = trim((string)($memberData['spouse_name'] ?? ''));
+        if (empty($spouseName)) {
+            $legacyOther = SelectFn::selectAllRowsById('otherFamily', 'id', $userId);
+            if (!empty($legacyOther) && !empty($legacyOther[0]['spouse_name'])) {
+                $spouseName = trim((string)$legacyOther[0]['spouse_name']);
             }
         }
 
-        // 6. Children from legacy table (Generation +1)
+        // Check if user already has an active union
+        $findCurrentUnion = $db->prepare("
+            SELECT id, partner_1_id, partner_2_id 
+            FROM family_unions 
+            WHERE family_code = ? AND (partner_1_id = ? OR partner_2_id = ?) 
+            LIMIT 1
+        ");
+        $findCurrentUnion->execute([$familyCode, $rootNodeId, $rootNodeId]);
+        $existingUnion = $findCurrentUnion->fetch(\PDO::FETCH_ASSOC);
+        $currentUnionId = $existingUnion ? (int)$existingUnion['id'] : null;
+
+        if (!empty($spouseName) && !$existingUnion) {
+            $spouseGender = ($userGender === 'Male') ? 'Female' : 'Male';
+            $spouseSex = ($spouseGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
+
+            // Check if partner node already exists by name
+            $findSpNode = $db->prepare("
+                SELECT id FROM family_nodes 
+                WHERE family_code = ? AND (LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(?) OR LOWER(first_name) = LOWER(?))
+                LIMIT 1
+            ");
+            $findSpNode->execute([$familyCode, $spouseName, $spouseName]);
+            $existingSpId = $findSpNode->fetchColumn();
+
+            if ($existingSpId) {
+                $currentSpouseId = (int)$existingSpId;
+            } else {
+                $spParts = explode(' ', $spouseName, 2);
+                $insSpouse = $db->prepare("
+                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio)
+                    VALUES (?, ?, ?, ?, ?, ?, 'Partner/Spouse')
+                ");
+                $insSpouse->execute([
+                    $familyCode,
+                    $spParts[0],
+                    $spParts[1] ?? '',
+                    $spouseGender,
+                    $genLevel,
+                    "/resources/images/profile/{$spouseSex}"
+                ]);
+                $currentSpouseId = (int)$db->lastInsertId();
+            }
+
+            $insUnion->execute([$familyCode, $rootNodeId, $currentSpouseId]);
+            $currentUnionId = (int)$db->lastInsertId();
+        }
+
+        // 3. Sync Children for this user (Generation Level + 1)
         $children = SelectFn::selectAllRowsById('children', 'id', $userId);
         if (!empty($children)) {
+            // If user has children but no union, create a personal/co-parent union
+            if (!$currentUnionId) {
+                $insUnion->execute([$familyCode, $rootNodeId, $rootNodeId]);
+                $currentUnionId = (int)$db->lastInsertId();
+            }
+
             foreach ($children as $ch) {
-                $chName = (string)($ch['children_name'] ?? 'Child');
-                $chGender = (string)($ch['children_gender'] ?? 'Female');
+                $chName = trim((string)($ch['children_name'] ?? ''));
+                if (empty($chName) || strcasecmp($chName, 'Child') === 0) continue;
+
+                $chGender = trim((string)($ch['children_gender'] ?? 'Male'));
+                if ($chGender !== 'Female' && $chGender !== 'Male') $chGender = 'Male';
                 $chSex = ($chGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
+                $chEmail = !empty($ch['children_email']) && !str_contains($ch['children_email'], 'provide') ? trim($ch['children_email']) : null;
 
-                $insCh = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, email)
-                    VALUES (?, ?, ?, ?, 1, ?, ?)
+                // Check if this child node already exists
+                $findChildNode = $db->prepare("
+                    SELECT id FROM family_nodes 
+                    WHERE family_code = ? AND (LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(?) OR LOWER(first_name) = LOWER(?))
+                    LIMIT 1
                 ");
-                $insCh->execute([
-                    $familyCode,
-                    $chName,
-                    (string)($memberData['lastName'] ?? ''),
-                    $chGender,
-                    "/resources/images/profile/{$chSex}",
-                    $ch['children_email'] ?? null
-                ]);
-                $chNodeId = (int) $db->lastInsertId();
+                $findChildNode->execute([$familyCode, $chName, $chName]);
+                $existingChildId = $findChildNode->fetchColumn();
 
-                $targetUnion = $currentUnionId ?? $parentUnionId;
-                $insChild->execute([$targetUnion, $chNodeId]);
+                if ($existingChildId) {
+                    $chNodeId = (int)$existingChildId;
+                } else {
+                    $chParts = explode(' ', $chName, 2);
+                    $insCh = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email)
+                        VALUES (?, ?, ?, ?, ?, ?, 'Child', ?)
+                    ");
+                    $insCh->execute([
+                        $familyCode,
+                        $chParts[0],
+                        $chParts[1] ?? (string)($memberData['lastName'] ?? ''),
+                        $chGender,
+                        $genLevel + 1,
+                        "/resources/images/profile/{$chSex}",
+                        $chEmail
+                    ]);
+                    $chNodeId = (int)$db->lastInsertId();
+                }
+
+                // Check if already linked to this union
+                $checkLink = $db->prepare("SELECT id FROM family_node_children WHERE union_id = ? AND child_id = ? LIMIT 1");
+                $checkLink->execute([$currentUnionId, $chNodeId]);
+                if (!$checkLink->fetchColumn()) {
+                    $insChild->execute([$currentUnionId, $chNodeId]);
+                }
+            }
+        }
+
+        // 4. Parents & Siblings from legacy table (only if root node is not yet connected to a parent union)
+        $findPUnion = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ? LIMIT 1");
+        $findPUnion->execute([$rootNodeId]);
+        $parentUnionId = (int)$findPUnion->fetchColumn();
+
+        if ($parentUnionId <= 0) {
+            $otherFamily = SelectFn::selectAllRowsById('otherFamily', 'id', $userId);
+            if (!empty($otherFamily)) {
+                $fatherName = trim((string)($otherFamily[0]['father_name'] ?? ''));
+                $motherName = trim((string)($otherFamily[0]['mother_name'] ?? ''));
+
+                if (!empty($fatherName) || !empty($motherName)) {
+                    $fParts = !empty($fatherName) ? explode(' ', $fatherName, 2) : ['Father', ''];
+                    $mParts = !empty($motherName) ? explode(' ', $motherName, 2) : ['Mother', ''];
+
+                    $insParent = $db->prepare("
+                        INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ");
+
+                    $fId = null;
+                    if (!empty($fatherName)) {
+                        $insParent->execute([$familyCode, $fParts[0], $fParts[1] ?? '', 'Male', $genLevel - 1, '/resources/images/profile/avatarM.png', 'Father']);
+                        $fId = (int)$db->lastInsertId();
+                    }
+
+                    $mId = null;
+                    if (!empty($motherName)) {
+                        $insParent->execute([$familyCode, $mParts[0], $mParts[1] ?? '', 'Female', $genLevel - 1, '/resources/images/profile/avatarF.png', 'Mother']);
+                        $mId = (int)$db->lastInsertId();
+                    }
+
+                    if ($fId && $mId) {
+                        $insUnion->execute([$familyCode, $fId, $mId]);
+                        $parentUnionId = (int)$db->lastInsertId();
+                    } elseif ($fId) {
+                        $insUnion->execute([$familyCode, $fId, $fId]);
+                        $parentUnionId = (int)$db->lastInsertId();
+                    } elseif ($mId) {
+                        $insUnion->execute([$familyCode, $mId, $mId]);
+                        $parentUnionId = (int)$db->lastInsertId();
+                    }
+
+                    if ($parentUnionId > 0) {
+                        $insChild->execute([$parentUnionId, $rootNodeId]);
+                    }
+                }
+            }
+        }
+
+        // 5. Siblings from legacy table
+        if ($parentUnionId > 0) {
+            $siblings = SelectFn::selectAllRowsById('sibling', 'id', $userId);
+            if (!empty($siblings)) {
+                foreach ($siblings as $sib) {
+                    $sibName = trim((string)($sib['sibling_name'] ?? ''));
+                    if (empty($sibName) || strcasecmp($sibName, 'Sibling') === 0) continue;
+
+                    $sibGender = (string)($sib['sibling_gender'] ?? 'Male');
+                    $sibSex = ($sibGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
+
+                    // Check if sibling node already exists
+                    $findSibNode = $db->prepare("
+                        SELECT id FROM family_nodes 
+                        WHERE family_code = ? AND (LOWER(TRIM(CONCAT(first_name, ' ', last_name))) = LOWER(?) OR LOWER(first_name) = LOWER(?))
+                        LIMIT 1
+                    ");
+                    $findSibNode->execute([$familyCode, $sibName, $sibName]);
+                    $existingSibId = $findSibNode->fetchColumn();
+
+                    if ($existingSibId) {
+                        $sibNodeId = (int)$existingSibId;
+                    } else {
+                        $sParts = explode(' ', $sibName, 2);
+                        $insSib = $db->prepare("
+                            INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, email)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ");
+                        $insSib->execute([
+                            $familyCode,
+                            $sParts[0],
+                            $sParts[1] ?? (string)($memberData['lastName'] ?? ''),
+                            $sibGender,
+                            $genLevel,
+                            "/resources/images/profile/{$sibSex}",
+                            $sib['sibling_email'] ?? null
+                        ]);
+                        $sibNodeId = (int)$db->lastInsertId();
+                    }
+
+                    $checkSibLink = $db->prepare("SELECT id FROM family_node_children WHERE union_id = ? AND child_id = ? LIMIT 1");
+                    $checkSibLink->execute([$parentUnionId, $sibNodeId]);
+                    if (!$checkSibLink->fetchColumn()) {
+                        $insChild->execute([$parentUnionId, $sibNodeId]);
+                    }
+                }
             }
         }
     }

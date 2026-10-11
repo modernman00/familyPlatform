@@ -36,10 +36,13 @@ document.addEventListener('click', (e) => {
   const country = node.dataset.country || nodeFn('.node-country') || '';
   const bio = node.dataset.bio || nodeFn('.node-bio') || '';
   const personId = node.dataset.personid || nodeFn('.node-id') || null;
+  const rawNodeId = node.dataset.nodeid || node.dataset.nId || node.dataset.id || null;
+  const nodeId = (rawNodeId && !isNaN(Number(rawNodeId))) ? Number(rawNodeId) : (rawNodeId || null);
 
   const nodeData = {
     fullName: name,
     personId: (personId && personId !== '') ? personId : null,
+    nodeId: nodeId,
     email: email,
     relation: role,
     img: img,
@@ -219,6 +222,7 @@ setTimeout(() => {
           img: nodeData.img,
           relation: nodeData.title,
           personId: nodeData.legacyId,
+          nodeId: nodeData.id,
           familyCode: window.__FAMILY_CODE__ || '',
           email: rawNode ? rawNode.email : '',
           maritalStatus: rawNode ? rawNode.marital_status : '',

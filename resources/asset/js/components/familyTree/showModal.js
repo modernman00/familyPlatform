@@ -32,10 +32,17 @@ export const showPersonDetails = async (personData) => {
 
   if (!targetModal || !targetModalBody) return;
 
+  let cleanName = (fullName || 'Family Member').trim().replace(/\s+/g, ' ');
+
+  // Robust effectiveNodeId resolution (defensive fallback from graph nodes)
+  const effectiveNodeId = nodeId || 
+    (typeof window.getGraphNodeId === 'function' ? window.getGraphNodeId(personId, cleanName) : null) || 
+    (window.graphData?.nodes?.find(n => (personId && String(n.user_id) === String(personId)) || (cleanName && (n.full_name === cleanName || n.first_name === cleanName)))?.id) ||
+    null;
+
   // Clean duplicate repeated words in full name (e.g. "AJIBIKE OLAOGUN OLAOGUN" -> "Ajibike Olaogun")
   const isSelf = (personId && String(personId) === String(window.__ROOT_USER_ID__)) || 
-                 (nodeId && typeof window.getGraphNodeId === 'function' && String(nodeId) === String(window.getGraphNodeId(window.__ROOT_USER_ID__, '')));
-  let cleanName = (fullName || 'Family Member').trim().replace(/\s+/g, ' ');
+                 (effectiveNodeId && typeof window.getGraphNodeId === 'function' && String(effectiveNodeId) === String(window.getGraphNodeId(window.__ROOT_USER_ID__, '')));
 
   const parts = cleanName.split(' ');
   if (parts.length >= 2) {
@@ -161,8 +168,8 @@ export const showPersonDetails = async (personData) => {
     ${claimSpotHtml}
 
     <div class="modal-actions mt-4" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
-      ${(!isSelf && nodeId && !isReadOnly) ? `
-        <button type="button" class="btn" onclick="if(window.confirmRemovePerson) window.confirmRemovePerson('${esc(String(nodeId))}', '${esc(cleanName)}')" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 8px 16px; font-weight: 600;">
+      ${(!isSelf && effectiveNodeId && !isReadOnly) ? `
+        <button type="button" class="btn" id="modalRemoveNodeBtn" onclick="if(window.confirmRemovePerson) { window.confirmRemovePerson('${esc(String(effectiveNodeId))}', '${esc(cleanName)}'); } else if(window.removePersonFallback) { window.removePersonFallback('${esc(String(effectiveNodeId))}', '${esc(cleanName)}'); }" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 8px 16px; font-weight: 600;">
           <i class="bi bi-trash3-fill text-danger me-1"></i> Remove from Tree
         </button>
       ` : ''}

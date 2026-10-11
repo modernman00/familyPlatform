@@ -36,6 +36,13 @@ $router->map(
 
 $router->map(
   method: 'GET', 
+  route: '/api/notifications/unread', 
+  target: 'App\controller\NotificationController@unread',
+  name: 'api notifications unread'
+);
+
+$router->map(
+  method: 'GET', 
   route: '/member/notifications/id/[**:id]/[**:famCode]', 
   target: 'App\controller\NotificationController@notificationById',
   name: 'all notification by id'
@@ -47,5 +54,3 @@ $router->map(
   target: 'App\controller\NotificationController@notificationRead',
   name: 'delete notification by id'
 );
-
-

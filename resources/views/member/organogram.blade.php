@@ -36,6 +36,9 @@
                     <a href="/familyStudio" id="configureFamilyBtn" class="btn-action" title="Open Lineage Studio">
                         <i class="bi bi-stars text-warning"></i> Lineage Studio
                     </a>
+                    <button type="button" class="btn-action" id="manageRelativesBtn" onclick="openManageRelativesModal()" title="Remove unrecognised names from family tree" style="border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
+                        <i class="bi bi-person-x-fill text-danger"></i> Remove Relatives
+                    </button>
                     @endif
                     <div class="search-box-wrapper" id="memberSearchWrapper" style="min-width: 240px;">
                         <i class="bi bi-search search-icon"></i>
@@ -320,6 +323,32 @@
         <!-- Add Relative Wizard Modal Component -->
         @include('components.lineage.wizard')
 
+        <!-- Manage & Remove Relatives Modal -->
+        <div class="modal fade" id="manageRelativesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 540px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff;">
+                    <div class="modal-header border-bottom py-3 px-4 bg-light">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                                <i class="bi bi-person-x-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Manage & Remove Relatives</h5>
+                                <small class="text-muted">Remove unrecognised names or incorrect relatives from your tree</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4" id="manageRelativesList">
+                        <!-- Dynamically filled with relative list -->
+                    </div>
+                    <div class="modal-footer border-top py-2 px-4 bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm fw-bold px-3" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Heritage Story Card Modal (9:16 Instagram/WhatsApp Story Format) -->
         <div class="modal fade" id="heritageStoryModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
@@ -350,6 +379,8 @@
 <script src="/public/js/vendor/kinshiptree.js?v=9.0"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
+    window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
+    window.__VIEWED_MEMBER_NAME__ = '{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }}';
     window.__FAMILY_CODE__ = '{{ $data['famCode'] ?? '' }}';
     window.__IS_READ_ONLY__ = {{ !empty($isReadOnly) ? 'true' : 'false' }};
     
@@ -401,14 +432,14 @@
                             else if (p2Gender === 'female') mid = p2.id;
                         }
 
-                        // Defensive fallback: assign opposites if one gender was unspecified
-                        if (!fid && p1 && p2) {
-                            if (mid === p2.id && p1Gender !== 'female') fid = p1.id;
-                            else if (mid === p1.id && p2Gender !== 'female') fid = p2.id;
+                        // Defensive fallback: single-parent or unspecified gender unions
+                        if (p1 && !fid && !mid) {
+                            if (p1Gender === 'female') mid = p1.id;
+                            else fid = p1.id;
                         }
-                        if (!mid && p1 && p2) {
-                            if (fid === p2.id && p1Gender !== 'male') mid = p1.id;
-                            else if (fid === p1.id && p2Gender !== 'male') mid = p2.id;
+                        if (p2 && !fid && !mid) {
+                            if (p2Gender === 'female') mid = p2.id;
+                            else fid = p2.id;
                         }
                         
                         childToParents[child.child_id] = { fid, mid };
@@ -465,6 +496,50 @@
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined
                 });
             });
+        }
+
+        const hasBuiltTree = graphData && graphData.has_built_tree !== false;
+        const isSelf = String(window.__ROOT_USER_ID__) === String(window.__LOGGED_IN_USER_ID__);
+
+        if (!hasBuiltTree) {
+            const memberName = window.__VIEWED_MEMBER_NAME__ || 'This Member';
+            const emptyTreeHtml = isSelf ? `
+                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border: 2px dashed #10b981;">
+                        <i class="bi bi-diagram-3 text-success fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-white mb-2">Build Your Family Tree</h3>
+                    <p class="text-white-50 mb-4" style="max-width: 500px;">
+                        Your family tree is currently empty. Start building your lineage by adding your parents, partner, siblings, or children!
+                    </p>
+                    <a href="/familyStudio" class="btn btn-success px-4 py-2 fw-bold" style="border-radius: 50px;">
+                        <i class="bi bi-plus-circle me-1"></i> Add Relatives Now
+                    </a>
+                </div>
+            ` : `
+                <div class="d-flex flex-column align-items-center justify-content-center p-5 text-center" style="min-height: 480px;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
+                        <i class="bi bi-diagram-3 text-primary fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold text-white mb-2">${memberName} Has Not Built Their Family Tree Yet</h3>
+                    <p class="text-white-50 mb-4" style="max-width: 500px;">
+                        This member has not built their personal family tree or added relatives yet. Once they connect their relatives, their family tree will be displayed here.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold" style="border-radius: 50px;">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Directory
+                        </a>
+                        <a href="/allMembers/seeProfile/${encodeURIComponent(window.__ROOT_USER_ID__)}" class="btn btn-primary px-4 py-2 fw-bold" style="border-radius: 50px;">
+                            <i class="bi bi-person-badge me-1"></i> View Profile
+                        </a>
+                    </div>
+                </div>
+            `;
+            const treeEl = document.getElementById("tree");
+            if (treeEl) treeEl.innerHTML = emptyTreeHtml;
+            const pedigreeEl = document.getElementById("pedigreeOutlineContainer");
+            if (pedigreeEl) pedigreeEl.innerHTML = emptyTreeHtml;
+            return;
         }
 
         if (familyTreeNodes.length > 0) {
@@ -813,11 +888,17 @@
         if (!nodeId) return;
         
         const rootGraphId = getGraphNodeId(window.__ROOT_USER_ID__, '');
-        if (String(nodeId) === String(rootGraphId) || String(nodeId) === String(window.__ROOT_USER_ID__)) {
+        const isTreeRoot = (String(nodeId) === String(rootGraphId)) || (String(nodeId) === String(window.__ROOT_USER_ID__));
+        const isSelfLoggedIn = window.__LOGGED_IN_USER_ID__ && (
+            String(nodeId) === String(getGraphNodeId(window.__LOGGED_IN_USER_ID__, '')) ||
+            String(nodeId) === String(window.__LOGGED_IN_USER_ID__)
+        );
+
+        if (isTreeRoot || isSelfLoggedIn) {
             if (typeof Swal !== 'undefined') {
-                Swal.fire('Action Not Allowed', 'You cannot remove yourself from your family tree.', 'warning');
+                Swal.fire('Action Not Allowed', 'You cannot remove the primary member from the family tree.', 'warning');
             } else {
-                alert('You cannot remove yourself from your family tree.');
+                alert('You cannot remove the primary member from the family tree.');
             }
             return;
         }
@@ -890,6 +971,75 @@
             if (confirm(`Are you sure you want to remove ${nodeName || 'this relative'} from your family tree?`)) {
                 performDelete();
             }
+        }
+    };
+
+    window.removePersonFallback = function(nodeId, nodeName) {
+        window.confirmRemovePerson(nodeId, nodeName);
+    };
+
+    window.openManageRelativesModal = function() {
+        const listEl = document.getElementById('manageRelativesList');
+        if (!listEl) return;
+
+        const isReadOnlyTree = Boolean(window.__IS_READ_ONLY__) || (typeof graphData !== 'undefined' && graphData && graphData.isReadOnly);
+        if (isReadOnlyTree) {
+            listEl.innerHTML = '<div class="alert alert-warning mb-0">You have read-only access to this family tree and cannot remove relatives.</div>';
+            const modalEl = document.getElementById('manageRelativesModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            }
+            return;
+        }
+
+        const rootGraphId = getGraphNodeId(window.__ROOT_USER_ID__, '');
+        const allNodes = (window.graphData && window.graphData.nodes) || [];
+
+        const removableNodes = allNodes.filter(n => {
+            const isRoot = (String(n.id) === String(rootGraphId)) || (String(n.user_id) === String(window.__ROOT_USER_ID__));
+            const isSelf = window.__LOGGED_IN_USER_ID__ && String(n.user_id) === String(window.__LOGGED_IN_USER_ID__);
+            return !isRoot && !isSelf;
+        });
+
+        if (removableNodes.length === 0) {
+            listEl.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
+                    <p class="mb-0 fw-semibold">No removable relatives found in this family tree.</p>
+                    <small>Primary root members cannot be removed.</small>
+                </div>
+            `;
+        } else {
+            let html = '<div class="d-flex flex-column gap-2">';
+            removableNodes.forEach(n => {
+                const name = n.full_name || (n.first_name + ' ' + (n.last_name || '')).trim() || 'Relative';
+                const role = n.ego_relation || n.bio || 'Family Member';
+                const avatar = n.avatar_url || ((n.gender || '').toLowerCase() === 'female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
+                const cleanName = name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                
+                html += `
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border bg-white shadow-sm">
+                        <div class="d-flex align-items-center gap-3">
+                            <img src="${avatar}" alt="${cleanName}" class="rounded-circle object-fit-cover" style="width: 44px; height: 44px; border: 2px solid #e2e8f0;">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark">${name}</h6>
+                                <span class="badge bg-light text-secondary border" style="font-size: 0.75rem;">${role}</span>
+                                ${n.user_id ? '<span class="badge bg-success-subtle text-success ms-1" style="font-size: 0.7rem;">Registered</span>' : ''}
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-3 py-1.5" onclick="window.confirmRemovePerson(${n.id}, '${cleanName}')" style="border-radius: 8px;">
+                            <i class="bi bi-trash3-fill me-1"></i> Remove
+                        </button>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            listEl.innerHTML = html;
+        }
+
+        const modalEl = document.getElementById('manageRelativesModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
         }
     };
 

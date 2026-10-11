@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Build(assets): compile production bundles with Laravel Mix",
+    "title": "Feat(feed): sync comment reactions and like events in real time via Pusher private channels",
     "notes": [
+        "Feat(feed): sync comment reactions and like events in real time via Pusher private channels",
         "Build(assets): compile production bundles with Laravel Mix",
-        "Fix(router): whitelist KinshipApiController for API key authentication in RouteDispatch",
-        "Test(e2e): eliminate modal timing race in family_code_approval spec"
+        "Fix(router): whitelist KinshipApiController for API key authentication in RouteDispatch"
     ],
     "released_at": "2026-10-10",
-    "commit": "d485474"
+    "commit": "df65727"
 }

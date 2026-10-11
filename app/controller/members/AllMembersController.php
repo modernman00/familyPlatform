@@ -259,6 +259,36 @@ final class AllMembersController extends AllMembersData
                     }
                 }
 
+                // Clean up target from family_nodes and linked unions/children for caller's family codes
+                if (!empty($callerFamCodes)) {
+                    try {
+                        $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
+                        // Find node IDs for target in caller's family codes
+                        $nodeStmt = $db->prepare("SELECT id FROM family_nodes WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                        $nodeStmt->execute(array_merge([$targetId], $callerFamCodes));
+                        $targetNodeIds = array_column($nodeStmt->fetchAll(\PDO::FETCH_ASSOC) ?: [], 'id');
+
+                        foreach ($targetNodeIds as $tNodeId) {
+                            $tNodeIdInt = (int)$tNodeId;
+                            // Remove from child links
+                            $db->prepare("DELETE FROM family_node_children WHERE child_id = ?")->execute([$tNodeIdInt]);
+                            // Remove from unions where partner
+                            $uStmt = $db->prepare("SELECT id FROM family_unions WHERE partner_1_id = ? OR partner_2_id = ?");
+                            $uStmt->execute([$tNodeIdInt, $tNodeIdInt]);
+                            $uIds = array_column($uStmt->fetchAll(\PDO::FETCH_ASSOC) ?: [], 'id');
+                            if (!empty($uIds)) {
+                                $uPlaceholders = implode(',', array_fill(0, count($uIds), '?'));
+                                $db->prepare("DELETE FROM family_node_children WHERE union_id IN ($uPlaceholders)")->execute($uIds);
+                                $db->prepare("DELETE FROM family_unions WHERE id IN ($uPlaceholders)")->execute($uIds);
+                            }
+                            // Delete node
+                            $db->prepare("DELETE FROM family_nodes WHERE id = ?")->execute([$tNodeIdInt]);
+                        }
+                    } catch (\Throwable $nodeEx) {
+                        error_log('[removeProfile] family_nodes cleanup warning: ' . $nodeEx->getMessage());
+                    }
+                }
+
                 // Clean up any pending approval requests
                 try {
                     $delReq = $db->prepare("DELETE FROM family_approval_requests WHERE (id = ? AND approver_id = ?) OR (id = ? AND approver_id = ?)");

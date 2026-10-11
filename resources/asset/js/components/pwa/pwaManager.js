@@ -364,18 +364,22 @@ class PWAManager {
     const syncBadge = () => {
       const desktopBadge = document.getElementById('notification_count');
       const mobileBadge = document.getElementById('pwa_bottom_badge');
-      if (!desktopBadge || !mobileBadge) return;
+      if (!desktopBadge && !mobileBadge) return;
 
-      const rawCount = desktopBadge.textContent.trim();
+      const rawCount = ((desktopBadge && desktopBadge.textContent) || (mobileBadge && mobileBadge.textContent) || '').trim();
       const count = parseInt(rawCount, 10);
 
       if (!isNaN(count) && count > 0) {
-        mobileBadge.textContent = count > 99 ? '99+' : count;
-        mobileBadge.style.display = 'inline-flex';
+        if (mobileBadge) {
+          mobileBadge.textContent = count > 99 ? '99+' : count;
+          mobileBadge.style.display = 'inline-flex';
+        }
         PWAManager.setBadge(count);
       } else {
-        mobileBadge.textContent = '';
-        mobileBadge.style.display = 'none';
+        if (mobileBadge) {
+          mobileBadge.textContent = '';
+          mobileBadge.style.display = 'none';
+        }
         PWAManager.setBadge(0);
       }
     };

@@ -7,6 +7,7 @@ import axios from "axios"
 function updateNotificationBadge(count) {
     const badge = id('notification_count');
     const headerBadge = id('header_notif_count');
+    const mobileBadge = id('pwa_bottom_badge');
     
     const countNum = parseInt(count || '0');
     const displayStr = countNum > 99 ? '99+' : (countNum > 0 ? countNum.toString() : '');
@@ -28,6 +29,24 @@ function updateNotificationBadge(count) {
         } else {
             headerBadge.textContent = displayStr;
             headerBadge.style.display = 'flex';
+        }
+    }
+
+    if (mobileBadge) {
+        if (countNum <= 0) {
+            mobileBadge.style.display = 'none';
+            mobileBadge.textContent = '';
+        } else {
+            mobileBadge.textContent = displayStr;
+            mobileBadge.style.display = 'inline-flex';
+        }
+    }
+
+    if (typeof navigator !== 'undefined' && 'setAppBadge' in navigator) {
+        if (countNum > 0) {
+            navigator.setAppBadge(countNum).catch(() => {});
+        } else {
+            navigator.clearAppBadge().catch(() => {});
         }
     }
 }
@@ -226,3 +245,14 @@ const initDeleteOnce = () => {
 document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', initDeleteOnce)
     : initDeleteOnce();
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('pwa:badge-updated', (e) => {
+        if (typeof e.detail?.count === 'number') {
+            updateNotificationBadge(e.detail.count);
+        }
+    });
+    window.addEventListener('pwa:notification-received', () => {
+        fetchUserNotifications();
+    });
+}
