@@ -19,13 +19,13 @@ final class Login
 
     public function show(): void
     {
-        if (\class_exists('\Src\functionality\SignIn')) {
+        if (\class_exists('\App\controller\BaseController')) {
+            \App\controller\BaseController::rehydrateSession();
+        } elseif (\class_exists('\Src\functionality\SignIn')) {
             \Src\functionality\SignIn::rehydrateSession();
         }
 
-        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true))
-            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
-
+        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true));
         if ($isAdmin) {
             redirect('/admin/dashboard');
             return;
@@ -52,7 +52,14 @@ final class Login
             \App\middleware\AdminGuardMiddleware::enforce();
         }
 
-        if (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin')) {
+        if (\class_exists('\App\controller\BaseController')) {
+            \App\controller\BaseController::rehydrateSession();
+        }
+
+        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true))
+            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
+
+        if ($isAdmin) {
             redirect('/admin/dashboard');
             return;
         }

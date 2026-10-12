@@ -63,6 +63,7 @@ if (!isset($_SERVER['SERVER_NAME']) || $_SERVER['SERVER_NAME'] === '') {
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start([
+        'cookie_lifetime' => $sessionExpire,
         'cookie_httponly' => true, // prevents XSS attacks from accessing the session cookie
         'cookie_secure' => $isHttps, // send cookie securely if HTTPS is active
         'cookie_samesite' => 'Lax', // prevents CSRF attacks

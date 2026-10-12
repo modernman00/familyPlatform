@@ -33,6 +33,99 @@ class BaseController
         Utility::view($view, $data);
     }
 
+    /**
+     * Silently and defensively rehydrates the PHP session from a valid auth cookie
+     * if the session was flushed by PHP's garbage collector or closed browser tabs.
+     * Ported from PartyPlatform with Silas's token_version validation guard.
+     */
+    public static function rehydrateSession(): void
+    {
+        if (!empty($_SESSION['id']) && !empty($_SESSION['auth']['identifyCust'])) {
+            return; // Session is already hot and valid
+        }
+
+        $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'familyCookie';
+        $token = $_COOKIE[$tokenName] ?? '';
+        if (empty($token) || !is_string($token)) {
+            return;
+        }
+
+        try {
+            $jwtKey = (string) ($_ENV['JWT_KEY'] ?? $_ENV['JWT_TOKEN'] ?? '');
+            if (!class_exists('\Firebase\JWT\JWT') || empty($jwtKey)) {
+                return;
+            }
+
+            try {
+                $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key($jwtKey, 'HS256'));
+            } catch (\Throwable $e) {
+                if (!empty($_ENV['JWT_KEY_PREVIOUS'])) {
+                    $decoded = \Firebase\JWT\JWT::decode($token, new \Firebase\JWT\Key((string) $_ENV['JWT_KEY_PREVIOUS'], 'HS256'));
+                } else {
+                    throw $e;
+                }
+            }
+
+            $userData = (array) ($decoded->data ?? []);
+            $userId = (string) ($userData['id'] ?? $decoded->sub ?? '');
+            $tokenVersion = (int) ($userData['token_version'] ?? $decoded->token_version ?? 1);
+
+            if (empty($userId)) {
+                return;
+            }
+
+            // Silas Guard: Verify token_version against account table to prevent revoked sessions
+            $dbTable = $_ENV['DB_TABLE_LOGIN'] ?? 'account';
+            $stmt = Db::connect2()->prepare("SELECT token_version, type, email FROM {$dbTable} WHERE id = ? LIMIT 1");
+            $stmt->execute([$userId]);
+            $accountRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$accountRow) {
+                throw new \Exception("Account no longer exists");
+            }
+
+            if (isset($accountRow['token_version']) && (int) $accountRow['token_version'] !== $tokenVersion) {
+                throw new \Exception("Session revoked: token_version mismatch");
+            }
+
+            $_SESSION['id'] = $userId;
+            $_SESSION['manager_id'] = $userId;
+            $_SESSION['auth'] = [
+                'identifyCust' => $userId,
+                'email' => (string) ($userData['email'] ?? $accountRow['email'] ?? ''),
+                'codeVerified' => true,
+                '2FA_token_ts' => time(),
+                'type' => (string) ($userData['type'] ?? $accountRow['type'] ?? 'user'),
+            ];
+            $_SESSION['user'] = $userData;
+            $_SESSION['user_id'] = $userId;
+            $_SESSION['loggedIn'] = true;
+
+            // Also hydrate famCode if empty
+            if (empty($_SESSION['famCode'])) {
+                $pStmt = Db::connect2()->prepare("SELECT famCode FROM personal WHERE id = ? LIMIT 1");
+                $pStmt->execute([$userId]);
+                $famCode = $pStmt->fetchColumn();
+                if ($famCode) {
+                    $_SESSION['famCode'] = (string) $famCode;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Invalid, expired, revoked, or tampered token: silently clear the dead cookie
+            $isHttps = (isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] === 1)) ||
+                (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            if (!headers_sent()) {
+                setcookie($tokenName, '', [
+                    'expires' => time() - 3600,
+                    'path' => '/',
+                    'secure' => $isHttps,
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ]);
+            }
+        }
+    }
+
     public static function membersData(): array
     {
         $id = checkInput($_SESSION['id']);

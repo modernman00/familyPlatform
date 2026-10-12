@@ -73,7 +73,9 @@ final class RouteDispatch
             'App\controller\api\KinshipApiController',
         ];
 
-        if (\class_exists('\Src\functionality\SignIn')) {
+        if (\class_exists('\App\controller\BaseController')) {
+            \App\controller\BaseController::rehydrateSession();
+        } elseif (\class_exists('\Src\functionality\SignIn')) {
             \Src\functionality\SignIn::rehydrateSession();
         }
 

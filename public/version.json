@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav",
+    "title": "Fix(ui): enforce strict fixed positioning and visualViewport pinning for bottom nav",
     "notes": [
+        "Fix(ui): enforce strict fixed positioning and visualViewport pinning for bottom nav",
         "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav",
-        "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up",
-        "Fix(auth): handle non-prod SMTP delivery errors gracefully and fix deploy regex for E2E target"
+        "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up"
     ],
-    "released_at": "2026-10-11",
-    "commit": "3e55dfb"
+    "released_at": "2026-10-12",
+    "commit": "551a9ad"
 }

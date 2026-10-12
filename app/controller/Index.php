@@ -7,13 +7,13 @@ final class Index
 {
     public function index(): void
     {
-        if (\class_exists('\Src\functionality\SignIn')) {
+        if (\class_exists('\App\controller\BaseController')) {
+            \App\controller\BaseController::rehydrateSession();
+        } elseif (\class_exists('\Src\functionality\SignIn')) {
             \Src\functionality\SignIn::rehydrateSession();
         }
 
-        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true))
-            || (\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('admin'));
-
+        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true));
         if ($isAdmin) {
             redirect('/admin/dashboard');
             return;
