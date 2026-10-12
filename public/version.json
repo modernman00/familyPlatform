@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up",
+    "title": "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav",
     "notes": [
+        "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav",
         "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up",
-        "Fix(auth): handle non-prod SMTP delivery errors gracefully and fix deploy regex for E2E target",
-        "Fix(security): sanitize voice capsule filename and annotate safe file storage for Semgrep"
+        "Fix(auth): handle non-prod SMTP delivery errors gracefully and fix deploy regex for E2E target"
     ],
     "released_at": "2026-10-11",
-    "commit": "ef038f8"
+    "commit": "3e55dfb"
 }

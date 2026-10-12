@@ -61,6 +61,24 @@
                 t.classList.add('active');
             }
         });
+
+        function pinBottomNav() {
+            if (window.visualViewport) {
+                var vv = window.visualViewport;
+                var offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+                if (offset > 120) {
+                    nav.style.transform = 'translateY(' + (-offset) + 'px)';
+                } else {
+                    nav.style.transform = 'translateY(0)';
+                }
+            }
+        }
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', pinBottomNav, { passive: true });
+            window.visualViewport.addEventListener('scroll', pinBottomNav, { passive: true });
+        }
+        window.addEventListener('resize', pinBottomNav, { passive: true });
+        window.addEventListener('orientationchange', pinBottomNav, { passive: true });
     } catch(e) {}
 })();
 </script>
