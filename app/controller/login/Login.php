@@ -151,12 +151,20 @@ final class Login
                 $totpEnabled = !empty($result['totp_enabled']);
 
                 $totpRequiredEnv = (string) ($_ENV['ADMIN_TOTP_REQUIRED'] ?? getenv('ADMIN_TOTP_REQUIRED') ?: 'false');
-                $isTotpRequired = filter_var($totpRequiredEnv, FILTER_VALIDATE_BOOLEAN) || $totpEnabled;
+                $adminEmail = (string) ($result['email'] ?? '');
+                $hasTrustedDevice = \Src\Auth\BaseAdminAuthController::checkTrustedDevice($adminId, $adminEmail);
 
-                if ($isTotpRequired && !empty($totpSecret)) {
+                if ($isTotpRequired && !empty($totpSecret) && !$hasTrustedDevice) {
                     if (empty($totpCode) || !TotpService::verifyCode($totpSecret, $totpCode)) {
                         Utility::msgException(401, 'Invalid or missing Google Authenticator 6-digit 2-FA code.');
                         return;
+                    }
+                }
+
+                if (!empty($totpCode) && !empty($totpSecret) && TotpService::verifyCode($totpSecret, $totpCode)) {
+                    $remember = !isset($_POST['remember_device']) || filter_var($_POST['remember_device'], FILTER_VALIDATE_BOOLEAN);
+                    if ($remember) {
+                        \Src\Auth\BaseAdminAuthController::issue2faTrustCookie($adminId, $adminEmail);
                     }
                 }
 

@@ -129,8 +129,23 @@
             text-decoration: none;
             transition: color 0.2s;
         }
-        .cancel-link:hover {
-            color: var(--danger);
+        .remember-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+        .remember-group input[type="checkbox"] {
+            width: 17px;
+            height: 17px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            border-radius: 4px;
         }
         .alert {
             border-radius: 8px;
@@ -183,6 +198,11 @@
                     autocomplete="one-time-code"
                 >
             </div>
+
+            <label class="remember-group">
+                <input type="checkbox" name="remember_device" value="1" checked>
+                <span>Remember this device for 7 days</span>
+            </label>
 
             <button type="submit" class="btn-primary">Verify &amp; Continue</button>
         </form>
