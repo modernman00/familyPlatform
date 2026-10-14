@@ -151,6 +151,7 @@ final class Login
                 $totpEnabled = !empty($result['totp_enabled']);
 
                 $totpRequiredEnv = (string) ($_ENV['ADMIN_TOTP_REQUIRED'] ?? getenv('ADMIN_TOTP_REQUIRED') ?: 'false');
+                $isTotpRequired = filter_var($totpRequiredEnv, FILTER_VALIDATE_BOOLEAN) || $totpEnabled;
                 $adminEmail = (string) ($result['email'] ?? '');
                 $hasTrustedDevice = \Src\Auth\BaseAdminAuthController::checkTrustedDevice($adminId, $adminEmail);
 
