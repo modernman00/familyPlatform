@@ -3,12 +3,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="The Ultimate Social Platform for Your Family - Social media sites for Families to connect, strengthen Bonds, share Memories, and know the family Tree.">
-  <meta name="keywords" content="family network, social platform, social media, connect, strengthen bonds, share memories, family tree">
+  <meta name="description" content="@yield('meta_description', 'Private family social network and interactive family tree. Safely connect relatives, coordinate private chats, share cherished memories, and build your digital family archive with zero ads.')">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Family Platform Team">
   <meta name="language" content="English">
-  <title>@yield('title') | OUR FAMILY NETWORK</title>
+  <title>@yield('title', 'FamilyPlatform | Private Family Social Network')</title>
+  <link rel="canonical" href="{{ rtrim($_ENV['APP_URL'] ?? 'https://myfamilyplatform.com', '/') . ($_SERVER['REQUEST_URI'] ?? '/') }}">
+  
+  <!-- JSON-LD Structured Data Schema (Google Sitelinks) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "FamilyPlatform",
+        "url": "https://myfamilyplatform.com",
+        "applicationCategory": "SocialNetworkingApplication",
+        "operatingSystem": "All",
+        "description": "Private family social network, heritage family tree, and secure digital family memory sanctuary."
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://myfamilyplatform.com/#website",
+        "name": "FamilyPlatform",
+        "url": "https://myfamilyplatform.com"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Home",
+        "url": "https://myfamilyplatform.com/"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "About Us",
+        "url": "https://myfamilyplatform.com/aboutus"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Blog",
+        "url": "https://myfamilyplatform.com/blog"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "name": "Contact",
+        "url": "https://myfamilyplatform.com/contact"
+      }
+    ]
+  }
+  </script>
+  @yield('extra_schema')
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
 
   @php

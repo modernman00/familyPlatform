@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
-@section('title', 'Connect, Share, and Grow Together')
+@section('title', 'FamilyPlatform | Private Family Social Network & Living Heritage Tree')
+@section('meta_description', 'The private, secure social platform built exclusively for families. Preserve precious memories, build interactive family trees, and stay connected with relatives without ads.')
 @section('data-page-id', 'home')
 
 @section('content')
@@ -84,6 +85,61 @@
     </div>
   </section>
 
+  <!-- FAQ Section -->
+  <section class="py-5" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+    <div class="container py-4" style="max-width: 860px;">
+      <div class="text-center mb-5">
+        <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(16, 185, 129, 0.12); color: #059669; font-size: 0.8rem;">
+          Frequently Asked Questions
+        </div>
+        <h2 class="fw-bold fs-1" style="color: var(--text-main);">Everything You Need to Know</h2>
+        <p class="text-muted fs-5 mt-2">Clear, straightforward answers about privacy, family coordination, and features.</p>
+      </div>
+
+      <div class="d-flex flex-column gap-3" itemscope itemtype="https://schema.org/FAQPage">
+        <details class="p-4 rounded-3 border bg-white shadow-sm" style="border-color: #e2e8f0;" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="fw-bold fs-5 text-dark cursor-pointer d-flex justify-content-between align-items-center" style="min-height: 44px; list-style: none;">
+            <span itemprop="name">How does FamilyPlatform keep our family coordination private?</span>
+            <span class="text-muted ms-3 fs-6">▼</span>
+          </summary>
+          <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <div itemprop="text">Unlike ad-supported social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines.</div>
+          </div>
+        </details>
+
+        <details class="p-4 rounded-3 border bg-white shadow-sm" style="border-color: #e2e8f0;" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="fw-bold fs-5 text-dark cursor-pointer d-flex justify-content-between align-items-center" style="min-height: 44px; list-style: none;">
+            <span itemprop="name">Can grandparents and kids use FamilyPlatform easily?</span>
+            <span class="text-muted ms-3 fs-6">▼</span>
+          </summary>
+          <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <div itemprop="text">Absolutely. The interface features large high-contrast touch targets, one-tap voice notes, and simplified senior-friendly views so everyone from age 7 to 85 stays connected without technological friction.</div>
+          </div>
+        </details>
+
+        <details class="p-4 rounded-3 border bg-white shadow-sm" style="border-color: #e2e8f0;" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="fw-bold fs-5 text-dark cursor-pointer d-flex justify-content-between align-items-center" style="min-height: 44px; list-style: none;">
+            <span itemprop="name">How does the shared family calendar sync with Google and Apple calendars?</span>
+            <span class="text-muted ms-3 fs-6">▼</span>
+          </summary>
+          <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <div itemprop="text">FamilyPlatform provides two-way iCal synchronization, automatically reflecting school events, doctor appointments, and family dinners directly into your phone’s native calendar.</div>
+          </div>
+        </details>
+
+        <details class="p-4 rounded-3 border bg-white shadow-sm" style="border-color: #e2e8f0;" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <summary class="fw-bold fs-5 text-dark cursor-pointer d-flex justify-content-between align-items-center" style="min-height: 44px; list-style: none;">
+            <span itemprop="name">Is FamilyPlatform free to get started?</span>
+            <span class="text-muted ms-3 fs-6">▼</span>
+          </summary>
+          <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <div itemprop="text">Yes! You can create your private family space, invite members, share photos, and build your heritage tree completely free.</div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA Section -->
   <section class="py-5" style="background-color: var(--brand-secondary); color: white;">
     <div class="container text-center py-5">
@@ -92,5 +148,48 @@
       <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary); border-radius: 12px;">Get Started Free</a>
     </div>
   </section>
+@endsection
+
+@section('extra_schema')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does FamilyPlatform keep our family coordination private?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Unlike ad-supported social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can grandparents and kids use FamilyPlatform easily?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Absolutely. The interface features large high-contrast touch targets, one-tap voice notes, and simplified senior-friendly views so everyone from age 7 to 85 stays connected without technological friction."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the shared family calendar sync with Google and Apple calendars?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "FamilyPlatform provides two-way iCal synchronization, automatically reflecting school events, doctor appointments, and family dinners directly into your phone’s native calendar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is FamilyPlatform free to get started?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! You can create your private family space, invite members, share photos, and build your heritage tree completely free."
+      }
+    }
+  ]
+}
+</script>
 @endsection
 
