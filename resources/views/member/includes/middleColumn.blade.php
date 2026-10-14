@@ -178,6 +178,14 @@
   <!-- 60-Second Onboarding Checklist (Alpine.js - auto hides when complete) -->
   @includeIf('member.includes.onboardingChecklistWidget')
 
+  {{-- 🌟 Ecosystem Cross-App Promotion Ribbon (PartyPlatform / iDecide) --}}
+  @include('components.advert_banner', [
+    'placement' => 'family_feed',
+    'context' => [
+      'tags' => ['party', 'event', 'celebration', 'birthday', 'milestone'],
+    ]
+  ])
+
   <!-- Post Composer (kept above the Kinship widget - creating a post is the
        primary action; kin discovery is secondary) -->
   <div class="card post-composer mb-4 border-0 shadow-sm" id="openPostModalTrigger" style="border-radius: 16px; overflow: hidden; background-color: var(--card-bg);">

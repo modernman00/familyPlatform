@@ -98,9 +98,18 @@
         </div>
 
         <!-- Footer -->
-        <footer class="w3-container w3-padding-16 w3-light-grey">
-            <h4>FOOTER</h4>
-            <p>Powered by <a href="https://www.w3schools.com/w3css/default.asp" target="_blank">w3.css</a></p>
+        <footer class="w3-container w3-padding-16 w3-white w3-border-top" style="margin-top: 3rem; color: #64748b; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <b><i class="fa fa-users text-primary"></i> {{ getenv('APP_NAME') ?? 'Family Platform' }}</b> &bull; &copy; {{ date('Y') }}. All rights reserved.
+                </div>
+                <div style="display: flex; gap: 1.5rem;">
+                    <a href="/admin/dashboard" style="color: #64748b; text-decoration: none;">Dashboard</a>
+                    <a href="/privacy" style="color: #64748b; text-decoration: none;">Privacy Policy</a>
+                    <a href="/terms" style="color: #64748b; text-decoration: none;">Terms of Use</a>
+                    <a href="/contact" style="color: #64748b; text-decoration: none;">Support</a>
+                </div>
+            </div>
         </footer>
 
         <!-- End page content -->

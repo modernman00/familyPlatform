@@ -22,7 +22,19 @@ $router->map('GET', '/robots.txt', function() {
     if (file_exists($robotsFile)) {
         readfile($robotsFile);
     } else {
-        echo "User-agent: *\nAllow: /\nDisallow: /app/\nDisallow: /api/\nDisallow: /cron/\nDisallow: /storage/\nSitemap: https://familyplatform.app/sitemap.xml\n";
+        echo "User-agent: *\nAllow: /\nDisallow: /app/\nDisallow: /api/\nDisallow: /cron/\nDisallow: /storage/\nSitemap: https://myfamilyplatform.com/sitemap.xml\n";
+    }
+});
+
+// --- SITEMAP.XML ROUTE HANDLER ---
+$router->map('GET', '/sitemap.xml', function() {
+    header('Content-Type: application/xml; charset=utf-8');
+    $sitemapFile = __DIR__ . '/../../public/sitemap.xml';
+    if (file_exists($sitemapFile)) {
+        readfile($sitemapFile);
+    } else {
+        http_response_code(404);
+        echo '<?xml version="1.0" encoding="UTF-8"?><error>Sitemap not found</error>';
     }
 });
 

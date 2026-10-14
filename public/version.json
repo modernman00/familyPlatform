@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(ui): enforce strict fixed positioning and visualViewport pinning for bottom nav",
+    "title": "Major Update",
     "notes": [
+        "Major Update",
         "Fix(ui): enforce strict fixed positioning and visualViewport pinning for bottom nav",
-        "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav",
-        "Fix(ui): anchor mobile bottom navbar firmly to viewport and prevent slide-up"
+        "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav"
     ],
     "released_at": "2026-10-12",
-    "commit": "551a9ad"
+    "commit": "70b467a"
 }
