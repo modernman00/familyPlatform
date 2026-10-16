@@ -212,4 +212,59 @@ final class EventNotificationFlowTest extends SocialFeedTestCase
         $this->assertSame('Test Notification Title', $row['notification_name'] ?? '');
         $this->assertSame('new', $row['notification_status'] ?? '');
     }
+
+    public function testSubmitEventSucceedsWithEmptyOrShortDescription(): void
+    {
+        $token = 'test_token_' . bin2hex(random_bytes(8));
+        $_SESSION['token'] = $token;
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['fName'] = 'Test';
+        $_SESSION['lName'] = 'Host';
+        $_SERVER['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
+
+        // 1. Submit event with EMPTY description
+        $_POST = [
+            'token' => $token,
+            'eventName' => 'Family Gathering',
+            'eventDate' => date('Y-m-d', strtotime('+10 days')),
+            'eventType' => 'Party',
+            'eventDescription' => '',
+            'eventFrequency' => 'One-off'
+        ];
+
+        ob_start();
+        Event::submitEvent();
+        $output = ob_get_clean();
+        $response = json_decode((string) $output, true);
+
+        $this->assertIsArray($response, "Output should be valid JSON, got: $output");
+        $this->assertSame('success', $response['status'] ?? '');
+        $this->assertSame('Event submitted', $response['message'] ?? '');
+        $createdId = (int) ($response['token'] ?? 0);
+        $this->assertGreaterThan(0, $createdId);
+        $this->createdEventNos[] = $createdId;
+
+        // 2. Submit event with SHORT description (< 5 chars, e.g. "BBQ")
+        $_POST = [
+            'token' => $token,
+            'eventName' => 'Backyard Cookout',
+            'eventDate' => date('Y-m-d', strtotime('+12 days')),
+            'eventType' => 'Party',
+            'eventDescription' => 'BBQ',
+            'eventFrequency' => 'One-off'
+        ];
+
+        ob_start();
+        Event::submitEvent();
+        $output2 = ob_get_clean();
+        $response2 = json_decode((string) $output2, true);
+
+        $this->assertIsArray($response2, "Output should be valid JSON, got: $output2");
+        $this->assertSame('success', $response2['status'] ?? '');
+        $this->assertSame('Event submitted', $response2['message'] ?? '');
+        $createdId2 = (int) ($response2['token'] ?? 0);
+        $this->assertGreaterThan(0, $createdId2);
+        $this->createdEventNos[] = $createdId2;
+    }
 }

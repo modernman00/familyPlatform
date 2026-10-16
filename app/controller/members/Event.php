@@ -47,16 +47,21 @@ final class Event extends AllMembersData
                 table: 'events',
                 minMaxData: [
                     'data' => ['eventName',  'eventDescription'],
-                    'min'  => [5,  5],
+                    'min'  => [3,  0],
                     'max'  => [100, 500]
                 ],
                 removeKeys: ['submit', 'token', 'grecaptcharesponse', 'awnqylrds9sip'],
                 newInput: [
                     'eventCode' => self::generateFamCode(),
                     'id' => checkInput($_SESSION['id'])
-                ]
-
+                ],
+                optionalFields: ['eventDescription']
             );
+
+            if (!$retunLastId) {
+                return;
+            }
+
             msgSuccess(200, "Event submitted", $retunLastId);
 
 

@@ -30,6 +30,9 @@
         @includeIf('member.modals.createEvent')
         @includeIf('member.modals.shareModal2')
         @includeIf('member.modals.createReelModal')
+        @includeIf('member.modals.lineageQuestModal')
+        @includeIf('member.modals.familyFlyerModal')
+        @includeIf('member.modals.timeCapsuleModal')
 
 
     </div>

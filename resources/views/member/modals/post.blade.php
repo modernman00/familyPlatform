@@ -212,4 +212,21 @@ window.applyTriviaTemplate = function(type) {
         if (optInputs[1]) optInputs[1].value = 'False';
     }
 };
+
+window.openComposerWithTrivia = function(type = 'guess_who') {
+    const postModalEl = document.getElementById('postModal');
+    if (!postModalEl) return;
+    const bsModal = bootstrap.Modal.getOrCreateInstance(postModalEl);
+    bsModal.show();
+    setTimeout(() => {
+        const pollBtn = document.getElementById('addPollBtn');
+        const pollContainer = document.getElementById('pollCreationContainer');
+        if (pollContainer && pollContainer.classList.contains('d-none') && pollBtn) {
+            pollBtn.click();
+        }
+        if (window.applyTriviaTemplate) {
+            window.applyTriviaTemplate(type);
+        }
+    }, 250);
+};
 </script>

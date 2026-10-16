@@ -108,6 +108,24 @@
         .finally(() => {
             renderFamilyFlyer();
         });
+
+        // If outside organogram page, asynchronously fetch live stats from lineage quests API
+        if (typeof graphData === 'undefined' || !graphData) {
+            fetch('/api/lineage/quests')
+                .then(res => res.json())
+                .then(res => {
+                    if (res && res.status === 'success' && res.data) {
+                        window.cachedFlyerStats = {
+                            memberCount: res.data.stats?.total_nodes || 1,
+                            genCount: Math.max(1, Math.min(6, Math.ceil((res.data.stats?.total_nodes || 1) / 3))),
+                            hubsCount: Math.max(1, Math.min(10, Math.ceil((res.data.stats?.total_nodes || 1) / 4))),
+                            familySurname: res.data.family_code || 'Family'
+                        };
+                        renderFamilyFlyer();
+                    }
+                })
+                .catch(() => {});
+        }
     };
 
     function renderFamilyFlyer() {
@@ -142,6 +160,13 @@
                 hubsCount = Math.max(1, locations.size);
             }
         } catch (e) {}
+
+        if (window.cachedFlyerStats) {
+            memberCount = window.cachedFlyerStats.memberCount || memberCount;
+            genCount = window.cachedFlyerStats.genCount || genCount;
+            hubsCount = window.cachedFlyerStats.hubsCount || hubsCount;
+            familySurname = window.cachedFlyerStats.familySurname || familySurname;
+        }
 
         const statMemEl = document.getElementById('flyerStatMembers');
         const statGenEl = document.getElementById('flyerStatGens');

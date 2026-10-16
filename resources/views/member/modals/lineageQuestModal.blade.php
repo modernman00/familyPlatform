@@ -22,26 +22,29 @@
             <div class="modal-body px-4 py-3">
                 <!-- Completeness Metric Card -->
                 <div class="card border-0 mb-4 shadow-sm" style="border-radius: 18px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff;">
-                    <div class="card-body p-4 d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 text-center text-md-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
-                                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.8rem;">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 0.8rem; font-weight: 600;">
                                     <i class="bi bi-diagram-3-fill me-1"></i> TREE HEALTH
                                 </span>
-                                <span class="text-light small" id="questStatsNodesText">Scanning tree...</span>
+                                <span class="text-light small text-nowrap" id="questStatsNodesText">Scanning tree...</span>
                             </div>
-                            <h4 class="fw-bold mb-1 text-white">
-                                <span id="questCompletenessScore">--</span>% Lineage Completeness
-                            </h4>
-                            <p class="text-secondary small mb-0" style="color: #94a3b8 !important;">
-                                Every relative who claims a profile or adds an ancestor pushes our dynasty closer to 100%.
-                            </p>
+                            <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: #e2e8f0; font-size: 0.78rem;">
+                                <span id="questCompletenessScoreBadge">--</span>% Complete
+                            </span>
                         </div>
-                        <div class="w-100 w-md-auto" style="min-width: 200px;">
-                            <div class="progress" style="height: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 999px;">
-                                <div id="questCompletenessProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <h3 class="fw-bold mb-0 text-white" style="letter-spacing: -0.5px;">
+                                <span id="questCompletenessScore">--</span>% <span class="fs-6 fw-normal text-light" style="opacity: 0.9;">Lineage Completeness</span>
+                            </h3>
                         </div>
+                        <div class="progress mb-2" style="height: 10px; background-color: rgba(255, 255, 255, 0.12); border-radius: 999px;">
+                            <div id="questCompletenessProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="text-secondary small mb-0" style="color: #94a3b8 !important; font-size: 0.8rem;">
+                            Every relative who claims a profile or adds an ancestor pushes our dynasty closer to 100%.
+                        </p>
                     </div>
                 </div>
 
@@ -118,6 +121,8 @@
                 const pct = data.completeness_percentage || 20;
 
                 if (scoreEl) scoreEl.textContent = pct;
+                const badgeScore = document.getElementById('questCompletenessScoreBadge');
+                if (badgeScore) badgeScore.textContent = pct;
                 if (barEl) {
                     barEl.style.width = pct + '%';
                     barEl.setAttribute('aria-valuenow', pct);
@@ -163,7 +168,7 @@
 
         quests.forEach(quest => {
             const card = document.createElement('div');
-            card.className = 'card border-0 shadow-sm p-3';
+            card.className = 'card border-0 shadow-sm p-3 mb-2';
             card.style.borderRadius = '16px';
             card.style.background = '#f8fafc';
             card.style.borderLeft = '5px solid #10b981 !important';
@@ -171,27 +176,25 @@
             const badgeBg = quest.badge_color === 'warning' ? 'bg-warning text-dark' : (quest.badge_color === 'info' ? 'bg-info text-dark' : 'bg-success text-white');
 
             card.innerHTML = `
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0" style="width: 42px; height: 42px; background: #e0f2fe;">
-                            <i class="bi ${quest.icon || 'bi-compass-fill'} fs-5 text-primary"></i>
-                        </div>
-                        <div>
-                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.92rem;">${escapeHtml(quest.title)}</h6>
-                                <span class="badge ${badgeBg}" style="font-size: 0.72rem;">${escapeHtml(quest.badge)}</span>
-                            </div>
-                            <p class="text-muted small mb-0" style="font-size: 0.82rem;">${escapeHtml(quest.subtitle)}</p>
-                        </div>
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-success flex-shrink-0 shadow-sm" style="width: 44px; height: 44px; background: #e0f2fe;">
+                        <i class="bi ${quest.icon || 'bi-compass-fill'} fs-5 text-primary"></i>
                     </div>
-                    <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-end flex-shrink-0">
-                        <a href="${escapeHtml(quest.whatsapp_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm w-100 w-md-auto" style="background: #25D366; border-radius: 10px; white-space: nowrap; font-size: 0.85rem;">
-                            <i class="bi bi-whatsapp me-1"></i> Ask on WhatsApp
-                        </a>
-                        <button type="button" class="btn btn-light btn-sm px-3 py-2 border text-secondary fw-semibold w-100 w-md-auto" style="border-radius: 10px; white-space: nowrap; font-size: 0.85rem;" onclick="copyQuestUrl('${escapeHtml(quest.invite_url)}')">
-                            <i class="bi bi-clipboard me-1"></i> Copy Link
-                        </button>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem; line-height: 1.35;">${escapeHtml(quest.title)}</h6>
+                            <span class="badge ${badgeBg}" style="font-size: 0.72rem; padding: 4px 8px;">${escapeHtml(quest.badge)}</span>
+                        </div>
+                        <p class="text-muted small mb-0" style="font-size: 0.84rem; line-height: 1.45;">${escapeHtml(quest.subtitle)}</p>
                     </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top" style="border-color: rgba(0, 0, 0, 0.06) !important;">
+                    <a href="${escapeHtml(quest.whatsapp_url)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm px-3 py-2 fw-bold text-white shadow-sm flex-fill d-flex align-items-center justify-content-center" style="background: #25D366; border-radius: 10px; font-size: 0.85rem; min-height: 38px;">
+                        <i class="bi bi-whatsapp me-2 fs-6"></i> Ask on WhatsApp
+                    </a>
+                    <button type="button" class="btn btn-light btn-sm px-3 py-2 border text-secondary fw-semibold flex-fill d-flex align-items-center justify-content-center" style="border-radius: 10px; font-size: 0.85rem; min-height: 38px;" onclick="copyQuestUrl('${escapeHtml(quest.invite_url)}')">
+                        <i class="bi bi-clipboard me-2"></i> Copy Link
+                    </button>
                 </div>
             `;
             container.appendChild(card);

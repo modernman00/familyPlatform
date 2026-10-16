@@ -212,6 +212,73 @@
           <i class="bi bi-bar-chart-fill" style="color: #f97316; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Poll</span>
         </button>
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="openComposerWithTrivia()" aria-label="Create Sunday Family Trivia">
+          <i class="bi bi-trophy-fill" style="color: #eab308; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Trivia</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family Heritage & Rituals Hub (Immediate 1-Click Viral Engagement) -->
+  <div class="card border-0 shadow-sm mb-4 family-heritage-hub" style="border-radius: 18px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%); border: 1px solid rgba(0, 0, 0, 0.06) !important;">
+    <div class="card-body p-3 p-sm-4">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge rounded-pill shadow-xs" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-size: 0.72rem; letter-spacing: 0.5px; padding: 4px 10px; font-weight: 700;">
+            <i class="bi bi-stars me-1"></i> RITUALS &amp; HERITAGE
+          </span>
+          <span class="fw-bold text-dark small" style="font-size: 0.92rem;">Family Dynasty Hub</span>
+        </div>
+        <a href="/organogram/{{ $data['id'] ?? '' }}?mode=canvas" class="text-decoration-none small d-flex align-items-center gap-1" style="color: #0d6efd; font-size: 0.82rem; font-weight: 600;">
+          <span>Explore Tree Canvas</span> <i class="bi bi-chevron-right" style="font-size: 0.72rem;"></i>
+        </a>
+      </div>
+
+      <div class="row g-2">
+        <!-- 1. Quests -->
+        <div class="col-6 col-sm-3">
+          <button type="button" onclick="openLineageQuestModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #f0fdf4; border: 1px solid rgba(16, 185, 129, 0.25) !important; min-height: 84px; justify-content: center;" title="Solve Missing Relatives on WhatsApp">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-success shadow-xs" style="width: 36px; height: 36px; background: #d1fae5;">
+              <i class="bi bi-compass-fill fs-6"></i>
+            </div>
+            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Tree Quests</span>
+            <span class="text-muted" style="font-size: 0.7rem;">Ask on WhatsApp</span>
+          </button>
+        </div>
+
+        <!-- 2. Sunday Trivia -->
+        <div class="col-6 col-sm-3">
+          <button type="button" onclick="openComposerWithTrivia()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #fefce8; border: 1px solid rgba(245, 158, 11, 0.25) !important; min-height: 84px; justify-content: center;" title="Create or Play Sunday Family Trivia">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-warning shadow-xs" style="width: 36px; height: 36px; background: #fef08a;">
+              <i class="bi bi-trophy-fill fs-6"></i>
+            </div>
+            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Sunday Trivia</span>
+            <span class="text-muted" style="font-size: 0.7rem;">Quiz &amp; Guess Who</span>
+          </button>
+        </div>
+
+        <!-- 3. WhatsApp Flyer -->
+        <div class="col-6 col-sm-3">
+          <button type="button" onclick="openFamilyFlyerModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #eff6ff; border: 1px solid rgba(59, 130, 246, 0.25) !important; min-height: 84px; justify-content: center;" title="Generate Heraldic WhatsApp Clan Status Flyer">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 text-primary shadow-xs" style="width: 36px; height: 36px; background: #dbeafe;">
+              <i class="bi bi-card-image fs-6"></i>
+            </div>
+            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Clan Flyer</span>
+            <span class="text-muted" style="font-size: 0.7rem;">WhatsApp Status</span>
+          </button>
+        </div>
+
+        <!-- 4. Time Capsule -->
+        <div class="col-6 col-sm-3">
+          <button type="button" onclick="openTimeCapsuleModal()" class="btn w-100 p-2.5 d-flex flex-column align-items-center text-center shadow-xs transition-all" style="border-radius: 14px; background: #faf5ff; border: 1px solid rgba(168, 85, 247, 0.25) !important; min-height: 84px; justify-content: center;" title="Seal Personal Letters and Heirlooms for Future Milestones">
+            <div class="rounded-circle d-flex align-items-center justify-content-center mb-1 shadow-xs" style="width: 36px; height: 36px; background: #f3e8ff; color: #a855f7;">
+              <i class="bi bi-hourglass-split fs-6"></i>
+            </div>
+            <span class="fw-bold text-dark" style="font-size: 0.82rem; line-height: 1.2;">Time Capsule</span>
+            <span class="text-muted" style="font-size: 0.7rem;">Future Milestones</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -41,6 +41,9 @@ foreach(($eventData ?? []) as $event) {
         @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => null])
     </div>
 
+    <!-- Family Heritage & Weekly Rituals Hub Widget -->
+    @includeIf('member.includes.familyHeritageWidget')
+
     <!-- Family Memories & Milestones Widget -->
     @includeIf('member.includes.memoriesMilestonesWidget')
 
