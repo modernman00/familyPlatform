@@ -157,8 +157,8 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="p-3 bg-white border border-slate-200 rounded-3">
-                                    <div class="text-slate-500 small fw-bold text-uppercase mb-1">Primary Controller / Action</div>
-                                    <code id="stageController" class="text-primary fw-bold">Register@register</code>
+                                    <div class="text-slate-500 small fw-bold text-uppercase mb-1">Operational Role &amp; Responsibility</div>
+                                    <span id="stageController" class="text-primary fw-bold">Family Founder / Circle Admin</span>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -169,8 +169,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="p-3 bg-white border border-slate-200 rounded-3">
-                                    <div class="text-slate-500 small fw-bold text-uppercase mb-1">Database Tables Affected</div>
-                                    <div id="stageDb" class="text-slate-700 font-monospace small">personal, familyCodeTable, users</div>
+                                    <div class="text-slate-500 small fw-bold text-uppercase mb-1">Domain Records Updated</div>
+                                    <div id="stageDb" class="text-slate-700 small fw-semibold">Family Sanctuary &amp; Member Directory</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -289,8 +289,8 @@
                         <div class="d-flex align-items-center gap-3">
                             <span class="badge rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center fs-6" style="width: 36px; height: 36px;">Q3</span>
                             <div>
-                                <h2 class="h5 fw-bold text-slate-900 mb-0">Kinship State Machine &amp; Schema Inspector</h2>
-                                <small class="text-slate-500">Inspect live entity transitions and family tree database tables</small>
+                                <h2 class="h5 fw-bold text-slate-900 mb-0">Kinship State Machine &amp; Domain Model Inspector</h2>
+                                <small class="text-slate-500">Inspect live entity transitions and family tree domain structures</small>
                             </div>
                         </div>
                         <ul class="nav nav-pills" id="stateMachineTabs">
@@ -301,7 +301,7 @@
                                 <button class="nav-link rounded-pill px-3 py-1 fw-bold small" onclick="switchStateTab('events')">Family Events</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link rounded-pill px-3 py-1 fw-bold small" onclick="switchStateTab('schema')">Schema</button>
+                                <button class="nav-link rounded-pill px-3 py-1 fw-bold small" onclick="switchStateTab('schema')">Domain Entities</button>
                             </li>
                         </ul>
                     </div>
@@ -332,47 +332,47 @@
                         <span class="state-node" id="node-ARCHIVED"><i class="fas fa-box-archive text-info"></i> ARCHIVED MOMENT</span>
                     </div>
 
-                    <!-- Schema View (Hidden by default) -->
+                    <!-- Domain Entities View (Hidden by default) -->
                     <div id="schemaView" class="d-none mb-4">
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Entity Table</th>
-                                        <th>Key Attributes</th>
-                                        <th>Kinship &amp; Privacy Constraints</th>
+                                        <th>Domain Entity</th>
+                                        <th>Key Operational Attributes</th>
+                                        <th>Kinship &amp; Privacy Safeguards</th>
                                     </tr>
                                 </thead>
                                 <tbody class="small">
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">personal</td>
-                                        <td>id, famCode, firstName, lastName, email, role, token_version</td>
-                                        <td>Primary member profile &amp; family code isolation</td>
+                                        <td class="fw-bold text-primary">Member Sanctuary Profile</td>
+                                        <td>Family code, verified identity, contact channels, member role</td>
+                                        <td>Strict family code isolation &amp; multi-tenant privacy boundaries</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">family_nodes</td>
-                                        <td>id, family_code, user_id, first_name, last_name, gender, generation_level</td>
-                                        <td>FK user_id &rarr; personal.id (NULL if unclaimed)</td>
+                                        <td class="fw-bold text-primary">Kinship Node Graph</td>
+                                        <td>Lineage profile, generational depth, family circle association</td>
+                                        <td>Node claim verification &amp; dynamic tree lineage protection</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">family_unions</td>
-                                        <td>id, family_code, partner_1_id, partner_2_id, union_type</td>
-                                        <td>Marital &amp; partnership links between nodes</td>
+                                        <td class="fw-bold text-primary">Family Union Linkage</td>
+                                        <td>Partner linkages, union classification, reciprocal connections</td>
+                                        <td>Consensual marital and partnership graph synchronization</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">family_node_children</td>
-                                        <td>id, union_id, child_id, relationship_type (biological, adopted)</td>
-                                        <td>Multigenerational lineage hierarchy</td>
+                                        <td class="fw-bold text-primary">Lineage Descendant Registry</td>
+                                        <td>Union attribution, descendant ties, biological/adoptive branches</td>
+                                        <td>Multigenerational lineage integrity &amp; historical heritage tree</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">post</td>
-                                        <td>id, author_id, famCode, message, img, type, created_at</td>
-                                        <td>Private family moments &amp; milestone stories</td>
+                                        <td class="fw-bold text-primary">Private Memory Stream</td>
+                                        <td>Authored narratives, milestone stories, heirloom media associations</td>
+                                        <td>End-to-end family circle access control &amp; zero public leakage</td>
                                     </tr>
                                     <tr>
-                                        <td class="font-monospace fw-bold text-primary">images</td>
-                                        <td>id, author_id, imageName, visibility (family, private)</td>
-                                        <td>AES-256-CBC encrypted photo vault storage</td>
+                                        <td class="fw-bold text-primary">Encrypted Photo Vault</td>
+                                        <td>Secure media assets, author attribution, circle visibility scope</td>
+                                        <td>Hardware-grade encrypted asset storage &amp; revocable access</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -480,9 +480,9 @@
             title: "Stage 1: Family Code Provisioning & Private Network Onboarding",
             route: "/register",
             desc: "A family founder creates their private family space and is assigned a unique Family Code. Relatives join using this code or an invite link, ensuring complete isolation from public social media networks.",
-            controller: "Register@register",
+            controller: "Family Founder / Circle Admin",
             state: "NEW_GUEST \u2192 PROVISIONED_FAMILY",
-            db: "personal, familyCodeTable, users",
+            db: "Family Sanctuary & Member Directory",
             compliance: "Zero-Ad Family Privacy Guarantee"
         },
         {
@@ -490,9 +490,9 @@
             title: "Stage 2: Smart Relatives Claim & Kinship Fuzzy Match Algorithm",
             route: "/kinship",
             desc: "When a new relative registers, FamilyPlatform runs a hybrid fuzzy match algorithm comparing surnames, diminutives, and generational hints to surface unclaimed kinship nodes, allowing 1-click claiming.",
-            controller: "KinshipController@match",
+            controller: "Kinship Matching Engine & Onboarding Lead",
             state: "PROVISIONED_FAMILY \u2192 NODE_MATCHED",
-            db: "family_nodes, kinship_match_dismissals",
+            db: "Kinship Node Registry & Match Queue",
             compliance: "UK GDPR Art. 6 (Consensual Family Linkage)"
         },
         {
@@ -500,9 +500,9 @@
             title: "Stage 3: Interactive Multigenerational Organogram / Dynamic Family Tree",
             route: "/organogram",
             desc: "Family members explore an interactive D3/SVG multigenerational organogram showing ancestors, living descendants, unions, and siblings with live profile cards and 60fps micro-animations.",
-            controller: "OrganogramEditorController@index",
+            controller: "Family Genealogist & Visual Tree Architect",
             state: "NODE_MATCHED \u2192 TREE_CONNECTED",
-            db: "family_nodes, family_unions, family_node_children",
+            db: "Generational Lineage Tree & Union Graphs",
             compliance: "Hierarchical Lineage Data Integrity Standard"
         },
         {
@@ -510,9 +510,9 @@
             title: "Stage 4: Real-time Moments, Heritage Memory Feed & Reaction Network",
             route: "/postMessage",
             desc: "Relatives share daily updates, heirloom recipes, vintage photos, and childhood stories on a private family feed. Reactions and comments sync in real time via Pusher channels.",
-            controller: "PostMessage@index",
+            controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "post, comment, post_likes",
+            db: "Private Memories Stream & Reaction Ledger",
             compliance: "Ad-Free & Telemetry-Free Social Exchange"
         },
         {
@@ -520,9 +520,9 @@
             title: "Stage 5: Multi-Branch Family Events & Milestone Reminders",
             route: "/events",
             desc: "Coordinate family reunions, anniversaries, weddings, and birthdays with automated reminders, map directions, and interactive RSVP tracking across family branches.",
-            controller: "EventController@index",
+            controller: "Reunion Organizer & Event Lead",
             state: "MOMENT_PUBLISHED \u2192 EVENT_COORDINATED",
-            db: "events, event_attendees",
+            db: "Reunion Schedule & Attendance Records",
             compliance: "Event Privacy & Secure Calendar Feeds"
         },
         {
@@ -530,9 +530,9 @@
             title: "Stage 6: Direct Family Messenger & Real-Time Pusher Channels",
             route: "/chat",
             desc: "Private group and one-on-one encrypted chat rooms for cousins, siblings, and elders with instant read receipts, push notifications, and voice/media sharing.",
-            controller: "ChatController@index",
+            controller: "Family Member / Circle Communicator",
             state: "EVENT_COORDINATED \u2192 REALTIME_CONNECTED",
-            db: "messages, chat_rooms, push_subscriptions",
+            db: "Encrypted Family Messenger Channels",
             compliance: "Secure Web Push & Zero-Trace Ephemeral Caching"
         },
         {
@@ -540,9 +540,9 @@
             title: "Stage 7: Cross-Generational Digital Photo Vault & Memory Preservation",
             route: "/gallery",
             desc: "A centralized, high-resolution photo repository tagging relatives across generational albums. Images are encrypted at rest (AES-256-CBC) to prevent unauthorized cloud exposure.",
-            controller: "ProfilePage@gallery",
+            controller: "Family Archivist & Memory Custodian",
             state: "REALTIME_CONNECTED \u2192 MEMORY_SECURED",
-            db: "images, album_tags",
+            db: "Encrypted Media Vault & Heirloom Albums",
             compliance: "AES-256-CBC Memory Vault Cryptography"
         },
         {
@@ -550,9 +550,9 @@
             title: "Stage 8: Autonomous Family Moderation, Kinship Tree Pruning & GDPR Vault",
             route: "/admin/members",
             desc: "Family elders and administrators manage access permissions, approve new member requests, prune tree duplicates, and execute full GDPR data export or right-to-be-forgotten requests.",
-            controller: "AdminMembersController@registeredUsers",
+            controller: "Family Council Elder & Privacy Officer",
             state: "MEMORY_SECURED \u2192 HERITAGE_PRESERVED",
-            db: "personal, audit_logs, gdpr_requests",
+            db: "Member Permissions & GDPR Erasure Log",
             compliance: "UK GDPR Art. 17 Right to Erasure & Portability"
         }
     ];
