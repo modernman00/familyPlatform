@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(auth): define isTotpRequired in Login.php",
+    "title": "Fix(types): satisfy PHPStan L8 strictness on non-nullable message offset",
     "notes": [
-        "Fix(auth): define isTotpRequired in Login.php",
-        "Feat(seo): add FAQ section and schema.org/FAQPage rich snippet on landing page",
-        "Feat(auth): integrate 7-day trusted device TOTP persistence and UI checkbox"
+        "Fix(types): satisfy PHPStan L8 strictness on non-nullable message offset",
+        "Fix(secops): sanitize echoed json response in KinshipController for Semgrep gate",
+        "Feat(kinship-onboarding): Kinship Auto-Matching Resolution Engine and Multi-Touch Lifecycle Follow-Up Cascade"
     ],
-    "released_at": "2026-10-14",
-    "commit": "56dde4a"
+    "released_at": "2026-10-16",
+    "commit": "ceb23c5"
 }
