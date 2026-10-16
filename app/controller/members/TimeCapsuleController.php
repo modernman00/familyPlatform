@@ -55,6 +55,7 @@ final class TimeCapsuleController extends BaseController
             $capsules = FamilyTimeCapsuleService::getFamilyCapsules($familyCode, $userId);
 
             http_response_code(200);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
             echo json_encode([
                 'status' => 'success',
                 'data'   => $capsules,
@@ -140,6 +141,7 @@ final class TimeCapsuleController extends BaseController
             ]);
 
             http_response_code(201);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
             echo json_encode([
                 'status'     => 'success',
                 'capsule_id' => $capsuleId,

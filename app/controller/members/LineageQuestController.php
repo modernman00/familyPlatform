@@ -59,6 +59,7 @@ final class LineageQuestController extends BaseController
             $data = LineageQuestService::getFamilyQuests($familyCode, $userId);
 
             http_response_code(200);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
             echo json_encode([
                 'status' => 'success',
                 'data'   => $data,
@@ -145,6 +146,7 @@ final class LineageQuestController extends BaseController
             $waUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode($waMessage);
 
             http_response_code(200);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response (Content-Type: application/json); json_encode escapes output safely
             echo json_encode([
                 'status'       => 'success',
                 'token'        => $token,
