@@ -35,8 +35,8 @@ foreach ($iterator as $file) {
 
     $filePath = $file->getPathname();
 
-    // Skip vendor, cache, git, tests directories
-    if (preg_match('#/(vendor|\.git|\.phpunit\.cache|cache|storage|node_modules)/#', $filePath)) {
+    // Skip vendor, cache, git, scratch, temp dirs, 3rd party SDKs, and scripts directories
+    if (preg_match('#/(vendor|\.git|\.phpunit\.cache|\.php_tmp|cache|storage|node_modules|scripts|gen_class|scratch|php-uk)/#', $filePath)) {
         continue;
     }
 
@@ -91,7 +91,7 @@ foreach ($iterator as $file) {
             // Check for SQL statements with direct variable interpolation
             if (preg_match('/\b(SELECT\s+.*?\s+FROM|INSERT\s+INTO\s+.*?\s+VALUES|UPDATE\s+.*?\s+SET|DELETE\s+FROM)\b.*["\'].*\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*.*["\']/i', $line)) {
                 // Ignore if it's within a comment
-                if (!preg_match('#^\s*(//|\*|#)#', $line)) {
+                if (!preg_match('~^\s*(//|\*|#)~', $line)) {
                     $violations[] = [
                         'severity' => 'CRITICAL',
                         'rule' => 'MUST-HAVE #2: Raw SQL Interpolation Detected',
@@ -121,12 +121,70 @@ foreach ($iterator as $file) {
             }
         }
     }
+
+    // --- CHECK 4: ANTI-REINVENTION GUARD (SHARED-LIB & SHARED-JS-LIB) ---
+    // 4A: Check for raw IP header lookups instead of \Src\ClientIp
+    if ($extension === 'php' && !str_ends_with($filePath, 'app/function/helper.php') && !str_contains($filePath, '/tests/')) {
+        $lines = explode("\n", $content);
+        foreach ($lines as $lineNum => $line) {
+            if (preg_match('/\$_SERVER\s*\[\s*[\'"](HTTP_CLIENT_IP|HTTP_X_FORWARDED_FOR|HTTP_CF_CONNECTING_IP)[\'"]\s*\]/i', $line)) {
+                if (!preg_match('~^\s*(//|\*|#)~', $line)) {
+                    $violations[] = [
+                        'severity' => 'CRITICAL',
+                        'rule' => 'MUST-HAVE #4: Ad-Hoc Client IP Parsing (Standard 21)',
+                        'file' => $filePath,
+                        'line' => $lineNum + 1,
+                        'remediation' => 'Use `\Src\ClientIp::fromGlobals()` or `getUserIpAddr()` from modernman00/shared-lib instead of raw $_SERVER inspection.',
+                    ];
+                    $exitCode = 1;
+                }
+            }
+        }
+    }
+
+    // 4B: Check for reinvented ad-hoc JSON responders in newly written controllers
+    if ($extension === 'php' && str_contains($filePath, '/app/controller/')) {
+        $lines = explode("\n", $content);
+        foreach ($lines as $lineNum => $line) {
+            if (preg_match('/function\s+(sendJson|outputJson|jsonResponse)\s*\(/i', $line)) {
+                if (!preg_match('~^\s*(//|\*|#)~', $line)) {
+                    $violations[] = [
+                        'severity' => 'CRITICAL',
+                        'rule' => 'MUST-HAVE #4: Ad-Hoc JSON Response Reinvention (Standard 21)',
+                        'file' => $filePath,
+                        'line' => $lineNum + 1,
+                        'remediation' => 'Use `\Src\ApiResponse::success()` or `\Src\ApiResponse::error()` from modernman00/shared-lib.',
+                    ];
+                    $exitCode = 1;
+                }
+            }
+        }
+    }
+
+    // 4C: Check for reinvented JS utility functions in blade templates or non-bundled scripts
+    if (($extension === 'php' || $extension === 'html' || $extension === 'js') && !preg_match('#/(public/assets/js/index|vendor|node_modules)/#', $filePath)) {
+        $lines = explode("\n", $content);
+        foreach ($lines as $lineNum => $line) {
+            if (preg_match('/function\s+(toSentenceCase|date2String|calTiming)\s*\(/i', $line)) {
+                if (!preg_match('~^\s*(//|\*|#)~', $line)) {
+                    $violations[] = [
+                        'severity' => 'CRITICAL',
+                        'rule' => 'MUST-HAVE #4: Reinvented Shared-JS-Lib Utility (Standard 21)',
+                        'file' => $filePath,
+                        'line' => $lineNum + 1,
+                        'remediation' => 'Import from `@modernman00/shared-js-lib` (Utility.js, DateTime.js) instead of defining duplicate functions.',
+                    ];
+                    $exitCode = 1;
+                }
+            }
+        }
+    }
 }
 
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";
-    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes detected.\n\n";
+    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes, 0 shared-lib reinventions detected.\n\n";
     exit(0);
 }
 

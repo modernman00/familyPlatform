@@ -21,16 +21,11 @@ final class AdminGuardMiddleware
 {
     public static function getClientIp(): string
     {
-        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP']) && is_string($_SERVER['HTTP_CF_CONNECTING_IP'])) {
-            return trim($_SERVER['HTTP_CF_CONNECTING_IP']);
+        if (class_exists('\\Src\\ClientIp')) {
+            return \Src\ClientIp::fromGlobals();
         }
-
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && is_string($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-            $first = trim($parts[0]);
-            if (filter_var($first, FILTER_VALIDATE_IP)) {
-                return $first;
-            }
+        if (function_exists('getUserIpAddr')) {
+            return getUserIpAddr();
         }
 
         return (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');

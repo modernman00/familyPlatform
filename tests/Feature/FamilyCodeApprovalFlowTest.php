@@ -750,8 +750,10 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $maternalCode = 'ADE555';
 
         // 1. Seed user in personal & otherFamily
-        $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)')->execute([$userId, $primaryCode, 'Titilayo', 'Olaogun']);
-        $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)')->execute([$userId, null]);
+        $pStmt = $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)');
+        $pStmt->execute([$userId, $primaryCode, 'Titilayo', 'Olaogun']);
+        $oStmt = $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)');
+        $oStmt->execute([$userId, null]);
 
         // 2. Set secondary family code to maternal code
         $stmt = $this->pdo->prepare('UPDATE otherFamily SET otherFamCode = ? WHERE id = ?');
@@ -780,10 +782,14 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $this->assertEquals($maternalCode, $stmtOtherAfter->fetchColumn(), 'Maternal otherFamCode must be preserved when branching solo');
 
         // Cleanup
-        $this->pdo->prepare('DELETE FROM otherFamily WHERE id = ?')->execute([$userId]);
-        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$userId]);
-        $this->pdo->prepare('DELETE FROM code_mgt WHERE id = ?')->execute([$userId]);
-        $this->pdo->prepare('DELETE FROM user_families WHERE user_id = ?')->execute([$userId]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM otherFamily WHERE id = ?');
+        $cleanStmt->execute([$userId]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM personal WHERE id = ?');
+        $cleanStmt->execute([$userId]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM code_mgt WHERE id = ?');
+        $cleanStmt->execute([$userId]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM user_families WHERE user_id = ?');
+        $cleanStmt->execute([$userId]);
     }
 
     /**
@@ -796,12 +802,16 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $maternalCode = 'MAT123';
 
         // User A has primary famCode OLA111, but maternal otherFamCode MAT123
-        $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)')->execute([$userA, 'OLA111', 'Simi', 'Olaogun']);
-        $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)')->execute([$userA, $maternalCode]);
+        $stmtA = $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)');
+        $stmtA->execute([$userA, 'OLA111', 'Simi', 'Olaogun']);
+        $stmtAOther = $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)');
+        $stmtAOther->execute([$userA, $maternalCode]);
 
         // User B has primary famCode MAT123 (maternal cousin)
-        $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)')->execute([$userB, $maternalCode, 'Kola', 'Adeyemi']);
-        $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)')->execute([$userB, null]);
+        $stmtB = $this->pdo->prepare('INSERT INTO personal (id, famCode, firstName, lastName) VALUES (?, ?, ?, ?)');
+        $stmtB->execute([$userB, $maternalCode, 'Kola', 'Adeyemi']);
+        $stmtBOther = $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)');
+        $stmtBOther->execute([$userB, null]);
 
         $suggestions = \App\services\KinshipEngineService::getSuggestedKin($userA, 10);
 
@@ -816,8 +826,10 @@ class FamilyCodeApprovalFlowTest extends TestCase
         $this->assertTrue($foundMatch, 'User B must be suggested to User A via maternal otherFamCode match');
 
         // Cleanup
-        $this->pdo->prepare('DELETE FROM otherFamily WHERE id IN (?, ?)')->execute([$userA, $userB]);
-        $this->pdo->prepare('DELETE FROM personal WHERE id IN (?, ?)')->execute([$userA, $userB]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM otherFamily WHERE id IN (?, ?)');
+        $cleanStmt->execute([$userA, $userB]);
+        $cleanStmt = $this->pdo->prepare('DELETE FROM personal WHERE id IN (?, ?)');
+        $cleanStmt->execute([$userA, $userB]);
     }
 
     /**

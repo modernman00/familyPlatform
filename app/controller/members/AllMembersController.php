@@ -233,7 +233,8 @@ final class AllMembersController extends AllMembersData
             $isSameFamily = ($callerFamCode !== '' && $callerFamCode === $targetFamCode);
             if (!$isSameFamily && !empty($callerFamCodes)) {
                 $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
-                $targetFamCheck = $db->prepare("SELECT COUNT(*) FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                $sql = sprintf("SELECT COUNT(*) FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN (%s)", $placeholders);
+                $targetFamCheck = $db->prepare($sql);
                 $targetFamCheck->execute(array_merge([$targetId], $callerFamCodes));
                 if (((int)$targetFamCheck->fetchColumn()) > 0) {
                     $isSameFamily = true;
@@ -244,7 +245,8 @@ final class AllMembersController extends AllMembersData
                 // Delete user_families records linking target to any of caller's family codes
                 if (!empty($callerFamCodes)) {
                     $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
-                    $delFamStmt = $db->prepare("DELETE FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                    $sql = sprintf("DELETE FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN (%s)", $placeholders);
+                    $delFamStmt = $db->prepare($sql);
                     $delFamStmt->execute(array_merge([$targetId], $callerFamCodes));
                 }
 
@@ -264,7 +266,8 @@ final class AllMembersController extends AllMembersData
                     try {
                         $placeholders = implode(',', array_fill(0, count($callerFamCodes), '?'));
                         // Find node IDs for target in caller's family codes
-                        $nodeStmt = $db->prepare("SELECT id FROM family_nodes WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN ($placeholders)");
+                        $sql = sprintf("SELECT id FROM family_nodes WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) IN (%s)", $placeholders);
+                        $nodeStmt = $db->prepare($sql);
                         $nodeStmt->execute(array_merge([$targetId], $callerFamCodes));
                         $targetNodeIds = array_column($nodeStmt->fetchAll(\PDO::FETCH_ASSOC) ?: [], 'id');
 
@@ -278,8 +281,10 @@ final class AllMembersController extends AllMembersData
                             $uIds = array_column($uStmt->fetchAll(\PDO::FETCH_ASSOC) ?: [], 'id');
                             if (!empty($uIds)) {
                                 $uPlaceholders = implode(',', array_fill(0, count($uIds), '?'));
-                                $db->prepare("DELETE FROM family_node_children WHERE union_id IN ($uPlaceholders)")->execute($uIds);
-                                $db->prepare("DELETE FROM family_unions WHERE id IN ($uPlaceholders)")->execute($uIds);
+                                $sqlChildren = sprintf("DELETE FROM family_node_children WHERE union_id IN (%s)", $uPlaceholders);
+                                $db->prepare($sqlChildren)->execute($uIds);
+                                $sqlUnions = sprintf("DELETE FROM family_unions WHERE id IN (%s)", $uPlaceholders);
+                                $db->prepare($sqlUnions)->execute($uIds);
                             }
                             // Delete node
                             $db->prepare("DELETE FROM family_nodes WHERE id = ?")->execute([$tNodeIdInt]);

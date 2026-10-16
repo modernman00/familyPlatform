@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(types): satisfy PHPStan L8 strictness on non-nullable message offset",
+    "title": "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook",
     "notes": [
+        "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook",
         "Fix(types): satisfy PHPStan L8 strictness on non-nullable message offset",
-        "Fix(secops): sanitize echoed json response in KinshipController for Semgrep gate",
-        "Feat(kinship-onboarding): Kinship Auto-Matching Resolution Engine and Multi-Touch Lifecycle Follow-Up Cascade"
+        "Fix(secops): sanitize echoed json response in KinshipController for Semgrep gate"
     ],
     "released_at": "2026-10-16",
-    "commit": "e051a67"
+    "commit": "38ef30a"
 }

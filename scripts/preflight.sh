@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# 🛡️  DAVID'S PRE-FLIGHT QUALITY & GOVERNANCE GATE — FamilyPlatform
+# 🛡️  DAVID & RED TEAM PRE-FLIGHT QUALITY & GOVERNANCE GATE — FamilyPlatform
 # ==============================================================================
 # Deterministic local gate enforcing:
 #   1. PHP Syntax Check (php -l) across all PHP codebase
 #   2. David's PHPStan Level 8 Static Analysis
 #   3. Semgrep Security & Vulnerability Scan
-#   4. Automated PHPUnit Test Suite
+#   4. Engineering Must-Haves (CSRF, SQL, Passwords, Shared-Lib)
+#   5. Automated PHPUnit Test Suite
+#   6. Marcus & Ghost Adversarial Red Team Gate (scripts/run-all-security-checks.sh)
 #
 # Exit Code: 0 = PASS (Ready to commit/deploy), 1 = BLOCKED (Must fix errors)
 # ==============================================================================
@@ -40,7 +42,7 @@ FAILURES=0
 # ------------------------------------------------------------------------------
 # 1. PHP Syntax Check (php -l)
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 1/4] Checking PHP Syntax (php -l)...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 1/6] Checking PHP Syntax (php -l)...${NC}"
 SYNTAX_ERRORS=0
 while IFS= read -r file; do
     if ! php -l "$file" > /dev/null 2>&1; then
@@ -48,7 +50,7 @@ while IFS= read -r file; do
         php -l "$file"
         SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
     fi
-done < <(find app bin scripts -name "*.php" -type f)
+done < <(find app bin scripts -name "*.php" -type f 2>/dev/null)
 
 if [ "$SYNTAX_ERRORS" -eq 0 ]; then
     echo -e "${GREEN}  ✅ Gate 1 Passed: All PHP files have valid syntax.${NC}"
@@ -61,7 +63,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 2. David's PHPStan Level 8 Static Analysis Gate
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 2/4] Running PHPStan Level 8 Analysis...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 2/6] Running PHPStan Level 8 Analysis...${NC}"
 if [ -x "vendor/bin/phpstan" ]; then
     if vendor/bin/phpstan analyse --level=8; then
         echo -e "${GREEN}  ✅ Gate 2 Passed: Zero PHPStan Level 8 errors.${NC}"
@@ -77,7 +79,7 @@ echo ""
 # ------------------------------------------------------------------------------
 # 3. Semgrep Security & Vulnerability Scan
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 3/4] Running Semgrep Security Scan...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 3/6] Running Semgrep Security Scan...${NC}"
 if command -v semgrep >/dev/null 2>&1; then
     SEMGREP_CFG="--config=auto"
     if [ -f ".semgrep.yml" ]; then
@@ -94,14 +96,30 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 4. Automated PHPUnit Test Suite
+# 4. Engineering Must-Haves & Anti-Reinvention Scanner (TAT & BRATS Gate)
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 4/4] Running PHPUnit Test Suite...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 4/6] Verifying Engineering Must-Haves (CSRF, SQL, Shared-Lib)...${NC}"
+if [ -f "scripts/verify_engineering_must_haves.php" ]; then
+    if php scripts/verify_engineering_must_haves.php; then
+        echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations.${NC}"
+    else
+        echo -e "${RED}  ❌ Gate 4 Failed: Engineering Must-Have violations detected.${NC}"
+        FAILURES=$((FAILURES + 1))
+    fi
+else
+    echo -e "${YELLOW}  ⚠️  Must-haves scanner not found.${NC}"
+fi
+echo ""
+
+# ------------------------------------------------------------------------------
+# 5. Automated PHPUnit Test Suite
+# ------------------------------------------------------------------------------
+echo -e "${BOLD}${CYAN}[GATE 5/6] Running PHPUnit Test Suite...${NC}"
 if [ -x "vendor/bin/phpunit" ]; then
     if vendor/bin/phpunit; then
-        echo -e "${GREEN}  ✅ Gate 4 Passed: All PHPUnit tests succeeded.${NC}"
+        echo -e "${GREEN}  ✅ Gate 5 Passed: All PHPUnit tests succeeded.${NC}"
     else
-        echo -e "${RED}  ❌ Gate 4 Failed: PHPUnit reported test failures.${NC}"
+        echo -e "${RED}  ❌ Gate 5 Failed: PHPUnit reported test failures.${NC}"
         FAILURES=$((FAILURES + 1))
     fi
 else
@@ -110,19 +128,25 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 5. Web-Server & Route Parity Smoke Check
+# 6. Marcus & Ghost Adversarial Red Team Gate
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 5/5] Checking Web-Server & Route Reachability...${NC}"
-APP_URL="${APP_URL:-https://olaogun.test}"
-if command -v curl >/dev/null 2>&1; then
-    LOGIN_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$APP_URL/login" || echo "000")
-    if [ "$LOGIN_STATUS" = "200" ] || [ "$LOGIN_STATUS" = "302" ]; then
-        echo -e "${GREEN}  ✅ Gate 5 Passed: $APP_URL/login reachable (HTTP $LOGIN_STATUS).${NC}"
+echo -e "${BOLD}${CYAN}[GATE 6/6] Running Marcus & Ghost Adversarial Red Team Gate...${NC}"
+if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
+    if bash scripts/dast-guest-builder-idor.sh; then
+        echo -e "${GREEN}  ✅ Gate 6 Passed: Marcus & Ghost Red Team IDOR gauntlet passed.${NC}"
     else
-        echo -e "${YELLOW}  ⚠️  Gate 5 Notice: $APP_URL/login returned HTTP $LOGIN_STATUS (Verify web server is running).${NC}"
+        echo -e "${RED}  ❌ Gate 6 Failed: Adversarial security check failed.${NC}"
+        FAILURES=$((FAILURES + 1))
+    fi
+elif [ -f "scripts/run-all-security-checks.sh" ]; then
+    if bash scripts/run-all-security-checks.sh; then
+        echo -e "${GREEN}  ✅ Gate 6 Passed: Adversarial security checks passed.${NC}"
+    else
+        echo -e "${RED}  ❌ Gate 6 Failed: Adversarial security check failed.${NC}"
+        FAILURES=$((FAILURES + 1))
     fi
 else
-    echo -e "${YELLOW}  ⚠️  curl not installed (Skipping Gate 5).${NC}"
+    echo -e "${YELLOW}  ⚠️  Red team security script not found.${NC}"
 fi
 echo ""
 

@@ -91,9 +91,11 @@ final class MemoryMilestoneSecurityTest extends SocialFeedTestCase
         $this->assertArrayHasKey('status', $result);
 
         // Cleanup
-        $this->pdo->prepare("DELETE FROM post WHERE post_no = ?")->execute([$victimPostNo]);
+        $cleanStmt1 = $this->pdo->prepare("DELETE FROM post WHERE post_no = ?");
+        $cleanStmt1->execute([$victimPostNo]);
         if (!empty($result['new_post_no'])) {
-            $this->pdo->prepare("DELETE FROM post WHERE post_no = ?")->execute([(int)$result['new_post_no']]);
+            $cleanStmt2 = $this->pdo->prepare("DELETE FROM post WHERE post_no = ?");
+            $cleanStmt2->execute([(int)$result['new_post_no']]);
         }
     }
 

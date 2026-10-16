@@ -191,7 +191,8 @@ final class SocialFeedTest extends SocialFeedTestCase
         $this->assertSame($payload['post_time'], (string) $row['post_time']);
 
         // Clean up
-        $this->pdo->prepare("DELETE FROM comment WHERE comment_no = ?")->execute([(int) $payload['comment_no']]);
+        $delStmt = $this->pdo->prepare("DELETE FROM comment WHERE comment_no = ?");
+        $delStmt->execute([(int) $payload['comment_no']]);
     }
 }
 

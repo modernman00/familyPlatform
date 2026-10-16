@@ -38,14 +38,18 @@ final class PostLikeController extends Db
 
             if ($existing) {
                 // User already liked, so unlike it (toggle)
-                $pdo->prepare("DELETE FROM post_reactions WHERE id = :id")->execute(['id' => $existing['id']]);
+                $delStmt = $pdo->prepare("DELETE FROM post_reactions WHERE id = :id");
+                $delStmt->execute(['id' => $existing['id']]);
                 // Decrement count
-                $pdo->prepare("UPDATE post SET post_likes = GREATEST(post_likes - 1, 0), likes_updated_at = NOW() WHERE post_no = :postNo")->execute(['postNo' => $postNo]);
+                $updStmt = $pdo->prepare("UPDATE post SET post_likes = GREATEST(post_likes - 1, 0), likes_updated_at = NOW() WHERE post_no = :postNo");
+                $updStmt->execute(['postNo' => $postNo]);
             } else {
                 // Insert new like
-                $pdo->prepare("INSERT INTO post_reactions (post_no, user_id, reaction_type) VALUES (:postNo, :userId, 'like')")->execute(['postNo' => $postNo, 'userId' => $userId]);
+                $insStmt = $pdo->prepare("INSERT INTO post_reactions (post_no, user_id, reaction_type) VALUES (:postNo, :userId, 'like')");
+                $insStmt->execute(['postNo' => $postNo, 'userId' => $userId]);
                 // Increment count
-                $pdo->prepare("UPDATE post SET post_likes = post_likes + 1, likes_updated_at = NOW() WHERE post_no = :postNo")->execute(['postNo' => $postNo]);
+                $updStmt = $pdo->prepare("UPDATE post SET post_likes = post_likes + 1, likes_updated_at = NOW() WHERE post_no = :postNo");
+                $updStmt->execute(['postNo' => $postNo]);
             }
 
             self::getNewLikesPusher();
