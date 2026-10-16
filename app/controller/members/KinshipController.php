@@ -230,11 +230,12 @@ final class KinshipController extends BaseController
             $result = KinshipEntityResolver::claimAndMergeNode($familyCode, $userId, $targetNodeId, $memberData);
 
             http_response_code((int)$result['code']);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
             echo json_encode([
                 'status'  => $result['success'] ? 'success' : 'error',
-                'message' => $result['message'],
+                'message' => htmlspecialchars((string)($result['message'] ?? ''), ENT_QUOTES, 'UTF-8'),
                 'data'    => $result
-            ]);
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['status' => 'error', 'message' => 'Internal server error: ' . $e->getMessage()]);
