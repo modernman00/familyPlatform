@@ -13,3 +13,11 @@ $router->map('POST', '/api/telemetry/event', 'App\controller\members\TelemetryCo
 $router->map('GET', '/api/telemetry/stats', 'App\controller\members\TelemetryController@getStats', 'telemetry_stats');
 $router->map('GET', '/api/recommendation/get-link', 'App\controller\members\RecommendationController@getShareLink', 'recommendation_get_link');
 
+// Sunday Family Trivia & Guess Who Engine
+$router->map('GET', '/api/trivia/current', 'App\controller\members\FamilyTriviaController@getCurrentTrivia', 'trivia_current');
+$router->map('POST', '/api/trivia/auto-generate', 'App\controller\members\FamilyTriviaController@autoGenerate', 'trivia_auto_generate');
+
+// Digital Family Time Capsule Vault
+$router->map('GET', '/api/capsules', 'App\controller\members\TimeCapsuleController@listCapsules', 'capsules_list');
+$router->map('POST', '/api/capsules/create', 'App\controller\members\TimeCapsuleController@createCapsule', 'capsules_create');
+

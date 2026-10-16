@@ -39,6 +39,15 @@
     </div>
   </div>
 
+  <!-- Weekly Family Trivia Badge -->
+  <template x-if="post.postMessage && post.postMessage.includes('Weekly Family Trivia')">
+    <div class="px-1 mb-2">
+      <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
+        <i class="bi bi-trophy-fill"></i> WEEKLY FAMILY TRIVIA
+      </span>
+    </div>
+  </template>
+
   <!-- Post Text -->
   <template x-if="post.displayMessage || (!post.video && post.postMessage)">
     <div class="post-content px-1 mb-3">

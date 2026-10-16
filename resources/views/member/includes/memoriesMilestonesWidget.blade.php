@@ -127,9 +127,14 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                             <i class="bi bi-camera-reels fs-4"></i>
                         </div>
                         <h6 class="fw-bold mb-1" style="color: var(--text-color, #1f2937); font-size: 0.88rem;">No Flashbacks Today</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.78rem; line-height: 1.4;">
+                        <p class="text-muted small mb-2" style="font-size: 0.78rem; line-height: 1.4;">
                             Keep sharing photos and family moments! They will reappear here as cherished memories on this day in future years.
                         </p>
+                        <div>
+                            <a href="/organogram" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1" style="font-size: 0.78rem;">
+                                <i class="bi bi-compass me-1"></i> Lineage Quests
+                            </a>
+                        </div>
                     </div>
                 </template>
 

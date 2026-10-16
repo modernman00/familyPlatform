@@ -29,4 +29,8 @@ $router->map('GET', '/api/v1/kinship/tree/[*:id]', 'App\controller\api\KinshipAp
 $router->map('GET', '/api/v1/kinship/tree', 'App\controller\api\KinshipApiController@getTree', 'API_V1_KINSHIP_TREE_DEFAULT');
 $router->map('POST', '/api/v1/admin/api-keys', 'App\controller\api\KinshipApiController@provisionKey', 'API_V1_ADMIN_PROVISION_KEY');
 
+// Gamified Lineage Quests & WhatsApp Flywheel
+$router->map('GET', '/api/lineage/quests', 'App\controller\members\LineageQuestController@getQuests', 'API_LINEAGE_QUESTS');
+$router->map('POST', '/api/lineage/quest-token', 'App\controller\members\LineageQuestController@generateQuestToken', 'API_LINEAGE_QUEST_TOKEN');
+
 

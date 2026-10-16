@@ -497,22 +497,22 @@
         },
         {
             num: 3,
-            title: "Stage 3: Interactive Multigenerational Organogram / Dynamic Family Tree",
+            title: "Stage 3: Multigenerational Organogram, Lineage Quests & WhatsApp Status Flyers",
             route: "/organogram",
-            desc: "Family members explore an interactive D3/SVG multigenerational organogram showing ancestors, living descendants, unions, and siblings with live profile cards and 60fps micro-animations.",
+            desc: "Family members explore an interactive D3/SVG multigenerational tree with 1-tap WhatsApp Quests to fill missing links, and generate high-status heraldic family status flyers with live counts of connected members and generations.",
             controller: "Family Genealogist & Visual Tree Architect",
             state: "NODE_MATCHED \u2192 TREE_CONNECTED",
-            db: "Generational Lineage Tree & Union Graphs",
+            db: "Generational Lineage Tree, Lineage Quests & Opaque Tokens",
             compliance: "Hierarchical Lineage Data Integrity Standard"
         },
         {
             num: 4,
-            title: "Stage 4: Real-time Moments, Heritage Memory Feed & Reaction Network",
+            title: "Stage 4: Moments Feed, Sunday Family Trivia & Living Time Capsule Vault",
             route: "/postMessage",
-            desc: "Relatives share daily updates, heirloom recipes, vintage photos, and childhood stories on a private family feed. Reactions and comments sync in real time via Pusher channels.",
+            desc: "Relatives share moments, participate in automated weekly Sunday Family Trivia challenges, and seal time capsules with zero-trust cryptographic lockups for children's future milestone birthdays.",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "Private Memories Stream & Reaction Ledger",
+            db: "Private Memories Stream, Trivia Polls & Time Capsules",
             compliance: "Ad-Free & Telemetry-Free Social Exchange"
         },
         {

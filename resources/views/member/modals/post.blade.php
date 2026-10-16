@@ -60,6 +60,17 @@
                             </button>
                         </div>
 
+                        <!-- Quick Trivia Templates -->
+                        <div class="d-flex align-items-center gap-1.5 mb-2 px-1">
+                            <span class="text-muted small" style="font-size: 0.75rem;">Trivia Starters:</span>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('guess_who')">
+                                👶 Guess Who
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('family_lore')">
+                                🧠 Family Lore
+                            </button>
+                        </div>
+
                         <div class="poll-builder__field">
                             <input type="text" name="poll_question" class="poll-builder__question" placeholder="Ask a question…" maxlength="150">
                         </div>
@@ -183,3 +194,22 @@
         </div>
     </div>
 </div>
+
+<script>
+window.applyTriviaTemplate = function(type) {
+    const qInput = document.querySelector('input[name="poll_question"]');
+    const msgInput = document.getElementById('postMessage');
+    const optInputs = document.querySelectorAll('input[name="poll_options[]"]');
+    if (type === 'guess_who') {
+        if (qInput) qInput.value = '👶 Guess Who: Who is this in the throwback photo?';
+        if (msgInput && !msgInput.value.trim()) msgInput.value = '👶 Weekly Family Trivia! Can anyone guess who this was? Cast your vote!';
+        if (optInputs[0]) optInputs[0].value = 'Cousin Ade';
+        if (optInputs[1]) optInputs[1].value = 'Uncle Tunde';
+    } else {
+        if (qInput) qInput.value = '🧠 Family Trivia: Who knows this family secret?';
+        if (msgInput && !msgInput.value.trim()) msgInput.value = '🧠 Weekly Family Trivia Challenge! Vote below and debate in the comments!';
+        if (optInputs[0]) optInputs[0].value = 'True';
+        if (optInputs[1]) optInputs[1].value = 'False';
+    }
+};
+</script>

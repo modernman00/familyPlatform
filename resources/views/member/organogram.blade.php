@@ -33,6 +33,15 @@
                         <i class="bi bi-aspect-ratio"></i> Fit Family
                     </button>
                     @if(empty($isReadOnly))
+                    <button type="button" class="btn-action" onclick="openLineageQuestModal()" title="Lineage Quests on WhatsApp" style="border-color: rgba(16, 185, 129, 0.4); color: #10b981;">
+                        <i class="bi bi-compass-fill text-success"></i> Quests
+                    </button>
+                    <button type="button" class="btn-action" onclick="openFamilyFlyerModal()" title="Generate WhatsApp Family Status Flyer" style="border-color: rgba(245, 158, 11, 0.4); color: #f59e0b;">
+                        <i class="bi bi-card-image text-warning"></i> WhatsApp Flyer
+                    </button>
+                    <button type="button" class="btn-action" onclick="openTimeCapsuleModal()" title="Digital Time Capsule Vault" style="border-color: rgba(168, 85, 247, 0.4); color: #a855f7;">
+                        <i class="bi bi-hourglass-split text-primary"></i> Time Capsule
+                    </button>
                     <a href="/familyStudio" id="configureFamilyBtn" class="btn-action" title="Open Lineage Studio">
                         <i class="bi bi-stars text-warning"></i> Lineage Studio
                     </a>
@@ -161,6 +170,9 @@
                     @else
                         Add Family Members
                     @endif
+                </button>
+                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success btn-sm px-3 py-2 fw-bold w-100 w-md-auto text-white shadow-sm" style="border-radius: 8px; white-space: nowrap; background: #10b981; border-color: #10b981;">
+                    <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
                 </button>
                 <button type="button" class="btn-close text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
             </div>
@@ -3391,4 +3403,8 @@
         checkPendingKinshipMatches();
     });
 </script>
+
+@include('member.modals.lineageQuestModal')
+@include('member.modals.familyFlyerModal')
+@include('member.modals.timeCapsuleModal')
 @endsection

@@ -153,6 +153,114 @@
           </div>
         </div>
 
+        <!-- Pillar 5: Gamified Lineage Quests & WhatsApp Flywheel -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="bi bi-compass-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">5. "The Missing Link" WhatsApp Quests</h3>
+                <span class="badge bg-success">Viral Acquisition</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Turn incomplete family branches into exciting family sleuthing missions. The platform scans your tree, identifies gaps (missing grandparents, unrecorded maiden names, or unclaimed cousins), and provides pre-composed WhatsApp questions.
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border mb-3">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-whatsapp text-success fs-5"></i>
+                <span class="fw-bold text-dark">1-Tap WhatsApp Collaboration</span>
+              </div>
+              <p class="small text-muted mb-0">
+                Click <strong>"Quests"</strong> on your organogram canvas to view active missions. Tap <strong>"Ask on WhatsApp"</strong> to instantly message Uncle Tunde or Auntie Funke with an opaque, 256-bit signed claim link that pre-fills their details in 10 seconds.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 6: Sunday Family Trivia & "Guess Who" -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                <i class="bi bi-trophy-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">6. Sunday Family Trivia &amp; "Guess Who"</h3>
+                <span class="badge bg-warning text-dark">Weekly Ritual</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Every Sunday, FamilyPlatform automatically drops an authentic heritage trivia poll generated directly from your family's records. Test how well cousins know their roots, vote in the feed, and debate in the comments!
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-stars text-warning fs-5"></i>
+                <span class="fw-bold text-dark">Custom "Guess Who" Challenges</span>
+              </div>
+              <p class="small text-muted mb-0">
+                Any family member can post a throwback photo challenge using the <strong>"👶 Guess Who"</strong> or <strong>"🧠 Family Lore"</strong> templates in the post composer to spark spirited multi-generational debates.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 7: Dynamic WhatsApp Family Status Flyer -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(59, 130, 246, 0.12); color: #3b82f6;">
+                <i class="bi bi-card-image fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">7. WhatsApp Family Status Flyer</h3>
+                <span class="badge bg-primary">Social Proof &amp; Pride</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Celebrate your family dynasty with a luxury heraldic status card. Rendered 100% client-side via HTML5 Canvas, this high-resolution graphic summarizes your total connected members, generations recorded, and cities spanned.
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="small text-muted mb-0">
+                Click <strong>"WhatsApp Flyer"</strong> on the organogram to preview your clan crest. Use <strong>"Share to WhatsApp"</strong> on mobile to pass the image directly into family group chats via the native Web Share API.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 8: Living Heritage Time Capsule Vault -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(168, 85, 247, 0.12); color: #a855f7;">
+                <i class="bi bi-hourglass-split fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">8. Digital Time Capsule Vault</h3>
+                <span class="badge" style="background: #a855f7; color: #fff;">Generational Preservation</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Seal personal letters, prayers, and words of wisdom for children and grandchildren locked until future milestone dates (such as an 18th/21st birthday, graduation, or wedding).
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="small text-muted mb-0">
+                All time capsule contents are cryptographically sealed with zero-trust server-side redaction—preserving surprises and anticipation until the exact arrival date.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); border-radius: 50px;">

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook",
+    "title": "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification",
     "notes": [
-        "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook",
-        "Fix(types): satisfy PHPStan L8 strictness on non-nullable message offset",
-        "Fix(secops): sanitize echoed json response in KinshipController for Semgrep gate"
+        "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification",
+        "Docs(governance): enforce Standard 19 Zero-Code & Zero-Schema Disclosure Invariant and SecOps Playbook Audit",
+        "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook"
     ],
     "released_at": "2026-10-16",
-    "commit": "38ef30a"
+    "commit": "cbec4fb"
 }
