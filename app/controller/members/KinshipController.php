@@ -233,7 +233,7 @@ final class KinshipController extends BaseController
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
             echo json_encode([
                 'status'  => $result['success'] ? 'success' : 'error',
-                'message' => htmlspecialchars((string)($result['message'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                'message' => htmlspecialchars($result['message'], ENT_QUOTES, 'UTF-8'),
                 'data'    => $result
             ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
         } catch (\Throwable $e) {
