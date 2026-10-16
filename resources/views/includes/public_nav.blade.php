@@ -10,10 +10,15 @@
     <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
       <ul class="navbar-nav align-items-center">
         <li class="nav-item">
-          <a class="nav-link {{ $_SERVER['REQUEST_URI'] == '/' ? 'active' : '' }}" href="/">Home</a>
+          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/' ? 'active' : '' }}" href="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ $_SERVER['REQUEST_URI'] == '/aboutus' ? 'active' : '' }}" href="/aboutus">About Us</a>
+          <a class="nav-link {{ ($_SERVER['REQUEST_URI'] ?? '') == '/aboutus' ? 'active' : '' }}" href="/aboutus">About Us</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/playbook') ? 'active' : '' }}" href="/playbook">
+            <i class="fas fa-book-open me-1" style="color: var(--brand-primary, #0284c7);"></i>Playbook
+          </a>
         </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0">

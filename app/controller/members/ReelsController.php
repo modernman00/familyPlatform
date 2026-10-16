@@ -100,7 +100,9 @@ final class ReelsController extends BaseController
                 exit;
             }
 
-            SignIn::verify();
+            if (empty($_SESSION['id'])) {
+                SignIn::verify();
+            }
 
             $userId = (string)($_SESSION['id'] ?? '');
             $famCode = (string)($_SESSION['famCode'] ?? '');
@@ -127,7 +129,9 @@ final class ReelsController extends BaseController
      */
     public function getFeed(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -156,7 +160,9 @@ final class ReelsController extends BaseController
      */
     public function uploadReel(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -288,7 +294,9 @@ final class ReelsController extends BaseController
      */
     public function toggleReaction(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -317,7 +325,9 @@ final class ReelsController extends BaseController
      */
     public function getComments(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -344,7 +354,9 @@ final class ReelsController extends BaseController
      */
     public function addComment(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -378,7 +390,9 @@ final class ReelsController extends BaseController
      */
     public function deleteReel(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {

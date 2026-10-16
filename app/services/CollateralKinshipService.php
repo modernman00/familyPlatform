@@ -231,125 +231,74 @@ final class CollateralKinshipService
         $selectedNodes[$egoNodeId] = true;
         $relativeGen[$egoNodeId] = 0;
 
-        // A. Direct Ascendant Spine:
-        // Tier -1: Parents
-        $parentsGen1 = $getParents($egoNodeId);
-        foreach ($parentsGen1 as $pId) {
-            $selectedNodes[$pId] = true;
-            $relativeGen[$pId] = -1;
-        }
-
-        // Tier -2: Grandparents
-        $grandparentsGen2 = [];
-        foreach ($parentsGen1 as $pId) {
-            foreach ($getParents($pId) as $gpId) {
-                $grandparentsGen2[] = $gpId;
-                $selectedNodes[$gpId] = true;
-                $relativeGen[$gpId] = -2;
+        // A. Direct Ascendant Spine (Up to 7 Generations: Parents, Grandparents, Great-Grandparents, up to 5th Great-Grandparents)
+        $ancestorsByTier = [];
+        $currentTierNodes = $getParents($egoNodeId);
+        for ($tier = -1; $tier >= -7; $tier--) {
+            if (empty($currentTierNodes)) {
+                break;
             }
-        }
-        $grandparentsGen2 = array_unique($grandparentsGen2);
+            $ancestorsByTier[$tier] = array_unique($currentTierNodes);
+            foreach ($currentTierNodes as $pId) {
+                $selectedNodes[$pId] = true;
+                $relativeGen[$pId] = $tier;
 
-        // Tier -3: Great-Grandparents
-        $greatGrandparentsGen3 = [];
-        foreach ($grandparentsGen2 as $gpId) {
-            foreach ($getParents($gpId) as $ggpId) {
-                $greatGrandparentsGen3[] = $ggpId;
-                $selectedNodes[$ggpId] = true;
-                $relativeGen[$ggpId] = -3;
-            }
-        }
-        $greatGrandparentsGen3 = array_unique($greatGrandparentsGen3);
-
-        // B. Collateral Expansion at Tier -3 (Great-Grandparents):
-        foreach ($greatGrandparentsGen3 as $ggpId) {
-            // Siblings of Great-Grandparents (Great-Grand-Uncles/Aunts)
-            $ggpSiblings = $getSiblings($ggpId);
-            foreach ($ggpSiblings as $sibId) {
-                $selectedNodes[$sibId] = true;
-                $relativeGen[$sibId] = -3;
-
-                // Spouses of Great-Grand-Siblings
-                foreach ($personPartners[$sibId] ?? [] as $partId) {
+                // Spouses of Ancestors
+                foreach ($personPartners[$pId] ?? [] as $partId) {
                     $selectedNodes[$partId] = true;
-                    $relativeGen[$partId] = -3;
+                    $relativeGen[$partId] = $tier;
                 }
+            }
 
-                // Children of Great-Grand-Siblings (Tier -2)
-                foreach ($getChildren($sibId) as $chId) {
-                    $selectedNodes[$chId] = true;
-                    $relativeGen[$chId] = -2;
-                    // Spouses
-                    foreach ($personPartners[$chId] ?? [] as $partId) {
+            // Ascend to next tier up
+            $nextTierNodes = [];
+            foreach ($currentTierNodes as $pId) {
+                foreach ($getParents($pId) as $parId) {
+                    $nextTierNodes[] = $parId;
+                }
+            }
+            $currentTierNodes = array_unique($nextTierNodes);
+        }
+
+        // B. Collateral Expansion for Ancestor Tiers (-7 to -1)
+        foreach ($ancestorsByTier as $tier => $ancestorIds) {
+            foreach ($ancestorIds as $ancId) {
+                // Siblings of Ancestor (Uncles, Great-Uncles, Great-Grand-Uncles, etc.)
+                $ancSiblings = $getSiblings($ancId);
+                foreach ($ancSiblings as $sibId) {
+                    $selectedNodes[$sibId] = true;
+                    $relativeGen[$sibId] = $tier;
+
+                    // Spouses of Ancestor Siblings
+                    foreach ($personPartners[$sibId] ?? [] as $partId) {
                         $selectedNodes[$partId] = true;
-                        $relativeGen[$partId] = -2;
+                        $relativeGen[$partId] = $tier;
+                    }
+
+                    // Children of Ancestor Siblings (Tier + 1)
+                    $childTier = $tier + 1;
+                    foreach ($getChildren($sibId) as $chId) {
+                        $selectedNodes[$chId] = true;
+                        $relativeGen[$chId] = $childTier;
+
+                        // Spouses
+                        foreach ($personPartners[$chId] ?? [] as $partId) {
+                            $selectedNodes[$partId] = true;
+                            $relativeGen[$partId] = $childTier;
+                        }
                     }
                 }
             }
         }
 
-        // C. Collateral Expansion at Tier -2 (Grandparents):
-        foreach ($grandparentsGen2 as $gpId) {
-            // Siblings of Grandparents (Great-Aunts & Great-Uncles)
-            $gpSiblings = $getSiblings($gpId);
-            foreach ($gpSiblings as $sibId) {
-                $selectedNodes[$sibId] = true;
-                $relativeGen[$sibId] = -2;
-
-                // Spouses of Great-Aunts/Uncles
-                foreach ($personPartners[$sibId] ?? [] as $partId) {
-                    $selectedNodes[$partId] = true;
-                    $relativeGen[$partId] = -2;
-                }
-
-                // Children of Great-Aunts/Uncles (First Cousins Once Removed, Tier -1)
-                foreach ($getChildren($sibId) as $chId) {
-                    $selectedNodes[$chId] = true;
-                    $relativeGen[$chId] = -1;
-                    // Spouses
-                    foreach ($personPartners[$chId] ?? [] as $partId) {
-                        $selectedNodes[$partId] = true;
-                        $relativeGen[$partId] = -1;
-                    }
-                }
-            }
-        }
-
-        // D. Collateral Expansion at Tier -1 (Parents):
-        foreach ($parentsGen1 as $pId) {
-            // Siblings of Parents (Uncles & Aunts)
-            $parentSiblings = $getSiblings($pId);
-            foreach ($parentSiblings as $sibId) {
-                $selectedNodes[$sibId] = true;
-                $relativeGen[$sibId] = -1;
-
-                // Spouses of Uncles/Aunts
-                foreach ($personPartners[$sibId] ?? [] as $partId) {
-                    $selectedNodes[$partId] = true;
-                    $relativeGen[$partId] = -1;
-                }
-
-                // Children of Uncles/Aunts (First Cousins, Tier 0)
-                foreach ($getChildren($sibId) as $chId) {
-                    $selectedNodes[$chId] = true;
-                    $relativeGen[$chId] = 0;
-                    // Spouses of First Cousins
-                    foreach ($personPartners[$chId] ?? [] as $partId) {
-                        $selectedNodes[$partId] = true;
-                        $relativeGen[$partId] = 0;
-                    }
-                }
-            }
-        }
-
-        // E. Ego Tier (Gen 0):
+        // C. Ego Tier (Gen 0):
         // Ego's Partners/Spouses
         foreach ($personPartners[$egoNodeId] ?? [] as $partId) {
             $selectedNodes[$partId] = true;
             $relativeGen[$partId] = 0;
         }
 
-        // Ego's Siblings (Brothers & Sisters)
+        // Ego's Siblings (Brothers & Sisters) and their descendant lineages (up to 7 tiers down)
         $egoSiblings = $getSiblings($egoNodeId);
         foreach ($egoSiblings as $sibId) {
             $selectedNodes[$sibId] = true;
@@ -361,41 +310,53 @@ final class CollateralKinshipService
                 $relativeGen[$partId] = 0;
             }
 
-            // Children of Siblings (Nieces & Nephews, Tier +1)
-            foreach ($getChildren($sibId) as $chId) {
-                $selectedNodes[$chId] = true;
-                $relativeGen[$chId] = 1;
-                // Spouses of Nieces/Nephews
-                foreach ($personPartners[$chId] ?? [] as $partId) {
-                    $selectedNodes[$partId] = true;
-                    $relativeGen[$partId] = 1;
+            // Descendants of Siblings (Nieces/Nephews, Grand-Nieces/Nephews, etc. up to 7 tiers down)
+            $currSibDescendants = $getChildren($sibId);
+            for ($dTier = 1; $dTier <= 7; $dTier++) {
+                if (empty($currSibDescendants)) {
+                    break;
                 }
+                $nextSibDescendants = [];
+                foreach ($currSibDescendants as $dId) {
+                    $selectedNodes[$dId] = true;
+                    $relativeGen[$dId] = $dTier;
+
+                    // Spouses of Sibling Descendants
+                    foreach ($personPartners[$dId] ?? [] as $partId) {
+                        $selectedNodes[$partId] = true;
+                        $relativeGen[$partId] = $dTier;
+                    }
+
+                    foreach ($getChildren($dId) as $nextDId) {
+                        $nextSibDescendants[] = $nextDId;
+                    }
+                }
+                $currSibDescendants = array_unique($nextSibDescendants);
             }
         }
 
-        // F. Downward Descent: Tier +1 (Children of Ego)
-        $childrenGen1 = $getChildren($egoNodeId);
-        foreach ($childrenGen1 as $chId) {
-            $selectedNodes[$chId] = true;
-            $relativeGen[$chId] = 1;
-
-            // Spouses of Children (Sons/Daughters-in-law)
-            foreach ($personPartners[$chId] ?? [] as $partId) {
-                $selectedNodes[$partId] = true;
-                $relativeGen[$partId] = 1;
+        // D. Downward Descent from Ego (Children, Grandchildren, Great-Grandchildren up to 7 tiers down)
+        $currentDescendants = $getChildren($egoNodeId);
+        for ($dTier = 1; $dTier <= 7; $dTier++) {
+            if (empty($currentDescendants)) {
+                break;
             }
+            $nextDescendants = [];
+            foreach ($currentDescendants as $chId) {
+                $selectedNodes[$chId] = true;
+                $relativeGen[$chId] = $dTier;
 
-            // Tier +2 (Grandchildren of Ego)
-            foreach ($getChildren($chId) as $gchId) {
-                $selectedNodes[$gchId] = true;
-                $relativeGen[$gchId] = 2;
-
-                // Spouses of Grandchildren
-                foreach ($personPartners[$gchId] ?? [] as $partId) {
+                // Spouses of Descendants
+                foreach ($personPartners[$chId] ?? [] as $partId) {
                     $selectedNodes[$partId] = true;
-                    $relativeGen[$partId] = 2;
+                    $relativeGen[$partId] = $dTier;
+                }
+
+                foreach ($getChildren($chId) as $nextChId) {
+                    $nextDescendants[] = $nextChId;
                 }
             }
+            $currentDescendants = array_unique($nextDescendants);
         }
 
         // 5. Build Final Formatted Nodes, Unions, and Children Sets
@@ -503,15 +464,20 @@ final class CollateralKinshipService
             'unions' => $finalUnions,
             'children' => $finalChildren,
             'ahnentafel' => $ahnentafelWedges,
-            'total_generations' => 6,
+            'total_generations' => (function() use ($annotatedNodes) {
+                $genLevels = array_map(fn($n) => (int)($n['generation_level'] ?? 0), $annotatedNodes);
+                $minGen = !empty($genLevels) ? min($genLevels) : 0;
+                $maxGen = !empty($genLevels) ? max($genLevels) : 0;
+                return max(6, ($maxGen - $minGen) + 1);
+            })(),
             'total_members' => count($annotatedNodes),
             'collateral_summary' => [
-                'great_grandparents' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -3)),
+                'great_grandparents' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) <= -3)),
                 'grandparents' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -2)),
                 'parents_and_aunts_uncles' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === -1)),
                 'ego_siblings_cousins' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 0)),
                 'children_nieces_nephews' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 1)),
-                'grandchildren' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) === 2))
+                'grandchildren' => count(array_filter($annotatedNodes, fn($n) => ($n['generation_level'] ?? 0) >= 2))
             ]
         ];
     }

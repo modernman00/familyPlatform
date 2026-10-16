@@ -23,14 +23,16 @@ class StreamController
         header('Content-Type: application/json');
 
         try {
-            $verifyJWT = SignIn::verify();
-            if (empty($verifyJWT['id'])) {
-                http_response_code(401);
-                echo json_encode(['success' => false, 'error' => 'Authentication required']);
-                return;
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                $verifyJWT = SignIn::verify();
+                if (empty($verifyJWT['id'])) {
+                    http_response_code(401);
+                    echo json_encode(['success' => false, 'error' => 'Authentication required']);
+                    return;
+                }
+                $userId = (string)$verifyJWT['id'];
             }
-
-            $userId = (string)$verifyJWT['id'];
 
             // Check if member has Premium status
             $isPremium = false;

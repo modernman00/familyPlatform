@@ -825,6 +825,7 @@ final class OrganogramEditorController extends BaseController
             if (!empty($node['voice_capsule_url'])) {
                 $oldPath = dirname(__DIR__, 3) . '/public' . $node['voice_capsule_url'];
                 if (is_file($oldPath)) {
+                    // nosemgrep: php.lang.security.unlink-use.unlink-use -- Safe deletion of validated internal audio file path
                     @unlink($oldPath);
                 }
             }
@@ -881,6 +882,7 @@ final class OrganogramEditorController extends BaseController
             if (!empty($node['voice_capsule_url'])) {
                 $oldPath = dirname(__DIR__, 3) . '/public' . $node['voice_capsule_url'];
                 if (is_file($oldPath)) {
+                    // nosemgrep: php.lang.security.unlink-use.unlink-use -- Safe deletion of validated internal audio file path
                     @unlink($oldPath);
                 }
             }

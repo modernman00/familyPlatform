@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Major Update",
+    "title": "Fix(auth): define isTotpRequired in Login.php",
     "notes": [
-        "Major Update",
-        "Fix(ui): enforce strict fixed positioning and visualViewport pinning for bottom nav",
-        "Fix(ui): close unclosed widget div, restore viewport meta, and unbind bottom nav"
+        "Fix(auth): define isTotpRequired in Login.php",
+        "Feat(seo): add FAQ section and schema.org/FAQPage rich snippet on landing page",
+        "Feat(auth): integrate 7-day trusted device TOTP persistence and UI checkbox"
     ],
-    "released_at": "2026-10-12",
-    "commit": "70b467a"
+    "released_at": "2026-10-14",
+    "commit": "56dde4a"
 }

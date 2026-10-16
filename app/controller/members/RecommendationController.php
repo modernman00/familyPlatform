@@ -21,8 +21,11 @@ final class RecommendationController
     public function getShareLink(): void
     {
         try {
-            $payload = SignIn::verify('users');
-            $userId = (string) $payload['id'];
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                $payload = SignIn::verify('users');
+                $userId = (string) $payload['id'];
+            }
 
             $db = Db::connect2();
             $stmt = $db->prepare('SELECT CONCAT(COALESCE(firstName, \'\'), \' \', COALESCE(lastName, \'\')) AS full_name FROM personal WHERE id = ? LIMIT 1');

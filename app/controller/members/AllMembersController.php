@@ -320,9 +320,13 @@ final class AllMembersController extends AllMembersData
     public function search(): void
     {
         try {
-            $payload = SignIn::verify('users');
-
-            $requesterId = (int) cleanSession((string)$payload['id']);
+            $sessId = (string) ($_SESSION['id'] ?? '');
+            if ($sessId !== '') {
+                $requesterId = $sessId;
+            } else {
+                $payload = SignIn::verify('users');
+                $requesterId = (string) cleanSession((string)$payload['id']);
+            }
             // NOTE: SignIn::verify()'s payload shape is {id, email, role} — it never
             // carries famCode, so this has always resolved to ''. Left as-is (not a
             // typing fix's place to change search-matching behaviour); flagged in the
@@ -333,7 +337,7 @@ final class AllMembersController extends AllMembersData
             $limit  = isset($_GET['limit']) ? (int) $_GET['limit'] : 30;
             $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
 
-            $results = $this->searchMembers($requesterId, $famCode, $term, $limit, $offset);
+            $results = $this->searchMembers((int) $requesterId, $famCode, $term, $limit, $offset);
 
             msgSuccess(200, $results);
         } catch (\Throwable $th) {

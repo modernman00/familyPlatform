@@ -15,6 +15,17 @@ class BaseController
     // use construct to check if user is logged in
     public function __construct()
     {
+        // Centralized auth: if session is already active via RouteDispatch or login, use it directly
+        if (!empty($_SESSION['id'])) {
+            if (empty($_SESSION['famCode'])) {
+                $query = "SELECT famCode FROM personal WHERE id = ?";
+                $stmt = Db::connect2()->prepare($query);
+                $stmt->execute([$_SESSION['id']]);
+                $_SESSION['famCode'] = (string) $stmt->fetchColumn();
+            }
+            return;
+        }
+
         $VerifyJWT = SignIn::verify();
         if (!\is_array($VerifyJWT) || empty($VerifyJWT['id'])) {
             throw new NotFoundException('Error Request_2');
@@ -25,7 +36,7 @@ class BaseController
         $query = "SELECT famCode FROM personal WHERE id = ?";
         $stmt = Db::connect2()->prepare($query);
         $stmt->execute([$id]);
-        $famCode = $stmt->fetchColumn();
+        $famCode = (string) $stmt->fetchColumn();
         $_SESSION['famCode'] = $famCode;
     }
     public static function viewWithCsp(string $view, array $data = []): void
@@ -40,7 +51,7 @@ class BaseController
      */
     public static function rehydrateSession(): void
     {
-        if (!empty($_SESSION['id']) && !empty($_SESSION['auth']['identifyCust'])) {
+        if (!empty($_SESSION['id']) && (!empty($_SESSION['auth']['identifyCust']) || !empty($_SESSION['loggedIn']))) {
             return; // Session is already hot and valid
         }
 

@@ -399,6 +399,86 @@ final class KinshipCalculatorService
             }
         }
 
+        // Sibling Descendants (Nieces, Nephews, Grand-Nieces/Nephews, etc.)
+        if ($types[0] === 'sibling' && count(array_filter(array_slice($types, 1), fn($t) => $t === 'child')) === ($len - 1)) {
+            $childCount = $len - 1;
+            if ($childCount === 2) {
+                return [
+                    'title' => $isMale ? 'Great-Nephew' : 'Great-Niece',
+                    'side' => 'direct',
+                    'degree' => 4,
+                    'category' => 'nephew_niece'
+                ];
+            }
+            if ($childCount === 3) {
+                return [
+                    'title' => $isMale ? 'Great-Great-Nephew' : 'Great-Great-Niece',
+                    'side' => 'direct',
+                    'degree' => 5,
+                    'category' => 'nephew_niece'
+                ];
+            }
+            if ($childCount >= 4) {
+                $ordinal = ($childCount - 1) . 'th';
+                return [
+                    'title' => $ordinal . ' Great-' . ($isMale ? 'Nephew' : 'Niece'),
+                    'side' => 'direct',
+                    'degree' => $childCount + 2,
+                    'category' => 'nephew_niece'
+                ];
+            }
+        }
+
+        // Direct Ancestors Spine (4 to 7+ Generations Up)
+        $allParents = (count(array_filter($types, fn($t) => $t === 'parent')) === $len);
+        if ($allParents) {
+            $genUp = $len;
+            if ($genUp === 4) {
+                return [
+                    'title' => 'Great-Great-' . ($isMale ? 'Grandfather' : 'Grandmother'),
+                    'side' => 'ancestral',
+                    'degree' => 4,
+                    'category' => 'ancestor'
+                ];
+            }
+            if ($genUp >= 5) {
+                $ordinal = ($genUp - 2) . (
+                    ($genUp - 2) === 3 ? 'rd' : 'th'
+                );
+                return [
+                    'title' => $ordinal . ' Great-' . ($isMale ? 'Grandfather' : 'Grandmother'),
+                    'side' => 'ancestral',
+                    'degree' => $genUp,
+                    'category' => 'ancestor'
+                ];
+            }
+        }
+
+        // Direct Descendants Spine (4 to 7+ Generations Down)
+        $allChildren = (count(array_filter($types, fn($t) => $t === 'child')) === $len);
+        if ($allChildren) {
+            $genDown = $len;
+            if ($genDown === 4) {
+                return [
+                    'title' => 'Great-Great-' . ($isMale ? 'Grandson' : 'Granddaughter'),
+                    'side' => 'direct',
+                    'degree' => 4,
+                    'category' => 'descendant'
+                ];
+            }
+            if ($genDown >= 5) {
+                $ordinal = ($genDown - 2) . (
+                    ($genDown - 2) === 3 ? 'rd' : 'th'
+                );
+                return [
+                    'title' => $ordinal . ' Great-' . ($isMale ? 'Grandson' : 'Granddaughter'),
+                    'side' => 'direct',
+                    'degree' => $genDown,
+                    'category' => 'descendant'
+                ];
+            }
+        }
+
         // Fallback for deeper generations
         $netGen = 0;
         foreach ($types as $t) {

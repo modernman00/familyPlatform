@@ -68,4 +68,61 @@ JS;
             'Temitope (sibling) must never be positioned between Wale and Ajibike (spouses)'
         );
     }
+
+    /**
+     * Test that maternal uncles/siblings positioned alongside a married mother and her husband
+     * do not collide or overlap with the husband when the family subtree shifts to center children.
+     */
+    public function testMaternalSiblingsDoNotOverlapWithSpouseWhenSubtreeShifts(): void
+    {
+        $nodeScript = <<<'JS'
+const fs = require("fs");
+const code = fs.readFileSync("public/js/vendor/kinshiptree.js", "utf8");
+const window = { innerWidth: 1200 };
+const document = {};
+eval(code);
+
+const rawNodes = [
+  { id: 1, name: "Pa John Adekoya Mayungbe", gender: "male", pids: [2] },
+  { id: 2, name: "Ondeyin Dorcas Adekoya", gender: "female", pids: [1] },
+  { id: 10, name: "IYABO OLAOGUN", gender: "female", fid: 1, mid: 2, pids: [20] },
+  { id: 20, name: "OLUYOMI OLAOGUN", gender: "male", pids: [10] },
+  { id: 11, name: "Adesanya Mayungbe", gender: "male", fid: 1, mid: 2, pids: [] },
+  { id: 12, name: "Labomehin Mayungbe", gender: "male", fid: 1, mid: 2, pids: [] },
+  { id: 30, name: "FEMI OLAOGUN", gender: "male", fid: 20, mid: 10, pids: [] },
+  { id: 31, name: "Sola Olaogun", gender: "male", fid: 20, mid: 10, pids: [] },
+  { id: 32, name: "Wale Olaogun", gender: "male", fid: 20, mid: 10, pids: [40] },
+  { id: 40, name: "Ajibike Olaogun", gender: "female", pids: [32] },
+  { id: 33, name: "Temitope Olaogun", gender: "female", fid: 20, mid: 10, pids: [] },
+];
+
+const engine = new window.KinshipTree.LayoutEngine({ rootId: "32" });
+const result = engine.computeLayout(rawNodes);
+
+const gen1 = result.nodes.filter(n => n.gen === 1);
+const oluyomi = gen1.find(n => n.id === "20");
+const adesanya = gen1.find(n => n.id === "11");
+console.log(JSON.stringify({ oluyomi, adesanya }));
+JS;
+
+        $output = shell_exec('node -e ' . escapeshellarg($nodeScript));
+        $this->assertNotEmpty($output, 'Node layout script should produce output');
+
+        /** @var array{oluyomi: array{x: float, width: float}, adesanya: array{x: float, width: float}} $data */
+        $data = json_decode((string)$output, true);
+        $this->assertIsArray($data);
+        $this->assertArrayHasKey('oluyomi', $data);
+        $this->assertArrayHasKey('adesanya', $data);
+
+        $oluyomiX = (float)$data['oluyomi']['x'];
+        $oluyomiWidth = (float)$data['oluyomi']['width'];
+        $adesanyaX = (float)$data['adesanya']['x'];
+
+        // Adesanya must start AFTER Oluyomi ends (adesanyaX >= oluyomiX + oluyomiWidth)
+        $this->assertGreaterThanOrEqual(
+            $oluyomiX + $oluyomiWidth,
+            $adesanyaX,
+            sprintf('Adesanya Mayungbe (x=%.1f) must not overlap with Oluyomi Olaogun (x=%.1f..%.1f)', $adesanyaX, $oluyomiX, $oluyomiX + $oluyomiWidth)
+        );
+    }
 }

@@ -5,8 +5,10 @@ namespace App\controller\members;
 
 use App\controller\BaseController;
 use App\services\KinshipEngineService;
+use App\services\KinshipEntityResolver;
 use App\services\AnalyticsService;
 use Src\functionality\SignIn;
+use Src\CheckToken;
 use Exception;
 
 final class KinshipController extends BaseController
@@ -20,7 +22,9 @@ final class KinshipController extends BaseController
      */
     public function getSuggestions(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -87,7 +91,9 @@ final class KinshipController extends BaseController
      */
     public function dismiss(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {
@@ -119,4 +125,164 @@ final class KinshipController extends BaseController
             echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
         }
     }
+
+    /**
+     * API: Get pending auto-matches for the authenticated user on the current family tree.
+     */
+    public function getPendingMatches(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+
+            if (empty($userId) || empty($familyCode)) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthenticated or missing family context']);
+                return;
+            }
+
+            // Rate Limiting: 30 requests/minute
+            if (AnalyticsService::isRateLimited($userId, 'kinship_matches_api', 30, 60)) {
+                http_response_code(429);
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Too many requests. Please try again shortly.'
+                ]);
+                return;
+            }
+            AnalyticsService::track($userId, 'kinship_matches_api');
+
+            /** @var array<string, mixed> $memberData */
+            $memberData = BaseController::findMemberById($userId);
+            $matches = KinshipEntityResolver::findProbableMatches($familyCode, $userId, $memberData);
+
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $matches,
+                'count'  => count($matches)
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
+        }
+    }
+
+    /**
+     * API: Claim an auto-matched node on the family tree.
+     */
+    public function claimMatch(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+
+            if (empty($userId) || empty($familyCode)) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+                return;
+            }
+
+            // Rate limiting: 10 claims per minute
+            if (AnalyticsService::isRateLimited($userId, 'kinship_claim_api', 10, 60)) {
+                http_response_code(429);
+                echo json_encode(['status' => 'error', 'message' => 'Too many claim requests. Please wait a moment.']);
+                return;
+            }
+            AnalyticsService::track($userId, 'kinship_claim_api');
+
+            $rawInput = file_get_contents('php://input');
+            $rawString = is_string($rawInput) ? $rawInput : '';
+            /** @var array<string, mixed> $payload */
+            $payload = (is_array($decoded = json_decode($rawString, true)) ? $decoded : null) ?: $_POST;
+
+            // CSRF Verification
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+            $reqToken = (string)($payload['token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '')));
+            if (empty($sessionToken) || !hash_equals($sessionToken, $reqToken)) {
+                if (!empty($_POST['token'])) {
+                    CheckToken::tokenCheck();
+                } else {
+                    http_response_code(403);
+                    echo json_encode(['status' => 'error', 'message' => 'Invalid or missing CSRF token']);
+                    return;
+                }
+            }
+
+            $targetNodeId = (int)($payload['node_id'] ?? 0);
+            if ($targetNodeId <= 0) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Valid node_id is required']);
+                return;
+            }
+
+            /** @var array<string, mixed> $memberData */
+            $memberData = BaseController::findMemberById($userId);
+            $result = KinshipEntityResolver::claimAndMergeNode($familyCode, $userId, $targetNodeId, $memberData);
+
+            http_response_code((int)$result['code']);
+            echo json_encode([
+                'status'  => $result['success'] ? 'success' : 'error',
+                'message' => $result['message'],
+                'data'    => $result
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Internal server error: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Dismiss an auto-matched candidate node.
+     */
+    public function dismissMatch(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+
+            if (empty($userId) || empty($familyCode)) {
+                http_response_code(401);
+                echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input');
+            $rawString = is_string($rawInput) ? $rawInput : '';
+            /** @var array<string, mixed> $payload */
+            $payload = (is_array($decoded = json_decode($rawString, true)) ? $decoded : null) ?: $_POST;
+
+            $nodeId = (int)($payload['node_id'] ?? 0);
+            if ($nodeId <= 0) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Valid node_id is required']);
+                return;
+            }
+
+            $success = KinshipEntityResolver::dismissMatch($familyCode, $userId, $nodeId);
+
+            echo json_encode([
+                'status'  => $success ? 'success' : 'error',
+                'message' => $success ? 'Match dismissed successfully' : 'Failed to dismiss match'
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Internal server error']);
+        }
+    }
 }
+

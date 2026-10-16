@@ -44,9 +44,8 @@ final class PostMessage
     public static function index()
     {
         try {
-            $VerifyJWT = SignIn::verify('users');
-            $id = \cleanSession((string)$VerifyJWT['id']);
-            if ($id === null) {
+            $id = !empty($_SESSION['id']) ? (string) $_SESSION['id'] : (string) \cleanSession((string) SignIn::verify('users')['id']);
+            if ($id === '') {
                 throw new ForbiddenException('Unable to verify user identity.');
             }
             $id = (string) $id;

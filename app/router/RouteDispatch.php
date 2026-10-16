@@ -71,6 +71,7 @@ final class RouteDispatch
             'Src\functionality\WebAuthnFunctionality',
             // Headless Kinship REST API handles API key authentication
             'App\controller\api\KinshipApiController',
+            'App\controller\PlaybookController',
         ];
 
         if (\class_exists('\App\controller\BaseController')) {
@@ -87,7 +88,7 @@ final class RouteDispatch
 
         if (!in_array($controller, $publicControllers, true)) {
             if (empty($_SESSION['id'])) {
-                $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'auth_token';
+                $tokenName = $_ENV['COOKIE_TOKEN_LOGIN'] ?? 'familyCookie';
                 if (empty($_COOKIE[$tokenName])) {
                     if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
                         throw new UnauthorisedException("Unauthorized");
@@ -132,7 +133,7 @@ final class RouteDispatch
             echo json_encode(['message' => $e->getMessage(), 'code' => 401, 'status' => 'error'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         } else {
             error_log('UNAUTHORISED REDIRECT: ' . $e->getMessage());
-            session_destroy();
+            // Do NOT call session_destroy() here — transient auth misses must never wipe the active session
             redirect('login');
         }
     } catch (\Src\Exceptions\ValidationException $e) {

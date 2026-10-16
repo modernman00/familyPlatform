@@ -277,4 +277,166 @@ final class CollateralKinshipServiceTest extends TestCase
         $this->assertSame(-3, $nodeMap['Abraham Olaogun']['generation_level']);
         $this->assertStringContainsString('Great-Grandfather', $nodeMap['Abraham Olaogun']['ego_relation']);
     }
+
+    /**
+     * Test 3: Deep 7-Generation Dynasty with Paternal & Maternal Parity, Spouses, and Collaterals
+     */
+    public function testSevenGenerationDynastyWithPaternalMaternalParityAndSpouses(): void
+    {
+        $db = Db::connect2();
+        $famCode = 'TEST_7GEN_PARITY_FAM';
+        $wallyId = 'test-wally-7gen-root';
+
+        // Clean any leftovers
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$wallyId]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code = ?")->execute([$famCode]);
+        $db->prepare("DELETE FROM family_unions WHERE family_code = ?")->execute([$famCode]);
+
+        $db->prepare("
+            INSERT INTO personal (id, firstName, lastName, famCode, gender)
+            VALUES (?, 'Wale', 'Olaogun', ?, 'Male')
+        ")->execute([$wallyId, $famCode]);
+
+        $insertNode = function (string $first, string $last, string $gender, ?string $userId = null) use ($db, $famCode): int {
+            $stmt = $db->prepare("
+                INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, avatar_url)
+                VALUES (?, ?, ?, ?, ?, '/resources/images/profile/avatarM.png')
+            ");
+            $stmt->execute([$famCode, $userId, $first, $last, $gender]);
+            return (int)$db->lastInsertId();
+        };
+
+        $insertUnion = function (int $p1, int $p2) use ($db, $famCode): int {
+            $stmt = $db->prepare("
+                INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current)
+                VALUES (?, ?, ?, 'married', 1)
+            ");
+            $stmt->execute([$famCode, $p1, $p2]);
+            return (int)$db->lastInsertId();
+        };
+
+        $linkChild = function (int $uId, int $cId) use ($db): void {
+            $stmt = $db->prepare("
+                INSERT INTO family_node_children (union_id, child_id, relationship_type)
+                VALUES (?, ?, 'biological')
+            ");
+            $stmt->execute([$uId, $cId]);
+        };
+
+        // Ego (Tier 0)
+        $wally = $insertNode('Wale', 'Olaogun', 'Male', $wallyId);
+        $ajibike = $insertNode('Ajibike', 'Olaogun', 'Female');
+        $uWally = $insertUnion($wally, $ajibike);
+
+        // Ego Siblings
+        $femi = $insertNode('Femi', 'Olaogun', 'Male');
+        $sola = $insertNode('Sola', 'Olaogun', 'Male');
+        $temitope = $insertNode('Temitope', 'Olaogun', 'Female');
+
+        // Sibling child (Niece, Tier +1) & Sibling grandchild (Grand-niece, Tier +2)
+        $femiWife = $insertNode('FemiWife', 'Olaogun', 'Female');
+        $uFemi = $insertUnion($femi, $femiWife);
+        $niece = $insertNode('Bisi', 'Olaogun', 'Female');
+        $linkChild($uFemi, $niece);
+
+        $nieceHusband = $insertNode('NieceHusband', 'Olaogun', 'Male');
+        $uNiece = $insertUnion($niece, $nieceHusband);
+        $grandNiece = $insertNode('Tade', 'Olaogun', 'Female');
+        $linkChild($uNiece, $grandNiece);
+
+        // Parents (Tier -1)
+        $oluyomi = $insertNode('Oluyomi', 'Olaogun', 'Male');
+        $iyabo = $insertNode('Iyabo', 'Olaogun', 'Female');
+        $uParents = $insertUnion($oluyomi, $iyabo);
+        $linkChild($uParents, $wally);
+        $linkChild($uParents, $femi);
+        $linkChild($uParents, $sola);
+        $linkChild($uParents, $temitope);
+
+        // Paternal Grandparents (Tier -2)
+        $patGf = $insertNode('PaOluyomiFather', 'Olaogun', 'Male');
+        $patGm = $insertNode('MaOluyomiMother', 'Olaogun', 'Female');
+        $uPatGp = $insertUnion($patGf, $patGm);
+        $linkChild($uPatGp, $oluyomi);
+        // Oluyomi's Sibling (Paternal Uncle)
+        $patUncle = $insertNode('Kehinde', 'Olaogun', 'Male');
+        $linkChild($uPatGp, $patUncle);
+
+        // Maternal Grandparents (Tier -2)
+        $matGf = $insertNode('PaJohn', 'Mayungbe', 'Male');
+        $matGm = $insertNode('Ondeyin', 'Mayungbe', 'Female');
+        $uMatGp = $insertUnion($matGf, $matGm);
+        $linkChild($uMatGp, $iyabo);
+        // Iyabo's Sibling (Maternal Uncle)
+        $matUncle = $insertNode('Adesanya', 'Mayungbe', 'Male');
+        $linkChild($uMatGp, $matUncle);
+
+        // Ancestors up to Tier -4 (Great-Great-Grandparents)
+        $patGgf = $insertNode('PatGgf', 'Olaogun', 'Male');
+        $patGgm = $insertNode('PatGgm', 'Olaogun', 'Female');
+        $uPatGgp = $insertUnion($patGgf, $patGgm);
+        $linkChild($uPatGgp, $patGf);
+
+        $patGggf = $insertNode('PatGggf', 'Olaogun', 'Male');
+        $patGggm = $insertNode('PatGggm', 'Olaogun', 'Female');
+        $uPatGggp = $insertUnion($patGggf, $patGggm);
+        $linkChild($uPatGggp, $patGgf);
+
+        // Descendants down to Tier +3 (Great-Grandchild)
+        $child1 = $insertNode('Olutobi', 'Olaogun', 'Male');
+        $linkChild($uWally, $child1);
+
+        $child1Spouse = $insertNode('Child1Spouse', 'Olaogun', 'Female');
+        $uChild1 = $insertUnion($child1, $child1Spouse);
+        $grandChild1 = $insertNode('Grandchild1', 'Olaogun', 'Male');
+        $linkChild($uChild1, $grandChild1);
+
+        $gc1Spouse = $insertNode('Gc1Spouse', 'Olaogun', 'Female');
+        $uGc1 = $insertUnion($grandChild1, $gc1Spouse);
+        $greatGrandChild1 = $insertNode('GreatGrandchild1', 'Olaogun', 'Female');
+        $linkChild($uGc1, $greatGrandChild1);
+
+        // Build Graph
+        $graph = CollateralKinshipService::buildCollateralGraph($famCode, $wallyId);
+
+        $this->assertTrue($graph['has_built_tree']);
+        $nodeMap = [];
+        foreach ($graph['nodes'] as $n) {
+            $nodeMap[$n['full_name']] = $n;
+        }
+
+        // Verify Paternal & Maternal Parity
+        $this->assertArrayHasKey('PaOluyomiFather Olaogun', $nodeMap, 'Paternal Grandfather must be present');
+        $this->assertArrayHasKey('Kehinde Olaogun', $nodeMap, 'Paternal Uncle must be present');
+        $this->assertArrayHasKey('PaJohn Mayungbe', $nodeMap, 'Maternal Grandfather must be present');
+        $this->assertArrayHasKey('Adesanya Mayungbe', $nodeMap, 'Maternal Uncle must be present');
+
+        // Verify generation levels
+        $this->assertSame(-4, $nodeMap['PatGggf Olaogun']['generation_level']);
+        $this->assertSame(-3, $nodeMap['PatGgf Olaogun']['generation_level']);
+        $this->assertSame(-2, $nodeMap['PaOluyomiFather Olaogun']['generation_level']);
+        $this->assertSame(-2, $nodeMap['PaJohn Mayungbe']['generation_level']);
+        $this->assertSame(-1, $nodeMap['Oluyomi Olaogun']['generation_level']);
+        $this->assertSame(-1, $nodeMap['Iyabo Olaogun']['generation_level']);
+        $this->assertSame(0, $nodeMap['Wale Olaogun']['generation_level']);
+        $this->assertSame(1, $nodeMap['Olutobi Olaogun']['generation_level']);
+        $this->assertSame(2, $nodeMap['Grandchild1 Olaogun']['generation_level']);
+        $this->assertSame(3, $nodeMap['GreatGrandchild1 Olaogun']['generation_level']);
+
+        // Verify Sibling descendants
+        $this->assertArrayHasKey('Bisi Olaogun', $nodeMap, 'Niece must be present');
+        $this->assertSame(1, $nodeMap['Bisi Olaogun']['generation_level']);
+        $this->assertArrayHasKey('Tade Olaogun', $nodeMap, 'Grand-Niece must be present');
+        $this->assertSame(2, $nodeMap['Tade Olaogun']['generation_level']);
+
+        // Verify Titles
+        $this->assertStringContainsString('Uncle', $nodeMap['Kehinde Olaogun']['ego_relation']);
+        $this->assertStringContainsString('Uncle', $nodeMap['Adesanya Mayungbe']['ego_relation']);
+        $this->assertStringContainsString('Granddaughter', $nodeMap['GreatGrandchild1 Olaogun']['ego_relation']);
+
+        // Clean up
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$wallyId]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code = ?")->execute([$famCode]);
+        $db->prepare("DELETE FROM family_unions WHERE family_code = ?")->execute([$famCode]);
+    }
 }

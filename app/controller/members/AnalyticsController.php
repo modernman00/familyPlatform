@@ -22,7 +22,9 @@ final class AnalyticsController extends BaseController
      */
     public function track(): void
     {
-        SignIn::verify();
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
         header('Content-Type: application/json');
 
         try {

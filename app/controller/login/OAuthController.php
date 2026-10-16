@@ -454,13 +454,20 @@ class OAuthController
         $stmt->execute([$userId]);
         $famCode = (string) $stmt->fetchColumn();
 
+        $email = (string) ($userRow['email'] ?? '');
+        $tokenVersion = (int) ($userRow['token_version'] ?? 1);
+
         $_SESSION['id'] = $userId;
         $_SESSION['manager_id'] = $userId;
+        $_SESSION['auth'] = [
+            'identifyCust' => $userId,
+            'email' => $email,
+            'codeVerified' => true,
+            '2FA_token_ts' => time(),
+            'type' => 'member',
+        ];
         $_SESSION['famCode'] = $famCode;
         $_SESSION['loggedIn'] = true;
-
-        $tokenVersion = (int) ($userRow['token_version'] ?? 1);
-        $email = $userRow['email'] ?? '';
 
         // Create JWT cookie with exact user payload expected by RoleMiddleware
         \Src\JwtHandler::issueLoginCookie([

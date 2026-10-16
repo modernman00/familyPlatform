@@ -43,6 +43,10 @@ final class ProfilePage extends ProcessImg
 
     private function authenticate(): mixed
     {
+        if (!empty($_SESSION['id'])) {
+            return $_SESSION['id'];
+        }
+
         $verifyJWT = SignIn::verify();
 
         if (!\is_array($verifyJWT) || empty($verifyJWT['id'])) {
@@ -53,7 +57,6 @@ final class ProfilePage extends ProcessImg
 
         // centralise session handling
         $_SESSION['id'] = $id;
-        unset($_SESSION['loginType'], $_SESSION['identifyCust']);
 
         return $id;
     }
@@ -379,8 +382,7 @@ final class ProfilePage extends ProcessImg
     public function gallery(): void
     {
         try {
-            $VerifyJWT = SignIn::verify('users');
-            $id = (string)cleanSession((string)$VerifyJWT['id']);
+            $id = !empty($_SESSION['id']) ? (string) $_SESSION['id'] : (string) cleanSession((string) SignIn::verify('users')['id']);
 
             // Allow viewing a specific member's gallery if ?id=... is provided, default to current user
             $targetId = isset($_GET['id']) ? (string)cleanSession((string)$_GET['id']) : $id;
@@ -418,8 +420,7 @@ final class ProfilePage extends ProcessImg
     public function setProfilePicFromImage(): void
     {
         try {
-            $VerifyJWT = SignIn::verify('users');
-            $id = (string)cleanSession((string)$VerifyJWT['id']);
+            $id = !empty($_SESSION['id']) ? (string) $_SESSION['id'] : (string) cleanSession((string) SignIn::verify('users')['id']);
 
             $rawInput = (string)file_get_contents('php://input');
             $input = json_decode($rawInput, true);
@@ -456,8 +457,7 @@ final class ProfilePage extends ProcessImg
     public function toggleImageVisibility(): void
     {
         try {
-            $VerifyJWT = SignIn::verify('users');
-            $id = (string)cleanSession((string)$VerifyJWT['id']);
+            $id = !empty($_SESSION['id']) ? (string) $_SESSION['id'] : (string) cleanSession((string) SignIn::verify('users')['id']);
 
             $rawInput = (string)file_get_contents('php://input');
             $input = json_decode($rawInput, true);

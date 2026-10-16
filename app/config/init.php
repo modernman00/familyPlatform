@@ -44,10 +44,10 @@ if ($isCypressTest || (function_exists('isTestEnv') && \isTestEnv())) {
 }
 
 
-$sessionExpire = isset($_ENV['SESSION_EXPIRE']) ? (int)$_ENV['SESSION_EXPIRE'] : 7200;
-$cookieExpire = isset($_ENV['COOKIE_EXPIRE']) ? (int)$_ENV['COOKIE_EXPIRE'] : 7200;
+$sessionExpire = isset($_ENV['SESSION_EXPIRE']) ? (int)$_ENV['SESSION_EXPIRE'] : 2592000;
+$cookieExpire = isset($_ENV['COOKIE_EXPIRE']) ? (int)$_ENV['COOKIE_EXPIRE'] : 2592000;
 
-ini_set('session.gc_maxlifetime', (string)$sessionExpire); // Dynamic expiration
+ini_set('session.gc_maxlifetime', (string)$sessionExpire); // Dynamic expiration (30 days)
 session_set_cookie_params($sessionExpire);
 
 $isProd = ($_ENV['APP_ENV'] ?? 'production') === 'production';
@@ -63,9 +63,9 @@ if (!isset($_SERVER['SERVER_NAME']) || $_SERVER['SERVER_NAME'] === '') {
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start([
-        'cookie_lifetime' => $sessionExpire,
+        'cookie_lifetime' => $sessionExpire, // keep session alive for 30 days instead of expiring on browser close
         'cookie_httponly' => true, // prevents XSS attacks from accessing the session cookie
-        'cookie_secure' => $isHttps, // send cookie securely if HTTPS is active
+        'cookie_secure' => $isProd && $isHttps, // send cookie securely if HTTPS is active in production
         'cookie_samesite' => 'Lax', // prevents CSRF attacks
         'use_strict_mode' => true, // prevents session fixation attacks
     ]);

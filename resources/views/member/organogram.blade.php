@@ -92,6 +92,39 @@
         @endphp
 
         @if(empty($isReadOnly))
+        <!-- Kinship Auto-Match Discovery Banner ("Is this you on the family tree?") -->
+        <div id="kinshipAutoMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(240, 253, 250, 0.98) 0%, rgba(204, 251, 241, 0.95) 100%); backdrop-filter: blur(14px); z-index: 100; position: relative; border-left: 6px solid #00bfa5 !important; box-shadow: 0 12px 30px rgba(0, 191, 165, 0.15) !important;">
+            <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100 text-center text-md-start">
+                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(0, 191, 165, 0.15); min-width: 48px; min-height: 48px;">
+                    <i class="bi bi-person-bounding-box fs-3" style="color: #00897b;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
+                        <span class="badge" style="background: #00bfa5; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
+                            <i class="bi bi-stars me-1"></i> RELATIVE IDENTIFIED
+                        </span>
+                        <span id="matchConfidenceBadge" class="badge bg-light text-dark border" style="font-size: 0.75rem;">
+                            95% Match
+                        </span>
+                    </div>
+                    <h6 class="mb-1 fw-bold text-dark fs-6" id="matchHeadline">
+                        We found <span id="matchPersonName" style="color: #00796b;">Relative</span> on this family tree. Is this you?
+                    </h6>
+                    <p class="mb-0 text-muted" id="matchRelationshipHint" style="font-size: 0.88rem;">
+                        Relative on the family tree
+                    </p>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-center">
+                <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm w-100 w-md-auto" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border-radius: 10px; white-space: nowrap; font-size: 0.9rem;">
+                    <i class="bi bi-check2-circle me-1"></i> Yes, Connect My Account
+                </button>
+                <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-light btn-sm px-3 py-2 fw-semibold text-secondary border w-100 w-md-auto" style="border-radius: 10px; white-space: nowrap; font-size: 0.88rem;">
+                    Not Me
+                </button>
+            </div>
+        </div>
+
         <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; position: relative; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important;">
             <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
                 <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
@@ -524,7 +557,52 @@
                     </div>
                 </div>
             </div>
+        <!-- Claim Match Confirmation Modal -->
+        <div class="modal fade" id="claimMatchModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+                    <div class="modal-header border-0 pb-0 pt-4 px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(0, 191, 165, 0.12); width: 40px; height: 40px;">
+                                <i class="bi bi-person-check-fill fs-5" style="color: #00bfa5;"></i>
+                            </div>
+                            <div>
+                                <h5 class="modal-title fw-bold text-dark mb-0 fs-6">Claim Your Spot on the Tree</h5>
+                                <p class="text-muted small mb-0">Verified identity connection</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <div class="mb-3 position-relative d-inline-block">
+                            <img id="claimModalAvatar" src="/resources/images/profile/avatarM.png" class="rounded-circle shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #00bfa5;">
+                            <span class="position-absolute bottom-0 end-0 text-white rounded-circle p-1 shadow-sm d-flex align-items-center justify-content-center" style="width: 26px; height: 26px; font-size: 13px; background: #00bfa5;">
+                                <i class="bi bi-link-45deg"></i>
+                            </span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1" id="claimModalName">Family Member</h5>
+                        <p class="text-muted small mb-3" id="claimModalRelation">Relative on the family tree</p>
+
+                        <div class="alert alert-light border text-start p-3 mb-0" style="border-radius: 12px; font-size: 0.85rem; background-color: #f8fafc;">
+                            <div class="d-flex align-items-start gap-2 text-dark">
+                                <i class="bi bi-shield-check text-success fs-5"></i>
+                                <div>
+                                    <strong>What happens next:</strong>
+                                    <div class="text-muted mt-1">Your account will be directly linked to this position. If you added any spouses or children, they will be seamlessly grafted into this family dynasty.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex gap-2">
+                        <button type="button" class="btn btn-light btn-sm fw-semibold px-3 py-2 flex-grow-1" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                        <button type="button" id="btnExecuteClaim" onclick="executeClaimMatch()" class="btn btn-primary btn-sm fw-bold px-4 py-2 flex-grow-1 text-white" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border: none; border-radius: 10px;">
+                            Confirm & Connect
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <!-- Living Voice Capsule Recording & Upload Modal -->
         <div class="modal fade" id="voiceCapsuleModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
@@ -588,6 +666,7 @@
                             <!-- Tab 2: Audio File Upload -->
                             <div class="tab-pane fade" id="panelVoiceUpload" role="tabpanel">
                                 <form id="voiceUploadForm" onsubmit="handleVoiceFileUpload(event)" class="py-2">
+                                    @csrf
                                     <div class="mb-3">
                                         <label for="voiceAudioFile" class="form-label text-white-50 small mb-1">Select Audio File (MP3, WAV, OGG, M4A, WEBM - max 10MB)</label>
                                         <input type="file" class="form-control" id="voiceAudioFile" name="audio" accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm" required style="background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: white;">
@@ -607,7 +686,7 @@
     </div>
 </div>
 
-<script src="/public/js/vendor/kinshiptree.js?v=9.0"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.1"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -3168,5 +3247,148 @@
 
         state.animationFrameId = requestAnimationFrame(window.renderGlobeFrame);
     };
+
+    // =========================================================================
+    // Kinship Auto-Matching Resolution Engine ("Is This You?")
+    // =========================================================================
+    let currentPendingMatch = null;
+
+    async function checkPendingKinshipMatches() {
+        try {
+            const resp = await fetch('/api/kinship/pending-matches', {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!resp.ok) return;
+            const res = await resp.json();
+            if (res.status === 'success' && res.data && res.data.length > 0) {
+                currentPendingMatch = res.data[0];
+                const banner = document.getElementById('kinshipAutoMatchBanner');
+                const nameEl = document.getElementById('matchPersonName');
+                const hintEl = document.getElementById('matchRelationshipHint');
+                const badgeEl = document.getElementById('matchConfidenceBadge');
+
+                if (nameEl) nameEl.textContent = currentPendingMatch.full_name;
+                if (hintEl) hintEl.textContent = currentPendingMatch.relationship_hint || 'Relative on the family tree';
+                if (badgeEl) badgeEl.textContent = `${currentPendingMatch.confidence_percent || 90}% Match`;
+
+                if (banner) {
+                    banner.classList.remove('d-none');
+                    banner.classList.add('d-flex');
+                }
+            }
+        } catch (e) {
+            console.debug('Kinship auto-match check: no pending match found');
+        }
+    }
+
+    window.openClaimMatchModal = function() {
+        if (!currentPendingMatch) return;
+        const nameEl = document.getElementById('claimModalName');
+        const relEl = document.getElementById('claimModalRelation');
+        const avEl = document.getElementById('claimModalAvatar');
+
+        if (nameEl) nameEl.textContent = currentPendingMatch.full_name;
+        if (relEl) relEl.textContent = currentPendingMatch.relationship_hint || '';
+        if (avEl && currentPendingMatch.avatar_url) avEl.src = currentPendingMatch.avatar_url;
+
+        const modalEl = document.getElementById('claimMatchModal');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    };
+
+    window.executeClaimMatch = async function() {
+        if (!currentPendingMatch) return;
+        const btn = document.getElementById('btnExecuteClaim');
+        const originalText = btn ? btn.innerHTML : 'Confirm & Connect';
+        if (btn) {
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Connecting...';
+            btn.disabled = true;
+        }
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+        try {
+            const resp = await fetch('/api/kinship/claim-match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    node_id: currentPendingMatch.node_id,
+                    token: csrfToken
+                })
+            });
+
+            const res = await resp.json();
+            if (resp.ok && res.status === 'success') {
+                const modalEl = document.getElementById('claimMatchModal');
+                if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+                }
+                const banner = document.getElementById('kinshipAutoMatchBanner');
+                if (banner) banner.style.display = 'none';
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Welcome Home!',
+                        text: res.message || 'You are now connected to your spot on the family tree.',
+                        confirmButtonColor: '#00bfa5'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert(res.message || 'Unable to claim this position. Please try again.');
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            }
+        } catch (err) {
+            alert('A network error occurred. Please try again.');
+            if (btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    };
+
+    window.dismissCurrentMatch = async function() {
+        if (!currentPendingMatch) return;
+        const banner = document.getElementById('kinshipAutoMatchBanner');
+        if (banner) banner.style.display = 'none';
+
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+        try {
+            await fetch('/api/kinship/dismiss-match', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    node_id: currentPendingMatch.node_id,
+                    token: csrfToken
+                })
+            });
+        } catch (e) {
+            // fail-safe ignore
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        checkPendingKinshipMatches();
+    });
 </script>
 @endsection

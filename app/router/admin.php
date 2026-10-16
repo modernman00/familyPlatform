@@ -51,6 +51,9 @@ $router->map('GET', $adminSecretPath . '/online-users', 'App\controller\admin\Ad
 $router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard');
 $router->map('GET', $adminSecretPath . '/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard_secret');
 
+$router->map('GET', '/admin/playbook', 'App\controller\PlaybookController@adminPlaybook', 'admin_playbook');
+$router->map('GET', $adminSecretPath . '/playbook', 'App\controller\PlaybookController@adminPlaybook', 'admin_playbook_secret');
+
 $router->map('POST', '/admin/create-admin', 'App\controller\admin\AdminAuthController@createSuperAdmin', 'create_admin');
 $router->map('POST', $adminSecretPath . '/create-admin', 'App\controller\admin\AdminAuthController@createSuperAdmin', 'create_admin_secret');
 

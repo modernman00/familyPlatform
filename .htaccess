@@ -5,7 +5,8 @@
 # =============================================================================
 
 RewriteEngine On
-
+# Allow robots.txt and sitemap.xml directly
+RewriteRule ^(robots\.txt|sitemap\.xml)$ - [L]
 # ---------------------------------------------------------------------------
 # 0. Secrets directory. app/config/_env.php reads .env from APP_ENV_DIR if that
 #    directory holds a readable .env, otherwise it falls back to the project

@@ -311,7 +311,7 @@ class FamilyClaimService
     }
 
     /**
-     * Atomically claims a specific family node by ID.
+     * Atomically claims a specific family node by ID and grafts any existing subtree.
      */
     public static function claimNodeById(int $nodeId, string $userId, string $familyCode): bool
     {
@@ -319,40 +319,8 @@ class FamilyClaimService
             return false;
         }
 
-        $db = Db::connect2();
-        $db->beginTransaction();
-
-        try {
-            // Check if user already has an active root node
-            $checkExisting = $db->prepare("SELECT id FROM family_nodes WHERE family_code = ? AND user_id = ? LIMIT 1");
-            $checkExisting->execute([$familyCode, $userId]);
-            $existingId = $checkExisting->fetchColumn();
-
-            if ($existingId && (int)$existingId !== $nodeId) {
-                // If user had a standalone placeholder root node with no connections, delete it to merge
-                $checkConns = $db->prepare("SELECT COUNT(*) FROM family_node_children WHERE child_id = ?");
-                $checkConns->execute([$existingId]);
-                $conns = (int)$checkConns->fetchColumn();
-
-                if ($conns === 0) {
-                    $del = $db->prepare("DELETE FROM family_nodes WHERE id = ?");
-                    $del->execute([$existingId]);
-                }
-            }
-
-            $stmt = $db->prepare("UPDATE family_nodes SET user_id = ? WHERE id = ? AND family_code = ? AND user_id IS NULL");
-            $stmt->execute([$userId, $nodeId, $familyCode]);
-            $success = ($stmt->rowCount() === 1);
-
-            $db->commit();
-            return $success;
-        } catch (\Throwable $e) {
-            if ($db->inTransaction()) {
-                $db->rollBack();
-            }
-            error_log("claimNodeById error: " . $e->getMessage());
-            return false;
-        }
+        $res = KinshipEntityResolver::claimAndMergeNode($familyCode, $userId, $nodeId);
+        return $res['success'];
     }
 
     /**
@@ -367,26 +335,38 @@ class FamilyClaimService
             return null;
         }
 
-        $db = Db::connect2();
+        $matches = KinshipEntityResolver::findProbableMatches($familyCode, $userId, $memberData);
+        if (!empty($matches)) {
+            $top = $matches[0];
+            return [
+                'node_id' => $top['node_id'],
+                'first_name' => $top['first_name'],
+                'last_name' => $top['last_name'],
+                'full_name' => $top['full_name'],
+                'role' => $top['relationship_hint'],
+                'gender' => $top['gender']
+            ];
+        }
 
-        // 1. Check if user already claimed a node
+        // Fallback: check unclaimed candidate nodes by exact surname or phonetic match if user hasn't claimed yet
+        $db = Db::connect2();
         $checkStmt = $db->prepare("SELECT id FROM family_nodes WHERE family_code = ? AND user_id = ? LIMIT 1");
         $checkStmt->execute([$familyCode, $userId]);
         if ($checkStmt->fetchColumn()) {
-            return null; // Already linked to a node
+            return null;
         }
 
         $lastName = trim((string)($memberData['lastName'] ?? ''));
         $firstName = trim((string)($memberData['firstName'] ?? ''));
 
-        // 2. Look for unclaimed candidate nodes in the family tree
         $stmt = $db->prepare("
-            SELECT id, first_name, last_name, bio, gender, email, mobile, generation_level 
+            SELECT id, first_name, last_name, bio, gender 
             FROM family_nodes 
             WHERE family_code = ? AND user_id IS NULL
             ORDER BY id ASC
         ");
         $stmt->execute([$familyCode]);
+        /** @var array<int, array<string, mixed>> $candidates */
         $candidates = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($candidates as $cand) {
@@ -398,7 +378,6 @@ class FamilyClaimService
             $candFirst = trim((string)($cand['first_name'] ?? ''));
             $candLast = trim((string)($cand['last_name'] ?? ''));
 
-            // Check surname match or similar first name
             $isMatch = false;
             if (!empty($lastName) && !empty($candLast) && strcasecmp($lastName, $candLast) === 0) {
                 $isMatch = true;
@@ -419,7 +398,7 @@ class FamilyClaimService
                     'last_name' => $candLast,
                     'full_name' => trim("$candFirst $candLast"),
                     'role' => $role,
-                    'gender' => $cand['gender'] ?? 'Unknown'
+                    'gender' => (string)($cand['gender'] ?? 'Unknown')
                 ];
             }
         }
