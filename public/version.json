@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification",
+    "title": "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers",
     "notes": [
-        "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification",
-        "Docs(governance): enforce Standard 19 Zero-Code & Zero-Schema Disclosure Invariant and SecOps Playbook Audit",
-        "Fix(sec): sanitize internal architecture, code snippets and schema exposure from living playbook"
+        "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers",
+        "Feat(engagement): Master Viral Suite \u2014 Lineage Quests, Sunday Trivia, WhatsApp Flyer, Time Capsule & Sunday Digest",
+        "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification"
     ],
     "released_at": "2026-10-16",
-    "commit": "cbec4fb"
+    "commit": "4a87ade"
 }
