@@ -111,6 +111,20 @@
                        document.querySelector('input[name="token"]')?.value || '';
             },
 
+            getApiHeaders() {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': this.getCsrfToken(),
+                    'X-CSRF-TOKEN': this.getCsrfToken()
+                };
+                if (typeof window !== 'undefined' && window.Cypress) {
+                    headers['X-Cypress-Test'] = 'true';
+                }
+                return headers;
+            },
+
             async checkFamilyCode() {
                 const famInput = document.querySelector('input[name="famCode"]') || document.getElementById('famCode');
                 const rawCode = (famInput ? famInput.value : this.familyCode || '').trim();
@@ -134,13 +148,7 @@
                 try {
                     const response = await fetch('/api/family-code/check', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-XSRF-TOKEN': this.getCsrfToken(),
-                            'X-CSRF-TOKEN': this.getCsrfToken()
-                        },
+                        headers: this.getApiHeaders(),
                         body: JSON.stringify({
                             family_code: cleanCode
                         })
@@ -189,13 +197,7 @@
                 try {
                     const response = await fetch('/api/family-code/verify-inviter', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-XSRF-TOKEN': this.getCsrfToken(),
-                            'X-CSRF-TOKEN': this.getCsrfToken()
-                        },
+                        headers: this.getApiHeaders(),
                         body: JSON.stringify({
                             family_code: this.lastCheckedCode || this.familyCode,
                             inviter_first_name: this.inviterFirstName.trim(),

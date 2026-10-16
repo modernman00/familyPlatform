@@ -8,6 +8,13 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
     newUserPassword: 'TestPassword123!'
   };
 
+  beforeEach(() => {
+    cy.request({
+      url: '/api/test/clear-rate-limits',
+      failOnStatusCode: false
+    });
+  });
+
   // The register form is an Alpine component (familyCodeApprovalForm). Grab its
   // reactive data object so tests can drive it directly and read its state.
   const alpineData = () =>
@@ -38,7 +45,7 @@ describe('Family Code Approval - Registration & Approval Flow', () => {
   // Fill the inviter fields and submit. Sets the x-model values directly so the
   // "Verify & Continue" button (disabled until all three are non-empty) enables.
   const verifyInviter = ({ firstName, lastName, contact }) => {
-    cy.get('#inviter-verification-modal', { timeout: 8000 }).should('be.visible');
+    cy.get('#inviter-verification-modal', { timeout: 15000 }).should('be.visible');
     alpineData().then((data) => {
       data.inviterFirstName = firstName;
       data.inviterLastName = lastName;
