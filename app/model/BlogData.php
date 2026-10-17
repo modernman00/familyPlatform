@@ -41,6 +41,23 @@ final class BlogData extends Select
     }
 
     /**
+     * Retrieve recent published blogs excluding the current one
+     *
+     * @param string $excludeSlug
+     * @return array<int, mixed>
+     */
+    public static function getRecentPublishedBlogs(string $excludeSlug): array
+    {
+        $query = "SELECT blogs.*, account.firstName, account.lastName 
+                  FROM blogs 
+                  LEFT JOIN account ON blogs.author_id = account.id 
+                  WHERE blogs.status = 'published' AND blogs.slug != ? 
+                  ORDER BY blogs.created_at DESC 
+                  LIMIT 3";
+        return parent::selectFn2(query: $query, bind: [$excludeSlug]);
+    }
+
+    /**
      * Retrieve a specific blog by its ID (for admin editing)
      *
      * @return array<string, mixed>

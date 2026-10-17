@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Error')</title>
+    @include('partials.pwa-head')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -42,5 +43,7 @@
         <div class="error-details">@yield('details')</div>
         <a href="{{ url('/') }}" class="btn btn-primary">Go Home</a>
     </div>
+    @include('component.submitSpinner')
+    @include('partials.pwa-register')
 </body>
 </html>

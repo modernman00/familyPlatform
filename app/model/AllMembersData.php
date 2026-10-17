@@ -388,7 +388,7 @@ class AllMembersData extends InnerJoin
      * @return array<int, array<string, mixed>>
      */
     public function searchMembers(
-        int $requesterId,
+        string $requesterId,
         string $famCode,
         string $term,
         int $limit = 30,
@@ -396,12 +396,15 @@ class AllMembersData extends InnerJoin
     ): array {
         // if search term is empty, just return empty and let controller / frontend
         // fall back to processApiData()
-        if ($term === '') {
+        $cleanTerm = trim($term);
+        if ($cleanTerm === '') {
             return [];
         }
 
         try {
-            $like = "%$term%";
+            $like = '%' . $cleanTerm . '%';
+            $cleanDigits = (string) preg_replace('/[^0-9]/', '', $cleanTerm);
+            $digitsLike = ($cleanDigits !== '' && strlen($cleanDigits) >= 3) ? ('%' . $cleanDigits . '%') : $like;
 
             $sql = "
             SELECT DISTINCT 
@@ -414,18 +417,18 @@ class AllMembersData extends InnerJoin
                 ofm.mother_name AS motherName,
                 ofm.spouse_name AS spouseName,
                 pp.img,
-                c.email,
-                c.country,
-                c.mobile,
+                COALESCE(c.email, acc.email, '') AS email,
+                COALESCE(c.country, '') AS country,
+                COALESCE(c.mobile, '') AS mobile,
                 CASE 
-                    WHEN p.famCode = :famCode_case THEN 'family'
+                    WHEN (p.famCode = :famCode_case AND p.famCode != '') THEN 'family'
                     WHEN rm.requester_id = :req_case_approved_you
                          AND rm.approver_id = p.id
-                         AND rm.status = 'approved'
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
                          THEN 'approved_you'
                     WHEN rm.approver_id = :req_case_you_approved
                          AND rm.requester_id = p.id
-                         AND rm.status = 'approved'
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
                          THEN 'you_approved'
                     ELSE 'other'
                 END AS relationType,
@@ -434,6 +437,7 @@ class AllMembersData extends InnerJoin
                 rm.status,
                 rm.requesterCode
             FROM personal AS p
+            LEFT JOIN account AS acc ON p.id = acc.id
             LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
             LEFT JOIN profilePics AS pp   ON p.id = pp.id
             LEFT JOIN contact AS c        ON p.id = c.id
@@ -445,32 +449,38 @@ class AllMembersData extends InnerJoin
                 )
             WHERE
                 p.id != :req_where_not_me
+                AND p.deleted_at IS NULL
                 AND (
-                    COALESCE(c.show_my_profile, 'on') = 'on'
-                    OR p.famCode = :famCode_privacy
+                    LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off'
+                    OR (p.famCode = :famCode_privacy AND p.famCode != '')
                 )
                 AND (
                     p.firstName LIKE :search_firstName
                     OR p.lastName LIKE :search_lastName
+                    OR CONCAT(p.firstName, ' ', p.lastName) LIKE :search_fullName
+                    OR CONCAT(p.lastName, ' ', p.firstName) LIKE :search_fullNameRev
                     OR c.email LIKE :search_email
+                    OR acc.email LIKE :search_acc_email
                     OR c.mobile LIKE :search_mobile
+                    OR REPLACE(REPLACE(REPLACE(c.mobile, ' ', ''), '-', ''), '+', '') LIKE :search_mobile_digits
                     OR p.famCode LIKE :search_famCode
                     OR c.country LIKE :search_country
                 )
             ORDER BY
                 CASE 
-                    WHEN p.famCode = :famCode_order_family THEN 1
+                    WHEN (p.famCode = :famCode_order_family AND p.famCode != '') THEN 1
                     WHEN rm.requester_id = :req_order_outgoing
                          AND rm.approver_id = p.id
-                         AND rm.status = 'approved'
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
                          THEN 2
                     WHEN rm.approver_id = :req_order_incoming
                          AND rm.requester_id = p.id
-                         AND rm.status = 'approved'
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
                          THEN 3
                     ELSE 4
                 END,
-                p.firstName
+                p.firstName ASC,
+                p.lastName ASC
             LIMIT :limit_rows
             OFFSET :offset_rows
         ";
@@ -482,26 +492,24 @@ class AllMembersData extends InnerJoin
             $stmt->bindValue(':famCode_privacy', $famCode, PDO::PARAM_STR);
             $stmt->bindValue(':famCode_order_family', $famCode, PDO::PARAM_STR);
 
-            // --- requesterId placeholders used in CASE (relationType) ---
-            $stmt->bindValue(':req_case_approved_you', $requesterId, PDO::PARAM_INT);
-            $stmt->bindValue(':req_case_you_approved', $requesterId, PDO::PARAM_INT);
+            // --- requesterId placeholders (strictly string IDs) ---
+            $stmt->bindValue(':req_case_approved_you', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_case_you_approved', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_join_outgoing', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_join_incoming', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_where_not_me', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_order_outgoing', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':req_order_incoming', $requesterId, PDO::PARAM_STR);
 
-            // --- requesterId placeholders used in JOIN ---
-            $stmt->bindValue(':req_join_outgoing', $requesterId, PDO::PARAM_INT);
-            $stmt->bindValue(':req_join_incoming', $requesterId, PDO::PARAM_INT);
-
-            // --- requesterId placeholder used in WHERE p.id != ---
-            $stmt->bindValue(':req_where_not_me', $requesterId, PDO::PARAM_INT);
-
-            // --- requesterId placeholders used in ORDER BY ---
-            $stmt->bindValue(':req_order_outgoing', $requesterId, PDO::PARAM_INT);
-            $stmt->bindValue(':req_order_incoming', $requesterId, PDO::PARAM_INT);
-
-            // --- search term placeholders (all the same LIKE value) ---
+            // --- search term placeholders ---
             $stmt->bindValue(':search_firstName', $like, PDO::PARAM_STR);
             $stmt->bindValue(':search_lastName', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_fullName', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_fullNameRev', $like, PDO::PARAM_STR);
             $stmt->bindValue(':search_email', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_acc_email', $like, PDO::PARAM_STR);
             $stmt->bindValue(':search_mobile', $like, PDO::PARAM_STR);
+            $stmt->bindValue(':search_mobile_digits', $digitsLike, PDO::PARAM_STR);
             $stmt->bindValue(':search_famCode', $like, PDO::PARAM_STR);
             $stmt->bindValue(':search_country', $like, PDO::PARAM_STR);
 
@@ -514,6 +522,7 @@ class AllMembersData extends InnerJoin
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Remove duplicate users by ID
+            /** @var array<int, array<string, mixed>> $result2 */
             $result2 = $this->uniqueById($result);
 
             return $result2;

@@ -9,13 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   
   <!-- PWA & Mobile Web App Capabilities -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
-  <link rel="apple-touch-icon" href="/public/img/favicon/apple-touch-icon.png" sizes="180x180">
-  <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
+  @include('partials.pwa-head')
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
   <meta name="vapid-public-key" content="{{ $_ENV['VAPID_PUBLIC_KEY'] ?? $_SERVER['VAPID_PUBLIC_KEY'] ?? '' }}">
   <meta name="pusher-key" content="{{ $_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? '' }}">
@@ -39,8 +33,6 @@
   <!-- iPad Pro 12.9", 11", Air 10.9" -->
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)">
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
-
-  <link rel="manifest" href="/manifest.json">
 
       <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
 

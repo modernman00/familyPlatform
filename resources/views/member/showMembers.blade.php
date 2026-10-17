@@ -82,7 +82,7 @@
 
         <div class="position-relative">
             <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted ms-3" style="font-size: 0.85rem;"></i>
-            <input class="search-input-stitch" type="search" placeholder="Search members by name or email..." aria-label="Search" id="searchFamily" name="searchFamily">
+            <input class="search-input-stitch" type="search" placeholder="Search members by name, email or mobile..." aria-label="Search" id="searchFamily" name="searchFamily">
         </div>
     </div>
 

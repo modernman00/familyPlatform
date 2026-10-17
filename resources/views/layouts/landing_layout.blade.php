@@ -84,13 +84,8 @@
   <!-- Favicons -->
   <link rel="icon" type="image/png" sizes="32x32" href="{{ getenv('APP_LOGO') }}">
   
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json" type="application/manifest+json">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
+  <!-- PWA Manifest & Mobile Meta -->
+  @include('partials.pwa-head')
   
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
@@ -236,19 +231,8 @@
   
   @yield('extra_js')
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('Service Worker registered:', registration);
-          })
-          .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-          });
-      });
-    }
-  </script>
+  @include('component.submitSpinner')
+  @include('partials.pwa-register')
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')
    <script nonce="{{ $nonce }}">
         window.RECAPTCHA_SITE_KEY = "{{ $_ENV['RECAPTCHA_SITE_KEY'] }}";

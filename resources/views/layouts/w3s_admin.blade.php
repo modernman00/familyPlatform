@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
      <link rel="icon" type="image/png" sizes="32x32" href={{ getenv("IMG_CONTRACT") }}>
+     @include('partials.pwa-head')
 <style>
     html,
     body,
@@ -143,19 +144,8 @@ function w3_close() {
     <script type="text/javascript" src="/public/manifest.js" defer></script>
   <script type="text/javascript" src="/public/vendor.js" defer></script>
   <script type="text/javascript" src="/public/index.js" defer></script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered:', registration);
-        })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
-    });
-  }
-</script>
+  @include('component.submitSpinner')
+  @include('partials.pwa-register')
 </body>
 
 </html>

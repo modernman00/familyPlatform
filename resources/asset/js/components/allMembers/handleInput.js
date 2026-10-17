@@ -130,11 +130,23 @@ export const createSearchHandler = ({
   let debounceTimer = null;
 
   const performSearch = async () => {
-    const rawQuery = searchInput.value.trim();  // THE SEARCH QUERY
+    const rawQuery = searchInput.value.trim();
 
+    const pillsContainer = id("memberFilterPills");
+    const memberCountBadge = id("memberCount");
+    const memberCountDisplay = id("memberCountDisplay");
 
-    // empty query = back to my network
+    const resetPillsToAll = () => {
+      if (pillsContainer) {
+        pillsContainer.querySelectorAll(".filter-pill-btn").forEach((b) => b.classList.remove("active"));
+        const allBtn = pillsContainer.querySelector('[data-filter="all"]');
+        if (allBtn) allBtn.classList.add("active");
+      }
+    };
+
+    // empty query = back to original network
     if (!rawQuery) {
+      resetPillsToAll();
       renderMembers(familyMembers);
       return;
     }
@@ -148,16 +160,17 @@ export const createSearchHandler = ({
       const matches = data.message || [];
 
       if (!matches.length) {
+        if (memberCountBadge) memberCountBadge.textContent = "0";
+        if (memberCountDisplay) memberCountDisplay.textContent = "0";
         renderInviteBlock(container, rawQuery);
         return;
       }
 
-      // backend already orders: family first, then approved, etc.
+      resetPillsToAll();
       container.innerHTML = "";
       renderMembers(matches);
     } catch (error) {
       showNotification("allMembers", "is-danger", "Search failed. Please try again.");
-      // optional: log or surface more detail in dev builds
       msgException(error);
     }
   };

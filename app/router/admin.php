@@ -62,6 +62,10 @@ $router->map('GET', '/admin/blog/create', 'App\controller\admin\AdminBlogControl
 $router->map('GET', $adminSecretPath . '/blog/create', 'App\controller\admin\AdminBlogController@create', 'admin_blog_create_secret');
 $router->map('POST', '/admin/blog/store', 'App\controller\admin\AdminBlogController@store', 'admin_blog_store');
 $router->map('POST', $adminSecretPath . '/blog/store', 'App\controller\admin\AdminBlogController@store', 'admin_blog_store_secret');
+$router->map('POST', '/admin/blog/ai-generate', 'App\controller\admin\AdminBlogController@generateAi', 'admin_blog_ai_generate');
+$router->map('POST', $adminSecretPath . '/blog/ai-generate', 'App\controller\admin\AdminBlogController@generateAi', 'admin_blog_ai_generate_secret');
+$router->map('POST', '/admin/blog/ai-summarize', 'App\controller\admin\AdminBlogController@summarizeAi', 'admin_blog_ai_summarize');
+$router->map('POST', $adminSecretPath . '/blog/ai-summarize', 'App\controller\admin\AdminBlogController@summarizeAi', 'admin_blog_ai_summarize_secret');
 
 // GDPR DATA ERASURE MANAGEMENT
 $router->map('GET', '/admin/erasure', 'App\controller\admin\AdminErasureController@index', 'admin_erasure_index');

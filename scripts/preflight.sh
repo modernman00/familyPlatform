@@ -96,18 +96,31 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 4. Engineering Must-Haves & Anti-Reinvention Scanner (TAT & BRATS Gate)
+# 4. Engineering Must-Haves, PWA & E2E Verification Suites (TAT & BRATS Gate)
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 4/6] Verifying Engineering Must-Haves (CSRF, SQL, Shared-Lib)...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 4/6] Verifying Engineering Must-Haves, PWA & Robust E2E Suites...${NC}"
+GATE4_PASSED=1
 if [ -f "scripts/verify_engineering_must_haves.php" ]; then
-    if php scripts/verify_engineering_must_haves.php; then
-        echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations.${NC}"
-    else
-        echo -e "${RED}  ❌ Gate 4 Failed: Engineering Must-Have violations detected.${NC}"
-        FAILURES=$((FAILURES + 1))
-    fi
+    php scripts/verify_engineering_must_haves.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_pwa_optimization.php" ]; then
+    php tests/verify_pwa_optimization.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_frontend_stability.php" ]; then
+    php tests/verify_frontend_stability.php || GATE4_PASSED=0
+fi
+
+if [ -f "tests/verify_e2e_robust_suite.php" ]; then
+    php tests/verify_e2e_robust_suite.php || GATE4_PASSED=0
+fi
+
+if [ "$GATE4_PASSED" -eq 1 ]; then
+    echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable, E2E robust suite 100% passed.${NC}"
 else
-    echo -e "${YELLOW}  ⚠️  Must-haves scanner not found.${NC}"
+    echo -e "${RED}  ❌ Gate 4 Failed: Engineering Must-Haves, PWA, or E2E suites reported failures.${NC}"
+    FAILURES=$((FAILURES + 1))
 fi
 echo ""
 

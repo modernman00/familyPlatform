@@ -139,4 +139,41 @@ final class AdminBlogController extends BaseController
             Utility::msgException(400, $th->getMessage());
         }
     }
+
+    public function generateAi(): void
+    {
+        try {
+            CheckToken::tokenCheck();
+            $topic = trim((string) ($_POST['topic'] ?? ''));
+            $tone = trim((string) ($_POST['tone'] ?? 'warm, inspiring, and family-focused'));
+
+            if ($topic === '') {
+                throw new ValidationException("Please provide a topic or idea for the story.");
+            }
+
+            $draft = \App\services\AIService::generateBlogDraft($topic, $tone);
+
+            Utility::msgSuccess(200, "Draft generated successfully", $draft);
+        } catch (\Throwable $th) {
+            Utility::msgException(400, $th->getMessage());
+        }
+    }
+
+    public function summarizeAi(): void
+    {
+        try {
+            CheckToken::tokenCheck();
+            $content = (string) ($_POST['content'] ?? '');
+
+            if (trim($content) === '') {
+                throw new ValidationException("Content cannot be empty to summarize.");
+            }
+
+            $summary = \App\services\AIService::summarizeBlog($content);
+
+            Utility::msgSuccess(200, "Summary generated successfully", ['summary' => $summary]);
+        } catch (\Throwable $th) {
+            Utility::msgException(400, $th->getMessage());
+        }
+    }
 }

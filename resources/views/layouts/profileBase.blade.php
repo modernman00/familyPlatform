@@ -9,15 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
   <!-- PWA & Mobile Web App Capabilities -->
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
-  <link rel="apple-touch-icon" href="/public/img/favicon/apple-touch-icon.png" sizes="180x180">
-  <link rel="icon" href="/public/img/favicon/favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="/public/img/favicon/favicon-16x16.png" sizes="16x16" type="image/png">
+  @include('partials.pwa-head')
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
   <meta name="pusher-key" content="{{ $_ENV['MIX_PUSHER_APP_KEY'] ?? $_SERVER['MIX_PUSHER_APP_KEY'] ?? $_ENV['PUSHER_APP_KEY'] ?? $_SERVER['PUSHER_APP_KEY'] ?? '' }}">
   <meta name="pusher-cluster" content="{{ $_ENV['MIX_PUSHER_APP_CLUSTER'] ?? $_SERVER['MIX_PUSHER_APP_CLUSTER'] ?? $_ENV['PUSHER_APP_CLUSTER'] ?? $_SERVER['PUSHER_APP_CLUSTER'] ?? 'eu' }}">
@@ -87,19 +79,8 @@
   <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then((registration) => {
-            console.log('Service Worker registered:', registration);
-          })
-          .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-          });
-      });
-    }
-  </script>
+  @include('component.submitSpinner')
+  @include('partials.pwa-register')
 </body>
 
 </html>

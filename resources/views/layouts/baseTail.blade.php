@@ -42,7 +42,7 @@
 
     <link rel="icon" type="image/png" sizes="32x32" href={{ $_ENV['APP_LOGO'] }}>
 
-    <link rel="manifest" href="/manifest.json" type="application/manifest+json">
+    @include('partials.pwa-head')
 
 
     <script>
@@ -301,7 +301,8 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/vendor.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
-
+    @include('component.submitSpinner')
+    @include('partials.pwa-register')
 </body>
 
 </html>

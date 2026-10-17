@@ -38,8 +38,11 @@ final class BlogController
                 return;
             }
 
+            $recentBlogs = BlogData::getRecentPublishedBlogs($slug);
+
             Utility::view('blog/show', [
-                'blog' => $blog
+                'blog' => $blog,
+                'recentBlogs' => $recentBlogs
             ]);
         } catch (\Throwable $th) {
             Utility::showError($th);

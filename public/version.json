@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs",
+    "title": "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts",
     "notes": [
+        "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts",
         "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs",
-        "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow",
-        "Feat(feed): Surface Family Heritage Hub and Rituals directly on Member Home Feed"
+        "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow"
     ],
     "released_at": "2026-10-17",
-    "commit": "21c0439"
+    "commit": "28f8c46"
 }

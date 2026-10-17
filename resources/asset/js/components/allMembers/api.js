@@ -129,6 +129,7 @@ function setupFilterPills() {
       });
 
       searchInput.addEventListener("input", handleSearch);
+      searchInput.addEventListener("search", handleSearch);
     }
   } catch (error) {
     showError(error);

@@ -181,10 +181,116 @@ foreach ($iterator as $file) {
     }
 }
 
+// --- CHECK 5: UNIVERSAL BUTTON SPINNER INVARIANT (JUMOKE MANDATE) ---
+$spinnerComponent = $targetDir . '/resources/views/component/submitSpinner.blade.php';
+$spinnerComponentAlias = $targetDir . '/resources/views/components/submitSpinner.blade.php';
+if (!file_exists($spinnerComponent)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #5: Missing Universal Submit Spinner Component',
+        'file' => $spinnerComponent,
+        'line' => 1,
+        'remediation' => 'Create resources/views/component/submitSpinner.blade.php to provide universal button spinners.',
+    ];
+    $exitCode = 1;
+}
+
+if (!file_exists($spinnerComponentAlias)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #5: Missing Universal Submit Spinner Alias',
+        'file' => $spinnerComponentAlias,
+        'line' => 1,
+        'remediation' => 'Create resources/views/components/submitSpinner.blade.php proxying to component.submitSpinner.',
+    ];
+    $exitCode = 1;
+}
+
+$requiredLayouts = [
+    $targetDir . '/resources/views/layouts/landing_layout.blade.php',
+    $targetDir . '/resources/views/layouts/profileBase.blade.php',
+    $targetDir . '/resources/views/layouts/w3s_admin.blade.php',
+    $targetDir . '/resources/views/layouts/w3s_member.blade.php',
+    $targetDir . '/resources/views/baseBulma.blade.php',
+    $targetDir . '/resources/views/baseBulmaForm.blade.php',
+    $targetDir . '/resources/views/errors/base.blade.php',
+    $targetDir . '/resources/views/baseError.blade.php',
+    $targetDir . '/resources/views/admin/base.blade.php',
+    $targetDir . '/resources/views/layouts/baseTail.blade.php',
+];
+
+foreach ($requiredLayouts as $layoutPath) {
+    if (file_exists($layoutPath)) {
+        $lContent = file_get_contents($layoutPath) ?: '';
+        if (!str_contains($lContent, 'submitSpinner')) {
+            $violations[] = [
+                'severity' => 'CRITICAL',
+                'rule' => 'MUST-HAVE #5: Layout Missing Universal Submit Spinner Inclusion',
+                'file' => $layoutPath,
+                'line' => 1,
+                'remediation' => "Add `@include('component.submitSpinner')` before `</body>` in {$layoutPath}.",
+            ];
+            $exitCode = 1;
+        }
+    }
+}
+
+// --- CHECK 6: ROOT SERVICE WORKER ACCESSIBILITY ---
+$swFile = $targetDir . '/public/sw.js';
+if (!file_exists($swFile)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #6: Missing Root Service Worker Script (public/sw.js)',
+        'file' => $swFile,
+        'line' => 1,
+        'remediation' => 'Create public/sw.js with push and fetch listeners to prevent service worker registration errors.',
+    ];
+    $exitCode = 1;
+}
+
+// --- CHECK 7: PWA OPTIMIZATION INVARIANT (MANIFEST & SERVICE WORKER LAYOUT INTEGRATION) ---
+$manifestFile = $targetDir . '/public/manifest.json';
+if (!file_exists($manifestFile)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #7: Missing PWA Manifest (public/manifest.json)',
+        'file' => $manifestFile,
+        'line' => 1,
+        'remediation' => 'Create public/manifest.json with valid PWA manifest fields (standalone, icons, theme_color).',
+    ];
+    $exitCode = 1;
+}
+
+foreach ($requiredLayouts as $pwaLayoutPath) {
+    if (file_exists($pwaLayoutPath)) {
+        $pContent = file_get_contents($pwaLayoutPath) ?: '';
+        if (!str_contains($pContent, 'partials.pwa-head') && !str_contains($pContent, 'layouts.head')) {
+            $violations[] = [
+                'severity' => 'CRITICAL',
+                'rule' => 'MUST-HAVE #7: Layout Missing PWA Head Meta Inclusion',
+                'file' => $pwaLayoutPath,
+                'line' => 1,
+                'remediation' => "Add `@include('partials.pwa-head')` inside `<head>` in {$pwaLayoutPath}.",
+            ];
+            $exitCode = 1;
+        }
+        if (!str_contains($pContent, 'partials.pwa-register')) {
+            $violations[] = [
+                'severity' => 'CRITICAL',
+                'rule' => 'MUST-HAVE #7: Layout Missing PWA Service Worker Registration',
+                'file' => $pwaLayoutPath,
+                'line' => 1,
+                'remediation' => "Add `@include('partials.pwa-register')` before `</body>` in {$pwaLayoutPath}.",
+            ];
+            $exitCode = 1;
+        }
+    }
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";
-    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes, 0 shared-lib reinventions detected.\n\n";
+    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes, 0 shared-lib reinventions, 100% button spinner compliance, root sw.js & PWA layouts verified.\n\n";
     exit(0);
 }
 
@@ -197,3 +303,4 @@ foreach ($violations as $v) {
 
 echo "❌ Pre-review gate failed. Address all violations above before submitting PR.\n";
 exit($exitCode);
+

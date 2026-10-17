@@ -143,6 +143,7 @@ function myFunction(id) {
 
 </script>
       
-
+  @include('component.submitSpinner')
+  @include('partials.pwa-register')
 </body>
 </html> 
