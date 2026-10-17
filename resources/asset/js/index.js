@@ -7,6 +7,7 @@ import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
 import { initBackToTop } from './components/backToTop';
 import './components/recommendModal';
+import './components/navbar';
 
 import { profileFeed } from './components/profilePage/feedComponent';
 import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';

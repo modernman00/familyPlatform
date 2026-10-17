@@ -12,27 +12,37 @@ final class EmailData
     public function __construct(private string $sender)
     {
         if ($sender === 'member') {
-            $this->username = getenv("APP_USERNAME") ?: null;
-            $this->password = getenv("APP_PASSWORD") ?: null;
-            $this->senderName = getenv('APP_SENDER') ?: null;
-            $this->senderEmail = getenv("APP_EMAIL") ?: null;
-            $this->testEmail = getenv("TEST_EMAIL") ?: null;
+            $this->username = ($_ENV['APP_USERNAME'] ?? null) ?: (getenv("APP_USERNAME") ?: null);
+            $this->password = ($_ENV['APP_PASSWORD'] ?? null) ?: (getenv("APP_PASSWORD") ?: null);
+            $this->senderName = ($_ENV['APP_SENDER'] ?? null) ?: (getenv('APP_SENDER') ?: null);
+            $this->senderEmail = ($_ENV['APP_EMAIL'] ?? null) ?: (getenv("APP_EMAIL") ?: null);
+            $this->testEmail = ($_ENV['TEST_EMAIL'] ?? null) ?: (getenv("TEST_EMAIL") ?: null);
         } elseif ($sender === 'admin') {
-            $this->username = getenv("ADMIN_USERNAME") ?: null;
-            $this->password = getenv("ADMIN_PASSWORD") ?: null;
-            $this->senderName = getenv('ADMIN_SENDER') ?: null;
-            $this->senderEmail = getenv("ADMIN_EMAIL") ?: null;
-            $this->testEmail = getenv("TEST_EMAIL") ?: null;
+            $this->username = ($_ENV['ADMIN_USERNAME'] ?? null) ?: (getenv("ADMIN_USERNAME") ?: null);
+            $this->password = ($_ENV['ADMIN_PASSWORD'] ?? null) ?: (getenv("ADMIN_PASSWORD") ?: null);
+            $this->senderName = ($_ENV['ADMIN_SENDER'] ?? null) ?: (getenv('ADMIN_SENDER') ?: null);
+            $this->senderEmail = ($_ENV['ADMIN_EMAIL'] ?? null) ?: (getenv("ADMIN_EMAIL") ?: null);
+            $this->testEmail = ($_ENV['TEST_EMAIL'] ?? null) ?: (getenv("TEST_EMAIL") ?: null);
         }
     }
 
     private function setEmailData(): void
     {
-        define('USER_APP', $this->username);
-        define('PASS', $this->password);
-        define('APP_EMAIL', $this->senderEmail);
-        define('APP_NAME', $this->senderName);
-        define('TEST_EMAIL', $this->testEmail);
+        if (!defined('USER_APP')) {
+            define('USER_APP', $this->username);
+        }
+        if (!defined('PASS')) {
+            define('PASS', $this->password);
+        }
+        if (!defined('APP_EMAIL')) {
+            define('APP_EMAIL', $this->senderEmail);
+        }
+        if (!defined('APP_NAME')) {
+            define('APP_NAME', $this->senderName);
+        }
+        if (!defined('TEST_EMAIL')) {
+            define('TEST_EMAIL', $this->testEmail);
+        }
     }
 
     public function getEmailData(): void

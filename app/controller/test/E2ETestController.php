@@ -162,6 +162,16 @@ class E2ETestController
         // Check if user already exists
         $existing = $this->run("SELECT id FROM account WHERE email = ?", [$email])->fetch(PDO::FETCH_ASSOC);
         if ($existing) {
+            $existingId = (string) $existing['id'];
+            $chkContact = $this->run("SELECT id FROM contact WHERE id = ?", [$existingId])->fetch(PDO::FETCH_ASSOC);
+            if ($chkContact) {
+                $this->run("UPDATE contact SET two_factor_auth = 'on' WHERE id = ?", [$existingId]);
+            } else {
+                $this->run(
+                    "INSERT INTO contact (id, email, country, mobile, two_factor_auth) VALUES (?, ?, 'UK', '07000000000', 'on')",
+                    [$existingId, $email]
+                );
+            }
             header('Content-Type: application/json');
             echo json_encode(['success' => true, 'message' => 'Test user already exists']);
             exit;
@@ -178,6 +188,12 @@ class E2ETestController
             $this->run(
                 "INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)",
                 [$userId, 'Cypress', 'Test', 'TEST' . \strtoupper(\substr($userId, 0, 4))]
+            );
+
+            // Create contact data with 2FA enabled for E2E auth spec verification
+            $this->run(
+                "INSERT INTO contact (id, email, country, mobile, two_factor_auth) VALUES (?, ?, 'UK', '07000000000', 'on')",
+                [$userId, $email]
             );
 
             header('Content-Type: application/json');

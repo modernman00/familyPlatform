@@ -184,6 +184,98 @@ final class AuthLoginSecurityTest extends TestCase
 
         (new \App\controller\login\Login())->show();
 
+        $this->assertSame('/profilePage' === ($GLOBALS['__testRedirect'] ?? null) ? '/profilePage' : '/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
         $this->assertSame('/admin/dashboard', $GLOBALS['__testRedirect'] ?? null);
     }
+
+    // ---- Two-Factor Authentication (2FA) Toggle & Direct Login Alignment ----
+
+    public function test_code_show_redirects_directly_authenticated_member_to_profile_page(): void
+    {
+        $_SESSION['id'] = $this->userId;
+        $_SESSION['loggedIn'] = true;
+        $_SESSION['auth'] = [
+            'identifyCust' => $this->userId,
+            'type' => 'member',
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        (new Code())->show();
+
+        $this->assertSame(
+            '/profilePage',
+            $GLOBALS['__testRedirect'] ?? null,
+            'When a member with 2FA OFF signs in directly, /login/code must redirect straight to /profilePage.'
+        );
+    }
+
+    public function test_code_show_does_not_redirect_pending_2fa_member_to_profile_page(): void
+    {
+        $_SESSION = [
+            'auth' => [
+                'identifyCust' => $this->userId,
+                'email' => 'pending2fa@myfamilyplatform.com',
+                'type' => 'member',
+                'pendingUser' => ['id' => $this->userId],
+                '2FA_token_ts' => time(),
+            ],
+        ];
+        $GLOBALS['__testRedirect'] = null;
+
+        ob_start();
+        (new Code())->show();
+        ob_end_clean();
+
+        $this->assertNotSame(
+            '/profilePage',
+            $GLOBALS['__testRedirect'] ?? null,
+            'A pending_2fa session must never bypass /login/code to /profilePage.'
+        );
+    }
+
+    public function test_privacy_setting_persists_two_factor_auth_on_and_off_and_projects_in_member_data(): void
+    {
+        $email = strtolower($this->userId) . '@myfamilyplatform.com';
+        try {
+            $stmtAccount = $this->pdo->prepare(
+                'INSERT INTO account (id, email, password, status, deleted_at) VALUES (?, ?, ?, ?, NULL)'
+            );
+            $stmtAccount->execute([$this->userId, $email, password_hash('ValidPass123!', PASSWORD_DEFAULT), 'confirm']);
+
+            $stmtContact = $this->pdo->prepare(
+                'INSERT INTO contact (id, email, country, mobile, two_factor_auth, profile_visibility, show_my_profile) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            );
+            $stmtContact->execute([$this->userId, $email, 'UK', '07700900123', 'off', 'public', 'on']);
+
+            $check2faMethod = new \ReflectionMethod(\App\controller\login\Login::class, 'isMemberTwoFactorEnabled');
+            $check2faMethod->setAccessible(true);
+            $this->assertFalse($check2faMethod->invoke(null, $email), 'When two_factor_auth is off, Login::isMemberTwoFactorEnabled must return false.');
+
+            $updStmt = $this->pdo->prepare('UPDATE contact SET two_factor_auth = ? WHERE id = ?');
+            $updStmt->execute(['on', $this->userId]);
+            $this->assertTrue($check2faMethod->invoke(null, $email), 'When two_factor_auth is on, Login::isMemberTwoFactorEnabled must return true.');
+
+            // Simulate BaseController::membersData() projection via formatPerson
+            $ref = new \ReflectionMethod(\App\controller\BaseController::class, 'formatPerson');
+            $ref->setAccessible(true);
+            $formatted = $ref->invoke(null, [
+                'id' => $this->userId,
+                'firstName' => 'TwoFactor',
+                'lastName' => 'Tester',
+                'email' => $email,
+                'two_factor_auth' => 'on',
+                'profile_visibility' => 'family',
+                'show_my_profile' => 'off',
+            ]);
+
+            $this->assertIsArray($formatted);
+            $this->assertSame('on', $formatted['two_factor_auth'] ?? null);
+            $this->assertSame('family', $formatted['profile_visibility'] ?? null);
+            $this->assertSame('off', $formatted['show_my_profile'] ?? null);
+        } finally {
+            $this->pdo->prepare('DELETE FROM contact WHERE id = ?')->execute([$this->userId]);
+            $this->pdo->prepare('DELETE FROM account WHERE id = ?')->execute([$this->userId]);
+        }
+    }
 }
+

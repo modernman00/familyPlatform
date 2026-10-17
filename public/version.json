@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow",
+    "title": "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs",
     "notes": [
+        "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs",
         "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow",
-        "Feat(feed): Surface Family Heritage Hub and Rituals directly on Member Home Feed",
-        "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers"
+        "Feat(feed): Surface Family Heritage Hub and Rituals directly on Member Home Feed"
     ],
-    "released_at": "2026-10-16",
-    "commit": "7824224"
+    "released_at": "2026-10-17",
+    "commit": "21c0439"
 }

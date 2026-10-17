@@ -12,6 +12,10 @@ final class Code
     public function show(): void
     {
         try {
+            if (!empty($_SESSION['loggedIn']) && !empty($_SESSION['id']) && empty($_SESSION['auth']['pendingUser']) && empty($_SESSION['auth']['2FA_token_ts'])) {
+                redirect('/profilePage');
+                return;
+            }
             if (empty($_SESSION['token'])) {
                 $_SESSION['token'] = bin2hex(random_bytes(32));
             }

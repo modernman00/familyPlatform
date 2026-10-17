@@ -12,6 +12,7 @@ use Src\Exceptions\ValidationException;
 use Src\functionality\SubmitPostData;
 use Src\LoginUtility;
 use Src\SelectFn;
+use Src\SendEmail;
 use Src\SubmitForm;
 use Src\UpdateFn;
 
@@ -83,16 +84,11 @@ final class Event extends AllMembersData
     // Filter members based on the event famCode
     private static function filterMemberByFamCode(string $eventFamCode): array
     {
-        // Get all members' details including email, famCode, and id
-        $members = self::getAllMembersCodeAndEmail();
+        if ($eventFamCode === '') {
+            return [];
+        }
 
-        $membersToNotify = array_filter($members, function ($member) use ($eventFamCode) {
-            // Check legacy famCode column or new user_families array structure
-            $memberFamilies = isset($member['user_families']) ? array_column($member['user_families'], 'family_code') : [$member['famCode']];
-            return in_array($eventFamCode, $memberFamilies) || $member['famCode'] == $eventFamCode;
-        });
-
-        return $membersToNotify;
+        return self::AllMembersEmailByFamCode($eventFamCode);
     }
 
     /**
@@ -284,7 +280,7 @@ final class Event extends AllMembersData
             $allEventData = parent::getAllEventData();
 
             $notifyCustomer = new EmailData(
-                sender: 'admin'
+                sender: 'member'
             );
 
             if (!defined('PASS')) {
@@ -317,22 +313,33 @@ final class Event extends AllMembersData
 
     private static function sendBulkNotification(array $data, string $subject, array $email): void
     {
+        $validEmails = array_values(array_filter(
+            array_map(static fn(mixed $e): string => is_scalar($e) ? trim((string) $e) : '', $email),
+            static fn(string $addr): bool => $addr !== '' && filter_var($addr, FILTER_VALIDATE_EMAIL) !== false
+        ));
 
-        // $allEmails = getAllEmails();
+        if ($validEmails === []) {
+            return;
+        }
 
-        // $notifyCustomer = new EmailData('admin');
-
-        // if (!defined('PASS')) {
-        //     $notifyCustomer->getEmailData();
-        // }
+        if (!defined('PASS')) {
+            $notifyCustomer = new EmailData('member');
+            $notifyCustomer->getEmailData();
+        }
 
         ob_start();
         view(path: 'msg/events/event', data: compact('data'));
-        $emailContent = ob_get_contents();
-        ob_end_clean();
+        $emailContent = (string) ob_get_clean();
 
-
-        sendBulkEmail(emailAddresses: $email, subject: $subject, message: $emailContent);
+        try {
+            SendEmail::sendBulkEmail(
+                emailAddresses: $validEmails,
+                subject: $subject,
+                message: $emailContent
+            );
+        } catch (\Throwable $e) {
+            error_log('[Event] Bulk email notification failed: ' . $e->getMessage());
+        }
     }
     /**
      * this function extends the event date on the due date
@@ -537,6 +544,33 @@ final class Event extends AllMembersData
                 break;
             default:
                 break;
+        }
+
+        if (in_array($diffEventAndTodayDate, ['+7 days', '+1 days', '+0 days'], true) && !empty($id)) {
+            try {
+                $db = \Src\Db::connect2();
+                $stmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, 'Event', ?, 'new', NOW())
+                ");
+                $recipientList = $id;
+                $senderId = is_scalar($data['id'] ?? null) ? (string)$data['id'] : 'system';
+                $senderName = trim($eventHost) !== '' ? $eventHost : 'Family Platform';
+                foreach ($recipientList as $recId) {
+                    if (is_scalar($recId) && (string)$recId !== '') {
+                        $stmt->execute([
+                            $senderId,
+                            (string)$recId,
+                            $senderName,
+                            $subject,
+                            $eventInformation
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log('[Event] In-app notification write failed: ' . $e->getMessage());
+            }
         }
     }
 }

@@ -21,3 +21,10 @@ $router->map('POST', '/api/reels/comment', 'App\controller\members\ReelsControll
 
 // Delete Reel
 $router->map('POST', '/api/reels/delete', 'App\controller\members\ReelsController@deleteReel', 'family_reels_delete_api');
+
+// Record Reel View
+$router->map('POST', '/api/reels/view', 'App\controller\members\ReelsController@recordView', 'family_reels_view_api');
+
+// Update / Auto-Heal Reel Cover Thumbnail
+$router->map('POST', '/api/reels/thumbnail', 'App\controller\members\ReelsController@updateThumbnail', 'family_reels_thumbnail_api');
+

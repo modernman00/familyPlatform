@@ -12,24 +12,24 @@ import {
 
 // Register update handlers for all account & family forms
 const formsToRegister = [
-  { formId: 'profileForm', buttonId: 'profileBtn' },
-  { formId: 'accountSettingForm', buttonId: 'button' }, // backward compatibility
-  { formId: 'parentsForm', buttonId: 'parentsBtn' },
-  { formId: 'childrenForm', buttonId: 'childrenBtn' },
-  { formId: 'siblingsForm', buttonId: 'siblingsBtn' },
-  { formId: 'maritalForm', buttonId: 'maritalBtn' },
-  { formId: 'passwordForm', buttonId: 'passwordBtn' },
-  { formId: 'preferencesForm', buttonId: 'preferencesBtn' },
-  { formId: 'privacyForm', buttonId: 'privacyBtn' },
+  { formId: 'profileForm', buttonId: 'profileBtn', redirect: '/accountSetting#v-pills-profile' },
+  { formId: 'accountSettingForm', buttonId: 'button', redirect: '/accountSetting' }, // backward compatibility
+  { formId: 'parentsForm', buttonId: 'parentsBtn', redirect: '/accountSetting#v-pills-parents' },
+  { formId: 'childrenForm', buttonId: 'childrenBtn', redirect: '/accountSetting#v-pills-children' },
+  { formId: 'siblingsForm', buttonId: 'siblingsBtn', redirect: '/accountSetting#v-pills-siblings' },
+  { formId: 'maritalForm', buttonId: 'maritalBtn', redirect: '/accountSetting#v-pills-marital' },
+  { formId: 'passwordForm', buttonId: 'passwordBtn', redirect: '/accountSetting#v-pills-password' },
+  { formId: 'preferencesForm', buttonId: 'preferencesBtn', redirect: '/accountSetting#v-pills-preferences' },
+  { formId: 'privacyForm', buttonId: 'privacyBtn', redirect: '/accountSetting#v-pills-privacy' },
 ];
 
-formsToRegister.forEach(({ formId, buttonId }) => {
+formsToRegister.forEach(({ formId, buttonId, redirect }) => {
   if (id(formId) && id(buttonId)) {
     update({
       formId,
       route: '/accountSetting',
       buttonId,
-      redirect: '/accountSetting'
+      redirect: redirect || '/accountSetting'
     });
   }
 });
@@ -85,16 +85,25 @@ const handleHashNavigation = () => {
 
   const hashMap = {
     '#profile': 'v-pills-profile-tab',
+    '#v-pills-profile': 'v-pills-profile-tab',
     '#parents': 'v-pills-parents-tab',
+    '#v-pills-parents': 'v-pills-parents-tab',
     '#family-settings': 'v-pills-parents-tab',
     '#children': 'v-pills-children-tab',
+    '#v-pills-children': 'v-pills-children-tab',
     '#siblings': 'v-pills-siblings-tab',
+    '#v-pills-siblings': 'v-pills-siblings-tab',
     '#marital': 'v-pills-marital-tab',
+    '#v-pills-marital': 'v-pills-marital-tab',
     '#marital-status': 'v-pills-marital-tab',
     '#password': 'v-pills-password-tab',
+    '#v-pills-password': 'v-pills-password-tab',
     '#preferences': 'v-pills-preferences-tab',
+    '#v-pills-preferences': 'v-pills-preferences-tab',
     '#privacy': 'v-pills-privacy-tab',
+    '#v-pills-privacy': 'v-pills-privacy-tab',
     '#familycode': 'v-pills-familycode-tab',
+    '#v-pills-familycode': 'v-pills-familycode-tab',
     '#family-code': 'v-pills-familycode-tab',
     '#family-network': 'v-pills-familycode-tab',
   };
@@ -231,6 +240,7 @@ processKidsSiblings(fName, famCode);
   if (!toggle) return;
 
   const DEFAULT_HINT = 'Get instant alerts on this device even when the app is closed.';
+  const PUSH_OPT_OUT_KEY = 'fp_push_pref_disabled';
 
   const paint = (on, note) => {
     toggle.checked = on;
@@ -268,13 +278,26 @@ processKidsSiblings(fName, famCode);
     return;
   }
 
-  isPushSubscribed().then((subbed) => paint(subbed));
+  isPushSubscribed().then((subbed) => {
+    if (subbed) {
+      localStorage.removeItem(PUSH_OPT_OUT_KEY);
+      paint(true);
+    } else if (localStorage.getItem(PUSH_OPT_OUT_KEY) === '1') {
+      paint(false);
+    } else {
+      paint(true);
+      if (state === 'granted') {
+        enablePushNotifications().catch(() => {});
+      }
+    }
+  });
 
   toggle.addEventListener('change', async () => {
     toggle.disabled = true;
     const wantOn = toggle.checked;
     try {
       if (wantOn) {
+        localStorage.removeItem(PUSH_OPT_OUT_KEY);
         const res = await enablePushNotifications();
         if (res.ok) {
           paint(true, 'Push notifications are on for this device.');
@@ -285,6 +308,7 @@ processKidsSiblings(fName, famCode);
           paint(false, 'Could not enable notifications. Please try again.');
         }
       } else {
+        localStorage.setItem(PUSH_OPT_OUT_KEY, '1');
         await disablePushNotifications();
         paint(false, 'Push notifications are off for this device.');
         window.notify?.('Push notifications turned off', 'success');

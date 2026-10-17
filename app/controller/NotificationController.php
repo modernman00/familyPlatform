@@ -62,7 +62,7 @@ final class NotificationController extends Select
             $query = "SELECT * FROM notification
                 WHERE receiver_id IN ($placeholders)
                 AND notification_status = ?
-                ORDER BY created_at ASC";
+                ORDER BY created_at DESC";
             $result = Select::selectFn2($query, [...$receivers, 'new']);
             $merged = array_merge($approvals, $result);
 
@@ -96,7 +96,7 @@ final class NotificationController extends Select
             $query = "SELECT * FROM notification
                 WHERE receiver_id IN ($placeholders)
                 AND notification_status = ?
-                ORDER BY created_at ASC";
+                ORDER BY created_at DESC";
             $result = Select::selectFn2($query, [...$receivers, 'new']);
             $merged = array_merge($approvals, $result);
             $count = count($merged);
@@ -192,6 +192,22 @@ final class NotificationController extends Select
 
         if (!empty($_SESSION['famCode']) && is_string($_SESSION['famCode'])) {
             $receivers[] = $_SESSION['famCode'];
+        }
+
+        try {
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare("SELECT family_code FROM user_families WHERE user_id = ? AND status = 'approved'");
+            $stmt->execute([$userId]);
+            $dbCodes = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+            if ($dbCodes) {
+                foreach ($dbCodes as $dbc) {
+                    if (is_string($dbc) && $dbc !== '') {
+                        $receivers[] = $dbc;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // fallback gracefully to session cache
         }
 
         return array_values(array_unique($receivers));

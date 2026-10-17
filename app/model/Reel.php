@@ -267,6 +267,32 @@ final class Reel extends Select
     }
 
     /**
+     * Update a reel's thumbnail URL and detected aspect ratio (Owner-only, IDOR guarded).
+     */
+    public static function updateThumbnailAndAspect(int $reelId, string|int $userId, string $thumbnailUrl, string $aspectRatio = '9:16'): bool
+    {
+        try {
+            $pdo = self::connect2();
+            $allowedAspects = ['9:16', '16:9', '1:1', '4:5', 'cinema'];
+            $safeAspect = in_array($aspectRatio, $allowedAspects, true) ? $aspectRatio : '9:16';
+
+            $stmt = $pdo->prepare("UPDATE family_reels SET thumbnail_url = :thumb, aspect_ratio = :aspect WHERE id = :id AND user_id = :userId");
+            $stmt->execute([
+                ':thumb' => $thumbnailUrl,
+                ':aspect' => $safeAspect,
+                ':id' => $reelId,
+                ':userId' => (string)$userId,
+            ]);
+
+            return $stmt->rowCount() > 0;
+        } catch (\Throwable $e) {
+            error_log("[Reel::updateThumbnailAndAspect] " . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
      * Delete a Reel (Author or Manager only)
      */
     public static function deleteReel(int $reelId, string|int $userId): bool

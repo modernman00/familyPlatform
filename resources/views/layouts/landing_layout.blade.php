@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
   <meta name="description" content="@yield('meta_description', 'Private family social network and interactive family tree. Safely connect relatives, coordinate private chats, share cherished memories, and build your digital family archive with zero ads.')">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Family Platform Team">
@@ -86,10 +86,11 @@
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" type="application/manifest+json">
-  <meta name="theme-color" content="#00bfa5">
+  <meta name="theme-color" content="#ffffff">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Family Connect">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FamilyPlatform">
   
   <!-- CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
@@ -213,7 +214,7 @@
   
   @include('includes.public_nav')
 
-  <div class="content-wrapper" style="padding-top: 80px;">
+  <div class="content-wrapper" style="padding-top: calc(80px + env(safe-area-inset-top, 0px));">
     @yield('content')
   </div>
 

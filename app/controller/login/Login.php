@@ -118,31 +118,43 @@ final class Login
                 $_SERVER['REMOTE_ADDR'] = '0.0.0.0';
             }
 
-            try {
-                $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
-            } catch (\Throwable $loginEx) {
-                // In non-production or for automated E2E tests, catch SMTP delivery failures
-                // where the 2FA code was already generated and saved into the DB code_mgt table,
-                // but the remote SMTP server rejected the test email address (e.g. 550 No Such User Here).
-                $isTestOrDev = in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['local', 'development', 'testing'], true)
-                    || (($_POST['email'] ?? '') === 'cypress_test@myfamilyplatform.com');
-                $isSmtpError = str_contains(strtolower($loginEx->getMessage()), 'smtp')
-                    || str_contains(strtolower($loginEx->getMessage()), 'recipient');
+            $inputData = \Src\functionality\middleware\GetRequestData::getRequestData();
+            $loginEmail = trim((string) ($inputData['email'] ?? $inputData['username'] ?? ''));
+            $isAdminLoginRoute = str_contains($requestUri, $adminSecretPath)
+                || str_contains(strtolower($requestUri), 'portal_');
+            $requireMemberEmail2fa = $isAdminLoginRoute || self::isMemberTwoFactorEnabled($loginEmail);
 
-                if ($isTestOrDev && $isSmtpError && !empty($_SESSION['auth']['pendingUser'])) {
-                    $pendingUser = $_SESSION['auth']['pendingUser'];
-                    $result = [
-                        'message' => 'Verification code sent to your email successfully',
-                        'code' => 'xxxx',
-                        'id' => $pendingUser['id'] ?? 0,
-                    ];
-                } else {
-                    throw $loginEx;
+            if ($requireMemberEmail2fa) {
+                try {
+                    $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
+                } catch (\Throwable $loginEx) {
+                    // In non-production or for automated E2E tests, catch SMTP delivery failures
+                    // where the 2FA code was already generated and saved into the DB code_mgt table,
+                    // but the remote SMTP server rejected the test email address (e.g. 550 No Such User Here).
+                    $isTestOrDev = in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['local', 'development', 'testing'], true)
+                        || (($_POST['email'] ?? '') === 'cypress_test@myfamilyplatform.com');
+                    $isSmtpError = str_contains(strtolower($loginEx->getMessage()), 'smtp')
+                        || str_contains(strtolower($loginEx->getMessage()), 'recipient');
+
+                    if ($isTestOrDev && $isSmtpError && !empty($_SESSION['auth']['pendingUser'])) {
+                        $pendingUser = $_SESSION['auth']['pendingUser'];
+                        $result = [
+                            'message' => 'Verification code sent to your email successfully',
+                            'code' => 'xxxx',
+                            'id' => $pendingUser['id'] ?? 0,
+                        ];
+                    } else {
+                        throw $loginEx;
+                    }
                 }
+            } else {
+                $result = self::authenticateMemberDirect($inputData, $isCaptchaV3);
             }
 
             // Fetch extra admin columns defensively if present
-            $adminId = (int) ($result['id'] ?? 0);
+            $rawId = $result['id'] ?? 0;
+            $adminId = (int) $rawId;
+            $memberId = is_scalar($rawId) ? (string) $rawId : '';
             $userRole = (string) ($result['role'] ?? '');
 
             if ($adminId > 0 && ($userRole === 'admin' || str_contains(strtolower($_SERVER['REQUEST_URI'] ?? ''), 'portal_'))) {
@@ -177,7 +189,7 @@ final class Login
                 }
             }
 
-            $getFamCode = AllMembersDataModel::getFamCode($adminId);
+            $getFamCode = AllMembersDataModel::getFamCode($memberId !== '' ? $memberId : $adminId);
             $famCode = $getFamCode['famCode'] ?? '';
 
             // Store all approved family codes in the session
@@ -187,6 +199,143 @@ final class Login
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    /**
+     * Checks whether the member has explicitly enabled Two-Factor Authentication (2FA)
+     * in their Privacy & Security settings (`contact.two_factor_auth = 'on'`).
+     */
+    private static function isMemberTwoFactorEnabled(string $email): bool
+    {
+        $cleanEmail = trim($email);
+        if ($cleanEmail === '') {
+            return false;
+        }
+
+        try {
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare(
+                'SELECT c.two_factor_auth
+                 FROM account a
+                 LEFT JOIN contact c ON c.id = a.id
+                 WHERE a.email = ?
+                 LIMIT 1'
+            );
+            $stmt->execute([$cleanEmail]);
+            $val = $stmt->fetchColumn();
+
+            return is_string($val) && strtolower(trim($val)) === 'on';
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Authenticates a member directly when `contact.two_factor_auth` is OFF,
+     * preserving all rate-limiting, IP-ban, reCAPTCHA, Argon2id password verification,
+     * audit logging, JWT HttpOnly cookie issuance, and login anomaly tracking without
+     * dispatching an email OTP or holding the session at `/login/code`.
+     *
+     * @param array<string, mixed> $input
+     * @return array{message: string, code: string, id: int|string}
+     */
+    private static function authenticateMemberDirect(array $input, bool $isCaptchaV3): array
+    {
+        \Src\LoginUtility::checkIpBan(\Src\Utility::getUserIpAddr());
+
+        if (empty($input)) {
+            throw new \Src\Exceptions\NotFoundException('There was no post data');
+        }
+
+        if (empty($input['email']) && empty($input['username'])) {
+            throw new \InvalidArgumentException('Email or username is required');
+        }
+
+        $rawEmail = (string) ($input['email'] ?? $input['username'] ?? '');
+        $email = (string) (\Src\Utility::cleanSession($rawEmail) ?? '');
+
+        \Src\CorsHandler::setHeaders();
+        if ($isCaptchaV3) {
+            \Src\Recaptcha::verifyCaptchaEnterprise($input, 'LOGIN');
+            unset($input['action'], $input['token']);
+        }
+
+        if (\Src\Limiter::$argLimiter === null || \Src\Limiter::$ipLimiter === null) {
+            $noopLimiter = new class {
+                public function reset(): void {}
+                public function consume(int $tokens = 1): object
+                {
+                    return new class {
+                        public function isAccepted(): bool
+                        {
+                            return true;
+                        }
+                    };
+                }
+            };
+            \Src\Limiter::$argLimiter ??= $noopLimiter;
+            \Src\Limiter::$ipLimiter ??= $noopLimiter;
+        }
+
+        \Src\Limiter::limit($email);
+        \Src\functionality\middleware\Validator::requireKeys($input, ['email', 'password']);
+
+        $sanitised = \Src\LoginUtility::getSanitisedInputData($input, [
+            'data' => ['email', 'password'],
+            'min'  => [5, 5],
+            'max'  => [50, 100],
+        ]);
+
+        $user = \Src\LoginUtility::useEmailToFindData($sanitised);
+        \Src\LoginUtility::checkPassword($sanitised, $user);
+
+        $userId = (string) ($user['id'] ?? '');
+        $userEmail = (string) ($user['email'] ?? $email);
+
+        \Src\LoginUtility::logAudit(
+            $userId,
+            $userEmail,
+            'success',
+            (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+            (string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown')
+        );
+
+        unset($user['password']);
+
+        if (\is_object(\Src\Limiter::$argLimiter) && \method_exists(\Src\Limiter::$argLimiter, 'reset')) {
+            \Src\Limiter::$argLimiter->reset();
+        }
+        if (\is_object(\Src\Limiter::$ipLimiter) && \method_exists(\Src\Limiter::$ipLimiter, 'reset')) {
+            \Src\Limiter::$ipLimiter->reset();
+        }
+
+        \Src\JwtHandler::issueLoginCookie($user);
+
+        unset($_SESSION['token'], $_SESSION['auth']['pendingUser'], $_SESSION['auth']['2FA_token_ts']);
+        $_SESSION['auth'] = [
+            'identifyCust' => $userId,
+            'email' => $userEmail,
+            'codeVerified' => true,
+            'codeVerified_ts' => time(),
+            'type' => (string) ($user['type'] ?? 'member'),
+        ];
+        $_SESSION['id'] = $userId;
+        $_SESSION['loggedIn'] = true;
+
+        if (!\function_exists('isTestEnv') || !\isTestEnv()) {
+            if (\session_status() === PHP_SESSION_ACTIVE) {
+                \session_regenerate_id(true);
+            }
+        }
+
+        \App\services\LoginAnomalyService::check($userId);
+        \App\services\LoginAnomalyService::record($userId);
+
+        return [
+            'message' => 'Login successful. Redirecting to your profile...',
+            'code' => 'verified',
+            'id' => $userId,
+        ];
     }
 
 

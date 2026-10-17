@@ -131,4 +131,51 @@ final class ReelsTest extends TestCase
         }
         $this->assertTrue($found, 'Created reel must appear in the family feed');
     }
+
+    /**
+     * @depends testCanCreateReel
+     */
+    public function testCanUpdateThumbnailAndBlockCrossUserIdor(): void
+    {
+        $this->assertNotNull(self::$createdReelId);
+
+        // 1. Happy path: Owner updates thumbnail and aspect ratio to 16:9
+        $ok = Reel::updateThumbnailAndAspect(
+            self::$createdReelId,
+            self::$testUserId,
+            '/resources/images/reels/thumbs/healed_thumb.jpg',
+            '16:9'
+        );
+        $this->assertTrue($ok, 'Owner must be able to update their reel thumbnail and aspect ratio');
+
+        $reel = Reel::getReelById(self::$createdReelId, self::$testUserId);
+        $this->assertIsArray($reel);
+        $this->assertSame('/resources/images/reels/thumbs/healed_thumb.jpg', $reel['thumbnail_url']);
+        $this->assertSame('16:9', $reel['aspect_ratio']);
+
+        // 2. Sad path (IDOR attack): Attacker attempts to overwrite owner's thumbnail
+        $idorAttempt = Reel::updateThumbnailAndAspect(
+            self::$createdReelId,
+            'ATTACKER_999',
+            '/resources/images/reels/thumbs/malicious.jpg',
+            '9:16'
+        );
+        $this->assertFalse($idorAttempt, 'Non-owner IDOR thumbnail overwrite must be blocked');
+    }
+
+    /**
+     * @depends testCanCreateReel
+     */
+    public function testCanIncrementViews(): void
+    {
+        $this->assertNotNull(self::$createdReelId);
+        $before = Reel::getReelById(self::$createdReelId, self::$testUserId);
+        $initialViews = (int)($before['views_count'] ?? 0);
+
+        Reel::incrementViews(self::$createdReelId);
+
+        $after = Reel::getReelById(self::$createdReelId, self::$testUserId);
+        $this->assertSame($initialViews + 1, (int)($after['views_count'] ?? 0));
+    }
 }
+

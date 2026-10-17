@@ -103,10 +103,14 @@ class FamilyCodeApprovalService
              FROM personal p
              JOIN account a ON a.id = p.id
              LEFT JOIN contact c ON c.id = p.id
-             WHERE (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ($placeholders) OR UPPER(TRIM(p.famCode)) IN ($placeholders))
+             LEFT JOIN user_families uf ON uf.user_id = p.id AND uf.status = 'approved'
+             WHERE (UPPER(TRIM(REPLACE(p.famCode, '#', ''))) IN ($placeholders)
+                 OR UPPER(TRIM(p.famCode)) IN ($placeholders)
+                 OR UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ($placeholders)
+                 OR UPPER(TRIM(uf.family_code)) IN ($placeholders))
                AND a.deleted_at IS NULL"
         );
-        $params = array_merge($variations, $variations);
+        $params = array_merge($variations, $variations, $variations, $variations);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }

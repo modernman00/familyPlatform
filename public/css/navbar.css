@@ -20,7 +20,10 @@
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--brand-border);
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-  padding: 0.65rem 0;
+  padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
+  padding-bottom: 0.65rem;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   z-index: 1030;
 }
 
@@ -382,7 +385,7 @@
 @media (max-width: 991.98px) {
   .notification-dropdown {
     position: fixed !important;
-    top: 74px !important;
+    top: calc(74px + env(safe-area-inset-top, 0px)) !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
@@ -391,6 +394,11 @@
     margin: 0 !important;
     z-index: 1070 !important;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .modal {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
 }
 

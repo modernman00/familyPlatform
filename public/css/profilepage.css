@@ -43,7 +43,7 @@ body {
   font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
-  padding: 20px;
+  padding: 0;
 }
 
 
@@ -59,7 +59,7 @@ body {
 .profile-column {
   flex: 0 0 300px;
   position: sticky;
-  top: 80px;
+  top: calc(80px + env(safe-area-inset-top, 0px));
   height: fit-content;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
@@ -73,7 +73,7 @@ body {
 .sidebar-column {
   flex: 0 0 300px;
   position: sticky;
-  top: 80px;
+  top: calc(80px + env(safe-area-inset-top, 0px));
   height: fit-content;
   max-height: calc(100vh - 100px);
   overflow-y: auto;

@@ -90,12 +90,26 @@ final class SettingController extends BaseController
                     return;
                 }
 
+                $normalizeSwitch = static fn(mixed $val): string => in_array(strtolower(trim((string) $val)), ['on', '1', 'true'], true) ? 'on' : 'off';
+
+                $ensureContactRow = static function (string $uid): void {
+                    $db = Db::connect2();
+                    $chk = $db->prepare('SELECT id FROM contact WHERE id = ? LIMIT 1');
+                    $chk->execute([$uid]);
+                    if (!$chk->fetch()) {
+                        $email = (string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '');
+                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile) VALUES (?, ?, ?, ?)');
+                        $ins->execute([$uid, substr($email, 0, 50), '', '']);
+                    }
+                };
+
                 // 2. Preferences
                 if ($action === 'updatePreferences') {
+                    $ensureContactRow((string) $_POST['id']);
                     $data = [
                         'id' => $_POST['id'],
-                        'email_notifications' => isset($_POST['email_notifications']) ? 'on' : 'off',
-                        'sms_notifications' => isset($_POST['sms_notifications']) ? 'on' : 'off',
+                        'email_notifications' => $normalizeSwitch($_POST['email_notifications'] ?? 'off'),
+                        'sms_notifications' => $normalizeSwitch($_POST['sms_notifications'] ?? 'off'),
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
                     msgSuccess(200, "Preferences successfully updated.");
@@ -104,11 +118,16 @@ final class SettingController extends BaseController
 
                 // 3. Privacy
                 if ($action === 'updatePrivacy') {
+                    $ensureContactRow((string) $_POST['id']);
+                    $allowedVisibilities = ['Private', 'Public', 'Family Only'];
+                    $visibility = in_array($_POST['profile_visibility'] ?? '', $allowedVisibilities, true)
+                        ? (string) $_POST['profile_visibility']
+                        : 'Private';
                     $data = [
                         'id' => $_POST['id'],
-                        'two_factor_auth' => isset($_POST['two_factor_auth']) ? 'on' : 'off',
-                        'profile_visibility' => $_POST['profile_visibility'] ?? 'Private',
-                        'show_my_profile' => isset($_POST['show_my_profile']) ? 'on' : 'off',
+                        'two_factor_auth' => $normalizeSwitch($_POST['two_factor_auth'] ?? 'off'),
+                        'profile_visibility' => $visibility,
+                        'show_my_profile' => $normalizeSwitch($_POST['show_my_profile'] ?? 'off'),
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
                     msgSuccess(200, "Privacy settings successfully updated.");

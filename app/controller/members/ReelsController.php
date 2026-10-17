@@ -258,13 +258,17 @@ final class ReelsController extends BaseController
             }
 
             // Create Reel Record
+            $rawAspect = isset($_POST['aspect_ratio']) ? trim((string)$_POST['aspect_ratio']) : '9:16';
+            $allowedAspects = ['9:16', '16:9', '1:1', '4:5', 'cinema'];
+            $safeAspect = in_array($rawAspect, $allowedAspects, true) ? $rawAspect : '9:16';
+
             $reelId = Reel::createReel([
                 'user_id' => $userId,
                 'famCode' => $famCode,
                 'caption' => $caption,
                 'video_url' => $videoPath,
                 'thumbnail_url' => $thumbnailPath,
-                'aspect_ratio' => '9:16',
+                'aspect_ratio' => $safeAspect,
                 'category' => $category,
                 'music_title' => $musicTitle
             ]);
@@ -415,7 +419,112 @@ final class ReelsController extends BaseController
                 'message' => 'Reel deleted successfully.'
             ]);
         } catch (\Throwable $e) {
+            http_response_code($e->getCode() === 403 ? 403 : 400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Record Reel View (increments views_count)
+     */
+    public function recordView(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $raw = file_get_contents('php://input') ?: '';
+            $payload = json_decode($raw, true) ?? $_POST;
+            $reelId = (int)($payload['reel_id'] ?? 0);
+
+            if ($reelId <= 0 || empty($userId)) {
+                throw new Exception('Invalid reel ID or user session', 400);
+            }
+
+            Reel::incrementViews($reelId);
+            $updated = Reel::getReelById($reelId, $userId);
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status' => 'success',
+                'views_count' => (int)($updated['views_count'] ?? 0),
+            ]);
+        } catch (\Throwable $e) {
             http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * API: Update/Auto-Heal Reel Thumbnail & Aspect Ratio (IDOR Protected)
+     */
+    public function updateThumbnail(): void
+    {
+        if (empty($_SESSION['id'])) {
+            SignIn::verify();
+        }
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $raw = file_get_contents('php://input') ?: '';
+            $payload = json_decode($raw, true) ?? $_POST;
+
+            $reelId = (int)($payload['reel_id'] ?? 0);
+            $thumbnailData = isset($payload['thumbnail_data']) ? (string)$payload['thumbnail_data'] : '';
+            $aspectRatio = isset($payload['aspect_ratio']) ? trim((string)$payload['aspect_ratio']) : '9:16';
+
+            if ($reelId <= 0 || empty($userId)) {
+                throw new Exception('Invalid reel ID or unauthorized session', 401);
+            }
+
+            $existingReel = Reel::getReelById($reelId, $userId);
+            if (!is_array($existingReel) || (string)($existingReel['user_id'] ?? '') !== $userId) {
+                throw new Exception('Forbidden: You do not own this reel or it does not exist.', 403);
+            }
+
+            if (empty($thumbnailData) || !str_contains($thumbnailData, 'base64,')) {
+                throw new Exception('Valid Base64 image data is required', 400);
+            }
+
+            $parts = explode('base64,', $thumbnailData);
+            $rawBase64 = $parts[1] ?? '';
+            $decodedImg = base64_decode($rawBase64, true);
+            $imgInfo = is_string($decodedImg) ? @getimagesizefromstring($decodedImg) : false;
+
+            $okThumb = is_array($imgInfo)
+                && in_array($imgInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)
+                && strlen((string)$decodedImg) <= 5 * 1024 * 1024;
+
+            if (!$okThumb) {
+                throw new Exception('Invalid raster image payload', 400);
+            }
+
+            $thumbDir = __DIR__ . '/../../../resources/images/reels/thumbs/';
+            if (!is_dir($thumbDir)) {
+                mkdir($thumbDir, 0755, true);
+            }
+            $thumbName = 'thumb_' . preg_replace('/[^a-zA-Z0-9_-]/', '', $userId) . '_' . time() . '_' . bin2hex(random_bytes(3)) . '.jpg';
+            file_put_contents($thumbDir . $thumbName, $decodedImg);
+            $thumbnailPath = '/resources/images/reels/thumbs/' . $thumbName;
+
+            $updated = Reel::updateThumbnailAndAspect($reelId, $userId, $thumbnailPath, $aspectRatio);
+            if (!$updated) {
+                throw new Exception('Forbidden: You do not own this reel or it does not exist.', 403);
+            }
+
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode([
+                'status' => 'success',
+                'thumbnail_url' => $thumbnailPath,
+                'aspect_ratio' => $aspectRatio,
+            ]);
+        } catch (\Throwable $e) {
+            $code = (int)$e->getCode();
+            http_response_code(in_array($code, [400, 401, 403, 404], true) ? $code : 400);
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }

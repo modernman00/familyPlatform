@@ -20,6 +20,7 @@
             <form id="createReelForm" enctype="multipart/form-data">
     @include('csrf')
                 <input type="hidden" id="reelThumbnailDataInput" name="thumbnail_data">
+                <input type="hidden" id="reelAspectRatioInput" name="aspect_ratio" value="9:16">
                 <div class="modal-body px-4 py-3">
                     
                     <!-- Drag and Drop Video Dropzone -->
@@ -30,7 +31,7 @@
                             <div id="dropzonePrompt">
                                 <i class="bi bi-cloud-arrow-up-fill fs-2 text-primary"></i>
                                 <div class="fw-bold text-dark small mt-1">Click or drag video file here</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">MP4, WebM, MOV up to 100MB</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">MP4, WebM, MOV up to 100MB (Portrait or Landscape)</div>
                             </div>
                             <div id="dropzoneSelected" class="d-none">
                                 <i class="bi bi-file-earmark-play-fill fs-2 text-success"></i>
@@ -40,10 +41,47 @@
                         </div>
                     </div>
 
-                    <!-- Instant Video Preview -->
-                    <div class="mb-3 d-none text-center" id="reelVideoPreviewContainer">
-                        <div class="mx-auto rounded-3 overflow-hidden shadow-sm bg-black position-relative" style="width: 170px; height: 280px;">
-                            <video id="reelPreviewVideo" class="w-100 h-100" style="object-fit: cover;" playsinline loop muted controls></video>
+                    <!-- Instant Video & Aspect-Preserving Cover Studio -->
+                    <div class="mb-3 d-none" id="reelVideoPreviewContainer">
+                        <div class="p-3 rounded-4 border" style="background: #0f172a; color: #ffffff;">
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                <span class="small fw-bold text-white d-flex align-items-center gap-1">
+                                    <i class="bi bi-aspect-ratio text-warning"></i>
+                                    <span id="reelDetectedOrientationBadge">Smart Aspect Preview</span>
+                                </span>
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Framing mode">
+                                    <button type="button" class="btn btn-outline-light active py-1 px-2" id="btnReelFrameCinema" style="font-size: 0.72rem;">
+                                        <i class="bi bi-Bounding-box-circles me-1"></i>Cinema Fit
+                                    </button>
+                                    <button type="button" class="btn btn-outline-light py-1 px-2" id="btnReelFrameCover" style="font-size: 0.72rem;">
+                                        <i class="bi bi-arrows-angle-expand me-1"></i>9:16 Fill
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap">
+                                <!-- Active Video Player Preview -->
+                                <div class="rounded-3 overflow-hidden shadow position-relative" style="width: 148px; height: 262px; background: #000000; border: 1px solid rgba(255,255,255,0.15);">
+                                    <div id="reelPreviewAmbientBg" class="position-absolute inset-0 w-100 h-100" style="background-size: cover; background-position: center; filter: blur(16px) brightness(0.45); transform: scale(1.15);"></div>
+                                    <video id="reelPreviewVideo" class="w-100 h-100 position-relative" style="object-fit: contain; z-index: 2;" playsinline loop muted controls></video>
+                                    <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-1" style="z-index: 3; font-size: 0.62rem;">Video</span>
+                                </div>
+
+                                <!-- Live Tray Cover Card Preview (Zero-Stretch Verification) -->
+                                <div class="rounded-3 overflow-hidden shadow position-relative" style="width: 115px; height: 190px; background: #000000; border: 2px solid #4f46e5;">
+                                    <canvas id="reelCoverPreviewCanvas" width="540" height="960" class="w-100 h-100" style="object-fit: cover; display: block;"></canvas>
+                                    <span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 0.6rem;">Tray Cover</span>
+                                </div>
+                            </div>
+
+                            <!-- Cover Frame Timeline Scrubber -->
+                            <div class="mt-2 pt-2 border-top border-secondary border-opacity-25">
+                                <div class="d-flex justify-content-between align-items-center small text-white-50 mb-1" style="font-size: 0.72rem;">
+                                    <span><i class="bi bi-sliders me-1 text-warning"></i>Scrub to pick Cover Frame:</span>
+                                    <span id="reelScrubberTimeLabel" class="text-white fw-bold">0.8s</span>
+                                </div>
+                                <input type="range" class="form-range" id="reelCoverTimeScrubber" min="0" max="10" step="0.1" value="0.8">
+                            </div>
                         </div>
                     </div>
 

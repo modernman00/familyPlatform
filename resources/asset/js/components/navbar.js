@@ -162,41 +162,57 @@ const fetchUserNotifications = () => {
             }
         });
 };
+export { updateNotificationBadge, fetchUserNotifications };
 
-fetchUserNotifications();
-
-// Dropdown controls
-const notificationBtn = id('notificationBtn');
-const notificationDropdown = id('notificationDropdown');
-const markAllReadBtn = id('markAllRead');
-
-if (notificationBtn && notificationDropdown) {
-    notificationBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        notificationDropdown.classList.toggle('show');
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
-            notificationDropdown.classList.remove('show');
-        }
-    });
-
-    notificationDropdown.addEventListener('click', function (e) {
-        e.stopPropagation();
-    });
+if (typeof window !== 'undefined') {
+    window.updateNotificationBadge = updateNotificationBadge;
+    window.fetchUserNotifications = fetchUserNotifications;
 }
 
-if (markAllReadBtn) {
-    markAllReadBtn.addEventListener('click', function () {
-        const unreadItems = document.querySelectorAll('.notif-card-stitch.unread');
-        unreadItems.forEach(item => {
-            item.classList.remove('unread');
+// Dropdown controls
+const initNavbarControls = () => {
+    const notificationBtn = id('notificationBtn');
+    const notificationDropdown = id('notificationDropdown');
+    const markAllReadBtn = id('markAllRead');
+
+    if (notificationBtn && notificationDropdown) {
+        notificationBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
         });
 
-        sessionStorage.setItem('notificationCount', '0');
-        updateNotificationBadge(0);
+        document.addEventListener('click', function (e) {
+            if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        notificationDropdown.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function () {
+            const unreadItems = document.querySelectorAll('.notif-card-stitch.unread');
+            unreadItems.forEach(item => {
+                item.classList.remove('unread');
+            });
+
+            sessionStorage.setItem('notificationCount', '0');
+            updateNotificationBadge(0);
+        });
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initNavbarControls();
+        fetchUserNotifications();
     });
+} else {
+    initNavbarControls();
+    fetchUserNotifications();
 }
 
 // Dismiss listener delegation

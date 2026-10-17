@@ -27,9 +27,15 @@ describe('Reels Feature', () => {
             });
         });
 
-        it('opens the create reel modal when Create card is clicked', () => {
+        it('opens the create reel modal with Cover Studio when Create card is clicked', () => {
             cy.get('.reel-fb-create-card', { timeout: 15000 }).click();
             cy.get('#createReelModal, .modal.show', { timeout: 10000 }).should('be.visible');
+            cy.get('#reelCoverPreviewCanvas').should('exist');
+            cy.get('#reelCoverTimeScrubber').should('exist');
+        });
+
+        it('renders category filter pills in the reels tray', () => {
+            cy.get('.reel-tray-filter-pill', { timeout: 15000 }).should('have.length.gte', 4);
         });
     });
 

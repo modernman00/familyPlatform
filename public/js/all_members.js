@@ -1,1 +1,722 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[788],{7261:function(e,t,n){n.d(t,{A:function(){return s}});var a=n(3029),i=n(2901);n(7672);function r(e,t){var n="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!n){if(Array.isArray(e)||(n=function(e,t){if(e){if("string"==typeof e)return o(e,t);var n={}.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?o(e,t):void 0}}(e))||t&&e&&"number"==typeof e.length){n&&(e=n);var a=0,i=function(){};return{s:i,n:function(){return a>=e.length?{done:!0}:{done:!1,value:e[a++]}},e:function(e){throw e},f:i}}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}var r,s=!0,c=!1;return{s:function(){n=n.call(e)},n:function(){var e=n.next();return s=e.done,e},e:function(e){c=!0,r=e},f:function(){try{s||null==n.return||n.return()}finally{if(c)throw r}}}}function o(e,t){(null==t||t>e.length)&&(t=e.length);for(var n=0,a=Array(t);n<t;n++)a[n]=e[n];return a}var s=function(){return(0,i.A)(function e(t){(0,a.A)(this,e),Array.isArray(t)||throwError("data must be an array of form elements"),this.data=t,this.error=[],this.result=0},[{key:"id",value:function(e){return document.getElementById(e)}},{key:"getData",value:function(){return this.data}},{key:"validateField",value:function(e){return"email"===(arguments.length>1&&void 0!==arguments[1]?arguments[1]:"general")?/^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-Z0-9]{2,4}$/.test(e):""!==e.trim()}},{key:"massValidate",value:function(){var e=this;this.data.forEach(function(t){var n,a=r(t);try{for(a.s();!(n=a.n()).done;){var i=n.value,o=e.id("".concat(i.name,"_error")),s=i.name.replace("_"," ");if(["submit","button","showPassword_id","g-recaptcha-response","cancel","token","checkbox_id"].includes(i.name)||["button"].includes(i.id)||["button"].includes(i.type))return;if(["spouse_name","spouse_mobile","spouse_email","father_mobile","father_email","mother_mobile","maiden_name","mother_email"].includes(i.name)&&(i.value=""===i.value?"Not Provided":i.value),(""===i.value||"select"===i.value)&&!e.validateField(i.value)){var c;if(o)o.innerHTML="".concat(null!==(c=i.placeholder)&&void 0!==c?c:"*"," cannot be left empty"),o.style.color="red";e.error.push("".concat(s.toUpperCase()," cannot be left empty")),e.result=!1}"email"!==i.name||e.validateField(i.value,"email")||(e.error.push('<li style="color: red;">Please enter a valid email</li>'),o&&(o.innerHTML="* Please enter a valid email"),e.result=!1)}}catch(e){a.e(e)}finally{a.f()}})}},{key:"emailVal",value:function(){var e="<li style=color:'red';> Please enter a valid email</li>",t=this.id("email_id")||this.id("email");if(t&&null===t.value.match(/^[\w\-\.\+]+\@[a-zA-Z0-9\.\-]+\.[a-zA-z0-9]{2,4}$/)){var n=this.id("email_error");n&&(n.innerHTML=e,n.style.color="red"),this.error.push(e)}}},{key:"clearError",value:function(){var e=this;this.error=[];var t=function(t){var n=e.id("".concat(t,"_error"));n&&(n.innerHTML="")};this.data.forEach(function(n){var a,i=r(n);try{var o=function(){var n=a.value,i=n.id,r=n.name,o=n.value;if(["submit","button","token","checkbox"].includes(i)||["token","submit"].includes(r))return 1;var s=e.id(i);s?(console.log("Adding listeners to element: ".concat(i)),s.addEventListener("keyup",function(){"select"!==o&&t(r)}),s.addEventListener("change",function(){t(r)})):console.warn("Element with ID '".concat(i,"' with post name '").concat(n.name,"' not found."))};for(i.s();!(a=i.n()).done;)o()}catch(e){i.e(e)}finally{i.f()}})}},{key:"clearHtml",value:function(){this.data.forEach(function(e){var t,n=r(e);try{for(n.s();!(t=n.n()).done;){var a=t.value;"submit"!=a.id&&"submit"!=a.name&&"checkbox"!=a.name&&(a.value="")}}catch(e){n.e(e)}finally{n.f()}})}},{key:"realTimeCheckLen",value:function(e,t){var n=this;try{for(var a=function(a){var i=n.id("".concat(e[a],"_id"));if(i||(i=n.id(e[a])),null==i||""===i)return console.warn("Element with ID '".concat(e[a],"' not found or is empty")),1;var r=t[a],o=n.id("".concat(e[a],"_error"));i.maxLength=parseInt(r)+1,i.addEventListener("keyup",function(){o&&(o.innerHTML=i.value.length>r?"You have reached the maximum limit":"",o.style.color="red");var t=n.id("".concat(e[a],"_help"));t&&(t.style.color="red",t.style.fontSize="10px",setTimeout(function(){t.style.display="none"},5e3))})},i=0;i<e.length;i++)a(i)}catch(e){console.error(e.message)}}},{key:"matchInput",value:function(e,t){var n,a,i;n=this.id("".concat(t,"_error")),a=this.id(e+"_id")||this.id(e),i=this.id(t+"_id")||this.id(t),a&&i&&i.addEventListener("keyup",function(){n&&(n.innerHTML=i.value!==a.value?"Your passwords do not match":"")})}},{key:"injectData",value:function(e,t){for(var n=0;n<e.length;n++)this.id(e[n]).innerHTML=t[n]}},{key:"duplicate",value:function(e,t){var n,a;n=this.id(e)||this.id(e.replace("_id","")),a=this.id(t)||this.id(t.replace("_id","")),n&&a&&n.addEventListener("keyup",function(){a.value=n.value})}},{key:"realTimeServer",value:function(e,t,n){var a,i,r;a=this.id(e),r=this.id(n),a.addEventListener("keyup",function(){if(0!=(i=a.value)){var e=new XMLHttpRequest;e.onreadystatechange=function(){4==this.readyState&&200==this.status&&(r.innerHTML=this.responseText)},e.open("GET","".concat(t,"=").concat(i),!0),e.send()}else r.innerHTML=""})}},{key:"isChecked",value:function(e,t,n){var a=this,i=function(){(a.id(e).checked||a.id(t).checked)&&(a.id(n).innerHTML="checked")};this.id(e).addEventListener("click",i),this.id(t).addEventListener("click",i)}},{key:"previousAddress",value:function(){var e=this,t=this.id("time_at_address_id"),n=this.id("previous_address_class");t.addEventListener("change",function(){"3 years+"!=t.value?(n.style.display="block",e.id("previous_address_help").innerHTML="Please enter your full address: House No, Street Name, Town/City and Post Code"):n.style.display="none"})}}])}()},3067:function(e,t,n){var a,i=n(467),r=n(4756),o=n.n(r),s=n(6016),c=n(5769),l=n(7100),d=function(e){return e&&"string"==typeof e?e.toLowerCase().split(" ").map(function(e){return e.charAt(0).toUpperCase()+e.slice(1)}).join(" "):""},u=function(e){try{var t;if(!e)throw new Error("there is no data");var n=e.img?"/resources/images/profile/".concat(e.img):"/resources/images/profile/avatarM.png",a=(null===(t=e.status)||void 0===t?void 0:t.toLowerCase())||null,i="Connect",r="rejected"===a?"You can send another request":"Send connection request";"request sent"===a&&(i="Request Sent");var o="request sent"===a?"disabled":"",u=e.relationType||"other",m="",f="explore";"family"===u?(f="family",m='<span class="role-chip role-chip-family"><i class="bi bi-house-heart-fill"></i> Same Family</span>'):"approved_you"===u||"you_approved"===u?(f="connected",m='<span class="role-chip role-chip-connected"><i class="bi bi-check2-circle"></i> Connected Kin</span>'):(f="explore",m='<span class="role-chip role-chip-directory"><i class="bi bi-globe2"></i> Directory</span>');var p=(0,l.UQ)(e.id),v=d(e.firstName||""),h=d(e.lastName||""),b="".concat(v," ").concat(h).trim(),y=(0,l.UQ)(b),g=(0,l.UQ)(e.country?d(e.country):"Location not set"),w=(0,l.UQ)(e.famCode?String(e.famCode).toUpperCase():"CODE"),x=(0,l.UQ)(e.email||"Email not provided"),k=(0,l.UQ)(n),L='\n    <div class="member-card member_profile_'.concat(p,'" id="').concat(p,'" data-category="').concat(f,'" data-search="').concat((0,l.UQ)(b.toLowerCase()+" "+(e.email||"")),'">\n        <div class="card-cover"></div>\n\n        <div class="avatar-wrapper">\n             <img src="').concat(k,'" alt="').concat(y,'" loading="lazy">\n             <span class="avatar-online-dot"></span>\n        </div>\n\n        <div class="member-card-body">\n            ').concat(m,'\n            <h4 class="member-name text-truncate" title="').concat(y,'">').concat(y,'</h4>\n\n            <span class="member-location-chip">\n                <i class="bi bi-geo-alt-fill text-danger"></i> ').concat(g,'\n            </span>\n\n            <div class="member-details">\n                <div class="member-detail">\n                    <i class="bi bi-hash"></i>\n                    <span class="fw-bold">').concat(w,'</span>\n                </div>\n                <div class="member-detail">\n                    <i class="bi bi-envelope"></i>\n                    <span class="text-truncate">').concat(x,"</span>\n                </div>\n                ").concat("other"!==u?'\n                <div class="member-detail">\n                    <i class="bi bi-calendar-check"></i> \n                    <span>Connected '.concat((0,s.GP)(e.created_at),"</span>\n                </div>\n                "):"",'\n            </div>\n\n            <div class="member-interests">\n                ').concat("family"===u?'\n                <button class="btn-stitch-primary" id="seeProfile'.concat(p,'">\n                    <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile\n                </button>\n                <div class="d-flex gap-2">\n                    <button class="btn-stitch-tonal flex-grow-1" id="familyTree').concat(p,'" title="View in Family Tree">\n                        <i class="bi bi-diagram-3-fill" style="pointer-events: none;"></i> Tree\n                    </button>\n                    <button class="btn-stitch-danger flex-grow-1" id="removeProfile').concat(p,'" title="Remove from Family">\n                        <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove\n                    </button>\n                </div>\n                '):"approved_you"===u||"you_approved"===u?'\n                <button class="btn-stitch-primary" id="seeProfile'.concat(p,'">\n                    <i class="bi bi-person-badge-fill" style="pointer-events: none;"></i> View Profile\n                </button>\n                <div class="d-flex gap-2">\n                    <button class="btn-stitch-tonal flex-grow-1" id="familyTree').concat(p,'" title="View in Family Tree">\n                        <i class="bi bi-diagram-3-fill" style="pointer-events: none;"></i> Tree\n                    </button>\n                    <button class="btn-stitch-danger flex-grow-1" id="removeProfile').concat(p,'" title="Remove Connection">\n                        <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove\n                    </button>\n                </div>\n                '):'\n                <button class="btn-stitch-connect" \n                        data-user-id="addFamily'.concat(p,'" \n                        id="addFamily').concat(p,'"\n                        ').concat(o,'>\n                    <i class="bi bi-person-plus-fill" style="pointer-events: none;"></i> ').concat(i,'\n                </button>\n                <small class="text-muted text-center" style="font-size: 0.75rem; font-weight: 500;">').concat(r,"</small>\n                "),"\n            </div>\n        </div>\n    </div>\n    "),M=(0,c.id)("allMembers");M&&M.insertAdjacentHTML("beforeend",L)}catch(e){(0,c.Qg)(e)}},m=n(7819),f=function(e,t){var n=localStorage.getItem("requesterFamCode")||"",a=localStorage.getItem("yourName")||"";e.innerHTML="\n    <p>No matching name found – do you want us to send them a text/email to register to the platform?</p>\n    ".concat((0,c.OO)("newMemberRequest"),' <br>\n\n    <input type="hidden" id="newMemberName" value="').concat((0,l.UQ)(t),'">\n\n    <input type="text" id="newMemberRequestName" class="form-control"\n           name="newMemberRequestName"\n           placeholder="Enter their name">\n\n    <input type="text" id="newMemberRequestEmail" class="form-control"\n           name="newMemberRequestEmail"\n           placeholder="Enter their email address or mobile number">\n\n    <p id="loader" class="loader" style="display:none;"></p>\n    <small id="newMemberRequest_help" class="form-text text-muted"></small>\n\n    <button class="button is-primary" id="newMemberRequestBtn">Send Request</button>\n  ');var r=(0,c.id)("newMemberRequestName"),s=(0,c.id)("newMemberRequestEmail"),d=(0,c.id)("newMemberRequestBtn"),u=(0,c.id)("newMemberRequest_help");r.style.display="none",s.style.display="none",d.style.display="none";var f=(0,c.id)("newMemberRequestYes");f&&f.addEventListener("click",function(){r.style.display="block",s.style.display="block",d.style.display="block"}),d.addEventListener("click",(0,i.A)(o().mark(function e(){var t,i,d,f,p,v,h;return o().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(t=s.value.trim(),i=r.value.trim(),d=/^\+?[1-9]\d{1,14}$/,(f=/^[^\s@]+@[^\s@]+\.[^\s@]+$/).test(t)||d.test(t)){e.next=1;break}return u.textContent="Please enter a valid email address or mobile number.",e.abrupt("return");case 1:if(!d.test(t)||t.startsWith("+")){e.next=2;break}return u.textContent="Please include the country code. E.g. +2348036517179",e.abrupt("return");case 2:if(!(f.test(t)&&i.length<2)){e.next=3;break}return u.textContent="Please enter a valid name with at least 2 characters.",e.abrupt("return");case 3:if(!f.test(t)){e.next=7;break}return p={mobile:"",viewPath:"msg/contactNewMember",data:{email:t,mobile:"",name:i,familyCode:n,yourName:a},subject:"".concat(a," Wants You: Experience the Magic of your Family Network Today!")},e.prev=4,e.next=5,m.A.post("/register/contactNewMember",p,{headers:{"X-CSRF-TOKEN":(0,l.Qm)(),"X-XSRF-TOKEN":(0,l.Qm)()}});case 5:v=e.sent,(0,c.Ds)("allMembers","is-success",v.data.message),u.textContent="",e.next=7;break;case 6:e.prev=6,h=e.catch(4),(0,c.Ds)("allMembers","is-danger",h.message);case 7:case"end":return e.stop()}},e,null,[[4,6]])})))},p=function(e){var t=e.familyMembers,n=e.renderMembers,a=e.container,r=e.searchUrl,s=(0,c.id)("searchFamily"),l=null,d=function(){var e=(0,i.A)(o().mark(function e(){var i,l,d,u,p;return o().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(i=s.value.trim()){e.next=1;break}return n(t),e.abrupt("return");case 1:return e.prev=1,e.next=2,m.A.get(r,{params:{q:i}});case 2:if(l=e.sent,d=l.data||{},(u=d.message||[]).length){e.next=3;break}return f(a,i),e.abrupt("return");case 3:a.innerHTML="",n(u),e.next=5;break;case 4:e.prev=4,p=e.catch(1),(0,c.Ds)("allMembers","is-danger","Search failed. Please try again."),(0,c.xp)(p);case 5:case"end":return e.stop()}},e,null,[[1,4]])}));return function(){return e.apply(this,arguments)}}();return function(){clearTimeout(l),l=setTimeout(d,200)}},v=(0,c.id)("allMembers"),h=(0,c.id)("memberCount"),b=(0,c.id)("memberCountDisplay"),y=(0,c.id)("searchFamily"),g=function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:[];if(v.innerHTML="",!e.length)return v.innerHTML='\n  <div class="col-12 text-center py-5 bg-white rounded-4 border w-100" style="grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);">\n      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;">\n          <i class="bi bi-people"></i>\n      </div>\n      <h5 class="fw-bold text-dark mb-1">No Members in View</h5>\n      <p class="text-muted small mb-3" style="max-width: 440px; margin: 0 auto;">\n          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.\n      </p>\n      <a href="/familyStudio" class="btn btn-primary btn-sm fw-bold px-4 py-2" style="border-radius: var(--stitch-radius-pill);">\n          <i class="bi bi-plus-circle-fill me-1"></i> Open Family Studio\n      </a>\n  </div>\n',h&&(h.textContent="0"),void(b&&(b.textContent="0"));e.forEach(u);var t=e.length.toLocaleString();h&&(h.textContent=t),b&&(b.textContent=t)};function w(){var e=(0,c.id)("memberFilterPills");e&&e.addEventListener("click",function(t){var n=t.target.closest(".filter-pill-btn");if(n){e.querySelectorAll(".filter-pill-btn").forEach(function(e){return e.classList.remove("active")}),n.classList.add("active");var a=n.getAttribute("data-filter"),i=v.querySelectorAll(".member-card"),r=0;if(i.forEach(function(e){var t=e.getAttribute("data-category");"all"===a||t===a?(e.style.display="",r++):e.style.display="none"}),0===r&&i.length>0){v.querySelector(".empty-filter-placeholder")||v.insertAdjacentHTML("beforeend",'<div class="empty-filter-placeholder col-12 text-center py-4 text-muted small" style="grid-column: 1 / -1;">No members in this category.</div>')}else{var o=v.querySelector(".empty-filter-placeholder");o&&o.remove()}}})}(a=(0,i.A)(o().mark(function e(){var t,n,a,i,r;return o().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:return e.prev=0,e.next=1,(0,c.D$)("/allMembers/processApiData");case 1:t=e.sent,n=[],Array.isArray(t)?n=t:Array.isArray(null==t?void 0:t.message)?n=t.message:Array.isArray(null==t?void 0:t.data)&&(n=t.data),g(n),(a=(0,c.id)("setLoader"))&&(a.classList.remove("loader"),a.classList.add("d-none"),a.style.display="none"),w(),y&&(i=p({familyMembers:n,renderMembers:g,container:v,searchUrl:"/allMembers/search"}),y.addEventListener("input",i)),e.next=3;break;case 2:e.prev=2,r=e.catch(0),(0,c.Qg)(r);case 3:case"end":return e.stop()}},e,null,[[0,2]])})),function(){return a.apply(this,arguments)})();var x=n(8465),k=n.n(x);n(6117),encodeURIComponent(localStorage.getItem("requesterId"));function L(e){return M.apply(this,arguments)}function M(){return(M=(0,i.A)(o().mark(function e(t){var n,a,i;return o().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:return e.prev=0,e.next=1,m.A.get("/members/familyRequestMgt/getApprover?id=".concat(t));case 1:return n=e.sent,a={approverFirstName:n.data.message.firstName,approverLastName:n.data.message.lastName,approverEmail:n.data.message.email,approverId:n.data.message.id,approverCode:n.data.message.famCode},e.abrupt("return",a);case 2:throw e.prev=2,i=e.catch(0),console.error(i),i;case 3:case"end":return e.stop()}},e,null,[[0,2]])}))).apply(this,arguments)}function C(e){try{return m.A.post("/members/familyRequestMgt",e)}catch(e){(0,c.Qg)(e)}}function A(e,t){var n=(0,c.id)(e);n.innerHTML=t,n.disabled=!0}document.onclick=function(){var e=(0,i.A)(o().mark(function e(t){var n,a,i,r,s,d,u,f,p,v,h,b,y,g,w,x,M,_,E,T,S,q,N,R,P;return o().wrap(function(e){for(;;)switch(e.prev=e.next){case 0:if(e.prev=0,n=t.target.closest("button")||t.target.closest("[id]"),a=n?n.id:t.target.id||""){e.next=1;break}return e.abrupt("return");case 1:if(!a.includes("addFamily")){e.next=4;break}return i=a.replace("addFamily",""),e.next=2,L(i);case 2:return r=e.sent,s={approver:r,emailPath:"msg/request_premium"},e.next=3,C(s);case 3:"success"===(d=e.sent).data.status&&"Request sent"===d.data.message?A(a,"Request Sent"):"error"===d.data.status&&"Request already pending"===d.data.message?A(a,"Request Pending"):A(a,"Request Failed"),e.next=11;break;case 4:if(!a.includes("removeProfile")){e.next=10;break}return u=a.replace("removeProfile",""),f="/allMembers/removeProfile/".concat(u),e.next=5,k().fire({title:"Are you sure?",text:"You will no longer see this profile and associated posts. Are you sure you want to remove this connection?",icon:"warning",showCancelButton:!0,confirmButtonColor:"#d33",cancelButtonColor:"#3085d6",confirmButtonText:"Yes, remove connection!"});case 5:if(!e.sent.isConfirmed){e.next=9;break}return p=(0,c.yk)(".member_profile_".concat(u))||(0,c.id)(u)||(n?n.closest(".member-card"):null),e.prev=6,v=(0,l.Qm)(),e.next=7,m.A.delete(f,{headers:{"X-CSRF-TOKEN":v,"X-XSRF-TOKEN":v,"X-Requested-With":"XMLHttpRequest"},params:{token:v},data:{token:v}});case 7:!(h=e.sent).data||"success"!==h.data.status&&"success"!==h.data.message?(_=(null===(M=h.data)||void 0===M?void 0:M.message)||"Error deleting profile",(0,c.xp)(_),k().fire("Error",_,"error")):(p&&p.remove(),(b=(0,c.id)("allMembers"))&&(y=b.querySelectorAll(".member-card").length,g=y.toLocaleString(),w=(0,c.id)("memberCount"),x=(0,c.id)("memberCountDisplay"),w&&(w.textContent=g),x&&(x.textContent=g),0===y&&(b.innerHTML='\n                  <div class="col-12 text-center py-5 bg-white rounded-4 border w-100" style="grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);">\n                      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;">\n                          <i class="bi bi-people"></i>\n                      </div>\n                      <h5 class="fw-bold text-dark mb-1">No Members in View</h5>\n                      <p class="text-muted small mb-3" style="max-width: 440px; margin: 0 auto;">\n                          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.\n                      </p>\n                      <a href="/familyStudio" class="btn btn-primary btn-sm fw-bold px-4 py-2" style="border-radius: var(--stitch-radius-pill);">\n                          <i class="bi bi-plus-circle-fill me-1"></i> Open Family Studio\n                      </a>\n                  </div>\n                ')),k().fire({title:"Removed!",text:"Member connection has been removed successfully.",icon:"success",timer:2e3,showConfirmButton:!1})),e.next=9;break;case 8:e.prev=8,R=e.catch(6),(0,c.Qg)(R),S=(null===(E=R.response)||void 0===E||null===(T=E.data)||void 0===T?void 0:T.message)||R.message||"Error deleting profile",k().fire("Error",S,"error");case 9:e.next=11;break;case 10:a.includes("seeProfile")?(q=a.replace("seeProfile",""),window.location.href="/allMembers/seeProfile/".concat(q)):a.includes("familyTree")&&(N=a.replace("familyTree",""),window.location.href="/organogram/".concat(N));case 11:e.next=13;break;case 12:e.prev=12,P=e.catch(0),(0,c.Qg)(P);case 13:case"end":return e.stop()}},e,null,[[0,12],[6,8]])}));return function(t){return e.apply(this,arguments)}}()},7672:function(e,t,n){n.d(t,{OO:function(){return a},zX:function(){return i}});n(7100),n(8609),n(7261);var a=function(e){return'<div class="control"> \n        <label class="radio">\n          <input type="radio" name="send'.concat(e,'" value="yes" id=').concat(e,'Yes > Yes \n        </label>\n        <label class="radio"> \n          <input type="radio" name="send').concat(e,'" value="no" id=').concat(e,"No checked> No \n        </label>\n      </div>")},i=function(e){return e.toLowerCase().split(" ").map(function(e){return e.charAt(0).toUpperCase()+e.slice(1)}).join(" ")}},6117:function(e,t,n){var a=n(6016),i=n(5769),r=n(7672),o=n(7819);function s(e){var t=(0,i.id)("notification_count"),n=(0,i.id)("header_notif_count"),a=(0,i.id)("pwa_bottom_badge"),r=parseInt(e||"0"),o=r>99?"99+":r>0?r.toString():"";t&&(r<=0?(t.style.display="none",t.textContent=""):(t.textContent=o,t.style.display="flex")),n&&(r<=0?(n.style.display="none",n.textContent=""):(n.textContent=o,n.style.display="flex")),a&&(r<=0?(a.style.display="none",a.textContent=""):(a.textContent=o,a.style.display="inline-flex")),"undefined"!=typeof navigator&&"setAppBadge"in navigator&&(r>0?navigator.setAppBadge(r).catch(function(){}):navigator.clearAppBadge().catch(function(){}))}var c=function(e){var t=(0,i.yk)(".notification_tab");t&&t.insertAdjacentHTML("afterbegin",function(e){var t=function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:"",n=arguments.length>2&&void 0!==arguments[2]?arguments[2]:"",a="".concat(e," ").concat(t," ").concat(n).toLowerCase();return a.includes("birthday")||a.includes("cake")?"🎂":a.includes("anniversary")||a.includes("celebrate")||a.includes("cypress")||a.includes("party")?"🥂":a.includes("crash")||a.includes("chaos")||a.includes("alert")||a.includes("warning")?"🧧":a.includes("test")||a.includes("lab")?"🧪":a.includes("wedding")||a.includes("marriage")?"💍":a.includes("friend")||a.includes("request")||a.includes("connect")?"👋":a.includes("post")||a.includes("photo")||a.includes("memory")?"📸":a.includes("like")||a.includes("heart")?"❤️":a.includes("comment")?"💬":a.includes("house")?"🏡":a.includes("meeting")||a.includes("event")?"📅":"🔔"}(e.notification_type||"",e.notification_name||"",e.notification_content||""),n="new"===e.notification_status,i=e.sender_id,o=e.notification_name,s=e.notification_content,c=e.created_at,l=e.no,d=Math.floor(100+900*Math.random()),u="notificationBar".concat(i).concat(d),m=(0,r.zX)(o||"Notification"),f=c?(0,a.GP)(c):"Just now";return'\n    <div id="'.concat(u,'" class="notif-card-stitch ').concat(n?"unread":"",'">\n        <div class="notif-emoji-icon">\n            <span>').concat(t,'</span>\n        </div>\n        \n        <a href="').concat(e.action_url||"#linkNotification"+l,'" class="notif-details-link flex-grow-1 text-decoration-none">\n            <h6 class="notif-item-title">').concat(m,'</h6>\n            <p class="notif-item-desc">').concat(s||"",'</p>\n            <span class="notif-item-time">').concat(f,'</span>\n        </a>\n\n        <button class="notif-dismiss-btn" \n                data-no="').concat(l,'"\n                data-is="').concat(i,'"\n                type="button"\n                id="deleteNotification').concat(i).concat(d,'"\n                title="Dismiss">\n            <i class="bi bi-x-lg" style="pointer-events: none;"></i>\n        </button>\n    </div>\n    ')}(e))},l=function(){var e=localStorage.getItem("requesterId"),t=localStorage.getItem("requesterFamCode"),n=e&&t&&"null"!==e&&"null"!==t?"/member/notifications/id/".concat(encodeURIComponent(e),"/").concat(encodeURIComponent(t)):"/member/notifications/user";o.A.get(n).then(function(e){var t=e.data.message;if(t&&Array.isArray(t)&&t.length>0){sessionStorage.setItem("notificationCount",t.length),s(t.length);var n=(0,i.yk)(".notification_tab");n&&(n.innerHTML=""),t.forEach(function(e){c(e)});var r=document.querySelectorAll(".notification_timeago");r&&r.length>0&&(0,a.XX)(r)}else{sessionStorage.setItem("notificationCount","0"),s(0);var o=(0,i.yk)(".notification_tab");o&&!o.children.length&&(o.innerHTML='\n                    <div class="p-4 text-center text-muted">\n                        <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>\n                        <span class="small fw-medium">All caught up! No notifications</span>\n                    </div>')}}).catch(function(e){var t;401!==(null==e||null===(t=e.response)||void 0===t?void 0:t.status)&&(0,i.Qg)(e)})};l();var d=(0,i.id)("notificationBtn"),u=(0,i.id)("notificationDropdown"),m=(0,i.id)("markAllRead");d&&u&&(d.addEventListener("click",function(e){e.stopPropagation(),u.classList.toggle("show")}),document.addEventListener("click",function(e){d.contains(e.target)||u.contains(e.target)||u.classList.remove("show")}),u.addEventListener("click",function(e){e.stopPropagation()})),m&&m.addEventListener("click",function(){document.querySelectorAll(".notif-card-stitch.unread").forEach(function(e){e.classList.remove("unread")}),sessionStorage.setItem("notificationCount","0"),s(0)});var f=function(){var e=document.getElementById("notification_tab");e&&e.addEventListener("click",function(t){var n=t.target.closest('button[id*="deleteNotification"]');if(n){t.stopPropagation();var a=n.id.replace("deleteNotification","notificationBar"),r=n.getAttribute("data-no"),c="/removeNotification/".concat(r);o.A.put(c).then(function(t){if("Notification marked as read"===t.data.message){var n=document.getElementById(a);n&&(n.style.opacity="0",n.style.transform="translateX(10px)",setTimeout(function(){n.remove(),e.querySelectorAll(".notif-card-stitch").length||(e.innerHTML='\n                                <div class="p-4 text-center text-muted">\n                                    <i class="bi bi-bell-slash fs-3 d-block mb-2 text-secondary opacity-50"></i>\n                                    <span class="small fw-medium">All caught up! No notifications</span>\n                                </div>')},200));var i=parseInt(sessionStorage.getItem("notificationCount")||"1")-1,r=i>0?i:0;sessionStorage.setItem("notificationCount",r),s(r)}}).catch(i.Qg)}})};"loading"===document.readyState?document.addEventListener("DOMContentLoaded",f):f(),"undefined"!=typeof window&&(window.addEventListener("pwa:badge-updated",function(e){var t;"number"==typeof(null===(t=e.detail)||void 0===t?void 0:t.count)&&s(e.detail.count)}),window.addEventListener("pwa:notification-received",function(){l()}))}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["all_members"],{
+
+/***/ "./resources/asset/js/components/allMembers/allEvents.js":
+/*!***************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/allEvents.js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
+/* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../global.js */ "./resources/asset/js/components/global.js");
+/* harmony import */ var _navbar__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../navbar */ "./resources/asset/js/components/navbar.js");
+/* harmony import */ var _profilePage_htmlFolder_friendRequestCard__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../profilePage/htmlFolder/friendRequestCard */ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js");
+
+
+
+
+
+
+
+
+
+// Attach a click event listener to the document
+/**
+ * Attach a click event listener to the document. When a button with the id `addFamily<userId>` is clicked, send a family request to the user identified by the userId and update the button's HTML and disable it.
+ it returns the notification details for the approvers tab
+ * 
+ * @param {MouseEvent} e - The event object.
+ */
+document.onclick = /*#__PURE__*/function () {
+  var _ref = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee(e) {
+    var btn, targetId, userId, approverDetails, familyRequestData, result, _userId, url, _result, memberCard, csrfToken, response, container, remaining, countStr, memberCountBadge, memberCountDisplay, _response$data, errText, _err$response, _err$response$data, _errText, _userId2, _userId3, _t, _t2;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          // Get the target element's ID (defensively checking closest button or element with ID)
+          btn = e.target.closest('button') || e.target.closest('[id]');
+          targetId = btn ? btn.id : e.target.id || '';
+          if (targetId) {
+            _context.next = 1;
+            break;
+          }
+          return _context.abrupt("return");
+        case 1:
+          if (!targetId.includes('addFamily')) {
+            _context.next = 4;
+            break;
+          }
+          // Extract the user ID from the target ID
+          userId = targetId.replace('addFamily', ''); // Fetch approver details for the user
+          _context.next = 2;
+          return fetchApproverData(userId);
+        case 2:
+          approverDetails = _context.sent;
+          familyRequestData = {
+            approver: approverDetails,
+            emailPath: 'msg/request_premium'
+          }; // Send the family request data to the server for processing which returns the notification details for the approvers tab
+          _context.next = 3;
+          return sendFamilyRequest(familyRequestData);
+        case 3:
+          result = _context.sent;
+          if (result.data.status === 'success' && result.data.message === 'Request sent') {
+            // Update the button's HTML and disable it
+            updateButton(targetId, 'Request Sent');
+          } else if (result.data.status === 'error' && result.data.message === 'Request already pending') {
+            // Update the button's HTML and disable it
+            updateButton(targetId, 'Request Pending');
+          } else {
+            // Update the button's HTML and disable it
+            updateButton(targetId, 'Request Failed');
+          }
+          _context.next = 11;
+          break;
+        case 4:
+          if (!targetId.includes('removeProfile')) {
+            _context.next = 10;
+            break;
+          }
+          // Extract the user ID from the target ID
+          _userId = targetId.replace('removeProfile', '');
+          url = "/allMembers/removeProfile/".concat(_userId); // Confirm with SweetAlert warning modal
+          _context.next = 5;
+          return sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire({
+            title: 'Are you sure?',
+            text: 'You will no longer see this profile and associated posts. Are you sure you want to remove this connection?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove connection!'
+          });
+        case 5:
+          _result = _context.sent;
+          if (!_result.isConfirmed) {
+            _context.next = 9;
+            break;
+          }
+          memberCard = (0,_shared__WEBPACK_IMPORTED_MODULE_4__.qSel)(".member_profile_".concat(_userId)) || (0,_shared__WEBPACK_IMPORTED_MODULE_4__.id)(_userId) || (btn ? btn.closest('.member-card') : null);
+          _context.prev = 6;
+          csrfToken = (0,_global_js__WEBPACK_IMPORTED_MODULE_5__.getCsrfToken)();
+          _context.next = 7;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].delete(url, {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'X-XSRF-TOKEN': csrfToken,
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            params: {
+              token: csrfToken
+            },
+            data: {
+              token: csrfToken
+            }
+          });
+        case 7:
+          response = _context.sent;
+          if (response.data && (response.data.status === 'success' || response.data.message === 'success')) {
+            if (memberCard) {
+              memberCard.remove();
+            }
+
+            // Update member count badge
+            container = (0,_shared__WEBPACK_IMPORTED_MODULE_4__.id)('allMembers');
+            if (container) {
+              remaining = container.querySelectorAll('.member-card').length;
+              countStr = remaining.toLocaleString();
+              memberCountBadge = (0,_shared__WEBPACK_IMPORTED_MODULE_4__.id)('memberCount');
+              memberCountDisplay = (0,_shared__WEBPACK_IMPORTED_MODULE_4__.id)('memberCountDisplay');
+              if (memberCountBadge) memberCountBadge.textContent = countStr;
+              if (memberCountDisplay) memberCountDisplay.textContent = countStr;
+              if (remaining === 0) {
+                container.innerHTML = "\n                  <div class=\"col-12 text-center py-5 bg-white rounded-4 border w-100\" style=\"grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);\">\n                      <div class=\"mx-auto mb-3 d-flex align-items-center justify-content-center\" style=\"width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;\">\n                          <i class=\"bi bi-people\"></i>\n                      </div>\n                      <h5 class=\"fw-bold text-dark mb-1\">No Members in View</h5>\n                      <p class=\"text-muted small mb-3\" style=\"max-width: 440px; margin: 0 auto;\">\n                          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.\n                      </p>\n                      <a href=\"/familyStudio\" class=\"btn btn-primary btn-sm fw-bold px-4 py-2\" style=\"border-radius: var(--stitch-radius-pill);\">\n                          <i class=\"bi bi-plus-circle-fill me-1\"></i> Open Family Studio\n                      </a>\n                  </div>\n                ";
+              }
+            }
+            sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire({
+              title: 'Removed!',
+              text: 'Member connection has been removed successfully.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          } else {
+            errText = ((_response$data = response.data) === null || _response$data === void 0 ? void 0 : _response$data.message) || 'Error deleting profile';
+            (0,_shared__WEBPACK_IMPORTED_MODULE_4__.msgException)(errText);
+            sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire('Error', errText, 'error');
+          }
+          _context.next = 9;
+          break;
+        case 8:
+          _context.prev = 8;
+          _t = _context["catch"](6);
+          (0,_shared__WEBPACK_IMPORTED_MODULE_4__.showError)(_t);
+          _errText = ((_err$response = _t.response) === null || _err$response === void 0 ? void 0 : (_err$response$data = _err$response.data) === null || _err$response$data === void 0 ? void 0 : _err$response$data.message) || _t.message || 'Error deleting profile';
+          sweetalert2__WEBPACK_IMPORTED_MODULE_3___default().fire('Error', _errText, 'error');
+        case 9:
+          _context.next = 11;
+          break;
+        case 10:
+          if (targetId.includes('seeProfile')) {
+            // Extract the user ID from the target ID
+            _userId2 = targetId.replace('seeProfile', ''); // redirect to 'allMembers/setProfile/'+userId
+            window.location.href = "/allMembers/seeProfile/".concat(_userId2);
+          } else if (targetId.includes('familyTree')) {
+            // Extract the user ID from the target ID
+            _userId3 = targetId.replace('familyTree', ''); // redirect to 'allMembers/setProfile/'+userId
+            window.location.href = "/organogram/".concat(_userId3);
+          }
+        case 11:
+          _context.next = 13;
+          break;
+        case 12:
+          _context.prev = 12;
+          _t2 = _context["catch"](0);
+          // Handle any errors that occur during execution
+          (0,_shared__WEBPACK_IMPORTED_MODULE_4__.showError)(_t2);
+        case 13:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 12], [6, 8]]);
+  }));
+  return function (_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+// Function to fetch approver data based on user ID
+function fetchApproverData(_x2) {
+  return _fetchApproverData.apply(this, arguments);
+} // Function to send family request data to the server
+function _fetchApproverData() {
+  _fetchApproverData = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2(userId) {
+    var result, approverDetails, _t3;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _context2.next = 1;
+          return axios__WEBPACK_IMPORTED_MODULE_2__["default"].get("/members/familyRequestMgt/getApprover?id=".concat(userId));
+        case 1:
+          result = _context2.sent;
+          approverDetails = {
+            approverFirstName: result.data.message.firstName,
+            approverLastName: result.data.message.lastName,
+            approverEmail: result.data.message.email,
+            approverId: result.data.message.id,
+            approverCode: result.data.message.famCode
+          };
+          return _context2.abrupt("return", approverDetails);
+        case 2:
+          _context2.prev = 2;
+          _t3 = _context2["catch"](0);
+          console.error(_t3);
+          throw _t3;
+        case 3:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[0, 2]]);
+  }));
+  return _fetchApproverData.apply(this, arguments);
+}
+function sendFamilyRequest(data) {
+  try {
+    return axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/members/familyRequestMgt', data);
+  } catch (error) {
+    ;(0,_shared__WEBPACK_IMPORTED_MODULE_4__.showError)(error);
+  }
+}
+
+// Function to update the button's HTML and disable it
+function updateButton(targetId, newHTML) {
+  var theTargetId = (0,_shared__WEBPACK_IMPORTED_MODULE_4__.id)(targetId);
+  theTargetId.innerHTML = newHTML;
+  theTargetId.disabled = true;
+}
+
+// ADD THE NEW EVENT TO THE NOTIFICATION TAB
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/api.js":
+/*!*********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/api.js ***!
+  \*********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderMembers: function() { return /* binding */ renderMembers; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _html__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./html */ "./resources/asset/js/components/allMembers/html.js");
+/* harmony import */ var _handleInput__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./handleInput */ "./resources/asset/js/components/allMembers/handleInput.js");
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+
+
+// resources/js/allMembers/api.js
+
+
+
+var allMembersContainer = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("allMembers");
+var memberCountBadge = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("memberCount");
+var memberCountDisplay = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("memberCountDisplay");
+var searchInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("searchFamily");
+var NO_MEMBER_HTML = "\n  <div class=\"col-12 text-center py-5 bg-white rounded-4 border w-100\" style=\"grid-column: 1 / -1; border-radius: var(--stitch-radius-lg);\">\n      <div class=\"mx-auto mb-3 d-flex align-items-center justify-content-center\" style=\"width: 64px; height: 64px; font-size: 1.8rem; background: var(--stitch-primary-container); color: var(--stitch-primary); border-radius: 50%;\">\n          <i class=\"bi bi-people\"></i>\n      </div>\n      <h5 class=\"fw-bold text-dark mb-1\">No Members in View</h5>\n      <p class=\"text-muted small mb-3\" style=\"max-width: 440px; margin: 0 auto;\">\n          There are no matching relatives in this directory category yet. Invite or connect with your family members to build your network.\n      </p>\n      <a href=\"/familyStudio\" class=\"btn btn-primary btn-sm fw-bold px-4 py-2\" style=\"border-radius: var(--stitch-radius-pill);\">\n          <i class=\"bi bi-plus-circle-fill me-1\"></i> Open Family Studio\n      </a>\n  </div>\n";
+
+/**
+ * Render a list of members into the main container.
+ * Also updates the member count badge.
+ *
+ * @param {Array<object>} members
+ */
+var renderMembers = function renderMembers() {
+  var members = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  allMembersContainer.innerHTML = "";
+  if (!members.length) {
+    allMembersContainer.innerHTML = NO_MEMBER_HTML;
+    if (memberCountBadge) memberCountBadge.textContent = "0";
+    if (memberCountDisplay) memberCountDisplay.textContent = "0";
+    return;
+  }
+
+  // Render each member card
+  members.forEach(_html__WEBPACK_IMPORTED_MODULE_2__.renderHtml);
+
+  // Update member count badges
+  var countStr = members.length.toLocaleString();
+  if (memberCountBadge) memberCountBadge.textContent = countStr;
+  if (memberCountDisplay) memberCountDisplay.textContent = countStr;
+};
+
+// Client-side category pill filtering
+function setupFilterPills() {
+  var pillsContainer = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("memberFilterPills");
+  if (!pillsContainer) return;
+  pillsContainer.addEventListener("click", function (e) {
+    var btn = e.target.closest(".filter-pill-btn");
+    if (!btn) return;
+    pillsContainer.querySelectorAll(".filter-pill-btn").forEach(function (b) {
+      return b.classList.remove("active");
+    });
+    btn.classList.add("active");
+    var filterVal = btn.getAttribute("data-filter");
+    var cards = allMembersContainer.querySelectorAll(".member-card");
+    var visibleCount = 0;
+    cards.forEach(function (card) {
+      var cat = card.getAttribute("data-category");
+      if (filterVal === "all" || cat === filterVal) {
+        card.style.display = "";
+        visibleCount++;
+      } else {
+        card.style.display = "none";
+      }
+    });
+    if (visibleCount === 0 && cards.length > 0) {
+      // Show empty state placeholder if none match category filter
+      var emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
+      if (!emptyPlaceholder) {
+        allMembersContainer.insertAdjacentHTML("beforeend", "<div class=\"empty-filter-placeholder col-12 text-center py-4 text-muted small\" style=\"grid-column: 1 / -1;\">No members in this category.</div>");
+      }
+    } else {
+      var _emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
+      if (_emptyPlaceholder) _emptyPlaceholder.remove();
+    }
+  });
+}
+(function () {
+  var _bootstrapAllMembers = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee() {
+    var url, famCodeData, familyMembers, loader, handleSearch, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          _context.prev = 0;
+          url = "/allMembers/processApiData";
+          _context.next = 1;
+          return (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.getApiData)(url);
+        case 1:
+          famCodeData = _context.sent;
+          familyMembers = [];
+          if (Array.isArray(famCodeData)) {
+            familyMembers = famCodeData;
+          } else if (Array.isArray(famCodeData === null || famCodeData === void 0 ? void 0 : famCodeData.message)) {
+            familyMembers = famCodeData.message;
+          } else if (Array.isArray(famCodeData === null || famCodeData === void 0 ? void 0 : famCodeData.data)) {
+            familyMembers = famCodeData.data;
+          }
+
+          // Pre-render network members
+          renderMembers(familyMembers);
+
+          // Remove loading spinner
+          loader = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.id)("setLoader");
+          if (loader) {
+            loader.classList.remove("loader");
+            loader.classList.add("d-none");
+            loader.style.display = "none";
+          }
+
+          // Setup filter pills
+          setupFilterPills();
+
+          // Wire up debounced search handler
+          if (searchInput) {
+            handleSearch = (0,_handleInput__WEBPACK_IMPORTED_MODULE_3__.createSearchHandler)({
+              familyMembers,
+              renderMembers,
+              container: allMembersContainer,
+              searchUrl: "/allMembers/search"
+            });
+            searchInput.addEventListener("input", handleSearch);
+          }
+          _context.next = 3;
+          break;
+        case 2:
+          _context.prev = 2;
+          _t = _context["catch"](0);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_4__.showError)(_t);
+        case 3:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[0, 2]]);
+  }));
+  function bootstrapAllMembers() {
+    return _bootstrapAllMembers.apply(this, arguments);
+  }
+  return bootstrapAllMembers;
+})()();
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/handleInput.js":
+/*!*****************************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/handleInput.js ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createSearchHandler: function() { return /* binding */ createSearchHandler; }
+/* harmony export */ });
+/* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ "./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+
+
+// resources/js/allMembers/handleInput.js
+
+
+
+
+/**
+ * Render the "invite a new member" block when there is no search match.
+ *
+ * @param {HTMLElement} container
+ * @param {string} rawQuery
+ */
+var renderInviteBlock = function renderInviteBlock(container, rawQuery) {
+  var famCode = localStorage.getItem("requesterFamCode") || "";
+  var yourName = localStorage.getItem("yourName") || "";
+  container.innerHTML = "\n    <p>No matching name found \u2013 do you want us to send them a text/email to register to the platform?</p>\n    ".concat((0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.checkBox)("newMemberRequest"), " <br>\n\n    <input type=\"hidden\" id=\"newMemberName\" value=\"").concat((0,_global__WEBPACK_IMPORTED_MODULE_3__.esc)(rawQuery), "\">\n\n    <input type=\"text\" id=\"newMemberRequestName\" class=\"form-control\"\n           name=\"newMemberRequestName\"\n           placeholder=\"Enter their name\">\n\n    <input type=\"text\" id=\"newMemberRequestEmail\" class=\"form-control\"\n           name=\"newMemberRequestEmail\"\n           placeholder=\"Enter their email address or mobile number\">\n\n    <p id=\"loader\" class=\"loader\" style=\"display:none;\"></p>\n    <small id=\"newMemberRequest_help\" class=\"form-text text-muted\"></small>\n\n    <button class=\"button is-primary\" id=\"newMemberRequestBtn\">Send Request</button>\n  ");
+  var nameInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("newMemberRequestName");
+  var emailInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("newMemberRequestEmail");
+  var submitBtn = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("newMemberRequestBtn");
+  var helpMsg = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("newMemberRequest_help");
+
+  // hide fields until checkbox ticked
+  nameInput.style.display = "none";
+  emailInput.style.display = "none";
+  submitBtn.style.display = "none";
+  var yesCheckbox = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("newMemberRequestYes");
+  if (yesCheckbox) {
+    yesCheckbox.addEventListener("click", function () {
+      nameInput.style.display = "block";
+      emailInput.style.display = "block";
+      submitBtn.style.display = "block";
+    });
+  }
+  submitBtn.addEventListener("click", /*#__PURE__*/(0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee() {
+    var emailOrMobile, name, mobileRegex, emailRegex, postObj, response, _t;
+    return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context) {
+      while (1) switch (_context.prev = _context.next) {
+        case 0:
+          emailOrMobile = emailInput.value.trim();
+          name = nameInput.value.trim();
+          mobileRegex = /^\+?[1-9]\d{1,14}$/;
+          emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // validation
+          if (!(!emailRegex.test(emailOrMobile) && !mobileRegex.test(emailOrMobile))) {
+            _context.next = 1;
+            break;
+          }
+          helpMsg.textContent = "Please enter a valid email address or mobile number.";
+          return _context.abrupt("return");
+        case 1:
+          if (!(mobileRegex.test(emailOrMobile) && !emailOrMobile.startsWith("+"))) {
+            _context.next = 2;
+            break;
+          }
+          helpMsg.textContent = "Please include the country code. E.g. +2348036517179";
+          return _context.abrupt("return");
+        case 2:
+          if (!(emailRegex.test(emailOrMobile) && name.length < 2)) {
+            _context.next = 3;
+            break;
+          }
+          helpMsg.textContent = "Please enter a valid name with at least 2 characters.";
+          return _context.abrupt("return");
+        case 3:
+          if (!emailRegex.test(emailOrMobile)) {
+            _context.next = 7;
+            break;
+          }
+          postObj = {
+            mobile: "",
+            viewPath: "msg/contactNewMember",
+            data: {
+              email: emailOrMobile,
+              mobile: "",
+              name,
+              familyCode: famCode,
+              yourName
+            },
+            subject: "".concat(yourName, " Wants You: Experience the Magic of your Family Network Today!")
+          };
+          _context.prev = 4;
+          _context.next = 5;
+          return axios__WEBPACK_IMPORTED_MODULE_4__["default"].post("/register/contactNewMember", postObj, {
+            headers: {
+              "X-CSRF-TOKEN": (0,_global__WEBPACK_IMPORTED_MODULE_3__.getCsrfToken)(),
+              "X-XSRF-TOKEN": (0,_global__WEBPACK_IMPORTED_MODULE_3__.getCsrfToken)()
+            }
+          });
+        case 5:
+          response = _context.sent;
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showNotification)("allMembers", "is-success", response.data.message);
+          helpMsg.textContent = "";
+          _context.next = 7;
+          break;
+        case 6:
+          _context.prev = 6;
+          _t = _context["catch"](4);
+          (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showNotification)("allMembers", "is-danger", _t.message);
+        case 7:
+        case "end":
+          return _context.stop();
+      }
+    }, _callee, null, [[4, 6]]);
+  })));
+};
+
+/**
+ * Factory that returns a debounced search handler using the backend /allMembers/search endpoint.
+ *
+ * @param {object} options
+ * @param {Array<object>} options.familyMembers
+ * @param {Array<object>} options.directoryMembers  // currently unused but handy if you want to fall back
+ * @param {Function} options.renderMembers
+ * @param {HTMLElement} options.container
+ * @param {string} options.searchUrl  // e.g. `${URL}allMembers/search`
+ * @returns {(e: InputEvent) => void}
+ */
+var createSearchHandler = function createSearchHandler(_ref2) {
+  var familyMembers = _ref2.familyMembers,
+    renderMembers = _ref2.renderMembers,
+    container = _ref2.container,
+    searchUrl = _ref2.searchUrl;
+  var searchInput = (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.id)("searchFamily");
+  var debounceTimer = null;
+  var performSearch = /*#__PURE__*/function () {
+    var _ref3 = (0,_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_0__["default"])(/*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().mark(function _callee2() {
+      var rawQuery, response, data, matches, _t2;
+      return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_1___default().wrap(function (_context2) {
+        while (1) switch (_context2.prev = _context2.next) {
+          case 0:
+            rawQuery = searchInput.value.trim(); // THE SEARCH QUERY
+            // empty query = back to my network
+            if (rawQuery) {
+              _context2.next = 1;
+              break;
+            }
+            renderMembers(familyMembers);
+            return _context2.abrupt("return");
+          case 1:
+            _context2.prev = 1;
+            _context2.next = 2;
+            return axios__WEBPACK_IMPORTED_MODULE_4__["default"].get(searchUrl, {
+              params: {
+                q: rawQuery
+              }
+            });
+          case 2:
+            response = _context2.sent;
+            data = response.data || {};
+            matches = data.message || [];
+            if (matches.length) {
+              _context2.next = 3;
+              break;
+            }
+            renderInviteBlock(container, rawQuery);
+            return _context2.abrupt("return");
+          case 3:
+            // backend already orders: family first, then approved, etc.
+            container.innerHTML = "";
+            renderMembers(matches);
+            _context2.next = 5;
+            break;
+          case 4:
+            _context2.prev = 4;
+            _t2 = _context2["catch"](1);
+            (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.showNotification)("allMembers", "is-danger", "Search failed. Please try again.");
+            // optional: log or surface more detail in dev builds
+            (0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_2__.msgException)(_t2);
+          case 5:
+          case "end":
+            return _context2.stop();
+        }
+      }, _callee2, null, [[1, 4]]);
+    }));
+    return function performSearch() {
+      return _ref3.apply(this, arguments);
+    };
+  }();
+  return function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(performSearch, 200);
+  };
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/html.js":
+/*!**********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/html.js ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   renderHtml: function() { return /* binding */ renderHtml; }
+/* harmony export */ });
+/* harmony import */ var timeago_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! timeago.js */ "./node_modules/timeago.js/esm/index.js");
+/* harmony import */ var _shared__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @shared */ "./node_modules/@modernman00/shared-js-lib/index.js");
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../global */ "./resources/asset/js/components/global.js");
+
+
+
+var toSentenceCase = function toSentenceCase(str) {
+  if (!str || typeof str !== 'string') return '';
+  return str.toLowerCase().split(' ').map(function (word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+};
+var renderHtml = function renderHtml(el) {
+  try {
+    var _el$status;
+    if (!el) {
+      throw new Error('there is no data');
+    }
+    var theImg = el.img ? "/resources/images/profile/".concat(el.img) : '/resources/images/profile/avatarM.png';
+    var status = ((_el$status = el.status) === null || _el$status === void 0 ? void 0 : _el$status.toLowerCase()) || null;
+    var statusButtonHTML = 'Connect';
+    var tooltip = status === 'rejected' ? 'You can send another request' : 'Send connection request';
+    if (status === 'request sent') {
+      statusButtonHTML = 'Request Sent';
+    }
+    var disableButton = status === 'request sent' ? 'disabled' : '';
+
+    // Determine Relation Category & Human-Friendly Status Chip
+    var relType = el.relationType || 'other';
+    var roleChipHtml = '';
+    var categoryKey = 'explore';
+    if (relType === 'family') {
+      categoryKey = 'family';
+      roleChipHtml = "<span class=\"role-chip role-chip-family\"><i class=\"bi bi-house-heart-fill\"></i> Same Family</span>";
+    } else if (relType === 'approved_you' || relType === 'you_approved') {
+      categoryKey = 'connected';
+      roleChipHtml = "<span class=\"role-chip role-chip-connected\"><i class=\"bi bi-check2-circle\"></i> Connected Kin</span>";
+    } else {
+      categoryKey = 'explore';
+      roleChipHtml = "<span class=\"role-chip role-chip-directory\"><i class=\"bi bi-globe2\"></i> Directory</span>";
+    }
+
+    // el.* fields are user-authored — escape every one before it hits innerHTML (SEC-2).
+    var idSafe = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(el.id);
+    var firstName = toSentenceCase(el.firstName || '');
+    var lastName = toSentenceCase(el.lastName || '');
+    var fullNameRaw = "".concat(firstName, " ").concat(lastName).trim();
+    var fullName = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(fullNameRaw);
+    var location = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(el.country ? toSentenceCase(el.country) : 'Location not set');
+    var famCode = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(el.famCode ? String(el.famCode).toUpperCase() : 'CODE');
+    var emailSafe = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(el.email || 'Email not provided');
+    var imgSafe = (0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(theImg);
+    var html = "\n    <div class=\"member-card member_profile_".concat(idSafe, "\" id=\"").concat(idSafe, "\" data-category=\"").concat(categoryKey, "\" data-search=\"").concat((0,_global__WEBPACK_IMPORTED_MODULE_2__.esc)(fullNameRaw.toLowerCase() + ' ' + (el.email || '')), "\">\n        <div class=\"card-cover\"></div>\n\n        <div class=\"avatar-wrapper\">\n             <img src=\"").concat(imgSafe, "\" alt=\"").concat(fullName, "\" loading=\"lazy\">\n             <span class=\"avatar-online-dot\"></span>\n        </div>\n\n        <div class=\"member-card-body\">\n            ").concat(roleChipHtml, "\n            <h4 class=\"member-name text-truncate\" title=\"").concat(fullName, "\">").concat(fullName, "</h4>\n\n            <span class=\"member-location-chip\">\n                <i class=\"bi bi-geo-alt-fill text-danger\"></i> ").concat(location, "\n            </span>\n\n            <div class=\"member-details\">\n                <div class=\"member-detail\">\n                    <i class=\"bi bi-hash\"></i>\n                    <span class=\"fw-bold\">").concat(famCode, "</span>\n                </div>\n                <div class=\"member-detail\">\n                    <i class=\"bi bi-envelope\"></i>\n                    <span class=\"text-truncate\">").concat(emailSafe, "</span>\n                </div>\n                ").concat(relType !== 'other' ? "\n                <div class=\"member-detail\">\n                    <i class=\"bi bi-calendar-check\"></i> \n                    <span>Connected ".concat((0,timeago_js__WEBPACK_IMPORTED_MODULE_0__.format)(el.created_at), "</span>\n                </div>\n                ") : '', "\n            </div>\n\n            <div class=\"member-interests\">\n                ").concat(relType === 'family' ? "\n                <button class=\"btn-stitch-primary\" id=\"seeProfile".concat(idSafe, "\">\n                    <i class=\"bi bi-person-badge-fill\" style=\"pointer-events: none;\"></i> View Profile\n                </button>\n                <div class=\"d-flex gap-2\">\n                    <button class=\"btn-stitch-tonal flex-grow-1\" id=\"familyTree").concat(idSafe, "\" title=\"View in Family Tree\">\n                        <i class=\"bi bi-diagram-3-fill\" style=\"pointer-events: none;\"></i> Tree\n                    </button>\n                    <button class=\"btn-stitch-danger flex-grow-1\" id=\"removeProfile").concat(idSafe, "\" title=\"Remove from Family\">\n                        <i class=\"bi bi-person-dash-fill\" style=\"pointer-events: none;\"></i> Remove\n                    </button>\n                </div>\n                ") : relType === 'approved_you' || relType === 'you_approved' ? "\n                <button class=\"btn-stitch-primary\" id=\"seeProfile".concat(idSafe, "\">\n                    <i class=\"bi bi-person-badge-fill\" style=\"pointer-events: none;\"></i> View Profile\n                </button>\n                <div class=\"d-flex gap-2\">\n                    <button class=\"btn-stitch-tonal flex-grow-1\" id=\"familyTree").concat(idSafe, "\" title=\"View in Family Tree\">\n                        <i class=\"bi bi-diagram-3-fill\" style=\"pointer-events: none;\"></i> Tree\n                    </button>\n                    <button class=\"btn-stitch-danger flex-grow-1\" id=\"removeProfile").concat(idSafe, "\" title=\"Remove Connection\">\n                        <i class=\"bi bi-person-dash-fill\" style=\"pointer-events: none;\"></i> Remove\n                    </button>\n                </div>\n                ") : "\n                <button class=\"btn-stitch-connect\" \n                        data-user-id=\"addFamily".concat(idSafe, "\" \n                        id=\"addFamily").concat(idSafe, "\"\n                        ").concat(disableButton, ">\n                    <i class=\"bi bi-person-plus-fill\" style=\"pointer-events: none;\"></i> ").concat(statusButtonHTML, "\n                </button>\n                <small class=\"text-muted text-center\" style=\"font-size: 0.75rem; font-weight: 500;\">").concat(tooltip, "</small>\n                "), "\n            </div>\n        </div>\n    </div>\n    ");
+    var container = (0,_shared__WEBPACK_IMPORTED_MODULE_1__.id)('allMembers');
+    if (container) {
+      container.insertAdjacentHTML('beforeend', html);
+    }
+  } catch (error) {
+    ;(0,_shared__WEBPACK_IMPORTED_MODULE_1__.showError)(error);
+  }
+};
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/allMembers/index.js":
+/*!***********************************************************!*\
+  !*** ./resources/asset/js/components/allMembers/index.js ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _api__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./api */ "./resources/asset/js/components/allMembers/api.js");
+/* harmony import */ var _allEvents__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./allEvents */ "./resources/asset/js/components/allMembers/allEvents.js");
+
+
+
+/***/ }),
+
+/***/ "./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js":
+/*!***********************************************************************************!*\
+  !*** ./resources/asset/js/components/profilePage/htmlFolder/friendRequestCard.js ***!
+  \***********************************************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   friendRequestCard: function() { return /* binding */ friendRequestCard; }
+/* harmony export */ });
+/* harmony import */ var _global__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../global */ "./resources/asset/js/components/global.js");
+
+var appUrl = "https://olaogun.test/";
+var approverId = encodeURIComponent(localStorage.getItem('requesterId'));
+var friendRequestCard = function friendRequestCard(data) {
+  var _data$img, _data$firstName, _data$lastName, _data$id, _data$famCode;
+  var imageUrl = "/resources/images/profile/".concat(encodeURIComponent((_data$img = data.img) !== null && _data$img !== void 0 ? _data$img : data.requesterProfileImg));
+  var firstName = encodeURIComponent((_data$firstName = data.firstName) !== null && _data$firstName !== void 0 ? _data$firstName : data.requesterFirstName);
+  var lastName = encodeURIComponent((_data$lastName = data.lastName) !== null && _data$lastName !== void 0 ? _data$lastName : data.requesterLastName);
+  var requestId = encodeURIComponent((_data$id = data.id) !== null && _data$id !== void 0 ? _data$id : data.requesterId);
+  var requestCode = encodeURIComponent((_data$famCode = data.famCode) !== null && _data$famCode !== void 0 ? _data$famCode : data.requesterFamCode);
+  var html = "<p id=".concat(requestId, "_linkRequestCard></p>\n\n\n  <img src=\"").concat(imageUrl, "\" alt=\"Avatar\" style=\"width:50%\"><br>\n\n   <span>").concat(firstName, " ").concat(lastName, "</span>\n\n\n    <div class=\"w3-row w3-opacity\">\n      <div class=\"w3-half\">\n        <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/50/").concat(requestCode, "/pp\" style=\"text-decoration: none;\">\n          <button class=\"w3-button w3-block w3-green w3-section\" title=\"Accept\"><i class=\"fa fa-check\"></i></button>\n        </a>\n      </div>\n      \n      <div class=\"w3-half\">\n        <a href=\"").concat(appUrl, "member/request/").concat(requestId, "/").concat(approverId, "/10\" style=\"text-decoration: none;\">\n          <button class=\"w3-button w3-block w3-red w3-section\" title=\"Decline\"><i class=\"fa fa-remove\"></i></button>\n        </a>\n      </div>\n    </div>\n  ");
+  (0,_global__WEBPACK_IMPORTED_MODULE_0__.qSel)('.requestFriendClass').insertAdjacentHTML('afterbegin', html);
+};
+
+/***/ })
+
+}]);
+//# sourceMappingURL=all_members.js.map

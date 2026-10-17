@@ -24,7 +24,7 @@
     @endif
 @endpush
 @section('content')
-<div class="reels-theater-container" id="reelsTheaterContainer">
+<div class="reels-theater-container" id="reelsTheaterContainer" data-current-user-id="{{ $data['id'] ?? $_SESSION['id'] ?? '' }}">
 
     <!-- Hidden Initial JSON Payload -->
     <script id="reelsInitialData" type="application/json">

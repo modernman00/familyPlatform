@@ -690,9 +690,9 @@
                     <p>Receive alerts about events and activities via email.</p>
                   </div>
                   <div class="toggle-group">
-                    <span class="toggle-label">{{ ($accountData['email_notifications'] ?? '') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <span class="toggle-label">{{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'ON' : 'OFF' }}</span>
                     <label class="switch">
-                      <input type="checkbox" name="email_notifications" {{ ($accountData['email_notifications'] ?? '') === 'on' ? 'checked' : '' }}>
+                      <input type="checkbox" name="email_notifications" value="{{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'on' : 'off' }}" {{ ($accountData['email_notifications'] ?? 'on') === 'on' ? 'checked' : '' }}>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -704,9 +704,9 @@
                     <p>Receive critical alerts directly to your phone.</p>
                   </div>
                   <div class="toggle-group">
-                    <span class="toggle-label">{{ ($accountData['sms_notifications'] ?? '') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <span class="toggle-label">{{ ($accountData['sms_notifications'] ?? 'on') === 'on' ? 'ON' : 'OFF' }}</span>
                     <label class="switch">
-                      <input type="checkbox" name="sms_notifications" {{ ($accountData['sms_notifications'] ?? '') === 'on' ? 'checked' : '' }}>
+                      <input type="checkbox" name="sms_notifications" value="{{ ($accountData['sms_notifications'] ?? 'on') === 'on' ? 'on' : 'off' }}" {{ ($accountData['sms_notifications'] ?? 'on') === 'on' ? 'checked' : '' }}>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -718,9 +718,9 @@
                     <p id="pushPrefHint">Get instant alerts on this device even when the app is closed.</p>
                   </div>
                   <div class="toggle-group">
-                    <span class="toggle-label" id="pushPrefLabel">OFF</span>
+                    <span class="toggle-label" id="pushPrefLabel">ON</span>
                     <label class="switch">
-                      <input type="checkbox" id="pushPrefToggle" data-standalone="1">
+                      <input type="checkbox" id="pushPrefToggle" data-standalone="1" checked>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -743,12 +743,15 @@
                 <div class="custom-switch">
                   <div class="switch-info">
                     <h6>Two-Factor Authentication (2FA)</h6>
-                    <p>Add an extra layer of security to your account.</p>
+                    <p>Require a 6-digit verification code sent to your email when signing in.</p>
                   </div>
-                  <label class="switch">
-                    <input type="checkbox" name="two_factor_auth" {{ ($accountData['two_factor_auth'] ?? '') === 'on' ? 'checked' : '' }}>
-                    <span class="slider"></span>
-                  </label>
+                  <div class="toggle-group">
+                    <span class="toggle-label">{{ ($accountData['two_factor_auth'] ?? 'off') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <label class="switch">
+                      <input type="checkbox" name="two_factor_auth" value="{{ ($accountData['two_factor_auth'] ?? 'off') === 'on' ? 'on' : 'off' }}" {{ ($accountData['two_factor_auth'] ?? 'off') === 'on' ? 'checked' : '' }}>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
 
                 <div class="mb-4 mt-4">
@@ -766,9 +769,9 @@
                     <p>Allow family members and other verified users to discover your profile in member directory search.</p>
                   </div>
                   <div class="toggle-group">
-                    <span class="toggle-label">{{ ($accountData['show_my_profile'] ?? '') === 'on' ? 'ON' : 'OFF' }}</span>
+                    <span class="toggle-label">{{ ($accountData['show_my_profile'] ?? 'on') === 'on' ? 'ON' : 'OFF' }}</span>
                     <label class="switch">
-                      <input type="checkbox" name="show_my_profile" {{ ($accountData['show_my_profile'] ?? '') === 'on' ? 'checked' : '' }}>
+                      <input type="checkbox" name="show_my_profile" value="{{ ($accountData['show_my_profile'] ?? 'on') === 'on' ? 'on' : 'off' }}" {{ ($accountData['show_my_profile'] ?? 'on') === 'on' ? 'checked' : '' }}>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -1078,9 +1081,11 @@
       });
     });
 
-    // Live update for custom switch ON/OFF labels
+    // Live update for custom switch ON/OFF labels and checkbox value sync
     document.querySelectorAll('.toggle-group .switch input[type="checkbox"]').forEach(function(checkbox) {
+      checkbox.value = checkbox.checked ? 'on' : 'off';
       checkbox.addEventListener('change', function() {
+        this.value = this.checked ? 'on' : 'off';
         const label = this.closest('.toggle-group')?.querySelector('.toggle-label');
         if (label && label.id !== 'pushPrefLabel') {
           label.textContent = this.checked ? 'ON' : 'OFF';

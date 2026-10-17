@@ -25,19 +25,72 @@
   overflow-x: auto;
   scrollbar-width: none;
   padding: 4px 2px;
+  scroll-snap-type: x proximity;
 }
 .reels-tray-scroll::-webkit-scrollbar {
   display: none;
 }
 
+.reel-tray-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+  flex-shrink: 0;
+}
+
+/* Category Quick Filter Bar */
+.reel-tray-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.reel-tray-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+.reel-tray-filter-pill {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.reel-tray-filter-pill:hover {
+  background: #eef2ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+.reel-tray-filter-pill.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.28);
+}
+
 /* Facebook-Style Vertical Reels Card */
 .reel-fb-card {
-  width: 115px;
-  height: 190px;
+  width: 122px;
+  height: 204px;
+  aspect-ratio: 9 / 16;
   border-radius: 18px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+  scroll-snap-align: start;
   cursor: pointer;
   text-decoration: none;
   color: #ffffff;
@@ -51,24 +104,65 @@
   color: #ffffff;
 }
 
+/* Ambient Blurred Backdrop (prevents anamorphic stretching on landscape videos) */
+.reel-fb-ambient-bg {
+  position: absolute;
+  inset: -12px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(16px) brightness(0.48);
+  transform: scale(1.12);
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* Video Frame Snapshot Background */
 .reel-fb-thumb {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   position: absolute;
   inset: 0;
-  transition: transform 0.4s ease;
+  z-index: 1;
+  transition: transform 0.4s ease, opacity 0.25s ease;
+}
+.reel-fb-card.is-landscape .reel-fb-thumb {
+  object-fit: contain;
 }
 .reel-fb-card:hover .reel-fb-thumb {
-  transform: scale(1.08);
+  transform: scale(1.06);
+}
+
+/* True-Aspect Live Video Element in Tray Card */
+.reel-fb-video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+.reel-fb-video-thumb.ready {
+  opacity: 1;
+}
+.reel-fb-card.is-landscape .reel-fb-video-thumb {
+  object-fit: contain;
+}
+.reel-fb-card:hover .reel-fb-video-thumb {
+  transform: scale(1.05);
 }
 
 /* Dark Gradient for Text Legibility */
 .reel-fb-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 40%, rgba(0,0,0,0.85) 100%);
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(0,0,0,0.32) 0%, transparent 38%, rgba(0,0,0,0.88) 100%);
   pointer-events: none;
 }
 
@@ -77,12 +171,12 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2.5px solid #4f46e5;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  z-index: 2;
+  z-index: 3;
   background: #ffffff;
   overflow: hidden;
 }
@@ -92,13 +186,32 @@
   object-fit: cover;
 }
 
+/* Top-Right Play / Views Badge */
+.reel-fb-play-badge {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+  z-index: 3;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  padding: 2px 7px;
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
 /* Card Caption / Creator Name (Bottom) */
 .reel-fb-footer {
   position: absolute;
   bottom: 10px;
   left: 10px;
   right: 10px;
-  z-index: 2;
+  z-index: 3;
 }
 .reel-fb-creator {
   font-size: 0.82rem;
@@ -108,23 +221,33 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 .reel-fb-tag {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: #fbbf24;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.reel-fb-caption-snippet {
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Create Reel Card (First Card in Tray) */
 .reel-fb-create-card {
-  width: 115px;
-  height: 190px;
+  width: 122px;
+  height: 204px;
+  aspect-ratio: 9 / 16;
   border-radius: 18px;
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+  scroll-snap-align: start;
   cursor: pointer;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -146,6 +269,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   transition: transform 0.3s ease;
 }
 .reel-fb-create-card:hover .reel-fb-create-top img {
@@ -159,7 +283,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
 }
 .reel-fb-create-plus {
   position: absolute;
@@ -182,11 +306,6 @@
   font-size: 0.75rem;
   font-weight: 800;
   color: #1e293b;
-  text-align: center;
-}
-  font-weight: 700;
-  color: #1e293b;
-  margin-top: 6px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -226,13 +345,33 @@
   align-items: center;
   justify-content: center;
   background: #000000;
+  overflow: hidden;
+}
+
+/* Theater Ambient Blur Layer for Landscape / 16:9 Family Videos */
+.reel-ambient-backdrop {
+  position: absolute;
+  inset: -24px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) brightness(0.42);
+  transform: scale(1.18);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .reel-video-element {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #000000;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+  transition: object-fit 0.2s ease;
+}
+
+.reel-video-element.fit-cinema {
+  object-fit: contain;
 }
 
 .reel-iframe-wrapper {
@@ -245,6 +384,7 @@
   align-items: center;
   justify-content: center;
   background: #000000;
+  z-index: 2;
 }
 
 .reel-iframe-wrapper iframe {
@@ -261,6 +401,91 @@
   background: var(--reel-overlay-bg);
   pointer-events: none;
   z-index: 10;
+}
+
+/* Interactive Video Progress Scrubber Bar */
+.reel-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.22);
+  z-index: 26;
+  cursor: pointer;
+  transition: height 0.15s ease;
+}
+.reel-progress-track:hover {
+  height: 10px;
+}
+.reel-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4f46e5 0%, #f59e0b 100%);
+  border-radius: 0 4px 4px 0;
+  transition: width 0.1s linear;
+}
+
+/* Reaction Picker Popover & Emoji Particles */
+.reel-reaction-picker {
+  position: absolute;
+  right: 54px;
+  top: 50%;
+  transform: translateY(-50%) scale(0.85);
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 30;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+.reel-reaction-picker.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+.reel-reaction-emoji-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  padding: 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  line-height: 1;
+}
+.reel-reaction-emoji-btn:hover {
+  transform: scale(1.35);
+}
+
+.reel-floating-emoji {
+  position: absolute;
+  right: 28px;
+  bottom: 140px;
+  font-size: 1.8rem;
+  pointer-events: none;
+  z-index: 28;
+  animation: reelFloatEmoji 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes reelFloatEmoji {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.6) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-70px) scale(1.25) rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-150px) scale(0.9) rotate(12deg);
+  }
 }
 
 /* Big Center Play / Pause Indicator */
@@ -547,7 +772,7 @@
   }
 
   .reel-top-controls {
-    top: 12px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
     left: 12px;
     right: 12px;
   }

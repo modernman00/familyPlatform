@@ -98,7 +98,7 @@
                         <i class="fas fa-users me-1"></i> Social Media &amp; Lifestyle Sovereign Board
                     </span>
                     <span class="badge bg-light text-secondary border border-slate-200 fw-bold px-3 py-2 rounded-pill">
-                        Custodians: Mateo Rossi &amp; Ryan Mitchell
+                        Custodians: Noah Brooks, Isabella Torres &amp; Sarah (CPO)
                     </span>
                 </div>
                 <h1 class="h2 fw-bold text-slate-900 mb-1">FamilyPlatform Interactive Architecture &amp; Heritage Engine</h1>
@@ -445,6 +445,14 @@
                             </div>
                             <p class="text-slate-500 small mb-0">Family photos, heritage recordings, and documents are encrypted at rest with dedicated per-file initialization vectors.</p>
                         </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <strong class="text-slate-900 small">4. Adaptive Member 2FA &amp; Biometric Passkeys</strong>
+                                <span class="badge bg-success text-white rounded-pill px-2 py-1"><i class="fas fa-fingerprint me-1"></i>CONFIGURABLE</span>
+                            </div>
+                            <p class="text-slate-500 small mb-0">Relatives choose between 6-digit email verification codes on sign-in, 1-tap FaceID/TouchID passkeys, or streamlined direct sign-in from their Privacy settings.</p>
+                        </div>
                     </div>
 
                     <!-- Live HMAC Anti-Tamper Invite Generator -->
@@ -507,13 +515,13 @@
         },
         {
             num: 4,
-            title: "Stage 4: Moments Feed, Sunday Family Trivia & Living Time Capsule Vault",
-            route: "/postMessage",
-            desc: "Relatives share moments, participate in automated weekly Sunday Family Trivia challenges, and seal time capsules with zero-trust cryptographic lockups for children's future milestone birthdays.",
+            title: "Stage 4: Family Reels Studio, Adaptive Cinema Player, Sunday Trivia & Time Capsules",
+            route: "/reels",
+            desc: "Relatives publish short-form milestone videos with an interactive Cover Frame Scrubber and Adaptive Cinema Aspect Engine (preserving both 9:16 portrait and 16:9 landscape celebrations without distortion), react with celebratory emojis, play weekly Sunday Family Trivia, and seal milestone time capsules.",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "Private Memories Stream, Trivia Polls & Time Capsules",
-            compliance: "Ad-Free & Telemetry-Free Social Exchange"
+            db: "Family Reels Sanctuary, Celebratory Reactions, Trivia Polls & Time Capsules",
+            compliance: "Zero-Distortion Media Rendering & Ad-Free Family Privacy"
         },
         {
             num: 5,

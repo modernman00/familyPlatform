@@ -261,6 +261,31 @@
           </div>
         </div>
 
+        <!-- Pillar 9: Privacy, Two-Factor Authentication (2FA) & Passkeys -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(14, 165, 233, 0.12); color: #0ea5e9;">
+                <i class="bi bi-shield-lock-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">9. Privacy, Two-Factor Authentication &amp; Passkeys</h3>
+                <span class="badge bg-info text-dark">Account Security</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Control how you sign in and who can view your profile inside your family sanctuary from <strong>Account Settings &rarr; Privacy</strong>.
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="small text-muted mb-0">
+                Toggle <strong>Two-Factor Authentication (2FA)</strong> <strong>ON</strong> to require a 6-digit email verification code whenever you sign in with your password, or switch it <strong>OFF</strong> for direct password sign-in. You can also register <strong>FaceID / TouchID Passkeys</strong> for instant 1-tap biometric login.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); border-radius: 50px;">

@@ -43,17 +43,12 @@ final class ApprovalController extends BaseController
 
                 $db->commit();
 
-                // Send web push notification to requester
+                // Send confirmation notification & email to requester, and write in-app notification row
                 try {
-                    PushNotificationClass::sendPushNotification(
-                        userId: (string)$userId,
-                        message: "Your request to join family code {$familyCode} has been approved!",
-                        url: "/profilePage",
-                        title: "Family Membership Approved",
-                        tag: "family-code-approved"
-                    );
+                    $notifService = new \App\service\NotificationService($db);
+                    $notifService->sendApprovalConfirmationNotification((string)$userId, (string)$familyCode);
                 } catch (\Throwable $pushEx) {
-                    error_log('[ApprovalController] Push notification warning: ' . $pushEx->getMessage());
+                    error_log('[ApprovalController] Approval confirmation notification warning: ' . $pushEx->getMessage());
                 }
 
                 msgSuccess(200, "Application successfully approved.");

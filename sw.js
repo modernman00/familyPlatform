@@ -337,28 +337,26 @@ self.addEventListener('push', (event) => {
 
   // C. Intelligent Foreground Check: Suppress OS noise if app is focused & open
   pushPromises.push(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Broadcast to on-app UI toast and sync channels for all open windows
+      if (syncBroadcastChannel) {
+        syncBroadcastChannel.postMessage({
+          type: 'ON_APP_NOTIFICATION',
+          payload: data
+        });
+      }
+      clientList.forEach((client) => {
+        client.postMessage({
+          type: 'ON_APP_NOTIFICATION',
+          payload: data
+        });
+      });
+
       const isAppFocused = clientList.some(
         (client) => client.visibilityState === 'visible' && client.focused
       );
 
-      if (isAppFocused) {
-        // App is currently open on screen: Broadcast to on-app UI toast
-        if (syncBroadcastChannel) {
-          syncBroadcastChannel.postMessage({
-            type: 'ON_APP_NOTIFICATION',
-            payload: data
-          });
-        }
-        clientList.forEach((client) => {
-          client.postMessage({
-            type: 'ON_APP_NOTIFICATION',
-            payload: data
-          });
-        });
-        if (data.isSilent) {
-          return;
-        }
+      if (isAppFocused && data.isSilent) {
+        return;
       }
 
       // App is in background/locked: Show native OS notification
@@ -419,6 +417,16 @@ self.addEventListener('notificationclick', (event) => {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           if ('navigate' in client) {
             client.navigate(targetUrl);
+          }
+          client.postMessage({
+            type: 'NOTIFICATION_CLICKED',
+            payload: notifData
+          });
+          if (syncBroadcastChannel) {
+            syncBroadcastChannel.postMessage({
+              type: 'NOTIFICATION_CLICKED',
+              payload: notifData
+            });
           }
           return client.focus();
         }

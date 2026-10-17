@@ -126,6 +126,13 @@ final class EventNotificationFlowTest extends SocialFeedTestCase
 
     public function testPostEventNotificationBarInsertsNotificationRow(): void
     {
+        $hostEmail = "eventhost_{$this->authorId}@example.test";
+        $this->pdo->prepare("
+            INSERT INTO account (id, email, password, status) VALUES (?, ?, 'test_password_hash', 'active')
+        ")->execute([$this->authorId, $hostEmail]);
+
+        $GLOBALS['__testMail'] = [];
+
         $_POST = [
             'eventName' => 'Annual Summer BBQ',
             'eventDate' => date('Y-m-d', strtotime('+14 days')),
@@ -134,18 +141,32 @@ final class EventNotificationFlowTest extends SocialFeedTestCase
             'eventFrequency' => 'Annually',
         ];
 
-        $res = $this->captureLastJson(fn() => Event::PostEventNotificationBar());
-        $this->assertSame('success', $res['status'] ?? null);
-        $this->assertNotEmpty($res['message'] ?? null);
+        try {
+            $res = $this->captureLastJson(fn() => Event::PostEventNotificationBar());
+            $this->assertSame('success', $res['status'] ?? null);
+            $this->assertNotEmpty($res['message'] ?? null);
 
-        // Verify row was created in notification table
-        $stmt = $this->pdo->prepare("SELECT * FROM notification WHERE receiver_id = ? AND notification_name = ?");
-        $stmt->execute([$this->famCode, 'Annual Summer BBQ']);
-        $row = $stmt->fetch();
+            // Verify row was created in notification table
+            $stmt = $this->pdo->prepare("SELECT * FROM notification WHERE receiver_id = ? AND notification_name = ?");
+            $stmt->execute([$this->famCode, 'Annual Summer BBQ']);
+            $row = $stmt->fetch();
 
-        $this->assertNotEmpty($row);
-        $this->assertSame('Annual Summer BBQ', $row['notification_name'] ?? '');
-        $this->assertSame('new', $row['notification_status'] ?? '');
+            $this->assertNotEmpty($row);
+            $this->assertSame('Annual Summer BBQ', $row['notification_name'] ?? '');
+            $this->assertSame('new', $row['notification_status'] ?? '');
+
+            // Verify bulk email notification path initialized EmailData constants and executed SendEmail::sendBulkEmail without fatal error
+            $this->assertTrue(defined('PASS'), 'EmailData constants must be initialized during sendBulkNotification');
+            $this->assertTrue(defined('USER_APP'), 'USER_APP constant must be initialized during sendBulkNotification');
+
+            // Verify NotificationOrchestrator also dispatched a member-targeted notification row
+            $memberStmt = $this->pdo->prepare("SELECT * FROM notification WHERE receiver_id = ? AND notification_name = ?");
+            $memberStmt->execute([$this->authorId, '🎉 New Event: Annual Summer BBQ']);
+            $memberNotif = $memberStmt->fetch();
+            $this->assertNotEmpty($memberNotif, 'Member should receive orchestrated event notification');
+        } finally {
+            $this->pdo->prepare("DELETE FROM account WHERE id = ?")->execute([$this->authorId]);
+        }
     }
 
     public function testAllMembersEmailByFamCodeResolvesUserFamiliesMembers(): void
