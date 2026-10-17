@@ -16,9 +16,9 @@ final class BlogData extends Select
      */
     public static function getAllPublishedBlogs(): array
     {
-        $query = "SELECT blogs.*, account.firstName, account.lastName 
+        $query = "SELECT blogs.*, personal.firstName, personal.lastName 
                   FROM blogs 
-                  LEFT JOIN account ON blogs.author_id = account.id 
+                  LEFT JOIN personal ON blogs.author_id = personal.id 
                   WHERE blogs.status = 'published' 
                   ORDER BY blogs.created_at DESC";
         return parent::selectFn2(query: $query, bind: []);
@@ -31,9 +31,9 @@ final class BlogData extends Select
      */
     public static function getPublishedBlogBySlug(string $slug): array
     {
-        $query = "SELECT blogs.*, account.firstName, account.lastName 
+        $query = "SELECT blogs.*, personal.firstName, personal.lastName 
                   FROM blogs 
-                  LEFT JOIN account ON blogs.author_id = account.id 
+                  LEFT JOIN personal ON blogs.author_id = personal.id 
                   WHERE blogs.status = 'published' AND blogs.slug = ? 
                   LIMIT 1";
         $result = parent::selectFn2(query: $query, bind: [$slug]);
@@ -48,9 +48,9 @@ final class BlogData extends Select
      */
     public static function getRecentPublishedBlogs(string $excludeSlug): array
     {
-        $query = "SELECT blogs.*, account.firstName, account.lastName 
+        $query = "SELECT blogs.*, personal.firstName, personal.lastName 
                   FROM blogs 
-                  LEFT JOIN account ON blogs.author_id = account.id 
+                  LEFT JOIN personal ON blogs.author_id = personal.id 
                   WHERE blogs.status = 'published' AND blogs.slug != ? 
                   ORDER BY blogs.created_at DESC 
                   LIMIT 3";
@@ -74,9 +74,9 @@ final class BlogData extends Select
      */
     public static function getAllBlogsForAdmin(): array
     {
-        $query = "SELECT blogs.*, account.firstName, account.lastName 
+        $query = "SELECT blogs.*, personal.firstName, personal.lastName 
                   FROM blogs 
-                  LEFT JOIN account ON blogs.author_id = account.id 
+                  LEFT JOIN personal ON blogs.author_id = personal.id 
                   ORDER BY blogs.created_at DESC";
         return parent::selectFn2(query: $query, bind: []);
     }

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts",
+    "title": "Feat(blog): overhaul blog views to match iDecide with Web Share API and add AI Story Generator studio",
     "notes": [
+        "Feat(blog): overhaul blog views to match iDecide with Web Share API and add AI Story Generator studio",
         "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts",
-        "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs",
-        "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow"
+        "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs"
     ],
     "released_at": "2026-10-17",
-    "commit": "28f8c46"
+    "commit": "ac44a1e"
 }
