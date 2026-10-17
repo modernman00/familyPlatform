@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers",
+    "title": "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow",
     "notes": [
-        "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers",
-        "Feat(engagement): Master Viral Suite \u2014 Lineage Quests, Sunday Trivia, WhatsApp Flyer, Time Capsule & Sunday Digest",
-        "Feat(security): enforce pre-commit engineering must-haves, admin guard zero-disclosure and access-control verification"
+        "Fix(e2e): Bypass rate limiter in Cypress environment for family-code registration flow",
+        "Feat(feed): Surface Family Heritage Hub and Rituals directly on Member Home Feed",
+        "Fix(secops): Add nosemgrep annotations for JSON API responses in LineageQuest and TimeCapsule controllers"
     ],
     "released_at": "2026-10-16",
-    "commit": "4a87ade"
+    "commit": "7824224"
 }
