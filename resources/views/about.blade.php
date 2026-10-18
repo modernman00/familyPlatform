@@ -40,6 +40,9 @@
       <h3><span style="color: var(--brand-primary);">05.</span> Photo Vault</h3>
       <p>A dedicated space for preserving precious memories. Upload and organize family photos so future generations can reminisce and celebrate your family's legacy together.</p>
 
+      <h3><span style="color: var(--brand-primary);">06.</span> Public Blog &amp; Heritage Insights</h3>
+      <p>Explore inspiring stories, generational bonding advice, and memory preservation guides on our <a href="/blogs" class="fw-semibold text-decoration-none" style="color: var(--brand-primary);">public blog</a>.</p>
+
       <hr class="my-5">
 
       <div class="text-center">

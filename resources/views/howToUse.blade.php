@@ -286,6 +286,31 @@
           </div>
         </div>
 
+        <!-- Pillar 10: Family Chronicles, Announcements & Public Blog -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(0, 191, 165, 0.12); color: #00bfa5;">
+                <i class="bi bi-journal-richtext fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">10. Family Chronicles, Announcements &amp; Public Blog</h3>
+                <span class="badge" style="background: #00bfa5; color: #fff;">Storytelling &amp; Insights</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              Members can preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, broadcast urgent family notices, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #004182;">Public Blog</a>.
+            </p>
+
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="small text-muted mb-0">
+                Read public insights on <a href="/blogs" class="fw-semibold">FamilyPlatform Blog</a>, or craft private member journals within your family enclave.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Back to Organogram CTA -->
         <div class="text-center mt-5">
           <a href="/organogram" class="btn btn-lg fw-bold px-5 py-3 text-white shadow-sm" style="background: linear-gradient(135deg, #00bfa5 0%, #004182 100%); border-radius: 50px;">

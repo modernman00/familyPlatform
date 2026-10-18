@@ -42,7 +42,7 @@
       {
         "@type": "SiteNavigationElement",
         "name": "Blog",
-        "url": "https://myfamilyplatform.com/blog"
+        "url": "https://myfamilyplatform.com/blogs"
       },
       {
         "@type": "SiteNavigationElement",

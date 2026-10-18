@@ -6,4 +6,5 @@ declare(strict_types=1);
 $router->map('GET|HEAD', '/blog', 'App\controller\BlogController@index', 'blog_index');
 $router->map('GET|HEAD', '/blogs', 'App\controller\BlogController@index', 'blog_index_plural');
 $router->map('GET|HEAD', '/blog/[*:slug]', 'App\controller\BlogController@show', 'blog_show');
+$router->map('GET|HEAD', '/blogs/[*:slug]', 'App\controller\BlogController@show', 'blog_show_plural');
 

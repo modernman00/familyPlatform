@@ -85,6 +85,115 @@
     </div>
   </section>
 
+  <!-- From Our Blog Section -->
+  <section class="blog-preview-section py-5" style="background-color: #ffffff; border-top: 1px solid #f1f5f9;">
+    <div class="container py-4">
+      <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+          <div class="badge rounded-pill px-3 py-2 mb-2 fw-bold text-uppercase tracking-wider" style="background: rgba(0, 191, 165, 0.12); color: #00796b; font-size: 0.8rem; letter-spacing: 0.05em;">
+            📰 Family Stories &amp; Heritage
+          </div>
+          <h2 class="fw-bold fs-1 mb-1" style="color: var(--text-main);">From Our Blog</h2>
+          <p class="text-muted mb-0">Insights on keeping generations connected, preserving memories, and private family bonding.</p>
+        </div>
+        <div>
+          <a href="/blogs" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold" style="color: var(--brand-secondary, #004182); border-color: rgba(0,65,130,0.3);">
+            Explore All Articles <i class="fas fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        @if(!empty($latestBlogs) && count($latestBlogs) > 0)
+          @foreach($latestBlogs as $blog)
+            @php
+              $postSlug = $blog['slug'] ?? $blog['id'];
+              $postUrl = '/blog/' . htmlspecialchars((string)$postSlug, ENT_QUOTES, 'UTF-8');
+              $coverImage = !empty($blog['cover_image']) ? $blog['cover_image'] : 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80';
+              $rawExcerpt = !empty($blog['summary']) ? $blog['summary'] : strip_tags($blog['content'] ?? '');
+              $excerpt = function_exists('mb_substr') ? mb_substr(trim($rawExcerpt), 0, 110) : substr(trim($rawExcerpt), 0, 110);
+            @endphp
+            <div class="col-12 col-md-4">
+              <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid rgba(0,0,0,0.06);">
+                <a href="{{ $postUrl }}">
+                  <img src="{{ $coverImage }}" class="card-img-top" alt="{{ htmlspecialchars((string)$blog['title'], ENT_QUOTES, 'UTF-8') }}" style="height: 200px; object-fit: cover;">
+                </a>
+                <div class="card-body p-4 d-flex flex-column">
+                  <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">
+                    {{ !empty($blog['created_at']) ? date('M j, Y', strtotime((string)$blog['created_at'])) : 'Heritage' }}
+                  </span>
+                  <h4 class="card-title fw-bold fs-5 mb-2">
+                    <a href="{{ $postUrl }}" class="text-dark text-decoration-none hover-primary">
+                      {{ htmlspecialchars((string)$blog['title'], ENT_QUOTES, 'UTF-8') }}
+                    </a>
+                  </h4>
+                  <p class="card-text text-muted small flex-grow-1">
+                    {{ $excerpt }}{{ strlen($rawExcerpt) > 110 ? '...' : '' }}
+                  </p>
+                  <a href="{{ $postUrl }}" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                    Read Article <i class="fas fa-arrow-right ms-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          @endforeach
+        @else
+          <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.06);">
+              <a href="/blogs">
+                <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Preserving Memories" style="height: 200px; object-fit: cover;">
+              </a>
+              <div class="card-body p-4 d-flex flex-column">
+                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Heritage</span>
+                <h4 class="card-title fw-bold fs-5 mb-2">
+                  <a href="/blogs" class="text-dark text-decoration-none">Preserving Oral Traditions Across Generations</a>
+                </h4>
+                <p class="card-text text-muted small flex-grow-1">How private audio journals help children record and remember their grandparents' voices.</p>
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                  Explore Blog <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.06);">
+              <a href="/blogs">
+                <img src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Digital Privacy" style="height: 200px; object-fit: cover;">
+              </a>
+              <div class="card-body p-4 d-flex flex-column">
+                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Privacy</span>
+                <h4 class="card-title fw-bold fs-5 mb-2">
+                  <a href="/blogs" class="text-dark text-decoration-none">Why Your Family Photos Need an Encrypted Haven</a>
+                </h4>
+                <p class="card-text text-muted small flex-grow-1">Moving away from algorithm-driven social feeds to an intimate, advertisement-free sanctuary.</p>
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                  Explore Blog <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.06);">
+              <a href="/blogs">
+                <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Milestones" style="height: 200px; object-fit: cover;">
+              </a>
+              <div class="card-body p-4 d-flex flex-column">
+                <span class="badge mb-2 align-self-start" style="background: rgba(0,191,165,0.12); color: #00796b; font-size: 0.75rem;">Milestones</span>
+                <h4 class="card-title fw-bold fs-5 mb-2">
+                  <a href="/blogs" class="text-dark text-decoration-none">Chronicles &amp; Announcements for Extended Kin</a>
+                </h4>
+                <p class="card-text text-muted small flex-grow-1">Keep uncles, aunts, cousins, and distant relatives in the loop on birthdays and weddings.</p>
+                <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
+                  Explore Blog <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        @endif
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ Section -->
   <section class="py-5" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
     <div class="container py-4" style="max-width: 860px;">

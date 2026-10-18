@@ -28,7 +28,17 @@ final class Index
         }
 
         try {
-            Utility::view('index');
+            $latestBlogs = [];
+            if (\class_exists('\App\model\BlogData')) {
+                try {
+                    $latestBlogs = \App\model\BlogData::getLatestPublishedBlogs(3);
+                } catch (\Throwable $e) {
+                    $latestBlogs = [];
+                }
+            }
+            Utility::view('index', [
+                'latestBlogs' => $latestBlogs
+            ]);
         } catch (\Throwable $th) {
             Utility::showError($th);
         }

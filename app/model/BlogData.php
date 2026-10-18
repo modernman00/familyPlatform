@@ -58,6 +58,24 @@ final class BlogData extends Select
     }
 
     /**
+     * Retrieve the latest published blogs for the public landing page
+     *
+     * @param int $limit
+     * @return array<int, mixed>
+     */
+    public static function getLatestPublishedBlogs(int $limit = 3): array
+    {
+        $limitInt = max(1, min(10, $limit));
+        $query = "SELECT blogs.*, personal.firstName, personal.lastName 
+                  FROM blogs 
+                  LEFT JOIN personal ON blogs.author_id = personal.id 
+                  WHERE blogs.status = 'published' 
+                  ORDER BY blogs.created_at DESC 
+                  LIMIT 3";
+        return parent::selectFn2(query: $query, bind: []);
+    }
+
+    /**
      * Retrieve a specific blog by its ID (for admin editing)
      *
      * @return array<string, mixed>

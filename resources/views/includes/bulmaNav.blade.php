@@ -27,8 +27,8 @@
         About us
       </a>
 
-      <a href="/blog" class="navbar-item">
-        Journal
+      <a href="/blogs" class="navbar-item {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'is-active' : '' }}">
+        <i class="fas fa-newspaper me-1" style="color: #0284c7;"></i> Blog
       </a>
 
       {{--  <div class="navbar-item has-dropdown is-hoverable">

@@ -21,8 +21,8 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' }}" href="/blog">
-            <i class="fas fa-feather-alt me-1" style="color: var(--brand-primary, #0284c7);"></i>Journal
+          <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' }}" href="/blogs">
+            <i class="fas fa-newspaper me-1" style="color: var(--brand-primary, #0284c7);"></i>Blog
           </a>
         </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
