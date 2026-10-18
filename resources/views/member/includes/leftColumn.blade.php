@@ -38,6 +38,14 @@
                     <i class="bi bi-calendar-plus me-1 text-primary"></i> Create Event
                 </button>
 
+                <button type="button" class="btn fw-semibold flex-fill" style="border: 1px solid var(--border-color); color: var(--text-color); background: var(--hover-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+                    <i class="bi bi-megaphone-fill me-1 text-warning"></i> Announcement
+                </button>
+
+                <a href="/familyJournal" class="btn fw-semibold flex-fill text-decoration-none text-center" style="background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;">
+                    <i class="bi bi-journal-bookmark-fill me-1 text-success"></i> Family Journal
+                </a>
+
                 <button type="button" id="directToImages" class="btn fw-semibold flex-fill" style="background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 8px 12px; font-size: 0.9rem;" onclick="window.location.href='/profilepage/gallery'">
                     <i class="bi bi-images me-1 text-secondary"></i> Photo Gallery
                 </button>

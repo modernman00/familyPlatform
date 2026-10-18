@@ -33,6 +33,7 @@
         @includeIf('member.modals.lineageQuestModal')
         @includeIf('member.modals.familyFlyerModal')
         @includeIf('member.modals.timeCapsuleModal')
+        @includeIf('member.modals.createAnnouncementModal')
 
 
     </div>

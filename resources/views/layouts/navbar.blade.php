@@ -47,6 +47,11 @@
                         <i class="bi bi-stars text-warning me-1"></i> Family Studio
                     </a>
                 </li>
+                <li class="nav-item familyJournalNav">
+                    <a class="nav-link stitch-nav-link" href="/familyJournal">
+                        <i class="bi bi-journal-bookmark-fill text-success me-1"></i> Family Journal
+                    </a>
+                </li>
                 <li class="nav-item reelsNav">
                     <a class="nav-link stitch-nav-link" href="/reels">
                         <i class="bi bi-camera-reels-fill text-danger me-1"></i> Reels

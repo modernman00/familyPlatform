@@ -35,6 +35,8 @@ include_once __DIR__ . "/blog.php";
 include_once __DIR__ . "/reelsRoute.php";
 include_once __DIR__ . "/kinshipRoute.php";
 include_once __DIR__ . "/invite.php";
+include_once __DIR__ . "/journal.php";
+include_once __DIR__ . "/announcement.php";
 // SEC-4 — /checking was an unauthenticated `while (true)` SSE loop that pins an
 // FPM worker forever; superseded by Pusher. Route removed.
 

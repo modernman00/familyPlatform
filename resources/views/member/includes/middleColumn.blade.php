@@ -172,6 +172,9 @@
   </script>
   @endif
 
+  <!-- Pinned Family Announcements Bulletin -->
+  @includeIf('member.includes.announcementBanner')
+
   <!-- Family Reels & Stories Tray -->
   @includeIf('member.includes.reelsTray')
 
@@ -199,7 +202,7 @@
         </div>
       </div>
 
-      <div class="composer-quick-actions d-flex align-items-center gap-1 mt-3 pt-3" style="border-top: 1px solid var(--border-color);">
+      <div class="composer-quick-actions d-flex align-items-center gap-1 mt-3 pt-3 flex-wrap" style="border-top: 1px solid var(--border-color);">
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
           <i class="bi bi-camera-fill" style="color: #22c55e; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Photo</span>
@@ -208,13 +211,17 @@
           <i class="bi bi-play-btn-fill" style="color: #ef4444; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Video</span>
         </button>
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal" aria-label="Broadcast family announcement">
+          <i class="bi bi-megaphone-fill" style="color: #f59e0b; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Announcement</span>
+        </button>
+        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="window.location.href='/familyJournal/create'" aria-label="Write family journal chronicle">
+          <i class="bi bi-journal-bookmark-fill" style="color: #6366f1; font-size: 1.15rem;"></i>
+          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Journal</span>
+        </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Create a poll">
           <i class="bi bi-bar-chart-fill" style="color: #f97316; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Poll</span>
-        </button>
-        <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" onclick="openComposerWithTrivia()" aria-label="Create Sunday Family Trivia">
-          <i class="bi bi-trophy-fill" style="color: #eab308; font-size: 1.15rem;"></i>
-          <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Trivia</span>
         </button>
       </div>
     </div>

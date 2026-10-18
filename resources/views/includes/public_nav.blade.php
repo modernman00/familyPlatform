@@ -20,6 +20,11 @@
             <i class="fas fa-book-open me-1" style="color: var(--brand-primary, #0284c7);"></i>Playbook
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link {{ str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' }}" href="/blog">
+            <i class="fas fa-feather-alt me-1" style="color: var(--brand-primary, #0284c7);"></i>Journal
+          </a>
+        </li>
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
         <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
           <a class="btn btn-brand w-100" href="/profilePage">Go to Family Dashboard</a>

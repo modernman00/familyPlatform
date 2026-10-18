@@ -27,6 +27,10 @@
         About us
       </a>
 
+      <a href="/blog" class="navbar-item">
+        Journal
+      </a>
+
       {{--  <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">
           More

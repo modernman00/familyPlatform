@@ -12,6 +12,7 @@
         <h4 class="footer-heading">Platform</h4>
         <a href="/playbook" class="footer-link fw-semibold" style="color: var(--brand-primary, #0284c7);"><i class="fas fa-book-open me-1"></i>Interactive Playbook</a>
         <a href="/how-to-use" class="footer-link">How to Use Guide</a>
+        <a href="/blog" class="footer-link"><i class="fas fa-feather-alt me-1 text-primary"></i>Journal & Blog</a>
         <a href="/register" class="footer-link">Register</a>
         <a href="/login" class="footer-link">Log In</a>
         <a href="/aboutus" class="footer-link">About Us</a>

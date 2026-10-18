@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(blog): overhaul blog views to match iDecide with Web Share API and add AI Story Generator studio",
+    "title": "Fix(blog): resolve author name lookup using personal table and add seed script for production",
     "notes": [
+        "Fix(blog): resolve author name lookup using personal table and add seed script for production",
         "Feat(blog): overhaul blog views to match iDecide with Web Share API and add AI Story Generator studio",
-        "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts",
-        "Fix(promo): bump shared-lib to v2.5.3 for corrected canonical URLs"
+        "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts"
     ],
     "released_at": "2026-10-17",
-    "commit": "ac44a1e"
+    "commit": "01aef55"
 }
