@@ -79,6 +79,7 @@ final class FamilyAnnouncementController extends BaseController
 
             $newId = FamilyAnnouncement::createAnnouncement($announcementData);
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with json_encode and application/json header
             echo json_encode([
                 'status'  => 'success',
                 'message' => 'Announcement broadcasted to your family!',

@@ -159,6 +159,7 @@ final class FamilyJournalController extends BaseController
 
             $insertedId = FamilyJournal::createJournal($journalData);
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with json_encode and application/json header
             echo json_encode([
                 'status'  => 'success',
                 'message' => 'Family journal entry preserved successfully!',
@@ -195,6 +196,7 @@ final class FamilyJournalController extends BaseController
 
             $draft = AIService::generateBlogDraft($prompt, $tone);
 
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with json_encode and application/json header
             echo json_encode([
                 'status' => 'success',
                 'data'   => $draft
