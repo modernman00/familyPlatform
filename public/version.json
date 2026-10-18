@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(blog): resolve author name lookup using personal table and add seed script for production",
+    "title": "Fix(security): resolve semgrep echoed-request annotation and lastInsertId integer typing",
     "notes": [
-        "Fix(blog): resolve author name lookup using personal table and add seed script for production",
-        "Feat(blog): overhaul blog views to match iDecide with Web Share API and add AI Story Generator studio",
-        "Fix(pwa): add iOS safe-area-inset-top padding to sticky navbars and mobile layouts"
+        "Fix(security): resolve semgrep echoed-request annotation and lastInsertId integer typing",
+        "Feat(journal,announcement): implement family group chronicles, AI story assistant, and family feed bulletin announcements",
+        "Fix(blog): resolve author name lookup using personal table and add seed script for production"
     ],
-    "released_at": "2026-10-17",
-    "commit": "01aef55"
+    "released_at": "2026-10-18",
+    "commit": "515739c"
 }
