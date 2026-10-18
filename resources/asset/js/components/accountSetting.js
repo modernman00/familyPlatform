@@ -189,45 +189,121 @@ processKidsSiblings(fName, famCode);
     }
   });
 
-  // ---- GDPR Art. 17 — request account deletion --------------------------
+  // ---- GDPR Art. 17 — Account deletion options (Immediate vs 30-Day Grace Period) ----
   const delBtn = id('dataDeleteBtn');
   if (delBtn) {
-    delBtn.addEventListener('click', async () => {
-      const confirmed = window.Swal
-        ? (await window.Swal.fire({
-            icon: 'warning',
-            title: 'Request account deletion?',
-            html: 'Our team will permanently delete your account and personal data within 30 days. '
-              + 'Content other family members rely on may be kept in anonymised form. This cannot be undone.',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, request deletion',
-            confirmButtonColor: '#dc2626',
-            cancelButtonText: 'Cancel',
-          })).isConfirmed
-        : window.confirm('Request permanent deletion of your account? Our team will action it within 30 days.');
-      if (!confirmed) return;
-
+    const executeDeletion = async (mode) => {
       delBtn.disabled = true;
-      say('Sending your request…');
+      say('Processing your deletion request…');
       try {
         const res = await fetch('/account/request-deletion', {
           method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-XSRF-TOKEN': getCsrfToken(),
-          'X-CSRF-TOKEN': getCsrfToken(),
+            'X-CSRF-TOKEN': getCsrfToken(),
           },
+          body: JSON.stringify({ mode }),
         });
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body?.message || `Request failed (${res.status})`);
-        say(body?.message || 'Your deletion request has been received.');
-        window.notify?.(body?.message || 'Deletion request received', 'success');
+
+        say(body?.message || 'Your deletion request has been processed.');
+
+        if (window.Swal) {
+          await window.Swal.fire({
+            icon: 'success',
+            title: mode === 'immediate' ? 'Account Permanently Erased' : 'Deletion Scheduled',
+            text: body?.message || 'Your account deletion request has been processed.',
+            confirmButtonColor: '#0284c7',
+            confirmButtonText: 'Return to Sign In',
+          });
+        }
+
+        window.location.href = body?.redirect || '/login';
       } catch (err) {
         showError(err);
-        say('Sorry — we could not send your request. Please try again or email support.');
+        if (window.Swal) {
+          window.Swal.fire({
+            icon: 'error',
+            title: 'Deletion Request Failed',
+            text: err.message || 'Sorry — we could not process your deletion request. Please try again or contact support.',
+          });
+        }
+        say('Sorry — we could not process your request. Please try again or email support.');
       } finally {
         delBtn.disabled = false;
       }
+    };
+
+    delBtn.addEventListener('click', async () => {
+      if (!window.Swal) {
+        const choice = window.confirm(
+          'Do you want to permanently erase your account immediately (Click OK)? Or cancel (Click Cancel)?'
+        );
+        if (choice) executeDeletion('immediate');
+        return;
+      }
+
+      const { value: selectedOption } = await window.Swal.fire({
+        icon: 'warning',
+        title: 'Delete Your Account',
+        html: `
+          <div class="text-start" style="font-size: 0.95rem;">
+            <p class="text-muted mb-3">Under GDPR Article 17, please select your preferred deletion method:</p>
+            <div class="p-3 mb-3 border rounded-3" style="background-color: #f8fafc; cursor: pointer;">
+              <label class="d-flex align-items-start gap-2" style="cursor: pointer;">
+                <input class="form-check-input mt-1" type="radio" name="deletionMode" id="delModeSchedule" value="schedule" checked style="cursor: pointer;">
+                <div>
+                  <strong class="d-block text-dark">Option B: 30-Day Scheduled Deletion (Grace Period)</strong>
+                  <span class="small text-muted d-block mt-1">
+                    Your account is scheduled for deletion in 30 days and you will be signed out. You can cancel anytime within 30 days simply by signing back in.
+                  </span>
+                </div>
+              </label>
+            </div>
+            <div class="p-3 border rounded-3" style="background-color: #fff5f5; border-color: #fecaca !important; cursor: pointer;">
+              <label class="d-flex align-items-start gap-2" style="cursor: pointer;">
+                <input class="form-check-input mt-1" type="radio" name="deletionMode" id="delModeImmediate" value="immediate" style="cursor: pointer;">
+                <div>
+                  <strong class="d-block text-danger">Option A: Delete Immediately (Permanent Erasure)</strong>
+                  <span class="small text-danger-emphasis d-block mt-1">
+                    Instantly purges and anonymises your profile, credentials, and uploaded media. Shared family trees are preserved in anonymised form. <strong>This cannot be undone.</strong>
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Continue',
+        confirmButtonColor: '#dc2626',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+          const checked = document.querySelector('input[name="deletionMode"]:checked');
+          return checked ? checked.value : 'schedule';
+        },
+      });
+
+      if (!selectedOption) return;
+
+      const isImmediate = selectedOption === 'immediate';
+      const confirmResult = await window.Swal.fire({
+        icon: 'warning',
+        title: isImmediate ? 'Confirm Immediate Permanent Erasure?' : 'Confirm 30-Day Scheduled Deletion?',
+        html: isImmediate
+          ? 'Your personal data, media, and credentials will be permanently erased immediately. You will not be able to recover or sign into this account.'
+          : 'Your account will be deactivated and scheduled for deletion in 30 days. You will be signed out now. You may sign back in at any point within 30 days to cancel this request.',
+        showCancelButton: true,
+        confirmButtonText: isImmediate ? 'Yes, erase my account now' : 'Yes, schedule deletion',
+        confirmButtonColor: '#dc2626',
+        cancelButtonText: 'Keep My Account',
+      });
+
+      if (!confirmResult.isConfirmed) return;
+
+      executeDeletion(selectedOption);
     });
   }
 })();

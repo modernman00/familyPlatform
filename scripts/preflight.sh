@@ -8,7 +8,7 @@
 #   3. Semgrep Security & Vulnerability Scan
 #   4. Engineering Must-Haves (CSRF, SQL, Passwords, Shared-Lib)
 #   5. Automated PHPUnit Test Suite
-#   6. Marcus & Ghost Adversarial Red Team Gate (scripts/run-all-security-checks.sh)
+#   6. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate (scripts/run-all-security-checks.sh)
 #
 # Exit Code: 0 = PASS (Ready to commit/deploy), 1 = BLOCKED (Must fix errors)
 # ==============================================================================
@@ -141,9 +141,9 @@ fi
 echo ""
 
 # ------------------------------------------------------------------------------
-# 6. Marcus & Ghost Adversarial Red Team Gate
+# 6. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate
 # ------------------------------------------------------------------------------
-echo -e "${BOLD}${CYAN}[GATE 6/6] Running Marcus & Ghost Adversarial Red Team Gate...${NC}"
+echo -e "${BOLD}${CYAN}[GATE 6/6] Running Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Gate...${NC}"
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     if bash scripts/dast-guest-builder-idor.sh; then
         echo -e "${GREEN}  ✅ Gate 6 Passed: Marcus & Ghost Red Team IDOR gauntlet passed.${NC}"

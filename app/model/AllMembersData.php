@@ -205,6 +205,96 @@ class AllMembersData extends InnerJoin
         return $memberData;
     }
 
+    /**
+     * Retrieve all members outside the caller's family (directory members),
+     * respecting the privacy opt-out invariant (show_my_profile != 'off').
+     *
+     * @param string $userId
+     * @param string $famCode
+     * @param int $limit
+     * @param int $offset
+     * @return array<int, array<string, mixed>>
+     */
+    public function getAllUsersData(string $userId, string $famCode, int $limit = 200, int $offset = 0): array
+    {
+        try {
+            $sql = "
+            SELECT DISTINCT 
+                p.id,
+                p.firstName,
+                p.lastName,
+                p.famCode,
+                p.created_at,
+                ofm.father_name AS fatherName,
+                ofm.mother_name AS motherName,
+                ofm.spouse_name AS spouseName,
+                pp.img,
+                COALESCE(c.email, acc.email, '') AS email,
+                COALESCE(c.country, '') AS country,
+                COALESCE(c.mobile, '') AS mobile,
+                CASE 
+                    WHEN rm.requester_id = :req_case_approved_you
+                         AND rm.approver_id = p.id
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
+                         THEN 'approved_you'
+                    WHEN rm.approver_id = :req_case_you_approved
+                         AND rm.requester_id = p.id
+                         AND LOWER(rm.status) IN ('approved', 'accepted')
+                         THEN 'you_approved'
+                    ELSE 'other'
+                END AS relationType,
+                rm.requester_id,
+                rm.approver_id,
+                rm.status,
+                rm.requesterCode
+            FROM personal AS p
+            LEFT JOIN account AS acc ON p.id = acc.id
+            LEFT JOIN otherFamily AS ofm ON p.id = ofm.id
+            LEFT JOIN profilePics AS pp   ON p.id = pp.id
+            LEFT JOIN contact AS c        ON p.id = c.id
+            LEFT JOIN requestMgt AS rm
+                ON (
+                    (rm.requester_id = :req_join_outgoing AND rm.approver_id = p.id)
+                    OR
+                    (rm.approver_id = :req_join_incoming AND rm.requester_id = p.id)
+                )
+            WHERE 
+                p.id != :userId_where_not_me
+                AND (p.famCode != :famCode_outside OR :famCode_empty = '')
+                AND p.deleted_at IS NULL
+                AND LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off'
+            ORDER BY 
+                p.firstName ASC, 
+                p.lastName ASC
+            LIMIT :limit_rows
+            OFFSET :offset_rows
+            ";
+
+            $stmt = self::connect2()->prepare($sql);
+            $stmt->bindValue(':userId_where_not_me', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':famCode_outside', $famCode, \PDO::PARAM_STR);
+            $stmt->bindValue(':famCode_empty', $famCode, \PDO::PARAM_STR);
+            $stmt->bindValue(':req_case_approved_you', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':req_case_you_approved', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':req_join_outgoing', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':req_join_incoming', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':limit_rows', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset_rows', $offset, \PDO::PARAM_INT);
+
+            $stmt->execute();
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            /** @var array<int, array<string, mixed>> $result2 */
+            $result2 = $this->uniqueById($result);
+
+            return $result2;
+        } catch (\Throwable $e) {
+            showError($e);
+            return [];
+        }
+    }
+
+
     public function getAllMembersById(array|string|null $id): array|bool
     {
         $table = ['personal', 'otherFamily', 'profilePics', 'contact'];

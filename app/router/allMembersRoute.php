@@ -16,6 +16,8 @@ $router->map('DELETE', '/allMembers/removeProfile/[a:apr]/[a:req]', 'App\control
 $router->map('GET', '/allMembers/getProfile', 'App\controller\members\AllMembersController@getProfile', 'MEMBERS_PROFILE_GET');
 
 $router->map('GET', '/allMembers/search', 'App\controller\members\AllMembersController@search', 'ALL_MEMBERS_SEARCH');
+$router->map('GET', '/allMembers/allData', 'App\controller\members\AllMembersController@getAllUsersDataFn', 'SHOW_ALL_USERS_DATA');
+
 
 
 

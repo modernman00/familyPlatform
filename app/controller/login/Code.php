@@ -46,8 +46,32 @@ final class Code
                     $_SESSION['id'] = $_SESSION['auth']['identifyCust'];
                     $id = $_SESSION['id'];
                     $_SESSION['loggedIn'] = true;
-                     $anomaly = LoginAnomalyService::check( $id);
-                LoginAnomalyService::record( $id);
+
+                    // GDPR Art. 17 — 30-Day Grace Period Restoration
+                    $stmtStatus = \Src\Db::connect2()->prepare('SELECT status, email FROM account WHERE id = ? LIMIT 1');
+                    $stmtStatus->execute([(string) $id]);
+                    $acctRow = $stmtStatus->fetch(\PDO::FETCH_ASSOC);
+                    if (($acctRow['status'] ?? '') === 'pending_deletion') {
+                        $updStatus = \Src\Db::connect2()->prepare("UPDATE account SET status = 'approved', deleted_at = NULL, updated_at = NOW() WHERE id = ?");
+                        $updStatus->execute([(string) $id]);
+                        try {
+                            $auditRestore = \Src\Db::connect2()->prepare("
+                                INSERT INTO audit_logs (email, user_id, status, ip_address, user_agent, created_at)
+                                VALUES (?, ?, 'DELETION_CANCELLED_ACCOUNT_RESTORED', ?, ?, NOW())
+                            ");
+                            $auditRestore->execute([
+                                (string) ($acctRow['email'] ?? ''),
+                                (string) $id,
+                                \Src\Utility::getUserIpAddr(),
+                                substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 0, 245),
+                            ]);
+                        } catch (\Throwable $e) {
+                            // Non-fatal
+                        }
+                    }
+
+                    $anomaly = LoginAnomalyService::check($id);
+                    LoginAnomalyService::record($id);
                 }
             }
         } catch (\Throwable $th) {

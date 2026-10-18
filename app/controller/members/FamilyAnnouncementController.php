@@ -35,6 +35,9 @@ final class FamilyAnnouncementController extends BaseController
             $_SESSION['famCode'] = $famCode;
         }
         $this->famCode = $famCode;
+        if (empty($this->famCode)) {
+            throw new ForbiddenException("Active family group membership is required to access family announcements.");
+        }
     }
 
     /**
@@ -52,10 +55,18 @@ final class FamilyAnnouncementController extends BaseController
             $message = trim((string)($input['message'] ?? ''));
             $priority = (string)($input['priority'] ?? 'important');
             $type = (string)($input['type'] ?? 'general');
-            $expiresAt = !empty($input['expires_at']) ? (string)$input['expires_at'] : null;
+            $rawExpiresAt = !empty($input['expires_at']) ? trim((string)$input['expires_at']) : null;
 
             if (empty($title) || empty($message)) {
                 throw new ValidationException("Title and announcement message are required.");
+            }
+
+            if (mb_strlen($title) < 3 || mb_strlen($title) > 255) {
+                throw new ValidationException("Announcement title must be between 3 and 255 characters.");
+            }
+
+            if (mb_strlen($message) < 5 || mb_strlen($message) > 5000) {
+                throw new ValidationException("Announcement message must be between 5 and 5,000 characters.");
             }
 
             if (!in_array($priority, ['normal', 'important', 'urgent'], true)) {
@@ -64,6 +75,14 @@ final class FamilyAnnouncementController extends BaseController
 
             if (!in_array($type, ['general', 'reunion', 'milestone', 'alert', 'celebration'], true)) {
                 $type = 'general';
+            }
+
+            $expiresAt = null;
+            if ($rawExpiresAt !== null) {
+                if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $rawExpiresAt)) {
+                    throw new ValidationException("Expiration date must follow YYYY-MM-DD format.");
+                }
+                $expiresAt = $rawExpiresAt;
             }
 
             $announcementData = [

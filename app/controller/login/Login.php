@@ -292,6 +292,42 @@ final class Login
         $userId = (string) ($user['id'] ?? '');
         $userEmail = (string) ($user['email'] ?? $email);
 
+        // GDPR Art. 17 — 30-Day Grace Period Management
+        if (($user['status'] ?? '') === 'pending_deletion') {
+            $deletedAt = !empty($user['deleted_at']) ? strtotime((string) $user['deleted_at']) : 0;
+            if ($deletedAt > 0 && (time() - $deletedAt) > (30 * 86400)) {
+                // Expired past 30 days: execute permanent erasure and reject sign in
+                (new \App\services\DataErasureService($userId))->erase('system_grace_period_expired');
+                throw new \Src\Exceptions\UnauthorisedException('This account has passed its 30-day grace period and has been permanently deleted.');
+            }
+
+            // Within 30 days: restore account to active approved status
+            $restoreStmt = \Src\Db::connect2()->prepare("
+                UPDATE account
+                SET status = 'approved',
+                    deleted_at = NULL,
+                    updated_at = NOW()
+                WHERE id = ?
+            ");
+            $restoreStmt->execute([$userId]);
+
+            try {
+                $auditRestore = \Src\Db::connect2()->prepare("
+                    INSERT INTO audit_logs (email, user_id, status, ip_address, user_agent, created_at)
+                    VALUES (?, ?, 'DELETION_CANCELLED_ACCOUNT_RESTORED', ?, ?, NOW())
+                ");
+                $auditRestore->execute([
+                    $userEmail,
+                    $userId,
+                    \Src\Utility::getUserIpAddr(),
+                    substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 0, 245),
+                ]);
+            } catch (\Throwable $e) {
+                // Non-fatal
+            }
+            $user['status'] = 'approved';
+        }
+
         \Src\LoginUtility::logAudit(
             $userId,
             $userEmail,

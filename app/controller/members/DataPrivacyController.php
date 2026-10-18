@@ -60,12 +60,9 @@ final class DataPrivacyController
     }
 
     /**
-     * Records a GDPR Art. 17 erasure request and routes it to ops.
-     *
-     * Deliberately not an automatic wipe — erasure has to respect content other
-     * family members depend on and any legal hold, which is a manual review.
-     * This gives members the required channel; the processing side (and an
-     * automated pipeline) is tracked as GDPR-1.
+     * Records or executes a GDPR Art. 17 erasure request:
+     * - Option A (mode === 'immediate'): Instantly wipes/anonymises the account via DataErasureService.
+     * - Option B (mode === 'schedule', default): Schedules account for 30-day deletion in DB with grace period.
      */
     public function requestDeletion(): void
     {
@@ -88,34 +85,85 @@ final class DataPrivacyController
 
             \Src\Limiter::limit('deletion:' . $userId);
 
-            // Durable backstop — this line is the record of the request even if
-            // the notification email below fails.
-            error_log("[GDPR] Art.17 erasure request — account_id={$userId} email={$memberEmail} at " . gmdate('c'));
+            $rawInput = file_get_contents('php://input') ?: '';
+            $json = json_decode($rawInput, true);
+            $mode = is_array($json) && isset($json['mode']) ? (string) $json['mode'] : (string) ($_POST['mode'] ?? 'schedule');
 
-            if (!headers_sent()) {
-                header('Content-Type: application/json; charset=utf-8');
-            }
-            Utility::msgSuccess(
-                200,
-                'We have received your deletion request. Our team will action it within 30 days and email you at ' . $memberEmail . ' when it is done.'
-            );
+            if ($mode === 'immediate') {
+                // Option A: Immediate Permanent Erasure via DataErasureService
+                $service = new \App\services\DataErasureService($userId);
+                $eraseResult = $service->erase('self');
 
-            // Do not make the member wait for an operational notification email.
-            // Local PHP servers cannot flush and continue safely, so leave the
-            // notification to the durable log until a worker-backed mail queue
-            // is configured.
-            if (!function_exists('fastcgi_finish_request')) {
+                if (!$eraseResult['success']) {
+                    Utility::msgException(500, 'Erasure failed: ' . $eraseResult['message']);
+                    return;
+                }
+
+                error_log("[GDPR] Art.17 immediate erasure completed — account_id={$userId} email={$memberEmail} at " . gmdate('c'));
+
+                // Invalidate active session and authentication cookies
+                $_SESSION = [];
+                $sessName = \session_name();
+                if (\ini_get('session.use_cookies') && is_string($sessName)) {
+                    $params = \session_get_cookie_params();
+                    \setcookie($sessName, '', time() - 42000,
+                        $params['path'], $params['domain'],
+                        $params['secure'], $params['httponly']
+                    );
+                }
+                if (\session_status() === PHP_SESSION_ACTIVE) {
+                    \session_destroy();
+                }
+
+                if (!headers_sent()) {
+                    header('Content-Type: application/json; charset=utf-8');
+                }
+                Utility::msgSuccess(
+                    200,
+                    'Your account and personal data have been permanently erased.',
+                    [
+                        'mode' => 'immediate',
+                        'redirect' => '/login',
+                    ]
+                );
                 return;
             }
-            fastcgi_finish_request();
+
+            // Option B: 30-Day Scheduled Deletion (Grace Period)
+            $updateStmt = Db::connect2()->prepare("
+                UPDATE account
+                SET status = 'pending_deletion',
+                    deleted_at = NOW(),
+                    token_version = token_version + 1
+                WHERE id = ?
+            ");
+            $updateStmt->execute([$userId]);
+
+            // Durable audit log
+            try {
+                $auditStmt = Db::connect2()->prepare("
+                    INSERT INTO audit_logs (email, user_id, status, ip_address, user_agent, created_at)
+                    VALUES (?, ?, 'GDPR_DELETION_SCHEDULED_30_DAYS', ?, ?, NOW())
+                ");
+                $auditStmt->execute([
+                    $memberEmail,
+                    $userId,
+                    Utility::getUserIpAddr(),
+                    substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown'), 0, 245),
+                ]);
+            } catch (\Throwable $e) {
+                error_log('[GDPR] audit_logs insertion failed: ' . $e->getMessage());
+            }
+
+            error_log("[GDPR] Art.17 erasure request scheduled (30 days) — account_id={$userId} email={$memberEmail} at " . gmdate('c'));
 
             $opsEmail = (string) ($_ENV['ADMIN_EMAIL'] ?? getenv('ADMIN_EMAIL') ?: '');
-            $opsEmail = str_contains($opsEmail, '${') ? '' : $opsEmail; // guard against an unresolved .env var
+            $opsEmail = str_contains($opsEmail, '${') ? '' : $opsEmail;
             if ($opsEmail !== '') {
                 try {
                     SendEmailFunctionality::email(
                         'msg/dataDeletionRequest',
-                        'GDPR — account deletion request',
+                        'GDPR — account deletion request (30-day scheduled)',
                         [
                             'email'         => $opsEmail,
                             'name'          => 'Data Protection',
@@ -126,10 +174,35 @@ final class DataPrivacyController
                         'admin'
                     );
                 } catch (\Throwable $mailErr) {
-                    // The user's request still stands — it's in the error log above.
                     error_log('[GDPR] deletion-request ops email failed: ' . $mailErr->getMessage());
                 }
             }
+
+            // Securely invalidate active session so user is logged out
+            $_SESSION = [];
+            $sessName = \session_name();
+            if (\ini_get('session.use_cookies') && is_string($sessName)) {
+                $params = \session_get_cookie_params();
+                \setcookie($sessName, '', time() - 42000,
+                    $params['path'], $params['domain'],
+                    $params['secure'], $params['httponly']
+                );
+            }
+            if (\session_status() === PHP_SESSION_ACTIVE) {
+                \session_destroy();
+            }
+
+            if (!headers_sent()) {
+                header('Content-Type: application/json; charset=utf-8');
+            }
+            Utility::msgSuccess(
+                200,
+                'We have received your deletion request. Your account has been scheduled for permanent deletion in 30 days and you have been securely logged out.',
+                [
+                    'mode' => 'schedule',
+                    'redirect' => '/login',
+                ]
+            );
         } catch (\Throwable $th) {
             Utility::showError($th);
         }

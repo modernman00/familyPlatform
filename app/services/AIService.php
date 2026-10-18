@@ -22,7 +22,8 @@ class AIService
     public static function generateBlogDraft(string $topic, string $tone = 'warm, inspiring, and family-focused'): array
     {
         $cleanTopic = self::promptText($topic, 300);
-        $systemPrompt = "You are an award-winning editorial writer and family life historian for FamilyPlatform, a private family social network and interactive family tree archive. Write with a $tone tone. Never output conversational pleasantries, preambles, or markdown wrappers like ```json. Return ONLY raw JSON.";
+        $cleanTone = self::promptText($tone, 50);
+        $systemPrompt = "You are an award-winning editorial writer and family life historian for FamilyPlatform, a private family social network and interactive family tree archive. Write with a $cleanTone tone. Never output conversational pleasantries, preambles, or markdown wrappers like ```json. Return ONLY raw JSON.";
 
         $userPrompt = "Write an engaging, heartwarming, and practical family blog post about: \"$cleanTopic\".
 Return a JSON object with exactly these three keys:
@@ -76,15 +77,110 @@ Return a JSON object with exactly these three keys:
     }
 
     /**
-     * Sanitizes AI-generated content for safe HTML output.
+     * Sanitizes rich HTML content, completely neutralizing XSS vectors, inline event handlers,
+     * dangerous protocols, and unwhitelisted tags/attributes.
      *
      * @param string $html
      * @return string
      */
     public static function purifyHtml(string $html): string
     {
-        $allowedTags = '<p><br><b><strong><i><em><u><h2><h3><h4><ul><ol><li><blockquote>';
-        return trim(strip_tags($html, $allowedTags));
+        $trimmed = trim($html);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        // Fast-path: if no tags present, escape and return
+        if (!str_contains($trimmed, '<')) {
+            return htmlspecialchars($trimmed, ENT_QUOTES, 'UTF-8');
+        }
+
+        $doc = new \DOMDocument();
+        $prevErrors = libxml_use_internal_errors(true);
+        $doc->loadHTML('<?xml encoding="utf-8" ?><div>' . $trimmed . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        libxml_use_internal_errors($prevErrors);
+
+        $allowedTags = [
+            'p', 'br', 'b', 'strong', 'i', 'em', 'u', 'h2', 'h3', 'h4',
+            'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span'
+        ];
+
+        $allowedAttributes = [
+            'a' => ['href', 'title', 'target', 'rel'],
+        ];
+
+        $xpath = new \DOMXPath($doc);
+        $nodes = $xpath->query('//*');
+
+        if ($nodes !== false) {
+            for ($i = $nodes->length - 1; $i >= 0; $i--) {
+                $node = $nodes->item($i);
+                if (!$node instanceof \DOMElement) {
+                    continue;
+                }
+
+                $tagName = strtolower($node->nodeName);
+
+                // Skip outer wrapper div
+                if ($tagName === 'div' && $node->parentNode === $doc) {
+                    continue;
+                }
+
+                if (!in_array($tagName, $allowedTags, true)) {
+                    if (in_array($tagName, ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'form', 'input', 'button'], true)) {
+                        $node->parentNode?->removeChild($node);
+                    } else {
+                        while ($node->hasChildNodes() && $node->firstChild !== null) {
+                            $node->parentNode?->insertBefore($node->firstChild, $node);
+                        }
+                        $node->parentNode?->removeChild($node);
+                    }
+                    continue;
+                }
+
+                // Sanitize attributes
+                if ($node->hasAttributes()) {
+                    $allowedForTag = $allowedAttributes[$tagName] ?? [];
+                    for ($a = $node->attributes->length - 1; $a >= 0; $a--) {
+                        $attr = $node->attributes->item($a);
+                        if (!$attr instanceof \DOMAttr) {
+                            continue;
+                        }
+
+                        $attrName = strtolower($attr->name);
+
+                        // Neutralize on* handlers (onfocus, onmouseover, onclick, etc.) and non-whitelisted attributes
+                        if (!in_array($attrName, $allowedForTag, true) || str_starts_with($attrName, 'on')) {
+                            $node->removeAttribute($attr->name);
+                            continue;
+                        }
+
+                        // Validate href protocols
+                        if ($attrName === 'href') {
+                            $val = trim($attr->value);
+                            if (preg_match('/^(javascript|data|vbscript):/i', $val)) {
+                                $node->removeAttribute($attr->name);
+                            }
+                        }
+                    }
+
+                    if ($tagName === 'a' && $node->hasAttribute('href')) {
+                        $node->setAttribute('rel', 'noopener noreferrer');
+                    }
+                }
+            }
+        }
+
+        $container = $doc->getElementsByTagName('div')->item(0);
+        $output = '';
+        if ($container !== null) {
+            foreach ($container->childNodes as $child) {
+                $output .= $doc->saveHTML($child);
+            }
+        }
+
+        return trim($output);
     }
 
     /**

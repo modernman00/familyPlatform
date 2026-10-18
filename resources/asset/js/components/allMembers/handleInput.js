@@ -110,24 +110,59 @@ const renderInviteBlock = (container, rawQuery) => {
 };
 
 /**
- * Factory that returns a debounced search handler using the backend /allMembers/search endpoint.
+ * Factory that returns a debounced search handler using both client-side loaded members
+ * and backend /allMembers/search endpoint for complete directory discovery.
  *
  * @param {object} options
  * @param {Array<object>} options.familyMembers
- * @param {Array<object>} options.directoryMembers  // currently unused but handy if you want to fall back
+ * @param {Array<object>} options.directoryMembers
+ * @param {Array<object>} options.allLoadedMembers
  * @param {Function} options.renderMembers
  * @param {HTMLElement} options.container
- * @param {string} options.searchUrl  // e.g. `${URL}allMembers/search`
- * @returns {(e: InputEvent) => void}
+ * @param {string} options.searchUrl
+ * @param {Function} [options.onResetView]
+ * @returns {() => void}
  */
 export const createSearchHandler = ({
-  familyMembers,
+  familyMembers = [],
+  directoryMembers = [],
+  allLoadedMembers = [],
   renderMembers,
   container,
   searchUrl,
+  onResetView,
 }) => {
   const searchInput = id("searchFamily");
   let debounceTimer = null;
+
+  const performLocalFilter = (rawQuery) => {
+    const q = rawQuery.toLowerCase();
+    const cleanDigits = q.replace(/[^0-9]/g, "");
+
+    return (allLoadedMembers || []).filter((m) => {
+      const fName = (m.firstName || "").toLowerCase();
+      const lName = (m.lastName || "").toLowerCase();
+      const fullName = `${fName} ${lName}`.trim();
+      const fullNameRev = `${lName} ${fName}`.trim();
+      const email = (m.email || "").toLowerCase();
+      const mobile = (m.mobile || "").toLowerCase();
+      const mobileDigits = mobile.replace(/[^0-9]/g, "");
+      const famCode = (m.famCode || "").toLowerCase();
+      const country = (m.country || "").toLowerCase();
+
+      return (
+        fName.includes(q) ||
+        lName.includes(q) ||
+        fullName.includes(q) ||
+        fullNameRev.includes(q) ||
+        email.includes(q) ||
+        mobile.includes(q) ||
+        (cleanDigits.length >= 3 && mobileDigits.includes(cleanDigits)) ||
+        famCode.includes(q) ||
+        country.includes(q)
+      );
+    });
+  };
 
   const performSearch = async () => {
     const rawQuery = searchInput.value.trim();
@@ -144,13 +179,25 @@ export const createSearchHandler = ({
       }
     };
 
-    // empty query = back to original network
+    // empty query = back to original view
     if (!rawQuery) {
-      resetPillsToAll();
-      renderMembers(familyMembers);
+      if (typeof onResetView === "function") {
+        onResetView();
+      } else {
+        resetPillsToAll();
+        renderMembers(familyMembers);
+      }
       return;
     }
 
+    // 1. Instant client-side matches across all loaded directory & family members
+    const localMatches = performLocalFilter(rawQuery);
+    if (localMatches.length > 0) {
+      resetPillsToAll();
+      renderMembers(localMatches);
+    }
+
+    // 2. Server-side debounced search for full platform directory coverage
     try {
       const response = await axios.get(searchUrl, {
         params: { q: rawQuery },
@@ -159,24 +206,28 @@ export const createSearchHandler = ({
       const data = response.data || {};
       const matches = data.message || [];
 
-      if (!matches.length) {
+      if (!matches.length && localMatches.length === 0) {
         if (memberCountBadge) memberCountBadge.textContent = "0";
         if (memberCountDisplay) memberCountDisplay.textContent = "0";
         renderInviteBlock(container, rawQuery);
         return;
       }
 
-      resetPillsToAll();
-      container.innerHTML = "";
-      renderMembers(matches);
+      if (matches.length > 0) {
+        resetPillsToAll();
+        renderMembers(matches);
+      }
     } catch (error) {
-      showNotification("allMembers", "is-danger", "Search failed. Please try again.");
-      msgException(error);
+      if (localMatches.length === 0) {
+        showNotification("allMembers", "is-danger", "Search failed. Please try again.");
+        msgException(error);
+      }
     }
   };
 
   return () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(performSearch, 200);
+    debounceTimer = setTimeout(performSearch, 150);
   };
 };
+

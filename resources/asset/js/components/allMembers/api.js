@@ -49,6 +49,46 @@ export const renderMembers = (members = []) => {
 };
 
 // Client-side category pill filtering
+export function applyFilter(filterVal = "all") {
+  const cards = allMembersContainer.querySelectorAll(".member-card");
+  let visibleCount = 0;
+
+  cards.forEach((card) => {
+    const cat = card.getAttribute("data-category");
+    if (filterVal === "all") {
+      // "all" shows all connected members in network (family + connected kin)
+      if (cat === "family" || cat === "connected") {
+        card.style.display = "";
+        visibleCount++;
+      } else {
+        card.style.display = "none";
+      }
+    } else if (cat === filterVal) {
+      card.style.display = "";
+      visibleCount++;
+    } else {
+      card.style.display = "none";
+    }
+  });
+
+  const emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
+  if (visibleCount === 0 && cards.length > 0) {
+    if (!emptyPlaceholder) {
+      const message = filterVal === "explore"
+        ? "No additional members in the public directory."
+        : "No members in this category.";
+      allMembersContainer.insertAdjacentHTML(
+        "beforeend",
+        `<div class="empty-filter-placeholder col-12 text-center py-4 text-muted small" style="grid-column: 1 / -1;">${message}</div>`
+      );
+    }
+  } else if (emptyPlaceholder) {
+    emptyPlaceholder.remove();
+  }
+
+  return visibleCount;
+}
+
 function setupFilterPills() {
   const pillsContainer = id("memberFilterPills");
   if (!pillsContainer) return;
@@ -60,41 +100,25 @@ function setupFilterPills() {
     pillsContainer.querySelectorAll(".filter-pill-btn").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
 
-    const filterVal = btn.getAttribute("data-filter");
-    const cards = allMembersContainer.querySelectorAll(".member-card");
-    let visibleCount = 0;
+    const filterVal = btn.getAttribute("data-filter") || "all";
+    const visibleCount = applyFilter(filterVal);
 
-    cards.forEach((card) => {
-      const cat = card.getAttribute("data-category");
-      if (filterVal === "all" || cat === filterVal) {
-        card.style.display = "";
-        visibleCount++;
-      } else {
-        card.style.display = "none";
-      }
-    });
-
-    if (visibleCount === 0 && cards.length > 0) {
-      // Show empty state placeholder if none match category filter
-      let emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
-      if (!emptyPlaceholder) {
-        allMembersContainer.insertAdjacentHTML(
-          "beforeend",
-          `<div class="empty-filter-placeholder col-12 text-center py-4 text-muted small" style="grid-column: 1 / -1;">No members in this category.</div>`
-        );
-      }
-    } else {
-      const emptyPlaceholder = allMembersContainer.querySelector(".empty-filter-placeholder");
-      if (emptyPlaceholder) emptyPlaceholder.remove();
+    if (memberCountBadge) {
+      memberCountBadge.textContent = visibleCount.toLocaleString();
     }
   });
 }
 
 (async function bootstrapAllMembers() {
   try {
-    const url = `/allMembers/processApiData`;
+    const url1 = `/allMembers/processApiData`;
+    const url2 = `/allMembers/allData`;
 
-    const famCodeData = await getApiData(url);
+    // Fetch caller's network (family/connected) and wider directory in parallel
+    const [famCodeData, allUsersData] = await Promise.all([
+      getApiData(url1).catch(() => ({ message: [] })),
+      getApiData(url2).catch(() => ({ message: [] }))
+    ]);
 
     let familyMembers = [];
     if (Array.isArray(famCodeData)) {
@@ -105,8 +129,47 @@ function setupFilterPills() {
       familyMembers = famCodeData.data;
     }
 
-    // Pre-render network members
-    renderMembers(familyMembers);
+    let directoryMembers = [];
+    if (Array.isArray(allUsersData)) {
+      directoryMembers = allUsersData;
+    } else if (Array.isArray(allUsersData?.message)) {
+      directoryMembers = allUsersData.message;
+    } else if (Array.isArray(allUsersData?.data)) {
+      directoryMembers = allUsersData.data;
+    }
+
+    // Tag directory members with relationType 'other' unless already set
+    const normalizedDirMembers = directoryMembers.map((m) => ({
+      ...m,
+      relationType: m.relationType || "other"
+    }));
+
+    // Deduplicate any overlap by ID (prioritizing family/connected)
+    const seenIds = new Set();
+    const allLoadedMembers = [];
+
+    familyMembers.forEach((m) => {
+      if (m && m.id && !seenIds.has(m.id)) {
+        seenIds.add(m.id);
+        allLoadedMembers.push(m);
+      }
+    });
+
+    normalizedDirMembers.forEach((m) => {
+      if (m && m.id && !seenIds.has(m.id)) {
+        seenIds.add(m.id);
+        allLoadedMembers.push(m);
+      }
+    });
+
+    // Pre-render all members (family + connected + directory) into DOM
+    renderMembers(allLoadedMembers);
+
+    // Initial view: show connected network by default
+    applyFilter("all");
+    if (memberCountBadge) {
+      memberCountBadge.textContent = familyMembers.length.toLocaleString();
+    }
 
     // Remove loading spinner
     const loader = id("setLoader");
@@ -119,13 +182,27 @@ function setupFilterPills() {
     // Setup filter pills
     setupFilterPills();
 
-    // Wire up debounced search handler
+    // Wire up search handler across both client-side loaded members & server endpoint
     if (searchInput) {
+      const resetViewToCurrentFilter = () => {
+        renderMembers(allLoadedMembers);
+        const activeBtn = id("memberFilterPills")?.querySelector(".filter-pill-btn.active");
+        const activeFilter = activeBtn?.getAttribute("data-filter") || "all";
+        applyFilter(activeFilter);
+        if (memberCountBadge) {
+          const count = activeFilter === "all" ? familyMembers.length : (activeFilter === "explore" ? normalizedDirMembers.length : allLoadedMembers.length);
+          memberCountBadge.textContent = count.toLocaleString();
+        }
+      };
+
       const handleSearch = createSearchHandler({
         familyMembers,
+        directoryMembers: normalizedDirMembers,
+        allLoadedMembers,
         renderMembers,
         container: allMembersContainer,
-        searchUrl: `/allMembers/search`
+        searchUrl: `/allMembers/search`,
+        onResetView: resetViewToCurrentFilter
       });
 
       searchInput.addEventListener("input", handleSearch);
@@ -135,3 +212,4 @@ function setupFilterPills() {
     showError(error);
   }
 })();
+

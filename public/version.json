@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(security): resolve semgrep echoed-request annotation and lastInsertId integer typing",
+    "title": "Feat(blog): link /blogs across all public facing pages, navbars, and homepage",
     "notes": [
+        "Feat(blog): link /blogs across all public facing pages, navbars, and homepage",
         "Fix(security): resolve semgrep echoed-request annotation and lastInsertId integer typing",
-        "Feat(journal,announcement): implement family group chronicles, AI story assistant, and family feed bulletin announcements",
-        "Fix(blog): resolve author name lookup using personal table and add seed script for production"
+        "Feat(journal,announcement): implement family group chronicles, AI story assistant, and family feed bulletin announcements"
     ],
     "released_at": "2026-10-18",
-    "commit": "515739c"
+    "commit": "38255db"
 }

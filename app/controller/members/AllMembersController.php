@@ -54,6 +54,51 @@ final class AllMembersController extends AllMembersData
         }
     }
 
+    /**
+     * GET /allMembers/allData
+     * Returns directory members outside the caller's family,
+     * respecting privacy opt-out preferences.
+     */
+    public function getAllUsersDataFn(): void
+    {
+        try {
+            $sessId = (string) ($_SESSION['id'] ?? '');
+            if ($sessId !== '') {
+                $requesterId = $sessId;
+            } else {
+                $payload = SignIn::verify('users');
+                $requesterId = (string) cleanSession((string)$payload['id']);
+            }
+
+
+            if ($requesterId === '') {
+                msgException(401, 'Unauthorized');
+                return;
+            }
+
+            $famCode = (string) ($_SESSION['famCode'] ?? '');
+            if ($famCode === '') {
+                try {
+                    $stmtFam = self::connect2()->prepare('SELECT famCode FROM personal WHERE id = ?');
+                    $stmtFam->execute([$requesterId]);
+                    $famCode = (string) ($stmtFam->fetchColumn() ?: '');
+                } catch (\Throwable) {
+                    $famCode = '';
+                }
+            }
+
+            $limit  = isset($_GET['limit']) ? max(1, min((int) $_GET['limit'], 200)) : 200;
+            $offset = isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : 0;
+
+            $result = $this->getAllUsersData($requesterId, $famCode, $limit, $offset);
+            msgSuccess(200, $result);
+        } catch (\Throwable $th) {
+            showError($th);
+            msgException(500, 'Unable to load directory members');
+        }
+    }
+
+
 
     // /**
     //  * @return never

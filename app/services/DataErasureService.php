@@ -64,8 +64,11 @@ final class DataErasureService
                 UPDATE account
                 SET email = ?,
                     password = \'[ERASED]\',
-                    mobile = \'[ERASED]\',
-                    country = \'[ERASED]\',
+                    firstName = \'Anonymised\',
+                    lastName = \'Member\',
+                    google_id = NULL,
+                    facebook_id = NULL,
+                    apple_id = NULL,
                     token = NULL,
                     token_version = token_version + 1,
                     status = \'erased\',
@@ -238,10 +241,11 @@ final class DataErasureService
                     $paths = $imgStmt->fetchAll(\PDO::FETCH_COLUMN);
                     foreach ($paths as $path) {
                         if (is_string($path) && $path !== '' && str_starts_with($path, '/') && !str_contains($path, '..')) {
-                            $fullPath = BASE_PATH . $path;
+                            $basePath = defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 2);
+                            $fullPath = $basePath . $path;
                             if (file_exists($fullPath) && is_file($fullPath)) {
                                 $real = realpath($fullPath);
-                                if ($real !== false && str_starts_with($real, BASE_PATH)) {
+                                if ($real !== false && str_starts_with($real, $basePath)) {
                                     // nosemgrep: php.lang.security.unlink-use.unlink-use
                                     @unlink($real);
                                 }

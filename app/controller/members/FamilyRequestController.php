@@ -289,9 +289,11 @@ final class FamilyRequestController extends BaseController
           $req['decision'] = $decision;
           $subject = "{$app['fullName']} approved your request";
 
-          // email the requester that the request has been approved
-
-          SendEmailFunctionality::email('msg/requestRequest', $subject, $req, 'member');
+          try {
+              SendEmailFunctionality::email('msg/requestRequest', $subject, $req, 'member');
+          } catch (\Throwable $e) {
+              error_log('[FamilyRequestController] Approval notification email failed: ' . $e->getMessage());
+          }
 
           $cleanDataNotification = [
             'sender_id' => $approver,

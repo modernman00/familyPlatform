@@ -822,15 +822,15 @@
 
               <div class="section-divider mt-4"></div>
               <div class="switch-info">
-                <h6>Your data</h6>
-                <p>Download a copy of the personal data we hold about your account (GDPR Article 15). Shared family content created by other members isn't included.</p>
+                <h6>Your data & account deletion (GDPR)</h6>
+                <p>Download a copy of your personal data (Article 15) or manage account deletion (Article 17) with options for immediate permanent erasure or a 30-day scheduled grace period.</p>
               </div>
               <div class="d-flex flex-wrap gap-2 mt-2">
                 <button type="button" id="dataExportBtn" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                   <i class="bi bi-download me-1"></i> Download my data
                 </button>
                 <button type="button" id="dataDeleteBtn" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                  <i class="bi bi-trash3 me-1"></i> Request account deletion
+                  <i class="bi bi-trash3 me-1"></i> Delete account
                 </button>
               </div>
               <p id="dataExportStatus" class="small text-muted mt-2" style="display:none;"></p>

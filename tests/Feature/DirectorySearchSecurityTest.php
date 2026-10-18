@@ -220,4 +220,33 @@ final class DirectorySearchSecurityTest extends TestCase
             );
         }
     }
+
+    public function test_get_all_users_data_returns_directory_members_outside_family_respecting_privacy(): void
+    {
+        $results = $this->model->getAllUsersData($this->callerId, $this->callerFamCode, 200, 0);
+
+        $ids = array_column($results, 'id');
+
+        // Target member outside family must be present
+        $this->assertContains(
+            $this->targetMemberId,
+            $ids,
+            'Public directory member outside family must be returned by getAllUsersData.'
+        );
+
+        // Caller themselves must not be present
+        $this->assertNotContains(
+            $this->callerId,
+            $ids,
+            'Caller must not be included in directory results.'
+        );
+
+        // Private member outside family must NOT be present
+        $this->assertNotContains(
+            $this->privateMemberId,
+            $ids,
+            'Opted-out member (show_my_profile = off) must not be returned by getAllUsersData.'
+        );
+    }
 }
+

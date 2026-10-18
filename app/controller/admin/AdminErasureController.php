@@ -29,7 +29,7 @@ final class AdminErasureController
         $stmt = $db->query("
             SELECT id, email, status, created_at, deleted_at
             FROM account
-            WHERE status = 'erased' OR email LIKE 'erased-%@anonymised.local'
+            WHERE status IN ('erased', 'pending_deletion') OR email LIKE 'erased-%@anonymised.local'
             ORDER BY id DESC
             LIMIT 50
         ");
