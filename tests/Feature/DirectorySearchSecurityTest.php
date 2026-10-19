@@ -248,5 +248,80 @@ final class DirectorySearchSecurityTest extends TestCase
             'Opted-out member (show_my_profile = off) must not be returned by getAllUsersData.'
         );
     }
+
+    public function test_super_admin_can_search_and_see_opted_out_private_members(): void
+    {
+        // 1. Provision a Super Admin user
+        $adminSuffix = bin2hex(random_bytes(4));
+        $adminId = 'ADMIN_' . $adminSuffix;
+        $adminFamCode = 'ADMIN_FAM_' . $adminSuffix;
+        $adminEmail = 'superadmin_' . $adminSuffix . '@example.com';
+
+        $stmtA = $this->pdo->prepare('INSERT INTO account (id, email, password, type, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())');
+        $stmtA->execute([$adminId, $adminEmail, 'hash', 'super_admin', 'active']);
+
+        $stmtP = $this->pdo->prepare('INSERT INTO personal (id, firstName, lastName, famCode, created_at) VALUES (?, ?, ?, ?, NOW())');
+        $stmtP->execute([$adminId, 'AdminFirst', 'AdminLast', $adminFamCode]);
+
+        // 2. Normal user searching for 'Priv' cannot find private member
+        $normalResults = $this->model->searchMembers($this->callerId, $this->callerFamCode, 'Priv');
+        $normalIds = array_column($normalResults, 'id');
+        $this->assertNotContains(
+            $this->privateMemberId,
+            $normalIds,
+            'Standard member search must strictly exclude private member with show_my_profile = off.'
+        );
+
+        // 3. Super Admin searching for 'Priv' MUST find private member
+        $adminResults = $this->model->searchMembers($adminId, $adminFamCode, 'Priv');
+        $adminIds = array_column($adminResults, 'id');
+        $this->assertContains(
+            $this->privateMemberId,
+            $adminIds,
+            'Super Admin search must discover private member irrespective of show_my_profile = off.'
+        );
+
+        // Clean up
+        $this->pdo->prepare('DELETE FROM personal WHERE id = ?')->execute([$adminId]);
+        $this->pdo->prepare('DELETE FROM account WHERE id = ?')->execute([$adminId]);
+    }
+
+    public function test_designated_super_admin_email_bypasses_privacy_filter(): void
+    {
+        // Search using the designated CEO root email account 318422WALLY / waleolaogunrac@gmail.com
+        $results = $this->model->searchMembers('318422WALLY', 'OLAO60446', 'Priv');
+        $ids = array_column($results, 'id');
+        $this->assertContains(
+            $this->privateMemberId,
+            $ids,
+            'Designated root super admin waleolaogunrac@gmail.com must see private members irrespective of privacy preferences.'
+        );
+
+        // Also verify in getAllUsersData
+        $dirResults = $this->model->getAllUsersData('318422WALLY', 'OLAO60446', 200, 0);
+        $dirIds = array_column($dirResults, 'id');
+        $this->assertContains(
+            $this->privateMemberId,
+            $dirIds,
+            'Designated root super admin must receive private members in wider directory results.'
+        );
+    }
+
+    public function test_super_admin_can_view_any_member_profile_in_base_controller(): void
+    {
+        // Standard user cannot view private target without shared family or approved connection
+        $_SESSION['id'] = $this->callerId;
+        $_SESSION['auth'] = ['email' => 'caller@test.com', 'type' => 'member'];
+        $canViewNormal = \App\controller\BaseController::sessionCanViewMember($this->privateMemberId, $this->privateFamCode);
+        $this->assertFalse($canViewNormal, 'Normal session must not be allowed to view unlinked member profile.');
+
+        // Super Admin session CAN view private target
+        $_SESSION['id'] = '318422WALLY';
+        $_SESSION['auth'] = ['email' => 'waleolaogunrac@gmail.com', 'type' => 'super_admin'];
+        $canViewAdmin = \App\controller\BaseController::sessionCanViewMember($this->privateMemberId, $this->privateFamCode);
+        $this->assertTrue($canViewAdmin, 'Super Admin session must be allowed to view any member profile.');
+
+        unset($_SESSION['id'], $_SESSION['auth']);
+    }
 }
 

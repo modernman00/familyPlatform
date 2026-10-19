@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Portal | FamilyPlatform</title>
+    @include('partials.pwa-head')
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -148,8 +149,9 @@
 </head>
 <body>
     <div class="auth-card">
-        <div class="brand">
-            FamilyPlatform <span class="brand-badge">Super Admin</span>
+        <div class="brand" style="display: flex; align-items: center; gap: 10px;">
+            <img src="{{ $_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png' }}" alt="FamilyPlatform Logo" width="32" height="32" style="border-radius: 7px; object-fit: contain;">
+            <span>FamilyPlatform <span class="brand-badge">Super Admin</span></span>
         </div>
         <p class="subtitle">Sign in to access the executive admin portal</p>
 

@@ -95,9 +95,7 @@
     <header
         class="sticky top-0 z-50 bg-surface-light/90 dark:bg-surface-dark/90 backdrop-blur-md border-b border-border-light dark:border-border-dark px-4 py-3 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2">
-            <div class="bg-secondary p-1.5 rounded-lg">
-                <span class="material-icons-round text-white text-lg">diversity_1</span>
-            </div>
+            <img src="{{ $_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png' }}" alt="FamilyPlatform Logo" width="32" height="32" class="w-8 h-8 rounded-lg object-contain">
             <h1 class="font-bold text-lg tracking-tight text-blue-600 dark:text-blue-500">FamilyPlatform</h1>
         </div>
         <div class="flex items-center gap-4">

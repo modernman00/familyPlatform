@@ -206,8 +206,62 @@ class AllMembersData extends InnerJoin
     }
 
     /**
+     * Determines whether the given user/email/session holds Super Admin privileges.
+     * Super Admins can see all members platform-wide irrespective of individual privacy preferences.
+     *
+     * @param string $userId
+     * @param string $email
+     * @return bool
+     */
+    public static function isSuperAdmin(string $userId = '', string $email = ''): bool
+    {
+        // 1. Live session check
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            $sessEmail = strtolower(trim((string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '')));
+            $sessType = (string) ($_SESSION['auth']['type'] ?? $_SESSION['type'] ?? $_SESSION['role'] ?? '');
+            if ($sessEmail === 'waleolaogunrac@gmail.com' || in_array($sessType, ['super_admin', 'superadmin'], true)) {
+                return true;
+            }
+        }
+
+        // 2. Direct email check
+        $cleanEmail = strtolower(trim($email));
+        if ($cleanEmail === 'waleolaogunrac@gmail.com') {
+            return true;
+        }
+
+        // 3. Authoritative database lookup by ID or email
+        $cleanId = trim($userId);
+        if ($cleanId !== '' || $cleanEmail !== '') {
+            try {
+                $pdo = self::connect2();
+                if ($cleanId !== '') {
+                    $stmt = $pdo->prepare('SELECT type, email FROM account WHERE id = ? LIMIT 1');
+                    $stmt->execute([$cleanId]);
+                } else {
+                    $stmt = $pdo->prepare('SELECT type, email FROM account WHERE LOWER(email) = ? LIMIT 1');
+                    $stmt->execute([$cleanEmail]);
+                }
+                $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $dbType = (string) ($row['type'] ?? '');
+                    $dbEmail = strtolower(trim((string) ($row['email'] ?? '')));
+                    if ($dbEmail === 'waleolaogunrac@gmail.com' || in_array($dbType, ['super_admin', 'superadmin'], true)) {
+                        return true;
+                    }
+                }
+            } catch (\Throwable) {
+                // Defensive fallback
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Retrieve all members outside the caller's family (directory members),
-     * respecting the privacy opt-out invariant (show_my_profile != 'off').
+     * respecting the privacy opt-out invariant (show_my_profile != 'off')
+     * unless the requester is a Super Admin.
      *
      * @param string $userId
      * @param string $famCode
@@ -218,6 +272,7 @@ class AllMembersData extends InnerJoin
     public function getAllUsersData(string $userId, string $famCode, int $limit = 200, int $offset = 0): array
     {
         try {
+            $isSuperAdmin = self::isSuperAdmin($userId) ? 1 : 0;
             $sql = "
             SELECT DISTINCT 
                 p.id,
@@ -262,7 +317,7 @@ class AllMembersData extends InnerJoin
                 p.id != :userId_where_not_me
                 AND (p.famCode != :famCode_outside OR :famCode_empty = '')
                 AND p.deleted_at IS NULL
-                AND LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off'
+                AND (:is_super_admin = 1 OR LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off')
             ORDER BY 
                 p.firstName ASC, 
                 p.lastName ASC
@@ -278,6 +333,7 @@ class AllMembersData extends InnerJoin
             $stmt->bindValue(':req_case_you_approved', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':req_join_outgoing', $userId, \PDO::PARAM_STR);
             $stmt->bindValue(':req_join_incoming', $userId, \PDO::PARAM_STR);
+            $stmt->bindValue(':is_super_admin', $isSuperAdmin, \PDO::PARAM_INT);
             $stmt->bindValue(':limit_rows', $limit, \PDO::PARAM_INT);
             $stmt->bindValue(':offset_rows', $offset, \PDO::PARAM_INT);
 
@@ -492,6 +548,7 @@ class AllMembersData extends InnerJoin
         }
 
         try {
+            $isSuperAdmin = self::isSuperAdmin($requesterId) ? 1 : 0;
             $like = '%' . $cleanTerm . '%';
             $cleanDigits = (string) preg_replace('/[^0-9]/', '', $cleanTerm);
             $digitsLike = ($cleanDigits !== '' && strlen($cleanDigits) >= 3) ? ('%' . $cleanDigits . '%') : $like;
@@ -541,7 +598,8 @@ class AllMembersData extends InnerJoin
                 p.id != :req_where_not_me
                 AND p.deleted_at IS NULL
                 AND (
-                    LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off'
+                    :is_super_admin = 1
+                    OR LOWER(TRIM(COALESCE(c.show_my_profile, 'on'))) != 'off'
                     OR (p.famCode = :famCode_privacy AND p.famCode != '')
                 )
                 AND (
@@ -590,6 +648,7 @@ class AllMembersData extends InnerJoin
             $stmt->bindValue(':req_where_not_me', $requesterId, PDO::PARAM_STR);
             $stmt->bindValue(':req_order_outgoing', $requesterId, PDO::PARAM_STR);
             $stmt->bindValue(':req_order_incoming', $requesterId, PDO::PARAM_STR);
+            $stmt->bindValue(':is_super_admin', $isSuperAdmin, PDO::PARAM_INT);
 
             // --- search term placeholders ---
             $stmt->bindValue(':search_firstName', $like, PDO::PARAM_STR);

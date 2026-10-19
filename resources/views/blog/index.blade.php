@@ -27,7 +27,7 @@
     "url": {!! json_encode($appBase) !!},
     "logo": {
       "@type": "ImageObject",
-      "url": {!! json_encode($appBase . '/public/img/logo.png') !!}
+      "url": {!! json_encode($appBase . '/public/img/logo/logo.png') !!}
     }
   }
 }

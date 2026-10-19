@@ -5,21 +5,7 @@
         <!-- Brand Logo & Typography -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="/profilePage" style="text-decoration: none;">
             <div class="brand-logo-icon-wrapper">
-                <svg width="30" height="30" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="9" fill="url(#brandGradientMain)" />
-                    <!-- Interlocking Heritage Canopy & Home -->
-                    <path d="M16 6.5L24 13.5V25C24 25.5523 23.5523 26 23 26H9C8.44772 26 8 25.5523 8 25V13.5L16 6.5Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M13 26V18.5C13 18.2239 13.2239 18 13.5 18H18.5C18.7761 18 19 18.2239 19 18.5V26" stroke="white" stroke-width="1.8"/>
-                    <!-- Gold Kinship Spark -->
-                    <circle cx="16" cy="12" r="2.2" fill="#fbbf24"/>
-                    <defs>
-                        <linearGradient id="brandGradientMain" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#6366f1" />
-                            <stop offset="0.5" stop-color="#4f46e5" />
-                            <stop offset="1" stop-color="#312e81" />
-                        </linearGradient>
-                    </defs>
-                </svg>
+                <img src="{{ $_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png' }}" alt="FamilyPlatform Logo" width="32" height="32" style="width: 32px; height: 32px; border-radius: 7px; object-fit: contain; display: block;">
             </div>
             <div class="brand-text-container">
                 <span class="brand-name-family">Family</span><span class="brand-name-platform">Platform</span>

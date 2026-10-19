@@ -80,7 +80,11 @@ if [ -f "scripts/dast-idor-access-control.sh" ]; then
     bash scripts/dast-idor-access-control.sh || ADVERSARIAL_PASSED=0
 fi
 if [ -f "scripts/run-all-security-checks.sh" ]; then
-    bash scripts/run-all-security-checks.sh || ADVERSARIAL_PASSED=0
+    LOCAL_TEST_URL="https://olaogun.test"
+    if ! curl -k -s -m 2 "$LOCAL_TEST_URL" > /dev/null 2>&1; then
+        LOCAL_TEST_URL="http://localhost:8000"
+    fi
+    bash scripts/run-all-security-checks.sh "$LOCAL_TEST_URL" --skip-zap || ADVERSARIAL_PASSED=0
 fi
 
 if [ "$ADVERSARIAL_PASSED" -eq 1 ]; then

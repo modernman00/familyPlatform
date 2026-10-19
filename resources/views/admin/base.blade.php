@@ -54,7 +54,7 @@
 
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
-                <img src={{ getenv("IMG_LOGO_BLACK") }} width="200" height="600">
+                <img src="{{ $_ENV['APP_LOGO_HORIZONTAL'] ?? getenv('APP_LOGO_HORIZONTAL') ?: ($_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo.png') }}" alt="FamilyPlatform Logo" style="height: 32px; width: auto;">
             </a>
 
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"

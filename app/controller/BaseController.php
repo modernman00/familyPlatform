@@ -320,6 +320,12 @@ class BaseController
         if ($sessionId === '') {
             return false;
         }
+
+        // Super Admin bypass: can view any member irrespective of privacy or family
+        if (\App\model\AllMembersData::isSuperAdmin($sessionId)) {
+            return true;
+        }
+
         if ($memberId !== '' && hash_equals($sessionId, $memberId)) {
             return true;
         }
@@ -343,6 +349,15 @@ class BaseController
             error_log('sessionCanViewMember check failed: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Determines whether the given user or current session holds Super Admin privileges.
+     */
+    public static function isSuperAdmin(?string $userId = null): bool
+    {
+        $id = $userId ?? (isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '');
+        return \App\model\AllMembersData::isSuperAdmin($id);
     }
 
     /**
