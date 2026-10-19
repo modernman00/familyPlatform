@@ -21,7 +21,10 @@
                 {{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}
             </h4>
 
-            <p class="card-text mb-3" style="color: var(--text-muted); font-size: 0.85rem;"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ $data['country'] ?? 'Global' }}</p>
+            <p class="card-text mb-3" style="color: var(--text-muted); font-size: 0.85rem;">
+                <span class="me-1" style="font-size: 1.05rem;">{{ \App\classes\CountryCatalog::getFlag($data['country'] ?? '') }}</span>
+                <span>{{ $data['country'] ?? 'Global' }}</span>
+            </p>
 
             <!-- Family Code Tonal Pill -->
             <div class="family-code-pill mb-3">

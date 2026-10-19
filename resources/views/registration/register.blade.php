@@ -436,6 +436,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 @endif
 
+                <!-- International Language Switcher -->
+                <div class="d-flex justify-content-end mb-3">
+                    @php
+                        $activeLocale = \App\classes\I18n::getLocale();
+                        $supportedLocales = \App\classes\I18n::getSupportedLocales();
+                    @endphp
+                    <div class="d-flex align-items-center gap-1 p-1 rounded-pill" style="background: rgba(15, 23, 42, 0.45); border: 1px solid rgba(255, 255, 255, 0.15);">
+                        @foreach ($supportedLocales as $locKey => $locMeta)
+                            <a href="/locale/{{ $locKey }}" class="btn btn-sm py-1 px-2 rounded-pill {{ $locKey === $activeLocale ? 'btn-primary fw-bold text-white' : 'text-light' }}" style="font-size: 0.78rem; text-decoration: none;">
+                                {{ $locMeta['flag'] }} {{ $locMeta['native'] }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <form class="register" id="register" method="POST" enctype="multipart/form-data" autocomplete="off" x-data="familyCodeApprovalForm()" x-init="isCreating = $el.dataset.isCreating === 'true'" :data-is-creating="isCreating">
                     @if(!empty($registerPostData['claim_node']))
                     <input type="hidden" name="claim_node" value="{{ (int)$registerPostData['claim_node'] }}">
@@ -484,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'mixed',
                     'label' => ["Email", "Country", 'Mobile'],
                     'attribute' => ['email', 'country', 'mobile'],
-                    'placeholder' => ['toyin@yahoo.com', 'e.g. UK', 'include the area code - 234 or 1 or 44'],
+                    'placeholder' => ['e.g. alex@example.com', 'Select Country', 'e.g. +44 7123 456789 or local number'],
                     'inputType' => ['email', 'select', 'text'],
                     'value' => [
                     isset($registerPostData['email']) ? $registerPostData['email'] : '',

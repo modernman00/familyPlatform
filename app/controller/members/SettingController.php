@@ -357,6 +357,9 @@ final class SettingController extends BaseController
             if (!empty($updatesContact)) {
                 $updatesContact['id'] = $_POST['id'];
                 $cleanContact = LoginUtility::getSanitisedInputData($updatesContact, null, ['mobile', 'email', 'country']);
+                if (!empty($cleanContact['mobile'])) {
+                    $cleanContact['mobile'] = \App\classes\PhoneUtility::toE164((string)$cleanContact['mobile'], (string)($cleanContact['country'] ?? ''));
+                }
                 UpdateFn::updateMultiple('contact', $cleanContact, 'id');
             }
 

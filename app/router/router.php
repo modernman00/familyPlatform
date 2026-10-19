@@ -38,6 +38,9 @@ include_once __DIR__ . "/invite.php";
 include_once __DIR__ . "/journal.php";
 include_once __DIR__ . "/announcement.php";
 include_once __DIR__ . "/familyMigrationRoute.php";
+
+// Internationalization & Diaspora Language Switching
+$router->map('GET', '/locale/[a:lang]', 'App\controller\LocaleController@switch', 'LOCALE_SWITCH');
 // SEC-4 — /checking was an unauthenticated `while (true)` SSE loop that pins an
 // FPM worker forever; superseded by Pusher. Route removed.
 

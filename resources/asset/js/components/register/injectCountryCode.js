@@ -205,20 +205,63 @@ const countryCodes = {
 
 
 const injectCountryCode = () => {
-  const countryEl = id('country');
-  const mobileEl = id('mobile');
-  if (!countryEl || !mobileEl) return;
+  const initCountrySync = (countryEl, mobileEl) => {
+    if (!countryEl || !mobileEl) return;
 
-  countryEl.addEventListener('change', (e) => {
-    mobileEl.value = countryCodes[e.target.value] || '';
-  });
+    countryEl.addEventListener('change', (e) => {
+      const rawCode = countryCodes[e.target.value] || '';
+      if (!rawCode) return;
+      const dialCode = '+' + rawCode.replace(/[^\d]/g, '');
 
-  // Prefill from the country already selected on load (default option or the
-  // value carried over from the OAuth profile), unless a mobile number is
-  // already present so we never clobber what the user/provider supplied.
-  if (!mobileEl.value.trim()) {
-    const code = countryCodes[countryEl.value];
-    if (code) mobileEl.value = code;
+      const currentVal = mobileEl.value.trim();
+      if (!currentVal) {
+        mobileEl.value = dialCode + ' ';
+        return;
+      }
+
+      // If user had existing number, preserve subscriber digits
+      const digitsOnly = currentVal.replace(/[^\d]/g, '');
+      if (digitsOnly.length > 5) {
+        // Strip leading trunk zero if present
+        const subscriber = digitsOnly.startsWith('0') ? digitsOnly.slice(1) : digitsOnly.slice(-10);
+        mobileEl.value = dialCode + ' ' + subscriber;
+      } else {
+        mobileEl.value = dialCode + ' ';
+      }
+    });
+
+    mobileEl.addEventListener('blur', () => {
+      const val = mobileEl.value.trim();
+      if (!val) return;
+      const rawCode = countryCodes[countryEl.value] || '';
+      if (!rawCode) return;
+      const dialCode = '+' + rawCode.replace(/[^\d]/g, '');
+
+      // If typed 080... without +, normalize to +[dialCode][rest]
+      if (val.startsWith('0') && val.length >= 10) {
+        mobileEl.value = dialCode + ' ' + val.slice(1);
+      } else if (!val.startsWith('+') && !val.startsWith(dialCode.slice(1))) {
+        mobileEl.value = dialCode + ' ' + val;
+      }
+    });
+
+    // Prefill on load if empty
+    if (!mobileEl.value.trim() && countryEl.value) {
+      const rawCode = countryCodes[countryEl.value];
+      if (rawCode) {
+        mobileEl.value = '+' + rawCode.replace(/[^\d]/g, '') + ' ';
+      }
+    }
+  };
+
+  // Sync for registration form
+  initCountrySync(id('country'), id('mobile'));
+
+  // Sync for modal edit profile if present
+  const modalCountry = document.querySelector('#editProfileModal #country');
+  const modalMobile = document.querySelector('#editProfileModal #mobile');
+  if (modalCountry && modalMobile) {
+    initCountrySync(modalCountry, modalMobile);
   }
 };
 

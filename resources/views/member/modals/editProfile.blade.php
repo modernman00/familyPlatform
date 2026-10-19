@@ -336,13 +336,24 @@
                             <div class="row g-2">
                                 <div class="col-6">
                                     <label for="country" class="form-label">Country</label>
-                                    <input type="text" class="form-control" id="country" name="country" value="{{ $data['country'] ?? '' }}">
+                                    @php
+                                        $catalogCountries = \App\classes\CountryCatalog::getAll();
+                                        $userCountry = $data['country'] ?? '';
+                                    @endphp
+                                    <select class="form-select form-control" id="country" name="country">
+                                        <option value="">Select Country</option>
+                                        @foreach ($catalogCountries as $cName => $cMeta)
+                                            <option value="{{ $cName }}" {{ (strcasecmp($userCountry, $cName) === 0 || strcasecmp($userCountry, $cMeta['code']) === 0) ? 'selected' : '' }}>
+                                                {{ $cMeta['flag'] }} {{ $cName }} ({{ $cMeta['dial_code'] }})
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <small id="country_error" class="text-danger ps-2 small"></small>
                                 </div>
 
                                 <div class="col-6">
                                     <label for="mobile" class="form-label">Mobile</label>
-                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{ $data['mobile'] ?? '' }}">
+                                    <input type="text" class="form-control" id="mobile" name="mobile" value="{{ $data['mobile'] ?? '' }}" placeholder="e.g. +44 7123 456789">
                                     <small id="mobile_error" class="text-danger ps-2 small"></small>
                                 </div>
 

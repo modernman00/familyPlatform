@@ -72,6 +72,7 @@ final class RouteDispatch
             // Headless Kinship REST API handles API key authentication
             'App\controller\api\KinshipApiController',
             'App\controller\PlaybookController',
+            'App\controller\LocaleController',
         ];
 
         if (\class_exists('\App\controller\BaseController')) {

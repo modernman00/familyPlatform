@@ -22,8 +22,11 @@ resources/views/layouts/achive
 resources/images
 public/img
 !public/img/logo
-!public/img/logo/**
-public/js
+public/js/*
+!public/js/family-timezone.js
+!public/js/pwa-notifications.js
+!public/js/pwa-install.js
+!public/js/telemetry.js
 olaogun.test-key.pem
 olaogun.test.pem 
 

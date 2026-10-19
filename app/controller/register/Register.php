@@ -232,6 +232,11 @@ final class Register extends Db
             // Sanitise the data and get the cleaned data
             $cleanData = LoginUtility::getSanitisedInputData($generateId, $data, $optionalFields);
 
+            // Normalize mobile to E.164 with country awareness
+            if (!empty($cleanData['mobile'])) {
+                $cleanData['mobile'] = \App\classes\PhoneUtility::toE164((string)$cleanData['mobile'], (string)($cleanData['country'] ?? ''));
+            }
+
             // hash the password and confirm_password fields
             $cleanData = hashPasswordsInArray($cleanData);
 
@@ -461,7 +466,7 @@ final class Register extends Db
     {
         return [
             'min' => [2, 2, 2, 7, 7, 7, 4],
-            'max' => [35, 35, 30, 16, 50, 50, 20],
+            'max' => [35, 35, 30, 25, 50, 50, 20],
             'data' => [
                 'firstName', 'lastName', 'country', 'mobile', 'email', 'password', 'famCode'
             ]
@@ -580,8 +585,10 @@ final class Register extends Db
             $exists = false;
             
             if ($mobile) {
-                $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE mobile = ?");
-                $stmt->execute([$mobile]);
+                $e164 = \App\classes\PhoneUtility::toE164($mobile);
+                $trailing9 = strlen($e164) >= 9 ? substr($e164, -9) : $e164;
+                $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE mobile = ? OR mobile = ? OR mobile LIKE ?");
+                $stmt->execute([$mobile, $e164, '%' . $trailing9]);
                 if ($stmt->fetchColumn() > 0) {
                     $exists = true;
                 }

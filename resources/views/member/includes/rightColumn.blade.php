@@ -53,6 +53,9 @@ foreach(($eventData ?? []) as $event) {
             <div>
                 <h5 class="mb-0 fw-bold" style="color: var(--text-color); font-size: 1.05rem;">Upcoming Events</h5>
                 <p class="text-muted small mb-0" style="font-size: 0.8rem;">Family gatherings, birthdays & milestones.</p>
+                <div class="text-muted mt-1" style="font-size: 0.75rem;">
+                    <i class="bi bi-globe me-1 text-primary"></i> <span class="user-tz-name">Local Time</span>
+                </div>
             </div>
             <a href="/profilePage#eventHeader" class="text-decoration-none mt-1" style="color: var(--primary-color); font-weight: 600; font-size: 0.85rem;">See All <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i></a>
         </div>

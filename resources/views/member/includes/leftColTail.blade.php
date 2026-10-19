@@ -16,7 +16,10 @@
                 </div>
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white leading-tight">{{ $data['firstName'] }}
                         {{ $data['lastName'] }}</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ $data['country'] }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    <span class="mr-1">{{ \App\classes\CountryCatalog::getFlag($data['country'] ?? '') }}</span>
+                    <span>{{ $data['country'] ?? 'Global' }}</span>
+                </p>
                 <div
                     class="bg-gray-50 dark:bg-background-dark/50 rounded-lg p-3 mb-4 border border-border-light dark:border-border-dark">
                     <p class="text-xs text-gray-400 uppercase tracking-wider font-semibold">Family Code</p>

@@ -88,6 +88,29 @@
                     </div>
                 </div>
 
+                <!-- Language Selector Dropdown -->
+                <div class="dropdown">
+                    @php
+                        $activeLocale = \App\classes\I18n::getLocale();
+                        $supportedLocales = \App\classes\I18n::getSupportedLocales();
+                        $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
+                    @endphp
+                    <button class="btn btn-sm d-flex align-items-center gap-1 px-2 py-1 rounded-pill border" type="button" id="langMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background: var(--card-bg, #fff); font-size: 0.85rem;" title="Change Language">
+                        <span style="font-size: 1.1rem;">{{ $currLocale['flag'] }}</span>
+                        <span class="d-none d-md-inline fw-semibold text-uppercase" style="font-size: 0.78rem;">{{ $activeLocale }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" aria-labelledby="langMenu" style="border-radius: 12px; min-width: 140px;">
+                        @foreach ($supportedLocales as $locKey => $locMeta)
+                            <li>
+                                <a class="dropdown-item py-1.5 px-3 d-flex align-items-center gap-2 {{ $locKey === $activeLocale ? 'active fw-bold' : '' }}" href="/locale/{{ $locKey }}">
+                                    <span>{{ $locMeta['flag'] }}</span>
+                                    <span>{{ $locMeta['native'] }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
                 <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
                 <div class="dropdown">
                     <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">

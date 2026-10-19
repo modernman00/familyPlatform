@@ -177,7 +177,7 @@ input[type="file"] {
     <p><i class="fa fa-pencil fa-fw w3-margin-right w3-text-theme"></i> Spouse: {{ $data['spouseName'] }}</p>
 
     {{-- COUNTRY --}}
-    <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> {{ $data['country'] }}</p>
+    <p><i class="fa fa-globe fa-fw w3-margin-right w3-text-theme"></i> {{ \App\classes\CountryCatalog::getFlag($data['country'] ?? '') }} {{ $data['country'] ?? 'Global' }}</p>
 
      {{-- famcode --}}
     <p><i class="fa fa-home fa-fw w3-margin-right w3-text-theme"></i> Family code: {{ $data['famCode'] }}</p>

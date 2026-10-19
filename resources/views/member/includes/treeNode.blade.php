@@ -55,7 +55,12 @@
 
     <div class="node-content">
         <span class="node-title">{{ $relationshipLabel }}</span>
-        <span class="node-name">{{ $displayName }}</span>
+        <span class="node-name">
+            {{ $displayName }}
+            @if(!empty($dataDB['country']) || !empty($dataDB['location']))
+                <span class="node-flag ms-1" style="font-size: 0.9em;" title="{{ $dataDB['country'] ?? $dataDB['location'] }}">{{ \App\classes\CountryCatalog::getFlag($dataDB['country'] ?? ($dataDB['location'] ?? '')) }}</span>
+            @endif
+        </span>
         
         @if(!empty($dataDB['occupation']))
             <span class="node-relation">{{ $dataDB['occupation'] }}</span>

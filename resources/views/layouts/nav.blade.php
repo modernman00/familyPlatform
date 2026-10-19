@@ -59,6 +59,25 @@
       </div>
     </div>
 
+    <!-- Language Switcher Dropdown -->
+    <div class="w3-dropdown-hover w3-right">
+      @php
+        $activeLocale = \App\classes\I18n::getLocale();
+        $supportedLocales = \App\classes\I18n::getSupportedLocales();
+        $currLocale = $supportedLocales[$activeLocale] ?? $supportedLocales['en'];
+      @endphp
+      <button class="w3-button" title="Change Language" style="font-size: 0.9rem;">
+        <span>{{ $currLocale['flag'] }}</span> <span class="w3-hide-small">{{ $currLocale['name'] }}</span> <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="w3-dropdown-content w3-card-4 w3-bar-block" style="min-width: 140px; right: 0;">
+        @foreach ($supportedLocales as $locKey => $locMeta)
+          <a href="/locale/{{ $locKey }}" class="w3-bar-item w3-button {{ $locKey === $activeLocale ? 'w3-light-grey fw-bold' : '' }}">
+            <span class="me-1">{{ $locMeta['flag'] }}</span> {{ $locMeta['native'] }}
+          </a>
+        @endforeach
+      </div>
+    </div>
+
     <!-- Sign Out -->
     <a href="signout/login" class="w3-bar-item w3-button sign-out-btn w3-right" title="Sign out">
       <i class="fa fa-sign-out-alt"></i>
