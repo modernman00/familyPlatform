@@ -548,13 +548,13 @@
 
         <!-- Heritage Story Card Modal (9:16 Instagram/WhatsApp Story Format) -->
         <div class="modal fade" id="heritageStoryModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a;">
-                    <div class="modal-header border-0 pb-0 text-white">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 420px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a; max-height: calc(100vh - 3.5rem);">
+                    <div class="modal-header border-0 pb-0 text-white flex-shrink-0">
                         <h5 class="modal-title fw-bold" style="font-size: 1rem;"><i class="bi bi-stars text-warning me-2"></i>Heritage Story Card</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4 text-center">
+                    <div class="modal-body p-4 text-center" style="overflow-y: auto;">
                         <div id="storyCardPreview" class="story-card-preview">
                             <canvas id="storyCanvas" width="540" height="960" style="width: 100%; max-width: 280px; border-radius: 18px; box-shadow: 0 16px 36px rgba(0,0,0,0.5);"></canvas>
                         </div>
@@ -617,9 +617,9 @@
 
         <!-- Living Voice Capsule Recording & Upload Modal -->
         <div class="modal fade" id="voiceCapsuleModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a; color: #ffffff; border: 1px solid rgba(245, 158, 11, 0.3);">
-                    <div class="modal-header border-bottom border-secondary py-3 px-4" style="background: rgba(15, 23, 42, 0.95);">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 460px;">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #0f172a; color: #ffffff; border: 1px solid rgba(245, 158, 11, 0.3); max-height: calc(100vh - 3.5rem);">
+                    <div class="modal-header border-bottom border-secondary py-3 px-4 flex-shrink-0" style="background: rgba(15, 23, 42, 0.95);">
                         <div class="d-flex align-items-center gap-2">
                             <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(245, 158, 11, 0.2); color: #f59e0b;">
                                 <i class="bi bi-mic-fill fs-5"></i>
@@ -631,7 +631,7 @@
                         </div>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
+                    <div class="modal-body p-4" style="overflow-y: auto;">
                         <!-- Navigation Tabs: Record vs Upload -->
                         <ul class="nav nav-pills nav-fill mb-3 p-1 rounded-pill" style="background: rgba(255,255,255,0.06);" role="tablist">
                             <li class="nav-item" role="presentation">
@@ -3407,4 +3407,5 @@
 @include('member.modals.lineageQuestModal')
 @include('member.modals.familyFlyerModal')
 @include('member.modals.timeCapsuleModal')
+@include('member.modals.inviteFamilyModal')
 @endsection

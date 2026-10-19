@@ -3,96 +3,45 @@
      style="border-radius: 20px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%); color: #ffffff; border: 1.5px solid rgba(129, 140, 248, 0.4);"
      x-data="onboardingChecklist()"
      x-init="initState()"
-     x-show="visible"
+     x-show="visible && !isDone()"
      x-cloak
      x-transition:enter="transition ease-out duration-300"
      x-transition:enter-start="opacity-0 transform -translate-y-4"
-     x-transition:enter-end="opacity-100 transform translate-y-0">
+     x-transition:enter-end="opacity-100 transform translate-y-0"
+     x-transition:leave="transition ease-in duration-300"
+     x-transition:leave-start="opacity-100 transform translate-y-0"
+     x-transition:leave-end="opacity-0 transform -translate-y-4">
 
-    <!-- Mode 1: Compact Graduated Dynasty Ribbon (When 3/3 complete or minimized) -->
-    <template x-if="state.completed && !expanded">
-        <div class="p-3 d-flex align-items-center justify-content-between flex-wrap gap-3"
-             style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
-                     style="width: 38px; height: 38px; background: linear-gradient(135deg, #f59e0b, #d97706); color: #ffffff; box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);">
-                    <i class="bi bi-award-fill fs-5"></i>
-                </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="fw-bold text-white" style="font-size: 0.95rem; letter-spacing: -0.01em;">
-                            Dynasty Status: Active & Connected
-                        </span>
-                        <span class="badge rounded-pill bg-success text-white fw-bold px-2 py-0.5" style="font-size: 0.72rem;">
-                            3/3 Complete ✓
-                        </span>
-                    </div>
-                    <div class="text-white-50 small" style="font-size: 0.78rem;">
-                        All starter milestones achieved. Keep growing your family tree!
-                    </div>
-                </div>
+    <!-- Card Header -->
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-start">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center"
+                 style="width: 44px; height: 44px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45);">
+                <i class="bi bi-lightning-charge-fill fs-5"></i>
             </div>
-
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" 
-                        class="btn btn-sm btn-warning rounded-pill px-3 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-1.5"
-                        style="font-size: 0.8rem; min-height: 34px;"
-                        @click="shareInvite()">
-                    <i class="bi bi-whatsapp"></i> <span>Invite Kin</span>
-                </button>
-                <button type="button" 
-                        class="btn btn-sm btn-outline-light rounded-pill px-2.5"
-                        style="font-size: 0.78rem; min-height: 34px; border-color: rgba(255, 255, 255, 0.25);"
-                        @click="expanded = true"
-                        title="View Completed Milestones">
-                    <i class="bi bi-chevron-down"></i> Review
-                </button>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="mb-0 fw-bold text-white" style="font-size: 1.1rem; letter-spacing: -0.01em;">
+                        60-Second Quick-Start
+                    </h5>
+                    <span class="badge rounded-pill bg-warning text-dark fw-bold px-2 py-0.5" style="font-size: 0.72rem;">
+                        <span x-text="state.completed_count"></span>/3 Done
+                    </span>
+                </div>
+                <p class="mb-0 text-white-50 small" style="font-size: 0.82rem;">
+                    Unlock the full power of your family dynasty in 3 fast steps
+                </p>
             </div>
         </div>
-    </template>
 
-    <!-- Mode 2: Full Checklist Body (When incomplete or user clicks Review) -->
-    <template x-if="!state.completed || expanded">
-        <div>
-            <!-- Card Header -->
-            <div class="card-header bg-transparent border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-start">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle p-2 d-flex align-items-center justify-content-center"
-                         style="width: 44px; height: 44px; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.45);">
-                        <i class="bi bi-lightning-charge-fill fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="mb-0 fw-bold text-white" style="font-size: 1.1rem; letter-spacing: -0.01em;">
-                                60-Second Quick-Start
-                            </h5>
-                            <span class="badge rounded-pill bg-warning text-dark fw-bold px-2 py-0.5" style="font-size: 0.72rem;">
-                                <span x-text="state.completed_count"></span>/3 Done
-                            </span>
-                        </div>
-                        <p class="mb-0 text-white-50 small" style="font-size: 0.82rem;">
-                            Unlock the full power of your family dynasty in 3 fast steps
-                        </p>
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center gap-2">
-                    <template x-if="state.completed && expanded">
-                        <button type="button"
-                                class="btn btn-sm btn-outline-light rounded-pill px-2 py-1"
-                                style="font-size: 0.75rem; border-color: rgba(255, 255, 255, 0.3);"
-                                @click="expanded = false"
-                                title="Collapse to Ribbon">
-                            <i class="bi bi-chevron-up"></i> Collapse
-                        </button>
-                    </template>
-                    <button type="button" 
-                            class="btn-close btn-close-white" 
-                            @click="dismiss()" 
-                            aria-label="Dismiss checklist"
-                            title="Dismiss"></button>
-                </div>
-            </div>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" 
+                    class="btn-close btn-close-white" 
+                    @click="dismiss()" 
+                    aria-label="Dismiss checklist"
+                    title="Dismiss"></button>
+        </div>
+    </div>
 
     <!-- Progress Bar -->
     <div class="px-4 pt-2 pb-1">
@@ -161,9 +110,11 @@
                     <div class="d-flex gap-2">
                         <button type="button" 
                                 class="btn btn-sm btn-warning rounded-pill px-3 fw-bold text-dark shadow-sm d-inline-flex align-items-center gap-1"
-                                style="font-size: 0.78rem; min-height: 32px;"
-                                @click="shareInvite()">
-                            <i class="bi bi-whatsapp"></i> Invite Now
+                                style="font-size: 0.78rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#inviteFamilyModal"
+                                @click="openInviteModal()">
+                            <i class="bi bi-person-lines-fill"></i> Invite Family
                         </button>
                     </div>
                 </template>
@@ -204,17 +155,15 @@
                 </template>
             </div>
         </div>
-        </div>
-        </div>
-    </template>
+    </div>
 </div>
 
 <script>
 if (typeof window.onboardingChecklist !== 'function') {
     window.onboardingChecklist = function() {
         return {
-            visible: true,
-            expanded: false,
+            visible: false,
+            isPreview: false,
             state: {
                 completed: false,
                 progress_percentage: 0,
@@ -224,14 +173,32 @@ if (typeof window.onboardingChecklist !== 'function') {
                 invite_data: {}
             },
 
+            isDone() {
+                if (this.isPreview) return false;
+                const total = this.state.total_steps || 3;
+                return Boolean(this.state.completed || (typeof this.state.completed_count === 'number' && this.state.completed_count >= total));
+            },
+
             async initState() {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.has('onboarding') && urlParams.get('onboarding') === 'reset') {
-                    localStorage.removeItem('fp_onboarding_dismissed');
-                    sessionStorage.removeItem('fp_onboarding_minimized');
+                    try {
+                        localStorage.removeItem('fp_onboarding_dismissed');
+                        sessionStorage.removeItem('fp_onboarding_minimized');
+                        sessionStorage.removeItem('fp_onboarding_completed');
+                    } catch (e) {}
                 }
 
-                if (sessionStorage.getItem('fp_onboarding_minimized') === 'true') {
+                if (urlParams.has('onboarding') && urlParams.get('onboarding') === 'preview') {
+                    this.isPreview = true;
+                }
+
+                if (!this.isPreview && sessionStorage.getItem('fp_onboarding_completed') === 'true') {
+                    this.visible = false;
+                    return;
+                }
+
+                if (!this.isPreview && sessionStorage.getItem('fp_onboarding_minimized') === 'true') {
                     this.visible = false;
                     return;
                 }
@@ -244,9 +211,19 @@ if (typeof window.onboardingChecklist !== 'function') {
                         const res = await response.json();
                         if (res.status === 'success' && res.data) {
                             this.state = res.data;
-                            if (urlParams.has('onboarding') && urlParams.get('onboarding') === 'preview') {
+                            if (this.isPreview) {
                                 this.state.completed = false;
-                                this.expanded = true;
+                                this.visible = true;
+                                return;
+                            }
+
+                            if (this.isDone()) {
+                                this.visible = false;
+                                try {
+                                    sessionStorage.setItem('fp_onboarding_completed', 'true');
+                                } catch (e) {}
+                            } else {
+                                this.visible = true;
                             }
                         }
                     }
@@ -272,11 +249,36 @@ if (typeof window.onboardingChecklist !== 'function') {
 
                     if (this.state.steps && this.state.steps[stepKey]) {
                         this.state.steps[stepKey].done = true;
-                        this.state.completed_count = Math.min(3, this.state.completed_count + 1);
-                        this.state.progress_percentage = Math.round((this.state.completed_count / 3) * 100);
+                        let count = 0;
+                        for (const k in this.state.steps) {
+                            if (this.state.steps[k]?.done) count++;
+                        }
+                        this.state.completed_count = count;
+                        const total = this.state.total_steps || 3;
+                        this.state.progress_percentage = Math.round((count / total) * 100);
+
+                        if (count >= total) {
+                            this.state.completed = true;
+                            // Allow user to briefly register 3/3 completion, then completely disappear
+                            setTimeout(() => {
+                                this.visible = false;
+                                try {
+                                    sessionStorage.setItem('fp_onboarding_completed', 'true');
+                                } catch (e) {}
+                            }, 1000);
+                        }
                     }
                 } catch (err) {
                     console.error('[Onboarding] Error marking step:', err);
+                }
+            },
+
+            openInviteModal() {
+                this.markStep('invite_family');
+                const modalEl = document.getElementById('inviteFamilyModal');
+                if (modalEl && window.bootstrap?.Modal) {
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.show();
                 }
             },
 
@@ -304,12 +306,10 @@ if (typeof window.onboardingChecklist !== 'function') {
             },
 
             dismiss() {
-                if (this.state.completed && this.expanded) {
-                    this.expanded = false;
-                    return;
-                }
                 this.visible = false;
-                sessionStorage.setItem('fp_onboarding_minimized', 'true');
+                try {
+                    sessionStorage.setItem('fp_onboarding_minimized', 'true');
+                } catch (e) {}
             }
         };
     };

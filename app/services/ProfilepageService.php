@@ -44,6 +44,18 @@ final class ProfilepageService
             error_log('[ProfilepageService] Failed to load pending family requests: ' . $e->getMessage());
         }
 
+        $pendingMigrations = [
+            'incomingNudges' => [],
+            'incomingRequests' => [],
+            'totalPendingCount' => 0
+        ];
+        try {
+            $pendingMigrations = (new \App\services\FamilyMigrationService(\Src\Db::connect2()))
+                ->getPendingMigrationsForUser($userId, $famCode);
+        } catch (\Throwable $e) {
+            error_log('[ProfilepageService] Failed to load pending migrations: ' . $e->getMessage());
+        }
+
         return [
             'memberData' => $memberData,
             'famCode' => $famCode,
@@ -56,6 +68,7 @@ final class ProfilepageService
             'totalFamilyMembers' => count((new DataAll())->getAllMembers($userId)),
             'unclaimedMatch' => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData),
             'pendingFamilyRequests' => $pendingFamilyRequests,
+            'pendingMigrations' => $pendingMigrations,
         ];
     }
 }

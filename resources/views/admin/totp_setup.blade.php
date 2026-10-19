@@ -120,7 +120,7 @@
         const el = document.getElementById('manualSecret');
         el.select();
         navigator.clipboard.writeText(el.value).then(() => {
-            alert('Secret key copied to clipboard!');
+            (window.swalToast || alert)('Secret key copied to clipboard!', 'success');
         });
     }
 

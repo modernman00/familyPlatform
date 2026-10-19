@@ -1,9 +1,9 @@
 <div class="modal fade" id="lineageQuestModal" tabindex="-1" aria-labelledby="lineageQuestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
-            <div class="modal-header border-0 px-4 pt-4 pb-2" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-bottom: 1px solid rgba(16, 185, 129, 0.1) !important;">
+            <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-bottom: 1px solid rgba(16, 185, 129, 0.1) !important;">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-success shadow-sm" style="width: 48px; height: 48px; background: #d1fae5; font-size: 1.4rem;">
                         <i class="bi bi-compass-fill"></i>
@@ -19,7 +19,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body px-4 py-3">
+            <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 <!-- Completeness Metric Card -->
                 <div class="card border-0 mb-4 shadow-sm" style="border-radius: 18px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff;">
                     <div class="card-body p-4">
@@ -73,7 +73,7 @@
                 </div>
             </div>
 
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between">
+            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between flex-shrink-0">
                 <span class="text-muted small">
                     <i class="bi bi-shield-lock-fill text-success me-1"></i> Zero-PII 256-bit signed invite links
                 </span>

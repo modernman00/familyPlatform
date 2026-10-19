@@ -31,10 +31,11 @@ Debates must never be flat, isolated monologues. They must execute a **dynamic b
 ### 1.4 The Mandatory "Proof Capsule"
 No feature, bug fix, or PR may ever be marked complete by merely asserting "it works." Every deliverable must contain the **Empirical Proof Capsule**:
 1. **Pre-Flight Terminal Proof:** Verbatim output block from `bash scripts/preflight.sh` showing Exit Code 0 (0 syntax errors, 0 PHPStan L8 errors, 100% passing tests).
-2. **Dr. Viktor Kovács & Marcus PoC Neutralization Proof:** Verbatim output proving the raw attack payload returns `401 Unauthorized` / `403 Forbidden` / `404 Not Found` or rejects malicious execution.
-3. **Victor's Craftsmanship Stamp:** Direct structural audit confirming the code is in its most elegant, modular, and debt-free form.
-4. **Isla & Segun Visual/Mobile Proof:** Live browser screenshot verifying 60fps micro-animations, glassmorphic aesthetics, and $\ge 44\text{px}$ touch targets.
-5. **Sarah & Custodian's Interactive Playbook & Living Guide Proof:** Verbatim link or screenshot confirming the `/playbook`, `/admin/playbook`, or `/how-to-use` page has been updated according to the Mandatory 4-Quadrant Architecture, verified and signed off by the app's designated Playbook Custodian.
+2. **Sovereign E2E User Journey Proof (Simi & BRATS Gate) ⚡:** Verbatim output proving 100% pass rate of the sovereign End-to-End lifecycle suite (`tests/verify_e2e_robust_suite.php`). This suite is mandatory, un-skippable, and hard-blocking across all portfolio applications; soft conditional skipping or omission in pre-flight scripts is strictly prohibited and triggers an immediate deployment veto.
+3. **Dr. Viktor Kovács & Marcus PoC Neutralization Proof:** Verbatim output proving the raw attack payload returns `401 Unauthorized` / `403 Forbidden` / `404 Not Found` or rejects malicious execution.
+4. **Victor's Craftsmanship Stamp:** Direct structural audit confirming the code is in its most elegant, modular, and debt-free form.
+5. **Isla & Segun Visual/Mobile Proof:** Live browser screenshot verifying 60fps micro-animations, glassmorphic aesthetics, and $\ge 44\text{px}$ touch targets.
+6. **Sarah & Custodian's Interactive Playbook & Living Guide Proof:** Verbatim link or screenshot confirming the `/playbook`, `/admin/playbook`, or `/how-to-use` page has been updated according to the Mandatory 4-Quadrant Architecture, verified and signed off by the app's designated Playbook Custodian.
 
 ### 1.5 The Dual Visible Debate Mandate (Engineering Council + TAT 2.0) ⚡
 Just as TAT executive governance reviews are visibly conducted, the **Engineering Council's technical debate MUST also be visibly presented to the CEO**. Whenever planning or delivering Tier 2/3 features, agents must visibly report:
@@ -365,3 +366,45 @@ When conducting debates and reviews, output MUST follow this compact, high-impac
 ## 7. Authority & Enforceability
 This document is the supreme governance charter across the entire portfolio. Any deviation requires explicit written authorization from **Wally (CEO)** or **Olutobi (TAT Chair on CEO delegation)**.
 
+
+---
+
+## 8. Global Design & UI/UX Standards (v2.0 Enforced) 🎨
+
+> [!IMPORTANT]
+> **CEO Mandate:** These visual design frameworks, layout constraints, typography rules, and 4-state engineering requirements are live and enforced across all applications (`PartyPlatform`, `FamilyPlatform`, `iDecide`, `iAccount`, `TenantScore`, `ExecMind`, `LoanEasyFinance`, and `BCP`).
+
+### 8.1 Typography & Defensive Text Layouts
+* **Zero Mid-Word Truncation:** Dynamic strings (usernames, event titles, descriptions, account numbers) must never be chopped awkwardly (e.g., avoid "James Birthda"). Use either intelligent multi-line clamping (`line-clamp-2` / `line-clamp-3`) with full fallback wrapping, or explicit `text-overflow: ellipsis` accompanied by a native `title="..."` tooltip attribute on hover.
+* **Button Label Integrity:** Interactive elements (buttons, pill filters, tab headers) must NEVER wrap text across multiple lines. Always apply `white-space: nowrap; flex-shrink: 0;`. If space is constrained, allow the parent container to scroll horizontally (`overflow-x-auto`) or resize gracefully.
+* **Strict Type Scale:** Never use arbitrary font sizes. Use a disciplined 5-step scale with explicit line-heights:
+  - Hero/Title: `text-2xl` to `text-3xl` (font-extrabold / tracking-tight)
+  - Section Headers: `text-lg` to `text-xl` (font-semibold)
+  - Body Text: `text-sm` to `text-base` (font-normal / leading-relaxed)
+  - Captions & Badges: `text-xs` (font-medium / tracking-wide / uppercase where appropriate)
+* **British English (UK) Invariant:** All user-facing copy, labels, placeholders, and tooltips must strictly adhere to British English (e.g., *organise*, *optimise*, *customise*, *colour*, *behaviour*, *centre*).
+
+### 8.2 Layout Architecture, Spacing & Tap Targets
+* **Safe Touch Targets (Fitts's Law):** Every interactive control (buttons, icon links, checkboxes, chips, tab triggers) must have an absolute minimum hit target of 44x44px (`min-h-[44px] min-w-[44px]`).
+* **Interactive Element Separation:** Adjacent buttons or clickable items must have a minimum physical gap of `8px` (`gap-2`) to prevent accidental multi-taps on mobile touchscreens.
+* **Strict 8-Point Spacing Grid:** Spacing (padding, margin, gap) must strictly use multiples of 4px or 8px (`p-2`, `p-4`, `p-6`, `gap-3`, `gap-4`). Banish arbitrary values (e.g., `padding: 13px`).
+* **Visual Chunking & Containers:** Group related data inside dedicated surface cards with subtle border contrasts (`border border-slate-200 dark:border-slate-800`), rounded corners (`rounded-xl` or `rounded-2xl`), and consistent inner padding (`p-4` or `p-6`).
+
+### 8.3 Color Harmony, Contrast & Tactile Micro-Interactions
+* **WCAG AA Contrast Strictness:** All body copy and critical data must guarantee a minimum 4.5:1 contrast ratio against its background (3:1 for large headers). Never place medium grey on light grey, or muted blue on dark slate.
+* **Disciplined Accent Allocation (60-30-10 Rule):**
+  - 60% neutral surface/canvas (whites, slate, deep navy).
+  - 30% structural contrast (cards, dividers, readable typography).
+  - 10% high-energy accent (primary action buttons, active tabs, urgency status). Never plaster accent gradients or neon borders across secondary elements.
+* **Tactile State Feedback:** Every interactive element must define 4 distinct visual states:
+  - **Hover:** Subtle lift or brightness shift (`hover:brightness-105 hover:-translate-y-0.5 transition-all`).
+  - **Active:** Physical click compression (`active:scale-[0.98]`).
+  - **Focus:** Accessible keyboard focus outline (`focus-visible:ring-2 focus-visible:ring-offset-2`).
+  - **Disabled / Loading:** `opacity-50 cursor-not-allowed` with an integrated loading spinner.
+
+### 8.4 The 4-State Engineering Verification
+Before delivering any component or template, verify it against the 4 fundamental states:
+1. **Happy Path:** Does the layout look balanced, with clear visual hierarchy guiding the eye directly to the primary Call-to-Action?
+2. **Extreme Lengths:** Does the card still look pristine if an event/account name is 80 characters long or only 3 characters long?
+3. **Empty State:** If the dataset has 0 records, is there a helpful, beautifully illustrated fallback card with a primary action button?
+4. **Interactive Submitting:** Does every action button display a loading spinner when clicked to prevent duplicate submissions?

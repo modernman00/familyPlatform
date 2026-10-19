@@ -866,6 +866,14 @@ class FamilyReelsPlayer {
         }
     }
 
+    normalizeEmoji(str) {
+        if (!str || typeof str !== 'string') return '';
+        return str
+            .replace(/\u2764(?!\uFE0F)/g, '\u2764\uFE0F')
+            .replace(/\u2665(?!\uFE0F)/g, '\u2764\uFE0F')
+            .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
+    }
+
     async loadComments() {
         const reel = this.reels[this.currentIndex];
         if (!reel || !this.commentsList) return;
@@ -886,7 +894,7 @@ class FamilyReelsPlayer {
                 <img src="${esc(c.profilePics ? (c.profilePics.startsWith('/') ? c.profilePics : `/resources/images/profile/${c.profilePics}`) : '/resources/images/profile/avatarM.png')}" class="reel-comment-avatar" alt="User" onerror="this.src='/resources/images/profile/avatarM.png'">
                 <div class="reel-comment-content">
                     <div class="reel-comment-user">${esc(`${c.firstName || 'Family'} ${c.lastName || 'Member'}`)}</div>
-                    <div class="reel-comment-text">${esc(c.comment || '')}</div>
+                    <div class="reel-comment-text" style="font-variant-emoji: emoji;">${esc(this.normalizeEmoji(c.comment || ''))}</div>
                     <span class="reel-comment-time">${c.created_at ? format(c.created_at) : 'Just now'}</span>
                 </div>
             </div>
@@ -970,7 +978,7 @@ class FamilyReelsPlayer {
             });
             Toast.fire({ icon, title: message });
         } else {
-            alert(message);
+            (window.swalToast || alert)(message, icon);
         }
     }
 

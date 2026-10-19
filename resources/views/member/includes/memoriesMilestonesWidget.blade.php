@@ -260,17 +260,19 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
                         if (modalEl && window.bootstrap) {
                             bootstrap.Modal.getInstance(modalEl)?.hide();
                         }
-                        if (window.Toast) {
+                        if (window.swalSuccess) {
+                            window.swalSuccess('Flashback memory shared to family feed! ✨');
+                        } else if (window.Toast) {
                             Toast.fire({ icon: 'success', title: 'Flashback shared to family feed! ✨' });
                         } else {
-                            alert('Flashback memory shared to family feed!');
+                            (window.swalToast || alert)('Flashback memory shared to family feed!');
                         }
                     } else {
-                        alert(data.message || 'Failed to share memory');
+                        (window.swalError || alert)(data.message || 'Failed to share memory');
                     }
                 } catch (err) {
                     console.error('[MemoriesWidget] Share error:', err);
-                    alert('An error occurred while sharing the memory.');
+                    (window.swalError || alert)('An error occurred while sharing the memory.');
                 } finally {
                     this.sharing = false;
                 }

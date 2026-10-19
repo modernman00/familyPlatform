@@ -275,6 +275,19 @@ final class ReelsController extends BaseController
 
             $createdReel = Reel::getReelById($reelId, $userId);
 
+            // Synchronise hashtags for family reel
+            try {
+                \App\services\HashtagService::syncHashtags(
+                    $famCode,
+                    'reel',
+                    (string)$reelId,
+                    $userId,
+                    $caption
+                );
+            } catch (\Throwable $th) {
+                error_log('[ReelsController::uploadReel hashtags] ' . $th->getMessage());
+            }
+
             // Track reel creation
             AnalyticsService::track($userId, 'reel_create', (string)$reelId, [
                 'category' => $category,
@@ -412,6 +425,13 @@ final class ReelsController extends BaseController
             $deleted = Reel::deleteReel($reelId, $userId);
             if (!$deleted) {
                 throw new Exception('You are not authorized to delete this reel or it does not exist.', 403);
+            }
+
+            // Clean up family hashtag links for deleted reel
+            try {
+                \App\services\HashtagService::deleteLinksForTarget('reel', (string)$reelId);
+            } catch (\Throwable $th) {
+                error_log('[ReelsController::deleteReel hashtags] ' . $th->getMessage());
             }
 
             echo json_encode([

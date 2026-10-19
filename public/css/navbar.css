@@ -61,20 +61,35 @@
   color: var(--brand-text-muted) !important;
   font-weight: 600;
   font-size: 0.88rem;
-  padding: 0.5rem 0.95rem !important;
+  padding: 0.5rem 0.9rem !important;
   border-radius: var(--stitch-radius-pill);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap !important;
+}
+.stitch-nav-link i {
+  color: #64748b;
+  font-size: 0.95rem;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 .stitch-nav-link:hover {
   color: var(--brand-primary) !important;
   background: var(--brand-primary-container);
+  transform: translateY(-1px);
+}
+.stitch-nav-link:hover i {
+  color: var(--brand-primary);
+  transform: scale(1.08);
 }
 .stitch-nav-link.active {
   color: var(--brand-primary) !important;
   background: var(--brand-primary-container);
   font-weight: 700;
+}
+.stitch-nav-link.active i {
+  color: var(--brand-primary);
 }
 
 /* Action Controls */
@@ -87,8 +102,8 @@
 }
 
 .btn-icon-stitch {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid var(--brand-border);
   background: #ffffff;
@@ -107,7 +122,7 @@
   transform: translateY(-1px);
 }
 
-/* Toggler Button & High-Contrast 3-Line Icon */
+/* Toggler Button: Hidden on Desktop (>= 992px), Visible on Mobile (< 992px) */
 .navbar-toggler {
   padding: 0.45rem 0.65rem !important;
   border-radius: var(--stitch-radius-md, 12px) !important;
@@ -115,11 +130,22 @@
   border: 1px solid var(--brand-border, #e2e8f0) !important;
   color: var(--brand-text-dark, #0f172a) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
   cursor: pointer;
+}
+
+@media (min-width: 992px) {
+  .navbar-toggler {
+    display: none !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .navbar-toggler {
+    display: flex !important;
+  }
 }
 
 .navbar-toggler:hover,
@@ -162,22 +188,41 @@
   display: none !important;
 }
 
+/* User Profile Capsule (Refined Glassmorphic Pill) */
 .btn-user-stitch {
-  background: var(--brand-primary);
-  color: #ffffff !important;
-  border: none;
+  background: rgba(241, 245, 249, 0.9);
+  color: #1e293b !important;
+  border: 1px solid var(--brand-border);
   border-radius: var(--stitch-radius-pill);
-  padding: 0.45rem 1.1rem;
-  font-size: 0.85rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.4rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 .btn-user-stitch:hover,
 .btn-user-stitch:focus {
-  background: var(--brand-primary-hover);
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #0f172a !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+}
+
+.user-avatar-initials {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
+  margin-right: 0.25rem;
 }
 
 /* =========================================================
@@ -467,6 +512,23 @@ body.dark-mode .stitch-nav-link:hover,
 body.dark-mode .stitch-nav-link.active {
   color: #818cf8 !important;
   background: rgba(99, 102, 241, 0.18) !important;
+}
+body.dark-mode .stitch-nav-link i {
+  color: #94a3b8;
+}
+body.dark-mode .stitch-nav-link:hover i,
+body.dark-mode .stitch-nav-link.active i {
+  color: #818cf8;
+}
+
+body.dark-mode .btn-user-stitch {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+body.dark-mode .btn-user-stitch:hover {
+  background: #334155 !important;
+  border-color: #475569 !important;
 }
 
 body.dark-mode .btn-icon-stitch {

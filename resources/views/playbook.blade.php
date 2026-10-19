@@ -370,6 +370,11 @@
                                         <td>End-to-end family circle access control &amp; zero public leakage</td>
                                     </tr>
                                     <tr>
+                                        <td class="fw-bold text-primary">Family Hashtags &amp; Memory Pills</td>
+                                        <td>Family code, tag slug, usage count, polymorphic target links (post/reel/image/journal)</td>
+                                        <td>Strict family-level boundary partitioning ($O(1)$ lookups) &amp; zero public indexing</td>
+                                    </tr>
+                                    <tr>
                                         <td class="fw-bold text-primary">Encrypted Photo Vault</td>
                                         <td>Secure media assets, author attribution, circle visibility scope</td>
                                         <td>Hardware-grade encrypted asset storage &amp; revocable access</td>
@@ -453,6 +458,14 @@
                             </div>
                             <p class="text-slate-500 small mb-0">Relatives choose between 6-digit email verification codes on sign-in, 1-tap FaceID/TouchID passkeys, or streamlined direct sign-in from their Privacy settings.</p>
                         </div>
+
+                        <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <strong class="text-slate-900 small">5. Default Public Directory Discovery &amp; Opt-Out Control</strong>
+                                <span class="badge bg-success text-white rounded-pill px-2 py-1"><i class="fas fa-globe me-1"></i>PUBLIC BY DEFAULT</span>
+                            </div>
+                            <p class="text-slate-500 small mb-0">All registered members default to Public profile visibility and active directory searchability so relatives can effortlessly discover and connect with them, with 1-click controls to switch to Family Only or Private anytime.</p>
+                        </div>
                     </div>
 
                     <!-- Live HMAC Anti-Tamper Invite Generator -->
@@ -515,13 +528,13 @@
         },
         {
             num: 4,
-            title: "Stage 4: Family Reels Studio, Adaptive Cinema Player, Sunday Trivia & Time Capsules",
+            title: "Stage 4: Family Reels Studio, Private Family Hashtags, Smart Memory Pills & Sunday Trivia",
             route: "/reels",
-            desc: "Relatives publish short-form milestone videos with an interactive Cover Frame Scrubber and Adaptive Cinema Aspect Engine (preserving both 9:16 portrait and 16:9 landscape celebrations without distortion), react with celebratory emojis, play weekly Sunday Family Trivia, and seal milestone time capsules.",
+            desc: "Relatives publish short-form milestone videos and feed chronicles tagged with interactive Private Family Hashtags and Smart Memory Pills (enabling 1-tap episodic memory stream filtering across years of family moments without public leakage), play weekly Sunday Family Trivia, and seal milestone time capsules.",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "Family Reels Sanctuary, Celebratory Reactions, Trivia Polls & Time Capsules",
-            compliance: "Zero-Distortion Media Rendering & Ad-Free Family Privacy"
+            db: "Family Reels Sanctuary, Family Hashtags, Memory Links, Trivia Polls & Time Capsules",
+            compliance: "Zero-Distortion Media Rendering & Strict Multi-Tenant Family Tag Isolation"
         },
         {
             num: 5,

@@ -135,13 +135,13 @@
             });
         }
 
-        // No Swal: reveal the inline banner if one exists, else alert().
+        // No Swal: reveal the inline banner if one exists, else swalAlert.
         var el = opts.el || document.querySelector('[id$="_notification"]');
         if (el) {
             el.style.display = 'block';
             el.textContent = message;
         } else {
-            window.alert(message);
+            (window.swalAlert || window.alert)(message);
         }
     };
 

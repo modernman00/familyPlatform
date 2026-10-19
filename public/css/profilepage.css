@@ -40,7 +40,7 @@ body {
     radial-gradient(at 50% 100%, var(--bg-radial-3) 0px, transparent 50%);
   background-attachment: fixed;
   color: var(--text-color);
-  font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
   padding: 0;
@@ -1096,8 +1096,19 @@ body {
 }
 
 /* Facebook Layout Redesign overrides */
-body, h1, h2, h3, h4, h5, h6, p, span, button, input {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+body, h1, h2, h3, h4, h5, h6, p, span, button, input, textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+}
+
+.comment-bubble-text,
+.comment-text,
+.reel-comment-text,
+.reaction-emoji-btn,
+.reaction-count-pill,
+.reaction-preview,
+.reaction-option {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+  font-variant-emoji: emoji;
 }
 
 .hover-bg-light {

@@ -149,7 +149,7 @@ if (addVideoBtn && videoContainer) {
 
             // Cap at 100MB
             if (file.size > 100 * 1024 * 1024) {
-                alert('Video size exceeds 100MB. Please select a shorter video clip.');
+                (window.swalError || alert)('Video size exceeds 100MB. Please select a shorter video clip.');
                 videoDirectFileInput.value = '';
                 return;
             }
@@ -279,13 +279,13 @@ if (addVideoBtn && videoContainer) {
                             postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${streamUrl}` : streamUrl;
                         }
                     } else {
-                        alert('Cloudflare upload error. Please try again.');
+                        (window.swalError || alert)('Cloudflare upload error. Please try again.');
                         if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
                     }
                 };
 
                 xhr.onerror = () => {
-                    alert('Network error during video upload. Please check your internet connection.');
+                    (window.swalError || alert)('Network error during video upload. Please check your internet connection.');
                     if (videoUploadProgressWrapper) videoUploadProgressWrapper.classList.add('d-none');
                 };
 

@@ -397,6 +397,13 @@ final class PostMessage
                 identifierAnswer: $postNo
             );
 
+            // Clean up family hashtag links for deleted post
+            try {
+                \App\services\HashtagService::deleteLinksForTarget('post', (string)$postNo);
+            } catch (\Throwable $th) {
+                error_log('[PostMessage::deletePost hashtags] ' . $th->getMessage());
+            }
+
             Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'delete-post', ['postNo' => $postNo]);
 
             msgSuccess(200, "post deleted successfully");
@@ -428,13 +435,28 @@ final class PostMessage
             $rawInput = file_get_contents('php://input');
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
             $cleanMessage = checkInput($input['postMessage'] ?? null) ?? '';
+            $cleanMessageStr = is_string($cleanMessage) ? $cleanMessage : '';
 
             (new Update('post'))->updateTable(
                 column: 'postMessage',
-                columnAnswer: $cleanMessage,
+                columnAnswer: $cleanMessageStr,
                 identifier: 'post_no',
                 identifierAnswer: $postNo
             );
+
+            // Re-synchronise family hashtags
+            try {
+                $famCode = (string)($post['postFamCode'] ?? ($_SESSION['famCode'] ?? ''));
+                \App\services\HashtagService::syncHashtags(
+                    $famCode,
+                    'post',
+                    (string)$postNo,
+                    (string)$userId,
+                    $cleanMessageStr
+                );
+            } catch (\Throwable $th) {
+                error_log('[PostMessage::updatePost hashtags] ' . $th->getMessage());
+            }
 
             Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'update-post', [
                 'postNo' => $postNo,

@@ -86,6 +86,7 @@ final class ProfilePage extends ProcessImg
                 'totalFamilyMembers' => $data['totalFamilyMembers'],
                 'unclaimedMatch' => $data['unclaimedMatch'] ?? null,
                 'pendingFamilyRequests' => $data['pendingFamilyRequests'] ?? [],
+                'pendingMigrations' => $data['pendingMigrations'] ?? [],
                 'recentReels' => $recentReels,
                 'suggestedKin' => $suggestedKin
             ]);
@@ -229,6 +230,21 @@ final class ProfilePage extends ProcessImg
                     \App\controller\members\PostMessage::getNewPostPusher($result);
                 } catch (\Throwable $th) {
                     error_log((string) $th);
+                }
+
+                // Synchronise family hashtags & memory pills
+                try {
+                    $famCode = (string)($_SESSION['famCode'] ?? '');
+                    $authorIdStr = is_string($id) ? $id : (string)($_SESSION['id'] ?? '');
+                    \App\services\HashtagService::syncHashtags(
+                        $famCode,
+                        'post',
+                        (string)$result,
+                        $authorIdStr,
+                        (string)$postMessage
+                    );
+                } catch (\Throwable $th) {
+                    error_log('[ProfilePage::post hashtags] ' . $th->getMessage());
                 }
 
                 // Return the full post row (not just its id) so the composer can prepend it

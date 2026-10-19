@@ -1,9 +1,9 @@
 <div class="modal fade" id="timeCapsuleModal" tabindex="-1" aria-labelledby="timeCapsuleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
-            <div class="modal-header border-0 px-4 pt-4 pb-2" style="background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-bottom: 1px solid rgba(217, 70, 239, 0.15) !important;">
+            <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%); border-bottom: 1px solid rgba(217, 70, 239, 0.15) !important;">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-primary shadow-sm" style="width: 48px; height: 48px; background: #f0abfc; font-size: 1.4rem;">
                         <i class="bi bi-hourglass-split text-dark"></i>
@@ -20,7 +20,7 @@
             </div>
 
             <!-- Vault Mode Nav (Pills) -->
-            <div class="px-4 pt-3 pb-2 border-bottom bg-light d-flex gap-2">
+            <div class="px-4 pt-3 pb-2 border-bottom bg-light d-flex gap-2 flex-shrink-0">
                 <button type="button" class="btn btn-sm px-3 py-1.5 fw-bold rounded-pill" id="tabBtnViewVault" style="background: #1e293b; color: #ffffff;" onclick="switchCapsuleTab('view')">
                     <i class="bi bi-safe2 me-1"></i> Family Vault
                 </button>
@@ -29,7 +29,7 @@
                 </button>
             </div>
 
-            <div class="modal-body px-4 py-3">
+            <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 <!-- VIEW TAB -->
                 <div id="capsuleViewTab">
                     <div id="capsulesLoadingState" class="text-center py-5">
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between">
+            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex justify-content-between flex-shrink-0">
                 <span class="text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i> Multi-generational preservation
                 </span>
@@ -258,16 +258,19 @@
         .then(res => res.json())
         .then(res => {
             if (res.status !== 'success') {
-                alert(res.message || 'Failed to seal capsule.');
+                (window.swalError || alert)(res.message || 'Failed to seal capsule.');
                 return;
             }
             form.reset();
             capsulesLoaded = false;
             loadCapsules();
             switchCapsuleTab('view');
+            if (window.swalSuccess) {
+                window.swalSuccess('Time capsule safely sealed in vault! ⏳');
+            }
         })
         .catch(err => {
-            alert('A network error occurred.');
+            (window.swalError || alert)('A network error occurred.');
         })
         .finally(() => {
             if (btn) {

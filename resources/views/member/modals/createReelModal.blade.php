@@ -2,9 +2,9 @@
     $reelsExpDays = \App\model\Reel::getExpirationDays();
 @endphp
 <div class="modal fade" id="createReelModal" tabindex="-1" aria-labelledby="createReelModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
-            <div class="modal-header border-0 bg-light px-4 pt-4 pb-2">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 bg-light px-4 pt-4 pb-2 flex-shrink-0">
                 <div class="d-flex align-items-center gap-2">
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-primary" style="width: 44px; height: 44px; background: #e0e7ff; font-size: 1.3rem;">
                         <i class="bi bi-camera-reels-fill"></i>
@@ -17,11 +17,11 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="createReelForm" enctype="multipart/form-data">
+            <form id="createReelForm" enctype="multipart/form-data" class="d-flex flex-column" style="min-height: 0; flex: 1 1 auto; overflow: hidden; margin: 0;">
     @include('csrf')
                 <input type="hidden" id="reelThumbnailDataInput" name="thumbnail_data">
                 <input type="hidden" id="reelAspectRatioInput" name="aspect_ratio" value="9:16">
-                <div class="modal-body px-4 py-3">
+                <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                     
                     <!-- Drag and Drop Video Dropzone -->
                     <div class="mb-3">
@@ -119,7 +119,7 @@
 
                 </div>
 
-                <div class="modal-footer border-0 px-4 pb-4 pt-1">
+                <div class="modal-footer border-0 px-4 pb-4 pt-1 flex-shrink-0">
                     <button type="button" class="btn btn-light px-3 py-2 fw-semibold" style="border-radius: 12px; min-height: 42px;" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary fw-semibold px-4 py-2 shadow-sm" style="border-radius: 12px; min-height: 42px;" id="btnSubmitReel">
                         <i class="bi bi-camera-video-fill me-1"></i> Publish Reel

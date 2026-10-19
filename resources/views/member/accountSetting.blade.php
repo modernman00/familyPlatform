@@ -756,10 +756,10 @@
 
                 <div class="mb-4 mt-4">
                   <label class="form-label fw-bold">Profile Visibility</label>
-                  <select class="form-select" name="profile_visibility" style="background-color: #ffffff;">
-                    <option value="Private" {{ ($accountData['profile_visibility'] ?? 'Private') === 'Private' ? 'selected' : '' }}>Private</option>
-                    <option value="Public" {{ ($accountData['profile_visibility'] ?? '') === 'Public' ? 'selected' : '' }}>Public</option>
+                  <select class="form-select" name="profile_visibility" id="profileVisibilitySelect" style="background-color: #ffffff;">
+                    <option value="Public" {{ ($accountData['profile_visibility'] ?? 'Public') === 'Public' ? 'selected' : '' }}>Public</option>
                     <option value="Family Only" {{ ($accountData['profile_visibility'] ?? '') === 'Family Only' ? 'selected' : '' }}>Family Only</option>
+                    <option value="Private" {{ ($accountData['profile_visibility'] ?? '') === 'Private' ? 'selected' : '' }}>Private</option>
                   </select>
                 </div>
 
@@ -1092,6 +1092,21 @@
         }
       });
     });
+
+    // Keep Show My Profile toggle synchronized when Profile Visibility dropdown changes
+    const profileVisSelect = document.getElementById('profileVisibilitySelect');
+    const showMyProfileCheckbox = document.querySelector('#privacyForm input[name="show_my_profile"]');
+    if (profileVisSelect && showMyProfileCheckbox) {
+      profileVisSelect.addEventListener('change', function() {
+        if (this.value === 'Public') {
+          showMyProfileCheckbox.checked = true;
+          showMyProfileCheckbox.dispatchEvent(new Event('change'));
+        } else if (this.value === 'Private') {
+          showMyProfileCheckbox.checked = false;
+          showMyProfileCheckbox.dispatchEvent(new Event('change'));
+        }
+      });
+    }
 
     // 1. Copy Family Code
     const copyBtn = document.getElementById('copyCurrentFamCodeBtn');
@@ -1677,12 +1692,12 @@
           if (data.status === 'success' || data.status === 200) {
             window.location.reload();
           } else {
-            alert(data.message || 'Failed to revoke device.');
+            (window.swalError || alert)(data.message || 'Failed to revoke device.');
             btn.disabled = false;
             btn.textContent = originalText;
           }
         } catch (e) {
-          alert('Network error while revoking device.');
+          (window.swalError || alert)('Network error while revoking device.');
           btn.disabled = false;
           btn.textContent = originalText;
         }

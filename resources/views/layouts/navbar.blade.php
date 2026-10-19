@@ -5,7 +5,7 @@
         <!-- Brand Logo & Typography -->
         <a class="navbar-brand d-flex align-items-center gap-2" href="/profilePage" style="text-decoration: none;">
             <div class="brand-logo-icon-wrapper">
-                <img src="{{ $_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/favicon/android-chrome-192x192.png' }}" alt="FamilyPlatform Logo" width="32" height="32" style="width: 32px; height: 32px; border-radius: 7px; object-fit: contain; display: block;">
+                <img src="{{ $_ENV['APP_LOGO'] ?? getenv('APP_LOGO') ?: '/public/img/logo/logo-mark.png' }}" alt="FamilyPlatform Logo" width="34" height="34" style="width: 34px; height: 34px; border-radius: 9px; object-fit: contain; display: block;">
             </div>
             <div class="brand-text-container">
                 <span class="brand-name-family">Family</span><span class="brand-name-platform">Platform</span>
@@ -25,22 +25,22 @@
                 </li>
                 <li class="nav-item familyTreeNav">
                     <a class="nav-link stitch-nav-link" href="/organogram/{{ $_SESSION['id'] ?? '' }}?mode=canvas">
-                        <i class="bi bi-diagram-3-fill me-1"></i> Family Tree
+                        <i class="bi bi-diagram-3-fill me-1"></i> Tree
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link stitch-nav-link" href="/familyStudio">
-                        <i class="bi bi-stars text-warning me-1"></i> Family Studio
+                        <i class="bi bi-stars me-1"></i> Studio
                     </a>
                 </li>
                 <li class="nav-item familyJournalNav">
                     <a class="nav-link stitch-nav-link" href="/familyJournal">
-                        <i class="bi bi-journal-bookmark-fill text-success me-1"></i> Family Journal
+                        <i class="bi bi-journal-bookmark-fill me-1"></i> Journal
                     </a>
                 </li>
                 <li class="nav-item reelsNav">
                     <a class="nav-link stitch-nav-link" href="/reels">
-                        <i class="bi bi-camera-reels-fill text-danger me-1"></i> Reels
+                        <i class="bi bi-camera-reels-fill me-1"></i> Reels
                     </a>
                 </li>
                 <li class="nav-item allMembersNav">
@@ -88,11 +88,11 @@
                     </div>
                 </div>
 
-                <!-- User Profile Dropdown -->
+                <!-- User Profile Dropdown (Refined Capsule with Avatar Monogram) -->
                 <div class="dropdown">
                     <button class="btn btn-user-stitch dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle fs-5"></i>
-                        <span class="fw-semibold text-truncate" style="max-width: 140px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
+                        <span class="user-avatar-initials">{{ strtoupper(substr($_SESSION['fullName'] ?? 'A', 0, 1)) }}</span>
+                        <span class="fw-semibold text-truncate" style="max-width: 130px;">{{ ucwords(strtolower($_SESSION['fullName'] ?? 'Account')) }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-2" aria-labelledby="userMenu" style="border-radius: 16px; min-width: 200px;">
                         <li>

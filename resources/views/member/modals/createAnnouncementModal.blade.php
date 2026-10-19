@@ -1,8 +1,8 @@
 <!-- Modal: Create Family Announcement -->
 <div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-labelledby="createAnnouncementModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="modal-header border-0 pb-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 pb-0 flex-shrink-0" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff;">
                 <div class="d-flex align-items-center gap-2">
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255,255,255,0.2);">
                         <i class="bi bi-megaphone-fill text-warning"></i>
@@ -17,9 +17,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="familyAnnouncementForm">
+            <form id="familyAnnouncementForm" class="d-flex flex-column" style="min-height: 0; flex: 1 1 auto; overflow: hidden; margin: 0;">
                 @include('csrf')
-                <div class="modal-body p-4">
+                <div class="modal-body p-4" style="overflow-y: auto;">
                     <!-- Title -->
                     <div class="mb-3">
                         <label for="announcementTitle" class="form-label fw-bold small text-dark">Announcement Title <span class="text-danger">*</span></label>
@@ -62,7 +62,7 @@
                     </div>
                 </div>
 
-                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <div class="modal-footer border-0 pt-0 px-4 pb-4 flex-shrink-0">
                     <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" id="btnBroadcastAnnouncement" class="btn btn-primary rounded-pill px-4 fw-bold" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
                         <i class="bi bi-broadcast me-1"></i> Broadcast Announcement
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const csrfToken = annForm.querySelector('input[name="token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
         if (!title || !message) {
-            alert('Please provide both title and message.');
+            (window.swalWarning || alert)('Please provide both title and message.');
             return;
         }
 
@@ -125,11 +125,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (modal) modal.hide();
                 annForm.reset();
 
-                // Alert and reload feed to show pinned bulletin
-                alert('Family announcement broadcasted!');
-                window.location.reload();
+                if (window.swalSuccess) {
+                    window.swalSuccess('Family announcement broadcasted! 📢', false).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    (window.swalToast || alert)('Family announcement broadcasted!');
+                    window.location.reload();
+                }
             } else {
-                alert(data.message || 'Failed to broadcast announcement.');
+                (window.swalError || alert)(data.message || 'Failed to broadcast announcement.');
                 if (window.FamilyPlatformSpinner) {
                     window.FamilyPlatformSpinner.stop(submitBtn);
                 } else {
@@ -139,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(err => {
             console.error(err);
-            alert('A network error occurred.');
+            (window.swalError || alert)('A network error occurred.');
             if (window.FamilyPlatformSpinner) {
                 window.FamilyPlatformSpinner.stop(submitBtn);
             } else {

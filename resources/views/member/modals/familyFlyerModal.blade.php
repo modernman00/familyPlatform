@@ -1,9 +1,9 @@
 <div class="modal fade" id="familyFlyerModal" tabindex="-1" aria-labelledby="familyFlyerModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff;">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; background: #ffffff; max-height: calc(100vh - 3.5rem);">
             @include('csrf')
             <!-- Modal Header -->
-            <div class="modal-header border-0 px-4 pt-4 pb-2" style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border-bottom: 1px solid rgba(245, 158, 11, 0.15) !important;">
+            <div class="modal-header border-0 px-4 pt-4 pb-2 flex-shrink-0" style="background: linear-gradient(135deg, #fefce8 0%, #fef3c7 100%); border-bottom: 1px solid rgba(245, 158, 11, 0.15) !important;">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center text-warning shadow-sm" style="width: 48px; height: 48px; background: #fde68a; font-size: 1.4rem;">
                         <i class="bi bi-card-image"></i>
@@ -19,7 +19,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body px-4 py-3">
+            <div class="modal-body px-4 py-3" style="overflow-y: auto;">
                 <!-- Flyer Canvas Preview Wrapper -->
                 <div class="card border-0 mb-3 shadow-sm overflow-hidden" style="border-radius: 18px; background: #06170e;">
                     <div class="d-flex justify-content-center align-items-center p-2 p-md-3">
@@ -56,7 +56,7 @@
             </div>
 
             <!-- Modal Footer Actions -->
-            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex flex-column flex-sm-row justify-content-between gap-2">
+            <div class="modal-footer border-0 bg-light px-4 py-3 d-flex flex-column flex-sm-row justify-content-between gap-2 flex-shrink-0">
                 <span class="text-muted small">
                     <i class="bi bi-shield-check text-success me-1"></i> Client-side rendering • Zero PII leaked
                 </span>

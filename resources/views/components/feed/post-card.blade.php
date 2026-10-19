@@ -51,7 +51,7 @@
   <!-- Post Text -->
   <template x-if="post.displayMessage || (!post.video && post.postMessage)">
     <div class="post-content px-1 mb-3">
-      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-text="post.displayMessage || post.postMessage"></p>
+      <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
     </div>
   </template>
 
@@ -273,9 +273,9 @@
           <div class="flex-grow-1">
             <!-- Comment Bubble -->
             <template x-if="editingCommentNo !== c.comment_no">
-              <div class="px-3 py-2 rounded-3" style="background-color: #f0f2f5; display: inline-block; max-width: 90%;">
+              <div class="px-3 py-2 rounded-3 comment-bubble-box" style="background-color: #f0f2f5; display: inline-block; max-width: 90%;">
                 <div class="fw-semibold text-dark" style="font-size: 0.8125rem; line-height: 1.2;" x-text="c.fullName"></div>
-                <div class="mt-1" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35;" x-text="c.comment"></div>
+                <div class="mt-1 comment-bubble-text" style="font-size: 0.875rem; color: #050505; word-break: break-word; line-height: 1.35; font-variant-emoji: emoji;" x-text="c.comment"></div>
               </div>
             </template>
 

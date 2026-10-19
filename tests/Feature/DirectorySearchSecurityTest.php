@@ -223,7 +223,7 @@ final class DirectorySearchSecurityTest extends TestCase
 
     public function test_get_all_users_data_returns_directory_members_outside_family_respecting_privacy(): void
     {
-        $results = $this->model->getAllUsersData($this->callerId, $this->callerFamCode, 200, 0);
+        $results = $this->model->getAllUsersData($this->callerId, $this->callerFamCode, 1000, 0);
 
         $ids = array_column($results, 'id');
 
@@ -322,6 +322,53 @@ final class DirectorySearchSecurityTest extends TestCase
         $this->assertTrue($canViewAdmin, 'Super Admin session must be allowed to view any member profile.');
 
         unset($_SESSION['id'], $_SESSION['auth']);
+    }
+
+    public function test_registration_and_base_controller_default_profile_visibility_to_public(): void
+    {
+        // 1. RegisterTableData defaults
+        $cleanData = [
+            'id' => 'TEST_PUB_' . bin2hex(random_bytes(3)),
+            'firstName' => 'PublicFirst',
+            'lastName' => 'PublicLast',
+            'email' => 'public@test.com',
+            'mobile' => '+447000000000',
+            'country' => 'United Kingdom',
+        ];
+        $tables = \App\model\RegisterTableData::createRegisterTable($cleanData);
+        $this->assertArrayHasKey('contact', $tables);
+        $this->assertSame('Public', $tables['contact']['profile_visibility'] ?? null);
+        $this->assertSame('on', $tables['contact']['show_my_profile'] ?? null);
+
+        // 2. BaseController::formatPerson defaults
+        $ref = new \ReflectionMethod(\App\controller\BaseController::class, 'formatPerson');
+        $ref->setAccessible(true);
+        $person = $ref->invoke(null, [
+            'id' => $cleanData['id'],
+            'firstName' => $cleanData['firstName'],
+            'lastName' => $cleanData['lastName'],
+            'gender' => 'Male',
+        ]);
+        $this->assertIsArray($person);
+        $this->assertSame('Public', $person['profile_visibility'] ?? null);
+        $this->assertSame('on', $person['show_my_profile'] ?? null);
+
+        // 3. Database column defaults in contact table
+        $testContactId = 'CONTACT_DEF_' . bin2hex(random_bytes(3));
+        try {
+            $stmt = $this->pdo->prepare('INSERT INTO contact (id, email, country, mobile) VALUES (?, ?, ?, ?)');
+            $stmt->execute([$testContactId, 'testdef@example.com', 'UK', '+447111111111']);
+
+            $fetchStmt = $this->pdo->prepare('SELECT profile_visibility, show_my_profile FROM contact WHERE id = ?');
+            $fetchStmt->execute([$testContactId]);
+            $row = $fetchStmt->fetch(PDO::FETCH_ASSOC);
+
+            $this->assertIsArray($row);
+            $this->assertSame('Public', $row['profile_visibility'] ?? null);
+            $this->assertSame('on', $row['show_my_profile'] ?? null);
+        } finally {
+            $this->pdo->prepare('DELETE FROM contact WHERE id = ?')->execute([$testContactId]);
+        }
     }
 }
 

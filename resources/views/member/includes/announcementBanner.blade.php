@@ -92,12 +92,13 @@ function dismissAnnouncement(announcementId) {
                 setTimeout(() => card.remove(), 400);
             }
         } else {
-            alert(data.message || 'Unable to dismiss announcement.');
+            (window.swalError || alert)(data.message || 'Unable to dismiss announcement.');
         }
     })
     .catch(err => {
         console.error(err);
-        alert('Network error.');
+        (window.swalError || alert)('Network communication error.');
     });
 }
+
 </script>

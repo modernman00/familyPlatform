@@ -148,6 +148,168 @@ document.onclick = async (e) => {
 
       // redirect to 'allMembers/setProfile/'+userId
       window.location.href = `/organogram/${userId}`;
+    } else if (targetId.includes('nudgeMigrate')) {
+      const targetUserId = btn.getAttribute('data-target-id') || targetId.replace('nudgeMigrate', '');
+      const targetName = btn.getAttribute('data-target-name') || 'this relative';
+      const targetCode = btn.getAttribute('data-target-code') || '';
+
+      const { value: note, isConfirmed } = await Swal.fire({
+        title: `Nudge ${targetName}?`,
+        html: `
+          <p class="text-muted small mb-3">
+            They are currently registered under family code <strong>#${targetCode}</strong>.
+            Invite them to migrate to your family network so you can share your family tree, events, and memories.
+          </p>
+          <div class="form-group text-start">
+            <label for="swal-nudge-note" class="form-label small fw-semibold text-secondary">Optional Note:</label>
+            <textarea id="swal-nudge-note" class="form-control form-control-sm" rows="2" placeholder="e.g. Hi! I saw your profile in the directory. Let's unite our family trees!"></textarea>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#7c3aed',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="bi bi-send-check me-1"></i> Send Nudge',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+          const noteEl = document.getElementById('swal-nudge-note');
+          return noteEl ? noteEl.value.trim() : '';
+        }
+      });
+
+      if (isConfirmed) {
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
+
+        try {
+          const csrfToken = getCsrfToken();
+          const response = await axios.post('/api/family-migration/nudge', {
+            target_user_id: targetUserId,
+            note: note || null
+          }, {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'X-XSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.data && response.data.success) {
+            btn.innerHTML = '<i class="bi bi-check2-circle text-success me-1"></i> Nudge Sent';
+            btn.classList.remove('btn-stitch-tonal');
+            btn.classList.add('btn-outline-success');
+            Swal.fire({
+              icon: 'success',
+              title: 'Nudge Sent!',
+              text: `We have sent a migration invitation to ${targetName}. They will receive a notification to review and accept.`,
+              confirmButtonColor: '#10b981'
+            });
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            Swal.fire({
+              icon: 'warning',
+              title: 'Notice',
+              text: response.data?.message || response.data?.error || 'Unable to send nudge.',
+              confirmButtonColor: '#f59e0b'
+            });
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          const errMsg = err.response?.data?.error || err.response?.data?.message || 'A network error occurred. Please try again.';
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errMsg,
+            confirmButtonColor: '#ef4444'
+          });
+        }
+      }
+    } else if (targetId.includes('requestMigrate')) {
+      const targetUserId = btn.getAttribute('data-target-id') || targetId.replace('requestMigrate', '');
+      const targetName = btn.getAttribute('data-target-name') || 'this family';
+      const targetCode = btn.getAttribute('data-target-code') || '';
+
+      const { value: note, isConfirmed } = await Swal.fire({
+        title: `Join Family #${targetCode}?`,
+        html: `
+          <p class="text-muted small mb-3">
+            Request to migrate your account into the <strong>#${targetCode}</strong> family network (${targetName}).
+            <br><br>
+            <span class="badge bg-primary text-white px-2 py-1"><i class="bi bi-info-circle me-1"></i> Subject to Family Approval</span>
+            <br>
+            <small class="text-muted mt-2 d-block">Existing members of family #${targetCode} will be notified to approve your transfer.</small>
+          </p>
+          <div class="form-group text-start">
+            <label for="swal-req-note" class="form-label small fw-semibold text-secondary">Optional Note / Kinship explanation:</label>
+            <textarea id="swal-req-note" class="form-control form-control-sm" rows="2" placeholder="e.g. Hello, I am relative to ${targetName}, registering to connect with our family!"></textarea>
+          </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<i class="bi bi-box-arrow-in-right me-1"></i> Submit Request',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+          const noteEl = document.getElementById('swal-req-note');
+          return noteEl ? noteEl.value.trim() : '';
+        }
+      });
+
+      if (isConfirmed) {
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Submitting...';
+
+        try {
+          const csrfToken = getCsrfToken();
+          const response = await axios.post('/api/family-migration/request', {
+            family_code: targetCode,
+            target_user_id: targetUserId,
+            note: note || null
+          }, {
+            headers: {
+              'X-CSRF-TOKEN': csrfToken,
+              'X-XSRF-TOKEN': csrfToken,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.data && response.data.success) {
+            btn.innerHTML = '<i class="bi bi-hourglass-split text-primary me-1"></i> Request Pending';
+            btn.classList.remove('btn-stitch-tonal');
+            btn.classList.add('btn-outline-primary');
+            Swal.fire({
+              icon: 'success',
+              title: 'Request Submitted!',
+              text: `Your migration request to family #${targetCode} has been sent! You will be notified as soon as a family member approves.`,
+              confirmButtonColor: '#2563eb'
+            });
+          } else {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            Swal.fire({
+              icon: 'warning',
+              title: 'Notice',
+              text: response.data?.message || response.data?.error || 'Unable to submit request.',
+              confirmButtonColor: '#f59e0b'
+            });
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          const errMsg = err.response?.data?.error || err.response?.data?.message || 'A network error occurred. Please try again.';
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errMsg,
+            confirmButtonColor: '#ef4444'
+          });
+        }
+      }
     }
     // else if (targetId.includes('deleteNotification')) {
     //   // Call the deleteNotification function to remove the notification

@@ -21,14 +21,23 @@ use Src\Db;
  */
 final class OnboardingLifecycleEngineTest extends TestCase
 {
-    private static string $userEmptyTree = 'USR_TEST_EMPTY_TREE_99';
-    private static string $userFullTree = 'USR_TEST_FULL_TREE_99';
-    private static string $userVoiceDone = 'USR_TEST_VOICE_DONE_99';
-    private static string $familyEmpty = 'TEST_FAM_LC_EMPTY_99';
-    private static string $familyFull = 'TEST_FAM_LC_FULL_99';
+    private static string $userEmptyTree;
+    private static string $userFullTree;
+    private static string $userVoiceDone;
+    private static string $familyEmpty;
+    private static string $familyFull;
+    private static string $familyVoice;
 
     public static function setUpBeforeClass(): void
     {
+        $suffix = '_' . substr(bin2hex(random_bytes(4)), 0, 8);
+        self::$userEmptyTree = 'USR_TEST_ET' . $suffix;
+        self::$userFullTree  = 'USR_TEST_FT' . $suffix;
+        self::$userVoiceDone = 'USR_TEST_VD' . $suffix;
+        self::$familyEmpty   = 'FAM_TEST_ET' . $suffix;
+        self::$familyFull    = 'FAM_TEST_FT' . $suffix;
+        self::$familyVoice   = 'FAM_TEST_VD' . $suffix;
+
         $db = Db::connect2();
         self::tearDownAfterClass();
 
@@ -84,13 +93,13 @@ final class OnboardingLifecycleEngineTest extends TestCase
             INSERT INTO personal (id, firstName, lastName, famCode, created_at)
             VALUES (?, 'Ayomide', 'TestVoice', ?, DATE_SUB(NOW(), INTERVAL 96 HOUR))
         ");
-        $insPers3->execute([self::$userVoiceDone, 'TEST_FAM_VOICE_DONE_99']);
+        $insPers3->execute([self::$userVoiceDone, self::$familyVoice]);
 
         $insNode3 = $db->prepare("
             INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level, voice_capsule_url)
-            VALUES ('TEST_FAM_VOICE_DONE_99', ?, 'Ayomide', 'TestVoice', 'Female', 0, 'https://storage.test/audio.mp3')
+            VALUES (?, ?, 'Ayomide', 'TestVoice', 'Female', 0, 'https://storage.test/audio.mp3')
         ");
-        $insNode3->execute([self::$userVoiceDone]);
+        $insNode3->execute([self::$familyVoice, self::$userVoiceDone]);
     }
 
     public static function tearDownAfterClass(): void
@@ -98,8 +107,8 @@ final class OnboardingLifecycleEngineTest extends TestCase
         $db = Db::connect2();
         $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id IN (?, ?, ?)")
             ->execute([self::$userEmptyTree, self::$userFullTree, self::$userVoiceDone]);
-        $db->prepare("DELETE FROM family_nodes WHERE family_code IN (?, ?, 'TEST_FAM_VOICE_DONE_99')")
-            ->execute([self::$familyEmpty, self::$familyFull]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code IN (?, ?, ?)")
+            ->execute([self::$familyEmpty, self::$familyFull, self::$familyVoice]);
         $db->prepare("DELETE FROM personal WHERE id IN (?, ?, ?)")
             ->execute([self::$userEmptyTree, self::$userFullTree, self::$userVoiceDone]);
         $db->prepare("DELETE FROM account WHERE id IN (?, ?, ?)")
@@ -215,4 +224,129 @@ final class OnboardingLifecycleEngineTest extends TestCase
         $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
         $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
     }
+
+    /**
+     * Test Day 14 Heritage Roots Dispatches and Smart Skips
+     */
+    public function testDay14HeritageRootsDispatchesAndSkips(): void
+    {
+        $testUserId = 'USR_TEST_D14_ROOTS';
+        $testFamCode = 'FAM_TEST_D14';
+        $db = Db::connect2();
+
+        $db->prepare("
+            INSERT INTO account (id, email, password, status, created_at)
+            VALUES (?, 'roots@test.com', 'hash', 'approved', DATE_SUB(NOW(), INTERVAL 16 DAY))
+        ")->execute([$testUserId]);
+
+        $db->prepare("
+            INSERT INTO personal (id, firstName, lastName, famCode, created_at)
+            VALUES (?, 'Kola', 'RootsTest', ?, DATE_SUB(NOW(), INTERVAL 16 DAY))
+        ")->execute([$testUserId, $testFamCode]);
+
+        // 1. Without origins, should process
+        $processed = OnboardingFollowupService::processDay14HeritageRoots(true, $testUserId);
+        $this->assertSame(1, $processed, 'User without documented origins should be eligible');
+
+        // 2. Add an origin birth place to simulate documented roots
+        $db->prepare("
+            INSERT INTO family_nodes (family_code, user_id, first_name, last_name, gender, generation_level, birth_place)
+            VALUES (?, ?, 'Kola', 'RootsTest', 'Male', 0, 'Abeokuta, Nigeria')
+        ")->execute([$testFamCode, $testUserId]);
+
+        // Run non-dry-run: should mark skipped_already_documented
+        $processedSkipped = OnboardingFollowupService::processDay14HeritageRoots(false, $testUserId);
+        $this->assertSame(0, $processedSkipped, 'User with origins documented must be skipped');
+
+        $stmt = $db->prepare("SELECT channel FROM user_lifecycle_events WHERE user_id = ? AND event_type = ?");
+        $stmt->execute([$testUserId, OnboardingFollowupService::EVENT_DAY14_ROOTS]);
+        $this->assertSame('skipped_already_documented', $stmt->fetchColumn());
+
+        // Cleanup
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM family_nodes WHERE family_code = ?")->execute([$testFamCode]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
+    }
+
+    /**
+     * Test Day 35 Time Capsule Dispatches and Smart Skips
+     */
+    public function testDay35TimeCapsuleDispatchesAndSkips(): void
+    {
+        $testUserId = 'USR_TEST_D35_CAPSULE';
+        $testFamCode = 'FAM_TEST_D35';
+        $db = Db::connect2();
+
+        $db->prepare("
+            INSERT INTO account (id, email, password, status, created_at)
+            VALUES (?, 'capsule@test.com', 'hash', 'approved', DATE_SUB(NOW(), INTERVAL 36 DAY))
+        ")->execute([$testUserId]);
+
+        $db->prepare("
+            INSERT INTO personal (id, firstName, lastName, famCode, created_at)
+            VALUES (?, 'Tariq', 'CapsuleTest', ?, DATE_SUB(NOW(), INTERVAL 36 DAY))
+        ")->execute([$testUserId, $testFamCode]);
+
+        // 1. Without capsule, should be eligible
+        $processed = OnboardingFollowupService::processDay35TimeCapsule(true, $testUserId);
+        $this->assertSame(1, $processed, 'User without time capsule should be eligible');
+
+        // 2. Add time capsule
+        $db->prepare("
+            INSERT INTO family_time_capsules (family_code, creator_id, recipient_name, title, message, unlock_date)
+            VALUES (?, ?, 'Junior', 'For 18th Birthday', 'Happy 18th', '2030-01-01')
+        ")->execute([$testFamCode, $testUserId]);
+
+        // Run non-dry-run: should mark skipped_already_created
+        $processedSkipped = OnboardingFollowupService::processDay35TimeCapsule(false, $testUserId);
+        $this->assertSame(0, $processedSkipped, 'User who created capsule must be skipped');
+
+        $stmt = $db->prepare("SELECT channel FROM user_lifecycle_events WHERE user_id = ? AND event_type = ?");
+        $stmt->execute([$testUserId, OnboardingFollowupService::EVENT_DAY35_CAPSULE]);
+        $this->assertSame('skipped_already_created', $stmt->fetchColumn());
+
+        // Cleanup
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM family_time_capsules WHERE creator_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
+    }
+
+    /**
+     * Test Day 60 Dynasty Snapshot Milestone Dispatches
+     */
+    public function testDay60DynastySnapshotDispatches(): void
+    {
+        $testUserId = 'USR_TEST_D60_DYNASTY';
+        $testFamCode = 'FAM_TEST_D60';
+        $db = Db::connect2();
+
+        $db->prepare("
+            INSERT INTO account (id, email, password, status, created_at)
+            VALUES (?, 'dynasty@test.com', 'hash', 'approved', DATE_SUB(NOW(), INTERVAL 62 DAY))
+        ")->execute([$testUserId]);
+
+        $db->prepare("
+            INSERT INTO personal (id, firstName, lastName, famCode, created_at)
+            VALUES (?, 'Bisi', 'DynastyTest', ?, DATE_SUB(NOW(), INTERVAL 62 DAY))
+        ")->execute([$testUserId, $testFamCode]);
+
+        $processed = OnboardingFollowupService::processDay60DynastySnapshot(false, $testUserId);
+        $this->assertSame(1, $processed, 'User reaching 60 days should receive dynasty milestone');
+
+        $stmt = $db->prepare("SELECT channel FROM user_lifecycle_events WHERE user_id = ? AND event_type = ?");
+        $stmt->execute([$testUserId, OnboardingFollowupService::EVENT_DAY60_DYNASTY]);
+        $this->assertSame('omni', $stmt->fetchColumn());
+
+        // Idempotency: second run should process 0
+        $secondRun = OnboardingFollowupService::processDay60DynastySnapshot(false, $testUserId);
+        $this->assertSame(0, $secondRun, 'Second run must process 0 due to idempotency');
+
+        // Cleanup
+        $db->prepare("DELETE FROM user_lifecycle_events WHERE user_id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM personal WHERE id = ?")->execute([$testUserId]);
+        $db->prepare("DELETE FROM account WHERE id = ?")->execute([$testUserId]);
+    }
 }
+

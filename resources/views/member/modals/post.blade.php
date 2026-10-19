@@ -2,17 +2,17 @@
     $token = $_SESSION['token'] ?? '';
 @endphp
 <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
-    <div class="modal-dialog">
-        <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg);">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg); max-height: calc(100vh - 3.5rem);">
 
-            <div class="modal-header border-bottom py-3 px-4 align-items-center position-relative">
+            <div class="modal-header border-bottom py-3 px-4 align-items-center position-relative flex-shrink-0">
                 <h5 class="modal-title fw-bold w-100 text-center mb-0" id="postModalLabel" style="color: var(--text-color); font-size: 1.15rem;">
                     Create Post
                 </h5>
                 <button type="button" class="btn-close position-absolute end-0 me-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
             </div>
 
-            <div class="modal-body px-4 pt-3 pb-4">
+            <div class="modal-body px-4 pt-3 pb-4" style="overflow-y: auto;">
     
                 <div class="d-flex align-items-center mb-3">
                     <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
@@ -32,9 +32,39 @@
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
 
-                    <textarea class="form-control mb-3 border-0 bg-transparent shadow-none px-0" data-emoji-target
+                    <textarea class="form-control mb-2 border-0 bg-transparent shadow-none px-0" data-emoji-target
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
                         rows="4" style="font-size: 1.15rem; color: var(--text-color); resize: none;"></textarea>
+
+                    <!-- Smart Family Hashtags Quick Pill Suggestions -->
+                    <div class="family-hashtag-quick-tray mb-3 px-1">
+                        <div class="d-flex align-items-center justify-content-between mb-1.5">
+                            <span class="text-muted small fw-medium" style="font-size: 0.76rem;">
+                                <i class="bi bi-hash text-primary"></i> Family Milestones &amp; Topics:
+                            </span>
+                            <span class="text-muted small" style="font-size: 0.72rem;">Tap to add</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1.5 align-items-center" id="composerHashtagPillContainer">
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#SundayDinner')">
+                                #SundayDinner
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#FirstSteps')">
+                                #FirstSteps
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#FamilyReunion')">
+                                #FamilyReunion
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#Throwback')">
+                                #Throwback
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#HeritageRecipe')">
+                                #HeritageRecipe
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#Milestone')">
+                                #Milestone
+                            </button>
+                        </div>
+                    </div>
 
                     <small id="editPostNotice" class="d-none text-muted d-block mb-2 px-1">Editing text only — images and polls can't be changed here.</small>
 
@@ -196,6 +226,19 @@
 </div>
 
 <script>
+window.insertHashtagIntoComposer = function(tag) {
+    const textarea = document.getElementById('postMessage');
+    if (!textarea) return;
+    const currentVal = textarea.value.trim();
+    if (currentVal.includes(tag)) {
+        textarea.focus();
+        return;
+    }
+    textarea.value = currentVal ? currentVal + ' ' + tag + ' ' : tag + ' ';
+    textarea.focus();
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
 window.applyTriviaTemplate = function(type) {
     const qInput = document.querySelector('input[name="poll_question"]');
     const msgInput = document.getElementById('postMessage');

@@ -9,6 +9,7 @@
 #   1. PHP Syntax Check (php -l)
 #   2. 10 Golden Engineering Must-Haves Scanner
 #   3. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Suite
+#   4. Database Migration Engine & Ledger Health Check
 #
 # Exit Code: 0 = PASS, 1 = BLOCKED
 # ==============================================================================
@@ -39,8 +40,16 @@ echo ""
 
 FAILURES=0
 
+# 0. Standard 18 Zero-Symlink Invariant Fail-Fast Guard
+if [ -L "vendor/modernman00/shared-lib" ] || [ -L "node_modules/@modernman00/shared-js-lib" ]; then
+    echo -e "${RED}❌ FATAL GOVERNANCE BREACH: Standard 18 Zero-Symlink Invariant Violated!${NC}"
+    echo -e "${RED}   Symlinks in vendor/ or node_modules/ are strictly prohibited in application workspaces.${NC}"
+    echo -e "${RED}   Run 'manage-shared.sh --unlink' or install real versioned packages.${NC}"
+    exit 1
+fi
+
 # 1. PHP Syntax Linting
-echo -e "${BOLD}${CYAN}[IN-FLIGHT 1/3] Checking PHP Syntax (php -l)...${NC}"
+echo -e "${BOLD}${CYAN}[IN-FLIGHT 1/4] Checking PHP Syntax (php -l)...${NC}"
 SYNTAX_ERRORS=0
 while IFS= read -r file; do
     if ! php -l "$file" > /dev/null 2>&1; then
@@ -59,7 +68,7 @@ fi
 echo ""
 
 # 2. Engineering Must-Haves
-echo -e "${BOLD}${CYAN}[IN-FLIGHT 2/3] Checking 10 Golden Engineering Invariants...${NC}"
+echo -e "${BOLD}${CYAN}[IN-FLIGHT 2/4] Checking 10 Golden Engineering Invariants...${NC}"
 if [ -f "scripts/verify_engineering_must_haves.php" ]; then
     if php scripts/verify_engineering_must_haves.php; then
         echo -e "${GREEN}  ✅ In-Flight 2 Passed: All Engineering Must-Haves verified.${NC}"
@@ -71,7 +80,7 @@ fi
 echo ""
 
 # 3. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Suite
-echo -e "${BOLD}${CYAN}[IN-FLIGHT 3/3] Executing Dr. Viktor Kovács Adversarial Exploit Attacks...${NC}"
+echo -e "${BOLD}${CYAN}[IN-FLIGHT 3/4] Executing Dr. Viktor Kovács Adversarial Exploit Attacks...${NC}"
 ADVERSARIAL_PASSED=1
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     bash scripts/dast-guest-builder-idor.sh || ADVERSARIAL_PASSED=0
@@ -91,6 +100,25 @@ if [ "$ADVERSARIAL_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ In-Flight 3 Passed: Dr. Viktor Kovács & Marcus adversarial attacks neutralized (100% immune).${NC}"
 else
     echo -e "${RED}  ❌ In-Flight 3 Failed: Unhandled exploit or security vulnerability detected!${NC}"
+    FAILURES=$((FAILURES + 1))
+fi
+echo ""
+
+# 4. Database Migration Engine & Ledger Health
+echo -e "${BOLD}${CYAN}[IN-FLIGHT 4/4] Checking Database Migration Engine & Ledger Health...${NC}"
+if [ -f "scripts/run_migrations.php" ]; then
+    if php scripts/run_migrations.php --status > /tmp/_migration_status.txt 2>&1; then
+        cat /tmp/_migration_status.txt
+        echo -e "${GREEN}  ✅ In-Flight 4 Passed: Database migration engine and ledger are healthy.${NC}"
+        rm -f /tmp/_migration_status.txt
+    else
+        cat /tmp/_migration_status.txt
+        rm -f /tmp/_migration_status.txt
+        echo -e "${RED}  ❌ In-Flight 4 Failed: Database migration engine reported errors!${NC}"
+        FAILURES=$((FAILURES + 1))
+    fi
+else
+    echo -e "${RED}  ❌ In-Flight 4 Failed: scripts/run_migrations.php not found!${NC}"
     FAILURES=$((FAILURES + 1))
 fi
 echo ""

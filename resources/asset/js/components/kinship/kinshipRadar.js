@@ -70,7 +70,7 @@ function bindKinshipRadarContainer(container) {
                 console.error('[KinshipRadar] Connect error:', error);
                 connectBtn.disabled = false;
                 connectBtn.innerHTML = '<i class="bi bi-person-plus-fill me-1"></i> Connect';
-                alert('Could not send kinship request. Please try again.');
+                (window.swalError || alert)('Could not send kinship request. Please try again.');
             }
             return;
         }

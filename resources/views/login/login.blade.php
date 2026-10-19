@@ -427,9 +427,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 passkeyBtn.disabled = false;
                 passkeyBtn.innerHTML = originalHtml;
                 const msg = (err.name === 'NotAllowedError') 
-                    ? 'Biometric prompt was canceled or timed out.' 
+                    ? 'Biometric prompt was cancelled or timed out.' 
                     : (err.message || 'Biometric login failed. Please use your password.');
-                alert(msg);
+                (window.swalError || alert)(msg);
             }
         });
     }

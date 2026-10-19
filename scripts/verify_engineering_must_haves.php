@@ -287,10 +287,35 @@ foreach ($requiredLayouts as $pwaLayoutPath) {
     }
 }
 
+// --- CHECK 8: ZERO-SYMLINK INVARIANT (STANDARD 18 - VENDOR & BUILD ISOLATION) ---
+$sharedLibVendorPath = $targetDir . '/vendor/modernman00/shared-lib';
+if (is_link($sharedLibVendorPath)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #8: Standard 18 Zero-Symlink Invariant Violation (vendor/modernman00/shared-lib is a symlink)',
+        'file' => $sharedLibVendorPath,
+        'line' => 1,
+        'remediation' => 'Remove the symlink and install real, physical package via `composer update modernman00/shared-lib --prefer-dist`. Symlinks are strictly prohibited in application workspaces.',
+    ];
+    $exitCode = 1;
+}
+
+$sharedJsLibNodePath = $targetDir . '/node_modules/@modernman00/shared-js-lib';
+if (is_link($sharedJsLibNodePath)) {
+    $violations[] = [
+        'severity' => 'CRITICAL',
+        'rule' => 'MUST-HAVE #8: Standard 18 Zero-Symlink Invariant Violation (node_modules/@modernman00/shared-js-lib is a symlink)',
+        'file' => $sharedJsLibNodePath,
+        'line' => 1,
+        'remediation' => 'Remove the symlink and install physical package via npm. Local host symlinks are strictly prohibited.',
+    ];
+    $exitCode = 1;
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";
-    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes, 0 shared-lib reinventions, 100% button spinner compliance, root sw.js & PWA layouts verified.\n\n";
+    echo "0 CSRF violations, 0 SQL interpolation flaws, 0 weak hashes, 0 shared-lib reinventions, 0 symlink violations (Standard 18 verified), 100% button spinner compliance, root sw.js & PWA layouts verified.\n\n";
     exit(0);
 }
 

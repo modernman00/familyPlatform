@@ -1,12 +1,12 @@
 {{-- Scoped Lineage Wizard Component --}}
 <div class="modal fade" id="addRelativeModal" tabindex="-1" aria-labelledby="addRelativeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="backdrop-filter: blur(8px);">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, 0.95);">
-            <div class="modal-header border-0 bg-primary text-white">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="backdrop-filter: blur(8px);">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, 0.95); max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 bg-primary text-white flex-shrink-0">
                 <h5 class="modal-title fw-bold" id="addRelativeModalLabel"><i class="bi bi-diagram-3-fill"></i> Add Relative</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4" style="overflow-y: auto;">
                 <div id="addRelativeError" class="alert alert-danger d-none" style="border-radius: 8px;"></div>
                 
                 <!-- Step 1: Select Type -->

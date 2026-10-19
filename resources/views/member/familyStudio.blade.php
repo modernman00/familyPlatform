@@ -834,16 +834,16 @@
 
 <!-- Studio Add Relative Wizard Modal -->
 <div class="modal fade" id="studioAddRelativeModal" tabindex="-1" aria-labelledby="studioAddRelativeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--stitch-radius-lg); overflow: hidden;">
-            <div class="modal-header border-0 bg-primary text-white p-4">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--stitch-radius-lg); overflow: hidden; max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 bg-primary text-white p-4 flex-shrink-0">
                 <div>
                     <span class="badge bg-white text-primary fw-bold text-uppercase mb-1" style="font-size: 0.7rem;">Lineage Wizard</span>
                     <h5 class="modal-title fw-bold text-white" id="studioAddRelativeModalLabel"><i class="bi bi-person-plus-fill me-2"></i>Add Family Member</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4" style="overflow-y: auto;">
                 <div id="studioRelativeError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
 
                 <!-- Step 1: Relationship Type Selection -->
@@ -1034,22 +1034,22 @@
 
 <!-- Studio Edit Relative Modal -->
 <div class="modal fade" id="studioEditModal" tabindex="-1" aria-labelledby="studioEditModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--stitch-radius-lg); overflow: hidden;">
-            <div class="modal-header border-0 bg-primary text-white p-4">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--stitch-radius-lg); overflow: hidden; max-height: calc(100vh - 3.5rem);">
+            <div class="modal-header border-0 bg-primary text-white p-4 flex-shrink-0">
                 <div>
                     <span class="badge bg-white text-primary fw-bold text-uppercase mb-1" style="font-size: 0.7rem;">Update Record</span>
                     <h5 class="modal-title fw-bold text-white" id="studioEditModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit Relative Details</h5>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
-                <div id="studioEditError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
+            <form id="studioEditForm" class="d-flex flex-column" style="min-height: 0; flex: 1 1 auto; overflow: hidden; margin: 0;">
+                @include('csrf')
+                <input type="hidden" name="node_id" id="editNodeId" value="">
 
-                <form id="studioEditForm">
-    @include('csrf')
-                    <input type="hidden" name="node_id" id="editNodeId" value="">
-                    
+                <div class="modal-body p-4" style="overflow-y: auto;">
+                    <div id="studioEditError" class="alert alert-danger d-none" style="border-radius: var(--stitch-radius-md);"></div>
+
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label small fw-semibold">First Name *</label>
@@ -1107,23 +1107,25 @@
                         <textarea name="bio" id="editBio" class="form-control" rows="2" placeholder="Brief note or memory..."></textarea>
                     </div>
 
-                    <div class="form-check mb-4">
+                    <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" name="is_deceased" value="1" id="editIsDeceased">
                         <label class="form-check-label small text-muted" for="editIsDeceased">
                             Mark as Deceased / In Loving Memory
                         </label>
                     </div>
+                </div>
 
-                    <div class="d-flex gap-2 align-items-center">
-                        <button type="button" class="btn btn-outline-danger" id="studioDeleteRelativeBtn" onclick="deleteCurrentStudioRelative()" style="display: none;">
-                            <i class="bi bi-trash3-fill me-1"></i> Remove
-                        </button>
-                        <div class="flex-grow-1"></div>
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" id="studioSaveEditBtn" class="btn btn-primary px-4">Save Changes</button>
-                    </div>
-                </form>
-            </div>
+                <div class="modal-footer bg-light px-4 py-3 border-top d-flex gap-2 align-items-center flex-shrink-0" style="border-bottom-left-radius: var(--stitch-radius-lg); border-bottom-right-radius: var(--stitch-radius-lg);">
+                    <button type="button" class="btn btn-outline-danger btn-spin-on-click" id="studioDeleteRelativeBtn" onclick="deleteCurrentStudioRelative()" style="display: none;">
+                        <i class="bi bi-trash3-fill me-1"></i> Remove
+                    </button>
+                    <div class="flex-grow-1"></div>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="studioSaveEditBtn" class="btn btn-primary px-4 fw-semibold btn-spin-on-click">
+                        <i class="bi bi-check-circle-fill me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

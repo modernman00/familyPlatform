@@ -145,6 +145,13 @@
 .reaction-count-pill {
     user-select: none;
     cursor: default;
+    font-variant-emoji: emoji;
+}
+
+.comment-bubble-text,
+.comment-text,
+.reel-comment-text {
+    font-variant-emoji: emoji;
 }
 
 /* ── Mobile: long-press feedback on comment like button ─────────────────── */
@@ -404,6 +411,82 @@
     .poll-builder__question:focus,
     .poll-builder__option:focus {
         box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
+    }
+}
+
+/* Family Hashtags & Memory Pills */
+.family-hashtag-pill {
+    background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(99, 102, 241, 0.12) 100%);
+    color: #4f46e5 !important;
+    border: 1px solid rgba(79, 70, 229, 0.2) !important;
+    border-radius: 9999px !important;
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+
+        .badge {
+            background: rgba(255, 255, 255, 0.25) !important;
+            color: #ffffff !important;
+        }
+    }
+}
+
+.family-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(79, 70, 229, 0.09);
+    color: #4338ca;
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 2px 7px;
+    margin: 0 2px;
+    border-radius: 6px;
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    text-decoration: none;
+    cursor: pointer;
+    vertical-align: baseline;
+    transition: all 0.15s ease;
+
+    &:hover {
+        background: #4f46e5;
+        color: #ffffff;
+        border-color: #4f46e5;
+        text-decoration: none;
+    }
+}
+
+.hashtag-autocomplete-dropdown {
+    position: absolute;
+    z-index: 1055;
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    max-height: 220px;
+    overflow-y: auto;
+    width: 260px;
+
+    .hashtag-suggestion-item {
+        padding: 8px 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.88rem;
+        transition: background-color 0.12s ease;
+
+        &:hover,
+        &.active {
+            background-color: var(--hover-color, #f1f5f9);
+        }
     }
 }
 

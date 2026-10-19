@@ -58,3 +58,25 @@ $router->map(
   name: 'direct_video_upload'
 );
 
+// FAMILY HASHTAGS & MEMORY PILLS API
+$router->map(
+  method: 'GET',
+  route: '/api/hashtags/trending',
+  target: 'App\controller\members\HashtagController@trending',
+  name: 'api_hashtags_trending'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/hashtags/suggest',
+  target: 'App\controller\members\HashtagController@suggest',
+  name: 'api_hashtags_suggest'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/hashtags/stream',
+  target: 'App\controller\members\HashtagController@stream',
+  name: 'api_hashtags_stream'
+);
+

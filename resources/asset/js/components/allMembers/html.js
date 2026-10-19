@@ -114,13 +114,30 @@ export const renderHtml = (el) => {
                     </button>
                 </div>
                 ` : `
-                <button class="btn-stitch-connect" 
+                <button class="btn-stitch-connect w-100" 
                         data-user-id="addFamily${idSafe}" 
                         id="addFamily${idSafe}"
                         ${disableButton}>
                     <i class="bi bi-person-plus-fill" style="pointer-events: none;"></i> ${statusButtonHTML}
                 </button>
-                <small class="text-muted text-center" style="font-size: 0.75rem; font-weight: 500;">${tooltip}</small>
+                <button class="btn-stitch-tonal btn-nudge-family w-100 mt-2" 
+                        id="nudgeMigrate${idSafe}" 
+                        data-target-id="${idSafe}" 
+                        data-target-name="${fullName}" 
+                        data-target-code="${famCode}" 
+                        title="Invite relative to migrate to your family network">
+                    <i class="bi bi-send-check text-primary me-1" style="pointer-events: none;"></i> Nudge to Join Family
+                </button>
+                <button class="btn-stitch-tonal btn-request-migration w-100 mt-1" 
+                        id="requestMigrate${idSafe}" 
+                        data-target-id="${idSafe}" 
+                        data-target-name="${fullName}" 
+                        data-target-code="${famCode}" 
+                        style="font-size: 0.82rem; opacity: 0.85;"
+                        title="Request to migrate into family #${famCode}">
+                    <i class="bi bi-box-arrow-in-right me-1" style="pointer-events: none;"></i> Join #${famCode}
+                </button>
+                <small class="text-muted text-center mt-1 d-block" style="font-size: 0.72rem; font-weight: 500;">${tooltip}</small>
                 `}
             </div>
         </div>

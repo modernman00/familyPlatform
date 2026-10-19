@@ -34,6 +34,9 @@ export function profileFeed(opts = {}) {
         pusher: null,
         editingCommentNo: null,
         editCommentText: '',
+        activeHashtagFilter: null,
+        trendingHashtags: [],
+        isHashtagFilterActive: false,
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
@@ -65,7 +68,13 @@ export function profileFeed(opts = {}) {
             this.initPusher();
             this.initEventListeners();
             await this.fetchPosts();
+            await this.loadTrendingHashtags();
             this.scrollToHashPost();
+
+            // Expose filter helper globally for post pills
+            window.filterByFamilyHashtag = (tag) => {
+                this.filterByHashtag(tag);
+            };
         },
 
         // Jump to (and briefly highlight) the post referenced by a #postNNN link
@@ -140,7 +149,7 @@ export function profileFeed(opts = {}) {
                 date_created: p?.date_created || new Date().toISOString(),
                 post_time: p?.post_time || p?.date_created || new Date().toISOString(),
                 postMessage: p?.postMessage || '',
-                displayMessage: cleanPostMessage(p?.postMessage || '', extractVideoFromText(p?.postMessage)),
+                displayMessage: this.normalizeEmojiText(cleanPostMessage(p?.postMessage || '', extractVideoFromText(p?.postMessage))),
                 video: extractVideoFromText(p?.postMessage),
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
@@ -155,13 +164,14 @@ export function profileFeed(opts = {}) {
         normalizeComment(c) {
             const img = c?.img || c?.profileImg;
             const timeVal = c?.post_time || c?.comment_time || c?.date_created || '';
+            const rawComment = c?.comment || '';
             return {
                 comment_no: c?.comment_no,
                 post_no: c?.post_no,
                 id: c?.id,
                 fullName: c?.fullName || 'Family Member',
                 profileImg: img ? ((img.startsWith('/') || img.startsWith('http')) ? img : `/resources/images/profile/${img}`) : '/public/avatar/avatarM.png',
-                comment: c?.comment || '',
+                comment: this.normalizeEmojiText(rawComment),
                 date_created: c?.date_created || '',
                 post_time: c?.post_time || '',
                 comment_time: timeVal,
@@ -214,6 +224,86 @@ export function profileFeed(opts = {}) {
             } catch (e) {
                 return dateStr;
             }
+        },
+
+        escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        },
+
+        normalizeEmojiText(str) {
+            if (!str || typeof str !== 'string') return '';
+            return str
+                // Convert U+2764 (Heavy Black Heart) without \uFE0F to \u2764\uFE0F (Red Color Heart)
+                .replace(/\u2764(?!\uFE0F)/g, '\u2764\uFE0F')
+                // Convert U+2665 (Black Heart Suit) without \uFE0F to \u2764\uFE0F
+                .replace(/\u2665(?!\uFE0F)/g, '\u2764\uFE0F')
+                // Convert standalone ASCII heart '<3' to '❤️'
+                .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
+        },
+
+        renderHashtags(message) {
+            if (!message) return '';
+            const safeText = this.escapeHtml(message);
+            return safeText.replace(/#([a-zA-Z0-9_]{2,40})/g, (match, tag) => {
+                const cleanTag = tag.toLowerCase();
+                return `<span class="badge family-tag-pill" role="button" tabindex="0" onclick="window.filterByFamilyHashtag('${cleanTag}')" title="Filter family memories by #${cleanTag}"><i class="bi bi-hash me-0.5"></i>${tag}</span>`;
+            });
+        },
+
+        async loadTrendingHashtags() {
+            try {
+                const res = await axios.get('/api/hashtags/trending?limit=10');
+                if (res?.data?.status === 'success' && Array.isArray(res.data.tags)) {
+                    this.trendingHashtags = res.data.tags;
+                }
+            } catch (e) {
+                console.warn('[Feed] Trending hashtags load failed:', e);
+            }
+        },
+
+        async filterByHashtag(tag) {
+            if (!tag) return;
+            const cleanTag = tag.toLowerCase().replace(/^#/, '');
+            this.isLoading = true;
+            this.activeHashtagFilter = cleanTag;
+            this.isHashtagFilterActive = true;
+
+            try {
+                const res = await axios.get(`/api/hashtags/stream?tag=${encodeURIComponent(cleanTag)}`);
+                const streamData = res?.data?.data;
+                if (streamData && Array.isArray(streamData.items)) {
+                    this.posts = streamData.items.map(p => this.normalizePost(p));
+                } else {
+                    this.posts = [];
+                }
+            } catch (err) {
+                console.error('[Feed] Failed to filter by hashtag:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Memory Stream Error',
+                    text: 'Could not load memories for this hashtag.',
+                    confirmButtonColor: '#4f46e5'
+                });
+            } finally {
+                this.isLoading = false;
+                const feedElem = document.getElementById('postIt');
+                if (feedElem) {
+                    feedElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        },
+
+        async clearHashtagFilter() {
+            this.activeHashtagFilter = null;
+            this.isHashtagFilterActive = false;
+            await this.fetchPosts();
+            await this.loadTrendingHashtags();
         },
 
         toggleCommentForm(postNo) {
@@ -353,13 +443,14 @@ export function profileFeed(opts = {}) {
         async saveCommentEdit(commentNo) {
             const text = (this.editCommentText || '').trim();
             if (!text) return;
+            const normalizedText = this.normalizeEmojiText(text);
 
             try {
-                await axios.put(`/comment/${commentNo}`, { comment: text }, this.csrfOptions);
+                await axios.put(`/comment/${commentNo}`, { comment: normalizedText }, this.csrfOptions);
                 for (const post of this.posts) {
                     const comment = post.comments.find(c => String(c.comment_no) === String(commentNo));
                     if (comment) {
-                        comment.comment = text;
+                        comment.comment = normalizedText;
                         break;
                     }
                 }

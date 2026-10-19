@@ -414,7 +414,7 @@ class BaseController
             'spouse_mobile' => $data['spouse_mobile'] ?? null,
             'otherFamCode' => $data['otherFamCode'] ?? null,
             'two_factor_auth' => $data['two_factor_auth'] ?? 'off',
-            'profile_visibility' => $data['profile_visibility'] ?? 'Private',
+            'profile_visibility' => $data['profile_visibility'] ?? 'Public',
             'show_my_profile' => $data['show_my_profile'] ?? 'on',
             'email_notifications' => $data['email_notifications'] ?? 'on',
             'sms_notifications' => $data['sms_notifications'] ?? 'on',

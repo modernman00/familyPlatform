@@ -173,6 +173,25 @@ DEPLOY_LOCK_HELD=true
 echo "✅ Deploy lock acquired."
 
 ################################################################################
+# 3b. SHARED LIBRARIES SYNCHRONIZATION
+################################################################################
+
+echo -e "\n📦 [Shared-Lib] Synchronizing shared libraries (@modernman00/shared-lib & @modernman00/shared-js-lib)..."
+if [ -f "composer.json" ] && grep -q '"modernman00/shared-lib"' composer.json; then
+    echo "   ↳ Updating modernman00/shared-lib via Composer..."
+    composer update modernman00/shared-lib --prefer-dist --no-dev --no-interaction --quiet || {
+        echo "   ⚠️  Notice: composer update modernman00/shared-lib skipped or failed."
+    }
+fi
+
+if [ -f "package.json" ] && grep -q '"@modernman00/shared-js-lib"' package.json; then
+    echo "   ↳ Updating @modernman00/shared-js-lib via NPM..."
+    npm update @modernman00/shared-js-lib --silent 2>/dev/null || {
+        echo "   ⚠️  Notice: npm update @modernman00/shared-js-lib skipped or failed."
+    }
+fi
+
+################################################################################
 # 4. GIT & WORKSPACE INTEGRITY
 ################################################################################
 
@@ -371,7 +390,11 @@ copy_item() {
 copy_item app
 copy_item bootstrap
 copy_item cron
+copy_item migrations
 mkdir -p "$SANDBOX/scripts"
+if [ -d "scripts" ]; then
+    cp scripts/*.php "$SANDBOX/scripts/" 2>/dev/null || true
+fi
 if [ -f "cron/memory_milestone_cron.php" ]; then
     cp "cron/memory_milestone_cron.php" "$SANDBOX/scripts/memory_milestone_cron.php"
 fi
@@ -521,6 +544,15 @@ chmod -R 775 "${REMOTE_ROOT}/bootstrap/log" 2>/dev/null || true
 chmod 775 "${REMOTE_ROOT}/bootstrap/cache" 2>/dev/null || true
 chmod 755 "${REMOTE_ROOT}/cron" 2>/dev/null || true
 chmod 755 "${REMOTE_ROOT}/scripts" 2>/dev/null || true
+
+# Automated & Idempotent Database Migrations (schema_migrations ledger)
+if [ -f "${REMOTE_ROOT}/scripts/run_migrations.php" ]; then
+    echo "🗄️  Executing automated database migrations..."
+    /usr/local/bin/php "${REMOTE_ROOT}/scripts/run_migrations.php" || {
+        echo "🛑 FATAL: Remote database migration failed! Maintenance mode remains ON."
+        exit 1
+    }
+fi
 
 # Invalidate template and file caches
 rm -rf "${REMOTE_ROOT}/storage/framework/views/"* 2>/dev/null || true

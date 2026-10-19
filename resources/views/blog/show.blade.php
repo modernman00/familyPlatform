@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.execCommand('copy');
                     showCopiedFeedback();
                 } catch (err) {
-                    alert('Please copy the URL manually: ' + text);
+                    (window.swalToast || alert)('Please copy the URL manually: ' + text, 'info');
                 }
             }
         }

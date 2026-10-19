@@ -167,3 +167,5 @@
   });
 })();
 </script>
+@include('component.swalAlert')
+

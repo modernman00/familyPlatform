@@ -1,7 +1,7 @@
 'use strict';
 import axios from 'axios';
 import Alpine from 'alpinejs';
-import { qSel, showError } from "@modernman00/shared-js-lib";
+import { qSel, showError, initGlobalSwalAlerts, swalToast, swalSuccess, swalError, swalWarning, swalConfirm } from "@modernman00/shared-js-lib";
 import Swal from 'sweetalert2';
 import PWAManager from './components/pwa/pwaManager';
 import { initDarkMode } from './components/darkMode';
@@ -12,9 +12,16 @@ import './components/navbar';
 import { profileFeed } from './components/profilePage/feedComponent';
 import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';
 
-
+initGlobalSwalAlerts();
 window.Swal = Swal;
+window.swal = Swal;
+window.swalToast = swalToast;
+window.swalSuccess = swalSuccess;
+window.swalError = swalError;
+window.swalWarning = swalWarning;
+window.swalConfirm = swalConfirm;
 window.Alpine = Alpine;
+
 Alpine.data('profileFeed', profileFeed);
 Alpine.data('profileSidebar', profileSidebar);
 Alpine.data('upcomingEvents', upcomingEvents);

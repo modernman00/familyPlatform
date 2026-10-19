@@ -98,8 +98,8 @@ final class SettingController extends BaseController
                     $chk->execute([$uid]);
                     if (!$chk->fetch()) {
                         $email = (string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '');
-                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile) VALUES (?, ?, ?, ?)');
-                        $ins->execute([$uid, substr($email, 0, 50), '', '']);
+                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, sms_notifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'on']);
                     }
                 };
 
@@ -122,7 +122,7 @@ final class SettingController extends BaseController
                     $allowedVisibilities = ['Private', 'Public', 'Family Only'];
                     $visibility = in_array($_POST['profile_visibility'] ?? '', $allowedVisibilities, true)
                         ? (string) $_POST['profile_visibility']
-                        : 'Private';
+                        : 'Public';
                     $data = [
                         'id' => $_POST['id'],
                         'two_factor_auth' => $normalizeSwitch($_POST['two_factor_auth'] ?? 'off'),
@@ -205,6 +205,14 @@ final class SettingController extends BaseController
                     );
 
                     if (!$inviter) {
+                        // Fall back to family-wide migration request routed to existing approved family members
+                        $migrationService = new \App\services\FamilyMigrationService($pdo);
+                        $note = "Inviter specified: {$inviterFirstName} {$inviterLastName} ({$inviterContact})";
+                        $migRes = $migrationService->createRequest($userId, $cleanTargetCode, null, $note);
+                        if ($migRes['success']) {
+                            msgSuccess(200, "Migration request submitted to family #{$cleanTargetCode}. Your request has been routed to existing family members to review and approve.", $migRes);
+                            return;
+                        }
                         msgException(422, "Could not find a matching family member in family {$cleanTargetCode} with the provided details. Please verify their name and contact information.");
                         return;
                     }
@@ -242,6 +250,34 @@ final class SettingController extends BaseController
                     $safeInviterName = htmlspecialchars(trim(($inviter['firstName'] ?? '') . ' ' . ($inviter['lastName'] ?? '')), ENT_QUOTES, 'UTF-8');
                     // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string -- Human-readable API success message, not a SQL statement.
                     msgSuccess(200, "Transfer request submitted! An approval request has been sent to {$safeInviterName}. Your family code will refresh as soon as they approve.");
+                    return;
+                }
+
+                // 5b. Direct Family Migration Request (when discovering family code without inviter details)
+                if ($action === 'requestFamilyMigration') {
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
+                    $targetCode = trim((string)($_POST['family_code'] ?? ''));
+                    $note = trim((string)($_POST['note'] ?? ''));
+
+                    if ($userId === '') {
+                        msgException(401, "Unauthorized: Please log in to request a family migration.");
+                        return;
+                    }
+
+                    if (empty($targetCode)) {
+                        msgException(400, "Please enter the target family code.");
+                        return;
+                    }
+
+                    $migrationService = new \App\services\FamilyMigrationService(\Src\Db::connect2());
+                    $result = $migrationService->createRequest($userId, $targetCode, null, $note !== '' ? $note : null);
+
+                    if (!$result['success']) {
+                        msgException(422, $result['message']);
+                        return;
+                    }
+
+                    msgSuccess(200, $result['message'], $result);
                     return;
                 }
 
