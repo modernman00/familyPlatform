@@ -556,9 +556,10 @@ if [ -f "${REMOTE_ROOT}/scripts/run_migrations.php" ]; then
 fi
 
 # Invalidate template and file caches
-rm -rf "${REMOTE_ROOT}/storage/framework/views/"* 2>/dev/null || true
-rm -f "${REMOTE_ROOT}/bootstrap/cache/"*.bladec 2>/dev/null || true
-rm -rf "${REMOTE_ROOT}/storage/framework/cache/"* 2>/dev/null || true
+find "${REMOTE_ROOT}/storage/framework/views" -mindepth 1 -delete 2>/dev/null || true
+find "${REMOTE_ROOT}/bootstrap/cache" -name "*.bladec" -delete 2>/dev/null || true
+find "${REMOTE_ROOT}/bootstrap/cache" -name ".*.bladec" -delete 2>/dev/null || true
+find "${REMOTE_ROOT}/storage/framework/cache" -mindepth 1 -delete 2>/dev/null || true
 echo "🗑️  Cleared compiled view and framework cache."
 
 # Touch entry point to bump mtime
