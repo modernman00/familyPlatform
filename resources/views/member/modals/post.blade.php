@@ -257,10 +257,15 @@
                 </div>
 
                 <div class="d-grid gap-2 mb-3">
-                    <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;format=shortcut" class="btn btn-primary rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="min-height: 48px;">
+                    @php
+                        $signedDeviceToken = (!empty($_SESSION['id']) && !empty($_SESSION['famCode'])) 
+                            ? \App\controller\members\NativeShareController::generateUserToken((string)$_SESSION['id'], (string)$_SESSION['famCode']) 
+                            : '';
+                    @endphp
+                    <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;token={{ $signedDeviceToken }}&amp;format=shortcut" class="btn btn-primary rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="min-height: 48px;">
                         <i class="bi bi-download me-2"></i> Download iPhone Shortcut
                     </a>
-                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center" style="min-height: 44px;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}')">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center" style="min-height: 44px;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}', '{{ $signedDeviceToken }}')">
                         <i class="bi bi-clipboard me-2"></i> Copy Family Code &amp; Endpoint
                     </button>
                 </div>
@@ -277,8 +282,11 @@
 </div>
 
 <script>
-window.copyFamilyShareEndpoint = function(famCode) {
-    const text = window.location.origin + '/api/media/native-share?fam_code=' + encodeURIComponent(famCode);
+window.copyFamilyShareEndpoint = function(famCode, userToken) {
+    let text = window.location.origin + '/api/media/native-share?fam_code=' + encodeURIComponent(famCode);
+    if (userToken) {
+        text += '&user_token=' + encodeURIComponent(userToken);
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
             const el = document.getElementById('famCopyAlertSuccess');

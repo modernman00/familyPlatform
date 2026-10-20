@@ -123,6 +123,83 @@ class NativeShareControllerTest extends SocialFeedTestCase
         }
     }
 
+    public function test_native_share_rejects_unauthenticated_request_with_only_family_code(): void
+    {
+        unset($_SESSION['id'], $_SESSION['famCode']);
+        $_POST['fam_code'] = $this->famCode;
+        unset($_POST['user_token'], $_SERVER['HTTP_X_USER_TOKEN']);
+
+        ob_start();
+        (new NativeShareController())->share();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $data = json_decode($output, true);
+        $this->assertIsArray($data);
+        $this->assertSame('error', $data['status']);
+        $this->assertSame(401, http_response_code());
+        $this->assertStringContainsString('authenticated member token', $data['message']);
+
+        unset($_POST['fam_code']);
+    }
+
+    public function test_native_share_accepts_valid_hmac_signed_device_token(): void
+    {
+        unset($_SESSION['id'], $_SESSION['famCode']);
+        $validToken = NativeShareController::generateUserToken($this->authorId, $this->famCode);
+
+        $tmpImage = tempnam(sys_get_temp_dir(), 'test_fam_token_');
+        $im = imagecreatetruecolor(60, 60);
+        imagejpeg($im, $tmpImage);
+
+        $_POST['fam_code'] = $this->famCode;
+        $_POST['user_token'] = $validToken;
+        $_POST['caption'] = 'Direct upload with signed HMAC device token!';
+        $_FILES['photo'] = [
+            'name'     => 'token_test.jpg',
+            'type'     => 'image/jpeg',
+            'tmp_name' => $tmpImage,
+            'error'    => UPLOAD_ERR_OK,
+            'size'     => (int) filesize($tmpImage),
+        ];
+
+        ob_start();
+        (new NativeShareController())->share();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $data = json_decode($output, true);
+        $this->assertIsArray($data);
+        $this->assertSame('success', $data['status']);
+        $this->assertSame(200, http_response_code());
+        $this->assertGreaterThan(0, $data['post_no']);
+
+        unset($_POST['fam_code'], $_POST['user_token'], $_POST['caption'], $_FILES['photo']);
+        if (file_exists($tmpImage)) {
+            unlink($tmpImage);
+        }
+    }
+
+    public function test_native_share_rejects_tampered_device_token(): void
+    {
+        unset($_SESSION['id'], $_SESSION['famCode']);
+
+        $_POST['fam_code'] = $this->famCode;
+        $_POST['user_token'] = $this->authorId . '.tampered_invalid_signature';
+
+        ob_start();
+        (new NativeShareController())->share();
+        $output = ob_get_clean();
+
+        $this->assertIsString($output);
+        $data = json_decode($output, true);
+        $this->assertIsArray($data);
+        $this->assertSame('error', $data['status']);
+        $this->assertSame(401, http_response_code());
+
+        unset($_POST['fam_code'], $_POST['user_token']);
+    }
+
     public function test_native_share_serves_shortcut_config(): void
     {
         $_GET['fam_code'] = $this->famCode;

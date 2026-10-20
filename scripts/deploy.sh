@@ -136,6 +136,29 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# Watchdog runner: runs command with hard timeout preventing CI/CD hangs
+run_with_watchdog() {
+    local timeout_sec=$1
+    shift
+    "$@" &
+    local cmd_pid=$!
+    (
+        sleep "$timeout_sec"
+        if kill -0 "$cmd_pid" 2>/dev/null; then
+            echo -e "\n⏱️ [Watchdog] Command exceeded ${timeout_sec}s threshold. Terminating hung process (PID ${cmd_pid})..."
+            kill -TERM "$cmd_pid" 2>/dev/null || true
+            sleep 3
+            kill -9 "$cmd_pid" 2>/dev/null || true
+        fi
+    ) &
+    local watchdog_pid=$!
+    wait "$cmd_pid"
+    local exit_code=$?
+    kill "$watchdog_pid" 2>/dev/null || true
+    wait "$watchdog_pid" 2>/dev/null || true
+    return $exit_code
+}
+
 echo "======================================================================"
 echo " 🚀 [$APP_NAME] INITIATING DIRECT ATOMIC DEPLOYMENT PIPELINE"
 echo " Target  : ${SSH_USER}@${SSH_HOST}:${REMOTE_ROOT}"
@@ -329,19 +352,24 @@ if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
         TARGET_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "$E2E_TARGET" 2>/dev/null || echo "000")
 
         if [ "$TARGET_STATUS" != "000" ]; then
-            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests..."
+            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests (Watchdog limit: 180s)..."
+            CYPRESS_SUCCESS=false
             if grep -q '"test:e2e":' package.json 2>/dev/null; then
-                npm run test:e2e -- --headless || {
-                    echo "🛑 FATAL: Cypress E2E regression tests failed! Aborting deployment."
-                    exit 1
-                }
+                if run_with_watchdog 180 npm run test:e2e -- --headless; then
+                    CYPRESS_SUCCESS=true
+                fi
             elif command -v npx > /dev/null 2>&1; then
-                npx cypress run --headless || {
-                    echo "🛑 FATAL: Cypress E2E regression tests failed! Aborting deployment."
-                    exit 1
-                }
+                if run_with_watchdog 180 npx cypress run --headless; then
+                    CYPRESS_SUCCESS=true
+                fi
             fi
-            echo "✅ Cypress E2E tests passed."
+
+            if [ "$CYPRESS_SUCCESS" = "true" ]; then
+                echo "✅ Cypress E2E tests passed."
+            else
+                echo "🛑 FATAL: Cypress E2E regression tests failed or timed out! Aborting deployment."
+                exit 1
+            fi
         else
             echo "⚠️  Notice: Local E2E target (${E2E_TARGET}) is offline (curl code: ${TARGET_STATUS})."
             echo "   To enforce E2E before deploy, start your local server or specify CYPRESS_BASE_URL."

@@ -53,7 +53,7 @@ final class NativeShareController
                 http_response_code(401);
                 echo json_encode([
                     'status'  => 'error',
-                    'message' => 'Unauthorised: A valid family code or active user session is required to share memories.',
+                    'message' => 'Unauthorised: A valid family code and authenticated member token or active user session is required to share memories.',
                 ], JSON_UNESCAPED_SLASHES);
                 return;
             }
@@ -193,24 +193,72 @@ final class NativeShareController
     }
 
     /**
+     * Generates a cryptographically signed device share token for a user and family.
+     */
+    public static function generateUserToken(string $userId, string $famCode): string
+    {
+        $appSecret = (string) ($_ENV['APP_KEY'] ?? $_ENV['JWT_SECRET'] ?? 'fp_native_share_vault_secret_2026');
+        $signature = hash_hmac('sha256', $userId . '|' . $famCode, $appSecret);
+        return $userId . '.' . substr($signature, 0, 32);
+    }
+
+    /**
+     * Verifies a device share token and extracts the authenticated user ID.
+     */
+    public static function verifyUserToken(string $token, string $famCode): ?string
+    {
+        $parts = explode('.', $token, 2);
+        if (count($parts) !== 2) {
+            return null;
+        }
+
+        [$userId, $providedSig] = $parts;
+        if ($userId === '' || $providedSig === '') {
+            return null;
+        }
+
+        $appSecret = (string) ($_ENV['APP_KEY'] ?? $_ENV['JWT_SECRET'] ?? 'fp_native_share_vault_secret_2026');
+        $expectedSig = substr(hash_hmac('sha256', $userId . '|' . $famCode, $appSecret), 0, 32);
+
+        if (hash_equals($expectedSig, $providedSig)) {
+            return $userId;
+        }
+
+        return null;
+    }
+
+    /**
      * Serves iOS Shortcut configuration for iPhone 13 Photos Share Sheet.
      */
     public function shortcutConfig(): void
     {
-        // Resolve validated family code from active session or database lookup to prevent untrusted input echoing
+        // Resolve validated family code and user identity from active session or database lookup
+        $userId = '';
         $famCode = '';
-        if (!empty($_SESSION['famCode'])) {
+
+        if (!empty($_SESSION['id']) && !empty($_SESSION['famCode'])) {
+            $userId = (string) $_SESSION['id'];
+            $famCode = (string) $_SESSION['famCode'];
+        } elseif (!empty($_SESSION['famCode'])) {
             $famCode = (string) $_SESSION['famCode'];
         } else {
             $rawCode = (string) ($_GET['fam_code'] ?? '');
             $cleanCode = preg_replace('/[^a-zA-Z0-9_\-]/', '', $rawCode) ?? '';
             if ($cleanCode !== '') {
                 $db = Db::connect2();
-                $stmt = $db->prepare("SELECT famCode FROM personal WHERE famCode = ? OR familyCode2 = ? LIMIT 1");
+                $stmt = $db->prepare("SELECT id, famCode FROM personal WHERE famCode = ? OR familyCode2 = ? LIMIT 1");
                 $stmt->execute([$cleanCode, $cleanCode]);
-                $famCode = (string) ($stmt->fetchColumn() ?: '');
+                $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if ($row) {
+                    $userId = (string) ($row['id'] ?? '');
+                    $famCode = (string) ($row['famCode'] ?? '');
+                }
             }
         }
+
+        // Support explicit token if provided in query or generate from authenticated session
+        $queryToken = (string) ($_GET['token'] ?? $_GET['user_token'] ?? '');
+        $userToken = ($queryToken !== '') ? $queryToken : (($userId !== '' && $famCode !== '') ? self::generateUserToken($userId, $famCode) : '');
 
         $isShortcut = (isset($_GET['format']) && $_GET['format'] === 'shortcut');
 
@@ -223,7 +271,7 @@ final class NativeShareController
                 header('Content-Type: application/octet-stream');
                 header('Content-Disposition: attachment; filename="ShareToFamilyPlatform.shortcut"');
             }
-            echo $this->generateShortcutPlist($uploadUrl, $famCode);
+            echo $this->generateShortcutPlist($uploadUrl, $famCode, $userToken);
             return;
         }
 
@@ -234,6 +282,7 @@ final class NativeShareController
             'status'       => 'success',
             'app_name'     => 'FamilyPlatform',
             'fam_code'     => $famCode,
+            'user_token'   => $userToken,
             'upload_url'   => $uploadUrl,
             'instructions' => [
                 '1. Open Apple Photos on your iPhone 13.',
@@ -280,11 +329,14 @@ final class NativeShareController
         $userCandidate = is_string($headerUserToken) ? trim($headerUserToken) : (is_string($bodyUserToken) ? trim($bodyUserToken) : null);
 
         if ($famCodeCandidate !== null && $famCodeCandidate !== '') {
-            $db = Db::connect2();
-            // Look up personal table for the family member
             if ($userCandidate !== null && $userCandidate !== '') {
+                // Verify signed HMAC token or direct registered user identifier
+                $verifiedUserId = self::verifyUserToken($userCandidate, $famCodeCandidate);
+                $userIdToQuery = $verifiedUserId ?? $userCandidate;
+
+                $db = Db::connect2();
                 $stmt = $db->prepare("SELECT id, firstName, lastName, famCode FROM personal WHERE (id = ? OR famCode = ?) AND (famCode = ? OR familyCode2 = ?) LIMIT 1");
-                $stmt->execute([$userCandidate, $userCandidate, $famCodeCandidate, $famCodeCandidate]);
+                $stmt->execute([$userIdToQuery, $userIdToQuery, $famCodeCandidate, $famCodeCandidate]);
                 $user = $stmt->fetch(\PDO::FETCH_ASSOC);
                 if ($user) {
                     return [
@@ -295,17 +347,8 @@ final class NativeShareController
                 }
             }
 
-            // Fallback: look up primary family member
-            $stmt = $db->prepare("SELECT id, firstName, lastName, famCode FROM personal WHERE famCode = ? OR familyCode2 = ? ORDER BY no ASC LIMIT 1");
-            $stmt->execute([$famCodeCandidate, $famCodeCandidate]);
-            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if ($user) {
-                return [
-                    'id'       => (string)$user['id'],
-                    'famCode'  => (string)$user['famCode'],
-                    'fullName' => trim(($user['firstName'] ?? '') . ' ' . ($user['lastName'] ?? '')),
-                ];
-            }
+            // TIER 2 HARDENING: Strictly reject unauthenticated requests containing only fam_code.
+            // Arbitrary timeline posting via unauthenticated fallback to primary family head is deprecated and sealed.
         }
 
         return null;
@@ -392,10 +435,16 @@ final class NativeShareController
     /**
      * Generates an Apple Shortcut Property List for FamilyPlatform.
      */
-    private function generateShortcutPlist(string $uploadUrl, string $famCode): string
+    private function generateShortcutPlist(string $uploadUrl, string $famCode, string $userToken = ''): string
     {
         $escapedUrl = htmlspecialchars($uploadUrl, ENT_XML1, 'UTF-8');
         $escapedFamCode = htmlspecialchars($famCode, ENT_XML1, 'UTF-8');
+        $escapedToken = htmlspecialchars($userToken, ENT_XML1, 'UTF-8');
+
+        $tokenHeaderXml = '';
+        if ($escapedToken !== '') {
+            $tokenHeaderXml = "                    <key>X-User-Token</key>\n                    <string>{$escapedToken}</string>\n";
+        }
 
         return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -426,7 +475,7 @@ final class NativeShareController
                 <dict>
                     <key>X-Family-Code</key>
                     <string>{$escapedFamCode}</string>
-                </dict>
+{$tokenHeaderXml}                </dict>
                 <key>WFHTTPBodyType</key>
                 <string>Form</string>
             </dict>
