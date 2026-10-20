@@ -357,7 +357,9 @@ final class NotificationController extends Select
     public static function deleteSubscriberData(): void
     {
         try {
-            CheckToken::tokenCheck();
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true);
+            \App\controller\BaseController::validateCsrf(is_array($input) ? $input : null);
 
             $userId = isset($_SESSION['id']) ? cleanSession((string) $_SESSION['id']) : '';
             if ($userId === '') {
@@ -365,8 +367,6 @@ final class NotificationController extends Select
                 return;
             }
 
-            $rawInput = file_get_contents('php://input');
-            $input = json_decode($rawInput !== false ? $rawInput : '', true);
             $endpoint = is_array($input) && !empty($input['endpoint']) ? (string) $input['endpoint'] : '';
 
             $db = \Src\Db::connect2();

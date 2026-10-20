@@ -192,7 +192,6 @@ class CountryCatalog
             'Nepal' => ['code' => 'NP', 'dial_code' => '+977', 'flag' => '🇳🇵', 'name' => 'Nepal'],
             'Nicaragua' => ['code' => 'NI', 'dial_code' => '+505', 'flag' => '🇳🇮', 'name' => 'Nicaragua'],
             'Niger' => ['code' => 'NE', 'dial_code' => '+227', 'flag' => '🇳🇪', 'name' => 'Niger'],
-            'Pakistan' => ['code' => 'PK', 'dial_code' => '+92', 'flag' => '🇵🇰', 'name' => 'Pakistan'],
             'Palau' => ['code' => 'PW', 'dial_code' => '+680', 'flag' => '🇵🇼', 'name' => 'Palau'],
             'Panama' => ['code' => 'PA', 'dial_code' => '+507', 'flag' => '🇵🇦', 'name' => 'Panama'],
             'Papua New Guinea' => ['code' => 'PG', 'dial_code' => '+675', 'flag' => '🇵🇬', 'name' => 'Papua New Guinea'],

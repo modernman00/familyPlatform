@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(security): sanitize and validate shortcutConfig family code resolving Semgrep rule",
+    "title": "Fix(feed): resolve timezone observer infinite loop causing profilePage freeze and unresponsiveness",
     "notes": [
+        "Fix(feed): resolve timezone observer infinite loop causing profilePage freeze and unresponsiveness",
         "Fix(security): sanitize and validate shortcutConfig family code resolving Semgrep rule",
-        "Feat(native-share): implement iOS 13+ Apple Photos share sheet integration and modern enterprise admin portal",
-        "Fix(deploy): use find -delete to safely invalidate remote view and framework caches"
+        "Feat(native-share): implement iOS 13+ Apple Photos share sheet integration and modern enterprise admin portal"
     ],
     "released_at": "2026-10-20",
-    "commit": "5353d20"
+    "commit": "bbbff25"
 }

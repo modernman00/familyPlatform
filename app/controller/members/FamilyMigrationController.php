@@ -55,8 +55,10 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
+        $input = GetRequestData::getRequestData();
+
         try {
-            CheckToken::tokenCheck();
+            self::validateCsrf($input);
         } catch (\Throwable $e) {
             http_response_code(403);
             echo json_encode(['error' => 'Invalid or missing CSRF security token.']);
@@ -70,7 +72,6 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
-        $input = GetRequestData::getRequestData();
         $targetUserId = trim((string)($input['target_user_id'] ?? $_POST['target_user_id'] ?? ''));
         $note = isset($input['note']) ? (string)$input['note'] : (isset($_POST['note']) ? (string)$_POST['note'] : null);
 
@@ -106,8 +107,10 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
+        $input = GetRequestData::getRequestData();
+
         try {
-            CheckToken::tokenCheck();
+            self::validateCsrf($input);
         } catch (\Throwable $e) {
             http_response_code(403);
             echo json_encode(['error' => 'Invalid or missing CSRF security token.']);
@@ -121,7 +124,6 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
-        $input = GetRequestData::getRequestData();
         $familyCode = trim((string)($input['family_code'] ?? $_POST['family_code'] ?? ''));
         $targetUserId = isset($input['target_user_id']) ? (string)$input['target_user_id'] : (isset($_POST['target_user_id']) ? (string)$_POST['target_user_id'] : null);
         $note = isset($input['note']) ? (string)$input['note'] : (isset($_POST['note']) ? (string)$_POST['note'] : null);
@@ -150,8 +152,10 @@ final class FamilyMigrationController extends BaseController
     {
         header('Content-Type: application/json');
 
+        $input = GetRequestData::getRequestData();
+
         try {
-            CheckToken::tokenCheck();
+            self::validateCsrf($input);
         } catch (\Throwable $e) {
             http_response_code(403);
             echo json_encode(['error' => 'Invalid or missing CSRF security token.']);
@@ -165,7 +169,6 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
-        $input = GetRequestData::getRequestData();
         $id = (int)($input['id'] ?? $_POST['id'] ?? $_GET['id'] ?? 0);
         $token = trim((string)($input['token'] ?? $_POST['token'] ?? $_GET['token'] ?? ''));
 
@@ -193,8 +196,10 @@ final class FamilyMigrationController extends BaseController
     {
         header('Content-Type: application/json');
 
+        $input = GetRequestData::getRequestData();
+
         try {
-            CheckToken::tokenCheck();
+            self::validateCsrf($input);
         } catch (\Throwable $e) {
             http_response_code(403);
             echo json_encode(['error' => 'Invalid or missing CSRF security token.']);
@@ -208,7 +213,6 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
-        $input = GetRequestData::getRequestData();
         $id = (int)($input['id'] ?? $_POST['id'] ?? $_GET['id'] ?? 0);
         $token = trim((string)($input['token'] ?? $_POST['token'] ?? $_GET['token'] ?? ''));
 
@@ -236,8 +240,10 @@ final class FamilyMigrationController extends BaseController
     {
         header('Content-Type: application/json');
 
+        $input = GetRequestData::getRequestData();
+
         try {
-            CheckToken::tokenCheck();
+            self::validateCsrf($input);
         } catch (\Throwable $e) {
             http_response_code(403);
             echo json_encode(['error' => 'Invalid or missing CSRF security token.']);
@@ -251,7 +257,6 @@ final class FamilyMigrationController extends BaseController
             return;
         }
 
-        $input = GetRequestData::getRequestData();
         $id = (int)($input['id'] ?? $_POST['id'] ?? $_GET['id'] ?? 0);
         $token = trim((string)($input['token'] ?? $_POST['token'] ?? $_GET['token'] ?? ''));
         $reason = trim((string)($input['reason'] ?? $_POST['reason'] ?? ''));

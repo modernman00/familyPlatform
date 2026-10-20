@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const priority = document.getElementById('announcementPriority').value;
         const type = document.getElementById('announcementType').value;
         const expiresAt = document.getElementById('announcementExpiresAt').value;
-        const csrfToken = annForm.querySelector('input[name="token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const csrfToken = annForm.querySelector('input[name="token"]')?.value || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
 
         if (!title || !message) {
             (window.swalWarning || alert)('Please provide both title and message.');
@@ -106,7 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': csrfToken
             },
             body: JSON.stringify({
                 title: title,

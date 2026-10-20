@@ -342,10 +342,16 @@
     function claimFamilyNode(nodeId) {
       const btn = document.getElementById('btnClaimNode');
       if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Linking...'; }
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
       fetch('/api/claim-family-node', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ node_id: nodeId })
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ node_id: nodeId, token: csrfToken })
       })
       .then(res => res.json())
       .then(data => {
@@ -369,10 +375,16 @@
     function dismissFamilyNode(nodeId) {
       const banner = document.getElementById('unclaimedMatchBanner');
       if (banner) banner.style.display = 'none';
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
       fetch('/api/dismiss-claim-node', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ node_id: nodeId })
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+          'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ node_id: nodeId, token: csrfToken })
       }).catch(console.error);
     }
   </script>

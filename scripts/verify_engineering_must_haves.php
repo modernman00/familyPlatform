@@ -235,17 +235,35 @@ foreach ($requiredLayouts as $layoutPath) {
     }
 }
 
-// --- CHECK 6: ROOT SERVICE WORKER ACCESSIBILITY ---
-$swFile = $targetDir . '/public/sw.js';
-if (!file_exists($swFile)) {
-    $violations[] = [
-        'severity' => 'CRITICAL',
-        'rule' => 'MUST-HAVE #6: Missing Root Service Worker Script (public/sw.js)',
-        'file' => $swFile,
-        'line' => 1,
-        'remediation' => 'Create public/sw.js with push and fetch listeners to prevent service worker registration errors.',
-    ];
-    $exitCode = 1;
+// --- CHECK 6: ROOT SERVICE WORKER ACCESSIBILITY & SYNTAX INTEGRITY ---
+$swCandidates = [$targetDir . '/public/sw.js', $targetDir . '/sw.js'];
+foreach ($swCandidates as $swFile) {
+    if (!file_exists($swFile)) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #6: Missing Root Service Worker Script (' . basename($swFile) . ')',
+            'file' => $swFile,
+            'line' => 1,
+            'remediation' => 'Create ' . basename($swFile) . ' with push and fetch listeners to prevent service worker registration errors.',
+        ];
+        $exitCode = 1;
+    } else {
+        // Enforce JavaScript syntax verification via node --check
+        $cmd = 'node --check ' . escapeshellarg($swFile) . ' 2>&1';
+        $output = [];
+        $status = 0;
+        exec($cmd, $output, $status);
+        if ($status !== 0) {
+            $violations[] = [
+                'severity' => 'CRITICAL',
+                'rule' => 'MUST-HAVE #6: Service Worker Syntax Error (' . basename($swFile) . ')',
+                'file' => $swFile,
+                'line' => 1,
+                'remediation' => 'Resolve JavaScript syntax error in ' . basename($swFile) . ': ' . implode("\n", $output),
+            ];
+            $exitCode = 1;
+        }
+    }
 }
 
 // --- CHECK 7: PWA OPTIMIZATION INVARIANT (MANIFEST & SERVICE WORKER LAYOUT INTEGRATION) ---

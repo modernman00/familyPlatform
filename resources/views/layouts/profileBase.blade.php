@@ -82,6 +82,7 @@
 
   @include('component.submitSpinner')
   @include('partials.pwa-register')
+  @stack('scripts')
 </body>
 
 </html>

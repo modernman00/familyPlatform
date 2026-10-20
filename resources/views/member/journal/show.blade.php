@@ -195,13 +195,17 @@ function deleteFamilyJournal(id) {
         return;
     }
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="token"]')?.value 
+        || '{{ $_SESSION['token'] ?? '' }}';
 
     fetch('/familyJournal/' + id + '/delete', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-XSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({ token: csrfToken })
     })

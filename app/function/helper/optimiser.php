@@ -32,15 +32,15 @@ function assetVersion(string $relativePath): string
     return $cache[$rel] = $mtime !== false ? (string) $mtime : '1';
 }
 
-/**
- * Global I18n translation helper.
- *
- * @param string $key Translation key
- * @param string|null $fallback Fallback string if key not found
- * @param array<string, string|int|float> $replace Replacement pairs
- * @return string
- */
 if (!function_exists('__')) {
+    /**
+     * Global I18n translation helper.
+     *
+     * @param string $key Translation key
+     * @param string|null $fallback Fallback string if key not found
+     * @param array<string, string|int|float> $replace Replacement pairs
+     * @return string
+     */
     function __(string $key, ?string $fallback = null, array $replace = []): string
     {
         return \App\classes\I18n::trans($key, $replace, $fallback);

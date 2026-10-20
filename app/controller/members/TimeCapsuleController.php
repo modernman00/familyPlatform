@@ -87,14 +87,14 @@ final class TimeCapsuleController extends BaseController
                 return;
             }
 
-            CheckToken::tokenCheck();
-            Limiter::limit($userId . ':create_capsule');
-
             $rawInput = file_get_contents('php://input');
             $input = is_string($rawInput) ? json_decode($rawInput, true) : null;
             if (!is_array($input)) {
                 $input = $_POST;
             }
+
+            self::validateCsrf($input);
+            Limiter::limit($userId . ':create_capsule');
 
             $familyCode = (string)($_SESSION['famCode'] ?? '');
             if (empty($familyCode) || !BaseController::sessionSharesFamily($familyCode)) {

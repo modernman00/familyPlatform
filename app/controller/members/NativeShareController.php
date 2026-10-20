@@ -256,9 +256,8 @@ final class NativeShareController
             }
         }
 
-        // Support explicit token if provided in query or generate from authenticated session
-        $queryToken = (string) ($_GET['token'] ?? $_GET['user_token'] ?? '');
-        $userToken = ($queryToken !== '') ? $queryToken : (($userId !== '' && $famCode !== '') ? self::generateUserToken($userId, $famCode) : '');
+        // Authenticated token strictly generated from verified member identity to prevent echoed request vulnerabilities
+        $userToken = ($userId !== '' && $famCode !== '') ? self::generateUserToken($userId, $famCode) : '';
 
         $isShortcut = (isset($_GET['format']) && $_GET['format'] === 'shortcut');
 

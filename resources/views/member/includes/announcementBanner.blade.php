@@ -69,13 +69,17 @@
 function dismissAnnouncement(announcementId) {
     if (!confirm('Dismiss this family announcement?')) return;
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+        || document.querySelector('input[name="token"]')?.value 
+        || '{{ $_SESSION['token'] ?? '' }}';
 
     fetch('/api/announcement/delete', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-XSRF-TOKEN': csrfToken
         },
         body: JSON.stringify({
             id: announcementId,

@@ -458,9 +458,7 @@ final class Register extends Db
 
 
     /**
-     * @return (int|string)[][]
-     *
-     * @psalm-return array{min: array{0: 2, 1: 2, 2: 2, 3: 7, 4: 7, 5: 7}, max: array{0: 35, 1: 35, 2: 30, 3: 16, 4: 50, 5: 50}, data: array{0: 'firstName', 1: 'lastName', 2: 'country', 3: 'mobile', 4: 'email', 5: 'password'}}
+     * @return array{min: list<int>, max: list<int>, data: list<string>}
      */
     private function dataToCheck(): array
     {
@@ -584,7 +582,7 @@ final class Register extends Db
 
             $exists = false;
             
-            if ($mobile) {
+            if (is_string($mobile) && $mobile !== '') {
                 $e164 = \App\classes\PhoneUtility::toE164($mobile);
                 $trailing9 = strlen($e164) >= 9 ? substr($e164, -9) : $e164;
                 $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE mobile = ? OR mobile = ? OR mobile LIKE ?");
@@ -594,7 +592,7 @@ final class Register extends Db
                 }
             } 
             
-            if ($email && !$exists) {
+            if (is_string($email) && $email !== '' && !$exists) {
                 $stmt = $dbConnection->prepare("SELECT COUNT(*) FROM contact WHERE email = ?");
                 $stmt->execute([$email]);
                 if ($stmt->fetchColumn() > 0) {

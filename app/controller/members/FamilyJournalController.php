@@ -119,7 +119,11 @@ final class FamilyJournalController extends BaseController
             $contentRaw = $_POST['content'] ?? '';
             $status = (string)filter_input(INPUT_POST, 'status', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-            if (empty($title) || empty($contentRaw)) {
+            if (empty(trim((string)$contentRaw)) && !empty($summary)) {
+                $contentRaw = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
+            }
+
+            if (empty($title) || empty(trim((string)$contentRaw))) {
                 throw new ValidationException("Title and story content are required.");
             }
 
@@ -229,7 +233,9 @@ final class FamilyJournalController extends BaseController
     {
         header('Content-Type: application/json');
         try {
-            CheckToken::tokenCheck();
+            $rawInput = file_get_contents('php://input');
+            $input = (is_string($rawInput) && ($decoded = json_decode($rawInput, true)) && is_array($decoded)) ? $decoded : $_POST;
+            self::validateCsrf($input);
 
             // Enterprise Rate Limiting: Prevent LLM quota exhaustion and Denial of Wallet
             try {
@@ -243,7 +249,6 @@ final class FamilyJournalController extends BaseController
                 exit;
             }
 
-            $input = json_decode(file_get_contents('php://input') ?: '{}', true) ?: $_POST;
             $prompt = trim((string)($input['prompt'] ?? ''));
             $rawTone = trim((string)($input['tone'] ?? 'Heartwarming'));
 
@@ -290,7 +295,9 @@ final class FamilyJournalController extends BaseController
     {
         header('Content-Type: application/json');
         try {
-            CheckToken::tokenCheck();
+            $rawInput = file_get_contents('php://input');
+            $input = (is_string($rawInput) && ($decoded = json_decode($rawInput, true)) && is_array($decoded)) ? $decoded : $_POST;
+            self::validateCsrf($input);
 
             $isAdmin = ($_SESSION['type'] ?? '') === 'admin';
             $success = FamilyJournal::deleteJournal($id, $this->famCode, $this->userId, $isAdmin);

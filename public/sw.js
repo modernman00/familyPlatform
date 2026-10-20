@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.0.2';
+const SW_VERSION = 'v2.0.3';
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;
@@ -337,6 +337,7 @@ self.addEventListener('push', (event) => {
 
   // C. Intelligent Foreground Check: Suppress OS noise if app is focused & open
   pushPromises.push(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       // Broadcast to on-app UI toast and sync channels for all open windows
       if (syncBroadcastChannel) {
         syncBroadcastChannel.postMessage({

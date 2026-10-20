@@ -93,14 +93,14 @@ final class LineageQuestController extends BaseController
                 return;
             }
 
-            CheckToken::tokenCheck();
-            Limiter::limit($userId . ':quest_token');
-
             $rawInput = file_get_contents('php://input');
             $input = is_string($rawInput) ? json_decode($rawInput, true) : null;
             if (!is_array($input)) {
                 $input = $_POST;
             }
+
+            self::validateCsrf($input);
+            Limiter::limit($userId . ':quest_token');
 
             $familyCode = isset($input['family_code']) && is_string($input['family_code'])
                 ? trim($input['family_code'])

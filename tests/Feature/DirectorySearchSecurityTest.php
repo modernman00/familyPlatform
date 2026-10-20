@@ -298,7 +298,7 @@ final class DirectorySearchSecurityTest extends TestCase
         );
 
         // Also verify in getAllUsersData
-        $dirResults = $this->model->getAllUsersData('318422WALLY', 'OLAO60446', 200, 0);
+        $dirResults = $this->model->getAllUsersData('318422WALLY', 'OLAO60446', 1000, 0);
         $dirIds = array_column($dirResults, 'id');
         $this->assertContains(
             $this->privateMemberId,

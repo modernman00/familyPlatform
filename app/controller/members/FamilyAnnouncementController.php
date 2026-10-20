@@ -47,9 +47,8 @@ final class FamilyAnnouncementController extends BaseController
     {
         header('Content-Type: application/json');
         try {
-            CheckToken::tokenCheck();
-
             $input = json_decode(file_get_contents('php://input') ?: '{}', true) ?: $_POST;
+            self::validateCsrf(is_array($input) ? $input : null);
 
             $title = trim((string)($input['title'] ?? ''));
             $message = trim((string)($input['message'] ?? ''));
@@ -122,9 +121,9 @@ final class FamilyAnnouncementController extends BaseController
     {
         header('Content-Type: application/json');
         try {
-            CheckToken::tokenCheck();
-
             $input = json_decode(file_get_contents('php://input') ?: '{}', true) ?: $_POST;
+            self::validateCsrf(is_array($input) ? $input : null);
+
             $id = isset($input['id']) ? (int)$input['id'] : 0;
 
             if ($id <= 0) {

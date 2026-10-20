@@ -24,7 +24,7 @@ class PhoneUtility
      */
     public static function toE164(string $phone, ?string $country = null): string
     {
-        $raw = trim($phone);
+        $raw = trim(strip_tags($phone));
         if ($raw === '') {
             return '';
         }

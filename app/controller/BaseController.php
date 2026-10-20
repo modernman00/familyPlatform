@@ -45,6 +45,40 @@ class BaseController
     }
 
     /**
+     * Defensively validate CSRF token across headers, JSON payloads, and form posts.
+     *
+     * @param array<string, mixed>|null $payload Optional parsed JSON body or form input.
+     * @throws \Src\Exceptions\UnauthorisedException If token is missing or invalid.
+     */
+    public static function validateCsrf(?array $payload = null): void
+    {
+        $sessionToken = (string) ($_SESSION['token'] ?? '');
+        if ($sessionToken === '') {
+            throw new \Src\Exceptions\UnauthorisedException('We are not familiar with the nature of your activities.');
+        }
+
+        $headerToken = (string) ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_CSRF_TOKEN'] ?? '');
+        if ($headerToken === '' && function_exists('getallheaders')) {
+            $headers = getallheaders();
+            $headerToken = (string) ($headers['X-XSRF-TOKEN'] ?? $headers['X-CSRF-TOKEN'] ?? $headers['X-XSRF-Token'] ?? $headers['X-CSRF-Token'] ?? $headers['x-xsrf-token'] ?? $headers['x-csrf-token'] ?? '');
+        }
+
+        $bodyToken = (string) ($payload['token'] ?? ($payload['_token'] ?? ($_POST['token'] ?? ($_POST['_token'] ?? ''))));
+
+        $isValid = false;
+        if ($headerToken !== '') {
+            $isValid = hash_equals($sessionToken, $headerToken) || hash_equals($sessionToken, urldecode($headerToken));
+        }
+        if (!$isValid && $bodyToken !== '') {
+            $isValid = hash_equals($sessionToken, $bodyToken) || hash_equals($sessionToken, urldecode($bodyToken));
+        }
+
+        if (!$isValid) {
+            \Src\CheckToken::tokenCheck();
+        }
+    }
+
+    /**
      * Silently and defensively rehydrates the PHP session from a valid auth cookie
      * if the session was flushed by PHP's garbage collector or closed browser tabs.
      * Ported from PartyPlatform with Silas's token_version validation guard.
