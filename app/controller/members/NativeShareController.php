@@ -197,14 +197,28 @@ final class NativeShareController
      */
     public function shortcutConfig(): void
     {
-        $famCode = (string) ($_GET['fam_code'] ?? $_SESSION['famCode'] ?? '');
-        $format = (string) ($_GET['format'] ?? 'json');
+        // Resolve validated family code from active session or database lookup to prevent untrusted input echoing
+        $famCode = '';
+        if (!empty($_SESSION['famCode'])) {
+            $famCode = (string) $_SESSION['famCode'];
+        } else {
+            $rawCode = (string) ($_GET['fam_code'] ?? '');
+            $cleanCode = preg_replace('/[^a-zA-Z0-9_\-]/', '', $rawCode) ?? '';
+            if ($cleanCode !== '') {
+                $db = Db::connect2();
+                $stmt = $db->prepare("SELECT famCode FROM personal WHERE famCode = ? OR familyCode2 = ? LIMIT 1");
+                $stmt->execute([$cleanCode, $cleanCode]);
+                $famCode = (string) ($stmt->fetchColumn() ?: '');
+            }
+        }
+
+        $isShortcut = (isset($_GET['format']) && $_GET['format'] === 'shortcut');
 
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
         $host = (string) ($_SERVER['HTTP_HOST'] ?? 'familyplatform.com');
         $uploadUrl = $protocol . $host . '/api/media/native-share';
 
-        if ($format === 'shortcut') {
+        if ($isShortcut) {
             if (!headers_sent()) {
                 header('Content-Type: application/octet-stream');
                 header('Content-Disposition: attachment; filename="ShareToFamilyPlatform.shortcut"');
@@ -227,7 +241,7 @@ final class NativeShareController
                 '3. Tap "Share to FamilyPlatform" in the iOS Share Sheet.',
                 '4. Your memory will instantly appear on your family timeline!',
             ],
-        ], JSON_UNESCAPED_SLASHES);
+        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     }
 
     /**
