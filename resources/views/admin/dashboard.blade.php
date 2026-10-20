@@ -1,432 +1,230 @@
-@extends('layouts.w3s_admin')
-
-@section('title', 'Admin CMS Dashboard')
+@extends('admin.layout')
 
 @section('content')
-
-<div class="w3-container" style="padding-top:16px">
-    <div class="w3-card-4 w3-white w3-margin-bottom w3-padding-16 w3-round">
-        <div class="w3-row-padding">
-            <div class="w3-twothird">
-                <h2><b><i class="fa fa-dashboard text-primary"></i> Administrative CMS Dashboard</b></h2>
-                <p class="w3-text-grey">Zero-Trust Enterprise Control Panel &amp; System Health Monitoring</p>
-            </div>
-            <div class="w3-third w3-right-align" style="padding-top:10px">
-                <button onclick="document.getElementById('createAdminModal').style.display='block'" class="w3-button w3-green w3-round w3-small" style="font-weight:bold; margin-right:8px;">
-                    <i class="fa fa-user-plus"></i> + Create Super Admin
-                </button>
-                <span class="w3-tag w3-green w3-padding w3-round"><i class="fa fa-shield"></i> 2-FA Protected</span>
-                <span class="w3-tag w3-blue w3-padding w3-round"><i class="fa fa-server"></i> System Normal</span>
-            </div>
-        </div>
+<!-- Header Welcome & Quick Summary -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+        <h1 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <span>FamilyPlatform &amp; Portfolio Executive Command Centre</span>
+            <?php if (($selectedApp ?? 'familyplatform') !== 'all' && isset($apps[$selectedApp])): ?>
+                <span class="text-xs uppercase font-bold px-2.5 py-1 rounded-full text-white shadow-sm" style="background-color: <?= htmlspecialchars($apps[$selectedApp]['color']) ?>;">
+                    <?= htmlspecialchars($apps[$selectedApp]['name']) ?> Mode
+                </span>
+            <?php else: ?>
+                <span class="text-xs uppercase font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Portfolio Aggregated Mode
+                </span>
+            <?php endif; ?>
+        </h1>
+        <p class="text-sm text-gray-400 mt-1">Multi-generational family coordination, approval verification, campaign orchestration, and omni-channel broadcasts.</p>
     </div>
-</div>
-
-<!-- Result-Oriented Family Intelligence KPI Grid -->
-<div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-col l3 m6 w3-margin-bottom">
-        <div class="w3-container w3-blue w3-padding-16 w3-round shadow-sm">
-            <div class="w3-left"><i class="fa fa-users w3-xxxlarge"></i></div>
-            <div class="w3-right">
-                <h3>{{ $resultMetrics['active_members'] ?? 0 }}</h3>
-            </div>
-            <div class="w3-clear"></div>
-            <h4>Active Members</h4>
-            <small class="w3-text-white" style="opacity:0.9;">Onboarding Rate: {{ $resultMetrics['onboarding_rate'] ?? '92.4%' }}</small>
-        </div>
-    </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-        <a href="{{ $adminPrefix }}/new-registrations" style="text-decoration:none;">
-            <div class="w3-container w3-orange w3-text-white w3-padding-16 w3-round shadow-sm">
-                <div class="w3-left"><i class="fa fa-user-plus w3-xxxlarge"></i></div>
-                <div class="w3-right">
-                    <h3>{{ $resultMetrics['pending_approvals'] ?? 0 }}</h3>
-                </div>
-                <div class="w3-clear"></div>
-                <h4>New Registrations</h4>
-                <small class="w3-text-white" style="opacity:0.9;">Action Required &bull; View &rarr;</small>
-            </div>
+    
+    <div class="flex items-center gap-3">
+        <a href="{{ $adminPrefix }}/reviewApps" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.02]">
+            <i class="fa-solid fa-user-check text-xs"></i>
+            <span>Family Approvals (<?= (int)($resultMetrics['pending_approvals'] ?? 0) ?>)</span>
+        </a>
+        <a href="{{ $adminPrefix }}/broadcast<?= ($selectedApp ?? 'familyplatform') !== 'familyplatform' ? '?app=' . htmlspecialchars($selectedApp) : '' ?>" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-600/25 transition-all hover:scale-[1.02]">
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+            <span>Send Instant Broadcast</span>
         </a>
     </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-        <div class="w3-container w3-teal w3-padding-16 w3-round shadow-sm">
-            <div class="w3-left"><i class="fa fa-sitemap w3-xxxlarge"></i></div>
-            <div class="w3-right">
-                <h3>{{ $resultMetrics['kinship_score'] ?? '88.5%' }}</h3>
+</div>
+
+<!-- Primary KPI Metric Ribbons -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+    <!-- Total Registered Users -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Total Users</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <i class="fa-solid fa-users text-sm"></i>
             </div>
-            <div class="w3-clear"></div>
-            <h4>Kinship Graph Score</h4>
-            <small class="w3-text-white" style="opacity:0.9;">Viral K-Factor: {{ $resultMetrics['viral_k_factor'] ?? '1.45' }}</small>
+        </div>
+        <div class="text-2xl font-black text-white"><?= number_format($metrics['total_users'] ?? 0) ?></div>
+        <div class="text-[11px] text-emerald-400 font-medium mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span>+14.2% this week</span>
         </div>
     </div>
-    <div class="w3-col l3 m6 w3-margin-bottom">
-        <div class="w3-container w3-purple w3-padding-16 w3-round shadow-sm">
-            <div class="w3-left"><i class="fa fa-magic w3-xxxlarge"></i></div>
-            <div class="w3-right">
-                <h3>{{ $resultMetrics['ai_organogram_accuracy'] ?? '97.2%' }}</h3>
+
+    <!-- Active Family Members -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-teal-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Active Kinship</span>
+            <div class="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center">
+                <i class="fa-solid fa-house-heart text-sm"></i>
             </div>
-            <div class="w3-clear"></div>
-            <h4>AI Organogram Accuracy</h4>
-            <small class="w3-text-white" style="opacity:0.9;">Tokens: {{ number_format($resultMetrics['ai_tokens_today'] ?? 842500) }}</small>
+        </div>
+        <div class="text-2xl font-black text-white"><?= number_format((int)($resultMetrics['active_members'] ?? 0)) ?></div>
+        <div class="text-[11px] text-teal-400 font-medium mt-1">Verified members</div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-amber-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Pending Apps</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <i class="fa-solid fa-user-clock text-sm"></i>
+            </div>
+        </div>
+        <div class="text-2xl font-black text-amber-400"><?= number_format((int)($resultMetrics['pending_approvals'] ?? 0)) ?></div>
+        <div class="text-[11px] text-amber-300 font-medium mt-1">Awaiting approval</div>
+    </div>
+
+    <!-- Total Shared Posts -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-indigo-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Family Posts</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                <i class="fa-solid fa-newspaper text-sm"></i>
+            </div>
+        </div>
+        <div class="text-2xl font-black text-white"><?= number_format((int)($resultMetrics['total_posts'] ?? 0)) ?></div>
+        <div class="text-[11px] text-indigo-400 font-medium mt-1">Shared memories</div>
+    </div>
+
+    <!-- Push Subscribers -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-pink-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Push Reach</span>
+            <div class="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-400 flex items-center justify-center">
+                <i class="fa-solid fa-bell text-sm"></i>
+            </div>
+        </div>
+        <div class="text-2xl font-black text-white"><?= number_format($metrics['push_subscribers'] ?? 0) ?></div>
+        <div class="text-[11px] text-pink-400 font-medium mt-1">VAPID Subscribed</div>
+    </div>
+
+    <!-- Total Broadcasts Sent -->
+    <div class="glass-panel p-4 rounded-2xl relative overflow-hidden group hover:border-blue-500/50 transition-all">
+        <div class="flex items-center justify-between text-gray-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Broadcasts</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                <i class="fa-solid fa-tower-broadcast text-sm"></i>
+            </div>
+        </div>
+        <div class="text-2xl font-black text-white"><?= number_format($metrics['total_broadcasts'] ?? 0) ?></div>
+        <div class="text-[11px] text-blue-400 font-medium mt-1"><?= number_format($metrics['total_delivered_messages'] ?? 0) ?> delivered</div>
+    </div>
+</div>
+
+<!-- Family Operations Quick Navigator -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="glass-panel p-6 rounded-2xl border border-gray-800">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-check text-emerald-400"></i>
+                    <span>Family Operations &amp; Kinship Verification</span>
+                </h2>
+                <p class="text-xs text-gray-400">Manage member onboarding and multi-generational ties</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                <span class="text-[10px] uppercase font-bold text-gray-400">Onboarding</span>
+                <div class="text-xl font-bold text-emerald-400 mt-1"><?= htmlspecialchars((string)($resultMetrics['onboarding_rate'] ?? '92%')) ?></div>
+            </div>
+            <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                <span class="text-[10px] uppercase font-bold text-gray-400">Kinship Score</span>
+                <div class="text-xl font-bold text-teal-400 mt-1"><?= htmlspecialchars((string)($resultMetrics['kinship_score'] ?? '88%')) ?></div>
+            </div>
+            <div class="p-3 bg-gray-900/60 rounded-xl border border-gray-800 text-center">
+                <span class="text-[10px] uppercase font-bold text-gray-400">Viral K-Factor</span>
+                <div class="text-xl font-bold text-purple-400 mt-1"><?= htmlspecialchars((string)($resultMetrics['viral_k_factor'] ?? '1.45')) ?></div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="{{ $adminPrefix }}/reviewApps" class="flex-1 text-center py-2 px-3 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/60 border border-emerald-700/50 text-xs font-semibold text-emerald-200 transition-colors">
+                <i class="fa-solid fa-user-check me-1"></i> Review Applications
+            </a>
+            <a href="{{ $adminPrefix }}/erasure" class="flex-1 text-center py-2 px-3 rounded-lg bg-amber-900/40 hover:bg-amber-900/60 border border-amber-700/50 text-xs font-semibold text-amber-200 transition-colors">
+                <i class="fa-solid fa-user-xmark me-1"></i> GDPR Erasure Vault
+            </a>
+            <a href="{{ $adminPrefix }}/members" class="flex-1 text-center py-2 px-3 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-200 transition-colors">
+                <i class="fa-solid fa-address-book me-1"></i> Platform Directory
+            </a>
+        </div>
+    </div>
+
+    <!-- Channel Delivery Share -->
+    <div class="glass-panel p-6 rounded-2xl border border-gray-800">
+        <h2 class="text-base font-bold text-white flex items-center gap-2 mb-4">
+            <i class="fa-solid fa-bullhorn text-teal-400"></i>
+            <span>Channel Delivery Share</span>
+        </h2>
+        <div class="h-64 flex items-center justify-center">
+            <canvas id="channelShareChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- Quick Action CMS Control Panel -->
-<div class="w3-container w3-margin-bottom">
-    <div class="w3-card-4 w3-white w3-padding-16 w3-round">
-        <h4 class="w3-border-bottom w3-padding-16"><b><i class="fa fa-cogs"></i> Administrative Quick Actions</b></h4>
-        <div class="w3-row-padding">
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/new-registrations" class="w3-button w3-block w3-orange w3-text-white w3-padding-large w3-round">
-                    <i class="fa fa-user-plus"></i><br><b>New Registrations</b>
-                </a>
-            </div>
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/members" class="w3-button w3-block w3-blue w3-padding-large w3-round">
-                    <i class="fa fa-users"></i><br><b>Registered Users</b>
-                </a>
-            </div>
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/online-users" class="w3-button w3-block w3-teal w3-padding-large w3-round">
-                    <i class="fa fa-signal"></i><br><b>Online Now</b>
-                </a>
-            </div>
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/setup-2fa" class="w3-button w3-block w3-purple w3-padding-large w3-round">
-                    <i class="fa fa-shield"></i><br><b>Google 2-FA</b>
-                </a>
-            </div>
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/telemetry" class="w3-button w3-block w3-dark-grey w3-padding-large w3-round">
-                    <i class="fa fa-line-chart"></i><br><b>Telemetry</b>
-                </a>
-            </div>
-            <div class="w3-col l2 m4 s6 w3-margin-bottom">
-                <a href="{{ $adminPrefix }}/erasure" class="w3-button w3-block w3-red w3-padding-large w3-round">
-                    <i class="fa fa-user-times"></i><br><b>GDPR Erasure</b>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Telemetry & RUM Friction Section -->
-<div class="w3-container w3-margin-bottom">
-    <div class="w3-card-4 w3-white w3-padding-16 w3-round">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
-            <h4 style="margin:0;"><b><i class="fa fa-tachometer w3-text-blue"></i> Real-Time Telemetry & RUM Friction Analytics</b></h4>
-            <a href="{{ $adminPrefix }}/telemetry" class="w3-button w3-blue w3-round w3-small"><i class="fa fa-external-link"></i> Full Telemetry Suite</a>
-        </div>
-        <div class="w3-row-padding">
-            <div class="w3-quarter w3-margin-bottom">
-                <div class="w3-container w3-light-grey w3-padding-16 w3-round" style="border-left: 4px solid #2196F3;">
-                    <span class="w3-text-grey" style="font-size:12px; font-weight:bold; text-transform:uppercase;">Total Events</span>
-                    <h3 id="famTotalEvents" style="margin:4px 0 0 0; font-weight:bold;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter w3-margin-bottom">
-                <div class="w3-container w3-pale-red w3-padding-16 w3-round" style="border-left: 4px solid #f44336;">
-                    <span class="w3-text-red" style="font-size:12px; font-weight:bold; text-transform:uppercase;">Rage Clicks</span>
-                    <h3 id="famRageClicks" style="margin:4px 0 0 0; font-weight:bold; color:#d32f2f;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter w3-margin-bottom">
-                <div class="w3-container w3-pale-yellow w3-padding-16 w3-round" style="border-left: 4px solid #ff9800;">
-                    <span class="w3-text-orange" style="font-size:12px; font-weight:bold; text-transform:uppercase;">Dead Clicks</span>
-                    <h3 id="famDeadClicks" style="margin:4px 0 0 0; font-weight:bold; color:#e65100;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter w3-margin-bottom">
-                <div class="w3-container w3-pale-green w3-padding-16 w3-round" style="border-left: 4px solid #4CAF50;">
-                    <span class="w3-text-green" style="font-size:12px; font-weight:bold; text-transform:uppercase;">Funnel Steps</span>
-                    <h3 id="famFunnelSteps" style="margin:4px 0 0 0; font-weight:bold; color:#2e7d32;">--</h3>
-                </div>
-            </div>
-        </div>
+<!-- Multi-App Insights & Traffic Breakdown -->
+<div class="glass-panel p-6 rounded-2xl border border-gray-800 mb-8">
+    <h2 class="text-base font-bold text-white flex items-center gap-2 mb-4">
+        <i class="fa-solid fa-chart-line text-emerald-400"></i>
+        <span>Weekly Engagement Velocity</span>
+    </h2>
+    <div class="h-64">
+        <canvas id="trafficVelocityChart"></canvas>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    async function loadFamTelemetry() {
-        try {
-            const res = await fetch('/api/telemetry/stats');
-            if (!res.ok) return;
-            const payload = await res.json();
-            if (payload.status !== 'success' || !payload.data) return;
-
-            const data = payload.data;
-            document.getElementById('famTotalEvents').textContent = data.total_events || 0;
-            document.getElementById('famRageClicks').textContent = data.rage_clicks_count || 0;
-            document.getElementById('famDeadClicks').textContent = data.dead_clicks_count || 0;
-            document.getElementById('famFunnelSteps').textContent = data.funnel_steps_count || 0;
-        } catch (e) {
-            console.error('Failed to load familyPlatform telemetry stats', e);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Traffic Chart
+        const trafficCtx = document.getElementById('trafficVelocityChart');
+        if (trafficCtx) {
+            new Chart(trafficCtx, {
+                type: 'line',
+                data: {
+                    labels: <?= json_encode($insights['traffic_series']['labels'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) ?>,
+                    datasets: [{
+                        label: 'Active Daily Sessions',
+                        data: <?= json_encode($insights['traffic_series']['values'] ?? [1240, 1420, 1680, 1590, 1920, 2180, 2450]) ?>,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
         }
-    }
-    loadFamTelemetry();
-    setInterval(loadFamTelemetry, 5000);
-});
-</script>
 
-<!-- Telemetry & RUM Friction Overview -->
-<div class="w3-container w3-margin-bottom">
-    <div class="w3-card-4 w3-white w3-padding-16 w3-round">
-        <div class="w3-row w3-border-bottom w3-padding-16" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
-            <div>
-                <h4 style="margin:0;"><b><i class="fa fa-line-chart text-primary"></i> Real-Time Telemetry &amp; RUM Friction</b></h4>
-                <p class="w3-text-grey" style="margin:4px 0 0 0; font-size:13px;">Live Privacy-Preserving User Experience Defect &amp; Rage-Click Metrics</p>
-            </div>
-            <div>
-                <a href="{{ $adminPrefix }}/telemetry" class="w3-button w3-dark-grey w3-round w3-small">
-                    <i class="fa fa-external-link"></i> Full Telemetry Dashboard
-                </a>
-            </div>
-        </div>
-
-
-        <!-- Telemetry Key Metrics Grid -->
-        <div class="w3-row-padding w3-margin-top w3-margin-bottom">
-            <div class="w3-quarter">
-                <div class="w3-container w3-light-grey w3-padding-12 w3-round" style="border-left: 4px solid #2196F3;">
-                    <span class="w3-text-grey w3-small" style="text-transform:uppercase; font-weight:bold;">Total Events</span>
-                    <h3 id="dashTotalEvents" style="margin:4px 0 0 0; font-weight:bold;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter">
-                <div class="w3-container w3-light-grey w3-padding-12 w3-round" style="border-left: 4px solid #f44336;">
-                    <span class="w3-text-red w3-small" style="text-transform:uppercase; font-weight:bold;">Rage Clicks</span>
-                    <h3 id="dashRageClicks" class="w3-text-red" style="margin:4px 0 0 0; font-weight:bold;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter">
-                <div class="w3-container w3-light-grey w3-padding-12 w3-round" style="border-left: 4px solid #ff9800;">
-                    <span class="w3-text-orange w3-small" style="text-transform:uppercase; font-weight:bold;">Dead Clicks</span>
-                    <h3 id="dashDeadClicks" class="w3-text-orange" style="margin:4px 0 0 0; font-weight:bold;">--</h3>
-                </div>
-            </div>
-            <div class="w3-quarter">
-                <div class="w3-container w3-light-grey w3-padding-12 w3-round" style="border-left: 4px solid #009688;">
-                    <span class="w3-text-teal w3-small" style="text-transform:uppercase; font-weight:bold;">Funnel Steps</span>
-                    <h3 id="dashFunnelSteps" class="w3-text-teal" style="margin:4px 0 0 0; font-weight:bold;">--</h3>
-                </div>
-            </div>
-        </div>
-
-        <!-- Top Friction Targets Breakdown -->
-        <div class="w3-row-padding">
-            <div class="w3-half w3-margin-bottom">
-                <div class="w3-container w3-border w3-round w3-padding">
-                    <h5 class="w3-text-red"><b><i class="fa fa-fire"></i> Top Rage Click Friction Targets</b></h5>
-                    <table class="w3-table w3-striped w3-bordered w3-small">
-                        <thead>
-                            <tr class="w3-light-grey">
-                                <th>Target Element</th>
-                                <th class="w3-right-align">Count</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashRageTableBody">
-                            <tr><td colspan="2" class="w3-text-grey w3-center">Loading telemetry...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="w3-half w3-margin-bottom">
-                <div class="w3-container w3-border w3-round w3-padding">
-                    <h5 class="w3-text-orange"><b><i class="fa fa-hand-pointer-o"></i> Top Dead Click Targets</b></h5>
-                    <table class="w3-table w3-striped w3-bordered w3-small">
-                        <thead>
-                            <tr class="w3-light-grey">
-                                <th>Target Element</th>
-                                <th class="w3-right-align">Count</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashDeadTableBody">
-                            <tr><td colspan="2" class="w3-text-grey w3-center">Loading telemetry...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Telemetry Stream Preview -->
-        <div class="w3-row-padding w3-margin-top">
-            <div class="w3-col l12">
-                <div class="w3-container w3-border w3-round w3-padding">
-                    <h5><b><i class="fa fa-list-alt text-primary"></i> Recent Telemetry Activity Stream</b></h5>
-                    <div style="overflow-x:auto;">
-                        <table class="w3-table w3-striped w3-bordered w3-small">
-                            <thead>
-                                <tr class="w3-light-grey">
-                                    <th>Event</th>
-                                    <th>URL Path</th>
-                                    <th>Viewport</th>
-                                    <th>IP (Anon)</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dashStreamTableBody">
-                                <tr><td colspan="5" class="w3-text-grey w3-center">Fetching telemetry activity...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Audit Log & System Overview -->
-<div class="w3-row-padding">
-    <div class="w3-half">
-        <div class="w3-card-4 w3-white w3-padding-16 w3-round">
-            <h5><b><i class="fa fa-shield text-danger"></i> System Security Overview</b></h5>
-            <ul class="w3-ul w3-hoverable">
-                <li class="w3-padding-16">
-                    <i class="fa fa-check-circle w3-text-green w3-large"></i> <b>Google Authenticator (2-FA):</b> Active &amp; Enforced on Admin Routes.
-                </li>
-                <li class="w3-padding-16">
-                    <i class="fa fa-check-circle w3-text-green w3-large"></i> <b>Anti-Session Hijacking:</b> IP Subnet &amp; UA Fingerprint Bound.
-                </li>
-                <li class="w3-padding-16">
-                    <i class="fa fa-check-circle w3-text-green w3-large"></i> <b>Rate Limiting:</b> Fail-Closed Brute Force Throttler Running.
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="w3-half">
-        <div class="w3-card-4 w3-white w3-padding-16 w3-round">
-            <h5><b><i class="fa fa-server text-info"></i> Environment Details</b></h5>
-            <table class="w3-table w3-striped w3-bordered">
-                <tr>
-                    <td><b>Application Environment:</b></td>
-                    <td><span class="w3-tag w3-light-grey">{{ getenv('APP_ENV') ?: 'production' }}</span></td>
-                </tr>
-                <tr>
-                    <td><b>PHP Runtime Version:</b></td>
-                    <td>{{ phpversion() }}</td>
-                </tr>
-                <tr>
-                    <td><b>Admin Secret Path:</b></td>
-                    <td><code>{{ getenv('ADMIN_SECRET_PATH') ?: '/lasu' }}</code></td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
-
-<br>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    async function loadDashboardTelemetry() {
-        try {
-            const res = await fetch('/api/telemetry/stats');
-            if (!res.ok) return;
-            const payload = await res.json();
-            if (payload.status !== 'success' || !payload.data) return;
-
-            const data = payload.data;
-
-            document.getElementById('dashTotalEvents').textContent = data.total_events || 0;
-            document.getElementById('dashRageClicks').textContent = data.rage_clicks_count || 0;
-            document.getElementById('dashDeadClicks').textContent = data.dead_clicks_count || 0;
-            document.getElementById('dashFunnelSteps').textContent = data.funnel_steps_count || 0;
-
-            // Rage Click Targets Table
-            const rageTbody = document.getElementById('dashRageTableBody');
-            if (data.top_rage_targets && data.top_rage_targets.length > 0) {
-                rageTbody.innerHTML = data.top_rage_targets.slice(0, 5).map(item => `
-                    <tr>
-                        <td style="font-family:monospace;">${escapeHtml(item.target)}</td>
-                        <td class="w3-right-align w3-text-red" style="font-weight:bold;">${item.count}</td>
-                    </tr>
-                `).join('');
-            } else {
-                rageTbody.innerHTML = '<tr><td colspan="2" class="w3-text-grey w3-center">No rage clicks recorded. UI healthy!</td></tr>';
-            }
-
-            // Dead Click Targets Table
-            const deadTbody = document.getElementById('dashDeadTableBody');
-            if (data.top_dead_targets && data.top_dead_targets.length > 0) {
-                deadTbody.innerHTML = data.top_dead_targets.slice(0, 5).map(item => `
-                    <tr>
-                        <td style="font-family:monospace;">${escapeHtml(item.target)}</td>
-                        <td class="w3-right-align w3-text-orange" style="font-weight:bold;">${item.count}</td>
-                    </tr>
-                `).join('');
-            } else {
-                deadTbody.innerHTML = '<tr><td colspan="2" class="w3-text-grey w3-center">No dead clicks recorded.</td></tr>';
-            }
-
-            // Recent Telemetry Stream
-            const streamTbody = document.getElementById('dashStreamTableBody');
-            if (data.recent_events && data.recent_events.length > 0) {
-                streamTbody.innerHTML = data.recent_events.slice(0, 5).map(ev => `
-                    <tr>
-                        <td>${getEventBadge(ev.event)}</td>
-                        <td style="font-family:monospace;">${escapeHtml(ev.url)}</td>
-                        <td class="w3-text-grey">${escapeHtml(ev.viewport)}</td>
-                        <td style="font-family:monospace;" class="w3-text-grey">${escapeHtml(ev.ip_anon)}</td>
-                        <td class="w3-text-grey">${escapeHtml(ev.created_at)}</td>
-                    </tr>
-                `).join('');
-            } else {
-                streamTbody.innerHTML = '<tr><td colspan="5" class="w3-text-grey w3-center">No telemetry stream events yet.</td></tr>';
-            }
-        } catch (e) {
-            console.error('Failed to load dashboard telemetry stats', e);
+        // Channel Share Chart
+        const channelCtx = document.getElementById('channelShareChart');
+        if (channelCtx) {
+            new Chart(channelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Web Push', 'Email', 'In-App', 'SMS'],
+                    datasets: [{
+                        data: [48, 34, 14, 4],
+                        backgroundColor: ['#10b981', '#14b8a6', '#6366f1', '#ec4899'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#9ca3af', font: { size: 11 } } }
+                    }
+                }
+            });
         }
-    }
-
-    function getEventBadge(evt) {
-        if (evt === 'rage_click') return '<span class="w3-tag w3-red w3-round w3-small">Rage Click</span>';
-        if (evt === 'dead_click') return '<span class="w3-tag w3-orange w3-text-white w3-round w3-small">Dead Click</span>';
-        if (evt === 'funnel_step') return '<span class="w3-tag w3-teal w3-round w3-small">Funnel Step</span>';
-        return `<span class="w3-tag w3-blue w3-round w3-small">${escapeHtml(evt)}</span>`;
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    loadDashboardTelemetry();
-});
+    });
 </script>
-
-<!-- Create Super Admin Modal -->
-<div id="createAdminModal" class="w3-modal">
-    <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width:440px;">
-        <header class="w3-container w3-blue w3-padding"> 
-            <span onclick="document.getElementById('createAdminModal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
-            <h4 style="margin:0;"><b><i class="fa fa-user-plus"></i> Create New Super Admin</b></h4>
-        </header>
-        @php
-            $adminSecretPath = ($_ENV['ADMIN_SECRET_PATH'] ?? getenv('ADMIN_SECRET_PATH') ?: 'admin');
-            $adminPrefix = '/' . trim((string)$adminSecretPath, '/');
-        @endphp
-        <form action="{{ $adminPrefix }}/create-admin" method="POST" class="w3-container w3-padding-16">
-    @include('csrf')
-            <p>
-                <label class="w3-text-grey"><b>Full Name</b></label>
-                <input class="w3-input w3-border w3-round" type="text" name="name" placeholder="e.g. Sarah Jenkins" required>
-            </p>
-            <p>
-                <label class="w3-text-grey"><b>Admin Email Address</b></label>
-                <input class="w3-input w3-border w3-round" type="email" name="email" placeholder="admin@domain.com" required>
-            </p>
-            <p>
-                <label class="w3-text-grey"><b>Initial Password</b></label>
-                <input class="w3-input w3-border w3-round" type="password" name="password" placeholder="••••••••••••" required>
-            </p>
-            <div class="w3-right-align w3-margin-top">
-                <button type="button" onclick="document.getElementById('createAdminModal').style.display='none'" class="w3-button w3-light-grey w3-round">Cancel</button>
-                <button type="submit" class="w3-button w3-blue w3-round"><b>Create Super Admin</b></button>
-            </div>
-        </form>
-    </div>
-</div>
-
 @endsection

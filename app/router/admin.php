@@ -48,8 +48,31 @@ $router->map('GET', $adminSecretPath . '/members', 'App\controller\admin\AdminMe
 $router->map('GET', '/admin/online-users', 'App\controller\admin\AdminMembersController@onlineUsers', 'admin_online_users');
 $router->map('GET', $adminSecretPath . '/online-users', 'App\controller\admin\AdminMembersController@onlineUsers', 'admin_online_users_secret');
 
-$router->map('GET', '/admin/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard');
-$router->map('GET', $adminSecretPath . '/dashboard', 'App\controller\admin\Dashboard@index', 'dashboard_secret');
+$router->map('GET', '/admin/dashboard', 'App\controller\admin\AdminController@index', 'dashboard');
+$router->map('GET', $adminSecretPath . '/dashboard', 'App\controller\admin\AdminController@index', 'dashboard_secret');
+$router->map('GET', '/admin', 'App\controller\admin\AdminController@index', 'admin_root');
+$router->map('GET', $adminSecretPath . '/umac', 'App\controller\admin\AdminController@index', 'admin_umac_secret');
+
+$router->map('GET', '/admin/users', 'App\controller\admin\AdminController@users', 'admin_users');
+$router->map('GET', $adminSecretPath . '/users', 'App\controller\admin\AdminController@users', 'admin_users_secret');
+
+$router->map('GET', '/admin/campaigns', 'App\controller\admin\AdminController@campaigns', 'admin_campaigns');
+$router->map('GET', $adminSecretPath . '/campaigns', 'App\controller\admin\AdminController@campaigns', 'admin_campaigns_secret');
+
+$router->map('GET', '/admin/broadcast', 'App\controller\admin\AdminController@broadcast', 'admin_broadcast');
+$router->map('GET', $adminSecretPath . '/broadcast', 'App\controller\admin\AdminController@broadcast', 'admin_broadcast_secret');
+
+$router->map('GET', '/admin/system', 'App\controller\admin\AdminController@system', 'admin_system');
+$router->map('GET', $adminSecretPath . '/system', 'App\controller\admin\AdminController@system', 'admin_system_secret');
+
+// Admin APIs
+$router->map('GET', '/admin/api/metrics', 'App\controller\admin\AdminController@apiMetrics', 'admin_api_metrics');
+$router->map('POST', '/admin/api/users/status', 'App\controller\admin\AdminController@apiUpdateUserStatus', 'admin_api_user_status');
+$router->map('POST', '/admin/api/campaigns', 'App\controller\admin\AdminController@apiCreateCampaign', 'admin_api_create_campaign');
+$router->map('POST', '/admin/api/broadcast/audience', 'App\controller\admin\AdminController@apiAudienceCount', 'admin_api_audience_count');
+$router->map('POST', '/admin/api/broadcast/send', 'App\controller\admin\AdminController@apiSendBroadcast', 'admin_api_send_broadcast');
+$router->map('POST', '/admin/api/system/purge-cache', 'App\controller\admin\AdminController@apiPurgeCache', 'admin_api_purge_cache');
+
 
 $router->map('GET', '/admin/playbook', 'App\controller\PlaybookController@adminPlaybook', 'admin_playbook');
 $router->map('GET', $adminSecretPath . '/playbook', 'App\controller\PlaybookController@adminPlaybook', 'admin_playbook_secret');

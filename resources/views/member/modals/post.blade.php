@@ -201,6 +201,10 @@
                             <button type="button" class="btn-composer-action action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
                                 <i class="bi bi-bar-chart-fill"></i>
                             </button>
+
+                            <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="Share from iPhone 13 Apple Photos" aria-label="Share from iPhone Photos" data-bs-toggle="modal" data-bs-target="#iosFamilyShareModal">
+                                <i class="bi bi-apple"></i>
+                            </button>
                         </div>
 
                         <div id="emojiPickerContainer"
@@ -225,7 +229,68 @@
     </div>
 </div>
 
+<!-- iOS Apple Photos Direct Share Modal -->
+<div class="modal fade" id="iosFamilyShareModal" tabindex="-1" aria-labelledby="iosFamilyShareModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg);">
+            <div class="modal-header border-bottom py-3 px-4 align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="bg-dark text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                        <i class="bi bi-apple fs-5"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="iosFamilyShareModalLabel" style="color: var(--text-color);">iPhone 13 Photos Share Sheet</h5>
+                        <p class="text-muted small mb-0">Share directly from Apple Photos gallery</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="p-3 rounded-3 mb-3 border bg-light-subtle">
+                    <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> How To Share from iPhone Photos</h6>
+                    <ol class="small text-secondary ps-3 mb-0" style="line-height: 1.7;">
+                        <li>Tap <strong>Install Shortcut</strong> below to add <em>&quot;Share to FamilyPlatform&quot;</em> to your iPhone.</li>
+                        <li>Open any photo or video in your iPhone <strong>Apple Photos</strong> gallery.</li>
+                        <li>Tap the iOS <strong>Share</strong> button and choose <strong>&quot;Share to FamilyPlatform&quot;</strong>.</li>
+                        <li>It posts directly to your family feed instantly!</li>
+                    </ol>
+                </div>
+
+                <div class="d-grid gap-2 mb-3">
+                    <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;format=shortcut" class="btn btn-primary rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="min-height: 48px;">
+                        <i class="bi bi-download me-2"></i> Download iPhone Shortcut
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill py-2 fw-medium d-flex align-items-center justify-content-center" style="min-height: 44px;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}')">
+                        <i class="bi bi-clipboard me-2"></i> Copy Family Code &amp; Endpoint
+                    </button>
+                </div>
+
+                <div id="famCopyAlertSuccess" class="alert alert-success small py-2 px-3 text-center d-none" role="alert">
+                    <i class="bi bi-check-circle-fill me-1"></i> Copied to clipboard!
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal" style="min-height: 44px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+window.copyFamilyShareEndpoint = function(famCode) {
+    const text = window.location.origin + '/api/media/native-share?fam_code=' + encodeURIComponent(famCode);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            const el = document.getElementById('famCopyAlertSuccess');
+            if (el) {
+                el.classList.remove('d-none');
+                setTimeout(() => el.classList.add('d-none'), 3000);
+            }
+        });
+    } else {
+        prompt('Copy your direct share URL:', text);
+    }
+};
 window.insertHashtagIntoComposer = function(tag) {
     const textarea = document.getElementById('postMessage');
     if (!textarea) return;

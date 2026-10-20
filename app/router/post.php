@@ -80,3 +80,25 @@ $router->map(
   name: 'api_hashtags_stream'
 );
 
+// Native iOS / Apple Photos Share Sheet Endpoints
+$router->map(
+  method: 'POST',
+  route: '/api/media/native-share',
+  target: 'App\controller\members\NativeShareController@share',
+  name: 'api_media_native_share'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/media/ios-shortcut',
+  target: 'App\controller\members\NativeShareController@shortcutConfig',
+  name: 'api_media_ios_shortcut'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/media/ios-shortcut',
+  target: 'App\controller\members\NativeShareController@shortcutConfig',
+  name: 'media_ios_shortcut'
+);
+
