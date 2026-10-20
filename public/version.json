@@ -1,11 +1,11 @@
 {
-    "version": "v1.5.7",
-    "title": "Feat(directory): restore complete directory search across family and wider platform with privacy protection",
+    "version": "v1.5.8",
+    "title": "fix(views): resolve BladeOne pipe operator syntax error in editProfile modal",
     "notes": [
-        "Feat(directory): restore complete directory search across family and wider platform with privacy protection",
-        "Feat(blog): link /blogs across all public facing pages, navbars, and homepage",
-        "Fix(security): resolve semgrep echoed-request annotation and lastInsertId integer typing"
+        "fix(views): replace inline logical OR operator in editProfile modal with @if directive to prevent BladeOne pipeDream corruption",
+        "fix(views): clean up nested CSS comments in test/familyTree.blade.php",
+        "Feat(i18n): global spread, smart international dialling, client timezone engine and language switcher"
     ],
-    "released_at": "2026-10-18",
-    "commit": "9024c4c"
+    "released_at": "2026-10-20",
+    "commit": "HEAD"
 }

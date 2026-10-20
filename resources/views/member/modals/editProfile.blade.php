@@ -343,7 +343,7 @@
                                     <select class="form-select form-control" id="country" name="country">
                                         <option value="">Select Country</option>
                                         @foreach ($catalogCountries as $cName => $cMeta)
-                                            <option value="{{ $cName }}" {{ (strcasecmp($userCountry, $cName) === 0 || strcasecmp($userCountry, $cMeta['code']) === 0) ? 'selected' : '' }}>
+                                            <option value="{{ $cName }}" @if(strcasecmp($userCountry, $cName) === 0 || strcasecmp($userCountry, $cMeta['code']) === 0) selected @endif>
                                                 {{ $cMeta['flag'] }} {{ $cName }} ({{ $cMeta['dial_code'] }})
                                             </option>
                                         @endforeach

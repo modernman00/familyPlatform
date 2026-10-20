@@ -126,7 +126,6 @@
   <title>Family Tree with D3.js</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    /* CSS styles for the family tree */
     .node {
       fill: #fff;
       stroke: #000;
