@@ -197,6 +197,7 @@ fi
 
 echo -e "\n🔍 [2/8] Verifying Git & Workspace Integrity..."
 
+git update-index -q --refresh 2>/dev/null || true
 if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     echo "⚠️  WARNING: Uncommitted changes detected in workspace:"
     git status -s
