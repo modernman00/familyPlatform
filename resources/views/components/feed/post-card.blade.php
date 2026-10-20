@@ -174,14 +174,14 @@
            @mouseleave="keepPostReactionBar(post.post_no, false)"
            class="reaction-bar-float"
            style="position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--card-bg); border-radius:30px; padding:6px 10px; box-shadow:0 4px 20px rgba(0,0,0,0.18); display:flex; gap:4px; z-index:100; white-space:nowrap;">
-        <template x-for="[type, data] in Object.entries(emojiMap)" :key="type">
+        <template x-for="type in Object.keys(emojiMap)" :key="type">
           <button type="button"
                   @click="reactToPost(post.post_no, type)"
-                  :title="data.label"
-                  :aria-label="data.label"
+                  :title="emojiMap[type].label"
+                  :aria-label="emojiMap[type].label"
                   :class="post.user_reaction === type ? 'reaction-emoji-btn active' : 'reaction-emoji-btn'"
                   style="background:none; border:none; font-size:1.6rem; cursor:pointer; padding:2px 4px; border-radius:50%; transition:transform 0.15s ease, background 0.15s;">
-            <span x-text="data.icon"></span>
+            <span x-text="emojiMap[type].icon"></span>
           </button>
         </template>
       </div>
@@ -224,12 +224,12 @@
              @click.outside="commentEmojiOpen[post.post_no] = false"
              style="position:absolute; bottom:calc(100% + 6px); left:0; background:var(--card-bg); border-radius:16px; padding:10px; box-shadow:0 4px 20px rgba(0,0,0,0.15); z-index:200; width:260px;">
           <div style="display:grid; grid-template-columns:repeat(8,1fr); gap:4px;">
-            <template x-for="[type, emoji] in Object.entries(commentEmojiMap)" :key="type">
-              <button type="button" @click="insertEmojiIntoComment(post.post_no, emoji)"
+            <template x-for="type in Object.keys(commentEmojiMap)" :key="type">
+              <button type="button" @click="insertEmojiIntoComment(post.post_no, commentEmojiMap[type])"
                       style="background:none; border:none; font-size:1.4rem; cursor:pointer; border-radius:8px; padding:3px; transition:background 0.1s;"
                       @mouseenter="$el.style.background='var(--hover-color)'"
                       @mouseleave="$el.style.background='none'">
-                <span x-text="emoji"></span>
+                <span x-text="commentEmojiMap[type]"></span>
               </button>
             </template>
             <!-- Additional common emojis -->
@@ -323,13 +323,13 @@
                      @mouseenter="keepCommentReactionBar(c.comment_no, true)"
                      @mouseleave="keepCommentReactionBar(c.comment_no, false)"
                      style="position:absolute; bottom:calc(100% + 4px); left:0; background:var(--card-bg); border-radius:30px; padding:5px 8px; box-shadow:0 4px 18px rgba(0,0,0,0.16); display:flex; gap:3px; z-index:100; white-space:nowrap;">
-                  <template x-for="[type, emoji] in Object.entries(commentEmojiMap)" :key="type">
+                  <template x-for="type in Object.keys(commentEmojiMap)" :key="type">
                     <button type="button"
                             @click="reactToComment(post.post_no, c.comment_no, type)"
                             :title="type"
                             :class="c.userReaction === type ? 'reaction-emoji-btn active' : 'reaction-emoji-btn'"
                             style="background:none; border:none; font-size:1.4rem; cursor:pointer; padding:2px 3px; border-radius:50%; transition:transform 0.15s ease;">
-                      <span x-text="emoji"></span>
+                      <span x-text="commentEmojiMap[type]"></span>
                     </button>
                   </template>
                 </div>

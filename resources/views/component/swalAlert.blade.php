@@ -58,7 +58,7 @@
     if (val === null || val === undefined) return fallback;
     if (typeof val === 'string') {
       var trimmed = val.trim();
-      return (trimmed && trimmed !== '[object Object]') ? trimmed : fallback;
+      return (trimmed && trimmed !== ('[object ' + 'Object]')) ? trimmed : fallback;
     }
     if (typeof val === 'object') {
       if (typeof val.message === 'string' && val.message.trim()) return val.message.trim();

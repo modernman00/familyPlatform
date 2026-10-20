@@ -133,31 +133,42 @@
         },
 
         localizeAll: function(root) {
-            root = root || document;
-            const elements = root.querySelectorAll('.local-time, [data-utc]');
-            const userTz = this.getUserTimezone();
+            if (this._isLocalizing) return;
+            this._isLocalizing = true;
+            try {
+                root = root || document;
+                const elements = root.querySelectorAll('.local-time:not(.time-localized), [data-utc]:not(.time-localized)');
+                const userTz = this.getUserTimezone();
 
-            elements.forEach(function(el) {
-                const rawUtc = el.getAttribute('datetime') || el.getAttribute('data-utc');
-                if (!rawUtc) return;
+                elements.forEach(function(el) {
+                    const rawUtc = el.getAttribute('datetime') || el.getAttribute('data-utc');
+                    if (!rawUtc) return;
 
-                const formatType = el.getAttribute('data-format') || 'datetime';
-                const formatted = FamilyTimezone.format(rawUtc, formatType);
+                    const formatType = el.getAttribute('data-format') || 'datetime';
+                    const formatted = FamilyTimezone.format(rawUtc, formatType);
 
-                el.textContent = formatted;
-                el.setAttribute('title', rawUtc + ' UTC (' + userTz + ')');
-                el.classList.add('time-localized');
-            });
+                    if (el.textContent !== formatted) {
+                        el.textContent = formatted;
+                    }
+                    el.setAttribute('title', rawUtc + ' UTC (' + userTz + ')');
+                    el.classList.add('time-localized');
+                });
 
-            // Update any timezone badges
-            const tzLabels = root.querySelectorAll('.user-tz-name');
-            tzLabels.forEach(function(label) {
-                label.textContent = userTz;
-            });
+                // Update any timezone badges only if text actually differs
+                const tzLabels = root.querySelectorAll('.user-tz-name');
+                tzLabels.forEach(function(label) {
+                    if (label.textContent !== userTz) {
+                        label.textContent = userTz;
+                    }
+                });
+            } finally {
+                this._isLocalizing = false;
+            }
         },
 
         init: function() {
             const self = this;
+            this._isLocalizing = false;
             // Record detected timezone in cookie for server awareness
             try {
                 const tz = self.getUserTimezone();
@@ -179,17 +190,33 @@
             const self = this;
             if (typeof MutationObserver === 'undefined') return;
 
+            let debounceTimer = null;
             const observer = new MutationObserver(function(mutations) {
+                if (self._isLocalizing) return;
+
                 let shouldLocalize = false;
                 for (let i = 0; i < mutations.length; i++) {
                     const m = mutations[i];
                     if (m.addedNodes && m.addedNodes.length > 0) {
-                        shouldLocalize = true;
-                        break;
+                        for (let j = 0; j < m.addedNodes.length; j++) {
+                            const node = m.addedNodes[j];
+                            if (node.nodeType === 1) { // Element nodes only
+                                if ((node.matches && (node.matches('.local-time, [data-utc], .user-tz-name'))) ||
+                                    (node.querySelector && node.querySelector('.local-time, [data-utc], .user-tz-name'))) {
+                                    shouldLocalize = true;
+                                    break;
+                                }
+                            }
+                        }
                     }
+                    if (shouldLocalize) break;
                 }
+
                 if (shouldLocalize) {
-                    self.localizeAll();
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function() {
+                        self.localizeAll();
+                    }, 50);
                 }
             });
 

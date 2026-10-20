@@ -1,11 +1,11 @@
 {
-    "version": "v1.5.8",
-    "title": "fix(views): resolve BladeOne pipe operator syntax error in editProfile modal",
+    "version": "v1.5.7",
+    "title": "Fix(security): sanitize and validate shortcutConfig family code resolving Semgrep rule",
     "notes": [
-        "fix(views): replace inline logical OR operator in editProfile modal with @if directive to prevent BladeOne pipeDream corruption",
-        "fix(views): clean up nested CSS comments in test/familyTree.blade.php",
-        "Feat(i18n): global spread, smart international dialling, client timezone engine and language switcher"
+        "Fix(security): sanitize and validate shortcutConfig family code resolving Semgrep rule",
+        "Feat(native-share): implement iOS 13+ Apple Photos share sheet integration and modern enterprise admin portal",
+        "Fix(deploy): use find -delete to safely invalidate remote view and framework caches"
     ],
     "released_at": "2026-10-20",
-    "commit": "HEAD"
+    "commit": "5353d20"
 }

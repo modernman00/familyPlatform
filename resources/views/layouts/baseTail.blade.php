@@ -299,7 +299,7 @@
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/vendor.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="public/js/index.js" defer></script>
     <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js" defer></script>
-    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-timezone.js" defer></script>
+    <script type="text/javascript" nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
     @include('component.submitSpinner')
     @include('partials.pwa-register')
 </body>

@@ -35,7 +35,7 @@
   <link rel="apple-touch-startup-image" href="/public/img/favicon/android-chrome-512x512.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)">
 
       <script nonce="{{ $nonce }}" src="https://www.google.com/recaptcha/api.js" async defer></script>
-      <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v=1.0.0" defer></script>
+      <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
 
   
 

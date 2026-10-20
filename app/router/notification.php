@@ -43,7 +43,7 @@ $router->map(
 
 $router->map(
   method: 'GET', 
-  route: '/member/notifications/id/[**:id]/[**:famCode]', 
+  route: '/member/notifications/id/[*:id]/[*:famCode]', 
   target: 'App\controller\NotificationController@notificationById',
   name: 'all notification by id'
 );

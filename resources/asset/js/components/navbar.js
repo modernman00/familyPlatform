@@ -117,6 +117,12 @@ export const addToNotificationTab = (data) => {
 };
 
 const fetchUserNotifications = () => {
+    // Only attempt to poll/fetch notifications if notification UI elements exist on the page
+    const hasNotificationUI = document.getElementById('notificationBtn') || document.querySelector('.notification_tab');
+    if (!hasNotificationUI) {
+        return;
+    }
+
     const yourId = localStorage.getItem('requesterId');
     const famCode = localStorage.getItem('requesterFamCode');
     const notificationURL = (yourId && famCode && yourId !== 'null' && famCode !== 'null')
@@ -156,8 +162,13 @@ const fetchUserNotifications = () => {
             }
         })
         .catch(error => {
-            // Silently handle error if session expired
-            if (error?.response?.status !== 401) {
+            // Silently handle error if session expired or unauthenticated
+            if (error?.response?.status === 401) {
+                localStorage.removeItem('requesterId');
+                localStorage.removeItem('requesterFamCode');
+                return;
+            }
+            if (error?.response?.status !== 404) {
                 showError(error);
             }
         });

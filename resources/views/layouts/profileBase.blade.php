@@ -78,7 +78,7 @@
   <script nonce="{{ $nonce }}" src="/public/js/telemetry.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-install.js?v=1.0.0"></script>
   <script nonce="{{ $nonce }}" src="/public/js/pwa-notifications.js?v=1.0.0" defer></script>
-  <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v=1.0.0" defer></script>
+  <script nonce="{{ $nonce }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
 
   @include('component.submitSpinner')
   @include('partials.pwa-register')
