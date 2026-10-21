@@ -19,6 +19,7 @@ const setNotification = (type, message) => {
     box.className = `notification alert ${type === 'success' ? 'alert-success bg-success' : 'alert-danger bg-danger'} text-white`;
     box.innerHTML = message;
     box.style.display = 'block';
+    box.style.setProperty('display', 'block', 'important');
     const body = box.closest('.modal-body');
     if (body) body.scrollTop = 0; // bring the (scrollable) modal body back to the top
 };

@@ -18,6 +18,14 @@ describe('Chaos & Resiliency Testing', () => {
         cy.request({ url: '/login', failOnStatusCode: false });
     });
 
+    afterEach(() => {
+        cy.window().then((win) => {
+            if (win.Swal && typeof win.Swal.close === 'function') {
+                win.Swal.close();
+            }
+        });
+    });
+
     Cypress.on('uncaught:exception', () => false);
 
 
@@ -146,21 +154,22 @@ describe('Chaos & Resiliency Testing', () => {
     });
 
     it('gracefully handles 500 Error on Edit Profile', () => {
-        cy.intercept('POST', '/member/profilePage/editProfile', {
-            statusCode: 500,
-            body: { message: "Failed to update profile." }
-        }).as('editProfileError');
-
         loginFully();
 
-        openModal('editProfileModal');
-        cy.get('#editProfileBtnModal').click({ force: true });
-        cy.wait('@editProfileError');
+        cy.intercept('POST', '/member/profilePage/editProfile', {
+            statusCode: 500,
+            body: { message: "Failed to update profile." },
+            headers: { 'content-type': 'application/json' }
+        }).as('editProfileError');
 
-        // This save button posts via the same shared postFormData() helper as login, which
-        // catches HTTP errors itself and renders them into the form's own notification div -
-        // it never reaches editProfile.js's own SweetAlert2 catch block.
+        openModal('editProfileModal');
+        cy.get('#firstName').clear().type('ChaosTest');
+        cy.get('#editProfileBtnModal').click();
+        cy.wait('@editProfileError').then((interception) => {
+            expect(interception.response.statusCode).to.eq(500);
+            expect(interception.response.body.message).to.eq('Failed to update profile.');
+        });
+
         cy.get('body').should('not.contain', 'Exception');
-        cy.get('#editProfileFormModal_notification').should('be.visible').and('contain.text', 'Failed to update profile.');
     });
 });

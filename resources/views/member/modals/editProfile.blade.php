@@ -215,6 +215,9 @@
             font-size: 0.88rem;
             font-weight: 500;
         }
+        #editProfileFormModal_notification.alert {
+            display: block !important;
+        }
         #editProfileFormModal_notification.alert-danger,
         #editProfileFormModal_notification.bg-danger {
             background-color: #ef4444 !important;
