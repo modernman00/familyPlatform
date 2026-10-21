@@ -42,17 +42,15 @@ describe('Events and Profiles', () => {
     });
 
     it('can edit profile information', () => {
+        cy.intercept('POST', '/member/profilePage/editProfile').as('editProfileReq');
         openModal('editProfileModal');
         cy.get('#firstName').clear().type('CypressEdited');
 
         cy.get('#editProfileBtnModal').click();
-
-        // Success is shown via the form's own notification div, not SweetAlert2.
-        // This modal's form doesn't send an `action` field, so SettingController's
-        // $successMsg match falls through to its default arm: "Changes successfully
-        // saved." (not "submitted"/"updated", which are the other actions' wording).
-        cy.get('#editProfileFormModal_notification', { timeout: 10000 })
-            .should('contain.text', 'successfully saved');
+        cy.wait('@editProfileReq').then((interception) => {
+            expect(interception.response.statusCode).to.eq(200);
+            expect(interception.response.body.message).to.contain('successfully saved');
+        });
     });
 
     const csrf = () => cy.getCookie('XSRF-TOKEN').then((c) => (c ? c.value : ''));

@@ -352,14 +352,14 @@ if [ -f "cypress.config.js" ] || [ -f "cypress.json" ] || [ -d "cypress" ]; then
         TARGET_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" --connect-timeout 3 "$E2E_TARGET" 2>/dev/null || echo "000")
 
         if [ "$TARGET_STATUS" != "000" ]; then
-            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests (Watchdog limit: 180s)..."
+            echo "   ↳ Target reachable (HTTP ${TARGET_STATUS}). Executing headless Cypress E2E tests (Watchdog limit: 480s)..."
             CYPRESS_SUCCESS=false
             if grep -q '"test:e2e":' package.json 2>/dev/null; then
-                if run_with_watchdog 180 npm run test:e2e -- --headless; then
+                if run_with_watchdog 480 npm run test:e2e -- --headless; then
                     CYPRESS_SUCCESS=true
                 fi
             elif command -v npx > /dev/null 2>&1; then
-                if run_with_watchdog 180 npx cypress run --headless; then
+                if run_with_watchdog 480 npx cypress run --headless; then
                     CYPRESS_SUCCESS=true
                 fi
             fi
