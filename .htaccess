@@ -7,6 +7,28 @@
 RewriteEngine On
 # Allow robots.txt and sitemap.xml directly
 RewriteRule ^(robots\.txt|sitemap\.xml)$ - [L]
+
+# ---------------------------------------------------------------------------
+# 0a. NCSC PHP Advisory ("php2shell" — CVE-2026-109618 & CVE-2026-109619) Shield
+#     Disables RFC1867 session upload progress & blocks exploit triggers at edge
+# ---------------------------------------------------------------------------
+<IfModule mod_php.c>
+    php_flag session.upload_progress.enabled Off
+    php_flag session.upload_progress.cleanup Off
+    php_flag expose_php Off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag session.upload_progress.enabled Off
+    php_flag session.upload_progress.cleanup Off
+    php_flag expose_php Off
+</IfModule>
+RewriteCond %{QUERY_STRING} PHP_SESSION_UPLOAD_PROGRESS [NC,OR]
+RewriteCond %{HTTP_COOKIE} PHP_SESSION_UPLOAD_PROGRESS [NC,OR]
+RewriteCond %{THE_REQUEST} PHP_SESSION_UPLOAD_PROGRESS [NC]
+RewriteRule ^ - [F,L]
+RewriteCond %{REQUEST_METHOD} !^POST$ [NC]
+RewriteCond %{HTTP:Content-Type} multipart/form-data [NC]
+RewriteRule ^ - [F,L]
 # ---------------------------------------------------------------------------
 # 0. Secrets directory. app/config/_env.php reads .env from APP_ENV_DIR if that
 #    directory holds a readable .env, otherwise it falls back to the project

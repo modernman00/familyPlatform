@@ -439,6 +439,7 @@ copy_item composer.lock
 copy_item index.php
 copy_item offline.html
 copy_item .htaccess
+copy_item .user.ini
 
 if [ -f "manifest.json" ]; then
     copy_item manifest.json

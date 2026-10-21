@@ -82,6 +82,9 @@ echo ""
 # 3. Dr. Viktor Kovács & Marcus Adversarial Enterprise Security Attack Suite
 echo -e "${BOLD}${CYAN}[IN-FLIGHT 3/4] Executing Dr. Viktor Kovács Adversarial Exploit Attacks...${NC}"
 ADVERSARIAL_PASSED=1
+if [ -f "scripts/dast-php2shell-cve-2026-109618.sh" ]; then
+    bash scripts/dast-php2shell-cve-2026-109618.sh || ADVERSARIAL_PASSED=0
+fi
 if [ -f "scripts/dast-guest-builder-idor.sh" ]; then
     bash scripts/dast-guest-builder-idor.sh || ADVERSARIAL_PASSED=0
 fi

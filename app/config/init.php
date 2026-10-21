@@ -4,6 +4,26 @@ declare(strict_types=1);
 
 namespace App\config;
 
+// 🛡️ NCSC PHP Advisory ("php2shell" — CVE-2026-109618 & CVE-2026-109619) Defense-in-Depth Guard
+if (PHP_SAPI !== 'cli') {
+    @header_remove('X-Powered-By');
+    $rawQuery = (string) ($_SERVER['QUERY_STRING'] ?? '');
+    $rawCookie = (string) ($_SERVER['HTTP_COOKIE'] ?? '');
+    $contentType = (string) ($_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '');
+    $reqMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    if (
+        isset($_POST['PHP_SESSION_UPLOAD_PROGRESS']) ||
+        isset($_GET['PHP_SESSION_UPLOAD_PROGRESS']) ||
+        isset($_COOKIE['PHP_SESSION_UPLOAD_PROGRESS']) ||
+        stripos($rawQuery, 'PHP_SESSION_UPLOAD_PROGRESS') !== false ||
+        stripos($rawCookie, 'PHP_SESSION_UPLOAD_PROGRESS') !== false ||
+        ($reqMethod !== 'POST' && stripos($contentType, 'multipart/form-data') !== false)
+    ) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+}
+
 // E2E test bypass: detect Cypress E2E requests and disable rate limiting for tests
 // Check multiple headers since different web servers handle header names differently
 $isCypressTest = false;
