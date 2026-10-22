@@ -400,6 +400,32 @@
         }
     }
 
+    &.action-apple {
+        color: #64748b;
+        &:hover {
+            background-color: rgba(100, 116, 139, 0.14);
+            color: #0f172a;
+        }
+    }
+
+    &.emoji-active {
+        background-color: #f59e0b !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+    }
+
+    &.video-active {
+        background-color: #ef4444 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    }
+
+    &.gif-active {
+        background-color: #06b6d4 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
+    }
+
     &.poll-active {
         background-color: #f97316 !important;
         color: #fff !important;
@@ -410,6 +436,72 @@
         background-color: #3b82f6 !important;
         color: #fff !important;
         box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    }
+
+    &.apple-active {
+        background-color: #0f172a !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+    }
+}
+
+/* GIF Picker Styles */
+.gif-cat-pill {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.75rem;
+
+    &:hover {
+        background-color: var(--hover-color, #f1f5f9);
+        border-color: #0891b2 !important;
+    }
+
+    &.active {
+        background-color: #0891b2 !important;
+        color: #ffffff !important;
+        border-color: #0891b2 !important;
+        box-shadow: 0 2px 4px rgba(8, 145, 178, 0.25);
+    }
+}
+
+.gif-item-card {
+    position: relative;
+    width: calc(33.333% - 6px);
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #0f172a;
+    border: 2px solid transparent;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover {
+        transform: scale(1.03);
+        border-color: #06b6d4;
+        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+
+        img {
+            transform: scale(1.08);
+        }
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+@media (max-width: 576px) {
+    .gif-item-card {
+        width: calc(50% - 4px);
+        height: 100px;
     }
 }
 

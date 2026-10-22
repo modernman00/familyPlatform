@@ -60,17 +60,17 @@ import { html } from './html'
 
 export const initEngagementListeners = () => {
     document.addEventListener('click', async (e) => {
-        // Handle Poll Voting
+        // Handle Poll Voting (legacy container fallback; Alpine feedComponent manages the main feed)
         if (e.target.closest('.poll-option-btn')) {
-            const btn = e.target.closest('.poll-option-btn')
-            const optionId = btn.getAttribute('data-option-id')
+            const btn = e.target.closest('.poll-option-btn');
+            if (btn.closest('.feed-posts-container')) return;
+            const optionId = btn.getAttribute('data-option-id');
             if (optionId) {
                 btn.disabled = true;
-                const res = await handlePollVote(optionId)
+                const res = await handlePollVote(optionId);
                 if (res?.status === 'success') {
                     // Trigger a reload of the post or re-fetch to show new bars
-                    window.dispatchEvent(new Event('refresh-feed'))
-                    // For immediate visual feedback, just reload page for now or wait for pusher
+                    window.dispatchEvent(new Event('refresh-feed'));
                     window.location.reload(); 
                 }
                 btn.disabled = false;

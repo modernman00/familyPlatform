@@ -7,7 +7,6 @@ use App\model\ReactionData;
 use App\model\PollData;
 use App\model\AllMembersData;
 use App\controller\BaseController;
-use Src\CheckToken;
 use Src\Db;
 
 class EngagementController
@@ -15,13 +14,25 @@ class EngagementController
     public function react(): void
     {
         try {
-            CheckToken::tokenCheck();
+            // Accept both multipart/form-data and a raw JSON body
+            $input = $_POST;
+            if (empty($input)) {
+                $raw = file_get_contents('php://input');
+                if ($raw !== false && $raw !== '') {
+                    $decoded = json_decode($raw, true);
+                    if (is_array($decoded)) {
+                        $input = $decoded;
+                    }
+                }
+            }
 
-            $postNo = (int) ($_POST['post_no'] ?? 0);
-            $reactionType = is_string($_POST['reaction_type'] ?? null) ? $_POST['reaction_type'] : '';
-            $userId = $_SESSION['id'] ?? null;
+            BaseController::validateCsrf($input);
 
-            if (!$userId) {
+            $postNo = (int) ($input['post_no'] ?? 0);
+            $reactionType = is_string($input['reaction_type'] ?? null) ? $input['reaction_type'] : '';
+            $userId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+
+            if ($userId === '') {
                 http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
                 return;
@@ -29,39 +40,124 @@ class EngagementController
 
             $validReactions = ['like', 'love', 'haha', 'shock', 'sad'];
             if (!in_array($reactionType, $validReactions, true)) {
+                http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Invalid reaction type']);
                 return;
             }
 
-            // IDOR guard: you can only react to a post in one of your families.
-            if (!self::postInSessionFamily($postNo)) {
+            // IDOR guard: you can only react to a post accessible to your session.
+            if (!self::sessionCanAccessPost($postNo, $userId)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Not allowed']);
                 return;
             }
 
             ReactionData::toggleReaction($postNo, $userId, $reactionType);
+            http_response_code(200);
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'success']);
         } catch (\Throwable $th) {
+            http_response_code(400);
+            header('Content-Type: application/json');
             echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
         }
     }
 
-    /** True when $postNo belongs to a family the current session is a member of. */
-    private static function postInSessionFamily(int $postNo): bool
+    /**
+     * Determine whether the given user session has permission to view and interact
+     * with the specified post (voting, reacting, commenting).
+     */
+    public static function sessionCanAccessPost(int $postNo, string $userId): bool
     {
-        if ($postNo <= 0) {
+        if ($postNo <= 0 || $userId === '') {
             return false;
+        }
+        if (BaseController::isSuperAdmin($userId)) {
+            return true;
         }
         try {
-            $stmt = Db::connect2()->prepare("SELECT postFamCode FROM post WHERE post_no = ? LIMIT 1");
+            $stmt = Db::connect2()->prepare(
+                "SELECT id, postFamCode FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1"
+            );
             $stmt->execute([$postNo]);
-            $fc = $stmt->fetchColumn();
-            return is_string($fc) && BaseController::sessionSharesFamily($fc);
+            $post = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$post) {
+                return false;
+            }
+
+            // 1. Author of the post
+            if ((string)($post['id'] ?? '') === $userId) {
+                return true;
+            }
+
+            // 2. Shares family code directly or via user_families/personal
+            $postFamCode = (string)($post['postFamCode'] ?? '');
+            if ($postFamCode !== '' && BaseController::sessionSharesFamily($postFamCode)) {
+                return true;
+            }
+
+            // 3. Connected via requestMgt (either requester or approver)
+            $authorId = (string)($post['id'] ?? '');
+            if ($authorId !== '') {
+                $stmtConn = Db::connect2()->prepare(
+                    "SELECT 1 FROM requestMgt
+                     WHERE ((requester_id = ? AND approver_id = ?) OR (approver_id = ? AND requester_id = ?))
+                     LIMIT 1"
+                );
+                $stmtConn->execute([$userId, $authorId, $userId, $authorId]);
+                if ((bool)$stmtConn->fetchColumn()) {
+                    return true;
+                }
+            }
+
+            // 4. Tagged in post_tags
+            $stmtTag = Db::connect2()->prepare(
+                "SELECT 1 FROM post_tags WHERE post_no = ? AND user_id = ? LIMIT 1"
+            );
+            $stmtTag->execute([$postNo, $userId]);
+            if ((bool)$stmtTag->fetchColumn()) {
+                return true;
+            }
+
+            // 5. Member shares any family tree / family_nodes branch with this post
+            if ($postFamCode !== '') {
+                $stmtTree = Db::connect2()->prepare(
+                    "SELECT 1 FROM family_nodes
+                     WHERE user_id = ? AND family_code = ?
+                     LIMIT 1"
+                );
+                $stmtTree->execute([$userId, $postFamCode]);
+                if ((bool)$stmtTree->fetchColumn()) {
+                    return true;
+                }
+
+                // Or the post author is on the user's family tree
+                if ($authorId !== '' && $authorId !== 'HERITAGE_BOT') {
+                    $stmtKin = Db::connect2()->prepare(
+                        "SELECT 1 FROM family_nodes fnUser
+                         JOIN family_nodes fnAuthor ON fnUser.family_code = fnAuthor.family_code
+                         WHERE fnUser.user_id = ? AND fnAuthor.user_id = ?
+                         LIMIT 1"
+                    );
+                    $stmtKin->execute([$userId, $authorId]);
+                    if ((bool)$stmtKin->fetchColumn()) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         } catch (\Throwable $e) {
-            error_log('postInSessionFamily check failed: ' . $e->getMessage());
+            error_log('sessionCanAccessPost check failed: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /** Backwards-compatibility alias for internal callers. */
+    public static function postInSessionFamily(int $postNo): bool
+    {
+        $userId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
+        return self::sessionCanAccessPost($postNo, $userId);
     }
 
     /** Resolve the post a poll option belongs to (0 when unknown). */
@@ -88,8 +184,6 @@ class EngagementController
     public function vote(): void
     {
         try {
-            CheckToken::tokenCheck();
-
             // Accept both multipart/form-data and a raw JSON body
             $input = $_POST;
             if (empty($input)) {
@@ -101,6 +195,8 @@ class EngagementController
                     }
                 }
             }
+
+            BaseController::validateCsrf($input);
 
             $optionId = (int) ($input['option_id'] ?? 0);
             $postNo = (int) ($input['post_no'] ?? 0);
@@ -119,10 +215,10 @@ class EngagementController
             }
 
             // IDOR guard: resolve the poll's post (client-supplied post_no is only
-            // a hint) and confirm it's in one of the caller's families.
+            // a hint) and confirm it's accessible to the caller's session.
             $resolvedPost = self::postForOption($optionId);
             $targetPost = ($resolvedPost > 0) ? $resolvedPost : $postNo;
-            if ($targetPost <= 0 || !self::postInSessionFamily($targetPost)) {
+            if ($targetPost <= 0 || !self::sessionCanAccessPost($targetPost, $userId)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Not allowed']);
                 return;

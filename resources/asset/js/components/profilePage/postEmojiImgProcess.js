@@ -1,43 +1,84 @@
-// Import a helper function to get elements by ID (assumed from your shared utils)
+// Import helper functions and components
 import { showEmojiPicker, initEmojiPickerUX } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
-
+import { parseVideoUrl } from './videoParser';
 import axios from 'axios';
 
-// Get references to DOM elements used in the emoji picker and image preview - SHOW EMOJIs FOR POST
+// Helper to smooth scroll an element into view within the scrollable modal body
+const scrollDrawerIntoView = (el) => {
+    if (!el) return;
+    try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (_) {
+        el.scrollIntoView(false);
+    }
+};
 
-const emojiToggle = document.getElementById('emojiPost'); // Button to show/hide emoji picker
-const emojiContainer = document.getElementById('emojiPickerContainer'); // Container for emoji picker
-const closeEmojiBtn = document.getElementById('closeEmojiPicker'); // Close button
+// ----------------------------------------------------
+// 1. EMOJI PICKER (In-Flow, Zero-Clipping)
+// ----------------------------------------------------
+const emojiToggle = document.getElementById('emojiPost');
+const emojiContainer = document.getElementById('emojiPickerDrawer') || document.getElementById('emojiPickerContainer');
+const closeEmojiBtn = document.getElementById('closeEmojiDrawerBtn') || document.getElementById('closeEmojiPicker');
 
 if (document.getElementById('emojiListPost')) {
     showEmojiPicker('emojiListPost', 'data-emoji-target');
 }
-if (emojiToggle && emojiContainer) {
-    initEmojiPickerUX('emojiPost', 'emojiPickerContainer');
-}
 
-// 🟡 Toggle emoji picker visibility when the toggle button is clicked
-if (emojiToggle && emojiContainer) {
-    emojiToggle.addEventListener('click', () => {
-        emojiContainer.classList.toggle('d-none'); // Show/hide the emoji container
-        emojiToggle.setAttribute('aria-expanded', emojiContainer.classList.contains('d-none') ? 'false' : 'true');
-    });
-}
-
-// Close button handler
-if (closeEmojiBtn && emojiContainer && emojiToggle) {
-    closeEmojiBtn.addEventListener('click', () => {
-        emojiContainer.classList.add('d-none');
+const closeEmojiPicker = () => {
+    if (!emojiContainer) return;
+    emojiContainer.classList.add('d-none');
+    if (emojiToggle) {
+        emojiToggle.classList.remove('emoji-active');
         emojiToggle.setAttribute('aria-expanded', 'false');
+    }
+};
+
+// Sync active class and aria-expanded whenever the container is dismissed (e.g. on emoji selection)
+if (emojiContainer && window.MutationObserver) {
+    const emojiObserver = new MutationObserver(() => {
+        if (emojiContainer.classList.contains('d-none')) {
+            if (emojiToggle) {
+                emojiToggle.classList.remove('emoji-active');
+                emojiToggle.setAttribute('aria-expanded', 'false');
+            }
+        }
+    });
+    emojiObserver.observe(emojiContainer, { attributes: true, attributeFilter: ['class'] });
+}
+
+if (emojiToggle && emojiContainer) {
+    emojiToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isHidden = emojiContainer.classList.contains('d-none');
+        if (isHidden) {
+            emojiContainer.classList.remove('d-none');
+            emojiToggle.classList.add('emoji-active');
+            emojiToggle.setAttribute('aria-expanded', 'true');
+            scrollDrawerIntoView(emojiContainer);
+        } else {
+            closeEmojiPicker();
+        }
     });
 }
 
+if (closeEmojiBtn) {
+    closeEmojiBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeEmojiPicker();
+    });
+}
+
+// ----------------------------------------------------
+// 2. IMAGE PREVIEW
+// ----------------------------------------------------
 if (document.getElementById('imageUpload')) {
     imagePreview('imageUpload', 'imagePreviewList', 'postModalImgFileNames', 'imagePreviewContainer', 'closeImagePreview');
 }
 
-// Poll Creation UI Logic
+// ----------------------------------------------------
+// 3. POLL CREATION UI LOGIC
+// ----------------------------------------------------
 const addPollBtn = document.getElementById('addPollBtn');
 const pollContainer = document.getElementById('pollCreationContainer');
 const addOptionBtn = document.getElementById('addPollOptionBtn');
@@ -59,11 +100,13 @@ const closePoll = () => {
 };
 
 if (addPollBtn && pollContainer) {
-    addPollBtn.addEventListener('click', () => {
+    addPollBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         const isHidden = pollContainer.classList.contains('d-none');
         if (isHidden) {
             pollContainer.classList.remove('d-none');
             addPollBtn.classList.add('poll-active');
+            scrollDrawerIntoView(pollContainer);
             const questionInput = pollContainer.querySelector('input[name="poll_question"]');
             if (questionInput) setTimeout(() => questionInput.focus(), 60);
         } else {
@@ -72,11 +115,15 @@ if (addPollBtn && pollContainer) {
     });
 
     if (removePollBtn) {
-        removePollBtn.addEventListener('click', closePoll);
+        removePollBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closePoll();
+        });
     }
 
     if (addOptionBtn && optionsContainer) {
-        addOptionBtn.addEventListener('click', () => {
+        addOptionBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const current = optionsContainer.querySelectorAll('.poll-builder__option').length;
             if (current >= MAX_POLL_OPTIONS) return;
 
@@ -96,12 +143,33 @@ if (addPollBtn && pollContainer) {
     }
 }
 
-// Expose so the submit handler can reset the builder after a successful post
+// Quick Trivia Starters helper
+window.applyTriviaTemplate = (type) => {
+    if (!pollContainer) return;
+    if (pollContainer.classList.contains('d-none')) {
+        pollContainer.classList.remove('d-none');
+        if (addPollBtn) addPollBtn.classList.add('poll-active');
+        scrollDrawerIntoView(pollContainer);
+    }
+    const questionInput = pollContainer.querySelector('input[name="poll_question"]');
+    const options = pollContainer.querySelectorAll('input[name="poll_options[]"]');
+
+    if (type === 'guess_who') {
+        if (questionInput) questionInput.value = '👶 Guess who said or did this as a toddler?';
+        if (options[0]) options[0].value = 'Mum / Dad';
+        if (options[1]) options[1].value = 'Siblings / Cousins';
+    } else if (type === 'family_lore') {
+        if (questionInput) questionInput.value = '🧠 Who remembers what happened at the family reunion?';
+        if (options[0]) options[0].value = 'The legendary barbecue mishap';
+        if (options[1]) options[1].value = 'The surprise dance off';
+    }
+};
+
 window.__resetPollBuilder = closePoll;
 
-// Video Embed UI Logic
-import { parseVideoUrl } from './videoParser';
-
+// ----------------------------------------------------
+// 4. VIDEO EMBED & UPLOAD UI LOGIC
+// ----------------------------------------------------
 const addVideoBtn = document.getElementById('addVideoBtn');
 const videoContainer = document.getElementById('videoEmbedContainer');
 const videoInput = document.getElementById('postVideoInput');
@@ -128,11 +196,13 @@ const closeVideoBuilder = () => {
 };
 
 if (addVideoBtn && videoContainer) {
-    addVideoBtn.addEventListener('click', () => {
+    addVideoBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         const isHidden = videoContainer.classList.contains('d-none');
         if (isHidden) {
             videoContainer.classList.remove('d-none');
             addVideoBtn.classList.add('video-active');
+            scrollDrawerIntoView(videoContainer);
             if (videoInput) setTimeout(() => videoInput.focus(), 60);
         } else {
             closeVideoBuilder();
@@ -140,7 +210,10 @@ if (addVideoBtn && videoContainer) {
     });
 
     if (removeVideoBtn) {
-        removeVideoBtn.addEventListener('click', closeVideoBuilder);
+        removeVideoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeVideoBuilder();
+        });
     }
 
     // Direct Video File Upload to Cloudflare Stream
@@ -217,7 +290,6 @@ if (addVideoBtn && videoContainer) {
             const expirySeconds = expirySelect ? parseInt(expirySelect.value, 10) : 2592000;
 
             try {
-                // 1. Request one-time upload URL from our backend with strict 30s cap & dynamic retention
                 const tokenRes = await fetch('/api/video/direct-upload', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -230,8 +302,8 @@ if (addVideoBtn && videoContainer) {
                 const tokenData = await tokenRes.json();
 
                 if (!tokenRes.ok || !tokenData.success || !tokenData.uploadUrl) {
-                    if (tokenRes.status === 403 && Swal) {
-                        Swal.fire({
+                    if (tokenRes.status === 403 && window.Swal) {
+                        window.Swal.fire({
                             icon: 'warning',
                             title: '👑 Premium Retention Required',
                             text: tokenData.error || '1 Year and Permanent video retention are available exclusively for Premium members.',
@@ -243,7 +315,6 @@ if (addVideoBtn && videoContainer) {
                     throw new Error(tokenData.error || 'Failed to obtain direct upload URL.');
                 }
 
-                // 2. Upload file directly to Cloudflare Stream via XMLHttpRequest for progress tracking
                 if (videoUploadStatus) videoUploadStatus.textContent = 'Uploading directly to Cloudflare edge...';
                 
                 const formData = new FormData();
@@ -270,13 +341,11 @@ if (addVideoBtn && videoContainer) {
                         }
                         if (videoInput) videoInput.value = streamUrl;
 
-                        // Render live player preview
                         if (videoLivePreview) {
                             videoLivePreview.innerHTML = `<iframe src="${streamUrl}" style="width:100%; height:100%; border:none;" allowfullscreen></iframe>`;
                             videoLivePreview.classList.remove('d-none');
                         }
 
-                        // Auto-append URL to post text with clean line separation
                         if (postMessageArea && !postMessageArea.value.includes(streamUrl)) {
                             postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${streamUrl}` : streamUrl;
                         }
@@ -299,14 +368,13 @@ if (addVideoBtn && videoContainer) {
         });
     }
 
-    // Handle Expiration Select change for Premium upgrade hints
     const videoExpirySelectEl = document.getElementById('videoExpirySelect');
     if (videoExpirySelectEl) {
         videoExpirySelectEl.addEventListener('change', (e) => {
             const selectedOpt = e.target.options[e.target.selectedIndex];
             if (selectedOpt && selectedOpt.getAttribute('data-premium') === 'true') {
                 if (window.Swal) {
-                    Swal.fire({
+                    window.Swal.fire({
                         icon: 'info',
                         title: '👑 Premium Video Retention',
                         html: '1 Year and Permanent video memories are available for <strong>Premium Members</strong>.<br><small class="text-muted">Free members enjoy up to 30 days retention.</small>',
@@ -333,7 +401,6 @@ if (addVideoBtn && videoContainer) {
                 videoLivePreview.innerHTML = previewHtml;
                 videoLivePreview.classList.remove('d-none');
 
-                // Auto-append URL to post text if not already there with clean spacing
                 if (postMessageArea && !postMessageArea.value.includes(url)) {
                     postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${url}` : url;
                 }
@@ -347,7 +414,209 @@ if (addVideoBtn && videoContainer) {
 
 window.__resetVideoBuilder = closeVideoBuilder;
 
-// Tag People UI Logic
+// ----------------------------------------------------
+// 5. FAMILY GIF PICKER (Curated, Zero-Friction)
+// ----------------------------------------------------
+const FAMILY_GIFS = [
+    // Celebrate
+    { id: 'g_cel_1', cat: 'celebrate', title: 'Party Confetti Celebration', url: 'https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif' },
+    { id: 'g_cel_2', cat: 'celebrate', title: 'Cheers Toast Champagne', url: 'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif' },
+    { id: 'g_cel_3', cat: 'celebrate', title: 'Celebration Fireworks', url: 'https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif' },
+    { id: 'g_cel_4', cat: 'celebrate', title: 'High Five Teamwork', url: 'https://media.giphy.com/media/3oEjHV0z8S7WM4MwnK/giphy.gif' },
+
+    // Love & Hugs
+    { id: 'g_lov_1', cat: 'love', title: 'Warm Big Hug', url: 'https://media.giphy.com/media/l8ooTMA4bGUgs/giphy.gif' },
+    { id: 'g_lov_2', cat: 'love', title: 'Heart Flying Love', url: 'https://media.giphy.com/media/26BRv0ThflsDTqUXa/giphy.gif' },
+    { id: 'g_lov_3', cat: 'love', title: 'Family Love Heart', url: 'https://media.giphy.com/media/M90mJvfWfd5mbUuULX/giphy.gif' },
+    { id: 'g_lov_4', cat: 'love', title: 'Sending Hugs Bear', url: 'https://media.giphy.com/media/3bqtLDeiDtwhq/giphy.gif' },
+
+    // Family
+    { id: 'g_fam_1', cat: 'family', title: 'We Are Family Fast', url: 'https://media.giphy.com/media/amg2hcfGDkKt4Q3mV7/giphy.gif' },
+    { id: 'g_fam_2', cat: 'family', title: 'Family Dinner Gathering', url: 'https://media.giphy.com/media/xT0xeMA62E1URCXqYo/giphy.gif' },
+    { id: 'g_fam_3', cat: 'family', title: 'Proud Parents Cheer', url: 'https://media.giphy.com/media/3ohzdIuqJoo8QdKlnW/giphy.gif' },
+    { id: 'g_fam_4', cat: 'family', title: 'Group Family Hug', url: 'https://media.giphy.com/media/VGtdt3dVAbQYTk0fnu/giphy.gif' },
+
+    // Laughs
+    { id: 'g_lau_1', cat: 'laugh', title: 'Laughing Out Loud LOL', url: 'https://media.giphy.com/media/10JhviFuU2gWD6/giphy.gif' },
+    { id: 'g_lau_2', cat: 'laugh', title: 'Giggle Chuckle Cute', url: 'https://media.giphy.com/media/1d5Zn8FqmJqApu4hNU/giphy.gif' },
+    { id: 'g_lau_3', cat: 'laugh', title: 'Rolling On Floor Laughing', url: 'https://media.giphy.com/media/CoDp6NnSmItoY/giphy.gif' },
+    { id: 'g_lau_4', cat: 'laugh', title: 'Happy Tears Joy', url: 'https://media.giphy.com/media/26n6Gx9moCpHU1HO8/giphy.gif' },
+
+    // Birthday
+    { id: 'g_bdy_1', cat: 'birthday', title: 'Happy Birthday Cake', url: 'https://media.giphy.com/media/KdC9XVrVYO0LZhv1cU/giphy.gif' },
+    { id: 'g_bdy_2', cat: 'birthday', title: 'Birthday Candles Wish', url: 'https://media.giphy.com/media/MCeIiRETfwBK2rtVAM/giphy.gif' },
+    { id: 'g_bdy_3', cat: 'birthday', title: 'Birthday Balloons Celebration', url: 'https://media.giphy.com/media/GvjRy6pUMUjQxiKNlh/giphy.gif' },
+    { id: 'g_bdy_4', cat: 'birthday', title: 'Birthday Dance Party', url: 'https://media.giphy.com/media/l2YWvIqfPvXgN2Q2k/giphy.gif' },
+
+    // Joy / Dance
+    { id: 'g_dnc_1', cat: 'dance', title: 'Happy Dance Groove', url: 'https://media.giphy.com/media/blSTtZehjAZ8I/giphy.gif' },
+    { id: 'g_dnc_2', cat: 'dance', title: 'Pure Joy Dancing Snoopy', url: 'https://media.giphy.com/media/chzz1FQgqhytWRWbp3/giphy.gif' },
+    { id: 'g_dnc_3', cat: 'dance', title: 'Excited Celebration Dance', url: 'https://media.giphy.com/media/5GoVLqeAOo6PK/giphy.gif' },
+    { id: 'g_dnc_4', cat: 'dance', title: 'Victory Groove Celebration', url: 'https://media.giphy.com/media/l3q2wJsC23ikJg9xe/giphy.gif' }
+];
+
+const addGifBtn = document.getElementById('addGifBtn') || document.querySelector('.action-gif');
+const gifDrawer = document.getElementById('gifPickerDrawer');
+const closeGifDrawerBtn = document.getElementById('closeGifDrawerBtn');
+const gifCategoryPills = document.getElementById('gifCategoryPills');
+const gifSearchInput = document.getElementById('gifSearchInput');
+const gifResultsGrid = document.getElementById('gifResultsGrid');
+const selectedGifPreview = document.getElementById('selectedGifPreview');
+const selectedGifImg = document.getElementById('selectedGifImg');
+const removeSelectedGifBtn = document.getElementById('removeSelectedGifBtn');
+const postFormEl = document.getElementById('formPostMessageModal');
+
+let currentGifCategory = 'all';
+let currentGifSearch = '';
+let currentAttachedGifUrl = '';
+
+const closeGifDrawer = () => {
+    if (!gifDrawer) return;
+    gifDrawer.classList.add('d-none');
+    if (addGifBtn) addGifBtn.classList.remove('gif-active');
+};
+
+const renderGifGrid = (cat = 'all', query = '') => {
+    if (!gifResultsGrid) return;
+    gifResultsGrid.innerHTML = '';
+
+    const cleanQuery = query.toLowerCase().trim();
+    const filtered = FAMILY_GIFS.filter(item => {
+        const matchesCategory = (cat === 'all' || item.cat === cat);
+        const matchesQuery = !cleanQuery || item.title.toLowerCase().includes(cleanQuery) || item.cat.includes(cleanQuery);
+        return matchesCategory && matchesQuery;
+    });
+
+    if (filtered.length === 0) {
+        gifResultsGrid.innerHTML = `
+            <div class="text-center w-100 py-3 text-muted small">
+                <i class="bi bi-emoji-neutral fs-4 d-block mb-1 opacity-50"></i>
+                No matching GIFs found. Try searching another emotion!
+            </div>
+        `;
+        return;
+    }
+
+    filtered.forEach(gif => {
+        const card = document.createElement('div');
+        card.className = 'gif-item-card shadow-xs';
+        card.title = gif.title;
+        card.innerHTML = `<img src="${gif.url}" alt="${gif.title}" loading="lazy">`;
+
+        card.addEventListener('click', () => {
+            attachGif(gif.url);
+        });
+
+        gifResultsGrid.appendChild(card);
+    });
+};
+
+const attachGif = (gifUrl) => {
+    currentAttachedGifUrl = gifUrl;
+
+    // Show preview
+    if (selectedGifPreview && selectedGifImg) {
+        selectedGifImg.src = gifUrl;
+        selectedGifPreview.classList.remove('d-none');
+        scrollDrawerIntoView(selectedGifPreview);
+    }
+
+    // Hidden input for FormData submission
+    if (postFormEl) {
+        let hiddenInput = document.getElementById('attachedGifUrlInput');
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'attached_gif_url';
+            hiddenInput.id = 'attachedGifUrlInput';
+            postFormEl.appendChild(hiddenInput);
+        }
+        hiddenInput.value = gifUrl;
+    }
+
+    // Auto append or ensure GIF URL is in postMessage so backend validation and previews succeed
+    if (postMessageArea && !postMessageArea.value.includes(gifUrl)) {
+        postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${gifUrl}` : gifUrl;
+    }
+
+    closeGifDrawer();
+};
+
+const detachGif = () => {
+    if (selectedGifPreview) selectedGifPreview.classList.add('d-none');
+    if (selectedGifImg) selectedGifImg.src = '';
+    const hiddenInput = document.getElementById('attachedGifUrlInput');
+    if (hiddenInput) hiddenInput.remove();
+
+    if (currentAttachedGifUrl && postMessageArea) {
+        postMessageArea.value = postMessageArea.value.replace(currentAttachedGifUrl, '').trim();
+    }
+    currentAttachedGifUrl = '';
+};
+
+if (removeSelectedGifBtn) {
+    removeSelectedGifBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        detachGif();
+    });
+}
+
+if (addGifBtn && gifDrawer) {
+    addGifBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isHidden = gifDrawer.classList.contains('d-none');
+        if (isHidden) {
+            gifDrawer.classList.remove('d-none');
+            addGifBtn.classList.add('gif-active');
+            scrollDrawerIntoView(gifDrawer);
+            renderGifGrid(currentGifCategory, currentGifSearch);
+            if (gifSearchInput) setTimeout(() => gifSearchInput.focus(), 60);
+        } else {
+            closeGifDrawer();
+        }
+    });
+}
+
+if (closeGifDrawerBtn) {
+    closeGifDrawerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeGifDrawer();
+    });
+}
+
+// Category filter pills
+if (gifCategoryPills) {
+    gifCategoryPills.addEventListener('click', (e) => {
+        const pill = e.target.closest('.gif-cat-pill');
+        if (!pill) return;
+        gifCategoryPills.querySelectorAll('.gif-cat-pill').forEach(btn => btn.classList.remove('active'));
+        pill.classList.add('active');
+        currentGifCategory = pill.getAttribute('data-cat') || 'all';
+        renderGifGrid(currentGifCategory, currentGifSearch);
+    });
+}
+
+// Search input with debounce
+let gifSearchTimer = null;
+if (gifSearchInput) {
+    gifSearchInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (gifSearchTimer) clearTimeout(gifSearchTimer);
+        gifSearchTimer = setTimeout(() => {
+            currentGifSearch = val;
+            renderGifGrid(currentGifCategory, currentGifSearch);
+        }, 120);
+    });
+}
+
+window.__resetGifPicker = () => {
+    closeGifDrawer();
+    detachGif();
+};
+
+// ----------------------------------------------------
+// 6. TAG PEOPLE UI LOGIC
+// ----------------------------------------------------
 const addTagBtn = document.getElementById('addTagBtn');
 const tagContainer = document.getElementById('tagPeopleContainer');
 const removeTagContainerBtn = document.getElementById('removeTagContainerBtn');
@@ -477,7 +746,7 @@ const renderSuggestions = (members) => {
             } else {
                 if (selectedTags.size >= MAX_TAGGED_PEOPLE) {
                     if (window.Swal) {
-                        Swal.fire({
+                        window.Swal.fire({
                             icon: 'warning',
                             title: 'Tag Limit Reached',
                             text: `You can tag up to ${MAX_TAGGED_PEOPLE} people per post.`,
@@ -535,11 +804,13 @@ const resetTagBuilder = () => {
 };
 
 if (addTagBtn && tagContainer) {
-    addTagBtn.addEventListener('click', () => {
+    addTagBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         const isHidden = tagContainer.classList.contains('d-none');
         if (isHidden) {
             tagContainer.classList.remove('d-none');
             addTagBtn.classList.add('tag-active');
+            scrollDrawerIntoView(tagContainer);
             if (tagSearchInput) {
                 setTimeout(() => tagSearchInput.focus(), 60);
             }
@@ -550,7 +821,10 @@ if (addTagBtn && tagContainer) {
     });
 
     if (removeTagContainerBtn) {
-        removeTagContainerBtn.addEventListener('click', closeTagBuilder);
+        removeTagContainerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeTagBuilder();
+        });
     }
 
     if (tagSearchInput) {
@@ -569,6 +843,7 @@ if (addTagBtn && tagContainer) {
                 if (tagContainer.classList.contains('d-none')) {
                     tagContainer.classList.remove('d-none');
                     addTagBtn.classList.add('tag-active');
+                    scrollDrawerIntoView(tagContainer);
                     fetchSuggestions('');
                 }
                 if (tagSearchInput) {
@@ -581,3 +856,77 @@ if (addTagBtn && tagContainer) {
 
 window.__resetTagBuilder = resetTagBuilder;
 
+// ----------------------------------------------------
+// 7. iOS DIRECT APPLE PHOTOS SHARE GUIDE DRAWER
+// ----------------------------------------------------
+const iosShareBtn = document.getElementById('iosShareBtn');
+const iosShareDrawer = document.getElementById('iosShareDrawer');
+const closeIosShareDrawerBtn = document.getElementById('closeIosShareDrawerBtn');
+
+const closeIosShareDrawer = () => {
+    if (!iosShareDrawer) return;
+    iosShareDrawer.classList.add('d-none');
+    if (iosShareBtn) iosShareBtn.classList.remove('apple-active');
+};
+
+if (iosShareBtn && iosShareDrawer) {
+    iosShareBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isHidden = iosShareDrawer.classList.contains('d-none');
+        if (isHidden) {
+            iosShareDrawer.classList.remove('d-none');
+            iosShareBtn.classList.add('apple-active');
+            scrollDrawerIntoView(iosShareDrawer);
+        } else {
+            closeIosShareDrawer();
+        }
+    });
+}
+
+if (closeIosShareDrawerBtn) {
+    closeIosShareDrawerBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeIosShareDrawer();
+    });
+}
+
+window.copyFamilyShareEndpoint = (famCode, token) => {
+    const origin = window.location.origin;
+    const url = `${origin}/api/media/ios-shortcut?fam_code=${encodeURIComponent(famCode)}&token=${encodeURIComponent(token)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            if (window.Swal) {
+                window.Swal.fire({
+                    icon: 'success',
+                    title: 'Direct Link Copied',
+                    text: 'The iOS Photos direct upload link has been copied to your clipboard.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                alert('Copied direct share link to clipboard!');
+            }
+        }).catch(() => {
+            prompt('Copy this iOS direct upload link:', url);
+        });
+    } else {
+        prompt('Copy this iOS direct upload link:', url);
+    }
+};
+
+window.__resetIosShareGuide = closeIosShareDrawer;
+
+// ----------------------------------------------------
+// 8. UNIFIED DRAWER RESET ON POST MODAL CLOSE
+// ----------------------------------------------------
+const postModalElement = document.getElementById('postModal');
+if (postModalElement) {
+    postModalElement.addEventListener('hidden.bs.modal', () => {
+        closeEmojiPicker();
+        closeVideoBuilder();
+        if (window.__resetGifPicker) window.__resetGifPicker();
+        resetTagBuilder();
+        closePoll();
+        closeIosShareDrawer();
+    });
+}

@@ -243,11 +243,19 @@
       <div class="poll-options">
         <template x-for="opt in post.poll.options" :key="opt.option_id">
           <div class="poll-option mb-2 position-relative">
-            <button type="button" @click="votePoll(post.post_no, opt.option_id)" 
+            <button type="button" 
+                    @click="votePoll(post.post_no, opt.option_id)" 
+                    :disabled="isVotingPoll(post.post_no)"
                     class="poll-option-btn w-100 text-start btn position-relative overflow-hidden" 
-                    :class="isOptionVoted(post, opt.option_id) ? 'btn-outline-primary' : 'btn-outline-secondary'"
-                    style="z-index: 1; font-size: 0.85rem; padding: 8px 12px;">
-              <span class="position-relative" style="z-index: 2;" x-text="opt.option_text"></span>
+                    :class="[
+                      isOptionVoted(post, opt.option_id) ? 'btn-outline-primary' : 'btn-outline-secondary',
+                      isVotingPoll(post.post_no) ? 'opacity-75 cursor-not-allowed' : ''
+                    ]"
+                    style="z-index: 1; font-size: 0.85rem; padding: 8px 12px; min-height: 44px;">
+              <span class="position-relative d-inline-flex align-items-center gap-1" style="z-index: 2;">
+                <span x-text="opt.option_text"></span>
+                <span x-show="isVotingPoll(post.post_no)" class="spinner-border spinner-border-sm ms-1 text-primary" role="status" aria-hidden="true" style="width: 0.85rem; height: 0.85rem;"></span>
+              </span>
               <span class="float-end position-relative fw-bold" style="z-index: 2;" x-text="(opt.percentage || 0) + '%'"></span>
               <div class="position-absolute top-0 start-0 h-100" 
                    :class="isOptionVoted(post, opt.option_id) ? 'bg-primary' : 'bg-secondary'" 

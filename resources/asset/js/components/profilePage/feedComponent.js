@@ -37,6 +37,7 @@ export function profileFeed(opts = {}) {
         activeHashtagFilter: null,
         trendingHashtags: [],
         isHashtagFilterActive: false,
+        votingPolls: {},
         csrfOptions: {
             xsrfCookieName: 'XSRF-TOKEN',
             xsrfHeaderName: 'X-XSRF-TOKEN',
@@ -793,9 +794,16 @@ export function profileFeed(opts = {}) {
             return list.some(v => String(v) === String(optionId));
         },
 
+        isVotingPoll(postNo) {
+            return !!this.votingPolls[postNo];
+        },
+
         async votePoll(postNo, optionId) {
             const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post?.poll || !Array.isArray(post.poll.options)) return;
+            if (this.votingPolls[postNo]) return;
+
+            this.votingPolls[postNo] = true;
 
             // Snapshot for rollback
             const snapshot = JSON.parse(JSON.stringify(post.poll));
@@ -851,6 +859,8 @@ export function profileFeed(opts = {}) {
             } catch (err) {
                 console.error('Failed to vote on poll:', err);
                 post.poll = snapshot; // rollback
+            } finally {
+                this.votingPolls[postNo] = false;
             }
         },
 

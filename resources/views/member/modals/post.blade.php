@@ -103,133 +103,12 @@
 
                     <span id="postModalImgFileNames" class="invalid-feedback d-block mb-2 text-muted small px-2"></span>
 
-                    <!-- Tag People Container (Hidden by Default) -->
-                    <div id="tagPeopleContainer" class="tag-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-bold small text-primary"><i class="bi bi-people-fill me-1"></i> Tag Family Members</span>
-                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5" style="font-size: 0.72rem;" id="tagCountBadge">
-                                    0 Tagged
-                                </span>
-                            </div>
-                            <button type="button" id="removeTagContainerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close tag tray"></button>
-                        </div>
-
-                        <!-- Active Tagged Member Chips (With Ade Olaogun ✕) -->
-                        <div id="selectedTagsTray" class="d-flex flex-wrap gap-1.5 mb-2 d-none"></div>
-
-                        <!-- Hidden Inputs Container for POST submission -->
-                        <div id="taggedUserInputs"></div>
-
-                        <!-- Search Member Input -->
-                        <div class="position-relative mb-2">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text" id="tagSearchInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Type a name to search family members…" style="border-radius: 0 8px 8px 0;" autocomplete="off">
-                            </div>
-                        </div>
-
-                        <!-- Suggestion & Search Results Member Tray -->
-                        <div id="tagSuggestionsList" class="d-flex flex-column gap-1 overflow-y-auto" style="max-height: 180px;">
-                            <div class="text-center py-2 text-muted small" id="tagSuggestionsLoading">
-                                <span class="spinner-border spinner-border-sm me-1"></span> Loading family members…
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Poll Creation UI (Hidden by Default) -->
-                    <div id="pollCreationContainer" class="poll-builder d-none mb-3">
-                        <div class="poll-builder__header">
-                            <span class="poll-builder__icon"><i class="bi bi-bar-chart-fill"></i></span>
-                            <span class="poll-builder__title">Create a poll</span>
-                            <button type="button" id="removePollBtn" class="poll-builder__close" aria-label="Remove poll">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                        </div>
-
-                        <!-- Quick Trivia Templates -->
-                        <div class="d-flex align-items-center gap-1.5 mb-2 px-1">
-                            <span class="text-muted small" style="font-size: 0.75rem;">Trivia Starters:</span>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('guess_who')">
-                                👶 Guess Who
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('family_lore')">
-                                🧠 Family Lore
-                            </button>
-                        </div>
-
-                        <div class="poll-builder__field">
-                            <input type="text" name="poll_question" class="poll-builder__question" placeholder="Ask a question…" maxlength="150">
-                        </div>
-
-                        <div id="pollOptionsContainer" class="poll-builder__options">
-                            <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 1" maxlength="80">
-                            <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 2" maxlength="80">
-                        </div>
-
-                        <button type="button" id="addPollOptionBtn" class="poll-builder__add">
-                            <i class="bi bi-plus-lg"></i> Add option
+                    <!-- Selected GIF Attached Preview -->
+                    <div id="selectedGifPreview" class="d-none mb-3 position-relative rounded-3 overflow-hidden border border-light-subtle shadow-sm" style="background: #0f172a;">
+                        <img id="selectedGifImg" src="" alt="Attached GIF" class="w-100" style="max-height: 220px; object-fit: contain; display: block;">
+                        <button type="button" id="removeSelectedGifBtn" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow" style="width: 28px; height: 28px; padding: 0; opacity: 0.9;" aria-label="Remove GIF">
+                            <i class="bi bi-x"></i>
                         </button>
-                    </div>
-
-                    <!-- Video Embed Container (Hidden by Default) -->
-                    <div id="videoEmbedContainer" class="video-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-bold small text-primary"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
-                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
-                                    <i class="bi bi-clock-history me-1"></i> Max 30s
-                                </span>
-                            </div>
-                            <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
-                        </div>
-                        <div class="d-flex gap-2 align-items-center mb-2">
-                            <label for="videoDirectFileInput" class="btn btn-sm btn-outline-primary mb-0 d-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 5px 12px;">
-                                <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Max 30s)
-                            </label>
-                            <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" hidden>
-                            <span class="text-muted small">or paste video link below</span>
-                        </div>
-                        <div class="input-group input-group-sm mb-1">
-                            <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
-                        </div>
-
-                        <!-- 30-Second Rule Notification Banner -->
-                        <div class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
-                            <i class="bi bi-info-circle-fill text-primary"></i>
-                            <span class="text-secondary"><strong>Family Clip Rule:</strong> Direct video uploads are limited to a maximum of <strong>30 seconds</strong>.</span>
-                        </div>
-
-                        <!-- Dynamic Video Retention Expiration Control -->
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-light-subtle">
-                            <div class="d-flex align-items-center gap-1">
-                                <i class="bi bi-hourglass-split text-primary"></i>
-                                <span class="small fw-semibold text-secondary" style="font-size: 0.78rem;">Keep Video For:</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-1">
-                                <select id="videoExpirySelect" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; width: auto; font-weight: 500;">
-                                    <option value="86400">⏳ 24 Hours (Free)</option>
-                                    <option value="604800">📅 7 Days (Free)</option>
-                                    <option value="2592000" selected>🗓️ 30 Days (Free Default)</option>
-                                    <option value="31536000" data-premium="true">👑 1 Year (Premium Only)</option>
-                                    <option value="0" data-premium="true">👑 Permanent / Never (Premium Only)</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div id="videoUploadProgressWrapper" class="d-none mt-2">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <small id="videoUploadStatus" class="text-primary fw-semibold" style="font-size: 0.75rem;">Uploading directly to Cloudflare...</small>
-                                <small id="videoUploadPercent" class="text-muted fw-bold" style="font-size: 0.75rem;">0%</small>
-                            </div>
-                            <div class="progress" style="height: 6px; border-radius: 4px;">
-                                <div id="videoProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%;"></div>
-                            </div>
-                        </div>
-
-                        <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
                     </div>
 
                     <!-- Prominent Mobile Camera Roll Trigger (Universal 1-Tap Access for All iPhone & Android Users) -->
@@ -240,12 +119,217 @@
                         </label>
                     </div>
 
+                    <!-- Interactive Composer Action Drawers Container (Directly Above Toolbar) -->
+                    <div id="composerActiveDrawers" class="mb-3">
+
+                        <!-- 1. Emoji Picker Drawer (In-Flow, Zero-Clipping) -->
+                        <div id="emojiPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                <span class="fw-bold small text-warning d-flex align-items-center gap-1.5" style="color: #d97706 !important;">
+                                    <i class="bi bi-emoji-smile-fill fs-6"></i> Add an Emoji
+                                </span>
+                                <button type="button" id="closeEmojiDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close emoji picker"></button>
+                            </div>
+                            <div id="emojiListPost" role="listbox" style="max-height: 220px; overflow-y: auto;"></div>
+                        </div>
+
+                        <!-- 2. Video Embed Container -->
+                        <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold small text-danger"><i class="bi bi-play-circle-fill me-1"></i> Add Video</span>
+                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.7rem;">
+                                        <i class="bi bi-clock-history me-1"></i> Max 30s
+                                    </span>
+                                </div>
+                                <button type="button" id="removeVideoBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Remove video"></button>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center mb-2">
+                                <label for="videoDirectFileInput" class="btn btn-sm btn-outline-danger mb-0 d-flex align-items-center gap-1" style="cursor: pointer; border-radius: 8px; font-size: 0.8rem; padding: 5px 12px;">
+                                    <i class="bi bi-cloud-arrow-up-fill"></i> Upload Video (Max 30s)
+                                </label>
+                                <input type="file" id="videoDirectFileInput" accept="video/mp4,video/quicktime,video/webm" hidden>
+                                <span class="text-muted small">or paste video link below</span>
+                            </div>
+                            <div class="input-group input-group-sm mb-1">
+                                <input type="url" id="postVideoInput" class="form-control form-control-sm" placeholder="Paste YouTube, Vimeo or Cloudflare Stream URL">
+                            </div>
+
+                            <!-- 30-Second Rule Notification Banner -->
+                            <div class="d-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-dashed border-secondary-subtle" style="font-size: 0.75rem;">
+                                <i class="bi bi-info-circle-fill text-danger"></i>
+                                <span class="text-secondary"><strong>Family Clip Rule:</strong> Direct video uploads are limited to a maximum of <strong>30 seconds</strong>.</span>
+                            </div>
+
+                            <!-- Dynamic Video Retention Expiration Control -->
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2 px-2 py-1 rounded-2 bg-light-subtle border border-light-subtle">
+                                <div class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-hourglass-split text-danger"></i>
+                                    <span class="small fw-semibold text-secondary" style="font-size: 0.78rem;">Keep Video For:</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1">
+                                    <select id="videoExpirySelect" class="form-select form-select-sm" style="font-size: 0.75rem; padding: 3px 8px; border-radius: 8px; width: auto; font-weight: 500;">
+                                        <option value="86400">⏳ 24 Hours (Free)</option>
+                                        <option value="604800">📅 7 Days (Free)</option>
+                                        <option value="2592000" selected>🗓️ 30 Days (Free Default)</option>
+                                        <option value="31536000" data-premium="true">👑 1 Year (Premium Only)</option>
+                                        <option value="0" data-premium="true">👑 Permanent / Never (Premium Only)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="videoUploadProgressWrapper" class="d-none mt-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <small id="videoUploadStatus" class="text-danger fw-semibold" style="font-size: 0.75rem;">Uploading directly to Cloudflare...</small>
+                                    <small id="videoUploadPercent" class="text-muted fw-bold" style="font-size: 0.75rem;">0%</small>
+                                </div>
+                                <div class="progress" style="height: 6px; border-radius: 4px;">
+                                    <div id="videoProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
+                        </div>
+
+                        <!-- 3. Family GIF Picker Drawer -->
+                        <div id="gifPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                <span class="fw-bold small text-info d-flex align-items-center gap-1.5" style="color: #0891b2 !important;">
+                                    <i class="bi bi-filetype-gif fs-5"></i> Choose a Family GIF
+                                </span>
+                                <button type="button" id="closeGifDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close GIF picker"></button>
+                            </div>
+
+                            <!-- Fast Category Filter Chips -->
+                            <div class="d-flex flex-wrap gap-1.5 mb-2.5" id="gifCategoryPills">
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill active" data-cat="all" style="font-size: 0.75rem;">🌟 All</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="celebrate" style="font-size: 0.75rem;">🎉 Celebrate</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="love" style="font-size: 0.75rem;">❤️ Love &amp; Hugs</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="family" style="font-size: 0.75rem;">👨‍👩‍👧‍👦 Family</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="laugh" style="font-size: 0.75rem;">😂 Laughs</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="birthday" style="font-size: 0.75rem;">🎂 Birthday</button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2.5 rounded-pill fw-semibold gif-cat-pill" data-cat="dance" style="font-size: 0.75rem;">💃 Joy</button>
+                            </div>
+
+                            <!-- Search Filter Input -->
+                            <div class="position-relative mb-2">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" id="gifSearchInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Filter GIFs (e.g., love, proud, cheers, dance)..." style="border-radius: 0 8px 8px 0;" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- GIFs Grid Container -->
+                            <div id="gifResultsGrid" class="d-flex flex-wrap gap-2 overflow-y-auto" style="max-height: 220px;"></div>
+                        </div>
+
+                        <!-- 4. Tag People Container -->
+                        <div id="tagPeopleContainer" class="composer-drawer tag-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold small text-primary"><i class="bi bi-people-fill me-1"></i> Tag Family Members</span>
+                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5" style="font-size: 0.72rem;" id="tagCountBadge">
+                                        0 Tagged
+                                    </span>
+                                </div>
+                                <button type="button" id="removeTagContainerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close tag tray"></button>
+                            </div>
+
+                            <!-- Active Tagged Member Chips -->
+                            <div id="selectedTagsTray" class="d-flex flex-wrap gap-1.5 mb-2 d-none"></div>
+
+                            <!-- Hidden Inputs Container for POST submission -->
+                            <div id="taggedUserInputs"></div>
+
+                            <!-- Search Member Input -->
+                            <div class="position-relative mb-2">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <input type="text" id="tagSearchInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Type a name to search family members…" style="border-radius: 0 8px 8px 0;" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <!-- Suggestion & Search Results Member Tray -->
+                            <div id="tagSuggestionsList" class="d-flex flex-column gap-1 overflow-y-auto" style="max-height: 180px;">
+                                <div class="text-center py-2 text-muted small" id="tagSuggestionsLoading">
+                                    <span class="spinner-border spinner-border-sm me-1"></span> Loading family members…
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5. Poll Creation UI -->
+                        <div id="pollCreationContainer" class="composer-drawer poll-builder d-none mb-3 shadow-xs">
+                            <div class="poll-builder__header">
+                                <span class="poll-builder__icon"><i class="bi bi-bar-chart-fill"></i></span>
+                                <span class="poll-builder__title">Create a poll</span>
+                                <button type="button" id="removePollBtn" class="poll-builder__close" aria-label="Remove poll">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+
+                            <!-- Quick Trivia Templates -->
+                            <div class="d-flex align-items-center gap-1.5 mb-2 px-1">
+                                <span class="text-muted small" style="font-size: 0.75rem;">Trivia Starters:</span>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('guess_who')">
+                                    👶 Guess Who
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-dark fw-semibold" style="font-size: 0.72rem;" onclick="applyTriviaTemplate('family_lore')">
+                                    🧠 Family Lore
+                                </button>
+                            </div>
+
+                            <div class="poll-builder__field">
+                                <input type="text" name="poll_question" class="poll-builder__question" placeholder="Ask a question…" maxlength="150">
+                            </div>
+
+                            <div id="pollOptionsContainer" class="poll-builder__options">
+                                <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 1" maxlength="80">
+                                <input type="text" name="poll_options[]" class="poll-builder__option" placeholder="Option 2" maxlength="80">
+                            </div>
+
+                            <button type="button" id="addPollOptionBtn" class="poll-builder__add">
+                                <i class="bi bi-plus-lg"></i> Add option
+                            </button>
+                        </div>
+
+                        <!-- 6. iOS Direct Apple Photos Shortcut Guide Drawer -->
+                        <div id="iosShareDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                                <span class="fw-bold small text-dark d-flex align-items-center gap-1.5">
+                                    <i class="bi bi-apple fs-6"></i> iPhone Photos 1-Tap Share
+                                </span>
+                                <button type="button" id="closeIosShareDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close guide"></button>
+                            </div>
+                            <p class="small text-muted mb-2.5" style="font-size: 0.8rem; line-height: 1.45;">
+                                Post photos and videos straight from your iPhone <strong>Photos</strong> app directly to your family feed:
+                            </p>
+                            <div class="d-flex flex-wrap gap-2 mb-2">
+                                @php
+                                    $signedDeviceToken = (!empty($_SESSION['id']) && !empty($_SESSION['famCode'])) 
+                                        ? \App\controller\members\NativeShareController::generateUserToken((string)$_SESSION['id'], (string)$_SESSION['famCode']) 
+                                        : '';
+                                @endphp
+                                <a href="/api/media/ios-shortcut?fam_code={{ $_SESSION['famCode'] ?? '' }}&amp;token={{ $signedDeviceToken }}&amp;format=shortcut" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+                                    <i class="bi bi-download"></i> Install iPhone Shortcut
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-medium d-flex align-items-center gap-1.5" style="font-size: 0.78rem;" onclick="copyFamilyShareEndpoint('{{ $_SESSION['famCode'] ?? '' }}', '{{ $signedDeviceToken }}')">
+                                    <i class="bi bi-clipboard"></i> Copy Direct URL
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
                     <!-- Facebook-Style "Add to your post" Card -->
                     <div class="add-to-post-box d-flex align-items-center justify-content-between p-2 mb-3 rounded-3 position-relative"
                         style="border: 1px solid var(--border-color); background-color: var(--bg-color);">
                         <span class="fw-semibold small px-2" style="color: var(--text-color);">Add to your post</span>
                         
-                        <div class="d-flex gap-1 align-items-center">
+                        <div class="d-flex gap-2 align-items-center">
                             <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach Photo" style="cursor: pointer;" aria-label="Attach photo">
                                 <i class="bi bi-image-fill"></i>
                             </label>
@@ -255,11 +339,11 @@
                                 <i class="bi bi-emoji-smile-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo)" aria-label="Add video">
+                            <button type="button" class="btn-composer-action action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo / Cloudflare)" aria-label="Add video">
                                 <i class="bi bi-play-btn-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-gif gif-btn" title="Add GIF" aria-label="Add GIF">GIF</button>
+                            <button type="button" class="btn-composer-action action-gif gif-btn" id="addGifBtn" title="Add GIF" aria-label="Add GIF">GIF</button>
                             
                             <button type="button" class="btn-composer-action action-tag" id="addTagBtn" title="Tag Family Members" aria-label="Tag people">
                                 <i class="bi bi-tag-fill"></i>
@@ -269,18 +353,9 @@
                                 <i class="bi bi-bar-chart-fill"></i>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="Share from iPhone 13 Apple Photos" aria-label="Share from iPhone Photos" data-bs-toggle="modal" data-bs-target="#iosFamilyShareModal">
+                            <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
                                 <i class="bi bi-apple"></i>
                             </button>
-                        </div>
-
-                        <div id="emojiPickerContainer"
-                            class="d-none position-absolute modern-emoji-picker"
-                            style="z-index: 1000; bottom: 55px; right: 10px;">
-                            <div class="emoji-picker-caret"></div>
-                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
-                                id="closeEmojiPicker" aria-label="Close" style="font-size: 0.7rem; z-index: 10;"></button>
-                            <div id="emojiListPost" class="mt-2" role="listbox"></div>
                         </div>
                     </div>
 
