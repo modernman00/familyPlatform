@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(standards): integrate v2.1 design standards, aria enhancements and lineage prompts",
+    "title": "Feat(chronicle-tags): broadcast family chronicle stories to feed and integrate member tagging engine",
     "notes": [
+        "Feat(chronicle-tags): broadcast family chronicle stories to feed and integrate member tagging engine",
         "Feat(standards): integrate v2.1 design standards, aria enhancements and lineage prompts",
-        "Feat(cron): add family code approval reminder runner and harden preflight DAST resolution",
-        "Major update"
+        "Feat(cron): add family code approval reminder runner and harden preflight DAST resolution"
     ],
     "released_at": "2026-10-22",
-    "commit": "0b6a632"
+    "commit": "457519f"
 }
