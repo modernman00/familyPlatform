@@ -25,7 +25,7 @@ set -euo pipefail
 
 # Virtual Host & Target URL Resolution (Defaults to https://olaogun.test)
 if [ -z "${STAGING_URL:-}" ]; then
-    if curl -k -s -m 2 https://olaogun.test > /dev/null 2>&1; then
+    if curl -k -s -m 5 https://olaogun.test > /dev/null 2>&1; then
         STAGING_URL="https://olaogun.test"
     else
         STAGING_URL="http://localhost:8000"

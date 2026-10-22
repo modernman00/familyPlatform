@@ -61,7 +61,7 @@ while IFS= read -r file; do
         php -l "$file"
         SYNTAX_ERRORS=$((SYNTAX_ERRORS + 1))
     fi
-done < <(find app bin scripts -name "*.php" -type f 2>/dev/null)
+done < <(find app bin scripts cron -name "*.php" -type f 2>/dev/null)
 
 if [ "$SYNTAX_ERRORS" -eq 0 ]; then
     echo -e "${GREEN}  ✅ Gate 1 Passed: All PHP files have valid syntax.${NC}"
