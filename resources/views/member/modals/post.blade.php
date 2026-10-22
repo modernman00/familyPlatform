@@ -18,7 +18,12 @@
                     <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
                         class="rounded-circle me-3 shadow-sm" width="44" height="44" style="border: 2px solid var(--primary-color); object-fit: cover;">
                     <div>
-                        <h6 class="mb-1 fw-bold fs-6" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
+                        <h6 class="mb-1 fw-bold fs-6" style="color: var(--text-color);">
+                            {{ $data['firstName'] }} {{ $data['lastName'] }}
+                            <span id="composerTagHeaderWrapper" class="d-none fw-normal text-muted" style="font-size: 0.92rem;">
+                                is with <span id="composerTagHeaderNames" class="fw-semibold text-primary"></span>
+                            </span>
+                        </h6>
                         <span class="badge rounded-pill bg-light-subtle text-muted border border-secondary-subtle fw-medium px-2.5 py-1" style="font-size: 0.75rem;">
                             <i class="bi bi-shield-check me-1 text-primary"></i> Shared with Family
                         </span>
@@ -31,6 +36,7 @@
 
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
+                    <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
 
                     <textarea class="form-control mb-2 border-0 bg-transparent shadow-none px-0" data-emoji-target
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
@@ -122,18 +128,7 @@
                     <!-- Interactive Composer Action Drawers Container (Directly Above Toolbar) -->
                     <div id="composerActiveDrawers" class="mb-3">
 
-                        <!-- 1. Emoji Picker Drawer (In-Flow, Zero-Clipping) -->
-                        <div id="emojiPickerDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                                <span class="fw-bold small text-warning d-flex align-items-center gap-1.5" style="color: #d97706 !important;">
-                                    <i class="bi bi-emoji-smile-fill fs-6"></i> Add an Emoji
-                                </span>
-                                <button type="button" id="closeEmojiDrawerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close emoji picker"></button>
-                            </div>
-                            <div id="emojiListPost" role="listbox" style="max-height: 220px; overflow-y: auto;"></div>
-                        </div>
-
-                        <!-- 2. Video Embed Container -->
+                        <!-- 1. Video Embed Container -->
                         <div id="videoEmbedContainer" class="composer-drawer video-builder d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <div class="d-flex align-items-center gap-2">
@@ -356,6 +351,16 @@
                             <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
                                 <i class="bi bi-apple"></i>
                             </button>
+                        </div>
+
+                        <!-- Floating Emoji Picker Popover -->
+                        <div id="emojiPickerContainer"
+                            class="d-none position-absolute modern-emoji-picker shadow-lg"
+                            style="z-index: 1055; bottom: 58px; right: 10px;">
+                            <div class="emoji-picker-caret"></div>
+                            <button type="button" class="btn-close position-absolute top-0 end-0 m-2"
+                                id="closeEmojiPicker" aria-label="Close" style="font-size: 0.7rem; z-index: 10;"></button>
+                            <div id="emojiListPost" class="mt-2" role="listbox"></div>
                         </div>
                     </div>
 

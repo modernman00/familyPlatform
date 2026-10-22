@@ -185,7 +185,16 @@ final class ProfilePage extends ProcessImg
                     }
                 }
             }
-            $hasImage = $hasDirectImage || !empty($sharedTempImages);
+            // Attached family GIF support
+            $attachedGif = !empty($_POST['attached_gif_url']) ? trim((string)$_POST['attached_gif_url']) : null;
+            if ($attachedGif && filter_var($attachedGif, FILTER_VALIDATE_URL)) {
+                $hasGif = true;
+            } else {
+                $hasGif = false;
+                $attachedGif = null;
+            }
+
+            $hasImage = $hasDirectImage || !empty($sharedTempImages) || $hasGif;
             $hasPoll = !empty($_POST['poll_question']);
 
             if (empty($cleanMultiLineMessage) && !$hasImage && !$hasPoll) {
@@ -214,6 +223,16 @@ final class ProfilePage extends ProcessImg
     
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
+
+                // Promote attached GIF to primary post image if no local image uploaded
+                if ($attachedGif && !$hasDirectImage && empty($sharedTempImages)) {
+                    (new \Src\Update('post'))->updateTable(
+                        column: 'post_img0',
+                        columnAnswer: $attachedGif,
+                        identifier: 'post_no',
+                        identifierAnswer: $result
+                    );
+                }
 
                 // Preserve multi-line captions and full URLs without being squashed by checkInput
                 if ($cleanMultiLineMessage !== '') {

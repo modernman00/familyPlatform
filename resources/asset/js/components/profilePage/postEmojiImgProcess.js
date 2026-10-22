@@ -15,14 +15,18 @@ const scrollDrawerIntoView = (el) => {
 };
 
 // ----------------------------------------------------
-// 1. EMOJI PICKER (In-Flow, Zero-Clipping)
+// 1. EMOJI PICKER (Floating Popover UX with Caret & Auto-Dismiss)
 // ----------------------------------------------------
 const emojiToggle = document.getElementById('emojiPost');
-const emojiContainer = document.getElementById('emojiPickerDrawer') || document.getElementById('emojiPickerContainer');
-const closeEmojiBtn = document.getElementById('closeEmojiDrawerBtn') || document.getElementById('closeEmojiPicker');
+const emojiContainer = document.getElementById('emojiPickerContainer');
+const closeEmojiBtn = document.getElementById('closeEmojiPicker');
 
 if (document.getElementById('emojiListPost')) {
     showEmojiPicker('emojiListPost', 'data-emoji-target');
+}
+
+if (emojiToggle && emojiContainer) {
+    initEmojiPickerUX('emojiPost', 'emojiPickerContainer');
 }
 
 const closeEmojiPicker = () => {
@@ -50,12 +54,12 @@ if (emojiContainer && window.MutationObserver) {
 if (emojiToggle && emojiContainer) {
     emojiToggle.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         const isHidden = emojiContainer.classList.contains('d-none');
         if (isHidden) {
             emojiContainer.classList.remove('d-none');
             emojiToggle.classList.add('emoji-active');
             emojiToggle.setAttribute('aria-expanded', 'true');
-            scrollDrawerIntoView(emojiContainer);
         } else {
             closeEmojiPicker();
         }
@@ -65,6 +69,7 @@ if (emojiToggle && emojiContainer) {
 if (closeEmojiBtn) {
     closeEmojiBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         closeEmojiPicker();
     });
 }
@@ -522,21 +527,16 @@ const attachGif = (gifUrl) => {
     }
 
     // Hidden input for FormData submission
-    if (postFormEl) {
-        let hiddenInput = document.getElementById('attachedGifUrlInput');
-        if (!hiddenInput) {
-            hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'attached_gif_url';
-            hiddenInput.id = 'attachedGifUrlInput';
-            postFormEl.appendChild(hiddenInput);
-        }
-        hiddenInput.value = gifUrl;
+    let hiddenInput = document.getElementById('attachedGifUrlInput');
+    if (!hiddenInput && postFormEl) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'attached_gif_url';
+        hiddenInput.id = 'attachedGifUrlInput';
+        postFormEl.appendChild(hiddenInput);
     }
-
-    // Auto append or ensure GIF URL is in postMessage so backend validation and previews succeed
-    if (postMessageArea && !postMessageArea.value.includes(gifUrl)) {
-        postMessageArea.value = postMessageArea.value ? `${postMessageArea.value.trim()}\n\n${gifUrl}` : gifUrl;
+    if (hiddenInput) {
+        hiddenInput.value = gifUrl;
     }
 
     closeGifDrawer();
@@ -546,11 +546,7 @@ const detachGif = () => {
     if (selectedGifPreview) selectedGifPreview.classList.add('d-none');
     if (selectedGifImg) selectedGifImg.src = '';
     const hiddenInput = document.getElementById('attachedGifUrlInput');
-    if (hiddenInput) hiddenInput.remove();
-
-    if (currentAttachedGifUrl && postMessageArea) {
-        postMessageArea.value = postMessageArea.value.replace(currentAttachedGifUrl, '').trim();
-    }
+    if (hiddenInput) hiddenInput.value = '';
     currentAttachedGifUrl = '';
 };
 
@@ -636,12 +632,17 @@ const renderSelectedTags = () => {
     taggedUserInputs.innerHTML = '';
     selectedTagsTray.innerHTML = '';
 
+    const tagHeaderWrapper = document.getElementById('composerTagHeaderWrapper');
+    const tagHeaderNames = document.getElementById('composerTagHeaderNames');
+
     if (selectedTags.size === 0) {
         selectedTagsTray.classList.add('d-none');
         if (tagCountBadge) {
             tagCountBadge.textContent = '0 Tagged';
             tagCountBadge.className = 'badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5';
         }
+        if (tagHeaderWrapper) tagHeaderWrapper.classList.add('d-none');
+        if (tagHeaderNames) tagHeaderNames.textContent = '';
         return;
     }
 
@@ -649,6 +650,19 @@ const renderSelectedTags = () => {
     if (tagCountBadge) {
         tagCountBadge.textContent = `${selectedTags.size} Tagged`;
         tagCountBadge.className = 'badge rounded-pill bg-primary text-white px-2 py-0.5 shadow-xs';
+    }
+
+    // Facebook-style real-time header display: "[Author] is with [Tagged 1] and [Tagged 2]"
+    if (tagHeaderWrapper && tagHeaderNames) {
+        tagHeaderWrapper.classList.remove('d-none');
+        const tagList = Array.from(selectedTags.values()).map(m => m.fullName);
+        if (tagList.length === 1) {
+            tagHeaderNames.textContent = tagList[0];
+        } else if (tagList.length === 2) {
+            tagHeaderNames.textContent = `${tagList[0]} and ${tagList[1]}`;
+        } else {
+            tagHeaderNames.textContent = `${tagList[0]} and ${tagList.length - 1} others`;
+        }
     }
 
     selectedTags.forEach((member) => {

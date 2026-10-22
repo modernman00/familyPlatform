@@ -45,6 +45,7 @@ final class Organogram extends SingleCustomerData
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
+            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
 
             // Ensure graph tables are initialized and synced with legacy records
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);
@@ -77,7 +78,7 @@ final class Organogram extends SingleCustomerData
 
             $nodeAnalysis = $this->analyzeMissingNodes($orgData, $graphData);
 
-            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis', 'isReadOnly'));
+            view('member/organogram', compact('orgData', 'data', 'graphData', 'graphJson', 'nodeAnalysis', 'isReadOnly', 'isSelf'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -108,6 +109,7 @@ final class Organogram extends SingleCustomerData
             }
 
             $isReadOnly = !BaseController::sessionSharesFamily($familyCode);
+            $isSelf = (string)$idStr === (string)($_SESSION['id'] ?? '');
 
             // Ensure graph is initialized & synced
             $this->syncLegacyFamilyToGraph($familyCode, $idStr, $data);

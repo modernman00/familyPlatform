@@ -185,6 +185,9 @@ try {
                     if (typeof window.__resetTagBuilder === 'function') {
                         window.__resetTagBuilder();
                     }
+                    if (typeof window.__resetGifPicker === 'function') {
+                        window.__resetGifPicker();
+                    }
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';
                     
