@@ -102,7 +102,7 @@
                     </span>
                 </div>
                 <h1 class="h2 fw-bold text-slate-900 mb-1">FamilyPlatform Interactive Architecture &amp; Heritage Engine</h1>
-                <p class="text-slate-600 mb-0">Ad-free private family social network, interactive kinship tree, and intergenerational memory sanctuary.</p>
+                <p class="text-slate-600 mb-0">Private family social network, interactive kinship tree, and intergenerational memory sanctuary.</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <a href="/register" class="btn btn-outline-secondary rounded-pill px-4 touch-target-btn fw-semibold">
@@ -151,7 +151,7 @@
                             <span id="stageRouteTag" class="badge bg-white text-slate-600 border border-slate-200 font-monospace px-3 py-1 rounded-pill">/register</span>
                         </div>
                         <p id="stageDescription" class="text-slate-600 mb-3">
-                            A family founder provisions a private, cryptographically unique Family Code (e.g., <code>FAM-8492-WALLY</code>). Relatives can join via invite link or by entering this code, immediately joining an isolated, ad-free private sanctuary that shields family content from the public web.
+                            A family founder provisions a private, cryptographically unique Family Code (e.g., <code>FAM-8492-WALLY</code>). Relatives can join via invite link or by entering this code, immediately joining an isolated, encrypted private sanctuary that shields family content from the public web.
                         </p>
                         
                         <div class="row g-3">
@@ -177,7 +177,7 @@
                                 <div class="p-3 bg-white border border-slate-200 rounded-3">
                                     <div class="text-slate-500 small fw-bold text-uppercase mb-1">Privacy &amp; Safety Invariant</div>
                                     <div id="stageCompliance" class="text-success fw-bold small">
-                                        <i class="fas fa-shield-alt me-1"></i> Zero-Ad Family Privacy Guarantee
+                                        <i class="fas fa-shield-alt me-1"></i> End-to-End Family Privacy Guarantee
                                     </div>
                                 </div>
                             </div>
@@ -421,7 +421,7 @@
                             </div>
                         </div>
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold px-3 py-1 rounded-pill">
-                            Ad-Free Vault Active
+                            Private Vault Active
                         </span>
                     </div>
 
@@ -429,10 +429,10 @@
                     <div class="d-flex flex-column gap-3 mb-4">
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
                             <div class="d-flex align-items-center justify-content-between mb-1">
-                                <strong class="text-slate-900 small">1. Zero-Ad Family Privacy Guarantee</strong>
+                                <strong class="text-slate-900 small">1. End-to-End Family Privacy Guarantee</strong>
                                 <span class="badge bg-success text-white rounded-pill px-2 py-1"><i class="fas fa-check me-1"></i>ENFORCED</span>
                             </div>
-                            <p class="text-slate-500 small mb-0">No third-party ad networks, no tracking beacons, no data commercialization. Families own their data completely.</p>
+                            <p class="text-slate-500 small mb-0">No third-party tracking beacons or public data commercialisation. Families own their data completely.</p>
                         </div>
 
                         <div class="p-3 bg-slate-50 border border-slate-200 rounded-3">
@@ -504,7 +504,7 @@
             controller: "Family Founder / Circle Admin",
             state: "NEW_GUEST \u2192 PROVISIONED_FAMILY",
             db: "Family Sanctuary & Member Directory",
-            compliance: "Zero-Ad Family Privacy Guarantee"
+            compliance: "End-to-End Family Privacy Guarantee"
         },
         {
             num: 2,
@@ -528,13 +528,13 @@
         },
         {
             num: 4,
-            title: "Stage 4: Family Reels Studio, Private Family Hashtags, Smart Memory Pills & Sunday Trivia",
-            route: "/reels",
-            desc: "Relatives publish short-form milestone videos and feed chronicles tagged with interactive Private Family Hashtags and Smart Memory Pills (enabling 1-tap episodic memory stream filtering across years of family moments without public leakage), play weekly Sunday Family Trivia, and seal milestone time capsules.",
+            title: "Stage 4: Family Chronicles, 16:9 Rich Social Cards, Private Hashtags & Smart Memory Pills",
+            route: "/profilepage",
+            desc: "Relatives share multi-line celebration stories, milestone videos, and external event invites (such as PartyPlatform flyers) with automatic 16:9 rich OpenGraph social graphics unfurling, live composer previewing, self-healing URL reconstruction, private multi-tenant hashtags, smart memory pills, weekly Sunday Family Trivia, and time capsules.",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "Family Reels Sanctuary, Family Hashtags, Memory Links, Trivia Polls & Time Capsules",
-            compliance: "Zero-Distortion Media Rendering & Strict Multi-Tenant Family Tag Isolation"
+            db: "Family Feed, OpenGraph 16:9 Preview Cache, Family Hashtags, Memory Links & Reels Sanctuary",
+            compliance: "Standard 19 Living Architecture & Strict SSRF-Hardened Cache Isolation"
         },
         {
             num: 5,

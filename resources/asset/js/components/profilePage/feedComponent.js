@@ -140,7 +140,7 @@ export function profileFeed(opts = {}) {
             if (rawImg) {
                 profImg = (rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`;
             }
-            return {
+            const normalized = {
                 post_no: p?.post_no,
                 id: p?.id,
                 fullName: p?.fullName || 'Family Member',
@@ -151,6 +151,7 @@ export function profileFeed(opts = {}) {
                 postMessage: p?.postMessage || '',
                 displayMessage: this.normalizeEmojiText(cleanPostMessage(p?.postMessage || '', extractVideoFromText(p?.postMessage))),
                 video: extractVideoFromText(p?.postMessage),
+                link_preview: p?.link_preview || null,
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
                 poll: p?.poll || null,
@@ -159,6 +160,16 @@ export function profileFeed(opts = {}) {
                 comments: Array.isArray(p?.comments) ? p.comments.map(c => this.normalizeComment(c)) : [],
                 isLiked: false,
             };
+
+            // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
+            if (!normalized.link_preview && normalized.postMessage && !normalized.video) {
+                const urlMatch = normalized.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
+                if (urlMatch && urlMatch[1]) {
+                    this.lazyFetchLinkPreview(normalized, urlMatch[1]);
+                }
+            }
+
+            return normalized;
         },
 
         normalizeComment(c) {
@@ -249,11 +260,31 @@ export function profileFeed(opts = {}) {
 
         renderHashtags(message) {
             if (!message) return '';
-            const safeText = this.escapeHtml(message);
+            let safeText = this.escapeHtml(message);
+
+            // Linkify URLs into secure clickable links
+            safeText = safeText.replace(/(https?:\/\/[^\s<>"']+)/gi, (match) => {
+                const cleanHref = match.replace(/[.,;:!?)]+$/, '');
+                return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanHref}</a>`;
+            });
+
+            // Hashtag pills
             return safeText.replace(/#([a-zA-Z0-9_]{2,40})/g, (match, tag) => {
                 const cleanTag = tag.toLowerCase();
                 return `<span class="badge family-tag-pill" role="button" tabindex="0" onclick="window.filterByFamilyHashtag('${cleanTag}')" title="Filter family memories by #${cleanTag}"><i class="bi bi-hash me-0.5"></i>${tag}</span>`;
             });
+        },
+
+        async lazyFetchLinkPreview(post, url) {
+            if (!post || !url) return;
+            try {
+                const res = await axios.get(`/api/link-preview?url=${encodeURIComponent(url)}`);
+                if (res?.data?.status === 'success' && res?.data?.data) {
+                    post.link_preview = res.data.data;
+                }
+            } catch (_) {
+                // Silently ignore if unresolvable
+            }
         },
 
         async loadTrendingHashtags() {
@@ -783,9 +814,21 @@ export function profileFeed(opts = {}) {
             // Dispatched by allEvents.js after a successful post edit (the acting
             // user's own tab — other tabs get it via the update-post Pusher bind).
             window.addEventListener('post-updated', (event) => {
-                const { postNo, postMessage } = event?.detail || {};
+                const { postNo, postMessage, link_preview } = event?.detail || {};
                 const post = this.posts.find(p => String(p.post_no) === String(postNo));
-                if (post) post.postMessage = postMessage;
+                if (post) {
+                    post.postMessage = postMessage;
+                    post.displayMessage = this.normalizeEmojiText(cleanPostMessage(postMessage || '', extractVideoFromText(postMessage)));
+                    post.video = extractVideoFromText(postMessage);
+                    if (link_preview !== undefined) {
+                        post.link_preview = link_preview;
+                    } else if (post.postMessage && !post.video) {
+                        const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
+                        if (urlMatch && urlMatch[1]) {
+                            this.lazyFetchLinkPreview(post, urlMatch[1]);
+                        }
+                    }
+                }
             });
         },
 
@@ -1021,7 +1064,19 @@ export function profileFeed(opts = {}) {
                 });
                 channel.bind('update-post', (data) => {
                     const post = this.posts.find(p => String(p.post_no) === String(data?.postNo));
-                    if (post) post.postMessage = data?.postMessage ?? post.postMessage;
+                    if (post) {
+                        post.postMessage = data?.postMessage ?? post.postMessage;
+                        post.displayMessage = this.normalizeEmojiText(cleanPostMessage(post.postMessage || '', extractVideoFromText(post.postMessage)));
+                        post.video = extractVideoFromText(post.postMessage);
+                        if (data?.link_preview !== undefined) {
+                            post.link_preview = data.link_preview;
+                        } else if (post.postMessage && !post.video) {
+                            const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
+                            if (urlMatch && urlMatch[1]) {
+                                this.lazyFetchLinkPreview(post, urlMatch[1]);
+                            }
+                        }
+                    }
                 });
 
                 channel.bind('delete-comment', (data) => {
@@ -1081,6 +1136,99 @@ export function profileFeed(opts = {}) {
             } catch (e) {
                 console.warn('Pusher initialization skipped:', e);
             }
+        },
+
+        /**
+         * Web Share API: Native OS Sharing from PWA to Social Media (WhatsApp, Instagram, Facebook, Messages)
+         */
+        async sharePostToSocialMedia(post) {
+            const author = post.fullName || 'Family Member';
+            const caption = post.postMessage || post.displayMessage || 'Family Memory on FamilyPlatform';
+            const postUrl = window.location.origin + '/profilePage#post' + post.post_no;
+            const title = `${author}'s Family Memory — FamilyPlatform`;
+
+            // If Web Share API is available (Mobile iOS / Android / Desktop Safari/Chrome)
+            if (navigator.share) {
+                try {
+                    let filesToShare = [];
+
+                    // If post has an image and navigator.canShare supports files, fetch as Blob/File
+                    if (post.images && post.images.length > 0 && typeof navigator.canShare === 'function') {
+                        try {
+                            const imgUrl = getPostImageUrl(post.images[0]);
+                            const resp = await fetch(imgUrl, { mode: 'cors' });
+                            if (resp.ok) {
+                                const blob = await resp.blob();
+                                const ext = (blob.type && blob.type.split('/')[1]) ? blob.type.split('/')[1] : 'jpg';
+                                const file = new File([blob], `family-memory-${post.post_no}.${ext}`, { type: blob.type || 'image/jpeg' });
+                                if (navigator.canShare({ files: [file] })) {
+                                    filesToShare = [file];
+                                }
+                            }
+                        } catch (imgErr) {
+                            console.warn('[WebShare] Image fetch fallback to text:', imgErr);
+                        }
+                    }
+
+                    const sharePayload = {
+                        title: title,
+                        text: `${caption}\n\nShared via FamilyPlatform`,
+                        url: postUrl
+                    };
+
+                    if (filesToShare.length > 0) {
+                        sharePayload.files = filesToShare;
+                    }
+
+                    await navigator.share(sharePayload);
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        // User cancelled native share sheet
+                        return;
+                    }
+                    console.warn('[WebShare] Fallback to social modal:', err);
+                }
+            }
+
+            // Fallback for browsers without native Web Share API
+            this.openSocialShareModal(title, caption, postUrl);
+        },
+
+        /**
+         * Fallback Social Share Modal for desktop / unsupported browsers
+         */
+        openSocialShareModal(title, caption, postUrl) {
+            const encodedUrl = encodeURIComponent(postUrl);
+            const encodedText = encodeURIComponent(`${caption}\n\n${postUrl}`);
+
+            const htmlContent = `
+                <div class="d-flex flex-column gap-2 text-start p-2">
+                    <p class="small text-muted mb-2">Share this family memory to your favourite social platforms:</p>
+                    <a href="https://api.whatsapp.com/send?text=${encodedText}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success d-flex align-items-center justify-content-start gap-2 py-2 px-3 rounded-pill fw-semibold text-decoration-none" style="min-height:44px;">
+                        <i class="bi bi-whatsapp fs-5"></i> Share on WhatsApp
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary d-flex align-items-center justify-content-start gap-2 py-2 px-3 rounded-pill fw-semibold text-decoration-none" style="min-height:44px;">
+                        <i class="bi bi-facebook fs-5"></i> Share on Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?text=${encodedText}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark d-flex align-items-center justify-content-start gap-2 py-2 px-3 rounded-pill fw-semibold text-decoration-none" style="min-height:44px;">
+                        <i class="bi bi-twitter-x fs-5"></i> Share on X / Twitter
+                    </a>
+                    <button type="button" id="copyShareLinkBtn" class="btn btn-light border d-flex align-items-center justify-content-start gap-2 py-2 px-3 rounded-pill fw-medium text-dark mt-1" style="min-height:44px;" onclick="navigator.clipboard.writeText('${postUrl}').then(() => { if(window.Swal){ Swal.showValidationMessage('Link copied to clipboard!'); setTimeout(() => Swal.resetValidationMessage(), 2500); } })">
+                        <i class="bi bi-link-45deg fs-5"></i> Copy Memory Link
+                    </button>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Share Memory',
+                html: htmlContent,
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg'
+                }
+            });
         }
     };
 }

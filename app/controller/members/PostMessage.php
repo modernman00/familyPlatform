@@ -270,16 +270,17 @@ final class PostMessage
                 error_log("Pusher comment broadcast failed: " . $th->getMessage());
             }
 
-            // send push notification to all members with the same family code
-            $id = \checkInput($data['id']);
+            // send push notification to all members with the same family code (excluding the comment author)
+            $rawCommentAuthorId = \checkInput($newComment[0]['id'] ?? ($_SESSION['id'] ?? ''));
+            $commentAuthorId = is_string($rawCommentAuthorId) ? $rawCommentAuthorId : '';
 
-            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $id);
+            $results = AllMembersData::AllMembersEmailByFamCode($famCode, $commentAuthorId !== '' ? $commentAuthorId : null);
 
             $url = self::buildPostUrl($newComment[0]['post_no']);
 
             self::notifyMembersByPushNotification(
                 results: $results,
-                postId: (string)$newComment[0]['id'],
+                postId: $commentAuthorId !== '' ? $commentAuthorId : (string)($newComment[0]['id'] ?? ''),
                 postOriginName: (string)($newComment[0]['fullName'] ?? 'A member'),
                 url: $url,
                 notificationMsg: "{$newComment[0]['fullName']} posted a new comment"
@@ -434,8 +435,7 @@ final class PostMessage
             // have to be read manually, so the frontend sends JSON for edits.
             $rawInput = file_get_contents('php://input');
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
-            $cleanMessage = checkInput($input['postMessage'] ?? null) ?? '';
-            $cleanMessageStr = is_string($cleanMessage) ? $cleanMessage : '';
+            $cleanMessageStr = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['postMessage'] ?? ''));
 
             (new Update('post'))->updateTable(
                 column: 'postMessage',
@@ -458,9 +458,13 @@ final class PostMessage
                 error_log('[PostMessage::updatePost hashtags] ' . $th->getMessage());
             }
 
+            // Warm up and resolve link preview
+            $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($cleanMessageStr);
+
             Pusher::broadcastToFamily((string) ($post['postFamCode'] ?? ''), 'update-post', [
                 'postNo' => $postNo,
-                'postMessage' => $cleanMessage,
+                'postMessage' => $cleanMessageStr,
+                'link_preview' => $linkPreview,
             ]);
 
             msgSuccess(200, "post updated successfully");
@@ -599,6 +603,10 @@ final class PostMessage
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
+            $targetUserId = (string)($memberData['id'] ?? '');
+            if ($targetUserId !== '' && $targetUserId === $postId) {
+                continue;
+            }
             $memberData['postOriginName'] = $postOriginName;
             $memberData['url'] = $url;
             $memberData['img'] = $getPostProfilePics;
@@ -639,13 +647,13 @@ final class PostMessage
         $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
 
         foreach ($results as $memberData) {
+            $targetUserId = (string)($memberData['id'] ?? '');
+            if ($targetUserId === '' || $targetUserId === $postId) {
+                continue;
+            }
             $memberData['postOriginName'] = $postOriginName;
             $memberData['url'] = $url;
             $memberData['img'] = $getPostProfilePics;
-            $targetUserId = (string)($memberData['id'] ?? '');
-            if ($targetUserId === '') {
-                continue;
-            }
 
             // 1. Insert into in-app notification table so navbar bell & dropdown reflect the new post
             try {

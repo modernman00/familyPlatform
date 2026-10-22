@@ -29,12 +29,14 @@ import "./postEmojiImgProcess"
 
 
 import { initEngagementListeners, initMemories } from "./engagement"
+import { initPwaShareTargetHandler } from "./pwaShareTarget"
 import "../reels/reelsPlayer"
 import "../kinship/kinshipRadar"
 
 document.addEventListener('DOMContentLoaded', () => {
     initEngagementListeners();
     initMemories();
+    initPwaShareTargetHandler();
 });
 
 

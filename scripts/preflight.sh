@@ -123,6 +123,10 @@ if [ -f "tests/verify_frontend_stability.php" ]; then
     php tests/verify_frontend_stability.php || GATE4_PASSED=0
 fi
 
+if [ -f "tests/verify_link_preview_graphics_test.php" ]; then
+    php tests/verify_link_preview_graphics_test.php || GATE4_PASSED=0
+fi
+
 if [ "$GATE4_PASSED" -eq 1 ]; then
     echo -e "${GREEN}  ✅ Gate 4 Passed: 0 Must-Have violations, PWA verified, Frontend stable.${NC}"
 else

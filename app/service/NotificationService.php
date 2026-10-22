@@ -89,9 +89,13 @@ class NotificationService
                 VALUES (?, ?, ?, ?, 'Family Request', ?, 'new', NOW())
             ");
 
+            $requesterId = isset($newUserInfo['id']) && is_scalar($newUserInfo['id']) ? (string)$newUserInfo['id'] : 'system';
             foreach ($targetRecipients as $recipientId) {
+                if ($requesterId !== 'system' && $requesterId !== '' && (string)$recipientId === $requesterId) {
+                    continue;
+                }
                 $stmt->execute([
-                    $newUserInfo['id'] ?? 'system',
+                    $requesterId,
                     $recipientId,
                     $requesterName,
                     "Family Join Request",

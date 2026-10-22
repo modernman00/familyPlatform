@@ -68,6 +68,29 @@
 
                     <small id="editPostNotice" class="d-none text-muted d-block mb-2 px-1">Editing text only — images and polls can't be changed here.</small>
 
+                    <!-- Live OpenGraph Link Preview in Composer (16:9 Full Graphics) -->
+                    <div id="composerLinkPreviewContainer" class="d-none mb-3 position-relative rounded-3 overflow-hidden border border-light-subtle shadow-sm" style="background-color: var(--bs-card-bg, #ffffff);">
+                        <button type="button" id="closeComposerLinkPreview" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" style="width: 28px; height: 28px; padding: 0; z-index: 10; opacity: 0.85;" aria-label="Dismiss link preview">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        <div id="composerLinkPreviewImageWrapper" class="position-relative w-100 overflow-hidden" style="aspect-ratio: 16 / 9; max-height: 240px; background-color: #0f172a;">
+                            <img id="composerLinkPreviewImg" src="" alt="Link preview" class="w-100 h-100 object-fit-cover" style="display: block;">
+                            <span id="composerLinkPreviewDomainBadge" class="badge rounded-pill bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-2 px-2.5 py-1 small" style="font-size: 0.72rem; letter-spacing: 0.5px; backdrop-filter: blur(6px);"></span>
+                        </div>
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small id="composerLinkPreviewSiteName" class="text-muted text-uppercase fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;"></small>
+                                <small class="text-primary fw-medium"><i class="bi bi-lightning-charge-fill me-1"></i> Rich Preview</small>
+                            </div>
+                            <h6 id="composerLinkPreviewTitle" class="fw-bold mb-1 text-dark" style="font-size: 0.95rem; line-height: 1.35;"></h6>
+                            <p id="composerLinkPreviewDesc" class="text-secondary small mb-2" style="font-size: 0.82rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></p>
+                            <div class="pt-1 border-top d-flex justify-content-between align-items-center">
+                                <span id="composerLinkPreviewUrl" class="small text-muted text-truncate" style="font-size: 0.75rem; max-width: 65%;"></span>
+                                <span id="composerLinkPreviewCta" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1" style="font-size: 0.75rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="imagePreviewContainer" class="mb-3 d-none position-relative">
                         <div id="imagePreviewList" class="d-flex flex-wrap gap-2"></div>
                         <button type="button" id="closeImagePreview"
@@ -345,4 +368,79 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         }
     }, 250);
 };
+
+// Live Link Preview unfurler for composer
+(function() {
+    let previewDebounceTimer = null;
+    let dismissedUrl = null;
+    let lastFetchedUrl = null;
+
+    const textarea = document.getElementById('postMessage');
+    const container = document.getElementById('composerLinkPreviewContainer');
+    const closeBtn = document.getElementById('closeComposerLinkPreview');
+    const imgEl = document.getElementById('composerLinkPreviewImg');
+    const imgWrapper = document.getElementById('composerLinkPreviewImageWrapper');
+    const titleEl = document.getElementById('composerLinkPreviewTitle');
+    const descEl = document.getElementById('composerLinkPreviewDesc');
+    const domainBadge = document.getElementById('composerLinkPreviewDomainBadge');
+    const siteNameEl = document.getElementById('composerLinkPreviewSiteName');
+    const urlEl = document.getElementById('composerLinkPreviewUrl');
+    const ctaEl = document.getElementById('composerLinkPreviewCta');
+
+    if (closeBtn && container) {
+        closeBtn.addEventListener('click', function() {
+            container.classList.add('d-none');
+            dismissedUrl = lastFetchedUrl;
+        });
+    }
+
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            const val = textarea.value;
+            const urlMatch = val.match(/(https?:\/\/[^\s<>"']+)/i);
+            if (!urlMatch || !urlMatch[1]) {
+                if (container) container.classList.add('d-none');
+                lastFetchedUrl = null;
+                return;
+            }
+
+            const url = urlMatch[1].replace(/[.,;:!?)]+$/, '');
+            if (url === dismissedUrl || url === lastFetchedUrl) {
+                return;
+            }
+
+            if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
+            previewDebounceTimer = setTimeout(async function() {
+                try {
+                    const response = await fetch('/api/link-preview?url=' + encodeURIComponent(url), {
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!response.ok) return;
+                    const res = await response.json();
+                    if (res?.status === 'success' && res?.data && (res.data.title || res.data.image)) {
+                        const d = res.data;
+                        lastFetchedUrl = url;
+                        if (titleEl) titleEl.textContent = d.title || '';
+                        if (descEl) descEl.textContent = d.description || '';
+                        if (urlEl) urlEl.textContent = d.url || url;
+                        if (domainBadge) domainBadge.textContent = d.is_party_event ? 'PartyPlatform' : (d.domain || 'Link');
+                        if (siteNameEl) siteNameEl.textContent = d.site_name || d.domain || '';
+                        if (ctaEl) ctaEl.textContent = d.cta_label || 'View Event / RSVP →';
+                        if (imgEl && imgWrapper) {
+                            if (d.image) {
+                                imgEl.src = d.image;
+                                imgWrapper.classList.remove('d-none');
+                            } else {
+                                imgWrapper.classList.add('d-none');
+                            }
+                        }
+                        if (container) container.classList.remove('d-none');
+                    }
+                } catch (_) {
+                    // Fail silently
+                }
+            }, 400);
+        });
+    }
+})();
 </script>

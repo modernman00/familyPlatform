@@ -32,8 +32,8 @@ try {
         [
             'title' => 'Why Digital Sovereignty Matters for Your Family Archive',
             'slug' => 'digital-sovereignty-for-family-archives',
-            'summary' => 'Public social networks monetize your children’s photos and train advertising algorithms on your personal memories. Here is why private, ad-free family platforms are the future.',
-            'content' => '<p>When you post a milestone photo on ad-funded platforms, you trade intimacy for convenience. Your family’s sacred milestones become data points in an advertising broker’s database.</p><h2>Zero Advertising, Absolute Privacy</h2><p>A true family archive must be walled from third-party scrapers and surveillance capitalism. Your family tree belongs solely to the loved ones you explicitly invite.</p>',
+            'summary' => 'Public social networks monetise your children’s photos and train external algorithms on your personal memories. Here is why private, encrypted family platforms are the future.',
+            'content' => '<p>When you post a milestone photo on public platforms, you trade intimacy for convenience. Your family’s sacred milestones become data points in an external broker’s database.</p><h2>Absolute Privacy &amp; Sovereignty</h2><p>A true family archive must be walled from third-party scrapers and surveillance capitalism. Your family tree belongs solely to the loved ones you explicitly invite.</p>',
             'cover_image' => '/public/img/og-invite.jpg',
             'author_id' => $authorId,
             'status' => 'published',

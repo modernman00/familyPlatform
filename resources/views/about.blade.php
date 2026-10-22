@@ -21,7 +21,7 @@
       <hr class="my-5">
 
       <h2>Why We Built This</h2>
-      <p>In an age of public feeds and data harvesting, families need a private sanctuary. Our Family Network provides a secure, ad-free environment where your family's data, photos, and history belong strictly to you.</p>
+      <p>In an age of public feeds and data harvesting, families need a private sanctuary. Our Family Network provides a secure, private environment where your family's data, photos, and history belong strictly to you.</p>
 
       <h2>Core Features</h2>
       

@@ -18,7 +18,7 @@ final class NotificationController extends Select
     public static function index()
     {
         try {
-            $query = Select::formAndMatchQuery(selection: 'SELECT_ALL', table: 'notification', orderBy: 'ORDER BY created_at ASC', limit: 'LIMIT 15');
+            $query = Select::formAndMatchQuery(selection: 'SELECT_ALL', table: 'notification', orderBy: 'ORDER BY created_at DESC, no DESC', limit: 'LIMIT 15');
             $result = Select::selectFn2($query);
 
             // Call msgSuccess after returning the result
@@ -61,10 +61,11 @@ final class NotificationController extends Select
             $placeholders = implode(',', array_fill(0, count($receivers), '?'));
             $query = "SELECT * FROM notification
                 WHERE receiver_id IN ($placeholders)
+                AND (sender_id IS NULL OR sender_id != ?)
                 AND notification_status = ?
-                ORDER BY created_at DESC";
-            $result = Select::selectFn2($query, [...$receivers, 'new']);
-            $merged = array_merge($approvals, $result);
+                ORDER BY created_at DESC, no DESC";
+            $result = Select::selectFn2($query, [...$receivers, $userId, 'new']);
+            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, is_array($result) ? $result : []));
 
             msgSuccess(200, $merged);
 
@@ -95,10 +96,11 @@ final class NotificationController extends Select
             $placeholders = implode(',', array_fill(0, count($receivers), '?'));
             $query = "SELECT * FROM notification
                 WHERE receiver_id IN ($placeholders)
+                AND (sender_id IS NULL OR sender_id != ?)
                 AND notification_status = ?
-                ORDER BY created_at DESC";
-            $result = Select::selectFn2($query, [...$receivers, 'new']);
-            $merged = array_merge($approvals, $result);
+                ORDER BY created_at DESC, no DESC";
+            $result = Select::selectFn2($query, [...$receivers, $userId, 'new']);
+            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, is_array($result) ? $result : []));
             $count = count($merged);
 
             msgSuccess(200, [
@@ -111,6 +113,28 @@ final class NotificationController extends Select
         } catch (\Throwable $e) {
             msgSuccess(200, ['status' => 'success', 'unread_count' => 0, 'count' => 0, 'message' => []]);
         }
+    }
+
+    /**
+     * Sort notifications from newest to oldest by created_at (fallback notification_date) and no DESC.
+     *
+     * @param array<int, array<string, mixed>> $items
+     * @return array<int, array<string, mixed>>
+     */
+    private static function sortNotificationsNewestFirst(array $items): array
+    {
+        usort($items, static function (array $a, array $b): int {
+            $timeA = strtotime((string)($a['created_at'] ?? $a['notification_date'] ?? '')) ?: 0;
+            $timeB = strtotime((string)($b['created_at'] ?? $b['notification_date'] ?? '')) ?: 0;
+            if ($timeA !== $timeB) {
+                return $timeB <=> $timeA;
+            }
+            $noA = is_numeric($a['no'] ?? null) ? (int)$a['no'] : 0;
+            $noB = is_numeric($b['no'] ?? null) ? (int)$b['no'] : 0;
+            return $noB <=> $noA;
+        });
+
+        return $items;
     }
 
     /**
@@ -139,6 +163,11 @@ final class NotificationController extends Select
             $notifications = [];
 
             foreach ($requests as $req) {
+                $senderId = (string)($req['id'] ?? 'system');
+                if ($senderId !== '' && $senderId === $userId) {
+                    continue;
+                }
+
                 $farNo = 'far_' . ($req['no'] ?? '');
                 if (in_array($farNo, $dismissed, true)) {
                     continue;
@@ -149,7 +178,7 @@ final class NotificationController extends Select
 
                 $notifications[] = [
                     'no' => $farNo,
-                    'sender_id' => (string)($req['id'] ?? 'system'),
+                    'sender_id' => $senderId,
                     'sender_name' => $requesterName,
                     'notification_name' => 'Family Join Request',
                     'notification_type' => 'Family Request',

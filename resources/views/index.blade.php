@@ -1,7 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', 'FamilyPlatform | Private Family Social Network & Living Heritage Tree')
-@section('meta_description', 'The private, secure social platform built exclusively for families. Preserve precious memories, build interactive family trees, and stay connected with relatives without ads.')
+@section('meta_description', 'The private, secure social platform built exclusively for families. Preserve precious memories, build interactive family trees, and stay connected with relatives.')
 @section('data-page-id', 'home')
 
 @section('content')
@@ -165,7 +165,7 @@
                 <h4 class="card-title fw-bold fs-5 mb-2">
                   <a href="/blogs" class="text-dark text-decoration-none">Why Your Family Photos Need an Encrypted Haven</a>
                 </h4>
-                <p class="card-text text-muted small flex-grow-1">Moving away from algorithm-driven social feeds to an intimate, advertisement-free sanctuary.</p>
+                <p class="card-text text-muted small flex-grow-1">Moving away from algorithm-driven social feeds to an intimate, private family sanctuary.</p>
                 <a href="/blogs" class="fw-semibold small text-decoration-none mt-2" style="color: var(--brand-primary, #00bfa5);">
                   Explore Blog <i class="fas fa-arrow-right ms-1"></i>
                 </a>
@@ -212,7 +212,7 @@
             <span class="text-muted ms-3 fs-6">▼</span>
           </summary>
           <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <div itemprop="text">Unlike ad-supported social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines.</div>
+            <div itemprop="text">Unlike public social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines.</div>
           </div>
         </details>
 
@@ -238,11 +238,11 @@
 
         <details class="p-4 rounded-3 border bg-white shadow-sm" style="border-color: #e2e8f0;" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
           <summary class="fw-bold fs-5 text-dark cursor-pointer d-flex justify-content-between align-items-center" style="min-height: 44px; list-style: none;">
-            <span itemprop="name">Is FamilyPlatform free to get started?</span>
+            <span itemprop="name">How quickly can we set up our family tree?</span>
             <span class="text-muted ms-3 fs-6">▼</span>
           </summary>
           <div class="mt-3 text-secondary lh-lg" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <div itemprop="text">Yes! You can create your private family space, invite members, share photos, and build your heritage tree completely free.</div>
+            <div itemprop="text">You can create your private family space, generate your unique Family Code, invite members, share photos, and start building your living heritage tree in minutes.</div>
           </div>
         </details>
       </div>
@@ -254,7 +254,7 @@
     <div class="container text-center py-5">
       <h2 class="fw-bold mb-3">Ready to bring your family closer?</h2>
       <p class="fs-5 mb-4 text-white-50">Join thousands of families who have already made the switch to a better network.</p>
-      <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary); border-radius: 12px;">Get Started Free</a>
+      <a href="/register" class="btn btn-light btn-lg px-4 px-md-5 fw-bold shadow-sm" style="color: var(--brand-secondary); border-radius: 12px;">Get Started</a>
     </div>
   </section>
 @endsection
@@ -270,7 +270,7 @@
       "name": "How does FamilyPlatform keep our family coordination private?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Unlike ad-supported social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines."
+        "text": "Unlike public social networks, FamilyPlatform operates in a private, encrypted family vault. Your family photos, medical reminders, and schedules are never sold, tracked, or indexed by search engines."
       }
     },
     {
@@ -291,10 +291,10 @@
     },
     {
       "@type": "Question",
-      "name": "Is FamilyPlatform free to get started?",
+      "name": "How quickly can we set up our family tree?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes! You can create your private family space, invite members, share photos, and build your heritage tree completely free."
+        "text": "You can create your private family space, generate your unique Family Code, invite members, share photos, and start building your living heritage tree in minutes."
       }
     }
   ]

@@ -318,6 +318,10 @@ class FeedRepository
                     break;
                 }
             }
+
+            // Hydrate OpenGraph link preview (from fast cache or auto-recovery)
+            $msg = (string)($post['postMessage'] ?? ($post['content'] ?? ''));
+            $post['link_preview'] = !empty($msg) ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
         }
         unset($post);
     }

@@ -90,11 +90,74 @@ async function limitCacheSize(cacheName, maxEntries) {
 }
 
 /**
+ * Web Share Target Level 2 IndexedDB Storage
+ */
+const PWA_SHARE_DB = 'FP_PWA_ShareTarget_DB';
+const PWA_SHARE_STORE = 'shared_items';
+
+function openPwaShareDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(PWA_SHARE_DB, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(PWA_SHARE_STORE)) {
+        db.createObjectStore(PWA_SHARE_STORE, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveSharedMediaToIndexedDB(item) {
+  const db = await openPwaShareDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PWA_SHARE_STORE, 'readwrite');
+    const store = tx.objectStore(PWA_SHARE_STORE);
+    store.add(item);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+/**
  * 3. Fetch Event Routing Matrix
  */
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Web Share Target Level 2: Intercept OS gallery media share POST
+  if (request.method === 'POST' && (url.pathname === '/share-target' || url.pathname === '/share-target/')) {
+    event.respondWith((async () => {
+      try {
+        const formData = await event.request.formData();
+        const mediaFiles = formData.getAll('media');
+        const title = formData.get('title') || '';
+        const text = formData.get('text') || '';
+        const shareUrl = formData.get('url') || '';
+
+        // If files exist, store them in IndexedDB for the client app to retrieve
+        if (mediaFiles && mediaFiles.length > 0) {
+          await saveSharedMediaToIndexedDB({
+            mediaFiles,
+            title,
+            text,
+            url: shareUrl,
+            timestamp: Date.now()
+          });
+          return Response.redirect('/profilePage?pwa_shared=1', 303);
+        }
+
+        // Fallback to server processing
+        return fetch(event.request);
+      } catch (err) {
+        console.warn('[SW] Web Share Target handling fallback to network:', err);
+        return fetch(event.request).catch(() => Response.redirect('/profilePage?pwa_shared=1', 303));
+      }
+    })());
+    return;
+  }
 
   // Non-GET requests (POST, PUT, DELETE) are strictly Network-Only
   if (request.method !== 'GET') {

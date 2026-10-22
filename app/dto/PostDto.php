@@ -52,6 +52,7 @@ final class PostDto implements JsonSerializable
         public readonly ?string $profileImg,
         public readonly ?array $poll = null,
         public readonly array $reactions = [],
+        public readonly ?array $linkPreview = null,
         public readonly array $rawAttributes = []
     ) {}
 
@@ -94,6 +95,12 @@ final class PostDto implements JsonSerializable
         /** @var array<int, mixed> $reactions */
         $reactions = isset($row['reactions']) && is_array($row['reactions']) ? array_values($row['reactions']) : [];
 
+        /** @var array<string, mixed>|null $linkPreview */
+        $linkPreview = isset($row['link_preview']) && is_array($row['link_preview']) ? $row['link_preview'] : null;
+        if ($linkPreview === null && !empty($message)) {
+            $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($message);
+        }
+
         return new self(
             postNo: $postNo,
             id: $id,
@@ -112,6 +119,7 @@ final class PostDto implements JsonSerializable
             profileImg: $profileImg,
             poll: $poll,
             reactions: $reactions,
+            linkPreview: $linkPreview,
             rawAttributes: $row
         );
     }
@@ -143,6 +151,7 @@ final class PostDto implements JsonSerializable
         $arr['profileImg'] = $this->profileImg;
         $arr['poll'] = $this->poll;
         $arr['reactions'] = $this->reactions;
+        $arr['link_preview'] = $this->linkPreview;
 
         return $arr;
     }

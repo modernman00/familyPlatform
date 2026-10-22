@@ -40,7 +40,7 @@
                         </div>
                         <div>
                             <div class="fw-bold text-dark small" style="font-size: 0.9rem;">
-                                100% Private, Ad-Free Family Network
+                                100% Private Family Network
                             </div>
                             <div class="text-muted small" style="font-size: 0.78rem;">
                                 Relatives join your family with private code: <span class="badge bg-light text-primary border font-monospace fw-bold" id="modalFamilyCodeBadge">{{ $data['famCode'] ?? '...' }}</span>

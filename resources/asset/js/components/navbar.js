@@ -72,12 +72,13 @@ const notificationHTML = (data) => {
 
     const emoji = getEmoji(data.notification_type || '', data.notification_name || '', data.notification_content || '');
     const isUnread = data.notification_status === 'new';
-    const { sender_id, notification_name, notification_content, created_at, no } = data;
+    const { sender_id, notification_name, notification_content, created_at, notification_date, no } = data;
     const randomNumber = Math.floor(100 + Math.random() * 900);
     const bannerId = `notificationBar${sender_id}${randomNumber}`;
 
     const formattedTitle = toSentenceCase(notification_name || 'Notification');
-    const timeAgoStr = created_at ? format(created_at) : 'Just now';
+    const timestamp = created_at || notification_date;
+    const timeAgoStr = timestamp ? format(timestamp) : 'Just now';
 
     return `
     <div id="${bannerId}" class="notif-card-stitch ${isUnread ? 'unread' : ''}">
@@ -109,10 +110,10 @@ export const increaseNotificationCount = () => {
     updateNotificationBadge(current);
 };
 
-export const addToNotificationTab = (data) => {
+export const addToNotificationTab = (data, position = 'afterbegin') => {
     const tab = qSel('.notification_tab');
     if (tab) {
-        tab.insertAdjacentHTML('afterbegin', notificationHTML(data));
+        tab.insertAdjacentHTML(position, notificationHTML(data));
     }
 };
 
@@ -139,8 +140,10 @@ const fetchUserNotifications = () => {
                 const tab = qSel('.notification_tab');
                 if (tab) tab.innerHTML = '';
 
+                // Backend returns notifications ordered newest-first (DESC);
+                // append in sequence ('beforeend') so the newest stays at the top.
                 data.forEach(element => {
-                    addToNotificationTab(element);
+                    addToNotificationTab(element, 'beforeend');
                 });
 
                 const updateNotificationTiming = document.querySelectorAll(".notification_timeago");

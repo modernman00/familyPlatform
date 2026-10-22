@@ -72,7 +72,7 @@
             </p>
         </div>
         <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fw-semibold">
-            <i class="bi bi-lock-fill me-1"></i> Private & Ad-Free
+            <i class="bi bi-lock-fill me-1"></i> Private &amp; Secure
         </span>
     </div>
 

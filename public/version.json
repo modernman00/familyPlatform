@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(feed): resolve timezone observer infinite loop causing profilePage freeze and unresponsiveness",
+    "title": "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling",
     "notes": [
-        "Fix(feed): resolve timezone observer infinite loop causing profilePage freeze and unresponsiveness",
-        "Fix(security): sanitize and validate shortcutConfig family code resolving Semgrep rule",
-        "Feat(native-share): implement iOS 13+ Apple Photos share sheet integration and modern enterprise admin portal"
+        "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling",
+        "Fix(test): eliminate profile edit async race and expand e2e watchdog limit",
+        "Feat(security): fortify csrf validation, neutralize semgrep taint, and optimize production assets"
     ],
-    "released_at": "2026-10-20",
-    "commit": "bbbff25"
+    "released_at": "2026-10-21",
+    "commit": "1648dab"
 }

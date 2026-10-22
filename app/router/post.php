@@ -80,6 +80,14 @@ $router->map(
   name: 'api_hashtags_stream'
 );
 
+// LIVE OPENGRAPH LINK PREVIEW API
+$router->map(
+  method: 'GET',
+  route: '/api/link-preview',
+  target: 'App\controller\members\LinkPreviewController@preview',
+  name: 'api_link_preview'
+);
+
 // Native iOS / Apple Photos Share Sheet Endpoints
 $router->map(
   method: 'POST',
@@ -101,4 +109,20 @@ $router->map(
   target: 'App\controller\members\NativeShareController@shortcutConfig',
   name: 'media_ios_shortcut'
 );
+
+// W3C Web Share Target API Level 2 (POST from Native OS Gallery Share Sheet)
+$router->map(
+  method: 'POST',
+  route: '/share-target',
+  target: 'App\controller\members\ShareTargetController@receive',
+  name: 'pwa_web_share_target'
+);
+
+$router->map(
+  method: 'GET',
+  route: '/api/media/pwa-shared',
+  target: 'App\controller\members\ShareTargetController@getPendingShare',
+  name: 'api_media_pwa_shared'
+);
+
 

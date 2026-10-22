@@ -78,6 +78,35 @@ final class InAppNotificationSyncTest extends SocialFeedTestCase
         $this->assertSame($olderNo, (int)$filtered[1]['no']);
     }
 
+    public function testNotificationByIdExcludesSelfNotifications(): void
+    {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO notification 
+            (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date, created_at)
+            VALUES (?, ?, 'Wally Oguns', 'New update from Wally Oguns', 'Post', 'Wally Oguns posted a new comment', 'new', NOW(), NOW())
+        ");
+        $stmt->execute([$this->authorId, $this->authorId]);
+        $selfDirectNo = (int)$this->pdo->lastInsertId();
+        $this->seededNotifNos[] = $selfDirectNo;
+
+        $stmt->execute([$this->authorId, $this->famCode]);
+        $selfFamNo = (int)$this->pdo->lastInsertId();
+        $this->seededNotifNos[] = $selfFamNo;
+
+        $otherNo = $this->seedNotification($this->authorId, 'External Relative Comment', date('Y-m-d H:i:s'));
+
+        ob_start();
+        $result = NotificationController::notificationById();
+        ob_end_clean();
+
+        $this->assertIsArray($result);
+        $returnedNos = array_map(static fn(mixed $item): int => is_array($item) ? (int)($item['no'] ?? 0) : 0, $result);
+
+        $this->assertNotContains($selfDirectNo, $returnedNos, 'User must not see their own direct notification');
+        $this->assertNotContains($selfFamNo, $returnedNos, 'User must not see their own family-scoped notification');
+        $this->assertContains($otherNo, $returnedNos, 'User must still see notifications from other members');
+    }
+
     public function testSessionReceiverIdsIncludesUserFamiliesApprovedCodes(): void
     {
         $multiFamCode = 'MULTIFAM_' . bin2hex(random_bytes(4));

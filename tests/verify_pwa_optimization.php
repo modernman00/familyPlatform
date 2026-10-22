@@ -182,6 +182,57 @@ runCheck("sw.js & public/sw.js implement 3000ms timeout race and precaches criti
     }
 });
 
+// TEST 7: W3C Web Share Target API Level 2 (Receiving shares from OS gallery)
+runCheck("Web Share Target API Level 2 is fully configured across manifest, SW, and controllers", function() use ($rootDir) {
+    // 1. Manifest must declare share_target with POST and multipart/form-data
+    $manifestPath = $rootDir . '/public/manifest.json';
+    $manifest = json_decode((string)file_get_contents($manifestPath), true);
+    if (!isset($manifest['share_target'])) {
+        throw new \Exception("Manifest missing 'share_target' specification.");
+    }
+    $target = $manifest['share_target'];
+    if ($target['action'] !== '/share-target' || strtoupper($target['method']) !== 'POST') {
+        throw new \Exception("share_target must use action '/share-target' with method 'POST'.");
+    }
+    if (empty($target['params']['files'][0]['accept'])) {
+        throw new \Exception("share_target missing file accept types.");
+    }
+
+    // 2. Service Worker must intercept POST /share-target
+    $swContent = file_get_contents($rootDir . '/public/sw.js');
+    if (!str_contains($swContent, '/share-target') || !str_contains($swContent, 'FP_PWA_ShareTarget_DB')) {
+        throw new \Exception("Service Worker missing Web Share Target interceptor or IndexedDB queue.");
+    }
+
+    // 3. ShareTargetController & router must exist
+    $controllerPath = $rootDir . '/app/controller/members/ShareTargetController.php';
+    if (!file_exists($controllerPath)) {
+        throw new \Exception("ShareTargetController.php not found.");
+    }
+    $routerContent = file_get_contents($rootDir . '/app/router/post.php');
+    if (!str_contains($routerContent, '/share-target')) {
+        throw new \Exception("Router missing POST /share-target route mapping.");
+    }
+});
+
+// TEST 8: Web Share API (Sharing FROM PWA to Social Media)
+runCheck("Web Share API is integrated in feedComponent.js and post-card.blade.php", function() use ($rootDir) {
+    $feedCompPath = $rootDir . '/resources/asset/js/components/profilePage/feedComponent.js';
+    $feedContent = file_get_contents($feedCompPath);
+    if (!str_contains($feedContent, 'sharePostToSocialMedia') || !str_contains($feedContent, 'navigator.share')) {
+        throw new \Exception("feedComponent.js missing sharePostToSocialMedia or navigator.share implementation.");
+    }
+    if (!str_contains($feedContent, 'openSocialShareModal')) {
+        throw new \Exception("feedComponent.js missing openSocialShareModal fallback for desktop/unsupported browsers.");
+    }
+
+    $cardPath = $rootDir . '/resources/views/components/feed/post-card.blade.php';
+    $cardContent = file_get_contents($cardPath);
+    if (!str_contains($cardContent, 'sharePostToSocialMedia(post)')) {
+        throw new \Exception("post-card.blade.php missing Share button trigger.");
+    }
+});
+
 echo "\n=================================================================\n";
 if ($failed === 0) {
     echo "🏆 ALL {$passed} PWA OPTIMIZATION TESTS PASSED CLEANLY!\n";

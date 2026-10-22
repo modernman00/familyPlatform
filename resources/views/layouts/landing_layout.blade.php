@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
-  <meta name="description" content="@yield('meta_description', 'Private family social network and interactive family tree. Safely connect relatives, coordinate private chats, share cherished memories, and build your digital family archive with zero ads.')">
+  <meta name="description" content="@yield('meta_description', 'Private family social network and interactive family tree. Safely connect relatives, coordinate private chats, share cherished memories, and build your digital family archive.')">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Family Platform Team">
   <meta name="language" content="English">

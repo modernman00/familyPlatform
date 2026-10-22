@@ -171,11 +171,24 @@ final class ProfilePage extends ProcessImg
             // $getPost['profileImg'] = Post::getProfilePicsById($getPost['id']);
             // Insert::submitFormDynamic(table: 'post', field: $getPost); // this send the last post id to the JS frontend
 
-            $postMessage = trim($_POST['postMessage'] ?? '');
-            $hasImage = isset($_FILES['post_img']['name'][0]) && !empty($_FILES['post_img']['name'][0]);
+            $rawPostMessage = trim((string)($_POST['postMessage'] ?? ''));
+            $cleanMultiLineMessage = \App\services\LinkPreviewService::sanitizePostMessage($rawPostMessage);
+            $hasDirectImage = isset($_FILES['post_img']['name'][0]) && !empty($_FILES['post_img']['name'][0]);
+            
+            // Collect and validate any staged media from PWA Web Share Target
+            $sharedTempImages = [];
+            if (!empty($_POST['shared_temp_images']) && is_array($_POST['shared_temp_images'])) {
+                foreach ($_POST['shared_temp_images'] as $tempName) {
+                    $cleanName = basename((string)$tempName);
+                    if (preg_match('/^[a-zA-Z0-9_\-\.]+$/', $cleanName)) {
+                        $sharedTempImages[] = $cleanName;
+                    }
+                }
+            }
+            $hasImage = $hasDirectImage || !empty($sharedTempImages);
             $hasPoll = !empty($_POST['poll_question']);
 
-            if (empty($postMessage) && !$hasImage && !$hasPoll) {
+            if (empty($cleanMultiLineMessage) && !$hasImage && !$hasPoll) {
                 throw new \Src\Exceptions\ValidationException("Please add some text, an image, or a poll to your post.");
             }
 
@@ -201,6 +214,46 @@ final class ProfilePage extends ProcessImg
     
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
+
+                // Preserve multi-line captions and full URLs without being squashed by checkInput
+                if ($cleanMultiLineMessage !== '') {
+                    (new \Src\Update('post'))->updateTable(
+                        column: 'postMessage',
+                        columnAnswer: $cleanMultiLineMessage,
+                        identifier: 'post_no',
+                        identifierAnswer: $result
+                    );
+                }
+
+                // Promote staged media from PWA Web Share Target into persistent storage
+                if (!empty($sharedTempImages)) {
+                    $tempBaseDir = realpath(__DIR__ . '/../../../resources/images/post') . '/temp';
+                    $postBaseDir = realpath(__DIR__ . '/../../../resources/images/post');
+                    $imgIndex = 0;
+                    foreach ($sharedTempImages as $tempFile) {
+                        if ($imgIndex >= 6) {
+                            break;
+                        }
+                        $srcPath = rtrim($tempBaseDir, '/') . '/' . $tempFile;
+                        $destPath = rtrim($postBaseDir, '/') . '/' . $tempFile;
+                        if (file_exists($srcPath)) {
+                            if (rename($srcPath, $destPath) || copy($srcPath, $destPath)) {
+                                @unlink($srcPath);
+                                (new \Src\Update('post'))->updateTable(
+                                    column: 'post_img' . $imgIndex,
+                                    columnAnswer: $tempFile,
+                                    identifier: 'post_no',
+                                    identifierAnswer: $result
+                                );
+                                $imgIndex++;
+                            }
+                        }
+                    }
+                    unset($_SESSION['pwa_shared_target']);
+                }
+
+                // Warm up link preview cache if a URL is present
+                \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
 
                 // Handle Poll Data
                 $pollQuestion = isset($_POST['poll_question']) ? htmlspecialchars(trim($_POST['poll_question']), ENT_QUOTES, 'UTF-8') : null;
@@ -241,7 +294,7 @@ final class ProfilePage extends ProcessImg
                         'post',
                         (string)$result,
                         $authorIdStr,
-                        (string)$postMessage
+                        (string)$cleanMultiLineMessage
                     );
                 } catch (\Throwable $th) {
                     error_log('[ProfilePage::post hashtags] ' . $th->getMessage());
@@ -258,6 +311,11 @@ final class ProfilePage extends ProcessImg
                     'date_updated',
                     'date_deleted'
                 ]));
+
+                // Attach hydrated link preview for immediate feed presentation
+                if (is_array($newPost)) {
+                    $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                }
 
                 msgSuccess(200, $newPost ?: $result);
             }
