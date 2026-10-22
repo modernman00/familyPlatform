@@ -69,7 +69,7 @@ echo "✅ Deploy lock acquired."
 SANDBOX=$(mktemp -d "/tmp/${APP_NAME}_deploy_XXXXXX")
 
 echo -e "\n📦 [2/5] Preparing existing assets for deployment..."
-for item in app bootstrap public resources vendor composer.json composer.lock index.php offline.html .htaccess; do
+for item in app bootstrap cron migrations public resources vendor composer.json composer.lock index.php offline.html .htaccess; do
     if [ -e "$item" ]; then
         cp -R "$item" "$SANDBOX/" 2>/dev/null || true
     fi
