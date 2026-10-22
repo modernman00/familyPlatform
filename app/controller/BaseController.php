@@ -302,14 +302,15 @@ class BaseController
      */
     public static function sessionSharesFamily(string $famCode): bool
     {
-        $famCode = trim($famCode);
-        if ($famCode === '') {
+        $normalize = static fn(string $c): string => strtoupper(ltrim(trim($c), '#'));
+        $normFamCode = $normalize($famCode);
+        if ($normFamCode === '') {
             return false;
         }
 
         $sessionCodes = [];
         if (!empty($_SESSION['famCode']) && is_string($_SESSION['famCode'])) {
-            $sessionCodes[] = trim($_SESSION['famCode']);
+            $sessionCodes[] = $normalize($_SESSION['famCode']);
         }
         $many = $_SESSION['famCodes'] ?? [];
         if (is_string($many)) {
@@ -318,11 +319,11 @@ class BaseController
         if (is_array($many)) {
             foreach ($many as $fc) {
                 if (is_string($fc) && trim($fc) !== '') {
-                    $sessionCodes[] = trim($fc);
+                    $sessionCodes[] = $normalize($fc);
                 }
             }
         }
-        if (in_array($famCode, $sessionCodes, true)) {
+        if (in_array($normFamCode, $sessionCodes, true)) {
             return true;
         }
 
@@ -333,10 +334,19 @@ class BaseController
 
         try {
             $stmt = Db::connect2()->prepare(
-                "SELECT 1 FROM user_families WHERE user_id = ? AND family_code = ? LIMIT 1"
+                "SELECT 1 FROM user_families WHERE user_id = ? AND UPPER(TRIM(REPLACE(family_code, '#', ''))) = ? LIMIT 1"
             );
-            $stmt->execute([$sessionId, $famCode]);
-            return (bool) $stmt->fetchColumn();
+            $stmt->execute([$sessionId, $normFamCode]);
+            if ((bool) $stmt->fetchColumn()) {
+                return true;
+            }
+
+            // Fallback to personal table
+            $stmtPersonal = Db::connect2()->prepare(
+                "SELECT 1 FROM personal WHERE id = ? AND UPPER(TRIM(REPLACE(famCode, '#', ''))) = ? LIMIT 1"
+            );
+            $stmtPersonal->execute([$sessionId, $normFamCode]);
+            return (bool) $stmtPersonal->fetchColumn();
         } catch (\Throwable $e) {
             error_log('sessionSharesFamily check failed: ' . $e->getMessage());
             return false;

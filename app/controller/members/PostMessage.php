@@ -8,6 +8,7 @@ use App\classes\{PushNotificationClass, Pusher, VideoParser};
 use App\model\{
     Post,
     AllMembersData,
+    PollData,
 };
 
 use Src\functionality\SendEmailFunctionality as SendMail;
@@ -550,7 +551,15 @@ final class PostMessage
                 // author's own display name. Not SQL - it only flows into
                 // PushNotificationClass::sendPushNotification (a WebPush JSON
                 // payload). Semgrep's tainted-sql-string rule mis-attributes it.
-                $pushVerb = !empty($videoData) ? 'shared a video' : 'posted a new update';
+                $pollItems = PollData::getPollsForPosts([(int)$postNo], '');
+                $isPoll = !empty($pollItems[(int)$postNo]);
+                if ($isPoll) {
+                    $pushVerb = 'posted a new poll';
+                } elseif (!empty($videoData)) {
+                    $pushVerb = 'shared a video';
+                } else {
+                    $pushVerb = 'posted a new update';
+                }
                 $pushMsg = $postOriginName . ' ' . $pushVerb; // nosemgrep: php.lang.security.injection.tainted-sql-string.tainted-sql-string
 
                 self::notifyMembersByPushNotification(

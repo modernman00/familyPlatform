@@ -27,11 +27,14 @@ export const handlePollVote = async (optionId, postNo = '') => {
         const formData = new FormData()
         formData.append('option_id', optionId)
         if (postNo) formData.append('post_no', postNo)
-        formData.append('token', token)
+        if (token) formData.append('token', token)
 
-        const response = await fetch('/api/engagement/vote', {
+        const response = await fetch('/api/poll/vote', {
             method: 'POST',
-            headers: { 'X-XSRF-TOKEN': token },
+            headers: {
+                ...(token ? { 'X-XSRF-TOKEN': token } : {}),
+                'X-Requested-With': 'XMLHttpRequest',
+            },
             body: formData
         })
         const data = await response.json()

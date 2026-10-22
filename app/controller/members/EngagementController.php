@@ -104,9 +104,9 @@ class EngagementController
 
             $optionId = (int) ($input['option_id'] ?? 0);
             $postNo = (int) ($input['post_no'] ?? 0);
-            $userId = $_SESSION['id'] ?? null;
+            $userId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
 
-            if (!$userId) {
+            if ($userId === '') {
                 http_response_code(401);
                 echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
                 return;
@@ -121,7 +121,8 @@ class EngagementController
             // IDOR guard: resolve the poll's post (client-supplied post_no is only
             // a hint) and confirm it's in one of the caller's families.
             $resolvedPost = self::postForOption($optionId);
-            if ($resolvedPost <= 0 || !self::postInSessionFamily($resolvedPost)) {
+            $targetPost = ($resolvedPost > 0) ? $resolvedPost : $postNo;
+            if ($targetPost <= 0 || !self::postInSessionFamily($targetPost)) {
                 http_response_code(403);
                 echo json_encode(['status' => 'error', 'message' => 'Not allowed']);
                 return;
@@ -130,11 +131,12 @@ class EngagementController
             // Cast the vote
             PollData::castVote($optionId, $userId);
 
-            // Return updated poll data if post_no is provided, so the frontend can refresh it
+            // Return updated poll data so the frontend can refresh it authoritatively
+            $pollPostNo = ($postNo > 0) ? $postNo : $targetPost;
             $pollData = null;
-            if ($postNo > 0) {
-                $polls = PollData::getPollsForPosts([$postNo], $userId);
-                $pollData = $polls[$postNo] ?? null;
+            if ($pollPostNo > 0) {
+                $polls = PollData::getPollsForPosts([$pollPostNo], $userId);
+                $pollData = $polls[$pollPostNo] ?? null;
             }
 
             http_response_code(200);

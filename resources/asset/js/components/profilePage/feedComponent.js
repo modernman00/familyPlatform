@@ -785,6 +785,14 @@ export function profileFeed(opts = {}) {
         },
 
 
+        isOptionVoted(post, optionId) {
+            if (!post?.poll?.user_voted_option_id) return false;
+            const list = Array.isArray(post.poll.user_voted_option_id)
+                ? post.poll.user_voted_option_id
+                : [post.poll.user_voted_option_id];
+            return list.some(v => String(v) === String(optionId));
+        },
+
         async votePoll(postNo, optionId) {
             const post = this.posts.find(p => String(p.post_no) === String(postNo));
             if (!post?.poll || !Array.isArray(post.poll.options)) return;
@@ -795,7 +803,7 @@ export function profileFeed(opts = {}) {
             // ── Optimistic update ──────────────────────────────────────────
             const voted = Array.isArray(post.poll.user_voted_option_id)
                 ? [...post.poll.user_voted_option_id]
-                : [];
+                : (post.poll.user_voted_option_id ? [post.poll.user_voted_option_id] : []);
             const already = voted.some(v => String(v) === String(optionId));
 
             post.poll.options = post.poll.options.map(opt => {
@@ -819,12 +827,19 @@ export function profileFeed(opts = {}) {
 
             // ── Persist ────────────────────────────────────────────────────
             try {
+                const token = getCsrfToken();
                 const formData = new FormData();
                 formData.append('post_no', postNo);
                 formData.append('option_id', optionId);
+                if (token) {
+                    formData.append('token', token);
+                }
 
                 const response = await axios.post('/api/poll/vote', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                    headers: {
+                        ...(token ? { 'X-XSRF-TOKEN': token } : {}),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
                 });
 
                 // Prefer authoritative server state when returned

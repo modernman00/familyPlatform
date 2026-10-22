@@ -11,8 +11,12 @@ export const renderPoll = (poll) => {
         <div class="poll-options">`;
         
     poll.options.forEach(opt => {
-        // Multi-select is supported on backend. user_voted_option_id is an array now
-        const isVoted = poll.user_voted_option_id && Array.isArray(poll.user_voted_option_id) && poll.user_voted_option_id.includes(opt.option_id);
+        // Multi-select is supported on backend. user_voted_option_id is an array or string/number
+        const isVoted = poll.user_voted_option_id && (
+            Array.isArray(poll.user_voted_option_id)
+                ? poll.user_voted_option_id.some(v => String(v) === String(opt.option_id))
+                : String(poll.user_voted_option_id) === String(opt.option_id)
+        );
         const percentage = opt?.percentage || 0;
         const barWidth = percentage + '%';
         const bgClass = isVoted ? 'bg-primary' : 'bg-secondary';

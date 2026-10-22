@@ -90,48 +90,60 @@ class PollData extends Db {
         ");
         $stmtOpt->execute($pollIds);
         $options = $stmtOpt->fetchAll();
+
+        foreach ($options as &$optRow) {
+            $optRow['option_id'] = (int) $optRow['option_id'];
+            $optRow['poll_id'] = (int) $optRow['poll_id'];
+            $optRow['vote_count'] = (int) $optRow['vote_count'];
+        }
+        unset($optRow);
         
         // Get User's Votes for these polls
-        $params = $pollIds;
-        array_unshift($params, $userId);
-        
-        $stmtVotes = $db->prepare("
-            SELECT o.poll_id, v.option_id 
-            FROM post_poll_votes v
-            JOIN post_poll_options o ON v.option_id = o.option_id
-            WHERE v.user_id = ? AND o.poll_id IN ($pollPlaceholders)
-        ");
-        $stmtVotes->execute($params);
-        $userVotesRaw = $stmtVotes->fetchAll();
         $userVotes = [];
-        foreach ($userVotesRaw as $uv) {
-            if (!isset($userVotes[$uv['poll_id']])) {
-                $userVotes[$uv['poll_id']] = [];
+        if ($userId !== '') {
+            $params = $pollIds;
+            array_unshift($params, $userId);
+            
+            $stmtVotes = $db->prepare("
+                SELECT o.poll_id, v.option_id 
+                FROM post_poll_votes v
+                JOIN post_poll_options o ON v.option_id = o.option_id
+                WHERE v.user_id = ? AND o.poll_id IN ($pollPlaceholders)
+            ");
+            $stmtVotes->execute($params);
+            $userVotesRaw = $stmtVotes->fetchAll();
+            foreach ($userVotesRaw as $uv) {
+                $pId = (int) $uv['poll_id'];
+                if (!isset($userVotes[$pId])) {
+                    $userVotes[$pId] = [];
+                }
+                $userVotes[$pId][] = (int) $uv['option_id'];
             }
-            $userVotes[$uv['poll_id']][] = $uv['option_id'];
         }
         
         // Format Result
         $result = [];
         foreach ($polls as $poll) {
-            $pId = $poll['poll_id'];
-            $poll['options'] = array_filter($options, function($o) use ($pId) {
-                return $o['poll_id'] == $pId;
-            });
-            $poll['options'] = array_values($poll['options']);
+            $pId = (int) $poll['poll_id'];
+            $poll['poll_id'] = $pId;
+            $poll['post_no'] = (int) $poll['post_no'];
+            $poll['options'] = array_values(array_filter($options, function($o) use ($pId) {
+                return (int) $o['poll_id'] === $pId;
+            }));
             
             // Calc total votes for percentage
             $totalVotes = array_reduce($poll['options'], function($carry, $item) {
-                return $carry + $item['vote_count'];
+                return $carry + (int) $item['vote_count'];
             }, 0);
             $poll['total_votes'] = $totalVotes;
             
             // Calculate percentage
             foreach ($poll['options'] as &$opt) {
-                $opt['percentage'] = $totalVotes > 0 ? round(($opt['vote_count'] / $totalVotes) * 100) : 0;
+                $opt['percentage'] = $totalVotes > 0 ? (int) round(($opt['vote_count'] / $totalVotes) * 100) : 0;
             }
+            unset($opt);
             
-            $poll['user_voted_option_id'] = $userVotes[$pId] ?? null;
+            $poll['user_voted_option_id'] = $userVotes[$pId] ?? [];
             
             $result[$poll['post_no']] = $poll;
         }

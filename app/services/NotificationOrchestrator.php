@@ -26,6 +26,7 @@ final class NotificationOrchestrator
      * @param string $tag
      * @param string|null $familyCode
      * @param array<string, mixed>|null $metadata
+     * @param string|null $scheduledAt Optional future release timestamp
      * @return string
      */
     public static function dispatch(
@@ -37,8 +38,18 @@ final class NotificationOrchestrator
         string $actionUrl = '/profilePage',
         string $tag = 'general',
         ?string $familyCode = null,
-        ?array $metadata = null
+        ?array $metadata = null,
+        ?string $scheduledAt = null
     ): string {
+        $effectiveScheduledAt = $scheduledAt ?? (is_array($metadata) && isset($metadata['scheduled_at']) && is_string($metadata['scheduled_at']) ? $metadata['scheduled_at'] : null);
+        $isScheduled = false;
+        if ($effectiveScheduledAt !== null && trim($effectiveScheduledAt) !== '') {
+            $parsed = strtotime($effectiveScheduledAt);
+            if ($parsed !== false && $parsed > time()) {
+                $isScheduled = true;
+            }
+        }
+
         $notifId = CentralOrchestrator::dispatch(
             userId: $userId,
             category: $category,
@@ -48,8 +59,14 @@ final class NotificationOrchestrator
             actionUrl: $actionUrl,
             tag: $tag,
             scopeCode: $familyCode,
-            metadata: $metadata
+            metadata: $metadata,
+            scheduledAt: $scheduledAt
         );
+
+        // If scheduled for future release, do NOT insert into bell/dropdown feed yet
+        if ($isScheduled) {
+            return $notifId;
+        }
 
         // Guarantee durable in-app notification row for the bell & dropdown feed
         try {
@@ -109,5 +126,15 @@ final class NotificationOrchestrator
     public static function updatePresence(string $userId, string $channelName, bool $isActive): void
     {
         CentralOrchestrator::updatePresence($userId, $channelName, $isActive);
+    }
+
+    public static function processScheduled(int $limit = 50): int
+    {
+        return CentralOrchestrator::processScheduled($limit);
+    }
+
+    public static function recordTelemetry(string $notificationId, string $event, ?array $clientMeta = null): bool
+    {
+        return CentralOrchestrator::recordTelemetry($notificationId, $event, $clientMeta);
     }
 }

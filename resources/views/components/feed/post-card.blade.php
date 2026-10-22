@@ -245,12 +245,12 @@
           <div class="poll-option mb-2 position-relative">
             <button type="button" @click="votePoll(post.post_no, opt.option_id)" 
                     class="poll-option-btn w-100 text-start btn position-relative overflow-hidden" 
-                    :class="(post.poll.user_voted_option_id && post.poll.user_voted_option_id.includes(opt.option_id)) ? 'btn-outline-primary' : 'btn-outline-secondary'"
+                    :class="isOptionVoted(post, opt.option_id) ? 'btn-outline-primary' : 'btn-outline-secondary'"
                     style="z-index: 1; font-size: 0.85rem; padding: 8px 12px;">
               <span class="position-relative" style="z-index: 2;" x-text="opt.option_text"></span>
               <span class="float-end position-relative fw-bold" style="z-index: 2;" x-text="(opt.percentage || 0) + '%'"></span>
               <div class="position-absolute top-0 start-0 h-100" 
-                   :class="(post.poll.user_voted_option_id && post.poll.user_voted_option_id.includes(opt.option_id)) ? 'bg-primary' : 'bg-secondary'" 
+                   :class="isOptionVoted(post, opt.option_id) ? 'bg-primary' : 'bg-secondary'" 
                    :style="'width: ' + (opt.percentage || 0) + '%; opacity: 0.15; transition: width 0.5s ease; z-index: 0;'"></div>
             </button>
           </div>

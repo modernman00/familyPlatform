@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\services;
 
+use App\model\AllMembersData;
 use App\model\PollData;
 use App\model\Post;
+use App\controller\members\PostMessage;
+use App\services\NotificationOrchestrator;
 use Src\Db;
 use PDO;
 
@@ -60,7 +63,7 @@ final class FamilyTriviaService
 
         // 1. Fetch family nodes to formulate ground-truth questions
         $stmt = $db->prepare(
-            'SELECT id, first_name, last_name, maiden_name, gender, birth_date, birth_year, birth_place, generation_level
+            'SELECT id, user_id, first_name, last_name, maiden_name, gender, birth_date, birth_year, birth_place, generation_level
              FROM family_nodes
              WHERE family_code = ?
              ORDER BY generation_level ASC, id ASC'
@@ -98,12 +101,131 @@ final class FamilyTriviaService
         // Explicitly update status as published
         Post::updatePostByStatusAsPublished($postNo);
 
+        // 4. Resolve featured member user_id if not directly on the family_node
+        if (empty($triviaData['featured_user_id']) && !empty($triviaData['featured_first_name']) && !empty($triviaData['featured_last_name'])) {
+            $normFam = strtoupper(trim(str_replace('#', '', $familyCode)));
+            $uStmt = $db->prepare("
+                SELECT id FROM personal 
+                WHERE LOWER(firstName) = LOWER(?) 
+                  AND LOWER(lastName) = LOWER(?) 
+                  AND UPPER(TRIM(REPLACE(famCode, '#', ''))) = ? 
+                LIMIT 1
+            ");
+            $uStmt->execute([$triviaData['featured_first_name'], $triviaData['featured_last_name'], $normFam]);
+            $uid = $uStmt->fetchColumn();
+            if ($uid) {
+                $triviaData['featured_user_id'] = (string)$uid;
+            }
+        }
+
+        // 5. Tag featured member in post_tags
+        if (!empty($triviaData['featured_user_id'])) {
+            try {
+                $tagStmt = $db->prepare("INSERT IGNORE INTO post_tags (post_no, user_id, tagged_by, created_at) VALUES (?, ?, ?, NOW())");
+                $tagStmt->execute([$postNo, $triviaData['featured_user_id'], $authorId]);
+            } catch (\Throwable $e) {
+                error_log('[FamilyTriviaService] post_tags tag insert failed: ' . $e->getMessage());
+            }
+        }
+
+        // 6. Notify the featured member & the family network across all channels
+        self::notifyFamilyOfTriviaPost($familyCode, $postNo, $triviaData, $authorId);
+
         return [
-            'post_no'  => $postNo,
-            'question' => $triviaData['question'],
-            'options'  => $triviaData['options'],
-            'category' => $triviaData['category'],
+            'post_no'          => $postNo,
+            'question'         => $triviaData['question'],
+            'options'          => $triviaData['options'],
+            'category'         => $triviaData['category'],
+            'featured_user_id' => $triviaData['featured_user_id'] ?? null,
+            'featured_name'    => $triviaData['featured_name'] ?? null,
         ];
+    }
+
+    /**
+     * Dispatch multi-channel notifications (In-App, WebPush, Email, Realtime Pusher)
+     * for newly published family trivia.
+     *
+     * @param string $familyCode
+     * @param int $postNo
+     * @param array{
+     *     question: string,
+     *     options: array<int, string>,
+     *     category: string,
+     *     featured_user_id?: string|null,
+     *     featured_name?: string|null
+     * } $triviaData
+     * @param string $authorId
+     */
+    private static function notifyFamilyOfTriviaPost(
+        string $familyCode,
+        int $postNo,
+        array $triviaData,
+        string $authorId
+    ): void {
+        $cleanFam = strtoupper(trim(str_replace('#', '', $familyCode)));
+        $featuredUid = !empty($triviaData['featured_user_id']) ? (string)$triviaData['featured_user_id'] : '';
+        $postUrl = '/profilePage#post' . $postNo;
+
+        // 1. Featured Member Spotlight Notification (In-App & OS WebPush)
+        if ($featuredUid !== '') {
+            try {
+                NotificationOrchestrator::dispatch(
+                    userId: $featuredUid,
+                    category: 'trivia',
+                    priority: 'high',
+                    title: "🌟 You are featured in this week's Family Trivia Challenge!",
+                    body: "{$triviaData['question']} See who in the family knows you best! Cast your vote and join the debate.",
+                    actionUrl: $postUrl,
+                    tag: "trivia-featured-{$postNo}",
+                    familyCode: $cleanFam,
+                    metadata: [
+                        'sender_id' => $authorId,
+                        'sender_name' => 'FamilyPlatform Heritage',
+                        'post_no' => $postNo,
+                        'featured' => true,
+                    ]
+                );
+            } catch (\Throwable $e) {
+                error_log('[FamilyTriviaService] Featured member notification failed: ' . $e->getMessage());
+            }
+        }
+
+        // 2. Family Network Multi-Channel Notification (In-App & OS WebPush)
+        try {
+            $familyMembers = AllMembersData::AllMembersEmailByFamCode($familyCode, $authorId);
+            foreach ($familyMembers as $member) {
+                $targetUid = is_scalar($member['id'] ?? null) ? (string)$member['id'] : '';
+                if ($targetUid === '' || ($featuredUid !== '' && $targetUid === $featuredUid)) {
+                    continue;
+                }
+
+                NotificationOrchestrator::dispatch(
+                    userId: $targetUid,
+                    category: 'trivia',
+                    priority: 'medium',
+                    title: "🧠 Weekly Family Trivia Challenge!",
+                    body: "{$triviaData['question']} Cast your vote below and debate in the comments!",
+                    actionUrl: $postUrl,
+                    tag: "trivia-post-{$postNo}",
+                    familyCode: $cleanFam,
+                    metadata: [
+                        'sender_id' => $authorId,
+                        'sender_name' => 'FamilyPlatform Heritage',
+                        'post_no' => $postNo,
+                    ]
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[FamilyTriviaService] Family network notification failed: ' . $e->getMessage());
+        }
+
+        // 3. Realtime Pusher Feed Broadcast & Email Dispatch
+        try {
+            PostMessage::getNewPostPusher($postNo);
+            PostMessage::getNewPostAndEmail($postNo);
+        } catch (\Throwable $e) {
+            error_log('[FamilyTriviaService] Pusher/Email dispatch failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -111,7 +233,16 @@ final class FamilyTriviaService
      *
      * @param string $familyCode
      * @param array<int, array<string, mixed>> $nodes
-     * @return array{question: string, options: array<int, string>, category: string}
+     * @return array{
+     *     question: string,
+     *     options: array<int, string>,
+     *     category: string,
+     *     featured_node_id?: int,
+     *     featured_user_id?: string|null,
+     *     featured_first_name?: string,
+     *     featured_last_name?: string,
+     *     featured_name?: string
+     * }
      */
     private static function synthesizeTriviaQuestion(string $familyCode, array $nodes): array
     {
@@ -140,9 +271,14 @@ final class FamilyTriviaService
                 shuffle($options);
 
                 return [
-                    'question' => "In which decade was {$relName} born?",
-                    'options'  => array_values(array_unique($options)),
-                    'category' => 'ancestral_decade',
+                    'question'            => "In which decade was {$relName} born?",
+                    'options'             => array_values(array_unique($options)),
+                    'category'            => 'ancestral_decade',
+                    'featured_node_id'    => (int)($node['id'] ?? 0),
+                    'featured_user_id'    => !empty($node['user_id']) ? (string)$node['user_id'] : null,
+                    'featured_first_name' => (string)($node['first_name'] ?? ''),
+                    'featured_last_name'  => (string)($node['last_name'] ?? ''),
+                    'featured_name'       => $relName,
                 ];
             }
         }
@@ -157,9 +293,14 @@ final class FamilyTriviaService
                 shuffle($options);
 
                 return [
-                    'question' => "Where was {$relName}'s ancestral birthplace recorded?",
-                    'options'  => $options,
-                    'category' => 'ancestral_place',
+                    'question'            => "Where was {$relName}'s ancestral birthplace recorded?",
+                    'options'             => $options,
+                    'category'            => 'ancestral_place',
+                    'featured_node_id'    => (int)($node['id'] ?? 0),
+                    'featured_user_id'    => !empty($node['user_id']) ? (string)$node['user_id'] : null,
+                    'featured_first_name' => (string)($node['first_name'] ?? ''),
+                    'featured_last_name'  => (string)($node['last_name'] ?? ''),
+                    'featured_name'       => $relName,
                 ];
             }
         }
