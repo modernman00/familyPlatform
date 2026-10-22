@@ -11,10 +11,11 @@ class ReviewAppsData extends InnerJoin
 	public function index()
 	{
 		try {
-			$table = ['personal',  'contact', 'otherFamily', 'work'];
-		return $this->joinParam(firstTable: 'account', para: 'id', paraWhere: 'status', table : $table, bind : "new" );
+			$table = ['account', 'personal', 'contact', 'otherFamily', 'work'];
+			return $this->joinParam(para: 'id', paraWhere: 'status', table: $table, bind: "new");
 		} catch (\Throwable $th) {
 			showError($th);
+			return false;
 		}	
 	}
 
@@ -23,10 +24,11 @@ class ReviewAppsData extends InnerJoin
 	 */
 	public function getWithId(string | int $id) {
 		try {
-			$table = ['personal',  'contact', 'otherFamily', 'work'];
-		return $this->joinParam(firstTable: 'account', para: 'id', paraWhere: 'id', table : $table, bind : $id );
+			$table = ['account', 'personal', 'contact', 'otherFamily', 'work'];
+			return $this->joinParam(para: 'id', paraWhere: 'id', table: $table, bind: $id);
 		} catch (\Throwable $th) {
 			showError($th);
+			return false;
 		}	
 	}
 }

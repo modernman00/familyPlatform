@@ -21,6 +21,7 @@ $router->map('POST', '/member/organogram/node/voice-capsule', 'App\controller\me
 $router->map('POST', '/member/organogram/node/delete-voice-capsule', 'App\controller\members\OrganogramEditorController@deleteVoiceCapsule', 'MEMBER_ORGANOGRAM_DELETE_VOICE_CAPSULE');
 $router->map('POST', '/api/claim-family-node', 'App\controller\members\Organogram@claimNode', 'API_CLAIM_FAMILY_NODE');
 $router->map('POST', '/api/dismiss-claim-node', 'App\controller\members\Organogram@dismissClaimNode', 'API_DISMISS_CLAIM_NODE');
+$router->map('POST', '/api/family-tree/prompt-build', 'App\controller\members\Organogram@promptBuildTree', 'API_FAMILY_TREE_PROMPT_BUILD');
 $router->map('GET', '/member/organogram/export-poster/[*:id]', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER');
 $router->map('GET', '/member/organogram/export-poster', 'App\controller\members\Organogram@exportDynastyPoster', 'MEMBER_ORGANOGRAM_EXPORT_POSTER_DEFAULT');
 

@@ -849,12 +849,15 @@
                     <p class="text-white-50 mb-4" style="max-width: 500px;">
                         This member has not built their personal family tree or added relatives yet. Once they connect their relatives, their family tree will be displayed here.
                     </p>
-                    <div class="d-flex gap-3">
-                        <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold" style="border-radius: 50px;">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Directory
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
+                        <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                            <i class="bi bi-arrow-left me-2"></i> Back to Directory
                         </a>
-                        <a href="/allMembers/seeProfile/${encodeURIComponent(window.__ROOT_USER_ID__)}" class="btn btn-primary px-4 py-2 fw-bold" style="border-radius: 50px;">
-                            <i class="bi bi-person-badge me-1"></i> View Profile
+                        <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm" id="btnPromptBuildTree" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" onclick="window.promptMemberToBuildTree()">
+                            <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${memberName.split(' ')[0] || 'Them'} to Build Tree
+                        </button>
+                        <a href="/allMembers/seeProfile/${encodeURIComponent(window.__ROOT_USER_ID__)}" class="btn btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
+                            <i class="bi bi-person-badge me-2"></i> View Profile
                         </a>
                     </div>
                 </div>
@@ -865,6 +868,127 @@
             if (pedigreeEl) pedigreeEl.innerHTML = emptyTreeHtml;
             return;
         }
+
+        // Global helper: Prompt member to build their family tree
+        window.promptMemberToBuildTree = function() {
+            const memberName = window.__VIEWED_MEMBER_NAME__ || 'This Member';
+            const firstName = memberName.split(' ')[0] || memberName;
+            const targetUserId = window.__ROOT_USER_ID__;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ $_SESSION['token'] ?? '' }}';
+
+            function escapeHtmlText(str) {
+                return String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+            }
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: `Prompt ${escapeHtmlText(firstName)} to Build Tree`,
+                    html: `
+                        <p class="text-muted small mb-3">
+                            Send a warm reminder to <strong>${escapeHtmlText(memberName)}</strong> letting them know family members are waiting to explore their branch of the family tree!
+                        </p>
+                        <div class="text-start mb-2">
+                            <label class="form-label small fw-semibold text-secondary" for="swal-prompt-note">Add an optional message:</label>
+                            <textarea id="swal-prompt-note" class="form-control" rows="3" maxlength="300" placeholder="e.g. Hello ${escapeHtmlText(firstName)}, I was exploring our family platform and would love to see your branch connected!"></textarea>
+                        </div>
+                    `,
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Send Prompt',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#6c757d',
+                    showLoaderOnConfirm: true,
+                    preConfirm: async () => {
+                        const note = document.getElementById('swal-prompt-note')?.value?.trim() || '';
+                        try {
+                            const response = await fetch('/api/family-tree/prompt-build', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'X-XSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify({
+                                    target_user_id: targetUserId,
+                                    note: note,
+                                    token: csrfToken
+                                })
+                            });
+                            const resData = await response.json();
+                            if (!response.ok || !resData.success) {
+                                throw new Error(resData.message || resData.error || 'Failed to send prompt.');
+                            }
+                            return resData;
+                        } catch (err) {
+                            Swal.showValidationMessage(err.message || 'Unable to send prompt. Please try again.');
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        Swal.fire({
+                            title: 'Prompt Sent! 🌟',
+                            text: result.value.message || `We have sent a reminder to ${firstName} to build their family tree.`,
+                            icon: 'success',
+                            confirmButtonColor: '#10b981'
+                        });
+                        const promptBtn = document.getElementById('btnPromptBuildTree');
+                        if (promptBtn) {
+                            promptBtn.classList.remove('btn-warning', 'text-dark');
+                            promptBtn.classList.add('btn-secondary', 'text-white');
+                            promptBtn.disabled = true;
+                            promptBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i> Prompt Sent';
+                        }
+                    }
+                });
+            } else {
+                const note = prompt(`Send a reminder to ${firstName} to build their family tree:\n(Optional note)`);
+                if (note === null) return;
+                const promptBtn = document.getElementById('btnPromptBuildTree');
+                if (promptBtn) {
+                    promptBtn.disabled = true;
+                    promptBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Sending...';
+                }
+                fetch('/api/family-tree/prompt-build', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-XSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify({
+                        target_user_id: targetUserId,
+                        note: note,
+                        token: csrfToken
+                    })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        alert(res.message || 'Prompt sent successfully!');
+                        if (promptBtn) {
+                            promptBtn.classList.remove('btn-warning', 'text-dark');
+                            promptBtn.classList.add('btn-secondary', 'text-white');
+                            promptBtn.innerHTML = '<i class="bi bi-check2-circle me-2"></i> Prompt Sent';
+                        }
+                    } else {
+                        alert(res.message || res.error || 'Failed to send prompt.');
+                        if (promptBtn) {
+                            promptBtn.disabled = false;
+                            promptBtn.innerHTML = `<i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${firstName} to Build Tree`;
+                        }
+                    }
+                })
+                .catch(() => {
+                    alert('Network error. Please try again.');
+                    if (promptBtn) {
+                        promptBtn.disabled = false;
+                        promptBtn.innerHTML = `<i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${firstName} to Build Tree`;
+                    }
+                });
+            }
+        };
 
         if (familyTreeNodes.length > 0) {
             /* --------------------------------------------------------------

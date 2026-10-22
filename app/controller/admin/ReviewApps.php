@@ -29,7 +29,7 @@ final class ReviewApps extends ReviewAppsData
     public function get(): void
     {
         $result = $this->index();
-        BaseController::viewWithCsp('admin/ReviewApps', ['result' => $result, 'no' => 1]);
+        BaseController::viewWithCsp('admin/reviewApps', ['result' => $result, 'no' => 1]);
     }
 
     // once the $GET IS clicked, use this to get the customers data and set customers id as well

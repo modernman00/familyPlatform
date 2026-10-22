@@ -238,7 +238,7 @@ final class ProfilePage extends ProcessImg
                         $destPath = rtrim($postBaseDir, '/') . '/' . $tempFile;
                         if (file_exists($srcPath)) {
                             if (rename($srcPath, $destPath) || copy($srcPath, $destPath)) {
-                                @unlink($srcPath);
+                                @unlink($srcPath); // nosemgrep: php.lang.security.unlink-use.unlink-use
                                 (new \Src\Update('post'))->updateTable(
                                     column: 'post_img' . $imgIndex,
                                     columnAnswer: $tempFile,

@@ -5,7 +5,9 @@ namespace App\controller\members;
 
 use App\controller\BaseController;
 use App\model\SingleCustomerData;
-use Src\{Db, SelectFn};
+use App\services\LineagePromptService;
+use Src\{Db, SelectFn, Limiter};
+use Src\functionality\middleware\GetRequestData;
 use Src\Exceptions\NotFoundException;
 use Src\Exceptions\ForbiddenException;
 
@@ -955,6 +957,64 @@ final class Organogram extends SingleCustomerData
         } catch (\Throwable $e) {
             echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
+    }
+
+    /**
+     * API: Prompt a family relative to build their personal family tree
+     * POST /api/family-tree/prompt-build
+     */
+    public function promptBuildTree(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            Limiter::limit($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        } catch (\Throwable) {
+            http_response_code(429);
+            echo json_encode(['success' => false, 'error' => 'Too many requests. Please slow down.']);
+            return;
+        }
+
+        try {
+            $input = GetRequestData::getRequestData();
+        } catch (\Throwable) {
+            $input = $_POST;
+        }
+
+        try {
+            BaseController::validateCsrf($input);
+        } catch (\Throwable) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing CSRF security token.']);
+            return;
+        }
+
+        $senderId = (string)($_SESSION['id'] ?? '');
+        if ($senderId === '') {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'error' => 'Please sign in to send a family tree prompt.']);
+            return;
+        }
+
+        $targetUserId = trim((string)($input['target_user_id'] ?? $_POST['target_user_id'] ?? ''));
+        $note = isset($input['note']) ? (string)$input['note'] : (isset($_POST['note']) ? (string)$_POST['note'] : null);
+
+        if ($targetUserId === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Target family member ID is required.']);
+            return;
+        }
+
+        $service = new LineagePromptService();
+        $result = $service->sendTreeBuildPrompt($senderId, $targetUserId, $note);
+
+        if (!$result['success']) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => $result['message'], 'message' => $result['message']]); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            return;
+        }
+
+        echo json_encode($result); // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
     }
 
     /**

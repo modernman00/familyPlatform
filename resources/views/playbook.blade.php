@@ -518,12 +518,12 @@
         },
         {
             num: 3,
-            title: "Stage 3: Multigenerational Organogram, Lineage Quests & WhatsApp Status Flyers",
+            title: "Stage 3: Multigenerational Organogram, Lineage Nudges & WhatsApp Status Flyers",
             route: "/organogram",
-            desc: "Family members explore an interactive D3/SVG multigenerational tree with 1-tap WhatsApp Quests to fill missing links, and generate high-status heraldic family status flyers with live counts of connected members and generations.",
+            desc: "Family members explore an interactive D3/SVG multigenerational tree with 1-tap WhatsApp Quests to fill missing links, prompt unmapped relatives to build their personal family tree via multi-channel notifications (In-App, WebPush, Email), and generate high-status heraldic family status flyers with live counts of connected members and generations.",
             controller: "Family Genealogist & Visual Tree Architect",
             state: "NODE_MATCHED \u2192 TREE_CONNECTED",
-            db: "Generational Lineage Tree, Lineage Quests & Opaque Tokens",
+            db: "Generational Lineage Tree, Lineage Quests & Multi-Channel Prompts",
             compliance: "Hierarchical Lineage Data Integrity Standard"
         },
         {

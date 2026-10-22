@@ -196,6 +196,14 @@
                         <div id="videoLivePreview" class="mt-2 d-none ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm" style="max-height: 180px;"></div>
                     </div>
 
+                    <!-- Prominent Mobile Camera Roll Trigger (Universal 1-Tap Access for All iPhone & Android Users) -->
+                    <div class="d-md-none mb-3">
+                        <label for="imageUpload" class="btn btn-outline-primary w-100 rounded-pill py-2.5 px-3 d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-xs" style="min-height: 48px; border-width: 1.5px; cursor: pointer; background: rgba(37, 99, 235, 0.05);">
+                            <i class="bi bi-camera-fill fs-5"></i>
+                            <span>Choose Photos from Camera Roll</span>
+                        </label>
+                    </div>
+
                     <!-- Facebook-Style "Add to your post" Card -->
                     <div class="add-to-post-box d-flex align-items-center justify-content-between p-2 mb-3 rounded-3 position-relative"
                         style="border: 1px solid var(--border-color); background-color: var(--bg-color);">
@@ -205,7 +213,7 @@
                             <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach Photo" style="cursor: pointer;" aria-label="Attach photo">
                                 <i class="bi bi-image-fill"></i>
                             </label>
-                            <input type="file" name="post_img[]" id="imageUpload" accept="image/*" multiple hidden>
+                            <input type="file" name="post_img[]" id="imageUpload" accept="image/*,video/*" multiple hidden>
 
                             <button type="button" class="btn-composer-action action-emoji" id="emojiPost" title="Add Emoji" aria-label="Add emoji">
                                 <i class="bi bi-emoji-smile-fill"></i>

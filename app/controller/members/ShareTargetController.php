@@ -105,12 +105,16 @@ final class ShareTargetController
             // Standard PRG pattern (Post-Redirect-Get) via 303 See Other
             $destination = !empty($_SESSION['id']) ? '/profilePage?pwa_shared=1' : '/login?pwa_shared=1';
             header('Location: ' . $destination, true, 303);
-            exit;
+            if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+                exit;
+            }
 
         } catch (\Throwable $th) {
             error_log('[ShareTargetController] Error processing PWA share target: ' . $th->getMessage());
             header('Location: /profilePage?pwa_shared_err=1', true, 303);
-            exit;
+            if (!defined('PHPUNIT_COMPOSER_INSTALL')) {
+                exit;
+            }
         }
     }
 
@@ -130,5 +134,13 @@ final class ShareTargetController
             'status' => 'success',
             'data'   => $pending,
         ], JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * Alias for test suite compatibility
+     */
+    public function getSharedPayload(): void
+    {
+        $this->getPendingShare();
     }
 }

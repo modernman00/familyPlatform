@@ -16,20 +16,20 @@
         <span class="pwa-tab-label">Tree</span>
     </a>
 
+    <!-- Quick Camera & Photo Upload (Universal iPhone & Mobile 1-Tap Trigger) -->
+    <button type="button" class="pwa-tab-item pwa-tab-center-action" id="pwaQuickCameraBtn" aria-label="Add photo or memory from camera roll" title="Add Photo or Video">
+        <div class="pwa-center-btn-bubble shadow-md">
+            <i class="bi bi-camera-fill"></i>
+        </div>
+        <span class="pwa-tab-label">Add Photo</span>
+    </button>
+
     <!-- Family Studio / Reels -->
     <a href="/familyStudio" class="pwa-tab-item" data-tab="reels" title="Family Studio & Reels">
         <div class="pwa-tab-icon-wrap">
             <i class="bi bi-camera-reels-fill"></i>
         </div>
         <span class="pwa-tab-label">Studio</span>
-    </a>
-
-    <!-- Directory -->
-    <a href="/allMembers" class="pwa-tab-item" data-tab="members" title="Member Directory">
-        <div class="pwa-tab-icon-wrap">
-            <i class="bi bi-people-fill"></i>
-        </div>
-        <span class="pwa-tab-label">Directory</span>
     </a>
 
     <!-- Notifications & Alerts -->
@@ -61,6 +61,48 @@
                 t.classList.add('active');
             }
         });
+
+        // Universal 1-Tap Mobile Camera Roll Trigger
+        var cameraBtn = document.getElementById('pwaQuickCameraBtn');
+        if (cameraBtn) {
+            cameraBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var postModalEl = document.getElementById('postModal');
+                var fileInput = document.getElementById('imageUpload');
+                if (postModalEl && window.bootstrap && window.bootstrap.Modal) {
+                    var modal = window.bootstrap.Modal.getOrCreateInstance(postModalEl);
+                    modal.show();
+                    if (fileInput) {
+                        try {
+                            fileInput.click();
+                        } catch (err) {
+                            console.warn('[Camera] Direct click fallback:', err);
+                        }
+                    }
+                } else {
+                    window.location.href = '/profilePage?open_camera=1';
+                }
+            });
+        }
+
+        // Auto-open modal if navigated from another page via ?open_camera=1
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('open_camera')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            setTimeout(function() {
+                var postModalEl = document.getElementById('postModal');
+                var fileInput = document.getElementById('imageUpload');
+                if (postModalEl && window.bootstrap && window.bootstrap.Modal) {
+                    var modal = window.bootstrap.Modal.getOrCreateInstance(postModalEl);
+                    modal.show();
+                    if (fileInput) {
+                        try {
+                            fileInput.click();
+                        } catch (err) {}
+                    }
+                }
+            }, 300);
+        }
 
         function pinBottomNav() {
             if (window.visualViewport) {

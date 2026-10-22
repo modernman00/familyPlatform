@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling",
+    "title": "Feat(pwa-feed): implement Web Share Target API L2, OpenGraph link preview cards & in-app notification synchronization",
     "notes": [
-        "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling",
-        "Fix(test): eliminate profile edit async race and expand e2e watchdog limit",
-        "Feat(security): fortify csrf validation, neutralize semgrep taint, and optimize production assets"
+        "Feat(pwa-feed): implement Web Share Target API L2, OpenGraph link preview cards & in-app notification synchronization",
+        "Sec(cve-2026-109618): harden SAPI .user.ini, .htaccess & init.php against NCSC php2shell RCE",
+        "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling"
     ],
-    "released_at": "2026-10-21",
-    "commit": "1648dab"
+    "released_at": "2026-10-22",
+    "commit": "2c8f0fa"
 }
