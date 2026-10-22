@@ -41,5 +41,6 @@ module.exports = defineConfig({
     supportFile: false,
     video: false,
     screenshotOnRunFailure: true,
+    numTestsKeptInMemory: 1,
   },
 });

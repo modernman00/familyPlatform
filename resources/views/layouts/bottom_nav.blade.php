@@ -33,7 +33,7 @@
     </a>
 
     <!-- Notifications & Alerts -->
-    <a href="javascript:void(0)" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="Alerts & Notifications">
+    <a href="javascript:void(0)" role="button" aria-haspopup="true" class="pwa-tab-item position-relative" id="pwaNotifTab" data-tab="notifications" title="Alerts & Notifications">
         <div class="pwa-tab-icon-wrap position-relative">
             <i class="bi bi-bell-fill"></i>
             <span class="pwa-tab-badge" id="pwa_bottom_badge" style="display: none;"></span>
@@ -59,6 +59,9 @@
                 t.classList.add('active');
             } else if (dt === 'feed' && (p.indexOf('/profilepage') !== -1 || p === '/' || p === '')) {
                 t.classList.add('active');
+            }
+            if (t.classList.contains('active')) {
+                t.setAttribute('aria-current', 'page');
             }
         });
 

@@ -45,6 +45,7 @@
        which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
   <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
+  <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
   @stack('styles')
 </head>
 

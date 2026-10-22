@@ -81,7 +81,7 @@ describe('Social Feed Interactions', () => {
         cy.get('.swal2-popup', { timeout: 10000 }).should('contain.text', 'Post published successfully');
         cy.get('#postModal', { timeout: 10000 }).should('not.be.visible');
         cy.get('.modal-backdrop', { timeout: 10000 }).should('not.exist');
-        cy.contains('button', 'Like', { timeout: 10000 }).should('exist');
+        cy.contains(text, { timeout: 10000 }).should('be.visible');
     };
 
     it('can like a post and persists state after page reload (cy.reload)', () => {
@@ -125,26 +125,47 @@ describe('Social Feed Interactions', () => {
 
     it('can add a comment to a post', () => {
         const commentContent = `Cypress Automated Comment ${Date.now()}`;
+        const postMarker = `Cypress Comment Target ${Date.now()}`;
 
-        createFreshPost(`Cypress Comment Target ${Date.now()}`);
+        createFreshPost(postMarker);
 
-        // The comment form is hidden per-post until the "Comment" toggle button is clicked
-        cy.contains('button', 'Comment').first().click();
-        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first()
-            .should('be.visible').type(`${commentContent}{enter}`);
+        cy.intercept('POST', '**/postCommentProfile').as('commentReq');
+
+        // Locate the created post card container deterministically
+        cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
+            // The comment form is hidden per-post until the "Comment" toggle button is clicked
+            cy.contains('button', 'Comment').click();
+            cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]')
+                .should('be.visible')
+                .type(commentContent)
+                .should('have.value', commentContent);
+            cy.contains('button', 'Post').click();
+        });
+
+        // Wait for backend persistence confirmation
+        cy.wait('@commentReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
 
         // On success the new comment is pushed straight into Alpine state, so it renders immediately
-        cy.get('body').should('contain.text', commentContent);
+        cy.contains(commentContent, { timeout: 10000 }).should('be.visible');
     });
 
     it('can like a comment and updates reaction badge and state', () => {
         const commentContent = `Cypress Like Comment ${Date.now()}`;
-        createFreshPost(`Cypress Comment Like Target ${Date.now()}`);
+        const postMarker = `Cypress Comment Like Target ${Date.now()}`;
+        createFreshPost(postMarker);
 
-        cy.contains('button', 'Comment').first().click();
-        cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]').first()
-            .should('be.visible').type(`${commentContent}{enter}`);
+        cy.intercept('POST', '**/postCommentProfile').as('commentReq');
 
+        cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
+            cy.contains('button', 'Comment').click();
+            cy.get('input.form-control.rounded-pill[placeholder*="Write a comment"]')
+                .should('be.visible')
+                .type(commentContent)
+                .should('have.value', commentContent);
+            cy.contains('button', 'Post').click();
+        });
+
+        cy.wait('@commentReq', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
         cy.contains(commentContent, { timeout: 10000 }).should('be.visible');
 
         cy.intercept('POST', '**/api/reactions/add').as('commentReactionReq');
@@ -164,10 +185,13 @@ describe('Social Feed Interactions', () => {
     });
 
     it('denies empty comments', () => {
-        createFreshPost(`Cypress Empty Comment Target ${Date.now()}`);
+        const postMarker = `Cypress Empty Comment Target ${Date.now()}`;
+        createFreshPost(postMarker);
 
-        cy.contains('button', 'Comment').first().click();
-        cy.get('input[placeholder="Write a comment..."]').first().should('be.visible').as('commentInput');
+        cy.contains(postMarker, { timeout: 10000 }).parents('.card').within(() => {
+            cy.contains('button', 'Comment').click();
+            cy.get('input[placeholder="Write a comment..."]').should('be.visible').as('commentInput');
+        });
 
         // The input is HTML5-required and the submit handler no-ops on empty text, so there's
         // no error popup to check for here - the meaningful assertion is that nothing was sent.
