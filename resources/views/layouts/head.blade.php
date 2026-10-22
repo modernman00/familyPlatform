@@ -40,6 +40,7 @@
   
 
   <link rel="stylesheet" type="text/css" href="/public/css/profilepage.css?v={{ time() }}">
+  <link rel="stylesheet" type="text/css" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
   <link rel="stylesheet" type="text/css"
     href="https://unpkg.com/file-upload-with-preview@4.1.0/dist/file-upload-with-preview.min.css" />
 

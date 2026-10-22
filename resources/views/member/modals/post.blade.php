@@ -20,7 +20,7 @@
                     <div>
                         <h6 class="mb-1 fw-bold fs-6" style="color: var(--text-color);">{{ $data['firstName'] }} {{ $data['lastName'] }}</h6>
                         <span class="badge rounded-pill bg-light-subtle text-muted border border-secondary-subtle fw-medium px-2.5 py-1" style="font-size: 0.75rem;">
-                            <i class="bi bi-people-fill me-1 text-primary"></i> Family Members <i class="bi bi-caret-down-fill ms-1 small" style="font-size: 0.65rem;"></i>
+                            <i class="bi bi-shield-check me-1 text-primary"></i> Shared with Family
                         </span>
                     </div>
                 </div>
@@ -102,6 +102,42 @@
                     </div>
 
                     <span id="postModalImgFileNames" class="invalid-feedback d-block mb-2 text-muted small px-2"></span>
+
+                    <!-- Tag People Container (Hidden by Default) -->
+                    <div id="tagPeopleContainer" class="tag-builder d-none mb-3 p-3 rounded-3" style="background: var(--bg-color); border: 1px solid var(--border-color);">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold small text-primary"><i class="bi bi-people-fill me-1"></i> Tag Family Members</span>
+                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5" style="font-size: 0.72rem;" id="tagCountBadge">
+                                    0 Tagged
+                                </span>
+                            </div>
+                            <button type="button" id="removeTagContainerBtn" class="btn-close" style="font-size: 0.7rem;" aria-label="Close tag tray"></button>
+                        </div>
+
+                        <!-- Active Tagged Member Chips (With Ade Olaogun ✕) -->
+                        <div id="selectedTagsTray" class="d-flex flex-wrap gap-1.5 mb-2 d-none"></div>
+
+                        <!-- Hidden Inputs Container for POST submission -->
+                        <div id="taggedUserInputs"></div>
+
+                        <!-- Search Member Input -->
+                        <div class="position-relative mb-2">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="tagSearchInput" class="form-control form-control-sm border-start-0 shadow-none" placeholder="Type a name to search family members…" style="border-radius: 0 8px 8px 0;" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <!-- Suggestion & Search Results Member Tray -->
+                        <div id="tagSuggestionsList" class="d-flex flex-column gap-1 overflow-y-auto" style="max-height: 180px;">
+                            <div class="text-center py-2 text-muted small" id="tagSuggestionsLoading">
+                                <span class="spinner-border spinner-border-sm me-1"></span> Loading family members…
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Poll Creation UI (Hidden by Default) -->
                     <div id="pollCreationContainer" class="poll-builder d-none mb-3">
@@ -225,7 +261,7 @@
 
                             <button type="button" class="btn-composer-action action-gif gif-btn" title="Add GIF" aria-label="Add GIF">GIF</button>
                             
-                            <button type="button" class="btn-composer-action action-tag" title="Tag People / Stickers" aria-label="Tag people">
+                            <button type="button" class="btn-composer-action action-tag" id="addTagBtn" title="Tag Family Members" aria-label="Tag people">
                                 <i class="bi bi-tag-fill"></i>
                             </button>
                             

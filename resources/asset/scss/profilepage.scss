@@ -405,6 +405,12 @@
         color: #fff !important;
         box-shadow: 0 2px 8px rgba(249, 115, 22, 0.35);
     }
+
+    &.tag-active {
+        background-color: #3b82f6 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+    }
 }
 
 .dark-mode {

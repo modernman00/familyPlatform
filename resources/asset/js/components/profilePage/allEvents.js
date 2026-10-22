@@ -58,6 +58,9 @@ try {
             if (editPostNo) editPostNo.value = '';
             if (notice) notice.classList.add('d-none');
             if (title) title.textContent = 'Create Post';
+            if (typeof window.__resetTagBuilder === 'function') {
+                window.__resetTagBuilder();
+            }
         });
     }
 
@@ -178,6 +181,9 @@ try {
                     // Reset the poll builder after a successful submission
                     if (typeof window.__resetPollBuilder === 'function') {
                         window.__resetPollBuilder();
+                    }
+                    if (typeof window.__resetTagBuilder === 'function') {
+                        window.__resetTagBuilder();
                     }
                     const addOptBtn = document.getElementById('addPollOptionBtn');
                     if (addOptBtn) addOptBtn.style.display = '';

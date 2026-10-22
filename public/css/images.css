@@ -129,9 +129,10 @@ body {
   white-space: nowrap;
   font-size: 0.76rem;
   font-weight: 600;
-  padding: 6px 8px;
+  padding: 8px 12px;
   border-radius: 10px;
-  height: 36px;
+  min-height: 44px;
+  min-width: 44px;
   transition: all 0.2s ease;
 }
 
@@ -175,8 +176,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 40px;
-  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   background: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 50%;

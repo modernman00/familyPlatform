@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(pwa-feed): implement Web Share Target API L2, OpenGraph link preview cards & in-app notification synchronization",
+    "title": "Feat(standards): integrate v2.1 design standards, aria enhancements and lineage prompts",
     "notes": [
-        "Feat(pwa-feed): implement Web Share Target API L2, OpenGraph link preview cards & in-app notification synchronization",
-        "Sec(cve-2026-109618): harden SAPI .user.ini, .htaccess & init.php against NCSC php2shell RCE",
-        "Fix(chaos): stabilize edit profile modal resiliency assertion and notification styling"
+        "Feat(standards): integrate v2.1 design standards, aria enhancements and lineage prompts",
+        "Feat(cron): add family code approval reminder runner and harden preflight DAST resolution",
+        "Major update"
     ],
     "released_at": "2026-10-22",
-    "commit": "2c8f0fa"
+    "commit": "0b6a632"
 }

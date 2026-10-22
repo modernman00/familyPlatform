@@ -91,6 +91,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="/public/css/landing.css" rel="stylesheet">
+  <link href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" rel="stylesheet">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')

@@ -43,6 +43,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href={{ $_ENV['APP_LOGO'] }}>
 
     @include('partials.pwa-head')
+    <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" />
 
 
     <script>

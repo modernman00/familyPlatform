@@ -124,22 +124,22 @@
                     </p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-center">
-                <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm w-100 w-md-auto" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border-radius: 10px; white-space: nowrap; font-size: 0.9rem;">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
+                <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-check2-circle me-1"></i> Yes, Connect My Account
                 </button>
-                <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-light btn-sm px-3 py-2 fw-semibold text-secondary border w-100 w-md-auto" style="border-radius: 10px; white-space: nowrap; font-size: 0.88rem;">
+                <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-light btn-sm px-3 py-2 fw-semibold text-secondary border text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     Not Me
                 </button>
             </div>
         </div>
 
-        <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; position: relative; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important;">
+        <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start position-relative pe-md-5" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important; overflow: hidden;">
             <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
-                <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
+                <div class="d-flex align-items-center justify-content-center rounded-circle p-2 flex-shrink-0" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
                     <i class="bi {{ $analysis['is_flourishing'] ? 'bi-stars text-success' : 'bi-diagram-3-fill text-primary' }} fs-4"></i>
                 </div>
-                <div class="flex-grow-1">
+                <div class="flex-grow-1 pe-4 pe-md-0">
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
                         <h6 class="mb-0 fw-bold text-dark">{{ $analysis['banner_title'] }}</h6>
                         <span class="badge {{ $analysis['completeness_score'] >= 80 ? 'bg-success' : ($analysis['completeness_score'] >= 40 ? 'bg-warning text-dark' : 'bg-primary') }}" style="font-size: 0.75rem;">
@@ -156,8 +156,8 @@
                     <p class="mb-0 text-muted" style="font-size: 0.88rem;">{{ $analysis['banner_subtitle'] }}</p>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2 w-100 w-md-auto justify-content-center">
-                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary btn-sm px-3 py-2 fw-bold w-100 w-md-auto" style="border-radius: 8px; white-space: nowrap;">
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
+                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary btn-sm px-3 py-2 fw-bold text-nowrap" style="border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-person-plus-fill me-1"></i>
                     @if($analysis['recommended_cta_type'] === 'parents')
                         Add your family
@@ -171,11 +171,11 @@
                         Add Family Members
                     @endif
                 </button>
-                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success btn-sm px-3 py-2 fw-bold w-100 w-md-auto text-white shadow-sm" style="border-radius: 8px; white-space: nowrap; background: #10b981; border-color: #10b981;">
+                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success btn-sm px-3 py-2 fw-bold text-white shadow-sm text-nowrap" style="border-radius: 8px; background: #10b981; border-color: #10b981; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
                 </button>
-                <button type="button" class="btn-close text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
             </div>
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-2 m-md-3 text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
         </div>
         @endif
 

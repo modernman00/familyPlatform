@@ -8,6 +8,7 @@
 
     <title>@yield('title')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" />
 
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 

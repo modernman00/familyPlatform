@@ -303,9 +303,49 @@ class FeedRepository
         $reactions = ReactionData::getReactionsForPosts($postIds);
         $userReactions = ReactionData::getUserReactionsForPosts($userId, $postIds);
 
+        // Batch hydrate post tags
+        $postTagsByPostNo = [];
+        try {
+            $tagPlaceholders = implode(',', array_fill(0, count($postIds), '?'));
+            $tagSql = sprintf(
+                "SELECT pt.post_no, pt.user_id, pt.tagged_by, p.firstName, p.lastName, pp.img 
+                FROM post_tags pt 
+                JOIN personal p ON pt.user_id = p.id 
+                LEFT JOIN profilePics pp ON pt.user_id = pp.id 
+                WHERE pt.post_no IN (%s)
+                ORDER BY pt.id ASC",
+                $tagPlaceholders
+            );
+            $tagStmt = $this->db->prepare($tagSql);
+            $tagStmt->execute($postIds);
+            $tagRows = $tagStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($tagRows as $tRow) {
+                $pNo = (int)$tRow['post_no'];
+                $img = $tRow['img'] ?? null;
+                $profImg = '/resources/images/profile/avatarM.png';
+                if (!empty($img)) {
+                    $profImg = (str_starts_with((string)$img, '/') || str_starts_with((string)$img, 'http'))
+                        ? (string)$img
+                        : "/resources/images/profile/{$img}";
+                }
+                $postTagsByPostNo[$pNo][] = [
+                    'user_id' => (string)$tRow['user_id'],
+                    'fullName' => trim(($tRow['firstName'] ?? '') . ' ' . ($tRow['lastName'] ?? '')),
+                    'firstName' => (string)($tRow['firstName'] ?? ''),
+                    'lastName' => (string)($tRow['lastName'] ?? ''),
+                    'profileImg' => $profImg,
+                    'tagged_by' => (string)$tRow['tagged_by'],
+                ];
+            }
+        } catch (\Throwable $tagEx) {
+            \error_log('[FeedRepository::hydrateEngagement tags] ' . $tagEx->getMessage());
+        }
+
         foreach ($rows as &$post) {
             $pNo = (int)($post['post_no'] ?? 0);
             $post['poll'] = $polls[$pNo] ?? null;
+            $post['post_tags'] = $postTagsByPostNo[$pNo] ?? [];
 
             $post['reactions'] = array_values(array_filter($reactions, function ($r) use ($pNo) {
                 return (int)($r['post_no'] ?? 0) === $pNo;

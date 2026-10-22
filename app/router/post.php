@@ -88,6 +88,28 @@ $router->map(
   name: 'api_link_preview'
 );
 
+// POST & MEMBER TAGGING APIS
+$router->map(
+  method: 'GET',
+  route: '/api/members/tag-suggestions',
+  target: 'App\controller\members\TagController@searchTagSuggestions',
+  name: 'api_members_tag_suggestions'
+);
+
+$router->map(
+  method: 'POST',
+  route: '/api/posts/[i:postNo]/tags',
+  target: 'App\controller\members\TagController@addPostTags',
+  name: 'api_posts_add_tags'
+);
+
+$router->map(
+  method: 'DELETE',
+  route: '/api/posts/[i:postNo]/tags/[*:userId]',
+  target: 'App\controller\members\TagController@removePostTag',
+  name: 'api_posts_remove_tag'
+);
+
 // Native iOS / Apple Photos Share Sheet Endpoints
 $router->map(
   method: 'POST',

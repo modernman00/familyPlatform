@@ -159,6 +159,7 @@ export function profileFeed(opts = {}) {
                 user_reaction: p?.user_reaction || null,
                 comments: Array.isArray(p?.comments) ? p.comments.map(c => this.normalizeComment(c)) : [],
                 isLiked: false,
+                post_tags: Array.isArray(p?.post_tags) ? p.post_tags : [],
             };
 
             // Progressive enhancement: lazy unfurl link preview if server hasn't pre-hydrated
@@ -402,6 +403,46 @@ export function profileFeed(opts = {}) {
 
         isOwnPost(post) {
             return String(post?.id) === String(this.currentUserId);
+        },
+
+        isUserTaggedInPost(post) {
+            if (!post || !Array.isArray(post.post_tags) || !this.currentUserId) return false;
+            return post.post_tags.some(t => String(t.user_id) === String(this.currentUserId));
+        },
+
+        async untagSelfFromPost(post) {
+            if (!post || !post.post_no || !this.currentUserId) return;
+            const confirm = await Swal.fire({
+                title: 'Remove Tag?',
+                text: 'Do you want to remove your tag from this family post?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Yes, Remove Tag'
+            });
+            if (!confirm.isConfirmed) return;
+
+            try {
+                await axios.delete(`/api/posts/${post.post_no}/tags/${this.currentUserId}`, this.csrfOptions);
+                post.post_tags = (post.post_tags || []).filter(t => String(t.user_id) !== String(this.currentUserId));
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Tag removed from post',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            } catch (err) {
+                console.error('Failed to remove tag:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Action Failed',
+                    text: 'Unable to remove tag. Please try again.',
+                    confirmButtonColor: '#2563eb'
+                });
+            }
         },
 
         // Opens the existing "Create Post" modal in edit mode: prefills the text,

@@ -8,7 +8,34 @@
     <div class="flex-grow-1">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
+          <div class="d-flex align-items-center flex-wrap">
+            <h6 class="mb-0 fw-semibold text-dark" style="font-size: 1.05rem;" x-text="post.fullName"></h6>
+            <template x-if="post.post_tags && post.post_tags.length > 0">
+              <span class="text-secondary small fw-normal ms-1">
+                is with 
+                <template x-for="(tag, tIdx) in post.post_tags.slice(0, 2)" :key="tag.user_id">
+                  <span>
+                    <a :href="'/member/profilePage?id=' + tag.user_id" class="fw-semibold text-dark text-decoration-none" style="text-decoration: underline;" x-text="tag.fullName"></a><span x-show="tIdx === 0 && post.post_tags.length === 2"> and </span><span x-show="tIdx === 0 && post.post_tags.length > 2">, </span>
+                  </span>
+                </template>
+                <template x-if="post.post_tags.length > 2">
+                  <span class="dropdown d-inline">
+                    <a href="#" class="fw-semibold text-primary text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" x-text="(post.post_tags.length - 2) + ' others'"></a>
+                    <ul class="dropdown-menu shadow-sm border-0 p-2" style="border-radius: 12px; min-width: 180px;">
+                      <template x-for="tag in post.post_tags.slice(2)" :key="tag.user_id">
+                        <li>
+                          <a :href="'/member/profilePage?id=' + tag.user_id" class="dropdown-item d-flex align-items-center gap-2 py-1.5 px-2 rounded-2">
+                            <img :src="tag.profileImg || '/resources/images/profile/avatarM.png'" class="rounded-circle" width="24" height="24" style="object-fit: cover;">
+                            <span class="small fw-medium" x-text="tag.fullName"></span>
+                          </a>
+                        </li>
+                      </template>
+                    </ul>
+                  </span>
+                </template>
+              </span>
+            </template>
+          </div>
           <div class="d-flex align-items-center gap-2 mt-0.5">
             <small class="text-muted" style="font-size: 0.85rem;" x-text="formatDate(post.post_time || post.date_created)"></small>
             <template x-if="post.postFamCode">
@@ -16,22 +43,33 @@
             </template>
           </div>
         </div>
-        <template x-if="isOwnPost(post)">
+        <template x-if="isOwnPost(post) || isUserTaggedInPost(post)">
           <div class="dropdown">
             <button class="btn btn-sm btn-link text-muted p-1 rounded-circle" type="button" :id="'kebab' + post.post_no" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;" title="Post options">
               <i class="bi bi-three-dots" style="font-size: 1.25rem;"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" :aria-labelledby="'kebab' + post.post_no" style="border-radius: 12px; font-size: 0.9rem; min-width: 160px;">
-              <li>
-                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
-                  <i class="bi bi-pencil-square text-primary"></i> Edit Post
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" @click.prevent="deletePost(post.post_no)">
-                  <i class="bi bi-trash3"></i> Delete Post
-                </a>
-              </li>
+              <template x-if="isOwnPost(post)">
+                <div>
+                  <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" @click.prevent="editPost(post)">
+                      <i class="bi bi-pencil-square text-primary"></i> Edit Post
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" @click.prevent="deletePost(post.post_no)">
+                      <i class="bi bi-trash3"></i> Delete Post
+                    </a>
+                  </li>
+                </div>
+              </template>
+              <template x-if="isUserTaggedInPost(post)">
+                <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-warning" href="#" @click.prevent="untagSelfFromPost(post)">
+                    <i class="bi bi-tag-fill"></i> Remove Tag from Post
+                  </a>
+                </li>
+              </template>
             </ul>
           </div>
         </template>
@@ -48,10 +86,32 @@
     </div>
   </template>
 
+  <!-- Family Chronicle / Journal Badge -->
+  <template x-if="post.postMessage && (post.postMessage.includes('Family Chronicle') || post.postMessage.includes('/familyJournal/'))">
+    <div class="px-1 mb-2">
+      <span class="badge rounded-pill px-3 py-1.5 text-white shadow-sm d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.5px;">
+        <i class="bi bi-journal-bookmark-fill"></i> FAMILY CHRONICLE
+      </span>
+    </div>
+  </template>
+
   <!-- Post Text -->
   <template x-if="post.displayMessage || (!post.video && post.postMessage)">
     <div class="post-content px-1 mb-3">
       <p class="mb-0" style="white-space: pre-line; font-size: 1.05rem; color: var(--text-main); line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;" x-html="renderHashtags(post.displayMessage || post.postMessage)"></p>
+    </div>
+  </template>
+
+  <!-- Direct Chronicle Read CTA -->
+  <template x-if="post.postMessage && post.postMessage.includes('/familyJournal/')">
+    <div class="px-1 mb-3">
+      <a :href="((post.postMessage.match(/(?:https?:\/\/[^\s<>&\"']+)?\/familyJournal\/\d+/) || ['/familyJournal'])[0])" 
+         class="btn btn-sm text-white d-inline-flex align-items-center gap-2 px-3 py-2 fw-semibold shadow-xs" 
+         style="background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); border-radius: 12px; font-size: 0.88rem; min-height: 44px; text-decoration: none;">
+        <i class="bi bi-book-half"></i>
+        <span>Read Full Chronicle</span>
+        <i class="bi bi-arrow-right ms-1"></i>
+      </a>
     </div>
   </template>
 
@@ -67,7 +127,7 @@
                role="button" 
                aria-label="View enlarged photo or double tap to like" 
                style="display:block; overflow:hidden; border-radius:10px; position:relative;">
-              <img :src="getPostImageUrl(img)" 
+              <img :src="(img && (img.startsWith('/public/') || img.startsWith('/images/'))) ? img : getPostImageUrl(img)" 
                    class="post-media-first-img w-100"
                    style="border-radius: 10px; max-height: 380px; object-fit: cover; cursor: pointer;" 
                    alt="Family post image" 

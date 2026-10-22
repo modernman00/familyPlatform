@@ -19,6 +19,8 @@ server.cert
 .php-cs-fixer.cache
 psalm
 resources/views/layouts/achive
+public/images/journals/*
+!public/images/journals/.gitkeep
 resources/images
 public/img
 !public/img/logo

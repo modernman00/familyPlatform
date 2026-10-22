@@ -300,6 +300,30 @@ final class ProfilePage extends ProcessImg
                     error_log('[ProfilePage::post hashtags] ' . $th->getMessage());
                 }
 
+                // Synchronise tagged family members
+                $postTags = [];
+                try {
+                    $famCode = (string)($_SESSION['famCode'] ?? '');
+                    $authorIdStr = is_string($id) ? $id : (string)($_SESSION['id'] ?? '');
+                    $rawTagged = $_POST['tagged_user_ids'] ?? [];
+                    if (is_string($rawTagged)) {
+                        $rawTagged = json_decode($rawTagged, true) ?: [$rawTagged];
+                    }
+                    if (is_array($rawTagged) && !empty($rawTagged)) {
+                        $cleanTaggedIds = array_values(array_unique(array_filter(array_map('strval', $rawTagged))));
+                        if (!empty($cleanTaggedIds)) {
+                            $postTags = \App\controller\members\TagController::syncPostTags(
+                                (int)$result,
+                                $authorIdStr,
+                                $cleanTaggedIds,
+                                $famCode
+                            );
+                        }
+                    }
+                } catch (\Throwable $tagEx) {
+                    error_log('[ProfilePage::post tags] ' . $tagEx->getMessage());
+                }
+
                 // Return the full post row (not just its id) so the composer can prepend it
                 // to the feed immediately instead of waiting on a full posts re-fetch.
                 $newPost = Post::postByNo($result);
@@ -315,6 +339,7 @@ final class ProfilePage extends ProcessImg
                 // Attach hydrated link preview for immediate feed presentation
                 if (is_array($newPost)) {
                     $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                    $newPost['post_tags'] = !empty($postTags) ? $postTags : \App\controller\members\TagController::getPostTags((int)$result);
                 }
 
                 msgSuccess(200, $newPost ?: $result);

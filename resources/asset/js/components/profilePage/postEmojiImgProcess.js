@@ -2,6 +2,8 @@
 import { showEmojiPicker, initEmojiPickerUX } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
 
+import axios from 'axios';
+
 // Get references to DOM elements used in the emoji picker and image preview - SHOW EMOJIs FOR POST
 
 const emojiToggle = document.getElementById('emojiPost'); // Button to show/hide emoji picker
@@ -344,4 +346,238 @@ if (addVideoBtn && videoContainer) {
 }
 
 window.__resetVideoBuilder = closeVideoBuilder;
+
+// Tag People UI Logic
+const addTagBtn = document.getElementById('addTagBtn');
+const tagContainer = document.getElementById('tagPeopleContainer');
+const removeTagContainerBtn = document.getElementById('removeTagContainerBtn');
+const tagSearchInput = document.getElementById('tagSearchInput');
+const tagSuggestionsList = document.getElementById('tagSuggestionsList');
+const selectedTagsTray = document.getElementById('selectedTagsTray');
+const taggedUserInputs = document.getElementById('taggedUserInputs');
+const tagCountBadge = document.getElementById('tagCountBadge');
+
+const MAX_TAGGED_PEOPLE = 20;
+const selectedTags = new Map();
+let searchDebounceTimer = null;
+
+const renderSelectedTags = () => {
+    if (!selectedTagsTray || !taggedUserInputs) return;
+
+    taggedUserInputs.innerHTML = '';
+    selectedTagsTray.innerHTML = '';
+
+    if (selectedTags.size === 0) {
+        selectedTagsTray.classList.add('d-none');
+        if (tagCountBadge) {
+            tagCountBadge.textContent = '0 Tagged';
+            tagCountBadge.className = 'badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5';
+        }
+        return;
+    }
+
+    selectedTagsTray.classList.remove('d-none');
+    if (tagCountBadge) {
+        tagCountBadge.textContent = `${selectedTags.size} Tagged`;
+        tagCountBadge.className = 'badge rounded-pill bg-primary text-white px-2 py-0.5 shadow-xs';
+    }
+
+    selectedTags.forEach((member) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'tagged_user_ids[]';
+        input.value = member.id;
+        taggedUserInputs.appendChild(input);
+
+        const chip = document.createElement('span');
+        chip.className = 'badge d-inline-flex align-items-center gap-1.5 py-1 px-2.5 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill shadow-xs';
+        chip.style.fontSize = '0.8rem';
+        chip.style.fontWeight = '500';
+
+        const safeFullName = member.fullName.replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[m]));
+
+        chip.innerHTML = `
+            <img src="${member.profileImg}" class="rounded-circle" width="18" height="18" style="object-fit: cover;" alt="">
+            <span>${safeFullName}</span>
+            <button type="button" class="btn-close ms-1" style="font-size: 0.55rem;" aria-label="Remove tag"></button>
+        `;
+
+        chip.querySelector('.btn-close')?.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            selectedTags.delete(member.id);
+            renderSelectedTags();
+            updateSuggestionListSelectionState();
+        });
+
+        selectedTagsTray.appendChild(chip);
+    });
+};
+
+const updateSuggestionListSelectionState = () => {
+    if (!tagSuggestionsList) return;
+    const items = tagSuggestionsList.querySelectorAll('[data-user-id]');
+    items.forEach((item) => {
+        const uId = item.getAttribute('data-user-id');
+        const isSelected = selectedTags.has(uId);
+        const indicator = item.querySelector('.tag-item-indicator');
+        if (indicator) {
+            indicator.innerHTML = isSelected
+                ? '<i class="bi bi-check-circle-fill text-primary fs-5"></i>'
+                : '<i class="bi bi-plus-circle text-muted fs-5"></i>';
+        }
+        item.classList.toggle('border-primary', isSelected);
+        item.classList.toggle('bg-primary-subtle', isSelected);
+    });
+};
+
+const renderSuggestions = (members) => {
+    if (!tagSuggestionsList) return;
+    tagSuggestionsList.innerHTML = '';
+
+    if (!Array.isArray(members) || members.length === 0) {
+        tagSuggestionsList.innerHTML = `
+            <div class="text-center py-3 text-muted small">
+                <i class="bi bi-person-x fs-4 d-block mb-1 opacity-50"></i>
+                No matching family members found
+            </div>
+        `;
+        return;
+    }
+
+    members.forEach((m) => {
+        const isSelected = selectedTags.has(m.id);
+        const el = document.createElement('div');
+        el.className = `d-flex align-items-center justify-content-between p-2 rounded-2 transition-all ${isSelected ? 'border-primary bg-primary-subtle' : ''}`;
+        el.style.cssText = 'cursor: pointer; border: 1px solid var(--border-color, #e2e8f0); background-color: var(--card-bg, #ffffff);';
+        el.setAttribute('data-user-id', m.id);
+
+        const safeFullName = (m.fullName || `${m.firstName} ${m.lastName}`).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        }[c]));
+        const subtitle = m.famCode ? `Family Code: #${m.famCode}` : 'Connected Relative';
+
+        el.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+                <img src="${m.profileImg || '/resources/images/profile/avatarM.png'}" class="rounded-circle" width="34" height="34" style="object-fit: cover;" alt="">
+                <div>
+                    <div class="fw-semibold small text-dark lh-sm">${safeFullName}</div>
+                    <div class="text-muted" style="font-size: 0.72rem;">${subtitle}</div>
+                </div>
+            </div>
+            <div class="tag-item-indicator">
+                ${isSelected ? '<i class="bi bi-check-circle-fill text-primary fs-5"></i>' : '<i class="bi bi-plus-circle text-muted fs-5"></i>'}
+            </div>
+        `;
+
+        el.addEventListener('click', () => {
+            if (selectedTags.has(m.id)) {
+                selectedTags.delete(m.id);
+            } else {
+                if (selectedTags.size >= MAX_TAGGED_PEOPLE) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Tag Limit Reached',
+                            text: `You can tag up to ${MAX_TAGGED_PEOPLE} people per post.`,
+                            confirmButtonColor: '#2563eb'
+                        });
+                    }
+                    return;
+                }
+                selectedTags.set(m.id, {
+                    id: m.id,
+                    fullName: m.fullName || `${m.firstName} ${m.lastName}`.trim(),
+                    firstName: m.firstName,
+                    lastName: m.lastName,
+                    profileImg: m.profileImg || '/resources/images/profile/avatarM.png'
+                });
+            }
+            renderSelectedTags();
+            updateSuggestionListSelectionState();
+        });
+
+        tagSuggestionsList.appendChild(el);
+    });
+};
+
+const fetchSuggestions = async (query = '') => {
+    if (!tagSuggestionsList) return;
+    try {
+        const res = await axios.get('/api/members/tag-suggestions', {
+            params: { q: query.trim() }
+        });
+        const members = res?.data?.data?.members || res?.data?.members || [];
+        renderSuggestions(members);
+    } catch (err) {
+        console.error('[TagPeople] Failed to fetch tag suggestions:', err);
+        tagSuggestionsList.innerHTML = `
+            <div class="text-center py-2 text-danger small">
+                Failed to load family members. Tap to retry.
+            </div>
+        `;
+        tagSuggestionsList.firstElementChild?.addEventListener('click', () => fetchSuggestions(query));
+    }
+};
+
+const closeTagBuilder = () => {
+    if (!tagContainer) return;
+    tagContainer.classList.add('d-none');
+    if (addTagBtn) addTagBtn.classList.remove('tag-active');
+};
+
+const resetTagBuilder = () => {
+    selectedTags.clear();
+    renderSelectedTags();
+    closeTagBuilder();
+    if (tagSearchInput) tagSearchInput.value = '';
+};
+
+if (addTagBtn && tagContainer) {
+    addTagBtn.addEventListener('click', () => {
+        const isHidden = tagContainer.classList.contains('d-none');
+        if (isHidden) {
+            tagContainer.classList.remove('d-none');
+            addTagBtn.classList.add('tag-active');
+            if (tagSearchInput) {
+                setTimeout(() => tagSearchInput.focus(), 60);
+            }
+            fetchSuggestions(tagSearchInput ? tagSearchInput.value : '');
+        } else {
+            closeTagBuilder();
+        }
+    });
+
+    if (removeTagContainerBtn) {
+        removeTagContainerBtn.addEventListener('click', closeTagBuilder);
+    }
+
+    if (tagSearchInput) {
+        tagSearchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                fetchSuggestions(val);
+            }, 150);
+        });
+    }
+
+    if (postMessageArea) {
+        postMessageArea.addEventListener('keyup', (e) => {
+            if (e.key === '@') {
+                if (tagContainer.classList.contains('d-none')) {
+                    tagContainer.classList.remove('d-none');
+                    addTagBtn.classList.add('tag-active');
+                    fetchSuggestions('');
+                }
+                if (tagSearchInput) {
+                    setTimeout(() => tagSearchInput.focus(), 60);
+                }
+            }
+        });
+    }
+}
+
+window.__resetTagBuilder = resetTagBuilder;
 

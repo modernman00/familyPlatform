@@ -187,17 +187,27 @@
 
             <!-- Status & Submit -->
             <div class="d-flex align-items-center justify-content-between pt-4 border-top flex-wrap gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <label for="statusSelect" class="form-label small fw-semibold text-muted mb-0">Status:</label>
-                    <select class="form-select form-select-sm rounded-pill" id="statusSelect" name="status" style="width: 140px;">
-                        <option value="published">Published</option>
-                        <option value="draft">Save as Draft</option>
-                    </select>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="statusSelect" class="form-label small fw-semibold text-muted mb-0">Status:</label>
+                        <select class="form-select form-select-sm rounded-pill" id="statusSelect" name="status" style="width: 140px;">
+                            <option value="published">Published</option>
+                            <option value="draft">Save as Draft</option>
+                        </select>
+                    </div>
+
+                    <!-- Share to Family Feed Checkbox -->
+                    <div class="form-check form-switch mb-0 d-flex align-items-center gap-2" style="min-height: 44px;">
+                        <input class="form-check-input" type="checkbox" id="shareToFeed" name="share_to_feed" value="1" checked style="cursor: pointer; width: 2.2em; height: 1.2em;">
+                        <label class="form-check-label small fw-semibold text-dark mb-0" for="shareToFeed" style="cursor: pointer;">
+                            <i class="bi bi-broadcast text-primary me-1"></i> Share to Family Feed
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
                     <a href="/familyJournal" class="btn btn-light rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">Cancel</a>
-                    <button type="submit" id="btnSubmitJournal" class="btn btn-primary rounded-pill px-4 fw-bold" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
+                    <button type="submit" id="btnSubmitJournal" class="btn btn-primary rounded-pill px-4 fw-bold btn-spin-on-click" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
                         <i class="bi bi-cloud-arrow-up-fill me-1"></i> Preserve Chronicle
                     </button>
                 </div>

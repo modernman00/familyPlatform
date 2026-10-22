@@ -3,10 +3,14 @@ declare(strict_types=1);
 
 namespace App\controller\members;
 
+use App\classes\Pusher;
 use App\controller\BaseController;
 use App\model\FamilyJournal;
+use App\model\Post;
 use App\services\AIService;
+use App\services\HashtagService;
 use Src\CheckToken;
+use Src\Db;
 use Src\FileUploader;
 use Src\SelectFn;
 use Src\functionality\SignIn;
@@ -207,6 +211,95 @@ final class FamilyJournalController extends BaseController
             ];
 
             $insertedId = FamilyJournal::createJournal($journalData);
+
+            // Optional auto-broadcast to the main family feed
+            $shareToFeedRaw = $_POST['share_to_feed'] ?? null;
+            $shareToFeed = ($shareToFeedRaw === '1' || $shareToFeedRaw === 'on' || $shareToFeedRaw === 'true' || $shareToFeedRaw === true);
+
+            if ($status === 'published' && $shareToFeed) {
+                try {
+                    $fullName = (string)($_SESSION['fullName'] ?? '');
+                    if (empty($fullName)) {
+                        $userRow = SelectFn::selectOneRow('personal', 'id', $this->userId);
+                        $fullName = trim(($userRow['firstName'] ?? '') . ' ' . ($userRow['lastName'] ?? ''));
+                    }
+                    if (empty($fullName)) {
+                        $fullName = 'Family Member';
+                    }
+
+                    $profileImg = Post::getProfilePicsById($this->userId);
+                    if (empty($profileImg)) {
+                        $profileImg = 'resources/images/avatar.png';
+                    }
+
+                    $appUrl = rtrim((string)($_ENV['APP_URL'] ?? 'https://familyplatform.test'), '/');
+                    $chronicleUrl = $appUrl . '/familyJournal/' . $insertedId;
+
+                    $categoryEmoji = match($category) {
+                        'Milestone' => '🌟',
+                        'Heritage & Tradition' => '🏺',
+                        'Recipe' => '🍳',
+                        'Oral History' => '🎙️',
+                        'Celebration' => '🎉',
+                        'Memorial' => '🕊️',
+                        default => '📖'
+                    };
+
+                    $broadcastMessage = "{$categoryEmoji} Preserved a new Family Chronicle: \"{$title}\"\n\n{$summary}\n\n👉 Read the full story: {$chronicleUrl}";
+
+                    $db = Db::connect2();
+                    $currentTime = (string)(function_exists('milliSeconds') ? milliSeconds() : time());
+
+                    $insStmt = $db->prepare(
+                        "INSERT INTO post (id, fullName, profileImg, postMessage, postFamCode, post_time, post_status, post_img0, date_created) 
+                         VALUES (?, ?, ?, ?, ?, ?, 'published', ?, CURRENT_TIMESTAMP)"
+                    );
+                    $insStmt->execute([
+                        $this->userId,
+                        $fullName,
+                        $profileImg,
+                        $broadcastMessage,
+                        $this->famCode,
+                        $currentTime,
+                        $coverImage
+                    ]);
+
+                    $newPostNo = (int)$db->lastInsertId();
+
+                    // Realtime broadcast via Pusher
+                    try {
+                        Pusher::broadcastToFamily($this->famCode, 'new-post', [[
+                            'post_no' => $newPostNo,
+                            'id' => $this->userId,
+                            'fullName' => $fullName,
+                            'postMessage' => $broadcastMessage,
+                            'postFamCode' => $this->famCode,
+                            'post_img0' => $coverImage,
+                            'date_created' => date('Y-m-d H:i:s'),
+                        ]]);
+                    } catch (\Throwable $pusherEx) {
+                        // Resilient fallback: Broadcast failure does not abort response
+                    }
+
+                    // Synchronise hashtags
+                    try {
+                        $cleanCatTag = (string)preg_replace('/[^a-zA-Z0-9]/', '', $category);
+                        $tagsToSync = "#FamilyChronicle #{$cleanCatTag} {$broadcastMessage}";
+                        HashtagService::syncHashtags(
+                            $this->famCode,
+                            'post',
+                            (string)$newPostNo,
+                            (string)$this->userId,
+                            $tagsToSync
+                        );
+                    } catch (\Throwable $tagEx) {
+                        // Resilient fallback: Hashtag failure does not abort response
+                    }
+                } catch (\Throwable $postEx) {
+                    // Graceful fallback: Feed broadcast failure logged without blocking journal creation
+                    error_log('FamilyJournal feed auto-broadcast error: ' . $postEx->getMessage());
+                }
+            }
 
             // nosemgrep: php.lang.security.injection.echoed-request.echoed-request -- JSON API response with json_encode and application/json header
             echo json_encode([

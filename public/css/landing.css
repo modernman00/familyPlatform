@@ -560,9 +560,10 @@ body.dark-theme .back-to-top-btn:hover {
     }
 
     .btn-sm, .button.is-small {
-        min-height: 36px;
-        padding: 0.28rem 0.65rem !important;
-        font-size: 0.78rem !important;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0.35rem 0.75rem !important;
+        font-size: 0.82rem !important;
         border-radius: 8px !important;
     }
 }

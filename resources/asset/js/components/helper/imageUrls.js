@@ -35,6 +35,11 @@ export function getPostImageUrl(img) {
         return '';
     }
 
+    // Direct path under public/images/ or images/ or resources/
+    if (clean.startsWith('/public/images/') || clean.startsWith('/images/')) {
+        return clean;
+    }
+
     // Extract clean basename if path contains directories
     const parts = clean.split(/[/\\]/);
     const basename = parts[parts.length - 1];
