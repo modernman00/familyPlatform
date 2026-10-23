@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(studio): init child-partner picker lazily; stabilise grandparent E2E modal typing",
+    "title": "Xx",
     "notes": [
-        "Fix(studio): init child-partner picker lazily; stabilise grandparent E2E modal typing",
-        "Fix login redirect flow; pass all pre\u2011flight gates",
-        "Fix(composer): restore floating emoji picker, facebook-parity tagging, and gif media attachments"
+        "Xx",
+        "Migrate service worker to sw.js and update recommendation UI text to invite",
+        "Fix(studio): init child-partner picker lazily; stabilise grandparent E2E modal typing"
     ],
     "released_at": "2026-10-23",
-    "commit": "d81510b"
+    "commit": "9767dff"
 }
