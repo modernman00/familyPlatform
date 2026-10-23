@@ -15,7 +15,9 @@ describe('Family tree: unknown gender handling', () => {
             form: true,
             body: { node_id: 1, gender: 'Banana' },
             failOnStatusCode: false,
-            headers: { 'X-Cypress-Test': 'true' },
+            // No X-Cypress-Test header: it defines TESTING_ENV, which makes showError() swallow the
+            // HttpException and leave the response at an empty 200.
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
         }).then((res) => {
             expect(res.status).to.be.oneOf([400, 403, 419]);
         });
