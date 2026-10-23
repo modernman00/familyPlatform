@@ -1261,6 +1261,7 @@
             document.getElementById('studioStep2-partner').classList.remove('d-none');
         } else if (type === 'child') {
             document.getElementById('studioStep2-child').classList.remove('d-none');
+            initStudioChildUnion();
         } else if (type === 'sibling') {
             document.getElementById('studioStep2-sibling').classList.remove('d-none');
         } else if (type === 'parents' || type === 'grandparents') {
@@ -1651,16 +1652,19 @@
         submitStudioForm(this, '/member/organogram/editor/partner', 'studioSavePartnerBtn', 'Saving Partner...', 'partner');
     });
 
-    (function initStudioChildUnion() {
+    function initStudioChildUnion() {
         const sel = document.getElementById('studioChildUnion');
         const wrap = document.getElementById('studioChildNewPartnerWrap');
         if (!sel) return;
         // No existing partnership: the only choice is a new partner, so make it the value
         if (!sel.querySelector('option:not([value="new"])')) sel.value = 'new';
         const sync = () => wrap?.classList.toggle('d-none', sel.value !== 'new');
-        sel.addEventListener('change', sync);
+        if (!sel.dataset.bound) {
+            sel.addEventListener('change', sync);
+            sel.dataset.bound = '1';
+        }
         sync();
-    })();
+    }
 
     document.getElementById('studioChildForm')?.addEventListener('submit', function(e) {
         e.preventDefault();

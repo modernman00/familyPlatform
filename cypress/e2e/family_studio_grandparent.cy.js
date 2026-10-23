@@ -89,6 +89,10 @@ describe('Family Studio - Add Grandparent', () => {
 
                 cy.contains('.add-card-title', 'Add Grandparent').click();
                 cy.get('#studioGrandSide option').should('have.length.at.least', 1);
+                // Let the Bootstrap modal finish its fade/focus-trap before typing (typing mid-transition dropped characters)
+                cy.get('#studioAddRelativeModal.show').should('be.visible');
+                cy.get('#studioParentsForm [name=father_first_name]').should('be.visible').and('not.be.disabled');
+                cy.wait(600);
                 cy.get('#studioParentsForm [name=father_first_name]').clear().type('Gramps' + uid);
                 cy.get('#studioParentsForm [name=father_last_name]').clear().type('Elder');
                 cy.get('#studioParentsForm [name=mother_first_name]').clear().type('Granny' + uid);
