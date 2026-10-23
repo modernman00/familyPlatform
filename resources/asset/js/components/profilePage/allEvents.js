@@ -61,6 +61,9 @@ try {
             if (typeof window.__resetTagBuilder === 'function') {
                 window.__resetTagBuilder();
             }
+            if (typeof window.__resetThenNow === 'function') {
+                window.__resetThenNow();
+            }
         });
     }
 
@@ -107,6 +110,19 @@ try {
                 }
             }
 
+            // Then & Now needs both photos before anything is sent.
+            if (!isEditing && typeof window.__thenNowReady === 'function') await window.__thenNowReady();
+            const thenNow = !isEditing && typeof window.__getThenNowFiles === 'function' ? window.__getThenNowFiles() : null;
+            if (!isEditing && document.getElementById('thenNowFlag')?.value === '1' && (!thenNow?.then || !thenNow?.now)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Then & Now Incomplete',
+                    text: 'Please pick both a Then photo and a Now photo.',
+                    confirmButtonColor: '#4ade80'
+                });
+                return;
+            }
+
             let formData;
             if (!isEditing) {
                 formData = new FormData(formExtra);
@@ -120,7 +136,12 @@ try {
                     ? selectedFiles
                     : (fileInput && fileInput.files ? Array.from(fileInput.files) : []);
 
-                if (rawFiles.length > 0) {
+                if (thenNow) {
+                    formData.delete('post_img[]');
+                    formData.delete('post_img');
+                    formData.append('post_img[]', thenNow.then, thenNow.then.name);
+                    formData.append('post_img[]', thenNow.now, thenNow.now.name);
+                } else if (rawFiles.length > 0) {
                     formData.delete('post_img[]');
                     formData.delete('post_img');
                     rawFiles.forEach((file) => {
@@ -181,6 +202,9 @@ try {
                     // Reset the poll builder after a successful submission
                     if (typeof window.__resetPollBuilder === 'function') {
                         window.__resetPollBuilder();
+                    }
+                    if (typeof window.__resetThenNow === 'function') {
+                        window.__resetThenNow();
                     }
                     if (typeof window.__resetTagBuilder === 'function') {
                         window.__resetTagBuilder();

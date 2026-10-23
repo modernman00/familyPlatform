@@ -211,4 +211,56 @@ final class FamilyRelationshipRequestTest extends OrganogramTestCase
         $this->assertLessThan($used, $declared, 'layoutUnions must be declared in the outer scope (a block-scoped const crashed the tree)');
         $this->assertStringNotContainsString('const layoutUnions', $blade);
     }
+
+    // ---- "Father / Mother - tap to add" + maiden names ----------------------
+
+    public function testFillPlaceholderKeepsLinksAndOnlyTouchesPlaceholders(): void
+    {
+        $solo = $this->seedNode('Solo', 'Person', 'Male', 0);
+        $ctx = null;
+        G::upsertSibling($this->pdo, $this->famCode, $solo, ['first_name' => 'Half', 'parentage' => 'Same_Mother'], $ctx);
+        $ph = $this->pdo->prepare('SELECT id, gender FROM family_nodes WHERE family_code = ? AND is_placeholder = 1 ORDER BY id');
+        $ph->execute([$this->famCode]);
+        $rows = $ph->fetchAll();
+        $mother = null;
+        foreach ($rows as $r) {
+            if ($r['gender'] === 'Female') {
+                $mother = (int)$r['id'];
+            }
+        }
+        $this->assertNotNull($mother);
+
+        $node = G::fillPlaceholder($this->pdo, $this->famCode, $mother, 'Funke', 'Akinduro');
+        $this->assertSame('Funke', $node['first_name']);
+        $this->assertSame(0, (int)$node['is_placeholder']);
+        $this->assertSame('Mother', $node['bio']);
+        $halfStmt = $this->pdo->prepare("SELECT id FROM family_nodes WHERE first_name = 'Half' AND family_code = ?");
+        $halfStmt->execute([$this->famCode]);
+        $this->assertSame('half', G::siblingKind($this->pdo, $this->famCode, $solo, (int)$halfStmt->fetchColumn())['type']);
+
+        // a real person (not a placeholder) can never be overwritten through this door
+        $this->assertNull(G::fillPlaceholder($this->pdo, $this->famCode, $this->dad, 'Hacked'));
+        $this->assertSame('Dad', $this->nodeById($this->dad)['first_name']);
+        // nor a node of another family
+        $this->assertNull(G::fillPlaceholder($this->pdo, 'OTHER_FAMILY', $mother, 'Hacked'));
+        $this->assertNull(G::fillPlaceholder($this->pdo, $this->famCode, $mother, '   '));
+    }
+
+    public function testFillPlaceholderEndpointRejectsRealNodesAndBlankNames(): void
+    {
+        $_POST = ['node_id' => (string)$this->dad, 'first_name' => 'Hacked'];
+        $resp = $this->captureJsonOutput(fn () => $this->controller()->fillPlaceholder());
+        $this->assertSame(403, (int)($resp['code'] ?? 0));
+        $_POST = ['node_id' => (string)$this->dad, 'first_name' => ''];
+        $resp = $this->captureJsonOutput(fn () => $this->controller()->fillPlaceholder());
+        $this->assertSame(400, (int)($resp['code'] ?? 0));
+    }
+
+    public function testMaidenNameIsStoredForWifeAndSister(): void
+    {
+        $p = G::upsertPartner($this->pdo, $this->famCode, $this->ego, ['first_name' => 'Ada', 'last_name' => 'Oguns', 'gender' => 'Female', 'status' => 'married', 'maiden_name' => 'Akinduro']);
+        $this->assertSame('Akinduro', $this->nodeById($p['partner_id'])['maiden_name']);
+        $sid = G::upsertSibling($this->pdo, $this->famCode, $this->ego, ['first_name' => 'Bisi', 'gender' => 'Female', 'maiden_name' => 'Oguns']);
+        $this->assertSame('Oguns', $this->nodeById($sid)['maiden_name']);
+    }
 }

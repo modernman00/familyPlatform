@@ -27,6 +27,10 @@
         <button type="button" class="reel-tray-filter-pill" data-reel-filter="storytelling">📖 Stories</button>
         <button type="button" class="reel-tray-filter-pill" data-reel-filter="first_steps">👶 Kids</button>
         <button type="button" class="reel-tray-filter-pill" data-reel-filter="wedding">💍 Weddings</button>
+        <button type="button" class="reel-tray-filter-pill" data-reel-filter="night_out">🌙 Night Out</button>
+        <button type="button" class="reel-tray-filter-pill" data-reel-filter="weekend_out">🏖️ Weekend Out</button>
+        <button type="button" class="reel-tray-filter-pill" data-reel-filter="holiday">✈️ Holidays</button>
+        <button type="button" class="reel-tray-filter-pill" data-reel-filter="birthday">🎂 Birthdays</button>
     </div>
 
     <div class="reels-tray-scroll" id="reelsTrayScroll">

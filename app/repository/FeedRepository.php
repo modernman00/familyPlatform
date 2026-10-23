@@ -300,6 +300,12 @@ class FeedRepository
         }
 
         $polls = PollData::getPollsForPosts($postIds, $userId);
+        try {
+            $comparisons = \App\model\PostComparison::getForPosts($postIds);
+        } catch (\Throwable $cmpEx) {
+            $comparisons = [];
+            \error_log('[FeedRepository::hydrateEngagement comparisons] ' . $cmpEx->getMessage());
+        }
         $reactions = ReactionData::getReactionsForPosts($postIds);
         $userReactions = ReactionData::getUserReactionsForPosts($userId, $postIds);
 
@@ -345,6 +351,7 @@ class FeedRepository
         foreach ($rows as &$post) {
             $pNo = (int)($post['post_no'] ?? 0);
             $post['poll'] = $polls[$pNo] ?? null;
+            $post['comparison'] = $comparisons[$pNo] ?? null;
             $post['post_tags'] = $postTagsByPostNo[$pNo] ?? [];
 
             $post['reactions'] = array_values(array_filter($reactions, function ($r) use ($pNo) {

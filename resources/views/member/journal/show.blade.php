@@ -111,7 +111,7 @@
             $words = str_word_count(strip_tags((string)($journal['content'] ?? '')));
             $readTime = max(1, (int)ceil($words / 200)) . ' min read';
             $journalDate = !empty($journal['created_at']) ? date('F j, Y', strtotime((string)$journal['created_at'])) : 'Recent';
-            $isAuthor = ($journal['author_id'] === ($_SESSION['id'] ?? '')) || (($_SESSION['type'] ?? '') === 'admin');
+            $isAuthor = ((string)$journal['author_id'] === (string)($_SESSION['id'] ?? '')) || (($_SESSION['type'] ?? '') === 'admin');
             $appUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/');
             $currentStoryUrl = $appUrl . '/familyJournal/' . $journal['id'];
             $whatsappShareUrl = 'https://api.whatsapp.com/send?text=' . rawurlencode('Family Chronicle: "' . (string)$journal['title'] . '" by ' . $authorName . "\n\n" . $currentStoryUrl);
@@ -137,7 +137,7 @@
             <div class="d-flex align-items-center gap-3">
                 <img src="{{ $avatarSrc }}" alt="{{ $authorName }}" class="rounded-circle shadow-sm" width="48" height="48" style="object-fit: cover;">
                 <div>
-                    <div class="fw-bold text-dark">{{ $authorName }}</div>
+                    <div class="fw-bold text-dark">{{ $authorName }}@if(!empty($contributors)) <span class="fw-normal text-muted small">with {{ htmlspecialchars(implode(', ', array_map(static fn ($c) => trim((string)($c['firstName'] ?? '') . ' ' . (string)($c['lastName'] ?? '')), $contributors)), ENT_QUOTES, 'UTF-8') }}</span>@endif</div>
                     <div class="text-muted small">Preserved on {{ $journalDate }}</div>
                 </div>
             </div>
@@ -150,6 +150,11 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2" onclick="window.print()" title="Print or save as PDF">
                     <i class="bi bi-printer"></i>
                 </button>
+                @if(!empty($canEdit))
+                    <a href="/familyJournal/{{ (int)$journal['id'] }}/edit" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-2" title="Edit chronicle" aria-label="Edit chronicle">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                @endif
                 @if($isAuthor)
                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2" id="btnDeleteJournal" onclick="deleteFamilyJournal({{ (int)$journal['id'] }})">
                         <i class="bi bi-trash"></i>

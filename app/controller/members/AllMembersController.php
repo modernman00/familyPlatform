@@ -167,7 +167,7 @@ final class AllMembersController extends AllMembersData
             // Fetch public photos only
             $publicPhotos = \App\model\Post::getAllImagesByAuthor($id, true);
 
-            \App\controller\BaseController::viewWithCsp('member/getProfile', compact('data', 'pictures', 'relativesWithImgs', 'postCount', 'publicPhotos'));
+            \App\controller\BaseController::viewWithCsp('member/getProfile', compact('data', 'pictures', 'relativesWithImgs', 'postCount', 'publicPhotos') + ['viewedMemberId' => (string) $id]);
         } catch (Exception $e) {
             showError($e);
         }

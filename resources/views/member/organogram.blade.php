@@ -289,6 +289,11 @@
                     <div class="card-meta">
                         <div><i class="bi bi-upc-scan me-1"></i> ID: <strong id="cardId">-</strong></div>
                         <div><i class="bi bi-gender-ambiguous me-1"></i> Gender: <strong id="cardGender">Male</strong></div>
+                        <div id="cardSetGenderWrap" style="display: none; margin-top: 6px;">
+                            <span style="font-size: 0.8rem; color: #fbbf24;">Gender not set. Mark as:</span>
+                            <button type="button" class="btn-action" data-set-gender="Male" style="min-height: 44px; padding: 6px 14px; border-radius: 999px; margin-left: 6px;">Male</button>
+                            <button type="button" class="btn-action" data-set-gender="Female" style="min-height: 44px; padding: 6px 14px; border-radius: 999px;">Female</button>
+                        </div>
                         <div><i class="bi bi-people-fill me-1"></i> Descendants: <strong id="cardDescendants">0</strong></div>
                     </div>
 
@@ -593,24 +598,87 @@
         </div>
 
         <!-- Legend (Canvas mode) -->
-        <div class="family-legend" id="familyLegend">
-            <div class="legend-item">
-                <div class="legend-color legend-male"></div>
-                <span>Male</span>
+        <div class="family-legend" id="familyLegend" role="group" aria-label="How to read the family tree">
+            <div class="legend-row">
+                <span class="legend-heading">People</span>
+                <div class="legend-item"><div class="legend-color legend-male"></div><span>Male</span></div>
+                <div class="legend-item"><div class="legend-color legend-female"></div><span>Female</span></div>
+                <div class="legend-item"><span class="legend-chip legend-chip-member">✓</span><span>Registered member</span></div>
+                <div class="legend-item"><span class="legend-chip legend-chip-memory">🕊️</span><span>In memory</span></div>
+                <div class="legend-item"><span class="legend-chip legend-chip-ghost"></span><span>Parent not added yet</span></div>
+                <div class="legend-item"><span class="legend-chip legend-chip-pending">?</span><span>Awaiting confirmation</span></div>
             </div>
-            <div class="legend-item">
-                <div class="legend-color legend-female"></div>
-                <span>Female</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color legend-spouse"></div>
-                <span>Spouse / Partner</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color legend-divorced"></div>
-                <span>Divorced / Past Union</span>
+            <div class="legend-row">
+                <span class="legend-heading">Relationships</span>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="6 4"/></svg><span>Spouse / Partner</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4"/></svg><span class="legend-stamp legend-stamp-divorced">DIVORCED</span></div>
+                <div class="legend-item"><span class="legend-stamp legend-stamp-separated">SEPARATED</span></div>
+                <div class="legend-item"><span class="legend-stamp legend-stamp-widowed">WIDOWED</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5"/></svg><span>Parent &amp; child</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5" stroke-dasharray="8 5"/></svg><span>Half-sibling (one shared parent)</span></div>
+                <div class="legend-item"><svg class="legend-line" viewBox="0 0 34 10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" stroke="#818cf8" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg><span>Step / adopted</span></div>
             </div>
         </div>
+
+
+    <!-- Quick add: fill a "not yet added" parent -->
+    <div class="modal fade" id="fillParentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:20px;">
+                <form id="fillParentForm" autocomplete="off">
+                    @csrf
+                    <input type="hidden" name="node_id" id="fillParentNodeId">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold" id="fillParentTitle">Add details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger d-none" id="fillParentError"></div>
+                        <div class="row g-3">
+                            <div class="col-6"><label class="form-label small fw-semibold" for="fillParentFirst">First name *</label>
+                                <input type="text" class="form-control" id="fillParentFirst" name="first_name" required></div>
+                            <div class="col-6"><label class="form-label small fw-semibold" for="fillParentLast">Last name</label>
+                                <input type="text" class="form-control" id="fillParentLast" name="last_name"></div>
+                            <div class="col-12"><label class="form-label small fw-semibold" for="fillParentEmail">Email (optional)</label>
+                                <input type="email" class="form-control" id="fillParentEmail" name="email"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" id="fillParentSave" style="min-height:44px">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        function openFillParentModal(nodeData) {
+            document.getElementById('fillParentNodeId').value = nodeData.id;
+            document.getElementById('fillParentTitle').textContent = 'Add ' + (/^(Father|Mother)$/.test(nodeData.name || '') ? nodeData.name.toLowerCase() : (nodeData.name || 'details'));
+            document.getElementById('fillParentError').classList.add('d-none');
+            document.getElementById('fillParentForm').reset();
+            document.getElementById('fillParentNodeId').value = nodeData.id;
+            const m = bootstrap.Modal.getOrCreateInstance(document.getElementById('fillParentModal'));
+            m.show();
+            setTimeout(() => document.getElementById('fillParentFirst')?.focus(), 350);
+        }
+        document.getElementById('fillParentForm')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('fillParentSave');
+            btn.disabled = true;
+            fetch('/member/organogram/editor/fill-placeholder', { method: 'POST', body: new FormData(this), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(d => {
+                    const ok = (d?.status === 200 || d?.status === 'success' || d?.statusCode === 200);
+                    if (ok) { window.location.reload(); return; }
+                    const err = document.getElementById('fillParentError');
+                    err.textContent = (d?.message && d.message.message) || d?.message || 'Could not save. Please try again.';
+                    err.classList.remove('d-none');
+                    btn.disabled = false;
+                })
+                .catch(() => { btn.disabled = false; });
+        });
+    </script>
 
         <!-- Person Detail Modal / Native Bottom Sheet Drawer -->
         <div class="person-modal" id="personModal">
@@ -821,7 +889,7 @@
 </div>
 
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.2"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.4"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1038,7 +1106,17 @@
                 is_current: u.is_current ? 1 : 0,
                 children: (graphData.children || [])
                     .filter(c => String(c.union_id) === String(u.id))
-                    .map(c => c.child_id)
+                    .map(c => c.child_id),
+                // Branch style per child: half-sibling (dashed) / step or adopted (dotted)
+                kinds: (graphData.children || [])
+                    .filter(c => String(c.union_id) === String(u.id))
+                    .reduce((acc, c) => {
+                        const n = graphData.nodes.find(x => String(x.id) === String(c.child_id));
+                        acc[String(c.child_id)] = (c.relationship_type === 'step' || c.relationship_type === 'adopted' || c.relationship_type === 'foster')
+                            ? 'step'
+                            : (n && n.sibling_kind === 'half' ? 'half' : '');
+                        return acc;
+                    }, {})
             }));
 
             // Break a full name onto (at most) two balanced lines so it fits the card
@@ -1075,6 +1153,9 @@
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined,
                     voice_capsule_url: node.voice_capsule_url || null,
                     is_placeholder: Boolean(node.is_placeholder),
+                    pending_confirmation: Boolean(node.pending_confirmation),
+                    maiden_name: node.maiden_name || '',
+                    birth_family_code: node.birth_family_code || '',
                     sibling_kind: node.sibling_kind || null,
                     raw: node
                 });
@@ -1159,12 +1240,18 @@
             });
             
             window.family = family;
+            setTimeout(() => window.autoSizeTreeStage && window.autoSizeTreeStage(), 400);
             window.familyTreeNodes = familyTreeNodes;
             window.graphData = graphData;
 
             // Intercept clicks to trigger the floating Luxury Detail Card & custom Modal flow
             family.on('click', function (sender, args) {
                 const nodeData = familyTreeNodes.find(n => String(n.id) === String(args.node.id));
+                // "Father / Mother - tap to add": open the quick add dialog instead of a person card
+                if (nodeData && nodeData.is_placeholder && !(window.__IS_READ_ONLY__ || (graphData && graphData.isReadOnly))) {
+                    openFillParentModal(nodeData);
+                    return;
+                }
                 if (nodeData) {
                     currentBaseNodeName = nodeData.name;
                     currentBaseNodeId = nodeData.id;
@@ -1221,6 +1308,9 @@
                 const miniBtn = document.getElementById('btnReopenLineageGuide');
                 if (banner) banner.classList.add('d-none');
                 if (miniBtn) miniBtn.classList.remove('d-none');
+                let freed = 150;
+                try { freed = parseInt(sessionStorage.getItem('fp_guide_h') || '150', 10) || 150; } catch(_) {}
+                if (banner) window.setTreeStageExpanded(true, freed);
             }
         } catch(_) {}
 
@@ -1377,10 +1467,48 @@
         }
     };
 
+    // Size the canvas to the tree (no dead space under a short tree) and let a dismissed
+    // Dynasty Guide hand its space to the canvas as extra headroom for bigger trees.
+    window.__guideExtraPx = 0;
+    window.autoSizeTreeStage = function() {
+        const stage = document.getElementById('treeStage');
+        const fam = window.family;
+        if (!stage || !fam || stage.classList.contains('fullscreen-active')) return;
+        const g = stage.querySelector('#tree svg > g');
+        const scale = Number(fam.transform && fam.transform.scale) || 1;
+        if (!g) return;
+        const gr = g.getBoundingClientRect();
+        const contentH = gr.height / scale;
+        const contentW = gr.width / scale;
+        // Scale the library's fit() will land on (width-bound for wide trees), so height follows width.
+        const fitScale = Math.max(0.48, Math.min(stage.clientWidth / Math.max(contentW + 120, 1), 1.15));
+        const vh = window.innerHeight || 800;
+        const mobile = window.matchMedia('(max-width: 768px)').matches;
+        const maxH = Math.round(vh * (mobile ? 0.75 : 0.8) + (window.__guideExtraPx || 0));
+        const minH = mobile ? 420 : 460;
+        const wanted = Math.round(contentH * fitScale + 170);
+        const h = Math.max(minH, Math.min(wanted, Math.max(maxH, minH)));
+        stage.style.setProperty('height', h + 'px', 'important');
+        stage.style.setProperty('min-height', minH + 'px', 'important');
+        setTimeout(() => {
+            window.dispatchEvent(new Event('resize'));
+            if (typeof fam.fit === 'function') fam.fit('family', null, false);
+        }, 300);
+    };
+
+    window.setTreeStageExpanded = function(expanded, extraPx) {
+        window.__guideExtraPx = expanded ? (Number(extraPx) > 0 ? Number(extraPx) : 150) : 0;
+        window.autoSizeTreeStage();
+    };
+
     window.dismissLineageGuide = function() {
         const banner = document.getElementById('missingNodeBanner');
         const miniBtn = document.getElementById('btnReopenLineageGuide');
         if (banner) {
+            const cs = getComputedStyle(banner);
+            const freed = Math.round(banner.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0));
+            try { sessionStorage.setItem('fp_guide_h', String(freed)); } catch(_) {}
+            window.setTreeStageExpanded(true, freed);
             banner.style.opacity = '0';
             banner.style.transform = 'translateY(-8px)';
             setTimeout(() => {
@@ -1394,6 +1522,7 @@
     window.reopenLineageGuide = function() {
         const banner = document.getElementById('missingNodeBanner');
         const miniBtn = document.getElementById('btnReopenLineageGuide');
+        window.setTreeStageExpanded(false);
         if (banner) {
             banner.classList.remove('d-none');
             banner.style.opacity = '0';
@@ -1445,7 +1574,25 @@
         if (nameEl) nameEl.textContent = node.name || 'Family Relative';
         if (roleEl) roleEl.textContent = (node.title || 'Family Member').toUpperCase();
         if (idEl) idEl.textContent = node.id + (node.legacyId ? ' (' + node.legacyId + ')' : '');
-        if (genderEl) genderEl.textContent = node.gender ? node.gender.toUpperCase() : 'MALE';
+        const hasKnownGender = ['male', 'female'].includes(String(node.gender || '').toLowerCase());
+        if (genderEl) genderEl.textContent = hasKnownGender ? node.gender.toUpperCase() : 'NOT SET';
+        const setGenderWrap = document.getElementById('cardSetGenderWrap');
+        if (setGenderWrap) {
+            const canEditTree = !(Boolean(window.__IS_READ_ONLY__) || (typeof graphData !== 'undefined' && graphData && graphData.isReadOnly));
+            setGenderWrap.style.display = (!hasKnownGender && canEditTree && !node.is_placeholder) ? 'block' : 'none';
+            setGenderWrap.querySelectorAll('[data-set-gender]').forEach(btn => {
+                btn.onclick = () => {
+                    const fd = new FormData();
+                    fd.append('node_id', node.id);
+                    fd.append('gender', btn.dataset.setGender);
+                    fd.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
+                    fetch('/member/organogram/editor/set-gender', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => r.json())
+                        .then(d => { if (d?.status === 'success') window.location.reload(); else alert(d?.message || 'Could not update gender.'); })
+                        .catch(() => alert('Could not update gender.'));
+                };
+            });
+        }
         if (avatarEl) avatarEl.src = node.img || (node.gender === 'female' ? '/resources/images/profile/avatarF.png' : '/resources/images/profile/avatarM.png');
 
         const layoutNode = window.family && window.family.layout && window.family.layout.nodes 

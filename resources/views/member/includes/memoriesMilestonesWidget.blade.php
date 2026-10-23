@@ -109,6 +109,13 @@ $wId = $widgetId ?? 'memoriesWidgetDesktop';
                                             <div class="text-muted small text-truncate" style="font-size: 0.75rem;" x-text="milestone.subtitle"></div>
                                         </div>
                                     </div>
+                                    <button type="button" class="btn btn-sm rounded-pill flex-shrink-0 me-1 fw-bold"
+                                            style="min-height:44px; background:#8b5cf6; color:#fff;"
+                                            x-show="milestone.days_remaining === 0 && (milestone.type === 'birthday' || milestone.type === 'anniversary')"
+                                            :aria-label="'Share a Then and Now for ' + milestone.title"
+                                            @click="window.__openThenNow('', { caption: thenNowCaption(milestone) })">
+                                        <i class="bi bi-hourglass-split"></i> Then &amp; Now
+                                    </button>
                                     <span class="badge rounded-pill px-2.5 py-1 fw-bold flex-shrink-0" 
                                           :class="milestone.days_remaining === 0 ? 'bg-danger text-white' : 'bg-light text-primary border'"
                                           style="font-size: 0.72rem;" 
@@ -201,6 +208,12 @@ if (typeof window.memoriesMilestonesWidget !== 'function') {
 
             initWidget() {
                 this.loadData();
+            },
+
+            thenNowCaption(milestone) {
+                const title = String(milestone?.title || '').replace(/'s (Birthday|Anniversary)$/, '');
+                if (milestone?.type === 'anniversary') return `Then & Now: ${title} 💞 #ThenAndNow`;
+                return `Then & Now for ${title}'s birthday 🎂 #ThenAndNow`;
             },
 
             async loadData() {

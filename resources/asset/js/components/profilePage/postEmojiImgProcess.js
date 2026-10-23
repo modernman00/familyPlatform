@@ -3,6 +3,9 @@ import { showEmojiPicker, initEmojiPickerUX } from '../emojiPicker.js';
 import { imagePreview } from '../fileUploadPreview';
 import { parseVideoUrl } from './videoParser';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import { guessPhotoYear } from '../helper/photoDate';
+import { openGhostCamera } from './thenNowGhostCamera';
 
 // Helper to smooth scroll an element into view within the scrollable modal body
 const scrollDrawerIntoView = (el) => {
@@ -171,6 +174,140 @@ window.applyTriviaTemplate = (type) => {
 };
 
 window.__resetPollBuilder = closePoll;
+
+// ----------------------------------------------------
+// 3b. THEN & NOW (before / after) BUILDER — RFC-0002
+// ----------------------------------------------------
+const addThenNowBtn = document.getElementById('addThenNowBtn');
+const thenNowContainer = document.getElementById('thenNowContainer');
+const thenNowFlag = document.getElementById('thenNowFlag');
+const thenNowReplyTo = document.getElementById('thenNowReplyTo');
+const thenNowFiles = { then: null, now: null };
+// In-flight EXIF read + compression per slot, so camera and Post can wait for a photo that is still being prepared.
+const thenNowWork = { then: Promise.resolve(), now: Promise.resolve() };
+
+const setThenNowSlot = (slot, file) => {
+    thenNowFiles[slot] = file || null;
+    const img = document.getElementById(`${slot}Preview`);
+    const placeholder = document.getElementById(`${slot}Placeholder`);
+    if (!img || !placeholder) return;
+    if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
+    if (file) {
+        img.src = URL.createObjectURL(file);
+        img.classList.remove('d-none');
+        placeholder.classList.add('d-none');
+    } else {
+        img.removeAttribute('src');
+        img.classList.add('d-none');
+        placeholder.classList.remove('d-none');
+    }
+};
+
+const closeThenNow = () => {
+    if (!thenNowContainer) return;
+    thenNowContainer.classList.add('d-none');
+    if (addThenNowBtn) addThenNowBtn.classList.remove('thennow-active');
+    if (thenNowFlag) thenNowFlag.value = '';
+    if (thenNowReplyTo) thenNowReplyTo.value = '';
+    thenNowContainer.querySelectorAll('input[type="text"], input[type="file"]').forEach(i => (i.value = ''));
+    setThenNowSlot('then', null);
+    setThenNowSlot('now', null);
+    const title = document.getElementById('thenNowTitle');
+    if (title) title.textContent = 'Then & Now';
+};
+
+const openThenNow = (replyToPostNo = '') => {
+    if (!thenNowContainer) return;
+    thenNowContainer.classList.remove('d-none');
+    if (addThenNowBtn) addThenNowBtn.classList.add('thennow-active');
+    if (thenNowFlag) thenNowFlag.value = '1';
+    if (thenNowReplyTo) thenNowReplyTo.value = replyToPostNo ? String(replyToPostNo) : '';
+    const title = document.getElementById('thenNowTitle');
+    if (title) title.textContent = replyToPostNo ? 'Add your Then & Now' : 'Then & Now';
+    scrollDrawerIntoView(thenNowContainer);
+};
+
+if (addThenNowBtn && thenNowContainer) {
+    addThenNowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (thenNowContainer.classList.contains('d-none')) openThenNow();
+        else closeThenNow();
+    });
+    document.getElementById('removeThenNowBtn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeThenNow();
+    });
+    const labelInput = (slot) => thenNowContainer.querySelector(`input[name="${slot}_label"]`);
+    // Fill the year only when the member hasn't typed one; never overwrite their words.
+    const suggestYear = (slot, year) => {
+        const input = labelInput(slot);
+        if (input && year && !input.value.trim()) {
+            input.value = String(year);
+            input.dataset.guessed = '1';
+        }
+    };
+    ['then', 'now'].forEach((slot) => {
+        document.getElementById(`${slot}ImgInput`)?.addEventListener('change', (e) => {
+            const file = e.target?.files?.[0] || null;
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                setThenNowSlot(slot, null);
+                return;
+            }
+            thenNowWork[slot] = (async () => {
+                // Read the date from the original: compression re-encodes and drops EXIF.
+                const year = await guessPhotoYear(file);
+                try {
+                    const { compressImageFile } = await import('../helper/imageCompressor');
+                    setThenNowSlot(slot, await compressImageFile(file));
+                } catch (_) {
+                    setThenNowSlot(slot, file);
+                }
+                suggestYear(slot, year);
+            })();
+        });
+    });
+
+    document.getElementById('nowCameraBtn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await thenNowWork.then;
+        if (!thenNowFiles.then) {
+            Swal.fire({ icon: 'info', title: 'Pick the Then photo first', text: 'The camera shows it faintly on screen so you can line up the same pose.', confirmButtonColor: '#8b5cf6' });
+            return;
+        }
+        const shot = await openGhostCamera(thenNowFiles.then);
+        if (shot) {
+            setThenNowSlot('now', shot);
+            suggestYear('now', new Date().getFullYear());
+        }
+    });
+}
+
+window.__getThenNowFiles = () => (
+    thenNowFlag?.value === '1' ? { then: thenNowFiles.then, now: thenNowFiles.now } : null
+);
+window.__resetThenNow = closeThenNow;
+// Resolves once any photo still being compressed is ready; Post waits on this.
+window.__thenNowReady = () => Promise.all([thenNowWork.then, thenNowWork.now]);
+// Used by the "Add your Then & Now" button on a feed card.
+window.__openThenNow = (replyToPostNo, opts = {}) => {
+    const modalEl = document.getElementById('postModal');
+    if (modalEl && window.bootstrap?.Modal) window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    openThenNow(replyToPostNo);
+    // Milestone prompts hand over a ready-made caption; never overwrite what is already typed.
+    const caption = typeof opts?.caption === 'string' ? opts.caption : '';
+    const box = document.getElementById('postMessage');
+    const applyCaption = () => {
+        if (caption && box && !box.value.trim()) {
+            box.value = caption;
+            box.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    };
+    applyCaption();
+    // The modal resets the form as it opens, so apply again once it is fully shown.
+    modalEl?.addEventListener('shown.bs.modal', applyCaption, { once: true });
+};
+
 
 // ----------------------------------------------------
 // 4. VIDEO EMBED & UPLOAD UI LOGIC

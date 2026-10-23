@@ -205,9 +205,21 @@
                                         <div class="text-muted" style="font-size: 0.72rem;">{{ $journalDate }}</div>
                                     </div>
                                 </div>
-                                <a href="/familyJournal/{{ $journal['id'] }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" style="font-size: 0.8rem;">
-                                    Read <i class="bi bi-arrow-right ms-1"></i>
-                                </a>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if((string)$journal['author_id'] === (string)($_SESSION['id'] ?? '') || ($_SESSION['type'] ?? '') === 'admin' || in_array((string)$journal['id'], $contributedIds ?? [], true))
+                                        <a href="/familyJournal/{{ (int)$journal['id'] }}/edit" class="btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center justify-content-center" style="min-width: 44px; min-height: 44px;" title="Edit chronicle" aria-label="Edit chronicle">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    @endif
+                                    @if((string)$journal['author_id'] === (string)($_SESSION['id'] ?? '') || ($_SESSION['type'] ?? '') === 'admin')
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill d-inline-flex align-items-center justify-content-center" style="min-width: 44px; min-height: 44px;" title="Delete chronicle" aria-label="Delete chronicle" onclick="deleteFamilyJournal({{ (int)$journal['id'] }})">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    @endif
+                                    <a href="/familyJournal/{{ $journal['id'] }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold d-inline-flex align-items-center" style="font-size: 0.8rem; min-height: 44px;">
+                                        Read <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -239,4 +251,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@push('scripts')
+<script>
+function deleteFamilyJournal(id) {
+    if (!confirm('Are you sure you want to remove this family chronicle? This cannot be undone.')) {
+        return;
+    }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+        || document.querySelector('input[name="token"]')?.value
+        || '{{ $_SESSION['token'] ?? '' }}';
+    fetch('/familyJournal/' + id + '/delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-XSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ token: csrfToken })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data?.status === 'success') {
+            window.location.reload();
+        } else {
+            alert(data?.message || 'Unable to delete chronicle.');
+        }
+    })
+    .catch(() => alert('Network error occurred.'));
+}
+</script>
+@endpush
 @endsection

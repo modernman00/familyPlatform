@@ -30,6 +30,39 @@ use PDO;
 final class CollateralKinshipService
 {
     /**
+     * Remove unions whose two partners are directly parent and child of each other.
+     * Single-parent shells (partner_1 == partner_2) are kept.
+     *
+     * @param array<int, array<string, mixed>> $unions
+     * @param array<int, array<string, mixed>> $children
+     * @return array<int, array<string, mixed>>
+     */
+    public static function dropParentChildUnions(array $unions, array $children): array
+    {
+        $partnersOf = [];
+        foreach ($unions as $u) {
+            $partnersOf[(int)$u['id']] = [(int)$u['partner_1_id'], (int)$u['partner_2_id']];
+        }
+        // childId => set of parent ids
+        $parentsOf = [];
+        foreach ($children as $c) {
+            foreach ($partnersOf[(int)$c['union_id']] ?? [] as $pid) {
+                if ($pid > 0) {
+                    $parentsOf[(int)$c['child_id']][$pid] = true;
+                }
+            }
+        }
+        return array_values(array_filter($unions, static function (array $u) use ($parentsOf): bool {
+            $a = (int)$u['partner_1_id'];
+            $b = (int)$u['partner_2_id'];
+            if ($a === $b || $a <= 0 || $b <= 0) {
+                return true;
+            }
+            return !isset($parentsOf[$a][$b]) && !isset($parentsOf[$b][$a]);
+        }));
+    }
+
+    /**
      * Build full multi-generational collateral graph centered on an Ego member
      *
      * @param string $familyCode Primary family code of the context
@@ -75,6 +108,15 @@ final class CollateralKinshipService
         ");
         $stmtChildren->execute([$familyCode]);
         $allChildrenRaw = $stmtChildren->fetchAll(PDO::FETCH_ASSOC);
+
+        // A union between a person and their own parent can never be drawn sensibly (it drags the parent
+        // into the child's row and collides with them) - hide it instead of corrupting the whole layout.
+        $allUnionsRaw = self::dropParentChildUnions($allUnionsRaw, $allChildrenRaw);
+        $keptUnionIds = array_flip(array_map(static fn(array $u): int => (int)$u['id'], $allUnionsRaw));
+        $allChildrenRaw = array_values(array_filter(
+            $allChildrenRaw,
+            static fn(array $c): bool => isset($keptUnionIds[(int)$c['union_id']])
+        ));
 
         // Index raw nodes by ID
         $nodesById = [];
@@ -375,6 +417,16 @@ final class CollateralKinshipService
 
         // 5. Build Final Formatted Nodes, Unions, and Children Sets
         // Filter down to collected nodes in this multi-generational network
+        // Relatives still waiting for a family member to confirm the connection
+        $pendingNodeIds = [];
+        try {
+            $pStmt = $db->prepare("SELECT DISTINCT node_id FROM family_relationship_requests WHERE family_code = ? AND status = 'pending'");
+            $pStmt->execute([$familyCode]);
+            $pendingNodeIds = array_flip(array_map('intval', $pStmt->fetchAll(PDO::FETCH_COLUMN)));
+        } catch (\Throwable) {
+            // table not migrated yet: no badges
+        }
+
         $finalNodes = [];
         foreach ($selectedNodes as $nId => $_) {
             if (!isset($nodesById[$nId])) continue;
@@ -416,9 +468,40 @@ final class CollateralKinshipService
                 'generation_level' => $relativeGen[$nId] ?? 0,
                 'voice_capsule_url' => $n['voice_capsule_url'] ?? null,
                 'is_placeholder' => (bool)($n['is_placeholder'] ?? false),
+                'pending_confirmation' => isset($pendingNodeIds[$nId]),
                 'is_root' => ($nId === $egoNodeId)
             ];
         }
+
+        // Friendly names for "not yet added" parents: "Father" / "Mother" for the ego's own,
+        // "Eniola's father" for a half-sibling's other parent (never "Unknown ...").
+        foreach ($finalNodes as $phId => &$phNode) {
+            if (empty($phNode['is_placeholder'])) {
+                continue;
+            }
+            $isMum = strtolower((string)$phNode['gender']) === 'female';
+            $role = $isMum ? 'mother' : 'father';
+            $childId = 0;
+            foreach ($personUnions[$phId] ?? [] as $phUnion) {
+                foreach ($unionToChildren[$phUnion] ?? [] as $phChild) {
+                    if ($phChild === $egoNodeId) {
+                        $childId = $phChild;
+                        break 2;
+                    }
+                    if ($childId === 0) {
+                        $childId = $phChild;
+                    }
+                }
+            }
+            if ($childId === $egoNodeId || $childId === 0 || !isset($finalNodes[$childId])) {
+                $label = $isMum ? 'Mother' : 'Father';
+            } else {
+                $label = (string)$finalNodes[$childId]['first_name'] . "'s " . $role;
+            }
+            $phNode['full_name'] = $label;
+            $phNode['placeholder_label'] = $label;
+        }
+        unset($phNode);
 
         // Filter unions where AT LEAST ONE partner is in the selected nodes
         $finalUnions = [];

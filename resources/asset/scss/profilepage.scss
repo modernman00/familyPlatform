@@ -662,3 +662,224 @@
     z-index: 999;
 }
 
+
+
+/* ── Then & Now (before / after) — RFC-0002 ─────────────────────────────── */
+.btn-composer-action.action-thennow {
+    color: #8b5cf6;
+    &:hover { background-color: rgba(139, 92, 246, 0.14); color: #7c3aed; }
+    &.thennow-active {
+        background-color: #8b5cf6 !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+    }
+}
+
+.then-now-slots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.then-now-slot__pick {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 8px;
+    overflow: hidden;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-color);
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+    i { font-size: 1.6rem; }
+}
+
+.then-now__stage {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #0f172a;
+    touch-action: pan-y;
+}
+
+.then-now__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.then-now__tag {
+    position: absolute;
+    top: 10px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.7);
+    pointer-events: none;
+    &--then { left: 10px; }
+    &--now { right: 10px; }
+}
+
+.then-now__handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    margin-left: -1.5px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+
+    i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%) rotate(90deg);
+        border-radius: 50%;
+        background: #fff;
+        color: #0f172a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Native range = free keyboard + touch + screen-reader support */
+.then-now__range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+}
+
+.then-now__side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+
+    figure { margin: 0; text-align: center; }
+    img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; }
+    figcaption { font-size: 0.8rem; font-weight: 600; padding-top: 4px; }
+}
+
+.then-now__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+
+    .btn { min-height: 44px; }
+}
+
+/* ── Then & Now v2: ghost camera (RFC-0003) ─────────────────────────────── */
+body.ghost-cam-open { overflow: hidden; }
+
+.ghost-cam {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+}
+
+.ghost-cam__stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    max-height: calc(100vh - 96px);
+    margin: auto;
+    overflow: hidden;
+}
+
+.ghost-cam__video,
+.ghost-cam__ghost {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ghost-cam__ghost { pointer-events: none; }
+
+.ghost-cam__notice {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    margin: 0;
+    padding: 10px 14px;
+    color: #fff;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.8);
+    &:empty { display: none; }
+}
+
+.ghost-cam__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    color: #fff;
+    background: #0f172a;
+}
+
+.ghost-cam__opacity { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+
+.ghost-cam__btn {
+    width: 48px;
+    height: 48px;
+    border: 0;
+    border-radius: 50%;
+    color: #0f172a;
+    background: #fff;
+    font-size: 1.2rem;
+    &:disabled { opacity: 0.4; }
+}
+
+.ghost-cam__shutter { width: 64px; height: 64px; background: #8b5cf6; color: #fff; }
+
+/* ── Then & Now entry points: make them hard to miss ─────────────────────── */
+.btn-composer-action.action-thennow--labeled {
+    width: auto;
+    padding: 0 14px;
+    gap: 6px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+    &:hover { color: #fff; filter: brightness(1.08); background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+}
+
+.composer-quick-action.then-now-cta {
+    color: #fff;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+    &:hover, &:focus { color: #fff; filter: brightness(1.08); }
+}

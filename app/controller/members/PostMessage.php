@@ -208,6 +208,11 @@ final class PostMessage
         if ($postNoOverride !== null) {
             $post = Post::postByNo($postNoOverride);
             if (!empty($post)) {
+                try {
+                    $post['comparison'] = \App\model\PostComparison::getForPosts([(int)$postNoOverride])[(int)$postNoOverride] ?? null;
+                } catch (\Throwable $cmpEx) {
+                    error_log('[PostMessage::getNewPostPusher comparison] ' . $cmpEx->getMessage());
+                }
                 $targetFamCode = !empty($post['postFamCode']) ? (string)$post['postFamCode'] : (is_string($famCode) ? $famCode : '');
                 try {
                     Pusher::broadcastToFamily($targetFamCode, 'new-post', [$post]);

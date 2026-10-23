@@ -520,7 +520,7 @@
             num: 3,
             title: "Stage 3: Multigenerational Organogram, Lineage Nudges & WhatsApp Status Flyers",
             route: "/organogram",
-            desc: "Family members explore an interactive D3/SVG multigenerational tree with 1-tap WhatsApp Quests to fill missing links, prompt unmapped relatives to build their personal family tree via multi-channel notifications (In-App, WebPush, Email), and generate high-status heraldic family status flyers with live counts of connected members and generations. Blended families are first-class: record half-siblings (same mum or same dad only), step and adopted siblings, and former partners (divorced, separated, widowed) with children from each relationship. The tree stamps former unions DIVORCED / SEPARATED / WIDOWED and shows a greyed 'Not yet added' parent when only one parent is known.",
+            desc: "Family members explore an interactive D3/SVG multigenerational tree with 1-tap WhatsApp Quests to fill missing links, prompt unmapped relatives to build their personal family tree via multi-channel notifications (In-App, WebPush, Email), and generate high-status heraldic family status flyers with live counts of connected members and generations. Blended families are first-class: record half-siblings (same mum or same dad only), step and adopted siblings, and former partners (divorced, separated, widowed) with children from each relationship. The tree stamps former unions DIVORCED / SEPARATED / WIDOWED and shows a greyed 'Parent not added yet' parent when only one parent is known.",
             controller: "Family Genealogist & Visual Tree Architect",
             state: "NODE_MATCHED \u2192 TREE_CONNECTED",
             db: "Generational Lineage Tree, Lineage Quests & Multi-Channel Prompts",
@@ -530,10 +530,10 @@
             num: 4,
             title: "Stage 4: Family Chronicles, 16:9 Rich Social Cards, Private Hashtags & Smart Memory Pills",
             route: "/profilepage",
-            desc: "Relatives share multi-line celebration stories, milestone videos, and external event invites (such as PartyPlatform flyers) with automatic 16:9 rich OpenGraph social graphics unfurling, live composer previewing, self-healing URL reconstruction, private multi-tenant hashtags, smart memory pills, weekly Sunday Family Trivia, and time capsules.",
+            desc: "Relatives share multi-line celebration stories, milestone videos, and external event invites (such as PartyPlatform flyers) with automatic 16:9 rich OpenGraph social graphics unfurling, live composer previewing, self-healing URL reconstruction, private multi-tenant hashtags, smart memory pills, weekly Sunday Family Trivia, time capsules, and Then & Now before/after photo comparisons (drag-to-compare slider, side-by-side view, and a one-tap \"Add your Then & Now\" reply loop, a ghost-overlay camera to re-create the old pose, birthday and anniversary prompts, EXIF year suggestions, a Then & Now timeline on profiles).",
             controller: "Family Storyteller & Memory Contributor",
             state: "TREE_CONNECTED \u2192 MOMENT_PUBLISHED",
-            db: "Family Feed, OpenGraph 16:9 Preview Cache, Family Hashtags, Memory Links & Reels Sanctuary",
+            db: "Family Feed, Then & Now Comparisons (post_comparisons), OpenGraph 16:9 Preview Cache, Family Hashtags, Memory Links & Reels Sanctuary",
             compliance: "Standard 19 Living Architecture & Strict SSRF-Hardened Cache Isolation"
         },
         {

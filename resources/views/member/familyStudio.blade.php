@@ -629,16 +629,20 @@
         <h3 class="h6 fw-bold mb-3 text-dark"><i class="bi bi-patch-question-fill text-warning me-2"></i>Please confirm {{ count($pendingRelRequests) === 1 ? 'a family connection' : count($pendingRelRequests) . ' family connections' }}</h3>
         @foreach($pendingRelRequests as $rr)
             @php
-                $rrLabel = ['half_sibling' => 'half-sibling', 'step_sibling' => 'step-sibling', 'former_partner' => 'former partner'][$rr['kind']] ?? 'relative';
+                $rrLabel = ['half_sibling' => 'half-sibling', 'step_sibling' => 'step-sibling', 'former_partner' => 'former partner', 'link_account' => ''][$rr['kind']] ?? 'relative';
             @endphp
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 border-top" data-rel-request="{{ $rr['id'] }}">
                 <div class="text-dark">
                     <strong>{{ $rr['requester_name'] !== '' ? $rr['requester_name'] : 'A family member' }}</strong>
-                    added <strong>{{ $rr['relative_name'] }}</strong> as a {{ $rrLabel }}. Is this right?
+                    @if($rr['kind'] === 'link_account')
+                        added <strong>{{ $rr['relative_name'] }}</strong> to the family tree and thinks that is you. Is it?
+                    @else
+                        added <strong>{{ $rr['relative_name'] }}</strong> as a {{ $rrLabel }}. Is this right?
+                    @endif
                 </div>
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-success btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'approve', this)">Yes, confirm</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'decline', this)">No, remove</button>
+                    <button type="button" class="btn btn-success btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'approve', this)">{{ $rr['kind'] === 'link_account' ? "Yes, that's me" : 'Yes, confirm' }}</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'decline', this)">{{ $rr['kind'] === 'link_account' ? 'No, not me' : 'No, remove' }}</button>
                 </div>
             </div>
         @endforeach
@@ -964,6 +968,10 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-semibold">Maiden name (née) - if married (Optional)</label>
+                            <input type="text" name="maiden_name" class="form-control" placeholder="e.g. Akinduro">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">Relationship status</label>
                             <select name="union_status" class="form-select">
                                 <option value="married">Current spouse / partner</option>
@@ -1065,6 +1073,10 @@
                                 <option value="Male">Male (Brother)</option>
                                 <option value="Female">Female (Sister)</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Maiden name (née) - if she is married (Optional)</label>
+                            <input type="text" name="maiden_name" class="form-control" placeholder="e.g. Akinduro">
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">How are you related? *</label>
@@ -1646,6 +1658,69 @@
 
     }
 
+
+    // ---- "Is this person already a registered member?" (partner / child / sibling forms) ----
+    (function initMemberLookup() {
+        const forms = ['studioPartnerForm', 'studioChildForm', 'studioSiblingForm'];
+        let timer = null;
+        forms.forEach(id => {
+            const form = document.getElementById(id);
+            const email = form?.querySelector('input[type=email][name=email]');
+            if (!form || !email) return;
+            const note = document.createElement('div');
+            note.className = 'small mt-1 d-none';
+            note.setAttribute('data-member-note', '1');
+            email.parentElement.appendChild(note);
+
+            email.addEventListener('input', () => {
+                delete form.dataset.linkToken;
+                note.classList.add('d-none');
+                clearTimeout(timer);
+                const val = email.value.trim();
+                if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(val)) return;
+                timer = setTimeout(() => {
+                    const fd = new FormData();
+                    fd.append('email', val);
+                    const tok = form.querySelector('[name=_token]');
+                    if (tok) fd.append('_token', tok.value);
+                    fetch('/member/organogram/editor/member-lookup', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(r => r.json())
+                        .then(d => {
+                            const m = d?.message || {};
+                            if (!m.found) return;
+                            note.classList.remove('d-none');
+                            if (m.already_on_tree) {
+                                note.className = 'small mt-1 text-warning fw-semibold';
+                                note.textContent = `${m.masked} is already a member on this tree - check you are not adding them twice.`;
+                                return;
+                            }
+                            form.dataset.linkToken = m.link_token || '';
+                            note.className = 'small mt-1 text-success fw-semibold';
+                            note.textContent = m.same_family
+                                ? `✓ ${m.masked} is already a member. After saving, we'll ask them to confirm it's them and link their account.`
+                                : `✓ ${m.masked} is already a member in another family. After saving, we'll invite them to join yours.`;
+                        })
+                        .catch(() => {});
+                }, 600);
+            });
+        });
+    })();
+
+    // After a relative is saved, link the card to the member the lookup found
+    function linkSavedRelative(form, nodeId) {
+        const token = form?.dataset?.linkToken;
+        if (!token || !nodeId) return;
+        const fd = new FormData();
+        fd.append('node_id', nodeId);
+        fd.append('link_token', token);
+        const tok = form.querySelector('[name=_token]');
+        if (tok) fd.append('_token', tok.value);
+        delete form.dataset.linkToken;
+        fetch('/member/organogram/editor/member-link', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.json()).catch(() => {});
+        form.querySelector('[data-member-note]')?.classList.add('d-none');
+    }
+
     // AJAX Form submissions for Add relative (Real-Time In-Place DOM Insertion)
     document.getElementById('studioPartnerForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1731,6 +1806,7 @@
             const isOk = (data.status === 200 || data.status === 'success' || data.statusCode === 200);
             if (isOk) {
                 const msg = (data.message && typeof data.message === 'object') ? data.message : {};
+                linkSavedRelative(form, msg.node && msg.node.id);
                 
                 // Real-Time In-Place DOM Insertion for Added Relatives
                 if (relType === 'partner' && msg.node) {

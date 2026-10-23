@@ -175,6 +175,11 @@ final class ReelsController extends BaseController
 
             $caption = isset($_POST['caption']) ? trim((string)$_POST['caption']) : '';
             $category = isset($_POST['category']) ? trim((string)$_POST['category']) : 'milestone';
+            if ($category === 'custom') {
+                $custom = strtolower(trim((string)($_POST['custom_category'] ?? '')));
+                $custom = trim((string)preg_replace('/[^a-z0-9]+/', '_', $custom), '_');
+                $category = $custom !== '' ? substr($custom, 0, 30) : 'milestone';
+            }
             $musicTitle = isset($_POST['music_title']) ? trim((string)$_POST['music_title']) : 'Original Family Audio';
             $videoUrlInput = isset($_POST['video_url']) ? trim((string)$_POST['video_url']) : '';
             $videoPath = '';

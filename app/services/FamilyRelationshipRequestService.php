@@ -16,11 +16,13 @@ final class FamilyRelationshipRequestService
     public const HALF_SIBLING = 'half_sibling';
     public const STEP_SIBLING = 'step_sibling';
     public const FORMER_PARTNER = 'former_partner';
+    public const LINK_ACCOUNT = 'link_account';
 
     private const LABELS = [
         self::HALF_SIBLING => 'half-sibling',
         self::STEP_SIBLING => 'step-sibling',
         self::FORMER_PARTNER => 'former partner',
+        self::LINK_ACCOUNT => 'member of your family (is this you?)',
     ];
 
     /** Maps a sibling parentage to a request kind (null = no confirmation needed). */
@@ -96,6 +98,25 @@ final class FamilyRelationshipRequestService
     }
 
     /**
+     * Ask a registered member to confirm that a tree card is them.
+     *
+     * @return list<array{id:int, approver_id:string}>
+     */
+    public static function createLinkRequest(PDO $db, string $fam, string $requesterId, int $nodeId, string $memberId): array
+    {
+        if ($memberId === '' || $memberId === $requesterId) {
+            return [];
+        }
+        $ins = $db->prepare(
+            "INSERT IGNORE INTO family_relationship_requests (family_code, requester_id, approver_id, node_id, kind)
+             VALUES (?, ?, ?, ?, 'link_account')"
+        );
+        $ins->execute([$fam, $requesterId, $memberId, $nodeId]);
+        $id = (int)$db->lastInsertId();
+        return ($id > 0 && $ins->rowCount() > 0) ? [['id' => $id, 'approver_id' => $memberId]] : [];
+    }
+
+    /**
      * Notify approvers (in-app + push cascade). Call AFTER the transaction commits.
      *
      * @param list<array{id:int, approver_id:string}> $requests
@@ -159,6 +180,19 @@ final class FamilyRelationshipRequestService
             return ['ok' => false, 'status' => 'not_found', 'message' => 'Request not found or already answered.'];
         }
 
+        if ($approve && (string)$req['kind'] === self::LINK_ACCOUNT) {
+            $m = $db->prepare('SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1');
+            $m->execute([$approverId]);
+            $mr = $m->fetch(PDO::FETCH_ASSOC) ?: [];
+            $claim = KinshipEntityResolver::claimAndMergeNode((string)$req['family_code'], $approverId, (int)$req['node_id'], [
+                'firstName' => (string)($mr['firstName'] ?? ''),
+                'lastName' => (string)($mr['lastName'] ?? ''),
+            ]);
+            if (!$claim['success'] && (int)$claim['code'] !== 409) {
+                return ['ok' => false, 'status' => 'claim_failed', 'message' => (string)$claim['message']];
+            }
+        }
+
         $db->beginTransaction();
         try {
             $db->prepare('UPDATE family_relationship_requests SET status = ?, resolved_at = NOW() WHERE id = ?')
@@ -183,7 +217,7 @@ final class FamilyRelationshipRequestService
                 category: 'family',
                 priority: 'medium',
                 title: $approve ? '✅ Connection confirmed' : 'Connection declined',
-                body: $approve ? 'A family member confirmed the relationship you added.' : 'A family member declined a relationship you added. It was removed from the tree.',
+                body: $approve ? 'A family member confirmed the relationship you added.' : 'A family member declined a connection you added.',
                 actionUrl: '/familyStudio',
                 tag: 'relreq-done-' . $requestId,
                 familyCode: (string)$req['family_code'],
@@ -199,6 +233,9 @@ final class FamilyRelationshipRequestService
     /** Remove the declined relationship again (only the single link, never other family data). */
     private static function unlink(PDO $db, string $fam, int $nodeId, ?int $unionId, string $kind): void
     {
+        if ($kind === self::LINK_ACCOUNT) {
+            return; // "No, that's not me" only declines the link, the relative stays on the tree
+        }
         if ($kind === self::FORMER_PARTNER) {
             if ($unionId === null) {
                 return;

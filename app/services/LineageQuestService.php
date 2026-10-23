@@ -42,7 +42,7 @@ final class LineageQuestService
         $stmt = $db->prepare(
             'SELECT id, user_id, first_name, last_name, maiden_name, gender, birth_date, birth_year, is_deceased, generation_level, email, mobile
              FROM family_nodes
-             WHERE family_code = ?
+             WHERE family_code = ? AND is_placeholder = 0
              ORDER BY generation_level ASC, id ASC'
         );
         $stmt->execute([$familyCode]);

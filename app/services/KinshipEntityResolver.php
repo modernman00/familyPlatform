@@ -325,7 +325,7 @@ final class KinshipEntityResolver
         $candStmt = $db->prepare("
             SELECT id, family_code, first_name, last_name, gender, bio, email, mobile, avatar_url, generation_level
             FROM family_nodes
-            WHERE family_code = ? AND user_id IS NULL
+            WHERE family_code = ? AND user_id IS NULL AND is_placeholder = 0
             ORDER BY id ASC
         ");
         $candStmt->execute([$familyCode]);

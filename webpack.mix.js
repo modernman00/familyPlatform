@@ -37,7 +37,9 @@ mix.webpackConfig((webpack, config) => {
   );
   return {
     plugins,
-    output: { publicPath: "/public/" },
+    // The ?v=<hash> on lazy chunks stops the service worker's stale-while-revalidate cache
+    // (and browser caches) from serving an old profilePage.js after a deploy.
+    output: { publicPath: "/public/", chunkFilename: "js/[name].js?v=[contenthash:8]" },
     devtool,
     optimization: {
       splitChunks: {

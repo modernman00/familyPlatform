@@ -59,6 +59,7 @@ final class FamilyJournalController extends BaseController
             parent::viewWithCsp('member/journal/index', [
                 'data' => $userData,
                 'journals' => $journals,
+                'contributedIds' => FamilyJournal::getContributedJournalIds($this->userId),
                 'familyCode' => $this->famCode,
                 'totalCount' => count($journals)
             ]);
@@ -77,7 +78,8 @@ final class FamilyJournalController extends BaseController
 
             parent::viewWithCsp('member/journal/create', [
                 'data' => $userData,
-                'familyCode' => $this->famCode
+                'familyCode' => $this->famCode,
+                'familyMembers' => FamilyJournal::getFamilyMembers($this->famCode),
             ]);
         } catch (\Throwable $th) {
             \Src\Utility::showError($th);
@@ -100,10 +102,189 @@ final class FamilyJournalController extends BaseController
             parent::viewWithCsp('member/journal/show', [
                 'data' => $userData,
                 'journal' => $journal,
-                'familyCode' => $this->famCode
+                'familyCode' => $this->famCode,
+                'canEdit' => $this->canEdit($journal),
+                'contributors' => FamilyJournal::getContributors((int)$journal['id']),
             ]);
         } catch (\Throwable $th) {
             \Src\Utility::showError($th);
+        }
+    }
+
+    /**
+     * Validate and sanitise the posted chronicle fields (shared by store and update).
+     *
+     * @return array{title:string,category:string,mood:string,summary:string,cleanContent:string,status:string,slug:string,coverImage:?string}
+     */
+    private function collectInput(): array
+    {
+        $title = trim((string)filter_input(INPUT_POST, 'title', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $category = trim((string)filter_input(INPUT_POST, 'category', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $mood = trim((string)filter_input(INPUT_POST, 'mood', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $summary = trim((string)filter_input(INPUT_POST, 'summary', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
+        $contentRaw = $_POST['content'] ?? '';
+        $status = (string)filter_input(INPUT_POST, 'status', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+
+        if (empty(trim((string)$contentRaw)) && !empty($summary)) {
+            $contentRaw = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
+        }
+
+        if (empty($title) || empty(trim((string)$contentRaw))) {
+            throw new ValidationException("Title and story content are required.");
+        }
+
+        if (mb_strlen($title) < 3 || mb_strlen($title) > 255) {
+            throw new ValidationException("Story title must be between 3 and 255 characters.");
+        }
+
+        if (strlen((string)$contentRaw) > 500000) {
+            throw new ValidationException("Story content exceeds maximum allowed length (500KB).");
+        }
+
+        $allowedCategories = ['Milestone', 'Heritage & Tradition', 'Recipe', 'Oral History', 'Celebration', 'Memorial'];
+        if (!in_array($category, $allowedCategories, true)) {
+            $category = 'Milestone';
+        }
+
+        $allowedMoods = ['heartwarming', 'reflective', 'inspiring', 'humorous'];
+        if (!in_array($mood, $allowedMoods, true)) {
+            $mood = 'heartwarming';
+        }
+
+        $allowedStatuses = ['published', 'draft', 'archived'];
+        if (!in_array($status, $allowedStatuses, true)) {
+            $status = 'published';
+        }
+
+        // Sanitize rich HTML content using modern DOM-based HTML purifier
+        $cleanContent = AIService::purifyHtml((string)$contentRaw);
+
+        if (empty($summary)) {
+            $plain = strip_tags($cleanContent);
+            $summary = mb_substr($plain, 0, 200) . (mb_strlen($plain) > 200 ? '...' : '');
+        } else {
+            $summary = mb_substr($summary, 0, 500);
+        }
+
+        // Slug generation
+        $slug = strtolower(trim((string)preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
+        $slug .= '-' . substr(uniqid(), -4);
+
+        $coverImage = null;
+        if (!empty($_FILES['cover_image']) && $_FILES['cover_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            // Enterprise Gate: Strictly enforce image mime types and extensions for cover photos
+            $uploadedName = (string)($_FILES['cover_image']['name'] ?? '');
+            $fileExtension = strtolower(pathinfo($uploadedName, PATHINFO_EXTENSION));
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+            if (!in_array($fileExtension, $allowedExtensions, true)) {
+                throw new ValidationException("Cover photo must be a valid image file (JPEG, PNG, or WebP).");
+            }
+
+            $tmpFile = (string)($_FILES['cover_image']['tmp_name'] ?? '');
+            if (is_file($tmpFile)) {
+                $imgInfo = @getimagesize($tmpFile);
+                if ($imgInfo === false || !in_array($imgInfo['mime'], ['image/jpeg', 'image/png', 'image/webp'], true)) {
+                    throw new ValidationException("Cover photo file contents do not match a valid image format.");
+                }
+            }
+
+            $docRoot = defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 3);
+            $targetDir = rtrim($docRoot, '/') . '/public/images/journals/';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            
+            $uploadResult = FileUploader::fileUploadSingle($targetDir, 'cover_image');
+            $coverImage = '/public/images/journals/' . $uploadResult['fileName'];
+        }
+
+        return compact('title', 'category', 'mood', 'summary', 'cleanContent', 'status', 'slug', 'coverImage');
+    }
+
+    /**
+     * @param array<string, mixed> $journal
+     */
+    private function canEdit(array $journal): bool
+    {
+        return FamilyJournal::canEdit($journal, $this->userId, ($_SESSION['type'] ?? '') === 'admin');
+    }
+
+    /**
+     * Show the edit form (author, admin or co-contributor)
+     */
+    public function edit(int|string $id): void
+    {
+        try {
+            $userData = $this->membersData();
+            $journal = FamilyJournal::getJournalById($id, $this->famCode);
+            if (!$journal) {
+                throw new NotFoundException("Journal entry not found or belongs to another family network.");
+            }
+            if (!$this->canEdit($journal)) {
+                throw new ForbiddenException("Only the author or a co-contributor may edit this chronicle.");
+            }
+
+            parent::viewWithCsp('member/journal/create', [
+                'data' => $userData,
+                'familyCode' => $this->famCode,
+                'journal' => $journal,
+                'contributorIds' => FamilyJournal::getContributorIds((int)$journal['id']),
+                'familyMembers' => FamilyJournal::getFamilyMembers($this->famCode),
+                'canManageContributors' => FamilyJournal::canManage($journal, $this->userId, ($_SESSION['type'] ?? '') === 'admin'),
+            ]);
+        } catch (\Throwable $th) {
+            \Src\Utility::showError($th);
+        }
+    }
+
+    /**
+     * Update an existing chronicle (author, admin or co-contributor)
+     */
+    public function update(int|string $id): void
+    {
+        header('Content-Type: application/json');
+        try {
+            CheckToken::tokenCheck();
+
+            $journal = FamilyJournal::getJournalById($id, $this->famCode);
+            if (!$journal) {
+                throw new NotFoundException("Journal entry not found or belongs to another family network.");
+            }
+            if (!$this->canEdit($journal)) {
+                throw new ForbiddenException("Only the author or a co-contributor may edit this chronicle.");
+            }
+
+            $in = $this->collectInput();
+            FamilyJournal::updateJournal((int)$journal['id'], $this->famCode, [
+                'title'       => $in['title'],
+                'summary'     => $in['summary'],
+                'content'     => $in['cleanContent'],
+                'cover_image' => $in['coverImage'],
+                'remove_cover' => ($_POST['remove_cover'] ?? '') === '1',
+                'category'    => $in['category'],
+                'mood'        => $in['mood'],
+                'status'      => $in['status'],
+            ]);
+
+            // Only the author or an admin may change who the co-contributors are
+            if (FamilyJournal::canManage($journal, $this->userId, ($_SESSION['type'] ?? '') === 'admin')) {
+                $raw = $_POST['contributors'] ?? [];
+                $ids = is_array($raw) ? array_map('strval', $raw) : [];
+                FamilyJournal::setContributors((int)$journal['id'], $this->famCode, (string)$journal['author_id'], $ids, $this->userId);
+            }
+
+            echo json_encode([
+                'status'   => 'success',
+                'message'  => 'Chronicle updated.',
+                'id'       => (int)$journal['id'],
+                'redirect' => '/familyJournal/' . (int)$journal['id'],
+            ]);
+            exit;
+        } catch (\Throwable $e) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            exit;
         }
     }
 
@@ -116,86 +297,15 @@ final class FamilyJournalController extends BaseController
         try {
             CheckToken::tokenCheck();
 
-            $title = trim((string)filter_input(INPUT_POST, 'title', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-            $category = trim((string)filter_input(INPUT_POST, 'category', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-            $mood = trim((string)filter_input(INPUT_POST, 'mood', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-            $summary = trim((string)filter_input(INPUT_POST, 'summary', FILTER_SANITIZE_FULL_SPECIAL_CHARS));
-            $contentRaw = $_POST['content'] ?? '';
-            $status = (string)filter_input(INPUT_POST, 'status', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-
-            if (empty(trim((string)$contentRaw)) && !empty($summary)) {
-                $contentRaw = '<p>' . nl2br(htmlspecialchars($summary, ENT_QUOTES, 'UTF-8')) . '</p>';
-            }
-
-            if (empty($title) || empty(trim((string)$contentRaw))) {
-                throw new ValidationException("Title and story content are required.");
-            }
-
-            if (mb_strlen($title) < 3 || mb_strlen($title) > 255) {
-                throw new ValidationException("Story title must be between 3 and 255 characters.");
-            }
-
-            if (strlen((string)$contentRaw) > 500000) {
-                throw new ValidationException("Story content exceeds maximum allowed length (500KB).");
-            }
-
-            $allowedCategories = ['Milestone', 'Heritage & Tradition', 'Recipe', 'Oral History', 'Celebration', 'Memorial'];
-            if (!in_array($category, $allowedCategories, true)) {
-                $category = 'Milestone';
-            }
-
-            $allowedMoods = ['heartwarming', 'reflective', 'inspiring', 'humorous'];
-            if (!in_array($mood, $allowedMoods, true)) {
-                $mood = 'heartwarming';
-            }
-
-            $allowedStatuses = ['published', 'draft', 'archived'];
-            if (!in_array($status, $allowedStatuses, true)) {
-                $status = 'published';
-            }
-
-            // Sanitize rich HTML content using modern DOM-based HTML purifier
-            $cleanContent = AIService::purifyHtml((string)$contentRaw);
-
-            if (empty($summary)) {
-                $plain = strip_tags($cleanContent);
-                $summary = mb_substr($plain, 0, 200) . (mb_strlen($plain) > 200 ? '...' : '');
-            } else {
-                $summary = mb_substr($summary, 0, 500);
-            }
-
-            // Slug generation
-            $slug = strtolower(trim((string)preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
-            $slug .= '-' . substr(uniqid(), -4);
-
-            $coverImage = null;
-            if (!empty($_FILES['cover_image']) && $_FILES['cover_image']['error'] !== UPLOAD_ERR_NO_FILE) {
-                // Enterprise Gate: Strictly enforce image mime types and extensions for cover photos
-                $uploadedName = (string)($_FILES['cover_image']['name'] ?? '');
-                $fileExtension = strtolower(pathinfo($uploadedName, PATHINFO_EXTENSION));
-                $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
-
-                if (!in_array($fileExtension, $allowedExtensions, true)) {
-                    throw new ValidationException("Cover photo must be a valid image file (JPEG, PNG, or WebP).");
-                }
-
-                $tmpFile = (string)($_FILES['cover_image']['tmp_name'] ?? '');
-                if (is_file($tmpFile)) {
-                    $imgInfo = @getimagesize($tmpFile);
-                    if ($imgInfo === false || !in_array($imgInfo['mime'], ['image/jpeg', 'image/png', 'image/webp'], true)) {
-                        throw new ValidationException("Cover photo file contents do not match a valid image format.");
-                    }
-                }
-
-                $docRoot = defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 3);
-                $targetDir = rtrim($docRoot, '/') . '/public/images/journals/';
-                if (!is_dir($targetDir)) {
-                    mkdir($targetDir, 0755, true);
-                }
-                
-                $uploadResult = FileUploader::fileUploadSingle($targetDir, 'cover_image');
-                $coverImage = '/public/images/journals/' . $uploadResult['fileName'];
-            }
+            $in = $this->collectInput();
+            $title = $in['title'];
+            $category = $in['category'];
+            $mood = $in['mood'];
+            $summary = $in['summary'];
+            $cleanContent = $in['cleanContent'];
+            $status = $in['status'];
+            $slug = $in['slug'];
+            $coverImage = $in['coverImage'];
 
             $journalData = [
                 'family_code' => $this->famCode,
@@ -210,7 +320,23 @@ final class FamilyJournalController extends BaseController
                 'status'      => $status
             ];
 
+            $duplicateId = FamilyJournal::findRecentDuplicate($this->famCode, (string)$this->userId, $title);
+            if ($duplicateId !== null) {
+                echo json_encode([
+                    'status'   => 'success',
+                    'message'  => 'Chronicle already preserved.',
+                    'id'       => $duplicateId,
+                    'redirect' => '/familyJournal/' . $duplicateId,
+                ]);
+                return;
+            }
+
             $insertedId = FamilyJournal::createJournal($journalData);
+
+            $rawContributors = $_POST['contributors'] ?? [];
+            if (is_array($rawContributors) && $rawContributors !== []) {
+                FamilyJournal::setContributors($insertedId, $this->famCode, $this->userId, array_map('strval', $rawContributors), $this->userId);
+            }
 
             // Optional auto-broadcast to the main family feed
             $shareToFeedRaw = $_POST['share_to_feed'] ?? null;
@@ -396,6 +522,18 @@ final class FamilyJournalController extends BaseController
 
             if (!$success) {
                 throw new ForbiddenException("Unable to delete entry. Only the author or family admin may remove this journal.");
+            }
+
+            // Retire the auto-broadcast feed post that links to this chronicle
+            try {
+                $appUrl = rtrim((string)($_ENV['APP_URL'] ?? ''), '/');
+                $stmt = Db::connect2()->prepare(
+                    "UPDATE post SET post_status = 'deleted'
+                     WHERE postFamCode = ? AND postMessage LIKE ? AND postMessage LIKE '%Family Chronicle%'"
+                );
+                $stmt->execute([$this->famCode, '%' . $appUrl . '/familyJournal/' . (int)$id]);
+            } catch (\Throwable $feedEx) {
+                error_log('FamilyJournal feed post cleanup error: ' . $feedEx->getMessage());
             }
 
             echo json_encode([

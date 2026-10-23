@@ -53,6 +53,8 @@
             </div>
         </div>
 
+        @includeIf('member.includes.thenNowTimeline', ['memberId' => (string)($viewedMemberId ?? ($data['id'] ?? '')), 'memberName' => (string)($data['fullName'] ?? ''), 'tnSuffix' => 'seen'])
+
         @if(!empty($publicPhotos))
         {{-- Public Photo Gallery — shown only when images exist, placed prominently above info cards --}}
         <div class="profile-gallery-card" style="margin-bottom: 24px;">

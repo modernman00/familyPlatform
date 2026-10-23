@@ -85,13 +85,14 @@ final class FamilyGraphService
     {
         $gender = self::normaliseGender($f['gender'] ?? null);
         $stmt = $db->prepare(
-            'INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile, is_placeholder)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile, is_placeholder)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $stmt->execute([
             $fam,
             (string)($f['first_name'] ?? ''),
             (string)($f['last_name'] ?? ''),
+            self::nullIfEmpty($f['maiden_name'] ?? null),
             $gender,
             (int)($f['generation_level'] ?? 0),
             (string)($f['avatar_url'] ?? self::AVATAR[$gender]),
@@ -152,8 +153,23 @@ final class FamilyGraphService
         return array_values($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    /** True when one node is a direct child of a union the other node belongs to. */
+    public static function areParentAndChild(PDO $db, int $a, int $b): bool
+    {
+        $stmt = $db->prepare(
+            'SELECT 1 FROM family_node_children c JOIN family_unions u ON u.id = c.union_id
+             WHERE (c.child_id = ? AND (u.partner_1_id = ? OR u.partner_2_id = ?))
+                OR (c.child_id = ? AND (u.partner_1_id = ? OR u.partner_2_id = ?)) LIMIT 1'
+        );
+        $stmt->execute([$a, $b, $b, $b, $a, $a]);
+        return (bool)$stmt->fetchColumn();
+    }
+
     public static function createUnion(PDO $db, string $fam, int $p1, int $p2, string $type = 'married', ?int $marriageYear = null, ?int $divorceYear = null, ?bool $isCurrent = null): int
     {
+        if ($p1 !== $p2 && self::areParentAndChild($db, $p1, $p2)) {
+            throw new \DomainException('A person cannot be partnered with their own parent or child.');
+        }
         $type = self::normaliseUnionType($type);
         $isCurrent = ($isCurrent ?? ($type === 'married')) ? 1 : 0;
         $stmt = $db->prepare(
@@ -274,6 +290,27 @@ final class FamilyGraphService
         return self::createUnion($db, $fam, $parentId, $otherId, 'partner');
     }
 
+    /**
+     * Turn a "not yet added" parent into a real person (keeps every union / child link).
+     *
+     * @return array<string, mixed>|null the updated node, null when it is not a placeholder of this family
+     */
+    public static function fillPlaceholder(PDO $db, string $fam, int $nodeId, string $first, string $last = '', ?string $email = null, ?string $mobile = null): ?array
+    {
+        $first = trim($first);
+        $node = self::getNode($db, $fam, $nodeId);
+        if (!$node || (int)$node['is_placeholder'] !== 1 || $first === '') {
+            return null;
+        }
+        $role = ($node['gender'] ?? '') === 'Female' ? 'Mother' : (($node['gender'] ?? '') === 'Male' ? 'Father' : 'Parent');
+        $db->prepare(
+            "UPDATE family_nodes SET first_name = ?, last_name = ?, is_placeholder = 0, bio = ?,
+                    email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile)
+              WHERE id = ? AND family_code = ?"
+        )->execute([$first, trim($last), $role, (string)$email, (string)$mobile, $nodeId, $fam]);
+        return self::getNode($db, $fam, $nodeId);
+    }
+
     // ------------------------------------------------------------------
     // Siblings
     // ------------------------------------------------------------------
@@ -329,8 +366,9 @@ final class FamilyGraphService
         $gender = self::normaliseGender($d['gender'] ?? null, 'Other');
         if ($sibId > 0) {
             $db->prepare(
-                "UPDATE family_nodes SET gender = IF(? = 'Other', gender, ?), email = COALESCE(NULLIF(?, ''), email) WHERE id = ?"
-            )->execute([$gender, $gender, (string)($d['email'] ?? ''), $sibId]);
+                "UPDATE family_nodes SET gender = IF(? = 'Other', gender, ?), email = COALESCE(NULLIF(?, ''), email),
+                        maiden_name = COALESCE(NULLIF(?, ''), maiden_name) WHERE id = ?"
+            )->execute([$gender, $gender, (string)($d['email'] ?? ''), (string)($d['maiden_name'] ?? ''), $sibId]);
         } else {
             $sibId = self::createNode($db, $fam, [
                 'first_name' => $first,
@@ -340,6 +378,7 @@ final class FamilyGraphService
                 'bio' => 'Sibling',
                 'email' => $d['email'] ?? null,
                 'mobile' => $d['mobile'] ?? null,
+                'maiden_name' => $d['maiden_name'] ?? null,
             ]);
         }
 
@@ -466,8 +505,9 @@ final class FamilyGraphService
             [$u, $other] = $match;
             $db->prepare(
                 "UPDATE family_nodes SET first_name = ?, last_name = ?, is_placeholder = 0,
-                        email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile) WHERE id = ?"
-            )->execute([$first, $last, (string)($d['email'] ?? ''), (string)($d['mobile'] ?? ''), (int)$other['id']]);
+                        email = COALESCE(NULLIF(?, ''), email), mobile = COALESCE(NULLIF(?, ''), mobile),
+                        maiden_name = COALESCE(NULLIF(?, ''), maiden_name) WHERE id = ?"
+            )->execute([$first, $last, (string)($d['email'] ?? ''), (string)($d['mobile'] ?? ''), (string)($d['maiden_name'] ?? ''), (int)$other['id']]);
             $db->prepare('UPDATE family_unions SET union_type = ?, is_current = ? WHERE id = ?')
                 ->execute([$type, $current ? 1 : 0, (int)$u['id']]);
             return ['union_id' => (int)$u['id'], 'partner_id' => (int)$other['id']];
@@ -476,6 +516,7 @@ final class FamilyGraphService
         $partnerId = self::createNode($db, $fam, [
             'first_name' => $first, 'last_name' => $last, 'gender' => $gender, 'generation_level' => $gen,
             'bio' => 'Partner/Spouse', 'email' => $d['email'] ?? null, 'mobile' => $d['mobile'] ?? null,
+            'maiden_name' => $d['maiden_name'] ?? null,
         ]);
         $unionId = self::createUnion($db, $fam, $baseId, $partnerId, $type, null, null, $current);
         return ['union_id' => $unionId, 'partner_id' => $partnerId];

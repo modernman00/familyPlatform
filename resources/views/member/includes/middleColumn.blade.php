@@ -424,6 +424,13 @@
       </div>
 
       <div class="composer-quick-actions d-flex align-items-center gap-1 mt-3 pt-3 flex-wrap" style="border-top: 1px solid var(--border-color);">
+        <button type="button" class="btn composer-quick-action then-now-cta flex-fill d-flex align-items-center justify-content-center gap-2"
+                data-bs-toggle="modal" data-bs-target="#postModal"
+                onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
+                aria-label="Post a Then and Now photo comparison">
+          <i class="bi bi-hourglass-split" style="font-size: 1.15rem;"></i>
+          <span class="fw-bold" style="font-size: 0.85rem;">Then &amp; Now</span>
+        </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
           <i class="bi bi-camera-fill" style="color: #22c55e; font-size: 1.15rem;"></i>
           <span class="fw-semibold" style="font-size: 0.85rem; color: var(--text-muted);">Photo</span>

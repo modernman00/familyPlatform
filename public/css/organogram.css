@@ -533,6 +533,20 @@ body {
 .legend-male { background: var(--male-color); }
 .legend-female { background: var(--female-color); }
 .legend-spouse { background: var(--spouse-color); }
+.family-legend { flex-direction: column; align-items: stretch; gap: 10px; max-width: min(100%, 980px); }
+.family-legend .legend-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; }
+.legend-heading { font-size: 0.68rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: .6; min-width: 88px; text-align: right; }
+.legend-line { width: 34px; height: 10px; flex: none; }
+.legend-chip { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; font-size: 10px; font-weight: 800; flex: none; }
+.legend-chip-member { background: #3b82f6; color: #fff; border: 1.5px solid #fff; }
+.legend-chip-memory { background: rgba(15,23,42,.9); font-size: 10px; }
+.legend-chip-ghost { border: 2px dashed #64748b; opacity: .7; }
+.legend-chip-pending { background: #f59e0b; color: #0f172a; }
+.legend-stamp { font-size: 0.64rem; font-weight: 800; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; border: 1.2px solid currentColor; }
+.legend-stamp-divorced { color: #ef4444; }
+.legend-stamp-separated { color: #f59e0b; }
+.legend-stamp-widowed { color: #94a3b8; }
+@media (max-width: 640px) { .legend-heading { text-align: center; width: 100%; } .family-legend .legend-row { gap: 8px 14px; } }
 .legend-divorced { border: 2px dashed var(--divorced-color); background: var(--divorced-light); }
 
 /* Navigation Guide Instructions */
@@ -1826,3 +1840,10 @@ body[data-page-id="organogram"] .legend-item {
         touch-action: manipulation;
     }
 }
+/* Tighten the gap between the tree canvas and the legend */
+body[data-page-id="organogram"] .tree-container { margin-bottom: 0 !important; }
+body[data-page-id="organogram"] #treeStage { margin-bottom: 0; }
+body[data-page-id="organogram"] .family-legend { margin: 8px auto 12px; }
+
+/* Dynasty Guide dismissed: height is set inline by setTreeStageExpanded() */
+#treeStage { transition: height 0.25s ease, min-height 0.25s ease; }

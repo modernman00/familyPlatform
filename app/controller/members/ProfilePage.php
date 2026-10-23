@@ -208,6 +208,18 @@ final class ProfilePage extends ProcessImg
                 $attachedGif = null;
             }
 
+            // "Then & Now" (RFC-0002): exactly two uploaded photos, nothing else attached.
+            $isThenNow = ($_POST['then_now'] ?? '') === '1';
+            if ($isThenNow) {
+                $uploaded = array_filter((array)($_FILES['post_img']['name'] ?? []), fn($n) => (string)$n !== '');
+                if (count($uploaded) !== 2) {
+                    throw new \Src\Exceptions\ValidationException("Then & Now needs exactly two photos: one Then and one Now.");
+                }
+                $sharedTempImages = [];
+                $attachedGif = null;
+                $hasGif = false;
+            }
+
             $hasImage = $hasDirectImage || !empty($sharedTempImages) || $hasGif;
             $hasPoll = !empty($_POST['poll_question']);
 
@@ -239,12 +251,14 @@ final class ProfilePage extends ProcessImg
                 removeKeys: [
                     'poll_question', 'poll_options', 'token', 'post_no',
                     'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
+                    'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'submit', 'button'
                 ],
                 optionalFields: [
                     'poll_question', 'poll_options', 'postMessage', 'post_no',
                     'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
-                    'postFamCode', 'profileImg'
+                    'postFamCode', 'profileImg',
+                    'then_now', 'then_label', 'now_label', 'reply_to_post'
                 ]
             );
 
@@ -312,6 +326,21 @@ final class ProfilePage extends ProcessImg
                         }
                     }
                     unset($_SESSION['pwa_shared_target']);
+                }
+
+                if ($isThenNow) {
+                    try {
+                        $replyTo = (int)($_POST['reply_to_post'] ?? 0);
+                        $linked = \App\model\PostComparison::createForPost(
+                            (int)$result,
+                            \App\model\PostComparison::cleanLabel($_POST['then_label'] ?? ''),
+                            \App\model\PostComparison::cleanLabel($_POST['now_label'] ?? ''),
+                            $replyTo > 0 ? $replyTo : null
+                        );
+                        error_log((string)json_encode(['event' => 'then_now.created', 'post_no' => (int)$result, 'user_id' => is_string($id) ? $id : '', 'linked' => $linked, 'is_reply' => $replyTo > 0]));
+                    } catch (\Throwable $th) {
+                        error_log('[ProfilePage::post then_now] ' . $th->getMessage());
+                    }
                 }
 
                 // Warm up link preview cache if a URL is present
@@ -401,6 +430,7 @@ final class ProfilePage extends ProcessImg
                 // Attach hydrated link preview for immediate feed presentation
                 if (is_array($newPost)) {
                     $newPost['link_preview'] = \App\services\LinkPreviewService::getPreviewForPostText($cleanMultiLineMessage);
+                    $newPost['comparison'] = \App\model\PostComparison::getForPosts([(int)$result])[(int)$result] ?? null;
                     $newPost['post_tags'] = !empty($postTags) ? $postTags : \App\controller\members\TagController::getPostTags((int)$result);
                 }
 

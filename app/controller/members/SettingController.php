@@ -577,6 +577,7 @@ final class SettingController extends BaseController
                                 'gender' => $spGender,
                                 'email' => $_POST['spouse_email'] ?? '',
                                 'mobile' => $_POST['spouse_mobile'] ?? '',
+                                'maiden_name' => $maritalPost === 'Yes - Add Wife' ? ($_POST['maiden_name'] ?? '') : '',
                                 'status' => match ($maritalPost) {
                                     'Divorced' => 'divorced',
                                     'Widowed' => 'widowed',

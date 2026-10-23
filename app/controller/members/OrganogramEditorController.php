@@ -79,11 +79,13 @@ final class OrganogramEditorController extends BaseController
             try {
                 // 1. Insert New Partner Node
                 $insNode = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Partner/Spouse', ?, ?)
+                    INSERT INTO family_nodes (family_code, first_name, last_name, maiden_name, gender, generation_level, avatar_url, bio, email, mobile)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'Partner/Spouse', ?, ?)
                 ");
                 $insNode->execute([
-                    $familyCode, $firstName, $lastName, $gender, $genLevel, $avatar,
+                    $familyCode, $firstName, $lastName,
+                    ($pMaiden = trim((string)($_POST['maiden_name'] ?? ''))) !== '' ? $pMaiden : null,
+                    $gender, $genLevel, $avatar,
                     !empty($email) ? $email : null,
                     !empty($mobile) ? $mobile : null
                 ]);
@@ -518,6 +520,7 @@ final class OrganogramEditorController extends BaseController
                     'mobile' => $mobile,
                     'parentage' => $_POST['parentage'] ?? '',
                     'other_parent_name' => $_POST['other_parent_name'] ?? '',
+                    'maiden_name' => $_POST['maiden_name'] ?? '',
                 ], $sibCtx);
                 $relKind = is_array($sibCtx) ? \App\services\FamilyRelationshipRequestService::kindForParentage((string)$sibCtx['parentage']) : null;
                 $relRequests = ($relKind !== null && $sibId > 0)
@@ -617,6 +620,7 @@ final class OrganogramEditorController extends BaseController
             $upd = $db->prepare("
                 UPDATE family_nodes
                 SET first_name = ?,
+                    is_placeholder = 0,
                     last_name = ?,
                     maiden_name = ?,
                     gender = COALESCE(NULLIF(?, ''), gender),
@@ -646,6 +650,64 @@ final class OrganogramEditorController extends BaseController
             ]);
 
             msgSuccess(200, "Relative details updated successfully.");
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Set the gender of a node whose gender is unknown ('Other'/blank).
+     * Never overrides an explicit Male/Female value, and is scoped to the session family (anti-IDOR).
+     */
+    public function setGender(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+
+            $jsonInput = json_decode(file_get_contents('php://input') ?: '', true) ?: [];
+            $nodeId = (int)($_POST['node_id'] ?? ($jsonInput['node_id'] ?? 0));
+            $gender = \App\services\FamilyGraphService::normaliseGender((string)($_POST['gender'] ?? ($jsonInput['gender'] ?? '')), '');
+
+            if ($nodeId <= 0 || !in_array($gender, ['Male', 'Female'], true)) {
+                msgException(400, 'A valid node and gender (Male or Female) are required.');
+                return;
+            }
+
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            if ($familyCode === '') {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+
+            $db = Db::connect2();
+            $stmt = $db->prepare("SELECT id, user_id, gender FROM family_nodes WHERE id = ? AND family_code = ?");
+            $stmt->execute([$nodeId, $familyCode]);
+            $node = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$node) {
+                msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                return;
+            }
+
+            if (\App\services\KinshipCalculatorService::hasKnownGender((string)($node['gender'] ?? ''))) {
+                msgException(409, 'Gender is already set for this relative.');
+                return;
+            }
+
+            $db->prepare("UPDATE family_nodes SET gender = ? WHERE id = ? AND family_code = ?")
+                ->execute([$gender, $nodeId, $familyCode]);
+
+            // Own node: keep the account profile in step (it takes precedence in the tree query)
+            $sessionUserId = (string)($_SESSION['id'] ?? '');
+            if ($sessionUserId !== '' && (string)($node['user_id'] ?? '') === $sessionUserId) {
+                $db->prepare("UPDATE personal SET gender = ? WHERE id = ? AND (gender IS NULL OR gender = '')")
+                    ->execute([$gender, $sessionUserId]);
+            }
+
+            msgSuccess(200, ['message' => 'Gender updated.', 'gender' => $gender]);
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -978,6 +1040,97 @@ final class OrganogramEditorController extends BaseController
                 return;
             }
             msgSuccess(200, ['message' => $res['message'], 'status' => $res['status']]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * Click a "Father / Mother — tap to add" card: give the placeholder a real name.
+     */
+    public function fillPlaceholder(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+            $familyCode = (string)($_SESSION['famCode'] ?? '');
+            if ($familyCode === '') {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+            $nodeId = (int)($_POST['node_id'] ?? 0);
+            $first = trim((string)($_POST['first_name'] ?? ''));
+            if ($nodeId <= 0 || $first === '') {
+                msgException(400, 'Please enter a first name.');
+                return;
+            }
+            $node = \App\services\FamilyGraphService::fillPlaceholder(
+                Db::connect2(),
+                $familyCode,
+                $nodeId,
+                $first,
+                (string)($_POST['last_name'] ?? ''),
+                trim((string)($_POST['email'] ?? '')) ?: null,
+                trim((string)($_POST['mobile'] ?? '')) ?: null
+            );
+            if ($node === null) {
+                msgException(403, 'Permission Denied: this relative cannot be edited here.');
+                return;
+            }
+            msgSuccess(200, ['message' => 'Saved.', 'node' => ['id' => (int)$node['id'], 'first_name' => $node['first_name'], 'last_name' => $node['last_name']]]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * POST: is the typed email / mobile already a registered member? (masked answer only)
+     */
+    public function lookupMember(): void
+    {
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $fam = (string)($_SESSION['famCode'] ?? '');
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $userId === '' || $fam === '') {
+                msgException(403, 'Unauthorized Access');
+                return;
+            }
+            \Src\Limiter::limit($userId . ':member_lookup');
+            $res = \App\services\MemberLookupService::lookup(
+                Db::connect2(),
+                $userId,
+                $fam,
+                (string)($_POST['email'] ?? ''),
+                (string)($_POST['mobile'] ?? '')
+            );
+            msgSuccess(200, $res);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    /**
+     * POST: after saving a relative, link the card to the registered member the lookup found.
+     */
+    public function linkMember(): void
+    {
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            $fam = (string)($_SESSION['famCode'] ?? '');
+            $nodeId = (int)($_POST['node_id'] ?? 0);
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' || $userId === '' || $fam === '' || $nodeId <= 0) {
+                msgException(400, 'Invalid request.');
+                return;
+            }
+            \Src\Limiter::limit($userId . ':member_link');
+            $res = \App\services\MemberLookupService::link(Db::connect2(), $fam, $userId, $this->requesterName(), $nodeId, (string)($_POST['link_token'] ?? ''));
+            if (!$res['ok']) {
+                msgException(400, $res['message']);
+                return;
+            }
+            msgSuccess(200, ['message' => $res['message']]);
         } catch (\Throwable $th) {
             showError($th);
         }

@@ -101,8 +101,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $nodeIds = [25605, 25606, 26682];
-    $ph = implode(',', array_fill(0, count($nodeIds), '?'));
-    $sqlNodes = "SELECT family_code, COUNT(*) AS c FROM family_nodes WHERE id IN (" . $ph . ") GROUP BY family_code";
+    $sqlNodes = "SELECT family_code, COUNT(*) AS c FROM family_nodes WHERE id IN (?, ?, ?) GROUP BY family_code";
     $stmt = $pdo->prepare($sqlNodes);
     $stmt->execute($nodeIds);
     $byCode = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -120,8 +119,7 @@ try {
     echo "\nGATE 4 — Rogue invite tokens exhausted\n";
 
     $tokIds = [20575, 20576, 20582, 20583, 20650, 20651, 20652, 20653];
-    $ph2 = implode(',', array_fill(0, count($tokIds), '?'));
-    $sqlTok = "SELECT COUNT(*) FROM invite_tokens WHERE id IN (" . $ph2 . ") AND use_count < max_uses AND expires_at > NOW()";
+    $sqlTok = "SELECT COUNT(*) FROM invite_tokens WHERE id IN (?, ?, ?, ?, ?, ?, ?, ?) AND use_count < max_uses AND expires_at > NOW()";
     $stmt3 = $pdo->prepare($sqlTok);
     $stmt3->execute($tokIds);
     $activeRogue = (int)$stmt3->fetchColumn();

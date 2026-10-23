@@ -188,6 +188,9 @@ final class KinshipCalculatorService
         foreach ($nodesById as $id => $node) {
             $path = $pathToNode[$id] ?? null;
             $titleInfo = self::resolvePathToTitle($id, $node, $egoNodeId, $path, $nodesById);
+            if ($id !== $egoNodeId && !self::hasKnownGender($node['gender'] ?? null)) {
+                $titleInfo['title'] = self::neutraliseTitle($titleInfo['title']);
+            }
 
             $node['ego_relation'] = $titleInfo['title'];
             $node['ego_side'] = $titleInfo['side']; // maternal, paternal, direct, none
@@ -200,9 +203,14 @@ final class KinshipCalculatorService
             if ($id !== $egoNodeId && $titleInfo['category'] === 'sibling' && is_array($path) && count($path) === 1) {
                 $sharedParents = array_values(array_intersect($parentsOf[$egoNodeId] ?? [], $parentsOf[$id] ?? []));
                 if (count($sharedParents) === 1) {
-                    $isMaleSib = strtolower((string)($node['gender'] ?? 'male')) === 'male';
+                    $sibGender = strtolower((string)($node['gender'] ?? ''));
                     $viaFemale = strtolower((string)($nodesById[$sharedParents[0]]['gender'] ?? '')) === 'female';
-                    $node['ego_relation'] = ($isMaleSib ? 'Half-brother' : 'Half-sister') . ($viaFemale ? ' (same mum)' : ' (same dad)');
+                    $halfTitle = match ($sibGender) {
+                        'male' => 'Half-brother',
+                        'female' => 'Half-sister',
+                        default => 'Half-sibling',
+                    };
+                    $node['ego_relation'] = $halfTitle . ($viaFemale ? ' (same mum)' : ' (same dad)');
                     $node['sibling_kind'] = 'half';
                 } elseif (count($sharedParents) > 1) {
                     $node['sibling_kind'] = 'full';
@@ -213,22 +221,56 @@ final class KinshipCalculatorService
             if ($titleInfo['category'] === 'spouse' && is_array($path) && count($path) === 1) {
                 $pair = $unionOfPair[min($egoNodeId, $id) . '_' . max($egoNodeId, $id)] ?? null;
                 if ($pair !== null && !$pair['is_current'] && in_array($pair['union_type'], ['divorced', 'separated', 'annulled', 'widowed'], true)) {
-                    $isMaleSp = strtolower((string)($node['gender'] ?? 'male')) === 'male';
-                    $node['ego_relation'] = $pair['union_type'] === 'widowed'
-                        ? ($isMaleSp ? 'Late Husband' : 'Late Wife')
-                        : ($isMaleSp ? 'Former Husband' : 'Former Wife');
+                    $spGender = strtolower((string)($node['gender'] ?? ''));
+                    $spTitle = match ($spGender) {
+                        'male' => 'Husband',
+                        'female' => 'Wife',
+                        default => 'Spouse',
+                    };
+                    $node['ego_relation'] = ($pair['union_type'] === 'widowed' ? 'Late ' : 'Former ') . $spTitle;
                 }
             }
 
             // Ghost parents created for half-siblings
             if (!empty($node['is_placeholder'])) {
-                $node['ego_relation'] = strtolower((string)($node['gender'] ?? 'male')) === 'female' ? 'Unknown Mother' : 'Unknown Father';
+                $node['ego_relation'] = (string)($node['placeholder_label'] ?? (match (strtolower((string)($node['gender'] ?? ''))) {
+                    'female' => 'Mother',
+                    'male' => 'Father',
+                    default => 'Parent',
+                }));
             }
 
             $decorated[$id] = $node;
         }
 
         return $decorated;
+    }
+
+    /**
+     * True only for an explicit Male/Female value. 'Other', '', null and 'Unknown' are not a basis for gendered titles.
+     */
+    public static function hasKnownGender(?string $gender): bool
+    {
+        return in_array(strtolower(trim((string)$gender)), ['male', 'female'], true);
+    }
+
+    /**
+     * Replace gendered kinship words with neutral equivalents ("Sister-in-law" -> "Sibling-in-law").
+     * Longest keys first so "Grandfather" is not clobbered by "Father".
+     */
+    public static function neutraliseTitle(string $title): string
+    {
+        static $map = [
+            'Granddaughter' => 'Grandchild', 'Grandson' => 'Grandchild',
+            'Grandfather' => 'Grandparent', 'Grandmother' => 'Grandparent',
+            'Brother' => 'Sibling', 'Sister' => 'Sibling',
+            'Husband' => 'Spouse', 'Wife' => 'Spouse',
+            'Father' => 'Parent', 'Mother' => 'Parent',
+            'Daughter' => 'Child', 'Son' => 'Child',
+            'Nephew' => 'Nibling', 'Niece' => 'Nibling',
+            'Uncle' => 'Parent\'s Sibling', 'Aunt' => 'Parent\'s Sibling',
+        ];
+        return strtr($title, $map);
     }
 
     /**
@@ -257,8 +299,8 @@ final class KinshipCalculatorService
             ];
         }
 
-        $gender = strtolower((string)($node['gender'] ?? 'male'));
-        $isMale = ($gender === 'male');
+        // Unknown gender is neutralised by the caller (neutraliseTitle); never guess "male" here.
+        $isMale = strtolower((string)($node['gender'] ?? '')) === 'male';
 
         if ($path === null || empty($path)) {
             return [

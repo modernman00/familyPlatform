@@ -148,3 +148,11 @@ $router->map(
 );
 
 
+
+// THEN & NOW: a member's before/after timeline (RFC-0003)
+$router->map(
+  method: 'GET',
+  route: '/api/members/[a:userId]/then-now',
+  target: 'App\controller\members\ThenNowController@memberTimeline',
+  name: 'api_member_then_now'
+);

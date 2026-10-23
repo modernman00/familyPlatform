@@ -16,7 +16,11 @@ $router->map('POST', '/member/organogram/editor/child', 'App\controller\members\
 $router->map('POST', '/member/organogram/editor/parents', 'App\controller\members\OrganogramEditorController@addParents', 'MEMBER_ORGANOGRAM_ADD_PARENTS');
 $router->map('POST', '/member/organogram/editor/sibling', 'App\controller\members\OrganogramEditorController@addSibling', 'MEMBER_ORGANOGRAM_ADD_SIBLING');
 $router->map('POST', '/member/organogram/editor/relationship-request', 'App\controller\members\OrganogramEditorController@resolveRelationshipRequest', 'MEMBER_ORGANOGRAM_RESOLVE_RELATIONSHIP_REQUEST');
+$router->map('POST', '/member/organogram/editor/fill-placeholder', 'App\controller\members\OrganogramEditorController@fillPlaceholder', 'MEMBER_ORGANOGRAM_FILL_PLACEHOLDER');
+$router->map('POST', '/member/organogram/editor/member-lookup', 'App\controller\members\OrganogramEditorController@lookupMember', 'MEMBER_ORGANOGRAM_MEMBER_LOOKUP');
+$router->map('POST', '/member/organogram/editor/member-link', 'App\controller\members\OrganogramEditorController@linkMember', 'MEMBER_ORGANOGRAM_MEMBER_LINK');
 $router->map('POST', '/member/organogram/editor/update', 'App\controller\members\OrganogramEditorController@updateNode', 'MEMBER_ORGANOGRAM_UPDATE_NODE');
+$router->map('POST', '/member/organogram/editor/set-gender', 'App\controller\members\OrganogramEditorController@setGender', 'MEMBER_ORGANOGRAM_SET_GENDER');
 $router->map('POST', '/member/organogram/editor/delete', 'App\controller\members\OrganogramEditorController@deleteNode', 'MEMBER_ORGANOGRAM_DELETE_NODE');
 $router->map('POST', '/member/organogram/node/voice-capsule', 'App\controller\members\OrganogramEditorController@uploadVoiceCapsule', 'MEMBER_ORGANOGRAM_UPLOAD_VOICE_CAPSULE');
 $router->map('POST', '/member/organogram/node/delete-voice-capsule', 'App\controller\members\OrganogramEditorController@deleteVoiceCapsule', 'MEMBER_ORGANOGRAM_DELETE_VOICE_CAPSULE');

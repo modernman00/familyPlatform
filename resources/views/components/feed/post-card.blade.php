@@ -115,8 +115,37 @@
     </div>
   </template>
 
+  <!-- Then & Now (before / after) -->
+  <template x-if="post.comparison">
+    <div class="then-now px-1 mb-3" x-data="{ pos: 50, side: false }">
+      <div class="then-now__stage" x-show="!side">
+        <img class="then-now__img" :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy">
+        <img class="then-now__img then-now__img--then" :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy"
+             :style="'clip-path: inset(0 ' + (100 - pos) + '% 0 0)'">
+        <span class="then-now__tag then-now__tag--then" x-text="post.comparison.before_label"></span>
+        <span class="then-now__tag then-now__tag--now" x-text="post.comparison.after_label"></span>
+        <div class="then-now__handle" :style="'left:' + pos + '%'" aria-hidden="true"><i class="bi bi-arrows-expand-vertical"></i></div>
+        <input type="range" min="0" max="100" step="1" x-model.number="pos" class="then-now__range"
+               aria-label="Drag to compare Then and Now">
+      </div>
+      <div class="then-now__side" x-show="side" x-cloak>
+        <figure><img :src="getPostImageUrl(post.comparison.before_img)" alt="Then" loading="lazy"><figcaption x-text="post.comparison.before_label"></figcaption></figure>
+        <figure><img :src="getPostImageUrl(post.comparison.after_img)" alt="Now" loading="lazy"><figcaption x-text="post.comparison.after_label"></figcaption></figure>
+      </div>
+      <div class="then-now__actions">
+        <button type="button" class="btn btn-sm btn-light border rounded-pill" @click="side = !side"
+                x-text="side ? 'Slide to compare' : 'Side by side'"></button>
+        <button type="button" class="btn btn-sm btn-primary rounded-pill" @click="window.__openThenNow(post.post_no)">
+          <i class="bi bi-hourglass-split"></i> Add your Then &amp; Now
+        </button>
+        <span class="small text-muted" x-show="post.comparison.answer_count > 0"
+              x-text="post.comparison.answer_count + (post.comparison.answer_count === 1 ? ' family member joined in' : ' family members joined in')"></span>
+      </div>
+    </div>
+  </template>
+
   <!-- Post Images -->
-  <template x-if="post.images && post.images.length > 0">
+  <template x-if="post.images && post.images.length > 0 && !post.comparison">
     <div class="row g-2 mb-3 px-1">
       <template x-for="(img, idx) in post.images" :key="idx">
         <div :class="(post.images.length === 1 ? 'col-12' : (post.images.length === 3 && idx === 0 ? 'col-12' : 'col-6')) + ' post-img-col'">
@@ -175,7 +204,7 @@
   </template>
 
   <!-- Full Graphics OpenGraph Social Card (16:9) -->
-  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title)">
+  <template x-if="post.link_preview && (post.link_preview.image || post.link_preview.title) && !(post.postMessage || '').includes('/familyJournal/')">
     <div class="link-preview-container mb-3 px-1">
       <a :href="post.link_preview.url" 
          target="_blank" 

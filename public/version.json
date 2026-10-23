@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(chronicle-tags): broadcast family chronicle stories to feed and integrate member tagging engine",
+    "title": "Fix(studio): init child-partner picker lazily; stabilise grandparent E2E modal typing",
     "notes": [
-        "Feat(chronicle-tags): broadcast family chronicle stories to feed and integrate member tagging engine",
-        "Feat(standards): integrate v2.1 design standards, aria enhancements and lineage prompts",
-        "Feat(cron): add family code approval reminder runner and harden preflight DAST resolution"
+        "Fix(studio): init child-partner picker lazily; stabilise grandparent E2E modal typing",
+        "Fix login redirect flow; pass all pre\u2011flight gates",
+        "Fix(composer): restore floating emoji picker, facebook-parity tagging, and gif media attachments"
     ],
-    "released_at": "2026-10-22",
-    "commit": "457519f"
+    "released_at": "2026-10-23",
+    "commit": "d81510b"
 }

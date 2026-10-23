@@ -102,7 +102,32 @@
                             <option value="reunion">🏡 Reunion & Gathering</option>
                             <option value="graduation">🎓 Graduation & Achievement</option>
                             <option value="wedding">💍 Wedding & Anniversary</option>
+                            <option value="night_out">🌙 Night Out</option>
+                            <option value="weekend_out">🏖️ Weekend Out</option>
+                            <option value="holiday">✈️ Holiday & Travel</option>
+                            <option value="birthday">🎂 Birthday Party</option>
+                            <option value="day_trip">🚗 Day Trip & Outing</option>
+                            <option value="sports">⚽ Sports & Activities</option>
+                            <option value="food">🍽️ Family Meal & Cookout</option>
+                            <option value="faith">🙏 Faith & Celebration</option>
+                            <option value="funny">😂 Funny Moments</option>
+                            <option value="everyday">🏠 Everyday Life</option>
+                            <option value="custom">➕ Other (type your own)…</option>
                         </select>
+                        <input type="text" name="custom_category" id="reelCustomCategory" maxlength="30"
+                               class="form-control rounded-pill mt-2 d-none" placeholder="e.g. Game Night"
+                               style="font-size: 0.88rem; padding: 8px 16px;" autocomplete="off">
+                        <script>
+                        (function () {
+                            var sel = document.currentScript.parentElement.querySelector('select[name="category"]');
+                            var inp = document.getElementById('reelCustomCategory');
+                            sel?.addEventListener('change', function () {
+                                var custom = sel.value === 'custom';
+                                inp?.classList.toggle('d-none', !custom);
+                                if (custom) { inp?.focus(); }
+                            });
+                        })();
+                        </script>
                     </div>
 
                     <!-- Caption Textarea -->

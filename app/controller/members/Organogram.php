@@ -453,7 +453,43 @@ final class Organogram extends SingleCustomerData
      */
     private function buildSixGenGraphData(string $familyCode, string $rootUserId): array
     {
-        return \App\services\CollateralKinshipService::buildCollateralGraph($familyCode, $rootUserId);
+        $graph = \App\services\CollateralKinshipService::buildCollateralGraph($familyCode, $rootUserId);
+
+        // Secondary (birth-family) code for registered women: shown only to viewers who belong to that family
+        try {
+            $userIds = [];
+            foreach ($graph['nodes'] ?? [] as $n) {
+                if (!empty($n['user_id']) && strtolower((string)($n['gender'] ?? '')) === 'female') {
+                    $userIds[] = (string)$n['user_id'];
+                }
+            }
+            if ($userIds) {
+                $in = implode(',', array_fill(0, count($userIds), '?'));
+                $stmt = Db::connect2()->prepare(
+                    "SELECT p.id, COALESCE(NULLIF(o.otherFamCode, ''), NULLIF(p.familyCode2, '')) AS otherFamCode
+                       FROM personal p LEFT JOIN otherFamily o ON o.id = p.id
+                      WHERE p.id IN ($in)"
+                );
+                $stmt->execute($userIds);
+                $codes = [];
+                foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $r) {
+                    $code = strtoupper(trim((string)($r['otherFamCode'] ?? '')));
+                    if ($code !== '' && $code !== strtoupper($familyCode) && BaseController::sessionSharesFamily($code)) {
+                        $codes[(string)$r['id']] = $code;
+                    }
+                }
+                foreach ($graph['nodes'] as &$gn) {
+                    if (!empty($gn['user_id']) && isset($codes[(string)$gn['user_id']])) {
+                        $gn['birth_family_code'] = $codes[(string)$gn['user_id']];
+                    }
+                }
+                unset($gn);
+            }
+        } catch (\Throwable) {
+            // non-critical decoration
+        }
+
+        return $graph;
     }
 
     /**
@@ -573,9 +609,8 @@ final class Organogram extends SingleCustomerData
                 $chName = trim((string)($ch['children_name'] ?? ''));
                 if (empty($chName) || strcasecmp($chName, 'Child') === 0) continue;
 
-                $chGender = trim((string)($ch['children_gender'] ?? 'Male'));
-                if ($chGender !== 'Female' && $chGender !== 'Male') $chGender = 'Male';
-                $chSex = ($chGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
+                $chGender = \App\services\FamilyGraphService::normaliseGender((string)($ch['children_gender'] ?? ''), 'Other');
+                $chSex = ($chGender === 'Female') ? 'avatarF.png' : 'avatarM.png';
                 $chEmail = !empty($ch['children_email']) && !str_contains($ch['children_email'], 'provide') ? trim($ch['children_email']) : null;
 
                 // Check if this child node already exists
@@ -675,8 +710,9 @@ final class Organogram extends SingleCustomerData
                     $sibName = trim((string)($sib['sibling_name'] ?? ''));
                     if (empty($sibName) || strcasecmp($sibName, 'Sibling') === 0) continue;
 
-                    $sibGender = (string)($sib['sibling_gender'] ?? 'Male');
-                    $sibSex = ($sibGender === 'Male') ? 'avatarM.png' : 'avatarF.png';
+                    // Legacy `sibling` table has no gender column: never guess Male, record it as unknown.
+                    $sibGender = \App\services\FamilyGraphService::normaliseGender((string)($sib['sibling_gender'] ?? ''), 'Other');
+                    $sibSex = ($sibGender === 'Female') ? 'avatarF.png' : 'avatarM.png';
 
                     // Check if sibling node already exists
                     $findSibNode = $db->prepare("

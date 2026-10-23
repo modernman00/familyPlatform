@@ -157,6 +157,7 @@ export function profileFeed(opts = {}) {
                 post_likes: parseInt(p?.post_likes || 0, 10),
                 images: this.extractImages(p),
                 poll: p?.poll || null,
+                comparison: this.normalizeComparison(p?.comparison),
                 reactions: Array.isArray(p?.reactions) ? p.reactions : [],
                 user_reaction: p?.user_reaction || null,
                 comments: Array.isArray(p?.comments) ? p.comments.map(c => this.normalizeComment(c)) : [],
@@ -192,6 +193,18 @@ export function profileFeed(opts = {}) {
                 reactions: c?.reactions?.counts ?? {},
                 totalReactions: c?.reactions?.counts?.totalReactions ?? 0,
                 userReaction: c?.user_reaction || null,
+            };
+        },
+
+        normalizeComparison(c) {
+            if (!c || typeof c !== 'object' || !c.before_img || !c.after_img) return null;
+            return {
+                before_img: String(c.before_img),
+                after_img: String(c.after_img),
+                before_label: c.before_label || 'Then',
+                after_label: c.after_label || 'Now',
+                parent_post_no: c.parent_post_no || null,
+                answer_count: parseInt(c.answer_count || 0, 10) || 0,
             };
         },
 
@@ -283,7 +296,10 @@ export function profileFeed(opts = {}) {
             try {
                 const res = await axios.get(`/api/link-preview?url=${encodeURIComponent(url)}`);
                 if (res?.data?.status === 'success' && res?.data?.data) {
-                    post.link_preview = res.data.data;
+                    // `post` may be the raw object from normalizePost(); assigning to it
+                    // bypasses Alpine's proxy, so write to the reactive copy in this.posts.
+                    const target = this.posts?.find(p => p?.post_no === post.post_no) || post;
+                    target.link_preview = res.data.data;
                 }
             } catch (_) {
                 // Silently ignore if unresolvable
@@ -870,8 +886,12 @@ export function profileFeed(opts = {}) {
                 const newPostData = event?.detail;
                 if (newPostData && typeof newPostData === 'object') {
                     const normalized = this.normalizePost(newPostData);
-                    if (!this.posts.some(p => String(p.post_no) === String(normalized.post_no))) {
+                    const existing = this.posts.find(p => String(p.post_no) === String(normalized.post_no));
+                    if (!existing) {
                         this.posts.unshift(normalized);
+                    } else if (normalized.comparison && !existing.comparison) {
+                        // The realtime broadcast can land first, without the Then & Now pair.
+                        existing.comparison = normalized.comparison;
                     }
                 } else {
                     this.fetchPosts();

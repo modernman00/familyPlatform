@@ -57,6 +57,14 @@
 @endpush
 
 @section('content')
+@php
+    $isEdit = !empty($journal);
+    $dec = static fn ($v): string => htmlspecialchars(html_entity_decode((string)($v ?? ''), ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+    $contributorIds = $contributorIds ?? [];
+    $familyMembers = $familyMembers ?? [];
+    $canManageContributors = $canManageContributors ?? true;
+    $existingContentJson = $isEdit ? json_encode((string)$journal['content'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) : 'null';
+@endphp
 <div class="container py-4 my-2" style="max-width: 900px;">
     <!-- Top Action Header -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
@@ -65,7 +73,7 @@
                 <i class="bi bi-arrow-left me-1"></i> Back to Family Shelf
             </a>
             <h2 class="fw-bold mb-1" style="color: #1e1b4b; letter-spacing: -0.02em;">
-                Preserve a Family Chronicle
+                {{ $isEdit ? 'Edit Family Chronicle' : 'Preserve a Family Chronicle' }}
             </h2>
             <p class="text-muted small mb-0">
                 Private to Family Network #{{ htmlspecialchars($familyCode, ENT_QUOTES, 'UTF-8') }}
@@ -95,7 +103,7 @@
             <div class="col-md-3">
                 <select id="aiToneSelect" class="form-select rounded-pill px-3">
                     <option value="Heartwarming">Tone: Heartwarming</option>
-                    <option value="Heritage & Tradition">Tone: Heritage</option>
+                    <option value="Heritage & Tradition" {{ $isEdit && ($journal['category'] ?? '') === 'Heritage & Tradition' ? 'selected' : '' }}>Tone: Heritage</option>
                     <option value="Celebratory">Tone: Celebratory</option>
                     <option value="Humorous">Tone: Humorous</option>
                 </select>
@@ -111,13 +119,13 @@
 
     <!-- Main Creation Form -->
     <div class="card form-card shadow-sm p-4 p-sm-5">
-        <form id="journalForm" enctype="multipart/form-data">
+        <form id="journalForm" enctype="multipart/form-data" data-action="{{ $isEdit ? '/familyJournal/' . (int)$journal['id'] . '/update' : '/familyJournal/store' }}" data-edit="{{ $isEdit ? '1' : '0' }}">
             @include('csrf')
 
             <!-- Title -->
             <div class="mb-4">
                 <label for="titleInput" class="form-label fw-bold" style="color: #1e1b4b;">Story Title <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-lg rounded-3" id="titleInput" name="title" placeholder="e.g. The Secret Ingredient in Grandmother's Sunday Bread" required style="font-size: 1.25rem; font-weight: 600;">
+                <input type="text" class="form-control form-control-lg rounded-3" id="titleInput" name="title" value="{{ $isEdit ? $dec($journal['title']) : '' }}" placeholder="e.g. The Secret Ingredient in Grandmother's Sunday Bread" required style="font-size: 1.25rem; font-weight: 600;">
             </div>
 
             <!-- Category & Mood -->
@@ -125,21 +133,21 @@
                 <div class="col-sm-6">
                     <label for="categorySelect" class="form-label fw-semibold small text-muted">Category</label>
                     <select class="form-select rounded-3" id="categorySelect" name="category">
-                        <option value="Milestone">Milestone & Life Event</option>
+                        <option value="Milestone" {{ $isEdit && ($journal['category'] ?? '') === 'Milestone' ? 'selected' : '' }}>Milestone & Life Event</option>
                         <option value="Heritage & Tradition">Heritage & Family Tradition</option>
-                        <option value="Recipe">Heirloom Recipe & Kitchen Story</option>
-                        <option value="Oral History">Oral History / Grandparent Memories</option>
-                        <option value="Celebration">Reunion & Celebration</option>
-                        <option value="Memorial">Memorial & Tribute</option>
+                        <option value="Recipe" {{ $isEdit && ($journal['category'] ?? '') === 'Recipe' ? 'selected' : '' }}>Heirloom Recipe & Kitchen Story</option>
+                        <option value="Oral History" {{ $isEdit && ($journal['category'] ?? '') === 'Oral History' ? 'selected' : '' }}>Oral History / Grandparent Memories</option>
+                        <option value="Celebration" {{ $isEdit && ($journal['category'] ?? '') === 'Celebration' ? 'selected' : '' }}>Reunion & Celebration</option>
+                        <option value="Memorial" {{ $isEdit && ($journal['category'] ?? '') === 'Memorial' ? 'selected' : '' }}>Memorial & Tribute</option>
                     </select>
                 </div>
                 <div class="col-sm-6">
                     <label for="moodSelect" class="form-label fw-semibold small text-muted">Story Mood</label>
                     <select class="form-select rounded-3" id="moodSelect" name="mood">
-                        <option value="heartwarming">Heartwarming</option>
-                        <option value="reflective">Reflective & Nostalgic</option>
-                        <option value="inspiring">Inspiring & Triumphant</option>
-                        <option value="humorous">Humorous & Playful</option>
+                        <option value="heartwarming" {{ $isEdit && ($journal['mood'] ?? '') === 'heartwarming' ? 'selected' : '' }}>Heartwarming</option>
+                        <option value="reflective" {{ $isEdit && ($journal['mood'] ?? '') === 'reflective' ? 'selected' : '' }}>Reflective & Nostalgic</option>
+                        <option value="inspiring" {{ $isEdit && ($journal['mood'] ?? '') === 'inspiring' ? 'selected' : '' }}>Inspiring & Triumphant</option>
+                        <option value="humorous" {{ $isEdit && ($journal['mood'] ?? '') === 'humorous' ? 'selected' : '' }}>Humorous & Playful</option>
                     </select>
                 </div>
             </div>
@@ -152,7 +160,7 @@
                         <i class="bi bi-magic me-1"></i> Auto-Summarise Content
                     </button>
                 </div>
-                <textarea class="form-control rounded-3" id="summaryInput" name="summary" rows="2" placeholder="A brief teaser to show in the family journal shelf..."></textarea>
+                <textarea class="form-control rounded-3" id="summaryInput" name="summary" rows="2" placeholder="A brief teaser to show in the family journal shelf...">{{ $isEdit ? $dec($journal['summary']) : '' }}</textarea>
             </div>
 
             <!-- Rich Content Editor -->
@@ -161,6 +169,7 @@
                 <div id="quillEditor" style="min-height: 280px; background: #ffffff;"></div>
                 <textarea id="quillFallback" class="form-control rounded-3" style="display: none; min-height: 280px; font-size: 1rem;" placeholder="Write your family memory, stories, traditions, or recipes here..."></textarea>
                 <input type="hidden" name="content" id="contentInput">
+                <input type="hidden" name="remove_cover" id="removeCoverInput" value="0">
             </div>
 
             <!-- Cover Photo Upload -->
@@ -168,13 +177,13 @@
                 <label for="coverImageInput" class="form-label fw-semibold small text-muted">Cover Photo (Optional)</label>
                 <div class="d-flex flex-column flex-sm-row align-items-start gap-3">
                     <div class="preview-box shadow-sm" id="previewContainer">
-                        <div class="text-center text-muted p-3" id="previewPlaceholder">
+                        <div class="text-center text-muted p-3" id="previewPlaceholder" style="display: {{ $isEdit && !empty($journal['cover_image']) ? 'none' : 'block' }};">
                             <i class="bi bi-image fs-1 opacity-50"></i>
                             <div class="small mt-1 fw-semibold">Photo Preview</div>
                             <div class="text-muted" style="font-size: 0.72rem;">No cover selected yet</div>
                         </div>
-                        <img id="imagePreview" src="" alt="Cover Photo Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-                        <button type="button" id="btnRemoveCover" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow" style="display: none; width: 32px; height: 32px; padding: 0; align-items: center; justify-content: center; opacity: 0.88;" title="Remove cover photo" aria-label="Remove cover photo">
+                        <img id="imagePreview" src="{{ $isEdit && !empty($journal['cover_image']) ? htmlspecialchars((string)$journal['cover_image'], ENT_QUOTES, 'UTF-8') : '' }}" alt="Cover Photo Preview" style="display: {{ $isEdit && !empty($journal['cover_image']) ? 'block' : 'none' }}; width: 100%; height: 100%; object-fit: cover;">
+                        <button type="button" id="btnRemoveCover" class="btn btn-sm btn-dark position-absolute top-0 end-0 m-2 rounded-circle shadow" style="display: {{ $isEdit && !empty($journal['cover_image']) ? 'inline-flex' : 'none' }}; width: 32px; height: 32px; padding: 0; align-items: center; justify-content: center; opacity: 0.88;" title="Remove cover photo" aria-label="Remove cover photo">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
@@ -185,6 +194,30 @@
                 </div>
             </div>
 
+            <!-- Co-contributors -->
+            @if($canManageContributors)
+            <div class="mb-4">
+                <label class="form-label fw-semibold small text-muted">Co-contributors <span class="fw-normal">(can edit this chronicle)</span></label>
+                @php $authorKey = (string)($isEdit ? $journal['author_id'] : ($_SESSION['id'] ?? '')); @endphp
+                @if(count(array_filter($familyMembers, static fn ($m) => (string)$m['id'] !== $authorKey)) === 0)
+                    <div class="small text-muted">No other family members have joined yet. Invite relatives to write together.</div>
+                @else
+                <div class="border rounded-3 p-2" style="max-height: 200px; overflow-y: auto; background: #f8fafc;">
+                    @foreach($familyMembers as $member)
+                        @if((string)$member['id'] !== (string)($isEdit ? $journal['author_id'] : ($_SESSION['id'] ?? '')))
+                        <div class="form-check d-flex align-items-center gap-2" style="min-height: 44px;">
+                            <input class="form-check-input mt-0" type="checkbox" name="contributors[]" id="contrib_{{ htmlspecialchars((string)$member['id'], ENT_QUOTES, 'UTF-8') }}" value="{{ htmlspecialchars((string)$member['id'], ENT_QUOTES, 'UTF-8') }}" {{ in_array((string)$member['id'], $contributorIds, true) ? 'checked' : '' }}>
+                            <label class="form-check-label small fw-semibold text-dark" for="contrib_{{ htmlspecialchars((string)$member['id'], ENT_QUOTES, 'UTF-8') }}" style="cursor: pointer;">
+                                {{ htmlspecialchars(trim((string)($member['firstName'] ?? '') . ' ' . (string)($member['lastName'] ?? '')), ENT_QUOTES, 'UTF-8') }}
+                            </label>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+                @endif
+            </div>
+            @endif
+
             <!-- Status & Submit -->
             <div class="d-flex align-items-center justify-content-between pt-4 border-top flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -192,23 +225,25 @@
                         <label for="statusSelect" class="form-label small fw-semibold text-muted mb-0">Status:</label>
                         <select class="form-select form-select-sm rounded-pill" id="statusSelect" name="status" style="width: 140px;">
                             <option value="published">Published</option>
-                            <option value="draft">Save as Draft</option>
+                            <option value="draft" {{ $isEdit && ($journal['status'] ?? '') === 'draft' ? 'selected' : '' }}>Save as Draft</option>
                         </select>
                     </div>
 
                     <!-- Share to Family Feed Checkbox -->
+                    @if(!$isEdit)
                     <div class="form-check form-switch mb-0 d-flex align-items-center gap-2" style="min-height: 44px;">
                         <input class="form-check-input" type="checkbox" id="shareToFeed" name="share_to_feed" value="1" checked style="cursor: pointer; width: 2.2em; height: 1.2em;">
                         <label class="form-check-label small fw-semibold text-dark mb-0" for="shareToFeed" style="cursor: pointer;">
                             <i class="bi bi-broadcast text-primary me-1"></i> Share to Family Feed
                         </label>
                     </div>
+                    @endif
                 </div>
 
                 <div class="d-flex align-items-center gap-2">
-                    <a href="/familyJournal" class="btn btn-light rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">Cancel</a>
+                    <a href="{{ $isEdit ? '/familyJournal/' . (int)$journal['id'] : '/familyJournal' }}" class="btn btn-light rounded-pill px-4" style="min-height: 44px; display: inline-flex; align-items: center;">Cancel</a>
                     <button type="submit" id="btnSubmitJournal" class="btn btn-primary rounded-pill px-4 fw-bold btn-spin-on-click" style="background: #4f46e5; border-color: #4f46e5; min-height: 44px;">
-                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Preserve Chronicle
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> {{ $isEdit ? 'Save Changes' : 'Preserve Chronicle' }}
                     </button>
                 </div>
             </div>
@@ -249,6 +284,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (quillContainer) quillContainer.style.display = 'none';
         if (fallbackTextarea) fallbackTextarea.style.display = 'block';
     }
+
+    const isEdit = document.getElementById('journalForm')?.dataset.edit === '1';
+    @if($isEdit)
+    const existingContent = {!! $existingContentJson !!};
+    if (quill) {
+        quill.clipboard.dangerouslyPasteHTML(existingContent);
+    } else if (fallbackTextarea) {
+        fallbackTextarea.value = existingContent.replace(/<\/p>\s*<p>/g, '\n\n').replace(/<br\s*\/?>/g, '\n').replace(/<[^>]*>/g, '');
+    }
+    @endif
 
     // Image preview handler
     const coverInput = document.getElementById('coverImageInput');
@@ -311,6 +356,8 @@ document.addEventListener('DOMContentLoaded', function() {
         btnRemoveCover.addEventListener('click', function(e) {
             e.preventDefault();
             if (coverInput) coverInput.value = '';
+            const rc = document.getElementById('removeCoverInput');
+            if (rc) rc.value = '1';
             resetImagePreview();
         });
     }
@@ -450,12 +497,12 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) {}
     }
 
-    restoreLocalDraft();
+    if (!isEdit) { restoreLocalDraft(); }
     const debouncedSave = (function() {
         let timer = null;
         return function() {
             clearTimeout(timer);
-            timer = setTimeout(saveLocalDraft, 1000);
+            if (!isEdit) { timer = setTimeout(saveLocalDraft, 1000); }
         };
     })();
 
@@ -470,8 +517,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form Submit
     const form = document.getElementById('journalForm');
     if (form) {
+        let isSubmitting = false;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            if (isSubmitting) { return; }
 
             let html = '';
             let text = '';
@@ -502,13 +551,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const formData = new FormData(form);
             const submitBtn = document.getElementById('btnSubmitJournal');
+            isSubmitting = true;
             if (window.FamilyPlatformSpinner) {
                 window.FamilyPlatformSpinner.start(submitBtn, ' Preserving...');
             } else if (submitBtn) {
                 submitBtn.disabled = true;
             }
 
-            fetch('/familyJournal/store', {
+            fetch(form.dataset.action || '/familyJournal/store', {
                 method: 'POST',
                 body: formData
             })
@@ -518,6 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     try { localStorage.removeItem('fp_journal_draft'); } catch(e) {}
                     window.location.href = data.redirect || '/familyJournal';
                 } else {
+                    isSubmitting = false;
                     alert(data.message || 'Failed to preserve chronicle.');
                     if (window.FamilyPlatformSpinner) {
                         window.FamilyPlatformSpinner.stop(submitBtn);
@@ -528,6 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(err => {
                 console.error(err);
+                isSubmitting = false;
                 alert('A network error occurred. Please try again.');
                 if (window.FamilyPlatformSpinner) {
                     window.FamilyPlatformSpinner.stop(submitBtn);

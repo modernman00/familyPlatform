@@ -291,6 +291,40 @@
                             </button>
                         </div>
 
+                        <!-- 5b. Then & Now (before / after) Builder -->
+                        <div id="thenNowContainer" class="composer-drawer poll-builder d-none mb-3 shadow-xs">
+                            <div class="poll-builder__header">
+                                <span class="poll-builder__icon"><i class="bi bi-hourglass-split"></i></span>
+                                <span class="poll-builder__title" id="thenNowTitle">Then &amp; Now</span>
+                                <button type="button" id="removeThenNowBtn" class="poll-builder__close" aria-label="Remove Then and Now">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" name="then_now" id="thenNowFlag" value="">
+                            <input type="hidden" name="reply_to_post" id="thenNowReplyTo" value="">
+                            <div class="then-now-slots">
+                                <div class="then-now-slot">
+                                    <label for="thenImgInput" class="then-now-slot__pick" id="thenSlotPick">
+                                        <img id="thenPreview" class="d-none" alt="Then photo preview">
+                                        <span id="thenPlaceholder"><i class="bi bi-image"></i><br>Pick the <strong>Then</strong> photo</span>
+                                    </label>
+                                    <input type="file" id="thenImgInput" accept="image/*" hidden>
+                                    <input type="text" name="then_label" class="poll-builder__option" placeholder="Then, e.g. 1998" maxlength="40" aria-label="Then year or label">
+                                </div>
+                                <div class="then-now-slot">
+                                    <label for="nowImgInput" class="then-now-slot__pick" id="nowSlotPick">
+                                        <img id="nowPreview" class="d-none" alt="Now photo preview">
+                                        <span id="nowPlaceholder"><i class="bi bi-image"></i><br>Pick the <strong>Now</strong> photo</span>
+                                    </label>
+                                    <input type="file" id="nowImgInput" accept="image/*" hidden>
+                                    <input type="text" name="now_label" class="poll-builder__option" placeholder="Now, e.g. 2026" maxlength="40" aria-label="Now year or label">
+                                    <button type="button" id="nowCameraBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px;">
+                                        <i class="bi bi-camera-fill"></i> Match it with the camera
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- 6. iOS Direct Apple Photos Shortcut Guide Drawer -->
                         <div id="iosShareDrawer" class="composer-drawer d-none mb-3 p-3 rounded-3 shadow-xs" style="background: var(--bg-color); border: 1px solid var(--border-color);">
                             <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
@@ -324,7 +358,7 @@
                         style="border: 1px solid var(--border-color); background-color: var(--bg-color);">
                         <span class="fw-semibold small px-2" style="color: var(--text-color);">Add to your post</span>
                         
-                        <div class="d-flex gap-2 align-items-center">
+                        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
                             <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach Photo" style="cursor: pointer;" aria-label="Attach photo">
                                 <i class="bi bi-image-fill"></i>
                             </label>
@@ -346,6 +380,10 @@
                             
                             <button type="button" class="btn-composer-action action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
                                 <i class="bi bi-bar-chart-fill"></i>
+                            </button>
+
+                            <button type="button" class="btn-composer-action action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now: show how far you have come" aria-label="Then and Now photo comparison">
+                                <i class="bi bi-hourglass-split"></i><span>Then &amp; Now</span>
                             </button>
 
                             <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">

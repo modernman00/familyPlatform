@@ -163,7 +163,7 @@ if (typeof window.mobileHighlightsTray !== 'function') {
             milestones: [],
             loaded: false,
             initTray() {
-                fetch('/api/memories-milestones')
+                fetch('/api/memories/today')
                     .then(r => r.json())
                     .then(res => {
                         if (res.status === 'success' && res.data) {
