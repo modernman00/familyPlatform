@@ -1,10 +1,26 @@
 'use strict';
 import { createCodeSubmitHandler, qSelAll, id } from '@modernman00/shared-js-lib';
 
-// Determine redirect target based on session flag set by the forgot-password flow.
+// Determine redirect target: Server-rendered data-redirect attribute takes authoritative priority.
+// Fallback to sessionStorage only if data-redirect is not present on the form element.
+const formEl = id('code');
+const serverRedirect = formEl?.getAttribute('data-redirect');
 const fromForgot = sessionStorage.getItem('fromForgot');
-const redirectTo = fromForgot ? '/changePW' : '/profilePage';
-if (fromForgot) sessionStorage.removeItem('fromForgot');
+
+let redirectTo = '/profilePage';
+if (serverRedirect && (serverRedirect === '/profilePage' || serverRedirect === '/changePW' || serverRedirect.startsWith('/'))) {
+  redirectTo = serverRedirect;
+} else if (fromForgot) {
+  redirectTo = '/changePW';
+}
+
+// Clean up transient session and local storage flags immediately so future logins never misroute
+sessionStorage.removeItem('fromForgot');
+if (redirectTo === '/profilePage') {
+  try {
+    localStorage.removeItem('redirect');
+  } catch (e) {}
+}
 
 // The shared library binds the click handler on #button and submits form#code,
 // posting the hidden #codeValue field that the OTP boxes below keep in sync.

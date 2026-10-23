@@ -207,7 +207,7 @@ input[type="file"] {
 
 {{--  FRIEND REQUESTS  --}}
 
-  <div class="w3-card w3-round w3-white w3-center">
+  <div class="w3-card w3-round w3-white w3-center" id="friendRequestsCard">
      @if (count($requestData) > 1)
      <p><b>{{ count($requestData)}} Friend Requests </b></p><br>
      @else

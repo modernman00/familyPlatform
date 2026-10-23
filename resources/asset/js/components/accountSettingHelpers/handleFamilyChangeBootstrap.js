@@ -80,6 +80,20 @@ const onChangeKidAndSiblings = () => {
     if (kidInput) kidInput.addEventListener('change', (event) => show('children', event));
     if (sibInput) sibInput.addEventListener('change', (event) => show('sibling', event));
 
+    // Reveal "other parent" / "relationship status" only when the answer makes them relevant
+    document.addEventListener('change', (event) => {
+        const el = event.target;
+        if (!el || el.tagName !== 'SELECT') return;
+        const m = /^(sibling|children)_option(\d+)$/.exec(el.name || '');
+        if (!m) return;
+        const key = `${m[1]}${m[2]}`;
+        const half = m[1] === 'sibling'
+            ? ['Same_Father', 'Same_Mother'].includes(el.value)
+            : el.value === 'With Former Partner';
+        document.querySelector(`[data-family-other-parent="${key}"]`)?.classList.toggle('d-none', !half);
+        document.querySelector(`[data-family-union-status="${key}"]`)?.classList.toggle('d-none', el.value !== 'With Former Partner');
+    });
+
     // initialise on page load too (if selects already have values)
     syncCheckEmailObj();
 

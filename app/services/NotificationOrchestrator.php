@@ -68,24 +68,49 @@ final class NotificationOrchestrator
             return $notifId;
         }
 
-        // Guarantee durable in-app notification row for the bell & dropdown feed
+        // Guarantee durable in-app notification row for the bell & dropdown feed with canonical action_url
         try {
             $db = \Src\Db::connect2();
-            $stmt = $db->prepare("
-                INSERT INTO notification 
-                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                VALUES (?, ?, ?, ?, ?, ?, 'new', NOW())
-            ");
             $senderId = is_scalar($metadata['sender_id'] ?? null) ? (string)$metadata['sender_id'] : 'system';
             $senderName = is_scalar($metadata['sender_name'] ?? null) ? (string)$metadata['sender_name'] : 'Family Platform';
-            $stmt->execute([
+            $resolvedActionUrl = $actionUrl !== '' ? $actionUrl : '/profilePage';
+
+            // Check if CentralOrchestrator already inserted a row into notification for this dispatch
+            $updateStmt = $db->prepare("
+                UPDATE notification 
+                SET action_url = ?, sender_name = ?, sender_id = ?
+                WHERE receiver_id = ? 
+                  AND (notification_name = ? OR notification_content = ?)
+                  AND (action_url IS NULL OR action_url = '')
+                  AND created_at >= (NOW() - INTERVAL 10 SECOND)
+                ORDER BY no DESC 
+                LIMIT 1
+            ");
+            $updateStmt->execute([
+                $resolvedActionUrl,
+                $senderName,
                 $senderId,
                 $userId,
-                $senderName,
                 strip_tags($title),
-                ucfirst($category),
                 strip_tags($body)
             ]);
+
+            if ($updateStmt->rowCount() === 0) {
+                $stmt = $db->prepare("
+                    INSERT INTO notification 
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 'new', NOW())
+                ");
+                $stmt->execute([
+                    $senderId,
+                    $userId,
+                    $senderName,
+                    strip_tags($title),
+                    ucfirst($category),
+                    strip_tags($body),
+                    $resolvedActionUrl
+                ]);
+            }
         } catch (\Throwable $e) {
             // fail-safe logging
             error_log('[NotificationOrchestrator] In-app table sync failed: ' . $e->getMessage());
@@ -133,6 +158,12 @@ final class NotificationOrchestrator
         return CentralOrchestrator::processScheduled($limit);
     }
 
+    /**
+     * @param string $notificationId
+     * @param string $event
+     * @param array<string, mixed>|null $clientMeta
+     * @return bool
+     */
     public static function recordTelemetry(string $notificationId, string $event, ?array $clientMeta = null): bool
     {
         return CentralOrchestrator::recordTelemetry($notificationId, $event, $clientMeta);

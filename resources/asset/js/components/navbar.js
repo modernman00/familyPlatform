@@ -86,7 +86,10 @@ const notificationHTML = (data) => {
             <span>${emoji}</span>
         </div>
         
-        <a href="${data.action_url || ('#linkNotification' + no)}" class="notif-details-link flex-grow-1 text-decoration-none">
+        <a href="${data.action_url || '/profilePage'}" 
+           class="notif-details-link flex-grow-1 text-decoration-none"
+           data-no="${no}"
+           data-action-url="${data.action_url || '/profilePage'}">
             <h6 class="notif-item-title">${formattedTitle}</h6>
             <p class="notif-item-desc">${notification_content || ''}</p>
             <span class="notif-item-time">${timeAgoStr}</span>
@@ -229,12 +232,132 @@ if (document.readyState === 'loading') {
     fetchUserNotifications();
 }
 
-// Dismiss listener delegation
+// Smooth scroll and highlight an item navigated via notification
+export const scrollToAndHighlightItem = (hash) => {
+    if (!hash || hash === '#' || hash === '#!') return;
+    const rawId = hash.replace(/^#/, '');
+
+    let attempts = 0;
+    const maxAttempts = 30; // 3 seconds total (polling every 100ms)
+    const interval = setInterval(() => {
+        attempts++;
+
+        let el = document.getElementById(rawId)
+            || document.querySelector(hash)
+            || document.querySelector(`[data-id="${rawId}"]`)
+            || document.querySelector(`[id*="${rawId}"]`);
+
+        // Heuristic fallbacks for specific known sections
+        if (!el) {
+            if (rawId === 'familyJoinRequests' || rawId.startsWith('familyJoinReq')) {
+                el = document.querySelector('.family-join-request-card') || document.getElementById('familyJoinRequests');
+            } else if (rawId === 'migrationRequests' || rawId.startsWith('migrationReq')) {
+                el = document.querySelector('.family-migration-request-card') || document.getElementById('migrationRequests');
+            } else if (rawId === 'migrationNudges' || rawId.startsWith('migrationNudge')) {
+                el = document.querySelector('.family-migration-nudge-card') || document.getElementById('migrationNudges');
+            } else if (rawId === 'friendRequestsCard' || rawId.toLowerCase().includes('friend')) {
+                el = document.getElementById('friendRequestsCard') || document.querySelector('.requestFriendClass');
+            } else if (rawId === 'eventHeader' || rawId.startsWith('linkNotification')) {
+                el = document.getElementById('eventHeader') || document.getElementById('eventList');
+            } else if (rawId.startsWith('post')) {
+                el = document.getElementById(rawId) || document.querySelector(`.${rawId}`);
+            }
+        }
+
+        if (el) {
+            clearInterval(interval);
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('notif-item-target-highlight');
+            setTimeout(() => {
+                el.classList.remove('notif-item-target-highlight');
+            }, 3000);
+        } else if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            if (rawId.startsWith('linkNotification')) {
+                const eventHeader = document.getElementById('eventHeader') || document.getElementById('eventList');
+                if (eventHeader) {
+                    eventHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    eventHeader.classList.add('notif-item-target-highlight');
+                    setTimeout(() => eventHeader.classList.remove('notif-item-target-highlight'), 3000);
+                }
+            }
+        }
+    }, 100);
+};
+
+export const handleNotificationClickNavigation = (targetUrl, e) => {
+    if (!targetUrl) return;
+
+    try {
+        const parsed = new URL(targetUrl, window.location.origin);
+        const currentPath = window.location.pathname.toLowerCase().replace(/\/$/, '');
+        const targetPath = parsed.pathname.toLowerCase().replace(/\/$/, '');
+        const isCurrentPage = (currentPath === targetPath) || 
+            (currentPath === '' && targetPath === '/profilepage') ||
+            (currentPath === '/profilepage' && targetPath === '');
+
+        if (isCurrentPage) {
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
+
+            if (parsed.hash) {
+                if (window.location.hash !== parsed.hash) {
+                    history.pushState(null, '', parsed.hash);
+                }
+                scrollToAndHighlightItem(parsed.hash);
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } else {
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+                window.location.href = targetUrl;
+            }
+        }
+    } catch (err) {
+        window.location.href = targetUrl;
+    }
+};
+
+// Dismiss and navigation listener delegation
 const initDeleteOnce = () => {
     const tab = document.getElementById('notification_tab');
     if (!tab) return;
 
     tab.addEventListener('click', e => {
+        // Handle clicking the notification body to navigate directly to the item itself
+        const link = e.target.closest('.notif-details-link');
+        if (link) {
+            const no = link.getAttribute('data-no');
+            const targetUrl = link.getAttribute('data-action-url') || link.getAttribute('href') || '/profilePage';
+
+            // Mark as read asynchronously in background
+            if (no) {
+                axios.put(`/removeNotification/${encodeURIComponent(no)}`).catch(() => {});
+            }
+
+            // Visual update: remove unread styling & decrement badge count
+            const card = link.closest('.notif-card-stitch');
+            if (card && card.classList.contains('unread')) {
+                card.classList.remove('unread');
+                const currentCount = parseInt(sessionStorage.getItem('notificationCount') || '1') - 1;
+                const newValues = currentCount > 0 ? currentCount : 0;
+                sessionStorage.setItem('notificationCount', newValues);
+                updateNotificationBadge(newValues);
+            }
+
+            // Auto-close notification dropdown
+            const dropdown = document.getElementById('notificationDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+            }
+
+            handleNotificationClickNavigation(targetUrl, e);
+            return;
+        }
+
+        // Handle clicking the dismiss button
         const btn = e.target.closest('button[id*="deleteNotification"]');
         if (!btn) return;
 
@@ -277,6 +400,25 @@ document.readyState === 'loading'
     : initDeleteOnce();
 
 if (typeof window !== 'undefined') {
+    window.scrollToAndHighlightItem = scrollToAndHighlightItem;
+    window.handleNotificationClickNavigation = handleNotificationClickNavigation;
+
+    if (window.location.hash) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => scrollToAndHighlightItem(window.location.hash), 300);
+            });
+        } else {
+            setTimeout(() => scrollToAndHighlightItem(window.location.hash), 300);
+        }
+    }
+
+    window.addEventListener('hashchange', () => {
+        if (window.location.hash) {
+            scrollToAndHighlightItem(window.location.hash);
+        }
+    });
+
     window.addEventListener('pwa:badge-updated', (e) => {
         if (typeof e.detail?.count === 'number') {
             updateNotificationBadge(e.detail.count);

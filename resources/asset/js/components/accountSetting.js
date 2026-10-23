@@ -46,10 +46,16 @@ const showSpouse = () => {
   } else if (maritalStatus === "Yes - Add Wife") {
     showElement('maiden_name_div');
     showElement('spouse');
+  } else if (maritalStatus === "Divorced" || maritalStatus === "Widowed") {
+    // Former partner: same details, plus their gender (cannot be inferred)
+    showElement('spouse');
+    hideElement('maiden_name_div');
   } else {
     hideElement('spouse');
     hideElement('maiden_name_div');
   }
+  const gDiv = id('spouse_gender_div');
+  if (gDiv) gDiv.style.display = (maritalStatus === "Divorced" || maritalStatus === "Widowed") ? '' : 'none';
 };
 
 const maritalSelect = id('maritalStatus');
@@ -133,6 +139,68 @@ const handleHashNavigation = () => {
 
 window.addEventListener('DOMContentLoaded', handleHashNavigation);
 window.addEventListener('hashchange', handleHashNavigation);
+
+// ── Lineage Scope Radio Buttons ────────────────────────────────────────────
+// Wires the "Marital Tree / Birth Family" radio buttons in the Parents and
+// Siblings tabs to the hidden `lineage_scope` and `lineage_code` form fields.
+// When the user switches to "maternal", the sibling/parent invite emails will
+// use their otherFamCode instead of the primary marital family code.
+(function initLineageScopePickers() {
+  const TABS = [
+    {
+      primaryRadioId:  'parents-scope-primary',
+      maternalRadioId: 'parents-scope-maternal',
+      scopeFieldId:    'parentsLineageScope',
+      codeFieldId:     'parentsLineageCode',
+      primaryLabelId:  'parents-scope-primary-label',
+      maternalLabelId: 'parents-scope-maternal-label',
+    },
+    {
+      primaryRadioId:  'siblings-scope-primary',
+      maternalRadioId: 'siblings-scope-maternal',
+      scopeFieldId:    'siblingsLineageScope',
+      codeFieldId:     'siblingsLineageCode',
+      primaryLabelId:  'siblings-scope-primary-label',
+      maternalLabelId: 'siblings-scope-maternal-label',
+    },
+  ];
+
+  TABS.forEach(({ primaryRadioId, maternalRadioId, scopeFieldId, codeFieldId, primaryLabelId, maternalLabelId }) => {
+    const primaryRadio  = id(primaryRadioId);
+    const maternalRadio = id(maternalRadioId);
+    const scopeField    = id(scopeFieldId);
+    const codeField     = id(codeFieldId);
+    const primaryLabel  = id(primaryLabelId);
+    const maternalLabel = id(maternalLabelId);
+
+    if (!primaryRadio || !maternalRadio || !scopeField) return;
+
+    const applyStyles = (selected) => {
+      if (primaryLabel)  { primaryLabel.style.borderColor  = selected === 'primary'  ? '#4f46e5' : ''; primaryLabel.style.background  = selected === 'primary'  ? '#eef2ff' : ''; }
+      if (maternalLabel) { maternalLabel.style.borderColor = selected === 'maternal' ? '#16a34a' : ''; maternalLabel.style.background = selected === 'maternal' ? '#f0fdf4' : ''; }
+    };
+
+    const onPrimary = () => {
+      scopeField.value = 'primary';
+      applyStyles('primary');
+    };
+    const onMaternal = () => {
+      scopeField.value = 'maternal';
+      // Ensure lineage_code is populated (may already be set server-side)
+      if (codeField && !codeField.value) {
+        const otherEl = id('otherFamCode_id');
+        codeField.value = otherEl?.value ?? '';
+      }
+      applyStyles('maternal');
+    };
+
+    primaryRadio.addEventListener('change',  onPrimary);
+    maternalRadio.addEventListener('change', onMaternal);
+
+    // Apply initial visual state
+    applyStyles(primaryRadio.checked ? 'primary' : 'maternal');
+  });
+})();
 
 // Kid / sibling email helper — checks each address against the server on demand
 // (no bulk email list is pulled to the browser any more, SEC-4).

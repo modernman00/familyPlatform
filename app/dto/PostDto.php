@@ -32,6 +32,8 @@ final class PostDto implements JsonSerializable
      * @param string|null $profileImg
      * @param array<string, mixed>|null $poll
      * @param array<int, mixed> $reactions
+     * @param array<string, mixed>|null $linkPreview
+     * @param array<int, mixed> $postTags
      * @param array<string, mixed> $rawAttributes
      */
     public function __construct(

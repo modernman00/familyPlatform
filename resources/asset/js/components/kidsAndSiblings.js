@@ -17,6 +17,37 @@ export const processKidsSiblings = (firstName, famCode = null) => {
 
   const getFamCode = () => id("famCode_id")?.value ?? famCode ?? "";
 
+  /**
+   * Resolve the correct invite family code based on which tab the email input lives in.
+   * - Parents / Siblings tabs: if the user has selected "Birth / Maiden Family" lineage,
+   *   use their otherFamCode (the hidden #otherFamCode_id element populated by the blade).
+   * - Children tab: always use the primary marital family code.
+   * - Fallback: primary famCode.
+   */
+  const getInviteFamCode = (inputEl) => {
+    // Walk up the DOM to find which form this input belongs to
+    const parentForm = inputEl.closest("form");
+    const formId = parentForm?.id ?? "";
+
+    if (formId === "siblingsForm") {
+      const scopeEl = id("siblingsLineageScope");
+      if (scopeEl?.value === "maternal") {
+        const maternalCode = id("otherFamCode_id")?.value ?? id("siblingsLineageCode")?.value ?? "";
+        if (maternalCode) return maternalCode;
+      }
+    }
+
+    if (formId === "parentsForm") {
+      const scopeEl = id("parentsLineageScope");
+      if (scopeEl?.value === "maternal") {
+        const maternalCode = id("otherFamCode_id")?.value ?? id("parentsLineageCode")?.value ?? "";
+        if (maternalCode) return maternalCode;
+      }
+    }
+
+    return getFamCode();
+  };
+
   // debounce so it doesn't fire too aggressively
   let t = null;
   const debounce = (fn, wait = 200) => (...args) => {
@@ -75,7 +106,7 @@ export const processKidsSiblings = (firstName, famCode = null) => {
       helpEl.style.display = "block";
       helpEl.dataset.email = emailInput;
       helpEl.dataset.name = nameValue;
-      helpEl.dataset.familyCode = getFamCode();
+      helpEl.dataset.familyCode = getInviteFamCode(el);
 
       helpEl.innerHTML = exists
         ? `Great news! ${nameValue || "This person"} is already registered on the platform`

@@ -1417,6 +1417,214 @@ body.dark-mode .text-muted {
   color: #94a3b8 !important;
 }
 
+/* ── Feed Banners & Migration Cards Dark Theme Invariant ────────────── */
+body.dark-mode .family-join-request-card,
+[data-bs-theme="dark"] .family-join-request-card {
+  background: linear-gradient(135deg, rgba(0, 191, 165, 0.16) 0%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(0, 191, 165, 0.35) !important;
+  border-left: 5px solid #00bfa5 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .family-join-request-card .card-icon-badge,
+[data-bs-theme="dark"] .family-join-request-card .card-icon-badge {
+  background: rgba(0, 191, 165, 0.22) !important;
+  color: #5eead4 !important;
+}
+body.dark-mode .family-join-request-card .card-heading,
+[data-bs-theme="dark"] .family-join-request-card .card-heading {
+  color: #f8fafc !important;
+}
+body.dark-mode .family-join-request-card .card-desc,
+[data-bs-theme="dark"] .family-join-request-card .card-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .family-join-request-card .btn-deny,
+[data-bs-theme="dark"] .family-join-request-card .btn-deny {
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+body.dark-mode .family-join-request-card .btn-deny:hover,
+[data-bs-theme="dark"] .family-join-request-card .btn-deny:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .family-migration-nudge-card,
+[data-bs-theme="dark"] .family-migration-nudge-card {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  border-left: 5px solid #8b5cf6 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .family-migration-nudge-card .card-icon-badge,
+[data-bs-theme="dark"] .family-migration-nudge-card .card-icon-badge {
+  background: rgba(139, 92, 246, 0.25) !important;
+  color: #c4b5fd !important;
+}
+body.dark-mode .family-migration-nudge-card .card-heading,
+[data-bs-theme="dark"] .family-migration-nudge-card .card-heading {
+  color: #f8fafc !important;
+}
+body.dark-mode .family-migration-nudge-card .card-desc,
+[data-bs-theme="dark"] .family-migration-nudge-card .card-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .family-migration-nudge-card .card-quote-box,
+[data-bs-theme="dark"] .family-migration-nudge-card .card-quote-box {
+  background: rgba(15, 23, 42, 0.65) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+}
+body.dark-mode .family-migration-nudge-card .btn-decline,
+[data-bs-theme="dark"] .family-migration-nudge-card .btn-decline {
+  border-color: #64748b !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+body.dark-mode .family-migration-nudge-card .btn-decline:hover,
+[data-bs-theme="dark"] .family-migration-nudge-card .btn-decline:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .family-migration-request-card,
+[data-bs-theme="dark"] .family-migration-request-card {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.22) 0%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  border-left: 5px solid #2563eb !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .family-migration-request-card .card-icon-badge,
+[data-bs-theme="dark"] .family-migration-request-card .card-icon-badge {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: #93c5fd !important;
+}
+body.dark-mode .family-migration-request-card .card-heading,
+[data-bs-theme="dark"] .family-migration-request-card .card-heading {
+  color: #f8fafc !important;
+}
+body.dark-mode .family-migration-request-card .card-desc,
+[data-bs-theme="dark"] .family-migration-request-card .card-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .family-migration-request-card .card-quote-box,
+[data-bs-theme="dark"] .family-migration-request-card .card-quote-box {
+  background: rgba(15, 23, 42, 0.65) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #334155 !important;
+}
+body.dark-mode .family-migration-request-card .btn-deny,
+[data-bs-theme="dark"] .family-migration-request-card .btn-deny {
+  border-color: #ef4444 !important;
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+body.dark-mode .family-migration-request-card .btn-deny:hover,
+[data-bs-theme="dark"] .family-migration-request-card .btn-deny:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #fca5a5 !important;
+}
+
+body.dark-mode .unclaimed-match-card,
+[data-bs-theme="dark"] .unclaimed-match-card {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  border-left: 5px solid #2563eb !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+body.dark-mode .unclaimed-match-card .card-icon-badge,
+[data-bs-theme="dark"] .unclaimed-match-card .card-icon-badge {
+  background: rgba(37, 99, 235, 0.25) !important;
+  color: #93c5fd !important;
+}
+body.dark-mode .unclaimed-match-card .card-heading,
+[data-bs-theme="dark"] .unclaimed-match-card .card-heading {
+  color: #f8fafc !important;
+}
+body.dark-mode .unclaimed-match-card .card-desc,
+[data-bs-theme="dark"] .unclaimed-match-card .card-desc {
+  color: #cbd5e1 !important;
+}
+body.dark-mode .unclaimed-match-card .btn-dismiss,
+[data-bs-theme="dark"] .unclaimed-match-card .btn-dismiss {
+  border-color: #64748b !important;
+  color: #e2e8f0 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+body.dark-mode .family-heritage-hub,
+[data-bs-theme="dark"] .family-heritage-hub {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-quest {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-quest .tile-icon {
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-trivia {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-trivia .tile-icon {
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-flyer {
+  background: rgba(59, 130, 246, 0.12) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-flyer .tile-icon {
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: #60a5fa !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-capsule {
+  background: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+body.dark-mode .family-heritage-hub .hub-tile-capsule .tile-icon {
+  background: rgba(168, 85, 247, 0.25) !important;
+  color: #c084fc !important;
+}
+body.dark-mode .family-heritage-hub .tile-title {
+  color: #f8fafc !important;
+}
+body.dark-mode .family-heritage-hub .tile-desc {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .active-hashtag-filter-card,
+[data-bs-theme="dark"] .active-hashtag-filter-card {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.22) 0%, #1e293b 100%) !important;
+  background-color: #1e293b !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  border-left: 4px solid #6366f1 !important;
+}
+body.dark-mode .active-hashtag-filter-card .stream-label,
+[data-bs-theme="dark"] .active-hashtag-filter-card .stream-label {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .feed-empty-state-card,
+[data-bs-theme="dark"] .feed-empty-state-card {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+body.dark-mode .feed-empty-state-card h5 {
+  color: #f8fafc !important;
+}
+body.dark-mode .feed-empty-state-card p {
+  color: #94a3b8 !important;
+}
+
 /* ── Segun PWA & Mobile Optimization: Memories & Milestones ────────── */
 #memoriesWidgetMobile,
 #memoriesWidgetDesktop {

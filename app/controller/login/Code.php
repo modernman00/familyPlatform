@@ -19,6 +19,10 @@ final class Code
             if (empty($_SESSION['token'])) {
                 $_SESSION['token'] = bin2hex(random_bytes(32));
             }
+            // Ensure flow is explicitly recorded: default to login if pendingUser exists, otherwise preserve flow
+            if (empty($_SESSION['auth']['flow'])) {
+                $_SESSION['auth']['flow'] = !empty($_SESSION['auth']['pendingUser']) ? 'login' : 'forgot_password';
+            }
             PwdRecoveryCodeFunctionality::show('login/code');
         } catch (\Throwable $th) {
             Utility::showError($th);
@@ -46,6 +50,15 @@ final class Code
                     $_SESSION['id'] = $_SESSION['auth']['identifyCust'];
                     $id = $_SESSION['id'];
                     $_SESSION['loggedIn'] = true;
+
+                    // If user was logging in with verified credentials, issue auth cookie and finalize login
+                    $isLoginFlow = !empty($_SESSION['auth']['pendingUser']) || (($_SESSION['auth']['flow'] ?? '') === 'login');
+                    if ($isLoginFlow) {
+                        $userPayload = $_SESSION['auth']['pendingUser'] ?? ['id' => $id, 'role' => 'users'];
+                        \Src\JwtHandler::issueLoginCookie($userPayload);
+                        unset($_SESSION['auth']['pendingUser']);
+                        $_SESSION['auth']['flow'] = 'authenticated';
+                    }
 
                     // GDPR Art. 17 — 30-Day Grace Period Restoration
                     $stmtStatus = \Src\Db::connect2()->prepare('SELECT status, email FROM account WHERE id = ? LIMIT 1');

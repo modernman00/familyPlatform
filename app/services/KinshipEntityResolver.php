@@ -143,8 +143,14 @@ final class KinshipEntityResolver
             $last = strtolower(trim((string)($n['last_name'] ?? '')));
             $fullName = preg_replace('/\s+/', ' ', trim($first . ' ' . $last));
             
-            // Normalize "WALE OLAOGUN" vs "Wale" vs "Wale Olaogun"
-            $normalizedKey = (string)$fullName;
+            // "Unknown Father/Mother" placeholders are distinct slots (one per half-family), never duplicates
+            if (!empty($n['is_placeholder']) || $fullName === '') {
+                continue;
+            }
+
+            // Same name in a different generation is a different person (grandfather / grandson),
+            // so the generation level is part of the identity.
+            $normalizedKey = (string)$fullName . '|' . (int)($n['generation_level'] ?? 0);
 
             $groups[$normalizedKey][] = $n;
         }

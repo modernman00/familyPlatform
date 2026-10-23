@@ -223,7 +223,21 @@
     <h1 class="stitch-title">Security Verification</h1>
     <p class="stitch-subtitle">Please enter the 6-digit code sent to your email to verify your identity.</p>
 
-    <form id="code" class="styleform_form" autocomplete="off">
+    @php
+        $isForgotFlow = (!empty($_SESSION['auth']['flow']) && $_SESSION['auth']['flow'] === 'forgot_password' && empty($_SESSION['auth']['pendingUser']));
+        $targetRedirect = $isForgotFlow ? '/changePW' : '/profilePage';
+    @endphp
+
+    <form id="code" class="styleform_form" autocomplete="off" data-redirect="{{ $targetRedirect }}">
+        @include('csrf')
+        <script nonce="{{ $nonce }}">
+            if (!{{ $isForgotFlow ? 'true' : 'false' }}) {
+                try {
+                    sessionStorage.removeItem('fromForgot');
+                    localStorage.removeItem('redirect');
+                } catch (e) {}
+            }
+        </script>
 
         <div id="setLoader" tabindex="-1" class="loader noDisplay"></div>
         <div class="alert alert-danger noDisplay" id="code_notification" role="alert" aria-live="assertive"><p id="error"></p></div>

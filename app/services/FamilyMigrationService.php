@@ -645,8 +645,8 @@ final class FamilyMigrationService
         try {
             $stmtNotif = $this->pdo->prepare(
                 "INSERT INTO notification 
-                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                 VALUES (?, ?, ?, 'Family Migration Nudge', 'Family Request', ?, 'new', NOW())"
+                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                 VALUES (?, ?, ?, 'Family Migration Nudge', 'Family Request', ?, ?, 'new', NOW())"
             );
             $msgContent = "{$requesterName} invited you to migrate your account to the #{$newFamilyCode} family network.";
             if ($note) {
@@ -656,7 +656,8 @@ final class FamilyMigrationService
                 (string)($requester['id'] ?? 'system'),
                 $targetId,
                 $requesterName,
-                $msgContent
+                $msgContent,
+                "/profilePage#migrationNudgeCard-{$migrationId}"
             ]);
         } catch (\Throwable $e) {
             error_log('[FamilyMigrationService] Notification table write failed: ' . $e->getMessage());
@@ -743,8 +744,8 @@ final class FamilyMigrationService
         try {
             $stmtNotif = $this->pdo->prepare(
                 "INSERT INTO notification 
-                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                 VALUES (?, ?, ?, 'Migration Join Request', 'Family Request', ?, 'new', NOW())"
+                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                 VALUES (?, ?, ?, 'Migration Join Request', 'Family Request', ?, ?, 'new', NOW())"
             );
             $msgContent = "{$requesterName} requested to migrate into your #{$targetFamilyCode} family network.";
             if ($note) {
@@ -756,7 +757,8 @@ final class FamilyMigrationService
                     $requesterId,
                     $recId,
                     $requesterName,
-                    $msgContent
+                    $msgContent,
+                    "/profilePage#migrationReqCard-{$migrationId}"
                 ]);
             }
         } catch (\Throwable $e) {

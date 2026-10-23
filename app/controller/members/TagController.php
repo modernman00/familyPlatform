@@ -335,8 +335,8 @@ class TagController
 
             $notifStmt = $pdo->prepare("
                 INSERT INTO notification 
-                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                VALUES (?, ?, ?, 'Post Tag', 'Post Tag', ?, 'new', NOW())
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                VALUES (?, ?, ?, 'Post Tag', 'Post Tag', ?, ?, 'new', NOW())
             ");
 
             $validTagged = [];
@@ -375,7 +375,8 @@ class TagController
                         $authorId,
                         $targetId,
                         $authorName,
-                        "{$authorName} tagged you in a family post."
+                        "{$authorName} tagged you in a family post.",
+                        "/profilePage#post{$postNo}"
                     ]);
                 } catch (Throwable) {}
 

@@ -242,7 +242,6 @@ final class FamilyJournalController extends BaseController
                         'Oral History' => '🎙️',
                         'Celebration' => '🎉',
                         'Memorial' => '🕊️',
-                        default => '📖'
                     };
 
                     $broadcastMessage = "{$categoryEmoji} Preserved a new Family Chronicle: \"{$title}\"\n\n{$summary}\n\n👉 Read the full story: {$chronicleUrl}";

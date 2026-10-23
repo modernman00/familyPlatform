@@ -85,8 +85,8 @@ class NotificationService
 
             $stmt = $this->pdo->prepare("
                 INSERT INTO notification 
-                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                VALUES (?, ?, ?, ?, 'Family Request', ?, 'new', NOW())
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                VALUES (?, ?, ?, ?, 'Family Request', ?, ?, 'new', NOW())
             ");
 
             $requesterId = isset($newUserInfo['id']) && is_scalar($newUserInfo['id']) ? (string)$newUserInfo['id'] : 'system';
@@ -99,7 +99,8 @@ class NotificationService
                     $recipientId,
                     $requesterName,
                     "Family Join Request",
-                    "{$requesterName} wants to join your {$familyCode} family network."
+                    "{$requesterName} wants to join your {$familyCode} family network.",
+                    "/profilePage#familyJoinReq-{$requestId}"
                 ]);
             }
 
@@ -170,8 +171,8 @@ class NotificationService
         try {
             $stmt = $this->pdo->prepare("
                 INSERT INTO notification 
-                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                VALUES ('system', ?, 'Family Platform', 'Membership Approved', 'Family Request', ?, 'new', NOW())
+                (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                VALUES ('system', ?, 'Family Platform', 'Membership Approved', 'Family Request', ?, '/profilePage', 'new', NOW())
             ");
             $stmt->execute([
                 $userId,

@@ -77,6 +77,13 @@
     return String(val) || fallback;
   }
 
+  var recentTexts = {};
+  function trackRecentText(msg) {
+    if (!msg) return;
+    recentTexts[msg] = true;
+    setTimeout(function() { delete recentTexts[msg]; }, 4000);
+  }
+
   // Toast instance
   function getToast() {
     if (typeof Swal === 'undefined') return null;
@@ -97,6 +104,7 @@
     icon = icon || 'success';
     timer = timer || 3500;
     var cleanMsg = safeString(message);
+    trackRecentText(cleanMsg);
     if (typeof Swal !== 'undefined') {
       var t = getToast();
       if (t) return t.fire({ icon: icon, title: cleanMsg, timer: timer });
@@ -109,6 +117,7 @@
     if (asToast === undefined) asToast = true;
     title = title || 'Success';
     var cleanMsg = safeString(message);
+    trackRecentText(cleanMsg);
     if (asToast) {
       return window.swalToast(cleanMsg, 'success');
     }
@@ -128,6 +137,7 @@
     if (isModal === undefined) isModal = true;
     title = title || 'Error';
     var cleanMsg = safeString(message);
+    trackRecentText(cleanMsg);
     if (!isModal) {
       return window.swalToast(cleanMsg, 'error');
     }
@@ -146,6 +156,7 @@
   window.swalWarning = function(message, title) {
     title = title || 'Warning';
     var cleanMsg = safeString(message);
+    trackRecentText(cleanMsg);
     if (typeof Swal !== 'undefined') {
       return Swal.fire({
         icon: 'warning',
@@ -183,6 +194,7 @@
   window.swalAlert = function(message, type, title) {
     type = type || 'info';
     var cleanMsg = safeString(message);
+    trackRecentText(cleanMsg);
     if (type === 'success') return window.swalSuccess(cleanMsg, false, title);
     if (type === 'error') return window.swalError(cleanMsg, true, title);
     if (type === 'warning') return window.swalWarning(cleanMsg, title);
@@ -203,6 +215,7 @@
     window._nativeAlert = window.alert;
     window.alert = function(msg) {
       var cleanMsg = safeString(msg);
+      trackRecentText(cleanMsg);
       if (typeof Swal !== 'undefined') {
         return Swal.fire({
           text: cleanMsg,
@@ -218,11 +231,17 @@
   }
 
   // Banner MutationObserver Bridge: Automatically elevates #*_notification elements to SweetAlert
-  var recentTexts = {};
   function bridgeNotification(el) {
     if (!el || !el.id || el.id.slice(-13) !== '_notification') return;
     var text = (el.textContent || '').trim();
-    if (!text || recentTexts[text]) return;
+    if (!text) return;
+
+    // If an alert was already triggered directly for this exact message, prevent duplicates/conflicts
+    if (recentTexts[text]) {
+      el.style.display = 'none';
+      el.textContent = '';
+      return;
+    }
 
     var inlineShown = el.style.display && el.style.display !== 'none';
     var hasClass = /(?:^|\s)(?:bg|is)-(?:danger|success|warning|info)(?:\s|$)/.test(el.className) ||
@@ -232,10 +251,26 @@
     if (!inlineShown && !hasClass) return;
     if (typeof Swal === 'undefined') return;
 
-    recentTexts[text] = true;
-    setTimeout(function() { delete recentTexts[text]; }, 3000);
+    trackRecentText(text);
 
-    var isError = /(?:^|\s)(?:bg-danger|is-danger|w3-red|alert-danger)(?:\s|$)/.test(el.className) || !el.className.match(/(?:success|green)/);
+    // Intelligently evaluate whether this is an error or success message
+    var hasErrorKeyword = /(?:error|failed|failure|unable|cannot|could not|invalid|problem|denied|unauthorized|forbidden|wrong|incorrect|mismatch|required|not match)/i.test(text);
+    var hasSuccessKeyword = /(?:success|successfully|saved|updated|created|added|welcom|thank|completed|verified|approved|branched|switched)/i.test(text);
+    var hasRedStyle = /background-color:\s*red|color:\s*red|text-danger/i.test(el.innerHTML || '');
+    var hasDangerClass = /(?:^|\s)(?:bg-danger|is-danger|w3-red|alert-danger)(?:\s|$)/.test(el.className);
+    var hasSuccessClass = /(?:^|\s)(?:bg-success|is-success|w3-green|alert-success)(?:\s|$)/.test(el.className);
+
+    var isError = false;
+    if (hasErrorKeyword || hasRedStyle) {
+      isError = true;
+    } else if (hasSuccessKeyword || hasSuccessClass) {
+      isError = false;
+    } else if (hasDangerClass) {
+      isError = true;
+    } else {
+      isError = false;
+    }
+
     el.style.display = 'none';
     el.textContent = '';
 

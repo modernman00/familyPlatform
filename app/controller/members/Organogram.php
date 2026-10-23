@@ -193,7 +193,41 @@ final class Organogram extends SingleCustomerData
 
             $graphJson = json_encode($graphData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
-            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId', 'isReadOnly'));
+            // Partnerships the viewed member can add a child to (current spouse, former partners, ...)
+            $rootUnions = [];
+            if ($rootNodeId > 0) {
+                $nodesById = [];
+                foreach ($nodes as $n) {
+                    $nodesById[(int)($n['id'] ?? 0)] = $n;
+                }
+                foreach ($unions as $u) {
+                    $p1 = (int)($u['partner_1_id'] ?? 0);
+                    $p2 = (int)($u['partner_2_id'] ?? 0);
+                    if ($p1 === $p2 || ($p1 !== $rootNodeId && $p2 !== $rootNodeId)) {
+                        continue;
+                    }
+                    $partner = $nodesById[$p1 === $rootNodeId ? $p2 : $p1] ?? [];
+                    $rootUnions[] = [
+                        'id' => (int)$u['id'],
+                        'partner_name' => !empty($partner['is_placeholder']) ? '' : trim((string)($partner['full_name'] ?? '')),
+                        'union_type' => (string)($u['union_type'] ?? 'married'),
+                        'is_current' => !empty($u['is_current']),
+                    ];
+                }
+                usort($rootUnions, static fn(array $a, array $b): int => ((int)$b['is_current'] <=> (int)$a['is_current']) ?: ($a['id'] <=> $b['id']));
+            }
+
+            // Relationship confirmations addressed to the signed-in member
+            $pendingRelRequests = [];
+            if ($isSelf) {
+                try {
+                    $pendingRelRequests = \App\services\FamilyRelationshipRequestService::pendingFor(Db::connect2(), $idStr);
+                } catch (\Throwable) {
+                    $pendingRelRequests = []; // table not migrated yet: degrade silently
+                }
+            }
+
+            view('member/familyStudio', compact('data', 'graphData', 'orgData', 'generations', 'stats', 'graphJson', 'rootNodeId', 'isReadOnly', 'rootUnions', 'pendingRelRequests'));
         } catch (\Throwable $th) {
             showError($th);
         }
@@ -574,8 +608,9 @@ final class Organogram extends SingleCustomerData
                 }
 
                 // Check if already linked to this union
-                $checkLink = $db->prepare("SELECT id FROM family_node_children WHERE union_id = ? AND child_id = ? LIMIT 1");
-                $checkLink->execute([$currentUnionId, $chNodeId]);
+                // Never re-home a child that already hangs from ANY union (e.g. a child with a former partner)
+                $checkLink = $db->prepare("SELECT id FROM family_node_children WHERE child_id = ? LIMIT 1");
+                $checkLink->execute([$chNodeId]);
                 if (!$checkLink->fetchColumn()) {
                     $insChild->execute([$currentUnionId, $chNodeId]);
                 }
@@ -672,8 +707,9 @@ final class Organogram extends SingleCustomerData
                         $sibNodeId = (int)$db->lastInsertId();
                     }
 
-                    $checkSibLink = $db->prepare("SELECT id FROM family_node_children WHERE union_id = ? AND child_id = ? LIMIT 1");
-                    $checkSibLink->execute([$parentUnionId, $sibNodeId]);
+                    // Never re-home a sibling that already hangs from ANY union (half-siblings live on a different union)
+                    $checkSibLink = $db->prepare("SELECT id FROM family_node_children WHERE child_id = ? LIMIT 1");
+                    $checkSibLink->execute([$sibNodeId]);
                     if (!$checkSibLink->fetchColumn()) {
                         $insChild->execute([$parentUnionId, $sibNodeId]);
                     }
@@ -1212,19 +1248,24 @@ final class Organogram extends SingleCustomerData
         }
 
         $hasParents = $hasFather || $hasMother || ($parentsCount > 0);
+        $hasBothParents = ($hasFather && $hasMother) || ($parentsCount >= 2);
+        $hasAnyParent = $hasFather || $hasMother || ($parentsCount > 0);
 
         $missingNodeTypes = [];
         $missingLabels = [];
 
-        if (!$hasFather && !$hasMother) {
+        if (!$hasFather && !$hasMother && $parentsCount === 0) {
             $missingNodeTypes[] = 'parents';
             $missingLabels[] = 'Parents';
-        } elseif (!$hasFather) {
-            $missingNodeTypes[] = 'father';
-            $missingLabels[] = 'Father';
-        } elseif (!$hasMother) {
-            $missingNodeTypes[] = 'mother';
-            $missingLabels[] = 'Mother';
+        } else {
+            if (!$hasFather && $parentsCount < 2) {
+                $missingNodeTypes[] = 'father';
+                $missingLabels[] = 'Father';
+            }
+            if (!$hasMother && $parentsCount < 2) {
+                $missingNodeTypes[] = 'mother';
+                $missingLabels[] = 'Mother';
+            }
         }
 
         if ($grandparentsCount < 4) {
@@ -1251,16 +1292,23 @@ final class Organogram extends SingleCustomerData
         }
 
         // Determine primary priority & recommendations
-        if (!$hasParents) {
+        if (!$hasAnyParent) {
             $primaryMissing = 'parents';
             $recommendedCtaType = 'parents';
             $title = 'Build your family tree!';
             $subtitle = 'Your tree looks a bit empty. Add your Father & Mother to anchor your lineage.';
+        } elseif (!$hasBothParents) {
+            $primaryMissing = !$hasFather ? 'father' : 'mother';
+            $recommendedCtaType = 'parents';
+            $title = 'Complete your parents’ lineage!';
+            $subtitle = (!empty($hasFather))
+                ? 'Father added! Now add your Mother to complete your parental roots.'
+                : (!empty($hasMother) ? 'Mother added! Now add your Father to complete your parental roots.' : 'Add your Father & Mother to anchor your direct lineage.');
         } elseif ($grandparentsCount < 2) {
             $primaryMissing = 'grandparents';
             $recommendedCtaType = 'parents';
             $title = 'Preserve your ancestral heritage!';
-            $subtitle = 'Parents added! Now add your Paternal & Maternal Grandparents to unlock 3 generations.';
+            $subtitle = 'Parents connected! Now add your Paternal & Maternal Grandparents to unlock 3 generations of heritage.';
         } elseif ($siblingsCount === 0) {
             $primaryMissing = 'siblings';
             $recommendedCtaType = 'sibling';
@@ -1290,8 +1338,8 @@ final class Organogram extends SingleCustomerData
 
         // Calculate completeness score (0 - 100%)
         $score = 0;
-        if ($hasFather) $score += 20;
-        if ($hasMother) $score += 20;
+        if ($hasFather || $parentsCount >= 1) $score += 20;
+        if ($hasMother || $parentsCount >= 2) $score += 20;
         if ($grandparentsCount >= 2) $score += 15;
         if ($grandparentsCount >= 4) $score += 15;
         if ($siblingsCount > 0) $score += 10;

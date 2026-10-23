@@ -63,11 +63,34 @@ final class General
             $payloadData = $data['data'];
             $recipientName = trim((string)($payloadData['name'] ?? ''));
             $yourName = trim((string)($payloadData['yourName'] ?? 'A family member'));
-            $familyCode = trim((string)($data['familyCode'] ?? ($payloadData['familyCode'] ?? '')));
+            $requestedCode = strtoupper(trim(str_replace('#', '', (string)($data['familyCode'] ?? ($payloadData['familyCode'] ?? '')))));
 
             if (empty($payloadData['email']) || !filter_var($payloadData['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new Exception("Invalid recipient email");
             }
+
+            // 2b. ── Security Gate: Verify the requested family code is owned by the caller ──
+            // Allows only the user's primary famCode or their registered otherFamCode (maternal/maiden).
+            // Prevents invite token poisoning / BOLA by injecting an arbitrary family code.
+            $sessionPrimaryCode = strtoupper(trim((string)($_SESSION['famCode'] ?? '')));
+            $sessionOtherCode   = '';
+            if ($requestedCode !== '' && $requestedCode !== $sessionPrimaryCode) {
+                try {
+                    $pdo = \Src\Db::connect2();
+                    $stmtOther = $pdo->prepare('SELECT otherFamCode FROM otherFamily WHERE id = ? LIMIT 1');
+                    $stmtOther->execute([$userId]);
+                    $otherRow = $stmtOther->fetch(\PDO::FETCH_ASSOC);
+                    $sessionOtherCode = strtoupper(trim((string)($otherRow['otherFamCode'] ?? '')));
+                } catch (\Throwable $dbEx) {
+                    error_log('[General] otherFamCode lookup error: ' . $dbEx->getMessage());
+                }
+                if ($requestedCode !== $sessionOtherCode) {
+                    // Silently fall back to the user's primary code — never mint a token for an unowned code
+                    error_log("[General] Security: user {$userId} attempted invite for unowned family code '{$requestedCode}'. Falling back to primary '{$sessionPrimaryCode}'.");
+                    $requestedCode = $sessionPrimaryCode;
+                }
+            }
+            $familyCode = $requestedCode;
 
             // 3. Generate opaque invite token if family code is available
             if ($familyCode !== '') {

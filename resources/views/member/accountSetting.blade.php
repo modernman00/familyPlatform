@@ -355,7 +355,7 @@
                 </div>
               </div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="profileForm_notification" style="display: none;">
+              <div class="alert alert-info shadow-sm border-0 rounded-3" id="profileForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                   <p id="profileForm_notification_error" class="mb-0"></p>
@@ -443,7 +443,37 @@
                 </a>
               </div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="parentsForm_notification" style="display: none;">
+              {{-- ── Lineage Scope Selector ── --}}
+              {{-- Shown whenever the user has a secondary/maternal family code set. --}}
+              @php $hasMaternalCode = !empty($accountData['otherFamCode']); @endphp
+              @if($hasMaternalCode)
+              <div class="p-3 rounded-3 mb-4 border" id="parents-lineage-banner" style="background: linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%); border-color:#e9d5ff!important;">
+                <div class="fw-bold text-purple mb-2" style="color:#7c3aed;">
+                  <i class="bi bi-diagram-3-fill me-2"></i>Which family tree do these parents belong to?
+                </div>
+                <p class="small text-muted mb-3">You have two family connections. Choose the correct lineage so your parents are added to the right family tree and any invite sent uses the correct family code.</p>
+                <div class="d-flex flex-column flex-sm-row gap-3" role="group" aria-label="Lineage scope for parents">
+                  <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold cursor-pointer" style="min-height:44px; cursor:pointer; flex:1;" id="parents-scope-primary-label">
+                    <input type="radio" name="parents_lineage_ui" id="parents-scope-primary" value="primary" checked class="form-check-input m-0">
+                    <span>
+                      <i class="bi bi-house-heart-fill text-primary me-1"></i>
+                      Marital / Household Tree
+                      <span class="badge bg-primary ms-2 text-uppercase" style="font-size:.65rem;">{{ $accountData['famCode'] ?? 'Primary' }}</span>
+                    </span>
+                  </label>
+                  <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold cursor-pointer" style="min-height:44px; cursor:pointer; flex:1;" id="parents-scope-maternal-label">
+                    <input type="radio" name="parents_lineage_ui" id="parents-scope-maternal" value="maternal" class="form-check-input m-0">
+                    <span>
+                      <i class="bi bi-tree-fill text-success me-1"></i>
+                      My Birth / Maiden Family
+                      <span class="badge bg-success ms-2 text-uppercase" style="font-size:.65rem;">{{ $accountData['otherFamCode'] }}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              @endif
+
+              <div class="alert alert-info shadow-sm border-0 rounded-3" id="parentsForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                   <p id="parentsForm_notification_error" class="mb-0"></p>
@@ -453,6 +483,12 @@
               <form id="parentsForm">
                 <input type="hidden" name="action" value="updateParents">
                 <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                {{-- lineage_scope & lineage_code are updated by the radio buttons above (JS) --}}
+                <input type="hidden" name="lineage_scope" id="parentsLineageScope" value="primary">
+                <input type="hidden" name="lineage_code" id="parentsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
+                {{-- Expose the user's maiden/other code for use by the JS invite helper --}}
+                <input type="hidden" id="otherFamCode_id" value="{{ $accountData['otherFamCode'] ?? '' }}">
+                <input type="hidden" id="famCode_id" value="{{ $accountData['famCode'] ?? '' }}">
 
                 <!-- Father's Card -->
                 <div class="p-4 rounded-3 mb-4" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
@@ -508,6 +544,19 @@
                   </div>
                 </div>
 
+                <!-- Parents' relationship status (drives the divorced / separated stamp on the tree) -->
+                <div class="mb-4">
+                  <label for="parents_status" class="form-label fw-bold">Are your parents still together?</label>
+                  <select class="form-select" id="parents_status" name="parents_status">
+                    <option value="">Prefer not to say</option>
+                    <option value="married">Yes - together</option>
+                    <option value="divorced">Divorced</option>
+                    <option value="separated">Separated</option>
+                    <option value="widowed">One of them has passed away</option>
+                  </select>
+                  <div class="form-text">If you have half-siblings, add them under <strong>Siblings</strong> and choose "Same Mother Only" or "Same Father Only".</div>
+                </div>
+
                 <button type="button" id="parentsBtn" class="btn-save">Save Parents Details</button>
               </form>
             </div>
@@ -518,7 +567,7 @@
               <div class="section-subtitle">Add and manage children connections in your family tree.</div>
               <div class="section-divider"></div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="childrenForm_notification" style="display: none;">
+              <div class="alert alert-info shadow-sm border-0 rounded-3" id="childrenForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                   <p id="childrenForm_notification_error" class="mb-0"></p>
@@ -551,7 +600,35 @@
               <div class="section-subtitle">Add and manage your brothers and sisters in your family tree.</div>
               <div class="section-divider"></div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="siblingsForm_notification" style="display: none;">
+              {{-- ── Lineage Scope Selector ── --}}
+              @if($hasMaternalCode)
+              <div class="p-3 rounded-3 mb-4 border" id="siblings-lineage-banner" style="background: linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%); border-color:#e9d5ff!important;">
+                <div class="fw-bold mb-2" style="color:#7c3aed;">
+                  <i class="bi bi-diagram-3-fill me-2"></i>Which family tree do these siblings belong to?
+                </div>
+                <p class="small text-muted mb-3">Choose the correct lineage so siblings are added to the right family tree and any invite uses the correct family code.</p>
+                <div class="d-flex flex-column flex-sm-row gap-3" role="group" aria-label="Lineage scope for siblings">
+                  <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold" style="min-height:44px; cursor:pointer; flex:1;" id="siblings-scope-primary-label">
+                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-primary" value="primary" checked class="form-check-input m-0">
+                    <span>
+                      <i class="bi bi-house-heart-fill text-primary me-1"></i>
+                      Marital / Household Tree
+                      <span class="badge bg-primary ms-2 text-uppercase" style="font-size:.65rem;">{{ $accountData['famCode'] ?? 'Primary' }}</span>
+                    </span>
+                  </label>
+                  <label class="lineage-scope-pill d-flex align-items-center gap-2 px-4 py-3 rounded-3 border fw-semibold" style="min-height:44px; cursor:pointer; flex:1;" id="siblings-scope-maternal-label">
+                    <input type="radio" name="siblings_lineage_ui" id="siblings-scope-maternal" value="maternal" class="form-check-input m-0">
+                    <span>
+                      <i class="bi bi-tree-fill text-success me-1"></i>
+                      My Birth / Maiden Family
+                      <span class="badge bg-success ms-2 text-uppercase" style="font-size:.65rem;">{{ $accountData['otherFamCode'] }}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              @endif
+
+              <div class="alert alert-info shadow-sm border-0 rounded-3" id="siblingsForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                   <p id="siblingsForm_notification_error" class="mb-0"></p>
@@ -561,6 +638,8 @@
               <form id="siblingsForm">
                 <input type="hidden" name="action" value="updateSiblings">
                 <input type="hidden" name="token" value="{{ $_SESSION['token'] ?? '' }}">
+                <input type="hidden" name="lineage_scope" id="siblingsLineageScope" value="primary">
+                <input type="hidden" name="lineage_code" id="siblingsLineageCode" value="{{ $accountData['otherFamCode'] ?? '' }}">
 
                 <div class="mb-4">
                   <label for="sibling" class="form-label fw-bold">Select Number of Siblings</label>
@@ -584,7 +663,7 @@
               <div class="section-subtitle">Configure your relationship status and partner connections.</div>
               <div class="section-divider"></div>
 
-              <div class="alert alert-danger shadow-sm border-0 rounded-3" id="maritalForm_notification" style="display: none;">
+              <div class="alert alert-info shadow-sm border-0 rounded-3" id="maritalForm_notification" style="display: none;">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                   <p id="maritalForm_notification_error" class="mb-0"></p>
@@ -624,6 +703,14 @@
                     <div class="col-md-6">
                       <label class="form-label">Spouse's Mobile</label>
                       <input type="text" class="form-control" id="spouse_mobile" name="spouse_mobile" value="{{ $accountData['spouse_mobile'] ?? '' }}" placeholder="Enter mobile number">
+                    </div>
+                    <div class="col-md-6" id="spouse_gender_div" style="display: none;">
+                      <label class="form-label">Former partner is your</label>
+                      <select class="form-select" id="spouse_gender" name="spouse_gender">
+                        <option value="">Select...</option>
+                        <option value="Male">Husband / Male partner</option>
+                        <option value="Female">Wife / Female partner</option>
+                      </select>
                     </div>
                     <div class="col-md-6" id="maiden_name_div" style="display: none;">
                       <label class="form-label">Maiden Name</label>
@@ -1189,7 +1276,7 @@
 
             const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
             if (isSuccess) {
-              const newCode = (data.data && data.data.family_code) || 'Updated';
+              const newCode = (data.data && data.data.family_code) || (data.token && data.token.family_code) || 'Updated';
               const valSpan = document.getElementById('currentFamCodeValue');
               if (valSpan) valSpan.textContent = newCode;
               if (copyBtn) copyBtn.setAttribute('data-code', newCode);

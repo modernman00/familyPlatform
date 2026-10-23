@@ -58,6 +58,8 @@ final class KinshipCalculatorService
         $unionChildren = [];
         // person -> list of partner IDs
         $personPartners = [];
+        /** @var array<string, array{is_current: bool, union_type: string}> $unionOfPair */
+        $unionOfPair = [];
 
         foreach ($unions as $u) {
             $uId = (int)($u['id'] ?? 0);
@@ -67,6 +69,10 @@ final class KinshipCalculatorService
             if ($p1 > 0 && $p2 > 0) {
                 $personPartners[$p1][] = $p2;
                 $personPartners[$p2][] = $p1;
+                $unionOfPair[min($p1, $p2) . '_' . max($p1, $p2)] = [
+                    'is_current' => !empty($u['is_current']),
+                    'union_type' => (string)($u['union_type'] ?? 'married'),
+                ];
             }
         }
 
@@ -111,18 +117,19 @@ final class KinshipCalculatorService
         }
 
         // Direct sibling lookup: personId -> [siblingIds]
+        // Anyone sharing at least one parent is a sibling (full OR half), even
+        // when the other parent sits in a different union.
         $siblingsOf = [];
-        foreach ($childParents as $cId => $pUnions) {
-            foreach ($pUnions as $pu) {
-                $sharedKids = $unionChildren[$pu['union_id']] ?? [];
-                foreach ($sharedKids as $otherKid) {
+        foreach ($parentsOf as $cId => $parents) {
+            foreach ($parents as $parId) {
+                foreach ($childrenOf[$parId] ?? [] as $otherKid) {
                     if ($otherKid !== $cId) {
                         $siblingsOf[$cId][] = $otherKid;
                     }
                 }
             }
             if (isset($siblingsOf[$cId])) {
-                $siblingsOf[$cId] = array_unique($siblingsOf[$cId]);
+                $siblingsOf[$cId] = array_values(array_unique($siblingsOf[$cId]));
             }
         }
 
@@ -187,6 +194,36 @@ final class KinshipCalculatorService
             $node['consanguinity_degree'] = $titleInfo['degree'];
             $node['kinship_category'] = $titleInfo['category'];
             $node['is_ego'] = ($id === $egoNodeId);
+            $node['sibling_kind'] = null;
+
+            // Half-siblings: exactly one shared parent with the ego
+            if ($id !== $egoNodeId && $titleInfo['category'] === 'sibling' && is_array($path) && count($path) === 1) {
+                $sharedParents = array_values(array_intersect($parentsOf[$egoNodeId] ?? [], $parentsOf[$id] ?? []));
+                if (count($sharedParents) === 1) {
+                    $isMaleSib = strtolower((string)($node['gender'] ?? 'male')) === 'male';
+                    $viaFemale = strtolower((string)($nodesById[$sharedParents[0]]['gender'] ?? '')) === 'female';
+                    $node['ego_relation'] = ($isMaleSib ? 'Half-brother' : 'Half-sister') . ($viaFemale ? ' (same mum)' : ' (same dad)');
+                    $node['sibling_kind'] = 'half';
+                } elseif (count($sharedParents) > 1) {
+                    $node['sibling_kind'] = 'full';
+                }
+            }
+
+            // Former partners keep their own title instead of reading as a current spouse
+            if ($titleInfo['category'] === 'spouse' && is_array($path) && count($path) === 1) {
+                $pair = $unionOfPair[min($egoNodeId, $id) . '_' . max($egoNodeId, $id)] ?? null;
+                if ($pair !== null && !$pair['is_current'] && in_array($pair['union_type'], ['divorced', 'separated', 'annulled', 'widowed'], true)) {
+                    $isMaleSp = strtolower((string)($node['gender'] ?? 'male')) === 'male';
+                    $node['ego_relation'] = $pair['union_type'] === 'widowed'
+                        ? ($isMaleSp ? 'Late Husband' : 'Late Wife')
+                        : ($isMaleSp ? 'Former Husband' : 'Former Wife');
+                }
+            }
+
+            // Ghost parents created for half-siblings
+            if (!empty($node['is_placeholder'])) {
+                $node['ego_relation'] = strtolower((string)($node['gender'] ?? 'male')) === 'female' ? 'Unknown Mother' : 'Unknown Father';
+            }
 
             $decorated[$id] = $node;
         }

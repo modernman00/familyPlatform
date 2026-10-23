@@ -57,7 +57,11 @@ final class OrganogramEditorController extends BaseController
             $email = trim((string)($_POST['email'] ?? ''));
             $mobile = trim((string)($_POST['mobile'] ?? ''));
             $gender = trim((string)($_POST['gender'] ?? 'Female'));
-            $isCurrent = (isset($_POST['is_current']) && $_POST['is_current'] === 'yes') ? 1 : 0;
+            $unionStatus = \App\services\FamilyGraphService::normaliseUnionType($_POST['union_status'] ?? '');
+            $hasStatus = isset($_POST['union_status']) && $_POST['union_status'] !== '';
+            $isCurrent = $hasStatus
+                ? (in_array($unionStatus, ['married', 'partner'], true) ? 1 : 0)
+                : ((isset($_POST['is_current']) && $_POST['is_current'] === 'yes') ? 1 : 0);
             $marriageYear = !empty($_POST['marriage_year']) ? (int)$_POST['marriage_year'] : null;
             $divorceYear = !empty($_POST['divorce_year']) ? (int)$_POST['divorce_year'] : null;
 
@@ -86,15 +90,22 @@ final class OrganogramEditorController extends BaseController
                 $partnerId = (int)$db->lastInsertId();
 
                 // 2. Insert Union
-                $unionType = ($isCurrent === 1) ? 'married' : (($divorceYear) ? 'divorced' : 'separated');
+                $unionType = $hasStatus ? $unionStatus : (($isCurrent === 1) ? 'married' : (($divorceYear) ? 'divorced' : 'separated'));
                 
                 $insUnion = $db->prepare("
                     INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, marriage_year, divorce_year, is_current)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 ");
                 $insUnion->execute([$familyCode, $baseNodeId, $partnerId, $unionType, $marriageYear, $divorceYear, $isCurrent]);
+                $newUnionId = (int)$db->lastInsertId();
+                $partnerRequests = in_array($unionType, ['divorced', 'separated'], true)
+                    ? \App\services\FamilyRelationshipRequestService::createFor($db, $familyCode, (string)($_SESSION['id'] ?? ''), $partnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $newUnionId)
+                    : [];
 
                 $db->commit();
+                if ($partnerRequests) {
+                    \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $partnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $partnerRequests);
+                }
                 msgSuccess(200, [
                     "message" => "Partner added successfully.",
                     "node" => [
@@ -106,7 +117,9 @@ final class OrganogramEditorController extends BaseController
                         "email" => $email,
                         "mobile" => $mobile,
                         "bio" => "Partner/Spouse",
-                        "role" => "partner"
+                        "role" => "partner",
+                        "union_id" => $newUnionId,
+                        "union_status" => $unionType
                     ]
                 ]);
             } catch (\Exception $e) {
@@ -138,12 +151,55 @@ final class OrganogramEditorController extends BaseController
 
             $db = Db::connect2();
 
-            $unionId = (int)($_POST['union_id'] ?? 0);
+            $rawUnion = (string)($_POST['union_id'] ?? '');
+            $unionId = ctype_digit($rawUnion) ? (int)$rawUnion : 0;
             $baseNodeId = (int)($_POST['base_node_id'] ?? 0);
+            $wantsNewPartner = ($rawUnion === 'new');
+
+            // "Someone else": create the partnership first (named, or an unnamed placeholder partner)
+            if ($wantsNewPartner) {
+                if ($baseNodeId <= 0) {
+                    msgException(400, 'Invalid Base Node ID');
+                    return;
+                }
+                $ownCheck = $db->prepare('SELECT id FROM family_nodes WHERE id = ? AND family_code = ?');
+                $ownCheck->execute([$baseNodeId, $familyCode]);
+                if (!$ownCheck->fetchColumn()) {
+                    msgException(403, 'Permission Denied: Node does not belong to your family tree.');
+                    return;
+                }
+                $db->beginTransaction();
+                try {
+                    $newStatus = (string)($_POST['new_partner_status'] ?? 'partner');
+                    $unionId = \App\services\FamilyGraphService::createPartnerUnion(
+                        $db,
+                        $familyCode,
+                        $baseNodeId,
+                        (string)($_POST['new_partner_name'] ?? ''),
+                        $newStatus
+                    );
+                    $newPartnerRequests = [];
+                    $newPartnerId = 0;
+                    if ($unionId > 0 && in_array($newStatus, ['divorced', 'separated'], true)) {
+                        $pu = $db->prepare('SELECT partner_1_id, partner_2_id FROM family_unions WHERE id = ?');
+                        $pu->execute([$unionId]);
+                        $puRow = $pu->fetch(\PDO::FETCH_ASSOC) ?: [];
+                        $newPartnerId = (int)(($puRow['partner_1_id'] ?? 0) === $baseNodeId ? ($puRow['partner_2_id'] ?? 0) : ($puRow['partner_1_id'] ?? 0));
+                        $newPartnerRequests = \App\services\FamilyRelationshipRequestService::createFor($db, $familyCode, (string)($_SESSION['id'] ?? ''), $newPartnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $unionId);
+                    }
+                    $db->commit();
+                    if ($newPartnerRequests) {
+                        \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $newPartnerId, \App\services\FamilyRelationshipRequestService::FORMER_PARTNER, $newPartnerRequests);
+                    }
+                } catch (\Throwable $e) {
+                    $db->rollBack();
+                    throw $e;
+                }
+            }
 
             // Auto-resolve or create parent union if missing
             if ($unionId <= 0 && $baseNodeId > 0) {
-                $findU = $db->prepare("SELECT id FROM family_unions WHERE family_code = ? AND (partner_1_id = ? OR partner_2_id = ?) LIMIT 1");
+                $findU = $db->prepare("SELECT id FROM family_unions WHERE family_code = ? AND (partner_1_id = ? OR partner_2_id = ?) ORDER BY is_current DESC, id ASC LIMIT 1");
                 $findU->execute([$familyCode, $baseNodeId, $baseNodeId]);
                 $uRow = $findU->fetch(\PDO::FETCH_ASSOC);
                 if ($uRow) {
@@ -283,6 +339,16 @@ final class OrganogramEditorController extends BaseController
             }
 
             $parentGenLevel = (int)$baseNode['generation_level'] - 1;
+
+            // Grandparent mode: the base node is one of the user's parents; refuse to stack a second set of parents on it
+            if (($_POST['rel_mode'] ?? '') === 'grandparents') {
+                $chk = $db->prepare("SELECT 1 FROM family_node_children WHERE child_id = ? LIMIT 1");
+                $chk->execute([$baseNodeId]);
+                if ($chk->fetchColumn()) {
+                    msgException(409, 'This parent already has parents recorded.');
+                    return;
+                }
+            }
 
             $fatherFirst = trim((string)($_POST['father_first_name'] ?? ''));
             $fatherLast = trim((string)($_POST['father_last_name'] ?? ''));
@@ -442,47 +508,30 @@ final class OrganogramEditorController extends BaseController
             $db->beginTransaction();
 
             try {
-                // Find or create parent union
-                $chkP = $db->prepare("SELECT union_id FROM family_node_children WHERE child_id = ? LIMIT 1");
-                $chkP->execute([$baseNodeId]);
-                $pRow = $chkP->fetch(\PDO::FETCH_ASSOC);
-                $pUnionId = $pRow ? (int)$pRow['union_id'] : 0;
-
-                if ($pUnionId <= 0) {
-                    // Create default parent union
-                    $insF = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Father', 'Male', ?, '/resources/images/profile/avatarM.png', 'Father')");
-                    $insF->execute([$familyCode, $genLevel - 1]);
-                    $fId = (int)$db->lastInsertId();
-
-                    $insM = $db->prepare("INSERT INTO family_nodes (family_code, first_name, gender, generation_level, avatar_url, bio) VALUES (?, 'Mother', 'Female', ?, '/resources/images/profile/avatarF.png', 'Mother')");
-                    $insM->execute([$familyCode, $genLevel - 1]);
-                    $mId = (int)$db->lastInsertId();
-
-                    $insU = $db->prepare("INSERT INTO family_unions (family_code, partner_1_id, partner_2_id, union_type, is_current) VALUES (?, ?, ?, 'married', 1)");
-                    $insU->execute([$familyCode, $fId, $mId]);
-                    $pUnionId = (int)$db->lastInsertId();
-
-                    $insLinkSelf = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
-                    $insLinkSelf->execute([$pUnionId, $baseNodeId]);
+                // Routes to the correct parent union: full / same mother only / same father only / step / adopted
+                $sibCtx = null;
+                $sibId = \App\services\FamilyGraphService::upsertSibling($db, $familyCode, $baseNodeId, [
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'gender' => $gender,
+                    'email' => $email,
+                    'mobile' => $mobile,
+                    'parentage' => $_POST['parentage'] ?? '',
+                    'other_parent_name' => $_POST['other_parent_name'] ?? '',
+                ], $sibCtx);
+                $relKind = is_array($sibCtx) ? \App\services\FamilyRelationshipRequestService::kindForParentage((string)$sibCtx['parentage']) : null;
+                $relRequests = ($relKind !== null && $sibId > 0)
+                    ? \App\services\FamilyRelationshipRequestService::createFor($db, $familyCode, (string)($_SESSION['id'] ?? ''), $sibId, $relKind, (int)$sibCtx['union_id'], (int)$sibCtx['shared_parent_id'])
+                    : [];
+                if ($sibId <= 0) {
+                    throw new \RuntimeException('Unable to create sibling.');
                 }
-
-                // 1. Insert Sibling Node
-                $insSib = $db->prepare("
-                    INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level, avatar_url, bio, email, mobile)
-                    VALUES (?, ?, ?, ?, ?, ?, 'Sibling', ?, ?)
-                ");
-                $insSib->execute([
-                    $familyCode, $firstName, $lastName, $gender, $genLevel, $avatar,
-                    !empty($email) ? $email : null,
-                    !empty($mobile) ? $mobile : null
-                ]);
-                $sibId = (int)$db->lastInsertId();
-
-                // 2. Link Sibling to Parent Union
-                $insLink = $db->prepare("INSERT INTO family_node_children (union_id, child_id, relationship_type) VALUES (?, ?, 'biological')");
-                $insLink->execute([$pUnionId, $sibId]);
+                $parentage = \App\services\FamilyGraphService::normaliseParentage($_POST['parentage'] ?? '');
 
                 $db->commit();
+                if ($relKind !== null && $relRequests) {
+                    \App\services\FamilyRelationshipRequestService::notify($db, $familyCode, (string)($_SESSION['id'] ?? ''), $this->requesterName(), $sibId, $relKind, $relRequests);
+                }
                 msgSuccess(200, [
                     "message" => "Sibling added successfully.",
                     "node" => [
@@ -494,7 +543,8 @@ final class OrganogramEditorController extends BaseController
                         "email" => $email,
                         "mobile" => $mobile,
                         "bio" => "Sibling",
-                        "role" => "sibling"
+                        "role" => "sibling",
+                        "parentage" => $parentage
                     ]
                 ]);
             } catch (\Exception $e) {
@@ -894,6 +944,40 @@ final class OrganogramEditorController extends BaseController
                 'message' => 'Voice Capsule deleted successfully.',
                 'node_id' => $nodeId
             ]);
+        } catch (\Throwable $th) {
+            showError($th);
+        }
+    }
+
+    private function requesterName(): string
+    {
+        $n = trim((string)($_SESSION['fName'] ?? '') . ' ' . (string)($_SESSION['lName'] ?? ''));
+        return $n !== '' ? $n : 'A family member';
+    }
+
+    /**
+     * Confirm or decline a pending relationship request addressed to the signed-in member.
+     */
+    public function resolveRelationshipRequest(): void
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                msgException(405, 'Method Not Allowed');
+                return;
+            }
+            $userId = (string)($_SESSION['id'] ?? '');
+            $requestId = (int)($_POST['request_id'] ?? 0);
+            $decision = (string)($_POST['decision'] ?? '');
+            if ($userId === '' || $requestId <= 0 || !in_array($decision, ['approve', 'decline'], true)) {
+                msgException(400, 'Invalid request.');
+                return;
+            }
+            $res = \App\services\FamilyRelationshipRequestService::resolve(Db::connect2(), $requestId, $userId, $decision === 'approve');
+            if (!$res['ok']) {
+                msgException(404, $res['message']);
+                return;
+            }
+            msgSuccess(200, ['message' => $res['message'], 'status' => $res['status']]);
         } catch (\Throwable $th) {
             showError($th);
         }

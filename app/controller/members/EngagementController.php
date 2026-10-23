@@ -229,11 +229,8 @@ class EngagementController
 
             // Return updated poll data so the frontend can refresh it authoritatively
             $pollPostNo = ($postNo > 0) ? $postNo : $targetPost;
-            $pollData = null;
-            if ($pollPostNo > 0) {
-                $polls = PollData::getPollsForPosts([$pollPostNo], $userId);
-                $pollData = $polls[$pollPostNo] ?? null;
-            }
+            $polls = PollData::getPollsForPosts([$pollPostNo], $userId);
+            $pollData = $polls[$pollPostNo] ?? null;
 
             http_response_code(200);
             header('Content-Type: application/json');

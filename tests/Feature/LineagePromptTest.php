@@ -139,7 +139,8 @@ final class LineagePromptTest extends TestCase
 
         $this->assertIsArray($row);
         $this->assertStringContainsStringIgnoringCase('family tree', (string)($row['notification_name'] ?? ''));
-        $this->assertStringContainsString('Family Studio', (string)($row['notification_content'] ?? ''));
+        $this->assertStringContainsStringIgnoringCase('family tree', (string)($row['notification_content'] ?? ''));
+        $this->assertStringContainsString('/organogram', (string)($row['action_url'] ?? ''));
     }
 
     public function test_subsequent_prompt_within_24_hours_is_debounced(): void
@@ -158,7 +159,7 @@ final class LineagePromptTest extends TestCase
         // Immediate subsequent prompt should be debounced
         $secondResult = $service->sendTreeBuildPrompt($this->senderId, $this->targetId);
         $this->assertFalse($secondResult['success']);
-        $this->assertStringContainsString('already sent a reminder', $secondResult['message']);
+        $this->assertStringContainsString('already sent an invitation', $secondResult['message']);
     }
 
     public function test_controller_requires_valid_csrf_token(): void

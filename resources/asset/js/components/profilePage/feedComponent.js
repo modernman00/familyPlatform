@@ -122,6 +122,7 @@ export function profileFeed(opts = {}) {
                     if (window.offlineSync && typeof window.offlineSync.cacheFeed === 'function') {
                         window.offlineSync.cacheFeed(rawPosts).catch(() => {});
                     }
+                    this.scrollToHashPost();
                 } else if (this.posts.length === 0) {
                     this.posts = [];
                 }

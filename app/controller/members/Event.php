@@ -134,6 +134,7 @@ final class Event extends AllMembersData
                 'receiver' => 'everyone filtered',
                 'notification_type' => $eventType,
                 'notification_content' => $eventDescription,
+                'action_url' => '/profilePage#eventHeader',
                 'notification_status' => 'new'
             ];
 
@@ -551,8 +552,8 @@ final class Event extends AllMembersData
                 $db = \Src\Db::connect2();
                 $stmt = $db->prepare("
                     INSERT INTO notification 
-                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                    VALUES (?, ?, ?, ?, 'Event', ?, 'new', NOW())
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, 'Event', ?, '/profilePage#eventHeader', 'new', NOW())
                 ");
                 $recipientList = $id;
                 $senderId = is_scalar($data['id'] ?? null) ? (string)$data['id'] : 'system';

@@ -25,7 +25,7 @@
                 <div class="header-actions d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 gap-md-2">
                     @if(empty($isSelf) && empty($graphData['has_built_tree']))
                     <button type="button" class="btn btn-warning text-dark px-3 py-2 fw-bold d-inline-flex align-items-center shadow-sm btn-prompt-tree-action" id="btnHeaderPromptBuildTree" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                        <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Build Tree
+                        <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
                     </button>
                     @endif
                     <button type="button" class="btn-action" onclick="centerOnMe()" title="Focus on Me">
@@ -65,7 +65,7 @@
     </div>
 
     <!-- Multi-Modal View Switcher (Luxury Dark Segmented Control) -->
-    <div class="tree-mode-switcher-container text-center mb-3">
+    <div class="tree-mode-switcher-container text-center mb-3 d-flex flex-wrap align-items-center justify-content-center gap-2">
         <div class="layout-segmented-control" role="group" aria-label="Layout View Modes">
             <button type="button" id="btnModeCanvas" class="layout-segment-btn active" onclick="switchTreeViewMode('canvas')" title="Panoramic Dynasty: Full balanced wide tree of all siblings & branches">
                 <i class="bi bi-diagram-3-fill text-info"></i>
@@ -88,6 +88,10 @@
                 <span>Dynasty Globe</span>
             </button>
         </div>
+        <button type="button" id="btnReopenLineageGuide" class="btn btn-sm d-none align-items-center gap-1.5 px-3 py-1.5 text-white rounded-pill shadow-sm" onclick="reopenLineageGuide()" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.82rem; backdrop-filter: blur(10px); min-height: 38px;">
+            <i class="bi bi-stars text-warning"></i>
+            <span>Lineage Guide ({{ $analysis['completeness_score'] ?? 0 }}%)</span>
+        </button>
     </div>
 
     <!-- Tree Workspace Container -->
@@ -107,42 +111,42 @@
 
         @if(empty($isSelf) && empty($graphData['has_built_tree']))
         <!-- Prominent Lineage Tree Prompt Banner -->
-        <div id="promptBuildTreeBanner" class="alert shadow-sm border-0 rounded-4 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(254, 243, 199, 0.98) 0%, rgba(253, 230, 138, 0.95) 100%); border-left: 6px solid #f59e0b !important;">
+        <div id="promptBuildTreeBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 p-3 gap-3" style="background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(49, 46, 129, 0.85) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-left: 5px solid #f59e0b !important; backdrop-filter: blur(16px); box-shadow: 0 16px 36px rgba(0,0,0,0.4);">
             <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.2); color: #b45309; flex-shrink: 0;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; flex-shrink: 0;">
                     <i class="bi bi-bell-fill fs-4"></i>
                 </div>
                 <div>
-                    <h6 class="mb-1 fw-bold text-dark fs-6">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Built Their Family Tree Yet</h6>
-                    <p class="mb-0 text-secondary" style="font-size: 0.88rem;">This member has not built their personal family tree or added relatives yet. Send them a warm reminder to connect their lineage!</p>
+                    <h6 class="mb-1 fw-bold text-white fs-6">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h6>
+                    <p class="mb-0 text-white-50" style="font-size: 0.88rem;">This relative has not added their immediate family members yet. Send them a warm invitation to connect their branch!</p>
                 </div>
             </div>
             <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm flex-shrink-0 btn-prompt-tree-action" onclick="window.promptMemberToBuildTree()" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
-                <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Build Tree
+                <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
             </button>
         </div>
         @endif
 
         @if(empty($isReadOnly))
         <!-- Kinship Auto-Match Discovery Banner ("Is this you on the family tree?") -->
-        <div id="kinshipAutoMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(240, 253, 250, 0.98) 0%, rgba(204, 251, 241, 0.95) 100%); backdrop-filter: blur(14px); z-index: 100; position: relative; border-left: 6px solid #00bfa5 !important; box-shadow: 0 12px 30px rgba(0, 191, 165, 0.15) !important;">
+        <div id="kinshipAutoMatchBanner" class="alert shadow-lg border-0 rounded-4 mb-4 d-none flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3" style="background: linear-gradient(135deg, rgba(13, 37, 43, 0.95) 0%, rgba(19, 78, 74, 0.85) 100%); border: 1px solid rgba(0, 191, 165, 0.35); border-left: 5px solid #00bfa5 !important; backdrop-filter: blur(16px); z-index: 100; position: relative; box-shadow: 0 16px 36px rgba(0, 191, 165, 0.2) !important;">
             <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100 text-center text-md-start">
                 <div class="d-flex align-items-center justify-content-center rounded-circle p-2" style="background: rgba(0, 191, 165, 0.15); min-width: 48px; min-height: 48px;">
-                    <i class="bi bi-person-bounding-box fs-3" style="color: #00897b;"></i>
+                    <i class="bi bi-person-bounding-box fs-3" style="color: #00bfa5;"></i>
                 </div>
                 <div class="flex-grow-1">
                     <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
                         <span class="badge" style="background: #00bfa5; color: #ffffff; font-size: 0.75rem; letter-spacing: 0.5px;">
                             <i class="bi bi-stars me-1"></i> RELATIVE IDENTIFIED
                         </span>
-                        <span id="matchConfidenceBadge" class="badge bg-light text-dark border" style="font-size: 0.75rem;">
+                        <span id="matchConfidenceBadge" class="badge bg-dark text-light border border-secondary" style="font-size: 0.75rem;">
                             95% Match
                         </span>
                     </div>
-                    <h6 class="mb-1 fw-bold text-dark fs-6" id="matchHeadline">
-                        We found <span id="matchPersonName" style="color: #00796b;">Relative</span> on this family tree. Is this you?
+                    <h6 class="mb-1 fw-bold text-white fs-6" id="matchHeadline">
+                        We found <span id="matchPersonName" style="color: #2dd4bf;">Relative</span> on this family tree. Is this you?
                     </h6>
-                    <p class="mb-0 text-muted" id="matchRelationshipHint" style="font-size: 0.88rem;">
+                    <p class="mb-0 text-white-50" id="matchRelationshipHint" style="font-size: 0.88rem;">
                         Relative on the family tree
                     </p>
                 </div>
@@ -151,39 +155,60 @@
                 <button type="button" id="btnConfirmMatch" onclick="openClaimMatchModal()" class="btn btn-sm px-4 py-2 fw-bold text-white shadow-sm text-nowrap" style="background: linear-gradient(135deg, #00bfa5 0%, #00897b 100%); border-radius: 10px; font-size: 0.9rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="bi bi-check2-circle me-1"></i> Yes, Connect My Account
                 </button>
-                <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-light btn-sm px-3 py-2 fw-semibold text-secondary border text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-dark btn-sm px-3 py-2 fw-semibold text-light border border-secondary text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     Not Me
                 </button>
             </div>
         </div>
 
-        <div id="missingNodeBanner" class="alert {{ $analysis['is_flourishing'] ? 'alert-success' : 'alert-info' }} shadow-sm border-0 rounded-3 mb-4 d-flex flex-column flex-md-row align-items-center justify-content-between mx-3 mt-3 gap-3 text-center text-md-start position-relative pe-md-5" style="background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); z-index: 10; border-left: 5px solid {{ $analysis['is_flourishing'] ? '#10b981' : '#3b82f6' }} !important; overflow: hidden;">
-            <div class="d-flex flex-column flex-md-row align-items-center gap-3 w-100">
-                <div class="d-flex align-items-center justify-content-center rounded-circle p-2 flex-shrink-0" style="background: rgba(59, 130, 246, 0.1); min-width: 44px; min-height: 44px;">
-                    <i class="bi {{ $analysis['is_flourishing'] ? 'bi-stars text-success' : 'bi-diagram-3-fill text-primary' }} fs-4"></i>
+        <!-- Dynasty Lineage Completion HUD Card -->
+        <div id="missingNodeBanner" class="lineage-growth-hud mb-4 mx-3 mt-3 position-relative {{ $analysis['is_flourishing'] ? 'flourishing' : '' }}">
+            <div class="hud-main-content">
+                <!-- Circular Lineage Progress Indicator -->
+                <div class="lineage-progress-ring-wrapper position-relative flex-shrink-0" style="width: 58px; height: 58px;">
+                    <svg class="w-100 h-100" viewBox="0 0 36 36">
+                        <path stroke="rgba(255,255,255,0.12)" stroke-width="3.2" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path stroke="{{ $analysis['completeness_score'] >= 80 ? '#10b981' : ($analysis['completeness_score'] >= 40 ? '#f59e0b' : '#6366f1') }}" stroke-dasharray="{{ max(3, $analysis['completeness_score']) }}, 100" stroke-width="3.2" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="position-absolute top-50 start-50 translate-middle fw-bold text-white" style="font-size: 0.78rem; letter-spacing: -0.5px;">
+                        {{ $analysis['completeness_score'] }}%
+                    </span>
                 </div>
-                <div class="flex-grow-1 pe-4 pe-md-0">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1 justify-content-center justify-content-md-start">
-                        <h6 class="mb-0 fw-bold text-dark">{{ $analysis['banner_title'] }}</h6>
-                        <span class="badge {{ $analysis['completeness_score'] >= 80 ? 'bg-success' : ($analysis['completeness_score'] >= 40 ? 'bg-warning text-dark' : 'bg-primary') }}" style="font-size: 0.75rem;">
-                            {{ $analysis['completeness_score'] }}% Lineage Complete
+
+                <!-- Text & Dynamic Action Guidance -->
+                <div class="hud-text-block">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h6 class="mb-0 fw-bold text-white fs-6" style="letter-spacing: -0.2px;">{{ $analysis['banner_title'] }}</h6>
+                        <span class="badge" style="background: rgba(99, 102, 241, 0.18); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); font-size: 0.72rem; padding: 4px 8px; border-radius: 999px;">
+                            <i class="bi bi-stars me-1 text-warning"></i>Dynasty Guide
                         </span>
-                        @if(!empty($analysis['missing_labels']))
-                            @foreach($analysis['missing_labels'] as $label)
-                                <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
-                                    <i class="bi bi-plus-circle-fill text-info me-1"></i>Missing: {{ $label }}
-                                </span>
-                            @endforeach
-                        @endif
+                        <span class="badge {{ $analysis['completeness_score'] >= 80 ? 'bg-success' : ($analysis['completeness_score'] >= 40 ? 'bg-warning text-dark' : 'bg-primary') }}" style="font-size: 0.72rem;">
+                            {{ $analysis['completeness_score'] }}% Complete
+                        </span>
                     </div>
-                    <p class="mb-0 text-muted" style="font-size: 0.88rem;">{{ $analysis['banner_subtitle'] }}</p>
+                    <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">{{ $analysis['banner_subtitle'] }}</p>
+
+                    @if(!empty($analysis['missing_labels']))
+                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-1">
+                        <span class="text-white-50" style="font-size: 0.75rem; font-weight: 600;">
+                            <i class="bi bi-compass me-1 text-warning"></i>Recommended next:
+                        </span>
+                        @foreach($analysis['missing_labels'] as $label)
+                            <button type="button" onclick="openAddRelativeModalFromBanner('{{ strtolower($label) }}')" class="hud-missing-chip border-0" title="Add {{ $label }}">
+                                <i class="bi bi-plus-circle-fill text-info me-1"></i>Add {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
-            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto justify-content-center justify-content-md-end flex-shrink-0">
-                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary btn-sm px-3 py-2 fw-bold text-nowrap" style="border-radius: 8px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-person-plus-fill me-1"></i>
+
+            <!-- Action Controls (Zero Mid-Word Truncation & 44px Touch Targets) -->
+            <div class="hud-action-controls d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 flex-shrink-0">
+                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary px-3 py-2 fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
+                    <i class="bi bi-person-plus-fill me-1.5"></i>
                     @if($analysis['recommended_cta_type'] === 'parents')
-                        Add your family
+                        Add Parents
                     @elseif($analysis['recommended_cta_type'] === 'sibling')
                         Add Siblings
                     @elseif($analysis['recommended_cta_type'] === 'partner')
@@ -191,14 +216,14 @@
                     @elseif($analysis['recommended_cta_type'] === 'child')
                         Add Children
                     @else
-                        Add Family Members
+                        Add Family Member
                     @endif
                 </button>
-                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success btn-sm px-3 py-2 fw-bold text-white shadow-sm text-nowrap" style="border-radius: 8px; background: #10b981; border-color: #10b981; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
+                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success px-3 py-2 fw-bold text-white shadow-sm text-nowrap d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
+                    <i class="bi bi-whatsapp me-1.5"></i> WhatsApp Quests
                 </button>
+                <button type="button" class="btn-close btn-close-white ms-sm-2" onclick="dismissLineageGuide()" aria-label="Close" title="Minimise Lineage Guide" style="opacity: 0.6; cursor: pointer;"></button>
             </div>
-            <button type="button" class="btn-close position-absolute top-0 end-0 m-2 m-md-3 text-muted" onclick="document.getElementById('missingNodeBanner').remove();" aria-label="Close" title="Dismiss suggestion"></button>
         </div>
         @endif
 
@@ -367,16 +392,16 @@
                                 <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
                                     <i class="bi bi-diagram-3 text-primary fs-1"></i>
                                 </div>
-                                <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Built Their Family Tree Yet</h3>
+                                <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h3>
                                 <p class="text-white-50 mb-4" style="max-width: 500px;">
-                                    This member has not built their personal family tree or added relatives yet. Once they connect their relatives, their family tree will be displayed here.
+                                    This relative has not added their immediate family members yet. Once they connect their relatives, their branch will appear here.
                                 </p>
                                 <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
                                     <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                                         <i class="bi bi-arrow-left me-2"></i> Back to Directory
                                     </a>
                                     <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm btn-prompt-tree-action" id="btnPromptBuildTree" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" onclick="window.promptMemberToBuildTree()">
-                                        <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Build Tree
+                                        <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
                                     </button>
                                     <a href="/allMembers/seeProfile/{{ $data['id'] ?? '' }}" class="btn btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                                         <i class="bi bi-person-badge me-2"></i> View Profile
@@ -458,16 +483,16 @@
                         <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
                             <i class="bi bi-diagram-3 text-primary fs-1"></i>
                         </div>
-                        <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Built Their Family Tree Yet</h3>
+                        <h3 class="fw-bold text-white mb-2">{{ trim(($data['firstName'] ?? '') . ' ' . ($data['lastName'] ?? '')) }} Has Not Connected Their Branch Yet</h3>
                         <p class="text-white-50 mb-4" style="max-width: 500px;">
-                            This member has not built their personal family tree or added relatives yet. Once they connect their relatives, their family tree will be displayed here.
+                            This relative has not added their immediate family members yet. Once they connect their relatives, their branch will appear here.
                         </p>
                         <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
                             <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                                 <i class="bi bi-arrow-left me-2"></i> Back to Directory
                             </a>
                             <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm btn-prompt-tree-action" id="btnPromptBuildTreePedigree" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" onclick="window.promptMemberToBuildTree()">
-                                <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Build Tree
+                                <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite {{ explode(' ', trim($data['firstName'] ?? 'Them'))[0] }} to Connect Branch
                             </button>
                             <a href="/allMembers/seeProfile/{{ $data['id'] ?? '' }}" class="btn btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                                 <i class="bi bi-person-badge me-2"></i> View Profile
@@ -796,7 +821,7 @@
 </div>
 
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.1"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.2"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -822,27 +847,27 @@
                 btn.classList.remove('btn-warning', 'text-dark');
                 btn.classList.add('btn-secondary', 'text-white');
                 btn.disabled = true;
-                btn.innerHTML = '<i class="bi bi-check2-circle me-2"></i> Prompt Sent';
+                btn.innerHTML = '<i class="bi bi-check2-circle me-2"></i> Invitation Sent';
             });
         }
 
         if (typeof Swal !== 'undefined') {
             Swal.fire({
-                title: `Prompt ${escapeHtmlText(firstName)} to Build Tree`,
+                title: `Invite ${escapeHtmlText(firstName)} to Connect Their Branch`,
                 html: `
                     <p class="text-muted small mb-3">
-                        Send a warm reminder to <strong>${escapeHtmlText(memberName)}</strong> letting them know family members are waiting to explore their branch of the family tree!
+                        Send a warm invitation to <strong>${escapeHtmlText(memberName)}</strong> inviting them to connect their branch of the family tree!
                     </p>
                     <div class="text-start mb-2">
                         <label class="form-label small fw-semibold text-secondary" for="swal-prompt-note">Add an optional message:</label>
-                        <textarea id="swal-prompt-note" class="form-control" rows="3" maxlength="300" placeholder="e.g. Hello ${escapeHtmlText(firstName)}, I was exploring our family platform and would love to see your branch connected!"></textarea>
+                        <textarea id="swal-prompt-note" class="form-control" rows="3" maxlength="300" placeholder="e.g. Hello ${escapeHtmlText(firstName)}, let's connect our branches on the family tree!"></textarea>
                     </div>
                 `,
                 icon: 'info',
                 showCancelButton: true,
-                confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Send Prompt',
+                confirmButtonText: '<i class="bi bi-send-fill me-1"></i> Send Invitation',
                 cancelButtonText: 'Cancel',
-                confirmButtonColor: '#f59e0b',
+                confirmButtonColor: '#10b981',
                 cancelButtonColor: '#6c757d',
                 showLoaderOnConfirm: true,
                 preConfirm: async () => {
@@ -863,19 +888,19 @@
                         });
                         const resData = await response.json();
                         if (!response.ok || !resData.success) {
-                            throw new Error(resData.message || resData.error || 'Failed to send prompt.');
+                            throw new Error(resData.message || resData.error || 'Failed to send invitation.');
                         }
                         return resData;
                     } catch (err) {
-                        Swal.showValidationMessage(err.message || 'Unable to send prompt. Please try again.');
+                        Swal.showValidationMessage(err.message || 'Unable to send invitation. Please try again.');
                     }
                 },
                 allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
                 if (result.isConfirmed && result.value) {
                     Swal.fire({
-                        title: 'Prompt Sent! 🌟',
-                        text: result.value.message || `We have sent a reminder to ${firstName} to build their family tree.`,
+                        title: 'Invitation Sent! 🌟',
+                        text: result.value.message || `We have sent a warm invitation to ${firstName} to connect their family branch.`,
                         icon: 'success',
                         confirmButtonColor: '#10b981'
                     });
@@ -883,7 +908,7 @@
                 }
             });
         } else {
-            const note = prompt(`Send a reminder to ${firstName} to build their family tree:\n(Optional note)`);
+            const note = prompt(`Send a warm invitation to ${firstName} to connect their family branch:\n(Optional note)`);
             if (note === null) return;
             const buttons = document.querySelectorAll('#btnPromptBuildTree, #btnPromptBuildTreePedigree, #btnHeaderPromptBuildTree, .btn-prompt-tree-action');
             buttons.forEach(b => {
@@ -906,13 +931,13 @@
             .then(r => r.json())
             .then(res => {
                 if (res.success) {
-                    alert(res.message || 'Prompt sent successfully!');
+                    alert(res.message || 'Invitation sent successfully!');
                     markPromptButtonsSuccess();
                 } else {
-                    alert(res.message || res.error || 'Failed to send prompt.');
+                    alert(res.message || res.error || 'Failed to send invitation.');
                     buttons.forEach(b => {
                         b.disabled = false;
-                        b.innerHTML = `<i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${firstName} to Build Tree`;
+                        b.innerHTML = `<i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite ${firstName} to Connect Branch`;
                     });
                 }
             })
@@ -920,7 +945,7 @@
                 alert('Network error. Please try again.');
                 buttons.forEach(b => {
                     b.disabled = false;
-                    b.innerHTML = `<i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${firstName} to Build Tree`;
+                    b.innerHTML = `<i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite ${firstName} to Connect Branch`;
                 });
             });
         }
@@ -947,6 +972,7 @@
     // Initialize FamilyTreeJS
     document.addEventListener("DOMContentLoaded", function () {
         let familyTreeNodes = [];
+        let layoutUnions = [];
 
         if (graphData && graphData.nodes) {
             // Build a lookup for children to find parents
@@ -1002,6 +1028,19 @@
                 });
             }
 
+            // Explicit union graph (partners + the children that hang from each union) for the
+            // multi-union layout: half-siblings, former partners, remarriage.
+            layoutUnions = (graphData.unions || []).map(u => ({
+                id: u.id,
+                p1: u.partner_1_id,
+                p2: u.partner_2_id,
+                union_type: u.union_type || 'married',
+                is_current: u.is_current ? 1 : 0,
+                children: (graphData.children || [])
+                    .filter(c => String(c.union_id) === String(u.id))
+                    .map(c => c.child_id)
+            }));
+
             // Break a full name onto (at most) two balanced lines so it fits the card
             function splitNameLines(full) {
                 full = (full || '').trim().replace(/\s+/g, ' ');
@@ -1035,6 +1074,8 @@
                     legacyId: node.user_id,
                     generation_level: (typeof node.generation_level !== 'undefined') ? Number(node.generation_level) : undefined,
                     voice_capsule_url: node.voice_capsule_url || null,
+                    is_placeholder: Boolean(node.is_placeholder),
+                    sibling_kind: node.sibling_kind || null,
                     raw: node
                 });
             });
@@ -1063,16 +1104,16 @@
                     <div class="rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border: 2px dashed #3b82f6;">
                         <i class="bi bi-diagram-3 text-primary fs-1"></i>
                     </div>
-                    <h3 class="fw-bold text-white mb-2">${memberName} Has Not Built Their Family Tree Yet</h3>
+                    <h3 class="fw-bold text-white mb-2">${memberName} Has Not Connected Their Branch Yet</h3>
                     <p class="text-white-50 mb-4" style="max-width: 500px;">
-                        This member has not built their personal family tree or added relatives yet. Once they connect their relatives, their family tree will be displayed here.
+                        This relative has not added their immediate family members yet. Once they connect their relatives, their branch will appear here.
                     </p>
                     <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
                         <a href="/allMembers" class="btn btn-outline-light px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                             <i class="bi bi-arrow-left me-2"></i> Back to Directory
                         </a>
                         <button type="button" class="btn btn-warning text-dark px-4 py-2 fw-bold d-inline-flex align-items-center justify-content-center shadow-sm btn-prompt-tree-action" id="btnPromptBuildTree" style="border-radius: 50px; min-height: 44px; white-space: nowrap;" onclick="window.promptMemberToBuildTree()">
-                            <i class="bi bi-bell-fill me-2 text-dark"></i> Prompt ${memberName.split(' ')[0] || 'Them'} to Build Tree
+                            <i class="bi bi-envelope-heart-fill me-2 text-dark"></i> Invite ${memberName.split(' ')[0] || 'Them'} to Connect Branch
                         </button>
                         <a href="/allMembers/seeProfile/${encodeURIComponent(window.__ROOT_USER_ID__)}" class="btn btn-primary px-4 py-2 fw-bold d-inline-flex align-items-center" style="border-radius: 50px; min-height: 44px; white-space: nowrap;">
                             <i class="bi bi-person-badge me-2"></i> View Profile
@@ -1113,7 +1154,8 @@
                     field_2: "title",
                     img_0: "img"
                 },
-                nodes: familyTreeNodes
+                nodes: familyTreeNodes,
+                unions: layoutUnions
             });
             
             window.family = family;
@@ -1173,6 +1215,15 @@
 
         // Check view mode preference on initial load:
         // Default MUST be Panoramic Dynasty (canvas). Users can manually switch to Pedigree or Direct Lineage.
+        try {
+            if (sessionStorage.getItem('fp_dismiss_lineage_guide') === 'true') {
+                const banner = document.getElementById('missingNodeBanner');
+                const miniBtn = document.getElementById('btnReopenLineageGuide');
+                if (banner) banner.classList.add('d-none');
+                if (miniBtn) miniBtn.classList.remove('d-none');
+            }
+        } catch(_) {}
+
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const urlMode = (urlParams.get('mode') || urlParams.get('view') || '').toLowerCase();
@@ -1324,6 +1375,36 @@
             if (btnCanvas) btnCanvas.classList.add('active');
             try { localStorage.setItem('fp_tree_view_mode', 'canvas'); } catch(_) {}
         }
+    };
+
+    window.dismissLineageGuide = function() {
+        const banner = document.getElementById('missingNodeBanner');
+        const miniBtn = document.getElementById('btnReopenLineageGuide');
+        if (banner) {
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-8px)';
+            setTimeout(() => {
+                banner.classList.add('d-none');
+                if (miniBtn) miniBtn.classList.remove('d-none');
+            }, 250);
+        }
+        try { sessionStorage.setItem('fp_dismiss_lineage_guide', 'true'); } catch(_) {}
+    };
+
+    window.reopenLineageGuide = function() {
+        const banner = document.getElementById('missingNodeBanner');
+        const miniBtn = document.getElementById('btnReopenLineageGuide');
+        if (banner) {
+            banner.classList.remove('d-none');
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-8px)';
+            setTimeout(() => {
+                banner.style.opacity = '1';
+                banner.style.transform = 'translateY(0)';
+            }, 10);
+        }
+        if (miniBtn) miniBtn.classList.add('d-none');
+        try { sessionStorage.removeItem('fp_dismiss_lineage_guide'); } catch(_) {}
     };
 
     window.traceKinshipToSelected = function(targetNodeId, targetName) {

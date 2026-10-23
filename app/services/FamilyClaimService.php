@@ -130,7 +130,7 @@ class FamilyClaimService
             $userId,
             !empty($firstName) ? $firstName : 'Self',
             $lastName,
-            (string)($memberData['gender'] ?? 'Male'),
+            FamilyGraphService::normaliseGender((string)($memberData['gender'] ?? ''), 'Other'),
             !empty($memberData['year']) ? (int)$memberData['year'] : null,
             $memberData['occupation'] ?? null,
             $memberData['country'] ?? null,

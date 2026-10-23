@@ -9,7 +9,8 @@ export const renderHtmlFamilyBootstrap = (family, no) => {
 
    let optionsHtml = `
     <option value="select" disabled selected style="color: #64748b; background-color: #ffffff;">Select status</option>
-    <option value="With Spouse" style="color: #0f172a; background-color: #ffffff;">With Spouse</option>
+    <option value="With Spouse" style="color: #0f172a; background-color: #ffffff;">With Current Spouse</option>
+    <option value="With Former Partner" style="color: #0f172a; background-color: #ffffff;">With Former Partner (divorced / separated / late)</option>
     <option value="Not With Spouse" style="color: #0f172a; background-color: #ffffff;">Single / Other</option>
   `;
 
@@ -19,6 +20,8 @@ export const renderHtmlFamilyBootstrap = (family, no) => {
       <option value="Same_Mother_Father" style="color: #0f172a; background-color: #ffffff;">Same Father & Mother</option>
       <option value="Same_Father" style="color: #0f172a; background-color: #ffffff;">Same Father Only</option>
       <option value="Same_Mother" style="color: #0f172a; background-color: #ffffff;">Same Mother Only</option>
+      <option value="Step" style="color: #0f172a; background-color: #ffffff;">Step-sibling</option>
+      <option value="Adopted" style="color: #0f172a; background-color: #ffffff;">Adopted</option>
     `;
    }
 
@@ -71,6 +74,35 @@ export const renderHtmlFamilyBootstrap = (family, no) => {
               autocomplete="off"
            >
         </div>
+
+
+        <!-- Gender -->
+        <div class="col-md-4">
+           <label class="form-label text-dark fw-bold" for="${kids_sib}_gender${no}">Gender</label>
+           <select class="form-select text-dark bg-white border" name="${kids_sib}_gender${no}" id="${kids_sib}_gender${no}">
+              <option value="" selected>Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+           </select>
+        </div>
+
+        <!-- Other parent (shown only for half-siblings / children with a former partner) -->
+        <div class="col-md-4 d-none" data-family-other-parent="${kids_sib}${no}">
+           <label class="form-label text-dark fw-bold" for="${kids_sib}_other_parent${no}">
+               ${family === "children" ? "Former partner's name" : "Their other parent's name (optional)"}
+           </label>
+           <input type="text" class="form-control text-dark bg-white border" placeholder="Full name" name="${kids_sib}_other_parent${no}" id="${kids_sib}_other_parent${no}" autocomplete="off">
+        </div>
+        ${family === "children" ? `
+        <div class="col-md-4 d-none" data-family-union-status="${kids_sib}${no}">
+           <label class="form-label text-dark fw-bold" for="${kids_sib}_union_status${no}">Relationship status</label>
+           <select class="form-select text-dark bg-white border" name="${kids_sib}_union_status${no}" id="${kids_sib}_union_status${no}">
+              <option value="divorced" selected>Divorced</option>
+              <option value="separated">Separated</option>
+              <option value="widowed">Widowed / Late partner</option>
+              <option value="partner">Never married</option>
+           </select>
+        </div>` : ""}
 
         <!-- Email Input (Full Width) -->
         <div class="col-12">

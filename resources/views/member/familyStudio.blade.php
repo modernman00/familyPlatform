@@ -609,9 +609,13 @@
                 @endif
             </div>
 
+            <!-- Existing Grandparents (rendered client-side) -->
+            <div class="col-12 d-none" id="studioGrandparentsHeader"><h6 class="fw-bold text-muted mb-0">Grandparents</h6></div>
+            <div class="col-12 d-none" id="studioGrandparentsRowWrap"><div class="row g-3" id="studioGrandparentsRow"></div></div>
+
             <!-- Add Grandparent Card -->
             <div class="col-md-6 col-lg-4 relative-card-container">
-                <div class="btn-add-stitch-card" onclick="selectStudioRelativeType('parents')">
+                <div class="btn-add-stitch-card" onclick="selectStudioRelativeType('grandparents')">
                     <div class="add-icon-bubble"><i class="bi bi-diagram-3"></i></div>
                     <div class="add-card-title">Add Grandparent</div>
                     <div class="add-card-desc">Trace lineage back 2+ generations</div>
@@ -619,6 +623,47 @@
             </div>
         </div>
     </div>
+
+    @if(!empty($pendingRelRequests))
+    <section id="relationshipRequests" class="mb-4 p-3 rounded-4" style="background:#fffbeb;border:1.5px solid #fcd34d;">
+        <h3 class="h6 fw-bold mb-3 text-dark"><i class="bi bi-patch-question-fill text-warning me-2"></i>Please confirm {{ count($pendingRelRequests) === 1 ? 'a family connection' : count($pendingRelRequests) . ' family connections' }}</h3>
+        @foreach($pendingRelRequests as $rr)
+            @php
+                $rrLabel = ['half_sibling' => 'half-sibling', 'step_sibling' => 'step-sibling', 'former_partner' => 'former partner'][$rr['kind']] ?? 'relative';
+            @endphp
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 border-top" data-rel-request="{{ $rr['id'] }}">
+                <div class="text-dark">
+                    <strong>{{ $rr['requester_name'] !== '' ? $rr['requester_name'] : 'A family member' }}</strong>
+                    added <strong>{{ $rr['relative_name'] }}</strong> as a {{ $rrLabel }}. Is this right?
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'approve', this)">Yes, confirm</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3" style="min-height:44px" onclick="resolveRelRequest({{ (int)$rr['id'] }}, 'decline', this)">No, remove</button>
+                </div>
+            </div>
+        @endforeach
+    </section>
+    <script>
+        function resolveRelRequest(id, decision, btn) {
+            const row = btn.closest('[data-rel-request]');
+            row.querySelectorAll('button').forEach(b => b.disabled = true);
+            const fd = new FormData();
+            fd.append('request_id', id);
+            fd.append('decision', decision);
+            const tok = document.querySelector('#studioChildForm [name=_token], input[name=_token]');
+            if (tok) fd.append('_token', tok.value);
+            fetch('/member/organogram/editor/relationship-request', { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(d => {
+                    const ok = (d?.status === 200 || d?.status === 'success' || d?.statusCode === 200);
+                    if (!ok) { row.querySelectorAll('button').forEach(b => b.disabled = false); alert(d?.message?.message || d?.message || 'Could not save your answer.'); return; }
+                    if (decision === 'decline') { window.location.reload(); return; }
+                    row.innerHTML = '<div class="text-success fw-semibold py-1"><i class="bi bi-check-circle-fill me-2"></i>Confirmed. Thank you!</div>';
+                })
+                .catch(() => { row.querySelectorAll('button').forEach(b => b.disabled = false); });
+        }
+    </script>
+    @endif
 
     <!-- GENERATION 0: Immediate Household & Siblings -->
     <div class="studio-gen-group" id="group-gen-0">
@@ -919,6 +964,15 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-semibold">Relationship status</label>
+                            <select name="union_status" class="form-select">
+                                <option value="married">Current spouse / partner</option>
+                                <option value="divorced">Former - divorced</option>
+                                <option value="separated">Former - separated</option>
+                                <option value="widowed">Late spouse (widowed)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">Email (Optional)</label>
                             <input type="email" name="email" class="form-control" placeholder="partner@example.com">
                         </div>
@@ -938,6 +992,34 @@
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
                         <h6 class="fw-bold mb-3 text-success"><i class="bi bi-emoji-smile-fill me-2"></i>Child Details</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Who is the other parent? *</label>
+                            <select name="union_id" id="studioChildUnion" class="form-select">
+                                @foreach(($rootUnions ?? []) as $ru)
+                                    <option value="{{ $ru['id'] }}">
+                                        {{ $ru['partner_name'] !== '' ? $ru['partner_name'] : 'Partner (not yet named)' }}
+                                        — {{ $ru['is_current'] ? 'current' : ($ru['union_type'] === 'widowed' ? 'late partner' : 'former, ' . $ru['union_type']) }}
+                                    </option>
+                                @endforeach
+                                <option value="new">Someone else (new partner)…</option>
+                            </select>
+                        </div>
+                        <div class="{{ empty($rootUnions) ? '' : 'd-none' }}" id="studioChildNewPartnerWrap">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Other parent's name (Optional)</label>
+                                <input type="text" name="new_partner_name" class="form-control" placeholder="Leave blank if unknown">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Your relationship with them</label>
+                                <select name="new_partner_status" class="form-select">
+                                    <option value="partner">Not married / unknown</option>
+                                    <option value="divorced">Former - divorced</option>
+                                    <option value="separated">Former - separated</option>
+                                    <option value="widowed">Late partner (widowed)</option>
+                                    <option value="married">Current spouse</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold">First Name *</label>
                             <input type="text" name="first_name" class="form-control" placeholder="Child's first name" required>
@@ -985,6 +1067,20 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label small fw-semibold">How are you related? *</label>
+                            <select name="parentage" id="studioSiblingParentage" class="form-select">
+                                <option value="full">Same mother and father</option>
+                                <option value="same_mother">Same mother only (half-sibling)</option>
+                                <option value="same_father">Same father only (half-sibling)</option>
+                                <option value="step">Step-sibling</option>
+                                <option value="adopted">Adopted</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 d-none" id="studioSiblingOtherParentWrap">
+                            <label class="form-label small fw-semibold">Their other parent's name (Optional)</label>
+                            <input type="text" name="other_parent_name" class="form-control" placeholder="Leave blank if unknown">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label small fw-semibold">Email (Optional)</label>
                             <input type="email" name="email" class="form-control" placeholder="sibling@example.com">
                         </div>
@@ -999,7 +1095,18 @@
                     <form id="studioParentsForm">
     @include('csrf')
                         <input type="hidden" name="base_node_id" value="{{ $rootNodeId ?? 1 }}">
-                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i>Parents Details</h6>
+                        <input type="hidden" name="rel_mode" id="studioParentsMode" value="parents">
+                        <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-people-fill me-2"></i><span id="studioParentsHeading">Parents Details</span></h6>
+                        <div class="mb-3 d-none" id="studioGrandSideWrap">
+                            <label class="form-label small fw-semibold">Whose parents are these?</label>
+                            <select id="studioGrandSide" class="form-select">
+                                @if(!empty($fatherNode['id']))<option value="{{ $fatherNode['id'] }}">Father's parents (paternal)</option>@endif
+                                @if(!empty($motherNode['id']))<option value="{{ $motherNode['id'] }}">Mother's parents (maternal)</option>@endif
+                            </select>
+                            @if(empty($fatherNode['id']) && empty($motherNode['id']))
+                                <div class="small text-danger mt-1">Add your father or mother first, then add their parents here.</div>
+                            @endif
+                        </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label class="form-label small fw-semibold">Father First Name</label>
@@ -1156,7 +1263,18 @@
             document.getElementById('studioStep2-child').classList.remove('d-none');
         } else if (type === 'sibling') {
             document.getElementById('studioStep2-sibling').classList.remove('d-none');
-        } else if (type === 'parents') {
+        } else if (type === 'parents' || type === 'grandparents') {
+            const isGrand = type === 'grandparents';
+            const form = document.getElementById('studioParentsForm');
+            document.getElementById('studioParentsMode').value = type;
+            document.getElementById('studioParentsHeading').textContent = isGrand ? 'Grandparents Details' : 'Parents Details';
+            document.getElementById('studioGrandSideWrap').classList.toggle('d-none', !isGrand);
+            document.getElementById('studioSaveParentsBtn').textContent = isGrand ? 'Save Grandparents' : 'Save Parents';
+            form.querySelectorAll('label').forEach(l => {
+                l.textContent = l.textContent.replace(/^(Grand)?(Father|Mother)/, (m, g, r) => isGrand ? 'Grand' + r.toLowerCase() : r);
+            });
+            const side = document.getElementById('studioGrandSide');
+            form.querySelector('[name=base_node_id]').value = isGrand ? (side?.value || '') : '{{ $rootNodeId ?? 1 }}';
             document.getElementById('studioStep2-parents').classList.remove('d-none');
         }
 
@@ -1460,6 +1578,18 @@
         });
     }
 
+    function appendStudioGrandparent(node, role) {
+        if (!node) return;
+        document.getElementById('studioGrandparentsHeader')?.classList.remove('d-none');
+        document.getElementById('studioGrandparentsRowWrap')?.classList.remove('d-none');
+        document.getElementById('studioGrandparentsRow')?.insertAdjacentHTML('beforeend', createStudioCardHtml(node, role, 'role-chip-parent', 'bi-person-fill'));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const existing = @json(array_values($generations['grandparents'] ?? []));
+        (existing || []).forEach(n => appendStudioGrandparent(n, (n.gender === 'Female') ? 'Grandmother' : 'Grandfather'));
+    });
+
     function createStudioCardHtml(node, role, roleBadgeClass, roleIcon) {
         const fullName = toTitleCase((node.first_name + ' ' + (node.last_name || '')).trim());
         const maidenHtml = node.maiden_name ? `<div class="text-primary fw-semibold small card-maiden-name">née ${toTitleCase(node.maiden_name)}</div>` : `<div class="text-primary fw-semibold small card-maiden-name d-none"></div>`;
@@ -1521,19 +1651,44 @@
         submitStudioForm(this, '/member/organogram/editor/partner', 'studioSavePartnerBtn', 'Saving Partner...', 'partner');
     });
 
+    (function initStudioChildUnion() {
+        const sel = document.getElementById('studioChildUnion');
+        const wrap = document.getElementById('studioChildNewPartnerWrap');
+        if (!sel) return;
+        // No existing partnership: the only choice is a new partner, so make it the value
+        if (!sel.querySelector('option:not([value="new"])')) sel.value = 'new';
+        const sync = () => wrap?.classList.toggle('d-none', sel.value !== 'new');
+        sel.addEventListener('change', sync);
+        sync();
+    })();
+
     document.getElementById('studioChildForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         submitStudioForm(this, '/member/organogram/editor/child', 'studioSaveChildBtn', 'Saving Child...', 'child');
     });
 
+    document.getElementById('studioSiblingParentage')?.addEventListener('change', function () {
+        document.getElementById('studioSiblingOtherParentWrap')?.classList.toggle('d-none', !['same_mother', 'same_father'].includes(this.value));
+    });
     document.getElementById('studioSiblingForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         submitStudioForm(this, '/member/organogram/editor/sibling', 'studioSaveSiblingBtn', 'Saving Sibling...', 'sibling');
     });
 
+    document.getElementById('studioGrandSide')?.addEventListener('change', function() {
+        document.querySelector('#studioParentsForm [name=base_node_id]').value = this.value;
+    });
+
     document.getElementById('studioParentsForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
-        submitStudioForm(this, '/member/organogram/editor/parents', 'studioSaveParentsBtn', 'Saving Parents...', 'parents');
+        const isGrand = document.getElementById('studioParentsMode').value === 'grandparents';
+        if (isGrand && !this.querySelector('[name=base_node_id]').value) {
+            const err = document.getElementById('studioRelativeError');
+            err.textContent = 'Add your father or mother first, then add their parents.';
+            err.classList.remove('d-none');
+            return;
+        }
+        submitStudioForm(this, '/member/organogram/editor/parents', 'studioSaveParentsBtn', isGrand ? 'Saving Grandparents...' : 'Saving Parents...', isGrand ? 'grandparents' : 'parents');
     });
 
     function extractStudioErrorMessage(err) {
@@ -1575,6 +1730,14 @@
                 
                 // Real-Time In-Place DOM Insertion for Added Relatives
                 if (relType === 'partner' && msg.node) {
+                    const unionSel = document.getElementById('studioChildUnion');
+                    if (unionSel && msg.node.union_id) {
+                        const opt = document.createElement('option');
+                        opt.value = String(msg.node.union_id);
+                        opt.textContent = `${msg.node.first_name} ${msg.node.last_name || ''}`.trim() + ' — ' + (msg.node.union_status === 'married' ? 'current' : 'former, ' + (msg.node.union_status || 'partner'));
+                        unionSel.insertBefore(opt, unionSel.firstChild);
+                        unionSel.dispatchEvent(new Event('change'));
+                    }
                     const row = document.querySelector('#group-gen-0 .row');
                     if (row) {
                         const cardHtml = createStudioCardHtml(msg.node, 'Partner / Spouse', 'role-chip-partner', 'bi-heart-fill');
@@ -1611,6 +1774,9 @@
                             row.insertAdjacentHTML('afterbegin', cardHtml);
                         }
                     }
+                } else if (relType === 'grandparents' && (msg.father || msg.mother)) {
+                    appendStudioGrandparent(msg.father, 'Grandfather');
+                    appendStudioGrandparent(msg.mother, 'Grandmother');
                 } else if (relType === 'parents' && (msg.father || msg.mother)) {
                     const row = document.querySelector('#group-gen-minus1 .row');
                     if (row) {
@@ -1630,7 +1796,7 @@
                 // Increment Hero Stats Counter in Real-Time
                 const statTotal = document.getElementById('statTotalMembers');
                 if (statTotal) {
-                    const inc = (relType === 'parents') ? 2 : 1;
+                    const inc = (relType === 'parents' || relType === 'grandparents') ? 2 : 1;
                     statTotal.textContent = (parseInt(statTotal.textContent) || 0) + inc;
                 }
 

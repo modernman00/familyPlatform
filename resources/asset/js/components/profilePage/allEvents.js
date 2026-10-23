@@ -204,10 +204,11 @@ try {
                 }
             } catch (error) {
                 console.error("An error occurred:", error);
+                const rawMsg = error?.response?.data?.message || error.message || 'There was an error processing your request. Please try again.';
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: error?.response?.data?.message || error.message || 'There was an error processing your request. Please try again.',
+                    html: typeof rawMsg === 'string' ? rawMsg.replace(/\n/g, '<br>') : rawMsg,
                 });
             } finally {
                 submitBtn.innerHTML = originalBtnText;

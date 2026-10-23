@@ -198,17 +198,31 @@ final class CollateralKinshipService
             return array_unique($parentIds);
         };
 
-        // Helper: Get Siblings of a Person (sharing any parent union)
-        $getSiblings = function (int $personId) use ($childToUnions, $unionToChildren): array {
+        // Helper: Get Siblings of a Person (full AND half: sharing ANY parent, in any union)
+        $getSiblings = function (int $personId) use ($childToUnions, $unionToChildren, $unionPartners, $personUnions): array {
             $siblingIds = [];
+            $parentIds = [];
             foreach ($childToUnions[$personId] ?? [] as $uId) {
                 foreach ($unionToChildren[$uId] ?? [] as $cId) {
                     if ($cId !== $personId) {
                         $siblingIds[] = $cId;
                     }
                 }
+                foreach ($unionPartners[$uId] ?? [] as $pId) {
+                    $parentIds[$pId] = true;
+                }
             }
-            return array_unique($siblingIds);
+            // Half-siblings: children of the same parent from a different union
+            foreach (array_keys($parentIds) as $pId) {
+                foreach ($personUnions[$pId] ?? [] as $uId) {
+                    foreach ($unionToChildren[$uId] ?? [] as $cId) {
+                        if ($cId !== $personId) {
+                            $siblingIds[] = $cId;
+                        }
+                    }
+                }
+            }
+            return array_values(array_unique($siblingIds));
         };
 
         // Helper: Get Children of a Person (across all unions)
@@ -401,6 +415,7 @@ final class CollateralKinshipService
                 'avatar_url' => $avatar,
                 'generation_level' => $relativeGen[$nId] ?? 0,
                 'voice_capsule_url' => $n['voice_capsule_url'] ?? null,
+                'is_placeholder' => (bool)($n['is_placeholder'] ?? false),
                 'is_root' => ($nId === $egoNodeId)
             ];
         }

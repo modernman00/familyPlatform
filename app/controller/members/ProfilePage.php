@@ -185,10 +185,24 @@ final class ProfilePage extends ProcessImg
                     }
                 }
             }
-            // Attached family GIF support
+            // Attached family GIF support & SSRF hardening (Dr. Viktor Kovács & Marcus)
             $attachedGif = !empty($_POST['attached_gif_url']) ? trim((string)$_POST['attached_gif_url']) : null;
-            if ($attachedGif && filter_var($attachedGif, FILTER_VALIDATE_URL)) {
-                $hasGif = true;
+            if ($attachedGif && strlen($attachedGif) <= 2048 && filter_var($attachedGif, FILTER_VALIDATE_URL)) {
+                $parsed = parse_url($attachedGif);
+                $scheme = strtolower($parsed['scheme'] ?? '');
+                $host = strtolower($parsed['host'] ?? '');
+                if (in_array($scheme, ['https', 'http'], true) 
+                    && !empty($host) 
+                    && !in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
+                    && !str_starts_with($host, '169.254.')
+                    && !str_starts_with($host, '10.')
+                    && !str_starts_with($host, '192.168.')
+                ) {
+                    $hasGif = true;
+                } else {
+                    $hasGif = false;
+                    $attachedGif = null;
+                }
             } else {
                 $hasGif = false;
                 $attachedGif = null;
@@ -202,11 +216,17 @@ final class ProfilePage extends ProcessImg
             }
 
             $id = checkInput(data: $_SESSION['id']);
+            $userFamCode = (string)($_SESSION['famCode'] ?? '');
+            if (empty($userFamCode) && !empty($_POST['postFamCode'])) {
+                $userFamCode = trim((string)$_POST['postFamCode']);
+            }
+
             $newInput = [
                 'id' => $id,
                 'fullName' => $_SESSION['fName'] . " " . $_SESSION['lName'],
-                'profileImg' => Post::getProfilePicsById($id),
-                'post_time' => milliSeconds()
+                'profileImg' => Post::getProfilePicsById($id) ?: 'avatarM.png',
+                'post_time' => milliSeconds(),
+                'postFamCode' => $userFamCode
             ];
 
            $result =  SubmitPostData::submitToOneTablenImage(
@@ -216,22 +236,45 @@ final class ProfilePage extends ProcessImg
                 sourceFileTable: 'post',
                 newInput: $newInput,
                 isCaptcha: false,
-                removeKeys: ['poll_question', 'poll_options', 'token', 'post_no'],
-                optionalFields: ['poll_question', 'poll_options', 'postMessage', 'post_no']
+                removeKeys: [
+                    'poll_question', 'poll_options', 'token', 'post_no',
+                    'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
+                    'submit', 'button'
+                ],
+                optionalFields: [
+                    'poll_question', 'poll_options', 'postMessage', 'post_no',
+                    'attached_gif_url', 'tagged_user_ids', 'shared_temp_images',
+                    'postFamCode', 'profileImg'
+                ]
             );
 
     
             if ($result) {
                 $_SESSION["LAST_INSERT_ID_POST"] = $result;
 
-                // Promote attached GIF to primary post image if no local image uploaded
-                if ($attachedGif && !$hasDirectImage && empty($sharedTempImages)) {
-                    (new \Src\Update('post'))->updateTable(
-                        column: 'post_img0',
-                        columnAnswer: $attachedGif,
-                        identifier: 'post_no',
-                        identifierAnswer: $result
-                    );
+                // Promote attached GIF to primary post image if no local image uploaded,
+                // or into the next available image slot if local images were uploaded.
+                if ($attachedGif) {
+                    $targetColumn = null;
+                    if (!$hasDirectImage && empty($sharedTempImages)) {
+                        $targetColumn = 'post_img0';
+                    } else {
+                        $existingPost = Post::postByNo($result);
+                        for ($i = 0; $i < 6; $i++) {
+                            if (empty($existingPost['post_img' . $i])) {
+                                $targetColumn = 'post_img' . $i;
+                                break;
+                            }
+                        }
+                    }
+                    if ($targetColumn !== null) {
+                        (new \Src\Update('post'))->updateTable(
+                            column: $targetColumn,
+                            columnAnswer: $attachedGif,
+                            identifier: 'post_no',
+                            identifierAnswer: $result
+                        );
+                    }
                 }
 
                 // Preserve multi-line captions and full URLs without being squashed by checkInput

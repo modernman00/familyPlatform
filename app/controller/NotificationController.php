@@ -65,7 +65,8 @@ final class NotificationController extends Select
                 AND notification_status = ?
                 ORDER BY created_at DESC, no DESC";
             $result = Select::selectFn2($query, [...$receivers, $userId, 'new']);
-            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, is_array($result) ? $result : []));
+            $enriched = self::enrichWithActionUrls(is_array($result) ? $result : [], $userId);
+            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, $enriched));
 
             msgSuccess(200, $merged);
 
@@ -100,7 +101,8 @@ final class NotificationController extends Select
                 AND notification_status = ?
                 ORDER BY created_at DESC, no DESC";
             $result = Select::selectFn2($query, [...$receivers, $userId, 'new']);
-            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, is_array($result) ? $result : []));
+            $enriched = self::enrichWithActionUrls(is_array($result) ? $result : [], $userId);
+            $merged = self::sortNotificationsNewestFirst(array_merge($approvals, $enriched));
             $count = count($merged);
 
             msgSuccess(200, [
@@ -135,6 +137,174 @@ final class NotificationController extends Select
         });
 
         return $items;
+    }
+
+    /**
+     * Enriches notification items with canonical, direct action URLs pointing to the exact items.
+     *
+     * @param array<int, array<string, mixed>> $items
+     * @param string $userId
+     * @return array<int, array<string, mixed>>
+     */
+    public static function enrichWithActionUrls(array $items, string $userId = ''): array
+    {
+        $enriched = [];
+        foreach ($items as $item) {
+            $item['action_url'] = self::resolveNotificationActionUrl($item, $userId);
+            $enriched[] = $item;
+        }
+        return $enriched;
+    }
+
+    /**
+     * Resolves the canonical action URL for a notification item so that
+     * clicking the notification takes the user directly to the item itself.
+     *
+     * @param array<string, mixed> $notif
+     * @param string $userId
+     * @return string
+     */
+    public static function resolveNotificationActionUrl(array $notif, string $userId = ''): string
+    {
+        // 1. If action_url is already present and non-empty, normalize and return
+        if (!empty($notif['action_url']) && is_string($notif['action_url'])) {
+            $raw = trim($notif['action_url']);
+            if (stripos($raw, 'familyStudio') !== false) {
+                return '/organogram/' . ($userId !== '' ? $userId : '') . '?mode=canvas';
+            }
+            $parsed = parse_url($raw);
+            $path = $parsed['path'] ?? '/profilePage';
+            $query = isset($parsed['query']) && $parsed['query'] !== '' ? '?' . $parsed['query'] : '';
+            $fragment = isset($parsed['fragment']) && $parsed['fragment'] !== '' ? '#' . $parsed['fragment'] : '';
+            return ($path !== '' ? $path : '/profilePage') . $query . $fragment;
+        }
+
+        $type = (string)($notif['notification_type'] ?? '');
+        $name = (string)($notif['notification_name'] ?? '');
+        $content = (string)($notif['notification_content'] ?? '');
+        $senderId = (string)($notif['sender_id'] ?? '');
+
+        // 2. Check notification_orchestration for pre-computed action_url or data_payload
+        try {
+            $db = \Src\Db::connect2();
+            $stmt = $db->prepare("
+                SELECT action_url, tag, data_payload 
+                FROM notification_orchestration 
+                WHERE (user_id = ? OR family_code = ?)
+                  AND (title = ? OR body = ?)
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $receiverId = (string)($notif['receiver_id'] ?? $userId);
+            $stmt->execute([$receiverId, $receiverId, $name, $content]);
+            $orch = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($orch) {
+                if (!empty($orch['action_url']) && is_string($orch['action_url'])) {
+                    $url = trim($orch['action_url']);
+                    if (stripos($url, 'familyStudio') !== false) {
+                        return '/organogram/' . ($userId !== '' ? $userId : '') . '?mode=canvas';
+                    }
+                    if ($url !== '/' && $url !== '') {
+                        return $url;
+                    }
+                }
+                if (!empty($orch['data_payload'])) {
+                    $payload = json_decode((string)$orch['data_payload'], true);
+                    if (is_array($payload)) {
+                        if (!empty($payload['event_no'])) {
+                            return '/profilePage#linkNotification' . $payload['event_no'];
+                        }
+                        if (!empty($payload['post_no'])) {
+                            return '/profilePage#post' . $payload['post_no'];
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable) {
+            // Non-blocking fallback
+        }
+
+        // 3. Events: Party, Birthday, Wedding, Anniversary, House Warming, Meeting, Reunion, etc.
+        $eventTypes = [
+            'Party', 'Birthday', 'Wedding', 'Anniversary', 'House Warming', 'House_warming',
+            'Remembrance', 'Barbecue', 'Education', 'Naming', 'Meeting', 'Reunion',
+            'Holidays', 'Milestones', 'Others', 'Event'
+        ];
+        $isEvent = in_array($type, $eventTypes, true)
+            || stripos($name, 'Event') !== false
+            || stripos($content, 'added \'') !== false;
+
+        if ($isEvent) {
+            try {
+                $cleanName = preg_replace('/^🎉\s*New\s+Event:\s*/i', '', $name);
+                $cleanName = trim((string)$cleanName);
+                if ($cleanName !== '') {
+                    $db = \Src\Db::connect2();
+                    $stmt = $db->prepare("SELECT no FROM events WHERE eventName = ? ORDER BY no DESC LIMIT 1");
+                    $stmt->execute([$cleanName]);
+                    $eventNo = $stmt->fetchColumn();
+                    if ($eventNo) {
+                        return '/profilePage#linkNotification' . $eventNo;
+                    }
+                }
+            } catch (\Throwable) {}
+
+            return '/profilePage#eventHeader';
+        }
+
+        // 4. Posts and Post Tags
+        if (strcasecmp($type, 'Post') === 0 || strcasecmp($type, 'Post Tag') === 0 || stripos($name, 'update') !== false || stripos($content, 'tagged you') !== false) {
+            try {
+                $db = \Src\Db::connect2();
+                if ($senderId !== '' && $userId !== '') {
+                    $stmt = $db->prepare("SELECT post_no FROM post_tags WHERE user_id = ? AND tagged_by = ? ORDER BY created_at DESC LIMIT 1");
+                    $stmt->execute([$userId, $senderId]);
+                    $postNo = $stmt->fetchColumn();
+                    if ($postNo) {
+                        return '/profilePage#post' . $postNo;
+                    }
+
+                    $stmt = $db->prepare("SELECT post_no FROM post WHERE id = ? ORDER BY created_at DESC LIMIT 1");
+                    $stmt->execute([$senderId]);
+                    $postNo = $stmt->fetchColumn();
+                    if ($postNo) {
+                        return '/profilePage#post' . $postNo;
+                    }
+                }
+            } catch (\Throwable) {}
+
+            return '/profilePage#middleColumn';
+        }
+
+        // 5. Family Join Requests and Approvals
+        if (stripos($name, 'Family Join Request') !== false || stripos($content, 'wants to join your') !== false) {
+            return '/profilePage#familyJoinRequests';
+        }
+
+        // 6. Migration Nudges & Requests
+        if (stripos($name, 'Migration Join Request') !== false || stripos($content, 'requested to migrate') !== false) {
+            return '/profilePage#migrationRequests';
+        }
+        if (stripos($name, 'Family Migration Nudge') !== false || stripos($content, 'invited you to migrate') !== false) {
+            return '/profilePage#migrationNudges';
+        }
+
+        // 7. Friend Requests
+        if (strcasecmp($type, 'Friend Request') === 0 || stripos($name, 'Friend Request') !== false) {
+            return '/profilePage#friendRequestsCard';
+        }
+
+        // 8. Lineage / Family Tree / Dynasty Milestones / Onboarding
+        if (strcasecmp($type, 'onboarding') === 0 || strcasecmp($type, 'Lineage') === 0 || stripos($content, 'family tree') !== false || stripos($content, 'family branch') !== false || stripos($content, 'dynasty') !== false) {
+            return '/organogram/' . ($userId !== '' ? $userId : '') . '?mode=canvas';
+        }
+
+        // 9. Reels
+        if (stripos($content, 'reel') !== false || stripos($name, 'reel') !== false || stripos($content, 'video') !== false) {
+            return '/reels';
+        }
+
+        return '/profilePage';
     }
 
     /**

@@ -272,6 +272,12 @@
     <!-- Email Form -->
     <form id="login" class="styleform_form">
     @include('csrf')
+        <script nonce="{{ $nonce }}">
+            try {
+                sessionStorage.removeItem('fromForgot');
+                localStorage.removeItem('redirect');
+            } catch (e) {}
+        </script>
         @php
         $formArray = [
         'login_notification' => 'showError',

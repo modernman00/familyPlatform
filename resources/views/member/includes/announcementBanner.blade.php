@@ -1,4 +1,37 @@
 <!-- Family Announcements Bulletin Component -->
+<style>
+  body.dark-mode .family-announcement-card,
+  [data-bs-theme="dark"] .family-announcement-card {
+    background-color: #1e293b !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  }
+  body.dark-mode .family-announcement-card.announcement-urgent,
+  [data-bs-theme="dark"] .family-announcement-card.announcement-urgent {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    border-left: 5px solid #ef4444 !important;
+  }
+  body.dark-mode .family-announcement-card.announcement-normal,
+  [data-bs-theme="dark"] .family-announcement-card.announcement-normal {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    border-left: 5px solid #3b82f6 !important;
+  }
+  body.dark-mode .family-announcement-card.announcement-important,
+  [data-bs-theme="dark"] .family-announcement-card.announcement-important {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, #1e293b 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    border-left: 5px solid #f59e0b !important;
+  }
+  body.dark-mode .family-announcement-card h5,
+  [data-bs-theme="dark"] .family-announcement-card h5 {
+    color: #f8fafc !important;
+  }
+  body.dark-mode .family-announcement-card p,
+  [data-bs-theme="dark"] .family-announcement-card p {
+    color: #cbd5e1 !important;
+  }
+</style>
 @php
     $famCode = (string)($_SESSION['famCode'] ?? $data['famCode'] ?? '');
     $activeAnnouncements = [];
@@ -30,7 +63,7 @@
                 $canDelete = ($announcement['author_id'] === ($_SESSION['id'] ?? '')) || (($_SESSION['type'] ?? '') === 'admin');
             @endphp
 
-            <div class="card mb-3 border-0 shadow-sm family-announcement-card" id="announcementCard-{{ $announcement['id'] }}"
+            <div class="card mb-3 border-0 shadow-sm family-announcement-card {{ $isUrgent ? 'announcement-urgent' : ($isNormal ? 'announcement-normal' : 'announcement-important') }}" id="announcementCard-{{ $announcement['id'] }}"
                  style="border-radius: 16px; background: {{ $bgColor }}; border-left: 5px solid {{ $borderLeftColor }} !important;">
                 <div class="card-body p-3 p-sm-4">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">

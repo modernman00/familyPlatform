@@ -1281,6 +1281,9 @@ body[data-page-id="organogram"] .organogram-header {
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    padding: 20px 20px 16px !important;
+    margin-bottom: 16px !important;
+    border-radius: 0 0 24px 24px !important;
 }
 
 body[data-page-id="organogram"] .organogram-title {
@@ -1325,6 +1328,93 @@ body[data-page-id="organogram"] .tree-container {
     height: auto !important;
     padding: 0 !important;
     overflow: visible !important;
+}
+
+/* =======================================================
+   LUXURY LINEAGE GROWTH HUD (DARK CANVAS COMPONENT)
+   ======================================================= */
+.lineage-growth-hud {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.9) 100%) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-left: 5px solid #6366f1 !important;
+    border-radius: 20px !important;
+    padding: 18px 24px !important;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    z-index: 10 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 24px !important;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.lineage-growth-hud.flourishing {
+    border-left-color: #10b981 !important;
+}
+
+.hud-main-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.hud-text-block {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.hud-action-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.hud-missing-chip {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.hud-missing-chip:hover {
+    background: rgba(99, 102, 241, 0.35);
+    border-color: rgba(99, 102, 241, 0.5);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 992px) {
+    .lineage-growth-hud {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 16px !important;
+        padding: 16px !important;
+    }
+    .hud-main-content {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+    .hud-action-controls {
+        flex-direction: column !important;
+        width: 100% !important;
+    }
+    .hud-action-controls .btn {
+        width: 100% !important;
+    }
 }
 
 /* Main Canvas Stage */

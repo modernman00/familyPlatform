@@ -97,7 +97,7 @@ final class LineagePromptService
                 WHERE sender_id = ? 
                   AND receiver_id = ? 
                   AND notification_type = 'Lineage'
-                  AND (LOWER(notification_name) LIKE '%family tree%' OR LOWER(notification_content) LIKE '%family tree%')
+                  AND (LOWER(notification_name) LIKE '%family tree%' OR LOWER(notification_content) LIKE '%family tree%' OR LOWER(notification_name) LIKE '%family branch%' OR LOWER(notification_content) LIKE '%family branch%')
                   AND created_at >= (NOW() - INTERVAL 24 HOUR)
                 ORDER BY created_at DESC 
                 LIMIT 1
@@ -106,7 +106,7 @@ final class LineagePromptService
             if ($checkStmt->fetch()) {
                 return [
                     'success' => false,
-                    'message' => "You have already sent a reminder to {$targetFirstName} recently. Please allow them time to respond."
+                    'message' => "You have already sent an invitation to {$targetFirstName} recently. Please allow them time to respond."
                 ];
             }
         } catch (\Throwable $e) {
@@ -114,10 +114,10 @@ final class LineagePromptService
         }
 
         // 5. Construct notification payload
-        $title = "{$senderName} wants to see your family tree! 🌱";
+        $title = "{$senderName} invited you to connect your branch of the family tree! 🌱";
         $body = !empty($sanitizedNote)
-            ? "{$senderName}: \"{$sanitizedNote}\" — Click to build your family tree in the Family Studio."
-            : "{$senderName} visited your family tree and would love to see your relatives connected. Click to add your family in the Family Studio.";
+            ? "{$senderName}: \"{$sanitizedNote}\" — Tap to view your family tree."
+            : "{$senderName} invited you to connect your branch of the family tree. Tap to view your family tree.";
 
         // 6. Multi-channel dispatch (In-App + WebPush)
         try {
@@ -127,7 +127,7 @@ final class LineagePromptService
                 priority: 'high',
                 title: $title,
                 body: $body,
-                actionUrl: '/familyStudio',
+                actionUrl: '/organogram/' . $targetUserId . '?mode=canvas',
                 tag: "lineage-prompt-{$senderId}-{$targetUserId}",
                 familyCode: $famCode,
                 metadata: [
@@ -151,12 +151,13 @@ final class LineagePromptService
                     'firstName' => $targetFirstName,
                     'requesterName' => $senderName,
                     'note' => $sanitizedNote,
-                    'studioUrl' => $baseUrl . '/familyStudio',
+                    'treeUrl' => $baseUrl . '/organogram/' . $targetUserId . '?mode=canvas',
+                    'studioUrl' => $baseUrl . '/organogram/' . $targetUserId . '?mode=canvas',
                     'familyCode' => $famCode
                 ];
                 SendEmailFunctionality::email(
                     'msg/promptBuildFamilyTree',
-                    "{$senderName} prompted you to build your family tree",
+                    "{$senderName} invited you to connect your family branch",
                     $emailData,
                     'member'
                 );
@@ -167,7 +168,7 @@ final class LineagePromptService
 
         return [
             'success' => true,
-            'message' => "We have sent a friendly reminder to {$targetFirstName} to build their family tree!"
+            'message' => "We have sent a warm invitation to {$targetFirstName} to connect their family branch!"
         ];
     }
 }

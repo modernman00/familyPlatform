@@ -24,6 +24,8 @@ final class Forgot
 
       unset($_SESSION['auth']['2FA_token_ts']);
       unset($_SESSION['auth']['identifyCust']);
+      unset($_SESSION['auth']['pendingUser']);
+      $_SESSION['auth']['flow'] = 'forgot_password';
       
       $_SESSION['auth']['showLogin'] = true;
       PasswordRecoveryService::show('login/forgot');
@@ -35,6 +37,9 @@ final class Forgot
   public function verify(): void
   {
     try {
+        $_SESSION['auth']['flow'] = 'forgot_password';
+        unset($_SESSION['auth']['pendingUser']);
+
         $nonProdEnvs = ['local', 'development', 'testing'];
         $isCaptchaV3 = !in_array((string) getenv('APP_ENV'), $nonProdEnvs, true);
         PasswordRecoveryService::process(isCaptchaV3: $isCaptchaV3);

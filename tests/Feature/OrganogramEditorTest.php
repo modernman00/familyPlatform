@@ -250,6 +250,87 @@ final class OrganogramEditorTest extends OrganogramTestCase
         $this->assertContains('Unknown Father', $names, 'Missing father is backfilled so the union is structurally sound.');
     }
 
+    public function test_add_grandparents_land_two_generations_above_the_user_under_the_chosen_parent(): void
+    {
+        $meId = $this->seedNode('Me', 'Person', 'Male', 0);
+        $fatherId = $this->seedNode('Dad', 'Person', 'Male', -1);
+
+        $_POST = [
+            'rel_mode' => 'grandparents',
+            'base_node_id' => (string) $fatherId,
+            'father_first_name' => 'Grandpa',
+            'father_last_name' => 'Joe',
+            'mother_first_name' => 'Grandma',
+            'mother_last_name' => 'Jane',
+        ];
+
+        $response = $this->captureJsonOutput(fn () => $this->controller()->addParents());
+
+        $this->assertSame('success', $response['status'] ?? null);
+
+        $byName = [];
+        foreach ($this->familyNodes() as $node) {
+            $byName[$node['first_name']] = $node;
+        }
+        $this->assertSame(-2, (int) $byName['Grandpa']['generation_level']);
+        $this->assertSame(-2, (int) $byName['Grandma']['generation_level']);
+        $this->assertSame(0, (int) $byName['Me']['generation_level'], 'The user\'s own node is untouched.');
+        $this->assertSame(-1, (int) $byName['Dad']['generation_level'], 'The parent node is untouched, not replaced.');
+
+        $union = $this->latestUnion();
+        $this->assertNotNull($union);
+        $links = $this->childrenOfUnion((int) $union['id']);
+        $this->assertCount(1, $links);
+        $this->assertSame($fatherId, (int) $links[0]['child_id'], 'The parent, not the user, is the grandparents\' child.');
+        $this->assertNotSame($meId, (int) $links[0]['child_id']);
+    }
+
+    public function test_add_grandparents_rejects_a_parent_that_already_has_parents(): void
+    {
+        $fatherId = $this->seedNode('Dad', 'Person', 'Male', -1);
+
+        $_POST = [
+            'rel_mode' => 'grandparents',
+            'base_node_id' => (string) $fatherId,
+            'father_first_name' => 'First',
+            'father_last_name' => 'Set',
+        ];
+        $first = $this->captureJsonOutput(fn () => $this->controller()->addParents());
+        $this->assertSame('success', $first['status'] ?? null);
+        $countAfterFirst = count($this->familyNodes());
+
+        $_POST['father_first_name'] = 'Second';
+        $second = $this->captureJsonOutput(fn () => $this->controller()->addParents());
+
+        $this->assertSame('error', $second['status'] ?? null);
+        $this->assertSame(409, (int) ($second['code'] ?? 0));
+        $this->assertCount($countAfterFirst, $this->familyNodes(), 'No extra nodes are created on the rejected attempt.');
+    }
+
+    public function test_add_grandparents_refuses_a_parent_from_another_family(): void
+    {
+        $foreignFamily = 'PHPUNIT_TREE_OTHER_' . bin2hex(random_bytes(4));
+        $this->pdo->prepare(
+            'INSERT INTO family_nodes (family_code, first_name, last_name, gender, generation_level) VALUES (?, ?, ?, ?, ?)'
+        )->execute([$foreignFamily, 'Stranger', 'Dad', 'Male', -1]);
+        $foreignId = (int) $this->pdo->lastInsertId();
+
+        try {
+            $_POST = [
+                'rel_mode' => 'grandparents',
+                'base_node_id' => (string) $foreignId,
+                'father_first_name' => 'Intruder',
+                'father_last_name' => 'Gramps',
+            ];
+            $response = $this->captureJsonOutput(fn () => $this->controller()->addParents());
+
+            $this->assertSame('error', $response['status'] ?? null);
+            $this->assertSame(403, (int) ($response['code'] ?? 0));
+        } finally {
+            $this->pdo->prepare('DELETE FROM family_nodes WHERE family_code = ?')->execute([$foreignFamily]);
+        }
+    }
+
     public function test_add_parents_requires_at_least_one_parent_name(): void
     {
         $baseId = $this->seedNode();

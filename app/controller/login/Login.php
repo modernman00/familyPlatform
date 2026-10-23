@@ -39,6 +39,10 @@ final class Login
             return;
         }
 
+        // Reset any stale forgot-password state and mark authoritative login flow
+        unset($_SESSION['auth']['forgotPassword']);
+        $_SESSION['auth']['flow'] = 'login';
+
         try {
             BaseController::viewWithCsp('login/login');
         } catch (\Throwable $e) {
@@ -120,6 +124,11 @@ final class Login
 
             $inputData = \Src\functionality\middleware\GetRequestData::getRequestData();
             $loginEmail = trim((string) ($inputData['email'] ?? $inputData['username'] ?? ''));
+
+            // Authoritative session flow marking: this is a login attempt, NOT password recovery
+            unset($_SESSION['auth']['forgotPassword']);
+            $_SESSION['auth']['flow'] = 'login';
+
             $isAdminLoginRoute = str_contains($requestUri, $adminSecretPath)
                 || str_contains(strtolower($requestUri), 'portal_');
             $requireMemberEmail2fa = $isAdminLoginRoute || self::isMemberTwoFactorEnabled($loginEmail);
@@ -353,6 +362,7 @@ final class Login
             'email' => $userEmail,
             'codeVerified' => true,
             'codeVerified_ts' => time(),
+            'flow' => 'authenticated',
             'type' => (string) ($user['type'] ?? 'member'),
         ];
         $_SESSION['id'] = $userId;

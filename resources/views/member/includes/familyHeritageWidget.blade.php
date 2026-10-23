@@ -1,4 +1,21 @@
 <!-- Family Heritage & Weekly Rituals Sidebar Widget -->
+<style>
+  body.dark-mode .family-heritage-sidebar-widget .tree-completeness-strip,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .tree-completeness-strip {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(30, 41, 59, 0.95) 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  }
+  body.dark-mode .family-heritage-sidebar-widget .tree-completeness-strip .strip-heading,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .tree-completeness-strip .strip-heading {
+    color: #f8fafc !important;
+  }
+  body.dark-mode .family-heritage-sidebar-widget .btn-light,
+  [data-bs-theme="dark"] .family-heritage-sidebar-widget .btn-light {
+    background-color: #243044 !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+</style>
 <div class="card border-0 shadow-sm mb-4 family-heritage-sidebar-widget" style="border-radius: 20px; background-color: var(--card-bg);">
     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
         <div>
@@ -12,9 +29,9 @@
 
     <div class="card-body px-4 pt-2 pb-4">
         <!-- Tree Health & Quests Strip -->
-        <div class="p-3 rounded-3 mb-3" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid rgba(16, 185, 129, 0.2);">
+        <div class="p-3 rounded-3 mb-3 tree-completeness-strip" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid rgba(16, 185, 129, 0.2);">
             <div class="d-flex justify-content-between align-items-center mb-1.5">
-                <span class="fw-bold text-dark small" style="font-size: 0.84rem;">
+                <span class="fw-bold text-dark strip-heading small" style="font-size: 0.84rem;">
                     <i class="bi bi-diagram-3-fill text-success me-1"></i> Tree Completeness
                 </span>
                 <span class="badge bg-success" style="font-size: 0.72rem;" id="sideWidgetScoreBadge">--%</span>

@@ -669,15 +669,16 @@ final class PostMessage
                 $db = \Src\Db::connect2();
                 $stmt = $db->prepare("
                     INSERT INTO notification 
-                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, notification_status, notification_date)
-                    VALUES (?, ?, ?, ?, 'Post', ?, 'new', NOW())
+                    (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                    VALUES (?, ?, ?, ?, 'Post', ?, ?, 'new', NOW())
                 ");
                 $stmt->execute([
                     $postId,
                     $targetUserId,
                     $postOriginName,
                     "New update from {$postOriginName}",
-                    $notificationMsg
+                    $notificationMsg,
+                    $url ?: '/profilePage'
                 ]);
             } catch (\Throwable $e) {
                 error_log('[PostMessage] In-app notification write failed: ' . $e->getMessage());
