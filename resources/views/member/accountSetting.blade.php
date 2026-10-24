@@ -445,7 +445,7 @@
 
               {{-- ── Lineage Scope Selector ── --}}
               {{-- Shown whenever the user has a secondary/maternal family code set. --}}
-              @php $hasMaternalCode = !empty($accountData['otherFamCode']); @endphp
+              @php $hasMaternalCode = (($birthFamily['state'] ?? '') === 'active') && !empty($accountData['otherFamCode']); @endphp
               @if($hasMaternalCode)
               <div class="p-3 rounded-3 mb-4 border" id="parents-lineage-banner" style="background: linear-gradient(135deg,#faf5ff 0%,#f3e8ff 100%); border-color:#e9d5ff!important;">
                 <div class="fw-bold text-purple mb-2" style="color:#7c3aed;">
@@ -938,7 +938,7 @@
               </div>
 
               <!-- Active Pending Request Alert (if any) -->
-              @if(!empty($pendingFamilyRequest))
+              @if(!empty($pendingFamilyRequest) && ($pendingFamilyRequest['purpose'] ?? 'join') !== 'birth_link')
               <div class="alert alert-warning shadow-sm border-0 rounded-3 p-3 mb-4" id="pendingRequestAlert" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e;">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                   <div>
@@ -964,7 +964,7 @@
                       <h3 class="fw-bolder text-primary mb-1 mt-1" id="currentFamCodeText" style="letter-spacing: 1px;">
                         <i class="bi bi-hash text-muted"></i><span id="currentFamCodeValue">{{ $accountData['famCode'] ?? 'NOT ASSIGNED' }}</span>
                       </h3>
-                      @if(!empty($pendingFamilyRequest))
+                      @if(!empty($pendingFamilyRequest) && ($pendingFamilyRequest['purpose'] ?? 'join') !== 'birth_link')
                         <div class="mt-2 mb-2" id="currentFamCodePendingContainer">
                           <span class="badge rounded-pill px-3 py-1.5 fw-semibold" style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;">
                             <i class="bi bi-hourglass-split me-1"></i> Transfer to <strong>#{{ $pendingFamilyRequest['family_code'] }}</strong> pending approval
@@ -984,68 +984,177 @@
                 </div>
               </div>
 
-              <!-- Secondary / Maternal / Maiden Family Code Card -->
-              <div class="card border-0 shadow-sm rounded-3 mb-4" style="background: #ffffff; border: 1px solid #e2e8f0;">
+              <!-- Change Family Code by Family Vote (RFC-0005) -->
+              @php
+                $cr = $codeRename ?? ['is_creator' => false, 'can_propose' => false, 'code' => '', 'open' => null, 'cooldown' => false];
+                $crOpen = $cr['open'] ?? null;
+              @endphp
+              <div class="card border-0 shadow-sm rounded-3 mb-4" id="codeRenameCard" style="background: #ffffff; border: 1px solid #e2e8f0;">
                 <div class="card-body p-4">
-                  <div class="d-flex align-items-center gap-3 mb-3">
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-ui-checks-grid fs-4 text-primary"></i>
+                    <h5 class="fw-bold mb-0">Change Our Family Code</h5>
+                  </div>
+                  <p class="text-muted small mb-3">The creator of the code can propose a new one. The whole family votes, and if more vote yes than no it changes for everyone automatically.</p>
+                  <div id="codeRenameAlert" class="alert alert-danger small py-2 mb-3" style="display:none;" role="alert"></div>
+
+                  @if($crOpen)
+                    <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;" id="codeRenameOpen">
+                      <div class="fw-semibold mb-1">Vote open: #{{ $crOpen['old_code'] }} &rarr; #{{ $crOpen['new_code'] }}</div>
+                      <div class="small text-muted mb-2">
+                        So far {{ (int)($crOpen['yes'] ?? 0) }} yes and {{ (int)($crOpen['no'] ?? 0) }} no from {{ (int)($crOpen['eligible'] ?? 0) }} members.
+                        It passes if more members vote yes than no (at least one besides you must vote) when voting closes on {{ date('j M Y', strtotime((string)$crOpen['expires_at'])) }}, or straight away if over half the family says yes.
+                      </div>
+                      <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" href="/profilePage?#post{{ (int)$crOpen['post_no'] }}">
+                          <i class="bi bi-box-arrow-up-right me-1"></i> Go to the vote
+                        </a>
+                        @if(($crOpen['requested_by'] ?? '') === (string)($accountData['id'] ?? ''))
+                          <button type="button" id="btnCancelCodeRename" class="btn btn-outline-danger rounded-pill px-4 fw-semibold" style="min-height:44px;">Cancel vote</button>
+                        @endif
+                      </div>
+                    </div>
+                  @elseif(!empty($cr['can_propose']))
+                    <form id="codeRenameForm" onsubmit="return false;">
+                      @include('csrf')
+                      <label class="form-label small fw-bold text-muted text-uppercase" for="newFamilyCode">New family code</label>
+                      <input type="text" id="newFamilyCode" class="form-control mb-1" maxlength="12" minlength="4" placeholder="e.g. ADEYEMI" autocomplete="off" style="text-transform:uppercase;">
+                      <div class="form-text mb-3">4 to 12 letters or numbers. Your family is asked to vote first; nothing changes until the vote passes.</div>
+                      <button type="button" id="btnProposeCodeRename" class="btn btn-primary w-100 rounded-pill fw-semibold" style="min-height:44px;">
+                        <i class="bi bi-send me-1"></i> Ask my family to vote
+                      </button>
+                    </form>
+                  @elseif(!empty($cr['is_creator']) && !empty($cr['cooldown']))
+                    <div class="alert alert-secondary small mb-0">The family code was changed recently. You can propose another change in 30 days.</div>
+                  @else
+                    <div class="alert alert-secondary small mb-0">Only the person who created this family code can propose changing it. If they do, you will be asked to vote.</div>
+                  @endif
+                </div>
+              </div>
+
+              <!-- Birth / Maiden Family Code Card (RFC-0004) -->
+              @php
+                $bf = $birthFamily ?? ['state' => 'none', 'code' => '', 'origin' => null, 'pending' => null];
+                $bfState = (string)($bf['state'] ?? 'none');
+                $maidenPrefill = (string)($accountData['maiden_name'] ?? $accountData['mother_maiden'] ?? '');
+              @endphp
+              <div class="card border-0 shadow-sm rounded-3 mb-4" id="birthFamilyCard" data-state="{{ $bfState }}" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                <div class="card-body p-4">
+                  <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
                     <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: #faf5ff; color: #9333ea;">
                       <i class="bi bi-diagram-3-fill fs-4"></i>
                     </div>
                     <div class="flex-grow-1">
                       <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <h5 class="fw-bold mb-0">Secondary / Maternal / Maiden Family Code</h5>
-                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #f3e8ff; color: #7e22ce; font-size: 0.75rem;">Dual Lineage &amp; In-Laws</span>
+                        <h5 class="fw-bold mb-0">Birth / Maiden Family Code</h5>
+                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #f3e8ff; color: #7e22ce; font-size: 0.75rem;">Dual Lineage</span>
                       </div>
-                      <span class="text-muted small">Connect to your maternal relatives and in-law circles in the Kinship Suggestion Engine.</span>
+                      <span class="text-muted small">Keep your birth family connected without changing your household code.</span>
                     </div>
                     <div>
-                      @if(!empty($accountData['otherFamCode']))
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" id="secondaryCodeStatusBadge">
-                          <i class="bi bi-check2-circle me-1"></i> Active Link: <strong>{{ $accountData['otherFamCode'] }}</strong>
+                      @if($bfState === 'active')
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;" id="birthCodeStatusBadge">
+                          <i class="bi bi-check2-circle me-1"></i> {{ ($bf['origin'] ?? '') === 'created' ? 'Created by you' : 'Linked &amp; approved' }}
+                        </span>
+                      @elseif($bfState === 'pending')
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;" id="birthCodeStatusBadge">
+                          <i class="bi bi-hourglass-split me-1"></i> Awaiting approval
+                        </span>
+                      @elseif($bfState === 'unverified')
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;" id="birthCodeStatusBadge">
+                          <i class="bi bi-exclamation-triangle me-1"></i> Unverified
                         </span>
                       @else
-                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;" id="secondaryCodeStatusBadge">
-                          <i class="bi bi-dash-circle me-1"></i> Not Linked
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold" style="background-color: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;" id="birthCodeStatusBadge">
+                          <i class="bi bi-dash-circle me-1"></i> Not set up
                         </span>
                       @endif
                     </div>
                   </div>
 
-                  <div class="p-3 rounded-3 mb-3" style="background-color: #faf5ff; border: 1px solid #f3e8ff; font-size: 0.85rem; color: #581c87;">
-                    <div class="d-flex align-items-start gap-2">
-                      <i class="bi bi-info-circle-fill text-purple mt-1"></i>
-                      <div>
-                        <strong>How this works:</strong>
-                        <ul class="mb-0 ps-3 mt-1">
-                          <li><strong>For Married Women:</strong> Enter your biological maiden family code to stay connected with your parents' and siblings' lineage.</li>
-                          <li><strong>For All Members:</strong> Enter your mother's maternal family code to automatically discover maternal aunts, uncles, and cousins.</li>
-                          <li><em>Your primary household tree (<span class="fw-bold text-dark">{{ $accountData['famCode'] ?? 'Primary' }}</span>) remains completely unchanged.</em></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+                  <div id="birthFamilyAlert" class="alert alert-danger small py-2 mb-3" style="display:none;" role="alert"></div>
 
-                  <form id="secondaryFamCodeForm" onsubmit="return false;">
-    @include('csrf')
-                    <div class="row g-3 align-items-center">
-                      <div class="col-md-7">
-                        <label class="form-label small fw-bold text-muted text-uppercase" for="otherFamCodeInput">Maternal / Maiden Family Code</label>
-                        <div class="input-group">
-                          <span class="input-group-text bg-light text-muted fw-bold">#</span>
-                          <input type="text" name="otherFamCode" id="otherFamCodeInput" class="form-control text-uppercase fw-bold" placeholder="e.g. ADE123" value="{{ $accountData['otherFamCode'] ?? '' }}" maxlength="12">
-                        </div>
-                        <div class="form-text">Must be different from your primary family code ({{ $accountData['famCode'] ?? '' }}).</div>
+                  @if($bfState === 'active')
+                    <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="background-color: #faf5ff; border: 1px solid #f3e8ff;">
+                      <div>
+                        <span class="text-uppercase text-muted fw-bold small" style="letter-spacing: 0.05em;">Your birth family code</span>
+                        <h3 class="fw-bolder mb-0 mt-1" style="color:#7e22ce; letter-spacing:1px;">#<span id="birthCodeValue">{{ $bf['code'] }}</span></h3>
                       </div>
-                      <div class="col-md-5 d-flex align-items-end gap-2 pt-2">
-                        <button type="button" id="btnSaveOtherFamCode" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm flex-grow-1">
-                          <i class="bi bi-check-lg me-1"></i> Save Secondary Code
+                      <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" id="btnCopyBirthCode" class="btn btn-outline-primary rounded-pill px-4 fw-semibold" style="min-height:44px;" data-code="{{ $bf['code'] }}">
+                          <i class="bi bi-clipboard me-1"></i> Copy Code
                         </button>
-                        <button type="button" id="btnClearOtherFamCode" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold {{ empty($accountData['otherFamCode']) ? 'd-none' : '' }}" title="Clear secondary family code">
-                          <i class="bi bi-x-circle me-1"></i> Clear
-                        </button>
+                        @if(($bf['origin'] ?? '') === 'linked')
+                          <button type="button" id="btnClearBirthCode" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold" style="min-height:44px;" title="Unlink this birth family">
+                            <i class="bi bi-x-circle me-1"></i> Unlink
+                          </button>
+                        @endif
                       </div>
                     </div>
-                  </form>
+                    <p class="small text-muted mb-0">
+                      Use <strong>My Birth / Maiden Family</strong> in the <em>Parents</em> and <em>Siblings</em> tabs to invite your family into this tree.
+                      Your household tree (<strong>{{ $accountData['famCode'] ?? 'Primary' }}</strong>) stays unchanged.
+                      @if(($bf['origin'] ?? '') === 'created')
+                        This code is permanent once created.
+                      @endif
+                    </p>
+                  @elseif($bfState === 'pending')
+                    <div class="p-3 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: #fffbeb; border: 1px solid #fef3c7; color: #92400e;">
+                      <p class="small mb-0">
+                        You asked to link to <strong>#{{ $bf['code'] }}</strong>. Waiting for
+                        <strong>{{ $bf['pending']['inviter_first_name'] ?? '' }} {{ $bf['pending']['inviter_last_name'] ?? '' }}</strong> to confirm.
+                      </p>
+                      <button type="button" id="cancelBirthLinkBtn" class="btn btn-sm btn-outline-danger rounded-pill px-3" style="min-height:44px;">
+                        <i class="bi bi-x-circle me-1"></i> Cancel Request
+                      </button>
+                    </div>
+                  @else
+                    @if($bfState === 'unverified')
+                      <div class="alert alert-warning small mb-3" id="birthUnverifiedNotice">
+                        <i class="bi bi-shield-exclamation me-1"></i>
+                        The code <strong>#{{ $bf['code'] }}</strong> was saved before family codes were verified, so it is not used for invitations or tree changes.
+                        Create your birth family or ask a member of that family to confirm you below.
+                      </div>
+                    @endif
+
+                    <div class="row g-4">
+                      <div class="col-md-6">
+                        <div class="h-100 p-3 rounded-3" style="border: 1px solid #e2e8f0;">
+                          <h6 class="fw-bold mb-1"><i class="bi bi-stars me-1 text-primary"></i> My birth family isn't on yet</h6>
+                          <p class="text-muted small">We'll create a new family code from your maiden name. Your parents and siblings can join with it.</p>
+                          <form id="createBirthCodeForm" onsubmit="return false;">
+                            @include('csrf')
+                            <label class="form-label small fw-bold text-muted text-uppercase" for="birthMaidenName">Maiden / birth family name</label>
+                            <input type="text" id="birthMaidenName" name="maiden_name" class="form-control mb-3" maxlength="60" placeholder="e.g. Adeyemi" value="{{ $maidenPrefill }}" autocomplete="off">
+                            <button type="button" id="btnCreateBirthCode" class="btn btn-primary w-100 rounded-pill fw-semibold" style="min-height:44px;">
+                              <i class="bi bi-plus-circle me-1"></i> Create Birth Family Code
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="h-100 p-3 rounded-3" style="border: 1px solid #e2e8f0;">
+                          <h6 class="fw-bold mb-1"><i class="bi bi-link-45deg me-1 text-success"></i> My family is already here</h6>
+                          <p class="text-muted small">Enter their code and a family member who can confirm you. Your household code won't change.</p>
+                          <form id="linkBirthCodeForm" onsubmit="return false;">
+                            @include('csrf')
+                            <div class="input-group mb-2">
+                              <span class="input-group-text bg-light text-muted fw-bold">#</span>
+                              <input type="text" id="birthLinkCode" name="family_code" class="form-control text-uppercase fw-bold" maxlength="12" placeholder="e.g. ADE123" autocomplete="off">
+                            </div>
+                            <div class="row g-2 mb-2">
+                              <div class="col-6"><input type="text" id="birthInviterFirst" name="inviter_first_name" class="form-control" placeholder="Their first name" maxlength="100"></div>
+                              <div class="col-6"><input type="text" id="birthInviterLast" name="inviter_last_name" class="form-control" placeholder="Their last name" maxlength="100"></div>
+                            </div>
+                            <input type="text" id="birthInviterContact" name="inviter_email_or_mobile" class="form-control mb-3" placeholder="Their email or mobile" maxlength="100">
+                            <button type="button" id="btnRequestBirthLink" class="btn btn-success w-100 rounded-pill fw-semibold" style="min-height:44px;">
+                              <i class="bi bi-send me-1"></i> Request to Link
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  @endif
                 </div>
               </div>
 
@@ -1240,6 +1349,57 @@
         }
       });
     }
+
+    // 1b. RFC-0005: propose / cancel a family code change (family poll)
+    (function () {
+      const alertBox = document.getElementById('codeRenameAlert');
+      const showErr = (msg) => { if (alertBox) { alertBox.textContent = msg; alertBox.style.display = 'block'; } };
+      const post = (action, extra) => {
+        const fd = new FormData();
+        fd.append('action', action);
+        Object.keys(extra || {}).forEach((k) => fd.append(k, extra[k]));
+        if (csrfToken) fd.append('token', csrfToken);
+        return fetch('/accountSetting', {
+          method: 'POST',
+          body: fd,
+          headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-XSRF-TOKEN': csrfToken, 'X-CSRF-TOKEN': csrfToken }
+        }).then((res) => res.json());
+      };
+      const ok = (d) => d && (d.status === 200 || d.status === 'success' || d.success === true || d.ok === true);
+      const msgOf = (d, fallback) => (d && (d.message || (d.data && d.data.message))) || fallback;
+
+      const btnPropose = document.getElementById('btnProposeCodeRename');
+      if (btnPropose) {
+        btnPropose.addEventListener('click', function () {
+          const input = document.getElementById('newFamilyCode');
+          const code = input ? input.value.trim() : '';
+          if (alertBox) alertBox.style.display = 'none';
+          if (!code) { showErr('Please enter the new family code.'); return; }
+          btnPropose.disabled = true;
+          post('proposeFamilyCodeRename', { new_code: code })
+            .then((d) => {
+              if (ok(d)) { window.location.hash = 'v-pills-familycode'; window.location.reload(); return; }
+              btnPropose.disabled = false;
+              showErr(msgOf(d, 'Could not start the family vote.'));
+            })
+            .catch(() => { btnPropose.disabled = false; showErr('Network error. Please try again.'); });
+        });
+      }
+
+      const btnCancel = document.getElementById('btnCancelCodeRename');
+      if (btnCancel) {
+        btnCancel.addEventListener('click', function () {
+          btnCancel.disabled = true;
+          post('cancelFamilyCodeRename')
+            .then((d) => {
+              if (ok(d)) { window.location.hash = 'v-pills-familycode'; window.location.reload(); return; }
+              btnCancel.disabled = false;
+              showErr(msgOf(d, 'Could not cancel the vote.'));
+            })
+            .catch(() => { btnCancel.disabled = false; showErr('Network error. Please try again.'); });
+        });
+      }
+    })();
 
     // 2. Branch Out Solo
     const btnStaySolo = document.getElementById('btnStaySolo');
@@ -1513,125 +1673,130 @@
       });
     }
 
-    // 5. Update Secondary / Maternal / Maiden Family Code
-    const btnSaveOtherCode = document.getElementById('btnSaveOtherFamCode');
-    const btnClearOtherCode = document.getElementById('btnClearOtherFamCode');
-    const otherCodeInput = document.getElementById('otherFamCodeInput');
-    const secStatusBadge = document.getElementById('secondaryCodeStatusBadge');
-
-    const submitSecondaryCode = (codeToSave) => {
-      if (btnSaveOtherCode) {
-        btnSaveOtherCode.disabled = true;
+    // 5. Birth / Maiden Family Code (RFC-0004): create, link, unlink, cancel, copy
+    const birthAlert = document.getElementById('birthFamilyAlert');
+    const showBirthError = (msg) => {
+      if (birthAlert) {
+        birthAlert.textContent = msg;
+        birthAlert.style.display = 'block';
       }
-      if (btnClearOtherCode) {
-        btnClearOtherCode.disabled = true;
-      }
+      if (window.Swal) window.Swal.fire({ icon: 'error', title: 'Could not continue', text: msg, confirmButtonColor: '#4f46e5' });
+    };
 
+    const postBirthAction = (fields, btn, onDone) => {
+      if (birthAlert) birthAlert.style.display = 'none';
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      }
       const fd = new FormData();
-      fd.append('action', 'updateSecondaryFamilyCode');
-      fd.append('otherFamCode', codeToSave);
-      if (csrfToken) {
-        fd.append('token', csrfToken);
-      }
+      Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+      if (csrfToken) fd.append('token', csrfToken);
 
       fetch('/accountSetting', {
         method: 'POST',
         body: fd,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-XSRF-TOKEN': csrfToken,
-          'X-CSRF-TOKEN': csrfToken
-        }
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-XSRF-TOKEN': csrfToken, 'X-CSRF-TOKEN': csrfToken }
       })
-      .then(res => res.json())
-      .then(data => {
-        if (btnSaveOtherCode) btnSaveOtherCode.disabled = false;
-        if (btnClearOtherCode) btnClearOtherCode.disabled = false;
-
-        const isSuccess = data.status === 200 || data.status === 'success' || data.success === true || data.ok === true;
-        if (isSuccess) {
-          const msg = data.message || (data.data && data.data.message) || 'Secondary family code updated successfully.';
-          const rawCode = (codeToSave || '').trim().toUpperCase().replace('#', '');
-          const safeCode = rawCode.replace(/[^A-Z0-9]/g, '');
-          
-          if (otherCodeInput) {
-            otherCodeInput.value = safeCode;
-          }
-
-          if (secStatusBadge) {
-            if (safeCode) {
-              secStatusBadge.style.backgroundColor = '#ecfdf5';
-              secStatusBadge.style.color = '#047857';
-              secStatusBadge.style.borderColor = '#a7f3d0';
-              secStatusBadge.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Active Link: <strong>${safeCode}</strong>`;
-              if (btnClearOtherCode) btnClearOtherCode.classList.remove('d-none');
-            } else {
-              secStatusBadge.style.backgroundColor = '#f1f5f9';
-              secStatusBadge.style.color = '#64748b';
-              secStatusBadge.style.borderColor = '#e2e8f0';
-              secStatusBadge.innerHTML = `<i class="bi bi-dash-circle me-1"></i> Not Linked`;
-              if (btnClearOtherCode) btnClearOtherCode.classList.add('d-none');
-            }
-          }
-
-          if (window.Swal) {
-            window.Swal.fire({
-              icon: 'success',
-              title: newCode ? 'Secondary Code Linked!' : 'Secondary Code Cleared',
-              text: msg,
-              confirmButtonColor: '#4f46e5'
-            });
+        .then((res) => res.json().catch(() => ({})))
+        .then((data) => {
+          if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+          const ok = data?.status === 200 || data?.status === 'success' || data?.success === true || data?.ok === true;
+          if (ok) {
+            onDone(data?.message || data?.data?.message || 'Done.');
           } else {
-            alert(msg);
+            showBirthError(data?.message || data?.data?.message || 'Something went wrong. Please try again.');
           }
-        } else {
-          const err = data.message || (data.data && data.data.message) || 'Could not update secondary family code.';
-          if (window.Swal) {
-            window.Swal.fire({ icon: 'error', title: 'Update Failed', text: err, confirmButtonColor: '#4f46e5' });
-          } else {
-            alert(err);
-          }
-        }
-      })
-      .catch(err => {
-        if (btnSaveOtherCode) btnSaveOtherCode.disabled = false;
-        if (btnClearOtherCode) btnClearOtherCode.disabled = false;
-        console.error('Secondary code update error:', err);
-        if (window.Swal) {
-          window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to update. Please try again.', confirmButtonColor: '#4f46e5' });
-        } else {
-          alert('Network error while updating secondary code.');
-        }
-      });
+        })
+        .catch(() => {
+          if (btn) { btn.disabled = false; btn.innerHTML = origHtml; }
+          showBirthError('Network error. Please try again.');
+        });
     };
 
-    if (btnSaveOtherCode) {
-      btnSaveOtherCode.addEventListener('click', function() {
-        const codeVal = otherCodeInput ? otherCodeInput.value.trim() : '';
-        submitSecondaryCode(codeVal);
+    const reloadToFamilyTab = (msg) => {
+      const go = () => {
+        window.location.hash = 'v-pills-familycode';
+        window.location.reload();
+      };
+      if (window.Swal) {
+        window.Swal.fire({ icon: 'success', title: 'Done', text: msg, confirmButtonColor: '#4f46e5' }).then(go);
+      } else {
+        go();
+      }
+    };
+
+    const btnCreateBirth = document.getElementById('btnCreateBirthCode');
+    if (btnCreateBirth) {
+      btnCreateBirth.addEventListener('click', () => {
+        const maiden = (document.getElementById('birthMaidenName')?.value || '').trim();
+        if (maiden.length < 2) {
+          showBirthError('Enter your maiden (birth family) name first.');
+          return;
+        }
+        postBirthAction({ action: 'createBirthFamilyCode', maiden_name: maiden }, btnCreateBirth, reloadToFamilyTab);
       });
     }
 
-    if (btnClearOtherCode) {
-      btnClearOtherCode.addEventListener('click', function() {
-        const proceedClear = () => {
-          submitSecondaryCode('');
-        };
+    const btnLinkBirth = document.getElementById('btnRequestBirthLink');
+    if (btnLinkBirth) {
+      btnLinkBirth.addEventListener('click', () => {
+        const val = (id) => (document.getElementById(id)?.value || '').trim();
+        const code = val('birthLinkCode').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!code || !val('birthInviterFirst') || !val('birthInviterLast') || !val('birthInviterContact')) {
+          showBirthError('Fill in the family code and the name and contact of a family member who can confirm you.');
+          return;
+        }
+        postBirthAction({
+          action: 'requestBirthFamilyLink',
+          family_code: code,
+          inviter_first_name: val('birthInviterFirst'),
+          inviter_last_name: val('birthInviterLast'),
+          inviter_email_or_mobile: val('birthInviterContact')
+        }, btnLinkBirth, reloadToFamilyTab);
+      });
+    }
 
-        if (window.Swal) {
-          window.Swal.fire({
-            title: 'Clear Secondary Family Code?',
-            text: 'This will disconnect your profile from maternal and in-law kinship suggestions for this code.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Clear Code',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#dc2626'
-          }).then(res => {
-            if (res.isConfirmed) proceedClear();
-          });
-        } else {
-          if (confirm('Clear your secondary family code?')) proceedClear();
+    const confirmThen = (opts, proceed) => {
+      if (window.Swal) {
+        window.Swal.fire({ icon: 'warning', showCancelButton: true, confirmButtonColor: '#dc2626', ...opts }).then((r) => { if (r.isConfirmed) proceed(); });
+      } else if (confirm(opts.text || opts.title)) {
+        proceed();
+      }
+    };
+
+    const btnClearBirth = document.getElementById('btnClearBirthCode');
+    if (btnClearBirth) {
+      btnClearBirth.addEventListener('click', () => {
+        confirmThen(
+          { title: 'Unlink birth family?', text: 'You will leave this family tree. The tree and its members are not deleted.', confirmButtonText: 'Yes, unlink' },
+          () => postBirthAction({ action: 'updateSecondaryFamilyCode', otherFamCode: '' }, btnClearBirth, reloadToFamilyTab)
+        );
+      });
+    }
+
+    const btnCancelBirthLink = document.getElementById('cancelBirthLinkBtn');
+    if (btnCancelBirthLink) {
+      btnCancelBirthLink.addEventListener('click', () => {
+        confirmThen(
+          { title: 'Cancel request?', text: 'Cancel your pending request to link a birth family?', confirmButtonText: 'Yes, cancel' },
+          () => postBirthAction({ action: 'cancelFamilyRequest' }, btnCancelBirthLink, reloadToFamilyTab)
+        );
+      });
+    }
+
+    const btnCopyBirth = document.getElementById('btnCopyBirthCode');
+    if (btnCopyBirth) {
+      btnCopyBirth.addEventListener('click', () => {
+        const code = btnCopyBirth.getAttribute('data-code') || '';
+        const done = () => {
+          const orig = btnCopyBirth.innerHTML;
+          btnCopyBirth.innerHTML = '<i class="bi bi-check2 me-1"></i> Copied';
+          setTimeout(() => { btnCopyBirth.innerHTML = orig; }, 1800);
+        };
+        if (navigator.clipboard?.writeText) {
+          navigator.clipboard.writeText(code).then(done).catch(() => {});
         }
       });
     }

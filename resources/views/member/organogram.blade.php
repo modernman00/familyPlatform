@@ -65,7 +65,17 @@
     </div>
 
     <!-- Multi-Modal View Switcher (Luxury Dark Segmented Control) -->
-    <div class="tree-mode-switcher-container text-center mb-3 d-flex flex-wrap align-items-center justify-content-center gap-2">
+    <div class="tree-mode-switcher-container text-center mb-1 d-flex flex-wrap align-items-center justify-content-center gap-2">
+        @if(empty($isReadOnly))
+        <div class="d-flex align-items-center gap-2 flex-shrink-0 tree-quick-actions">
+            <button type="button" onclick="openAddRelativeModalFromBanner()" class="btn btn-primary fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
+                <i class="bi bi-person-plus-fill me-1"></i> Add Family
+            </button>
+            <button type="button" onclick="openLineageQuestModal()" class="btn btn-success fw-bold text-white text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
+                <i class="bi bi-whatsapp me-1"></i> WhatsApp Quests
+            </button>
+        </div>
+        @endif
         <div class="layout-segmented-control" role="group" aria-label="Layout View Modes">
             <button type="button" id="btnModeCanvas" class="layout-segment-btn active" onclick="switchTreeViewMode('canvas')" title="Panoramic Dynasty: Full balanced wide tree of all siblings & branches">
                 <i class="bi bi-diagram-3-fill text-info"></i>
@@ -88,10 +98,6 @@
                 <span>Dynasty Globe</span>
             </button>
         </div>
-        <button type="button" id="btnReopenLineageGuide" class="btn btn-sm d-none align-items-center gap-1.5 px-3 py-1.5 text-white rounded-pill shadow-sm" onclick="reopenLineageGuide()" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 0.82rem; backdrop-filter: blur(10px); min-height: 38px;">
-            <i class="bi bi-stars text-warning"></i>
-            <span>Lineage Guide ({{ $analysis['completeness_score'] ?? 0 }}%)</span>
-        </button>
     </div>
 
     <!-- Tree Workspace Container -->
@@ -158,71 +164,6 @@
                 <button type="button" id="btnDismissMatch" onclick="dismissCurrentMatch()" class="btn btn-dark btn-sm px-3 py-2 fw-semibold text-light border border-secondary text-nowrap" style="border-radius: 10px; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;">
                     Not Me
                 </button>
-            </div>
-        </div>
-
-        <!-- Dynasty Lineage Completion HUD Card -->
-        <div id="missingNodeBanner" class="lineage-growth-hud mb-4 mx-3 mt-3 position-relative {{ $analysis['is_flourishing'] ? 'flourishing' : '' }}">
-            <div class="hud-main-content">
-                <!-- Circular Lineage Progress Indicator -->
-                <div class="lineage-progress-ring-wrapper position-relative flex-shrink-0" style="width: 58px; height: 58px;">
-                    <svg class="w-100 h-100" viewBox="0 0 36 36">
-                        <path stroke="rgba(255,255,255,0.12)" stroke-width="3.2" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path stroke="{{ $analysis['completeness_score'] >= 80 ? '#10b981' : ($analysis['completeness_score'] >= 40 ? '#f59e0b' : '#6366f1') }}" stroke-dasharray="{{ max(3, $analysis['completeness_score']) }}, 100" stroke-width="3.2" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <span class="position-absolute top-50 start-50 translate-middle fw-bold text-white" style="font-size: 0.78rem; letter-spacing: -0.5px;">
-                        {{ $analysis['completeness_score'] }}%
-                    </span>
-                </div>
-
-                <!-- Text & Dynamic Action Guidance -->
-                <div class="hud-text-block">
-                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                        <h6 class="mb-0 fw-bold text-white fs-6" style="letter-spacing: -0.2px;">{{ $analysis['banner_title'] }}</h6>
-                        <span class="badge" style="background: rgba(99, 102, 241, 0.18); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.35); font-size: 0.72rem; padding: 4px 8px; border-radius: 999px;">
-                            <i class="bi bi-stars me-1 text-warning"></i>Dynasty Guide
-                        </span>
-                        <span class="badge {{ $analysis['completeness_score'] >= 80 ? 'bg-success' : ($analysis['completeness_score'] >= 40 ? 'bg-warning text-dark' : 'bg-primary') }}" style="font-size: 0.72rem;">
-                            {{ $analysis['completeness_score'] }}% Complete
-                        </span>
-                    </div>
-                    <p class="mb-0 text-white-50" style="font-size: 0.88rem; line-height: 1.45;">{{ $analysis['banner_subtitle'] }}</p>
-
-                    @if(!empty($analysis['missing_labels']))
-                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-1">
-                        <span class="text-white-50" style="font-size: 0.75rem; font-weight: 600;">
-                            <i class="bi bi-compass me-1 text-warning"></i>Recommended next:
-                        </span>
-                        @foreach($analysis['missing_labels'] as $label)
-                            <button type="button" onclick="openAddRelativeModalFromBanner('{{ strtolower($label) }}')" class="hud-missing-chip border-0" title="Add {{ $label }}">
-                                <i class="bi bi-plus-circle-fill text-info me-1"></i>Add {{ $label }}
-                            </button>
-                        @endforeach
-                    </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Action Controls (Zero Mid-Word Truncation & 44px Touch Targets) -->
-            <div class="hud-action-controls d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 flex-shrink-0">
-                <button type="button" onclick="openAddRelativeModalFromBanner('{{ $analysis['recommended_cta_type'] }}')" class="btn btn-primary px-3 py-2 fw-bold text-nowrap shadow-sm d-inline-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; border-radius: 10px; min-height: 44px; font-size: 0.9rem;">
-                    <i class="bi bi-person-plus-fill me-1.5"></i>
-                    @if($analysis['recommended_cta_type'] === 'parents')
-                        Add Parents
-                    @elseif($analysis['recommended_cta_type'] === 'sibling')
-                        Add Siblings
-                    @elseif($analysis['recommended_cta_type'] === 'partner')
-                        Add Partner
-                    @elseif($analysis['recommended_cta_type'] === 'child')
-                        Add Children
-                    @else
-                        Add Family Member
-                    @endif
-                </button>
-                <button type="button" onclick="openLineageQuestModal()" class="btn btn-success px-3 py-2 fw-bold text-white shadow-sm text-nowrap d-inline-flex align-items-center justify-content-center" style="border-radius: 10px; background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; min-height: 44px; font-size: 0.9rem;">
-                    <i class="bi bi-whatsapp me-1.5"></i> WhatsApp Quests
-                </button>
-                <button type="button" class="btn-close btn-close-white ms-sm-2" onclick="dismissLineageGuide()" aria-label="Close" title="Minimise Lineage Guide" style="opacity: 0.6; cursor: pointer;"></button>
             </div>
         </div>
         @endif
@@ -418,21 +359,21 @@
                 </div>
 
                 <!-- Mode 1 Enhancement: Generational Time Slider (Chronological Dynasty Flow) -->
-                <div id="timeSliderDock" style="position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 32; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 999px; padding: 10px 22px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; align-items: center; gap: 14px; max-width: 90vw;">
+                <div id="timeSliderDock" class="time-slider-dock" style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 32; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 999px; padding: 10px 22px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5); display: flex; align-items: center; gap: 14px; max-width: 90vw;">
                     <button type="button" id="btnPlayTimeSlider" onclick="toggleTimeSliderPlay()" class="btn btn-sm btn-gold d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border-radius: 50%; padding: 0;" title="Play Dynasty Chronology">
                         <i class="bi bi-play-fill fs-5" id="timeSliderPlayIcon"></i>
                     </button>
-                    <div class="d-flex flex-column" style="min-width: 180px;">
-                        <div class="d-flex justify-content-between text-white" style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
+                    <div class="d-flex flex-column time-slider-body" style="min-width: 180px;">
+                        <div class="d-flex justify-content-between text-white time-slider-head" style="font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;">
                             <span id="timeSliderLabel">ALL GENERATIONS</span>
                             <span class="text-warning" id="timeSliderEra">Present Era</span>
                         </div>
                         <input type="range" class="form-range custom-gold-range" id="dynastyTimeSlider" min="-3" max="2" step="1" value="2" oninput="onTimeSliderChange(this.value)" style="cursor: pointer; height: 6px;">
-                        <div class="d-flex justify-content-between text-white-50" style="font-size: 0.65rem; margin-top: -3px;">
+                        <div class="d-flex justify-content-between text-white-50 time-slider-ticks" style="font-size: 0.65rem; margin-top: -3px;">
                             <span>Great-Grands</span>
                             <span>Parents</span>
                             <span>You</span>
-                            <span>Grandchildren</span>
+                            <span>Grandkids</span>
                         </div>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-light rounded-pill py-0 px-2" onclick="resetTimeSlider()" style="font-size: 0.7rem; height: 26px;" title="Reset to Full Dynasty View">
@@ -889,7 +830,7 @@
 </div>
 
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=9.4"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=9.5"></script>
 <script>
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1087,7 +1028,8 @@
                 graphData.unions.forEach(u => {
                     const p1 = u.partner_1_id;
                     const p2 = u.partner_2_id;
-                    if (p1 && p2) {
+                    // p1 == p2 is a single-parent union, not a partnership: never list someone as their own partner
+                    if (p1 && p2 && String(p1) !== String(p2)) {
                         if (!nodeToPids[p1]) nodeToPids[p1] = [];
                         if (!nodeToPids[p2]) nodeToPids[p2] = [];
                         if (!nodeToPids[p1].includes(p2)) nodeToPids[p1].push(p2);
@@ -1303,18 +1245,6 @@
         // Check view mode preference on initial load:
         // Default MUST be Panoramic Dynasty (canvas). Users can manually switch to Pedigree or Direct Lineage.
         try {
-            if (sessionStorage.getItem('fp_dismiss_lineage_guide') === 'true') {
-                const banner = document.getElementById('missingNodeBanner');
-                const miniBtn = document.getElementById('btnReopenLineageGuide');
-                if (banner) banner.classList.add('d-none');
-                if (miniBtn) miniBtn.classList.remove('d-none');
-                let freed = 150;
-                try { freed = parseInt(sessionStorage.getItem('fp_guide_h') || '150', 10) || 150; } catch(_) {}
-                if (banner) window.setTreeStageExpanded(true, freed);
-            }
-        } catch(_) {}
-
-        try {
             const urlParams = new URLSearchParams(window.location.search);
             const urlMode = (urlParams.get('mode') || urlParams.get('view') || '').toLowerCase();
             const savedMode = localStorage.getItem('fp_tree_view_mode');
@@ -1467,73 +1397,23 @@
         }
     };
 
-    // Size the canvas to the tree (no dead space under a short tree) and let a dismissed
-    // Dynasty Guide hand its space to the canvas as extra headroom for bigger trees.
-    window.__guideExtraPx = 0;
+    // Pin the canvas to the full viewport height so the tree always has the room.
     window.autoSizeTreeStage = function() {
         const stage = document.getElementById('treeStage');
         const fam = window.family;
         if (!stage || !fam || stage.classList.contains('fullscreen-active')) return;
-        const g = stage.querySelector('#tree svg > g');
-        const scale = Number(fam.transform && fam.transform.scale) || 1;
-        if (!g) return;
-        const gr = g.getBoundingClientRect();
-        const contentH = gr.height / scale;
-        const contentW = gr.width / scale;
-        // Scale the library's fit() will land on (width-bound for wide trees), so height follows width.
-        const fitScale = Math.max(0.48, Math.min(stage.clientWidth / Math.max(contentW + 120, 1), 1.15));
+        if (!stage.querySelector('#tree svg > g')) return;
         const vh = window.innerHeight || 800;
         const mobile = window.matchMedia('(max-width: 768px)').matches;
-        const maxH = Math.round(vh * (mobile ? 0.75 : 0.8) + (window.__guideExtraPx || 0));
         const minH = mobile ? 420 : 460;
-        const wanted = Math.round(contentH * fitScale + 170);
-        const h = Math.max(minH, Math.min(wanted, Math.max(maxH, minH)));
+        // Fill the viewport whatever the tree size, then re-fit the tree inside it.
+        const h = Math.max(minH, Math.round(vh * (mobile ? 0.82 : 0.88)));
         stage.style.setProperty('height', h + 'px', 'important');
         stage.style.setProperty('min-height', minH + 'px', 'important');
         setTimeout(() => {
             window.dispatchEvent(new Event('resize'));
             if (typeof fam.fit === 'function') fam.fit('family', null, false);
         }, 300);
-    };
-
-    window.setTreeStageExpanded = function(expanded, extraPx) {
-        window.__guideExtraPx = expanded ? (Number(extraPx) > 0 ? Number(extraPx) : 150) : 0;
-        window.autoSizeTreeStage();
-    };
-
-    window.dismissLineageGuide = function() {
-        const banner = document.getElementById('missingNodeBanner');
-        const miniBtn = document.getElementById('btnReopenLineageGuide');
-        if (banner) {
-            const cs = getComputedStyle(banner);
-            const freed = Math.round(banner.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0));
-            try { sessionStorage.setItem('fp_guide_h', String(freed)); } catch(_) {}
-            window.setTreeStageExpanded(true, freed);
-            banner.style.opacity = '0';
-            banner.style.transform = 'translateY(-8px)';
-            setTimeout(() => {
-                banner.classList.add('d-none');
-                if (miniBtn) miniBtn.classList.remove('d-none');
-            }, 250);
-        }
-        try { sessionStorage.setItem('fp_dismiss_lineage_guide', 'true'); } catch(_) {}
-    };
-
-    window.reopenLineageGuide = function() {
-        const banner = document.getElementById('missingNodeBanner');
-        const miniBtn = document.getElementById('btnReopenLineageGuide');
-        window.setTreeStageExpanded(false);
-        if (banner) {
-            banner.classList.remove('d-none');
-            banner.style.opacity = '0';
-            banner.style.transform = 'translateY(-8px)';
-            setTimeout(() => {
-                banner.style.opacity = '1';
-                banner.style.transform = 'translateY(0)';
-            }, 10);
-        }
-        if (miniBtn) miniBtn.classList.add('d-none');
-        try { sessionStorage.removeItem('fp_dismiss_lineage_guide'); } catch(_) {}
     };
 
     window.traceKinshipToSelected = function(targetNodeId, targetName) {
@@ -2507,14 +2387,29 @@
         if (type === 'partner') {
             document.getElementById('step2-partner').classList.remove('d-none');
         } else if (type === 'child') {
+            setChildFormMode('child');
             document.getElementById('step2-child').classList.remove('d-none');
             fetchUnionsForNode(currentBaseNodeId);
         } else if (type === 'sibling') {
+            setChildFormMode('sibling');
             document.getElementById('step2-child').classList.remove('d-none'); // Reuses the child form structurally
             fetchParentUnionsForNode(currentBaseNodeId);
         } else if (type === 'parents') {
             document.getElementById('step2-parents').classList.remove('d-none');
         }
+    }
+
+    // The child form is reused for siblings; swap the copy so it reads correctly for each.
+    function setChildFormMode(mode) {
+        const sibling = mode === 'sibling';
+        const hint = document.getElementById('childUnionHint');
+        const label = document.getElementById('childUnionLabel');
+        const save = document.getElementById('submitChildBtn');
+        if (hint) hint.textContent = sibling
+            ? 'Pick the parents you share with this sibling. They will be added as their brother or sister.'
+            : 'To add a child, you must select which partnership/union they belong to.';
+        if (label) label.innerHTML = (sibling ? 'Shared Parents' : 'Select Union') + ' <span class="text-danger">*</span>';
+        if (save) save.textContent = sibling ? 'Save Sibling' : 'Save Child';
     }
 
     function backToStep1() {

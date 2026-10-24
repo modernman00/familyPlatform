@@ -84,7 +84,10 @@ final class General
                 } catch (\Throwable $dbEx) {
                     error_log('[General] otherFamCode lookup error: ' . $dbEx->getMessage());
                 }
-                if ($requestedCode !== $sessionOtherCode) {
+                // RFC-0004: a stored code is only honoured while the user still holds an approved membership of it.
+                $holdsOther = $sessionOtherCode !== ''
+                    && (new \App\services\BirthFamilyCodeService(\Src\Db::connect2()))->userHoldsCode((string)$userId, $sessionOtherCode);
+                if ($requestedCode !== $sessionOtherCode || !$holdsOther) {
                     // Silently fall back to the user's primary code — never mint a token for an unowned code
                     error_log("[General] Security: user {$userId} attempted invite for unowned family code '{$requestedCode}'. Falling back to primary '{$sessionPrimaryCode}'.");
                     $requestedCode = $sessionPrimaryCode;

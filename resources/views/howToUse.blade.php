@@ -153,6 +153,88 @@
           </div>
         </div>
 
+        <!-- Pillar 4b: Birth / Maiden Family Code (RFC-0004) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-birth-family">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(147, 51, 234, 0.12); color: #9333ea;">
+                <i class="bi bi-diagram-3-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">4b. Your Birth / Maiden Family Code</h3>
+                <span class="badge" style="background:#9333ea;">Dual Lineage</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              Married women keep two family circles: the household they live in and the family they were born into. Your household code never changes; your birth family gets its own code.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary mb-2">Step 1 &middot; Settings &rarr; Family Network</span>
+                  <h6 class="fw-bold text-dark">Create or link</h6>
+                  <p class="small text-muted mb-0"><strong>Create</strong> a new code from your maiden name if your parents and siblings are not here yet, or <strong>link</strong> to an existing code by naming a family member who can confirm you.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">Step 2 &middot; Verification</span>
+                  <h6 class="fw-bold text-dark">Only families you belong to</h6>
+                  <p class="small text-muted mb-0">A code you created is yours for good. A linked code needs approval from a real member of that family, and you can unlink it any time without deleting their tree.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success mb-2">Step 3 &middot; Parents &amp; Siblings tabs</span>
+                  <h6 class="fw-bold text-dark">Invite with the right code</h6>
+                  <p class="small text-muted mb-0">Choose <em>My Birth / Maiden Family</em> when adding parents or siblings. Invitations and new relatives land in your birth family tree, not your household tree.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 4c: Change the Family Code by Family Vote (RFC-0005) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-code-rename">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(79, 70, 229, 0.12); color: #4f46e5;">
+                <i class="bi bi-ui-checks-grid fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">4c. Changing Your Family Code</h3>
+                <span class="badge" style="background:#4f46e5;">Family Vote</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              The person who created the family code can propose a new one, but never alone: the whole family votes first. If more members vote yes than no, the code changes for everyone automatically.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary mb-2">Step 1 &middot; Settings &rarr; Family Network</span>
+                  <h6 class="fw-bold text-dark">Creator proposes</h6>
+                  <p class="small text-muted mb-0">Type the new code (4&ndash;12 letters or numbers) and tap <em>Ask my family to vote</em>. A poll appears in the family feed and every member is notified.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">Step 2 &middot; Seven days to vote</span>
+                  <h6 class="fw-bold text-dark">Most of the family must agree</h6>
+                  <p class="small text-muted mb-0">Each member has one vote and can change it until the vote closes. When voting ends, the change goes ahead if more members voted yes than no (and at least one member besides the creator voted), so members who never vote do not hold it back. If over half the family says yes it happens straight away; if no votes reach half the family it stops.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success mb-2">Step 3 &middot; Automatic</span>
+                  <h6 class="fw-bold text-dark">Everyone moves together</h6>
+                  <p class="small text-muted mb-0">Your tree, posts, events, journals and invites move to the new code and everyone is notified. Old invite links keep working. The code can be changed once every 30 days.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 5: Gamified Lineage Quests & WhatsApp Flywheel -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">

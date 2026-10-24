@@ -45,6 +45,45 @@ class FamilyCodeApprovalService
         } catch (\Throwable $e) {
             // Non-blocking in case of restricted permissions
         }
+
+        $this->ensureBirthFamilySchema();
+    }
+
+    /**
+     * RFC-0004: family_codes registry + family_approval_requests.purpose.
+     * Mirrors migrations/2026_10_24_family_codes_registry.sql; runs once per process.
+     */
+    private function ensureBirthFamilySchema(): void
+    {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+
+        try {
+            $this->pdo->exec(
+                "CREATE TABLE IF NOT EXISTS `family_codes` (
+                  `code` VARCHAR(50) NOT NULL PRIMARY KEY,
+                  `kind` ENUM('primary','birth') NOT NULL DEFAULT 'primary',
+                  `created_by` VARCHAR(255) NULL,
+                  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+            );
+
+            $has = $this->pdo->query(
+                "SELECT COUNT(*) FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'family_approval_requests' AND COLUMN_NAME = 'purpose'"
+            );
+            if ($has !== false && (int)$has->fetchColumn() === 0) {
+                $this->pdo->exec(
+                    "ALTER TABLE `family_approval_requests`
+                     ADD COLUMN `purpose` ENUM('join','birth_link') NOT NULL DEFAULT 'join'"
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[FamilyCodeApprovalService] birth-family schema warning: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -74,7 +113,18 @@ class FamilyCodeApprovalService
         );
         $params = array_merge($variations, $variations);
         $stmt->execute($params);
-        return ((int)$stmt->fetchColumn()) > 0;
+        if (((int)$stmt->fetchColumn()) > 0) {
+            return true;
+        }
+
+        // RFC-0004: minted birth/maiden codes live in the registry before anyone holds them as famCode.
+        try {
+            $reg = $this->pdo->prepare('SELECT COUNT(*) FROM family_codes WHERE code = ?');
+            $reg->execute([$clean]);
+            return ((int)$reg->fetchColumn()) > 0;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**
@@ -108,7 +158,7 @@ class FamilyCodeApprovalService
                  OR UPPER(TRIM(p.famCode)) IN ($placeholders)
                  OR UPPER(TRIM(REPLACE(uf.family_code, '#', ''))) IN ($placeholders)
                  OR UPPER(TRIM(uf.family_code)) IN ($placeholders))
-               AND a.deleted_at IS NULL"
+               AND COALESCE(a.status, '') NOT IN ('erased', 'pending_deletion')"
         );
         $params = array_merge($variations, $variations, $variations, $variations);
         $stmt->execute($params);
@@ -136,7 +186,8 @@ class FamilyCodeApprovalService
         string $familyCode,
         string $inviterFirstName,
         string $inviterLastName,
-        string $inviterEmailOrMobile
+        string $inviterEmailOrMobile,
+        string $purpose = 'join'
     ): array {
         $cleanCode = trim(str_replace('#', '', $familyCode));
         $tempCode = $this->generateTemporaryCode();
@@ -159,6 +210,13 @@ class FamilyCodeApprovalService
         ]);
 
         $requestId = (int)$this->pdo->lastInsertId();
+
+        // Only touch the `purpose` column for non-default requests so the legacy join flow
+        // keeps working even if the column could not be added (restricted DB permissions).
+        if ($purpose === 'birth_link') {
+            $this->pdo->prepare('UPDATE family_approval_requests SET purpose = "birth_link" WHERE no = ?')
+                ->execute([$requestId]);
+        }
         $approvalToken = $this->generateApprovalToken($requestId);
 
         return [
@@ -232,7 +290,7 @@ class FamilyCodeApprovalService
                  OR (c.mobile IS NOT NULL AND LOWER(TRIM(c.mobile)) = LOWER(?))
                  OR (c.mobile IS NOT NULL AND REPLACE(REPLACE(REPLACE(REPLACE(c.mobile, " ", ""), "-", ""), "+", ""), "(", "") LIKE ?)
              )
-             AND a.deleted_at IS NULL
+             AND COALESCE(a.status, "") NOT IN ("erased", "pending_deletion")
              LIMIT 1'
         );
 
@@ -420,6 +478,15 @@ class FamilyCodeApprovalService
                  WHERE no = ? AND status = "pending"'
             );
             $stmt->execute([$effectiveApproverId, $requestId]);
+
+            // RFC-0004: a birth/maiden-family link never moves the requester's primary family code.
+            if (($request['purpose'] ?? 'join') === 'birth_link') {
+                if (!$this->linkBirthFamily((string)$request['id'], (string)$request['family_code'])) {
+                    throw new \RuntimeException('birth family link failed');
+                }
+                $this->pdo->commit();
+                return true;
+            }
 
             // 2. Link user in code_mgt, personal table, otherFamily, and user_families
             $userId = (string)$request['id'];
@@ -727,6 +794,76 @@ class FamilyCodeApprovalService
             }
             throw $e;
         }
+    }
+
+    /**
+     * RFC-0004: attach a user to a birth/maiden family as a verified member WITHOUT touching
+     * personal.famCode / code_mgt / session famCode. Joins an open transaction if one exists.
+     */
+    public function linkBirthFamily(string $userId, string $familyCode): bool
+    {
+        $clean = strtoupper(trim(str_replace('#', '', $familyCode)));
+        if ($userId === '' || $clean === '') {
+            return false;
+        }
+
+        $own = !$this->pdo->inTransaction();
+        if ($own) {
+            $this->pdo->beginTransaction();
+        }
+
+        try {
+            $this->pdo->prepare(
+                'INSERT INTO user_families (user_id, family_code, status, role) VALUES (?, ?, "approved", "member")
+                 ON DUPLICATE KEY UPDATE status = "approved"'
+            )->execute([$userId, $clean]);
+
+            $chk = $this->pdo->prepare('SELECT no FROM otherFamily WHERE id = ? ORDER BY no ASC LIMIT 1');
+            $chk->execute([$userId]);
+            $rowNo = $chk->fetchColumn();
+            if ($rowNo !== false) {
+                $this->pdo->prepare('UPDATE otherFamily SET otherFamCode = ?, updated_at = NOW() WHERE no = ?')
+                    ->execute([$clean, $rowNo]);
+            } else {
+                $this->pdo->prepare('INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)')
+                    ->execute([$userId, $clean]);
+            }
+
+            if ($own) {
+                $this->pdo->commit();
+            }
+        } catch (\Throwable $e) {
+            if ($own) {
+                try {
+                    $this->pdo->rollBack();
+                } catch (\PDOException) {
+                    // no active transaction left to roll back
+                }
+            }
+            error_log((string)json_encode(['event' => 'birth_code.link_failed', 'user_id' => $userId, 'code' => $clean, 'error' => $e->getMessage()]));
+            return false;
+        }
+
+        if (isset($_SESSION['id']) && (string)$_SESSION['id'] === $userId) {
+            $codes = $_SESSION['famCodes'] ?? [];
+            $codes = is_array($codes) ? $codes : [$codes];
+            if (!in_array($clean, $codes, true)) {
+                $codes[] = $clean;
+            }
+            $_SESSION['famCodes'] = $codes;
+        }
+
+        try {
+            $stmtMember = $this->pdo->prepare('SELECT * FROM personal WHERE id = ?');
+            $stmtMember->execute([$userId]);
+            $pRow = $stmtMember->fetch(PDO::FETCH_ASSOC);
+            \App\services\FamilyClaimService::claimOrInitializeNode($clean, $userId, is_array($pRow) ? $pRow : []);
+        } catch (\Throwable $nodeEx) {
+            error_log('[FamilyCodeApprovalService] Birth-link node claim warning: ' . $nodeEx->getMessage());
+        }
+
+        error_log((string)json_encode(['event' => 'birth_code.linked', 'user_id' => $userId, 'code' => $clean]));
+        return true;
     }
 
     /**

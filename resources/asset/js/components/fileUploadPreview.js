@@ -58,9 +58,9 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       dataTransfer.items.add(file);
       totalBytes += file.size;
 
-      // Create wrapper for image and remove button
+      // Thumbnail tile with its own remove button (styled by .composer-thumb in profilepage.scss)
       const wrapper = document.createElement('div');
-      wrapper.className = 'position-relative d-inline-block';
+      wrapper.className = 'composer-thumb';
 
       const img = document.createElement('img');
       const reader = new FileReader();
@@ -68,23 +68,13 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+      img.alt = `Photo ${index + 1}`;
 
-      img.alt = 'Preview';
-      img.className = 'img-thumbnail';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.objectFit = 'cover';
-      img.style.borderRadius = '8px';
-
-      // Create remove button
       const removeBtn = document.createElement('button');
-      removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 p-0 rounded-circle d-flex align-items-center justify-content-center';
-      removeBtn.style.width = '22px';
-      removeBtn.style.height = '22px';
-      removeBtn.style.transform = 'translate(30%, -30%)';
-      removeBtn.innerHTML = '&times;';
-      removeBtn.style.fontSize = '14px';
-      removeBtn.style.lineHeight = '1';
+      removeBtn.type = 'button';
+      removeBtn.className = 'composer-thumb__remove';
+      removeBtn.setAttribute('aria-label', `Remove photo ${index + 1}`);
+      removeBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
       removeBtn.onclick = (e) => {
         e.preventDefault(); // Prevent form submission if inside form
         const newFiles = accumulatedFiles.filter((_, i) => i !== index);
@@ -96,12 +86,22 @@ export const imagePreview = (fileInputId, previewListId, fileNamesDisplayId, pre
       previewList.appendChild(wrapper);
     });
 
+    // "+" tile to add more photos (max 5)
+    if (files.length < 5) {
+      const addTile = document.createElement('label');
+      addTile.className = 'composer-thumb composer-thumb--add';
+      addTile.htmlFor = fileInputId;
+      addTile.setAttribute('aria-label', 'Add more photos');
+      addTile.innerHTML = '<i class="bi bi-plus-lg"></i><span>Add</span>';
+      previewList.appendChild(addTile);
+    }
+
     // Update the file input with the new list of files
     imageInput.files = dataTransfer.files;
 
     // Show file names and reveal preview container with optimized total size
     if (fileNamesDisplay) {
-      fileNamesDisplay.innerHTML = `<span class="fw-semibold">${files.length} image${files.length > 1 ? 's' : ''} ready</span> <small class="text-muted">(${formatFileSize(totalBytes)})</small>`;
+      fileNamesDisplay.innerHTML = `<strong>${files.length} photo${files.length > 1 ? 's' : ''}</strong> <small>· ${formatFileSize(totalBytes)}</small>`;
     }
     previewContainer.classList.remove('d-none');
   };

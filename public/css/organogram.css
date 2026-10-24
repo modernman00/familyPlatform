@@ -1847,3 +1847,85 @@ body[data-page-id="organogram"] .family-legend { margin: 8px auto 12px; }
 
 /* Dynasty Guide dismissed: height is set inline by setTreeStageExpanded() */
 #treeStage { transition: height 0.25s ease, min-height 0.25s ease; }
+
+/* Time-slider dock */
+.time-slider-dock { white-space: nowrap; }
+.time-slider-ticks span, .time-slider-head span { white-space: nowrap; }
+@media (max-width: 768px) {
+    .time-slider-dock {
+        width: calc(100% - 24px);
+        max-width: calc(100% - 24px) !important;
+        padding: 8px 12px !important;
+        gap: 10px !important;
+        bottom: 10px !important;
+    }
+    .time-slider-dock .time-slider-body { min-width: 0 !important; flex: 1 1 auto; }
+    .time-slider-head { font-size: 0.64rem !important; gap: 8px; }
+    .time-slider-ticks { font-size: 0.58rem !important; gap: 4px; }
+}
+
+/* Add Relative wizard: readable on the dark organogram page (labels inherit the page's white text) */
+#addRelativeModal .modal-content { color: #0f172a; }
+#addRelativeModal .form-label { color: #0f172a; font-size: 0.9rem; margin-bottom: 6px; }
+#addRelativeModal .form-control,
+#addRelativeModal .form-select {
+    min-height: 46px;
+    font-size: 16px;                /* stops iOS zoom-on-focus */
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    color: #0f172a;
+    background-color: #fff;
+}
+#addRelativeModal .form-control:focus,
+#addRelativeModal .form-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+#addRelativeModal input::placeholder { font-size: 0.95rem; text-transform: none; color: #94a3b8; }
+#addRelativeModal .alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-style: normal; border-radius: 12px; line-height: 1.45; }
+#addRelativeModal .alert-info { border-radius: 12px; line-height: 1.45; }
+#addRelativeModal .modal-body { padding: 20px; }
+#addRelativeModal form .btn { min-height: 46px; padding-left: 22px; padding-right: 22px; border-radius: 12px; }
+@media (max-width: 575.98px) {
+    #addRelativeModal .modal-dialog { margin: 12px; }
+    #addRelativeModal form .row > [class*="col-"] { margin-bottom: 12px; }
+    #addRelativeModal form .row { margin-bottom: 0 !important; }
+    #addRelativeModal form .d-flex.justify-content-between { gap: 12px; }
+    #addRelativeModal form .d-flex.justify-content-between .btn { flex: 1 1 0; }
+}
+
+/* Person card on phones: a bottom sheet that never outgrows the canvas, scrolls inside itself,
+   and keeps its close button pinned so it can't be pushed out of reach. */
+@media (max-width: 768px) {
+    #personDetailsCard {
+        max-height: 88% !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+    #personDetailsCard .card-header-flex {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        align-items: center;
+        margin: -20px -20px 12px;
+        padding: 14px 20px 10px;
+        background: rgba(15, 23, 42, 0.98);
+    }
+    #personDetailsCard .card-avatar { width: 48px; height: 48px; }
+    #personDetailsCard .card-header-flex .close-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #e2e8f0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+    }
+}
+
+/* Add Family / WhatsApp Quests sit left of the view switcher; the canvas hugs the switcher */
+body[data-page-id="organogram"] .tree-mode-switcher-container { margin-bottom: 4px; }
+@media (max-width: 768px) {
+    .tree-quick-actions { width: 100%; }
+    .tree-quick-actions .btn { flex: 1 1 0; min-width: 0; padding-left: 10px; padding-right: 10px; }
+}

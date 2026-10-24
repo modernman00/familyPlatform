@@ -26,12 +26,12 @@ describe('Family Code Migration & Discovery Nudge E2E Journey', () => {
             .filter(':visible')
             .first()
             .within(() => {
-                cy.get('.btn-nudge-family').should('exist').and('contain.text', 'Nudge to Join Family');
+                cy.get('.btn-nudge-family').should('exist').and('contain.text', 'Nudge to Join Your Family Code');
                 cy.get('.btn-request-migration').should('exist').and('contain.text', 'Join #');
             });
     });
 
-    it('opens interactive modal when clicking Nudge to Join Family', () => {
+    it('opens interactive modal when clicking Nudge to Join Your Family Code', () => {
         cy.visit('/allMembers');
         cy.get('.member-card', { timeout: 15000 }).should('have.length.at.least', 1);
         cy.get('[data-filter="explore"]').click();

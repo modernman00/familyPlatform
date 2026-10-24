@@ -23,6 +23,7 @@ class BaseController
                 $stmt->execute([$_SESSION['id']]);
                 $_SESSION['famCode'] = (string) $stmt->fetchColumn();
             }
+            self::followFamilyCodeRename();
             return;
         }
 
@@ -39,6 +40,38 @@ class BaseController
         $famCode = (string) $stmt->fetchColumn();
         $_SESSION['famCode'] = $famCode;
     }
+    /**
+     * RFC-0005: a renamed family code changes for every member, but their live session still holds the
+     * old one. At most every 30s per session, follow the alias to the current code.
+     */
+    private static function followFamilyCodeRename(): void
+    {
+        $current = (string) ($_SESSION['famCode'] ?? '');
+        if ($current === '' || (int) ($_SESSION['famCodeAliasCheckedAt'] ?? 0) > time() - 30) {
+            return;
+        }
+        $_SESSION['famCodeAliasCheckedAt'] = time();
+        try {
+            $live = \App\services\FamilyCodeRenameService::resolveAlias(Db::connect2(), $current);
+            $was = strtoupper(trim(str_replace('#', '', $current)));
+            if ($live !== '' && $live !== $was) {
+                $_SESSION['famCode'] = $live;
+                // famCodes is a string at login and an array after a migration; keep both in step.
+                $codes = $_SESSION['famCodes'] ?? null;
+                if (is_string($codes) && strtoupper(trim(str_replace('#', '', $codes))) === $was) {
+                    $_SESSION['famCodes'] = $live;
+                } elseif (is_array($codes)) {
+                    $_SESSION['famCodes'] = array_values(array_unique(array_map(
+                        static fn($c) => is_string($c) && strtoupper(trim(str_replace('#', '', $c))) === $was ? $live : $c,
+                        $codes
+                    )));
+                }
+            }
+        } catch (\Throwable) {
+            // never block a request on the alias lookup
+        }
+    }
+
     public static function viewWithCsp(string $view, array $data = []): void
     {
         Utility::view($view, $data);

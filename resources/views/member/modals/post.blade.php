@@ -3,72 +3,55 @@
 @endphp
 <div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="postModalLabel">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content glass-modal glass-overlay shadow-lg border-0" style="border-radius: 20px; background-color: var(--card-bg); max-height: calc(100vh - 3.5rem);">
+        <div class="modal-content composer-sheet glass-modal glass-overlay shadow-lg border-0">
 
-            <div class="modal-header border-bottom py-3 px-4 align-items-center position-relative flex-shrink-0">
-                <h5 class="modal-title fw-bold w-100 text-center mb-0" id="postModalLabel" style="color: var(--text-color); font-size: 1.15rem;">
-                    Create Post
-                </h5>
-                <button type="button" class="btn-close position-absolute end-0 me-3 shadow-none" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
+            <div class="modal-header composer-sheet__header flex-shrink-0">
+                <span class="composer-sheet__grab" aria-hidden="true"></span>
+                <h5 class="modal-title" id="postModalLabel">Create Post</h5>
+                <button type="button" class="composer-sheet__close" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
 
-            <div class="modal-body px-4 pt-3 pb-4" style="overflow-y: auto;">
-    
-                <div class="d-flex align-items-center mb-3">
-                    <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
-                        class="rounded-circle me-3 shadow-sm" width="44" height="44" style="border: 2px solid var(--primary-color); object-fit: cover;">
-                    <div>
-                        <h6 class="mb-1 fw-bold fs-6" style="color: var(--text-color);">
-                            {{ $data['firstName'] }} {{ $data['lastName'] }}
-                            <span id="composerTagHeaderWrapper" class="d-none fw-normal text-muted" style="font-size: 0.92rem;">
-                                is with <span id="composerTagHeaderNames" class="fw-semibold text-primary"></span>
+            <form id='formPostMessageModal' enctype='multipart/form-data' class="formPostMessageModal composer-form">
+
+                <div class="modal-body composer-sheet__body">
+
+                    <div class="composer-author">
+                        <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="Avatar"
+                            class="composer-author__avatar" width="48" height="48">
+                        <div class="composer-author__meta">
+                            <h6 class="composer-author__name">
+                                {{ $data['firstName'] }} {{ $data['lastName'] }}
+                                <span id="composerTagHeaderWrapper" class="d-none fw-normal text-muted">
+                                    is with <span id="composerTagHeaderNames" class="fw-semibold text-primary"></span>
+                                </span>
+                            </h6>
+                            <span class="composer-audience">
+                                <i class="bi bi-shield-check"></i> Shared with Family
                             </span>
-                        </h6>
-                        <span class="badge rounded-pill bg-light-subtle text-muted border border-secondary-subtle fw-medium px-2.5 py-1" style="font-size: 0.75rem;">
-                            <i class="bi bi-shield-check me-1 text-primary"></i> Shared with Family
-                        </span>
+                        </div>
                     </div>
-                </div>
 
-                <p id="formPostMessageModal_notification"></p>
-
-                <form id='formPostMessageModal' enctype='multipart/form-data' class="formPostMessageModal">
+                    <p id="formPostMessageModal_notification"></p>
 
                     <input type="hidden" name="token" value="{{ $token }}">
                     <input type="hidden" name="post_no" id="editPostNo" value="">
                     <input type="hidden" name="attached_gif_url" id="attachedGifUrlInput" value="">
 
-                    <textarea class="form-control mb-2 border-0 bg-transparent shadow-none px-0" data-emoji-target
+                    <textarea class="composer-text form-control border-0 bg-transparent shadow-none px-0" data-emoji-target
                         placeholder="What's on your mind, {{ $data['firstName'] }}?" name="postMessage" id="postMessage"
-                        rows="4" style="font-size: 1.15rem; color: var(--text-color); resize: none;"></textarea>
+                        rows="2"></textarea>
 
-                    <!-- Smart Family Hashtags Quick Pill Suggestions -->
-                    <div class="family-hashtag-quick-tray mb-3 px-1">
-                        <div class="d-flex align-items-center justify-content-between mb-1.5">
-                            <span class="text-muted small fw-medium" style="font-size: 0.76rem;">
-                                <i class="bi bi-hash text-primary"></i> Family Milestones &amp; Topics:
-                            </span>
-                            <span class="text-muted small" style="font-size: 0.72rem;">Tap to add</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-1.5 align-items-center" id="composerHashtagPillContainer">
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#SundayDinner')">
-                                #SundayDinner
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#FirstSteps')">
-                                #FirstSteps
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#FamilyReunion')">
-                                #FamilyReunion
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#Throwback')">
-                                #Throwback
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#HeritageRecipe')">
-                                #HeritageRecipe
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill text-primary fw-semibold" style="font-size: 0.75rem;" onclick="insertHashtagIntoComposer('#Milestone')">
-                                #Milestone
-                            </button>
+                    <!-- Smart Family Hashtags Quick Pill Suggestions (single swipeable row) -->
+                    <div class="composer-tags" aria-label="Family topics, tap to add">
+                        <div class="composer-tags__row" id="composerHashtagPillContainer">
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#SundayDinner')">#SundayDinner</button>
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#FirstSteps')">#FirstSteps</button>
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#FamilyReunion')">#FamilyReunion</button>
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#Throwback')">#Throwback</button>
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#HeritageRecipe')">#HeritageRecipe</button>
+                            <button type="button" class="composer-chip" onclick="insertHashtagIntoComposer('#Milestone')">#Milestone</button>
                         </div>
                     </div>
 
@@ -97,17 +80,15 @@
                         </div>
                     </div>
 
-                    <div id="imagePreviewContainer" class="mb-3 d-none position-relative">
-                        <div id="imagePreviewList" class="d-flex flex-wrap gap-2"></div>
-                        <button type="button" id="closeImagePreview"
-                            class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 rounded-circle"
-                            style="width: 30px; height: 30px; padding: 0;"
-                            aria-label="Remove all images">
-                            <i class="bi bi-x"></i>
-                        </button>
+                    <div id="imagePreviewContainer" class="composer-media d-none">
+                        <div class="composer-media__bar">
+                            <span id="postModalImgFileNames" class="composer-media__count"></span>
+                            <button type="button" id="closeImagePreview" class="composer-media__clear" aria-label="Remove all images">
+                                Remove all
+                            </button>
+                        </div>
+                        <div id="imagePreviewList" class="composer-media__list"></div>
                     </div>
-
-                    <span id="postModalImgFileNames" class="invalid-feedback d-block mb-2 text-muted small px-2"></span>
 
                     <!-- Selected GIF Attached Preview -->
                     <div id="selectedGifPreview" class="d-none mb-3 position-relative rounded-3 overflow-hidden border border-light-subtle shadow-sm" style="background: #0f172a;">
@@ -117,13 +98,15 @@
                         </button>
                     </div>
 
-                    <!-- Prominent Mobile Camera Roll Trigger (Universal 1-Tap Access for All iPhone & Android Users) -->
-                    <div class="d-md-none mb-3">
-                        <label for="imageUpload" class="btn btn-outline-primary w-100 rounded-pill py-2.5 px-3 d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-xs" style="min-height: 48px; border-width: 1.5px; cursor: pointer; background: rgba(37, 99, 235, 0.05);">
-                            <i class="bi bi-camera-fill fs-5"></i>
-                            <span>Choose Photos from Camera Roll</span>
-                        </label>
-                    </div>
+                    <!-- Mobile Camera Roll Trigger (hidden once photos are attached; the thumbnail row has its own "+" tile) -->
+                    <label for="imageUpload" class="composer-camera-cta d-md-none">
+                        <span class="composer-camera-cta__icon"><i class="bi bi-camera-fill"></i></span>
+                        <span class="composer-camera-cta__text">
+                            <strong>Add photos</strong>
+                            <small>From your camera roll</small>
+                        </span>
+                        <i class="bi bi-chevron-right composer-camera-cta__chev"></i>
+                    </label>
 
                     <!-- Interactive Composer Action Drawers Container (Directly Above Toolbar) -->
                     <div id="composerActiveDrawers" class="mb-3">
@@ -353,41 +336,42 @@
 
                     </div>
 
-                    <!-- Facebook-Style "Add to your post" Card -->
-                    <div class="add-to-post-box d-flex align-items-center justify-content-between p-2 mb-3 rounded-3 position-relative"
-                        style="border: 1px solid var(--border-color); background-color: var(--bg-color);">
-                        <span class="fw-semibold small px-2" style="color: var(--text-color);">Add to your post</span>
-                        
-                        <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
-                            <label for="imageUpload" class="btn-composer-action action-photo mb-0" title="Attach Photo" style="cursor: pointer;" aria-label="Attach photo">
-                                <i class="bi bi-image-fill"></i>
+                    <!-- "Add to your post" tool grid -->
+                    <div class="add-to-post-box composer-tools">
+                        <span class="composer-tools__title">Add to your post</span>
+
+                        <div class="composer-tools__grid">
+                            <label for="imageUpload" class="btn-composer-action composer-tool action-photo mb-0" title="Attach Photo" aria-label="Attach photo">
+                                <i class="bi bi-image-fill"></i><span>Photo</span>
                             </label>
                             <input type="file" name="post_img[]" id="imageUpload" accept="image/*,video/*" multiple hidden>
 
-                            <button type="button" class="btn-composer-action action-emoji" id="emojiPost" title="Add Emoji" aria-label="Add emoji">
-                                <i class="bi bi-emoji-smile-fill"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-emoji" id="emojiPost" title="Add Emoji" aria-label="Add emoji">
+                                <i class="bi bi-emoji-smile-fill"></i><span>Emoji</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo / Cloudflare)" aria-label="Add video">
-                                <i class="bi bi-play-btn-fill"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-video" id="addVideoBtn" title="Embed Video (YouTube / Vimeo / Cloudflare)" aria-label="Add video">
+                                <i class="bi bi-play-btn-fill"></i><span>Video</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-gif gif-btn" id="addGifBtn" title="Add GIF" aria-label="Add GIF">GIF</button>
-                            
-                            <button type="button" class="btn-composer-action action-tag" id="addTagBtn" title="Tag Family Members" aria-label="Tag people">
-                                <i class="bi bi-tag-fill"></i>
-                            </button>
-                            
-                            <button type="button" class="btn-composer-action action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
-                                <i class="bi bi-bar-chart-fill"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-gif gif-btn" id="addGifBtn" title="Add GIF" aria-label="Add GIF">
+                                <i class="bi bi-filetype-gif"></i><span>GIF</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now: show how far you have come" aria-label="Then and Now photo comparison">
+                            <button type="button" class="btn-composer-action composer-tool action-tag" id="addTagBtn" title="Tag Family Members" aria-label="Tag people">
+                                <i class="bi bi-tag-fill"></i><span>Tag</span>
+                            </button>
+
+                            <button type="button" class="btn-composer-action composer-tool action-poll" id="addPollBtn" title="Create Poll" aria-label="Create poll">
+                                <i class="bi bi-bar-chart-fill"></i><span>Poll</span>
+                            </button>
+
+                            <button type="button" class="btn-composer-action composer-tool action-thennow action-thennow--labeled" id="addThenNowBtn" title="Then &amp; Now: show how far you have come" aria-label="Then and Now photo comparison">
                                 <i class="bi bi-hourglass-split"></i><span>Then &amp; Now</span>
                             </button>
 
-                            <button type="button" class="btn-composer-action action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
-                                <i class="bi bi-apple"></i>
+                            <button type="button" class="btn-composer-action composer-tool action-apple" id="iosShareBtn" title="iPhone Direct Share Guide" aria-label="iPhone Photos Direct Share">
+                                <i class="bi bi-apple"></i><span>iPhone</span>
                             </button>
                         </div>
 
@@ -402,14 +386,15 @@
                         </div>
                     </div>
 
-                    <!-- Full-Width Facebook-Style Post Submit Button -->
-                    <button type="button" id="submitPost" name="submit" class="btn btn-primary w-100 fw-semibold submitPost shadow-sm" style="border-radius: 12px; min-height: 44px; font-size: 0.92rem; letter-spacing: -0.01em;">
-                        Post
-                    </button>
+                </div>
 
-                </form>
+                <!-- Sticky footer: the Post button is always on screen, whatever is attached above -->
+                <div class="composer-sheet__footer flex-shrink-0">
+                    <button type="button" id="submitPost" name="submit" class="btn btn-primary fw-semibold submitPost">Post</button>
+                </div>
 
-            </div>
+            </form>
+
         </div>
     </div>
 </div>

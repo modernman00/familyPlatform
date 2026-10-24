@@ -1,3 +1,24 @@
+<style>
+/* Scroll-stability: the bar must never move relative to the screen edge.
+   - opaque background, no backdrop-filter (iOS Safari repaints blur layers while the URL bar resizes -> visible jump)
+   - own GPU layer so the toolbar collapse/expand doesn't re-layout it
+   - no JS repositioning (the old visualViewport transform fought the browser) */
+.pwa-bottom-nav {
+    background: #ffffff !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+body.dark-mode .pwa-bottom-nav, body.dark-theme .pwa-bottom-nav { background: #0f172a !important; }
+@media (max-width: 991.98px) {
+    /* Android resizes the layout viewport for the keyboard and would float the bar over the input */
+    body:has(input:focus, textarea:focus, select:focus) .pwa-bottom-nav { display: none !important; }
+}
+</style>
 <!-- Mobile PWA Bottom Tab Navigation (Native App Store / Facebook Standard) -->
 <nav class="pwa-bottom-nav d-lg-none" id="pwaBottomNav" aria-label="Mobile App Navigation">
     <!-- Home / Feed -->
@@ -106,24 +127,6 @@
                 }
             }, 300);
         }
-
-        function pinBottomNav() {
-            if (window.visualViewport) {
-                var vv = window.visualViewport;
-                var offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-                if (offset > 120) {
-                    nav.style.transform = 'translateY(' + (-offset) + 'px)';
-                } else {
-                    nav.style.transform = 'translateY(0)';
-                }
-            }
-        }
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', pinBottomNav, { passive: true });
-            window.visualViewport.addEventListener('scroll', pinBottomNav, { passive: true });
-        }
-        window.addEventListener('resize', pinBottomNav, { passive: true });
-        window.addEventListener('orientationchange', pinBottomNav, { passive: true });
     } catch(e) {}
 })();
 </script>

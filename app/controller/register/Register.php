@@ -97,7 +97,9 @@ final class Register extends Db
                         : (is_array($_GET['famCode']) && is_string(reset($_GET['famCode'])) ? (string)reset($_GET['famCode']) : '');
                     $sanitizedCode = (string)preg_replace('/[^A-Za-z0-9]/', '', $rawCode);
                     if ($sanitizedCode !== '') {
-                        $registerPostData['famCode'] = $sanitizedCode;
+                        $resolvedCode = \App\services\FamilyCodeRenameService::resolveAlias(\Src\Db::connect2(), $sanitizedCode);
+                        // keep the visitor's casing unless the code was renamed
+                        $registerPostData['famCode'] = $resolvedCode === strtoupper($sanitizedCode) ? $sanitizedCode : $resolvedCode;
                     }
                 }
                 if (empty($registerPostData['firstName']) && !empty($_GET['name']) && is_string($_GET['name'])) {

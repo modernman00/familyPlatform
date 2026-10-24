@@ -162,13 +162,14 @@ final class FamilyMigrationService
         $upd->execute([$token, $migrationId]);
 
         // Send multi-channel non-blocking notifications
-        $this->notifyTargetAboutNudge($migrationId, $requester, $target, $newFamilyCode, $token, $cleanNote);
+        $emailSent = $this->notifyTargetAboutNudge($migrationId, $requester, $target, $newFamilyCode, $token, $cleanNote);
 
         return [
             'success' => true,
             'message' => 'Migration nudge sent successfully. Your relative can now accept to join your family network.',
             'migration_id' => $migrationId,
-            'token' => $token
+            'token' => $token,
+            'email_sent' => $emailSent
         ];
     }
 
@@ -249,13 +250,14 @@ final class FamilyMigrationService
         $upd->execute([$token, $migrationId]);
 
         // Send multi-channel non-blocking notifications to target family members
-        $this->notifyFamilyAboutRequest($migrationId, $requester, $cleanTargetCode, $cleanTargetUser, $token, $cleanNote);
+        $emailSent = $this->notifyFamilyAboutRequest($migrationId, $requester, $cleanTargetCode, $cleanTargetUser, $token, $cleanNote);
 
         return [
             'success' => true,
             'message' => "Your migration request to join family code #{$cleanTargetCode} has been sent and is awaiting family approval.",
             'migration_id' => $migrationId,
-            'token' => $token
+            'token' => $token,
+            'email_sent' => $emailSent
         ];
     }
 
@@ -633,8 +635,9 @@ final class FamilyMigrationService
      * @param array<string, mixed> $requester
      * @param array<string, mixed> $target
      */
-    private function notifyTargetAboutNudge(int $migrationId, array $requester, array $target, string $newFamilyCode, string $token, ?string $note): void
+    private function notifyTargetAboutNudge(int $migrationId, array $requester, array $target, string $newFamilyCode, string $token, ?string $note): bool
     {
+        $emailSent = false;
         $requesterName = trim(($requester['firstName'] ?? '') . ' ' . ($requester['lastName'] ?? '')) ?: 'A family member';
         $targetId = (string)($target['id'] ?? '');
         $targetEmail = (string)($target['email'] ?? '');
@@ -681,6 +684,8 @@ final class FamilyMigrationService
             try {
                 $emailData = [
                     'id' => $targetId,
+                    'email' => $targetEmail,
+                    'name' => $target['firstName'] ?? 'Relative',
                     'firstName' => $target['firstName'] ?? 'Relative',
                     'requesterName' => $requesterName,
                     'newFamilyCode' => $newFamilyCode,
@@ -694,6 +699,7 @@ final class FamilyMigrationService
                     $emailData,
                     'member'
                 );
+                $emailSent = true;
             } catch (\Throwable $e) {
                 error_log('[FamilyMigrationService] Nudge email failed: ' . $e->getMessage());
             }
@@ -712,6 +718,8 @@ final class FamilyMigrationService
         } catch (\Throwable) {
             // Non-blocking
         }
+
+        return $emailSent;
     }
 
     /**
@@ -719,8 +727,9 @@ final class FamilyMigrationService
      *
      * @param array<string, mixed> $requester
      */
-    private function notifyFamilyAboutRequest(int $migrationId, array $requester, string $targetFamilyCode, ?string $targetUserId, string $token, ?string $note): void
+    private function notifyFamilyAboutRequest(int $migrationId, array $requester, string $targetFamilyCode, ?string $targetUserId, string $token, ?string $note): bool
     {
+        $emailSent = false;
         $requesterName = trim(($requester['firstName'] ?? '') . ' ' . ($requester['lastName'] ?? '')) ?: 'A relative';
         $requesterId = (string)($requester['id'] ?? '');
 
@@ -785,6 +794,8 @@ final class FamilyMigrationService
             try {
                 $emailData = [
                     'id' => (string)$familyMembers[0]['id'],
+                    'email' => (string)$familyMembers[0]['email'],
+                    'name' => $familyMembers[0]['firstName'] ?? 'Family Member',
                     'firstName' => $familyMembers[0]['firstName'] ?? 'Family Member',
                     'requesterName' => $requesterName,
                     'familyCode' => $targetFamilyCode,
@@ -798,10 +809,13 @@ final class FamilyMigrationService
                     $emailData,
                     'member'
                 );
+                $emailSent = true;
             } catch (\Throwable $e) {
                 error_log('[FamilyMigrationService] Request email failed: ' . $e->getMessage());
             }
         }
+
+        return $emailSent;
     }
 
     /**

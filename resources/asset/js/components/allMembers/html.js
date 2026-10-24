@@ -54,6 +54,26 @@ export const renderHtml = (el) => {
     const emailSafe = esc(el.email || 'Email not provided');
     const imgSafe = esc(theImg);
 
+    const migrationButtonsHtml = `
+                <button class="btn-stitch-tonal btn-nudge-family w-100 mt-2" 
+                        id="nudgeMigrate${idSafe}" 
+                        data-target-id="${idSafe}" 
+                        data-target-name="${fullName}" 
+                        data-target-code="${famCode}" 
+                        title="Invite relative to migrate to your family network">
+                    <i class="bi bi-send-check text-primary me-1" style="pointer-events: none;"></i> Nudge to Join Your Family Code
+                </button>
+                <button class="btn-stitch-tonal btn-request-migration w-100 mt-1" 
+                        id="requestMigrate${idSafe}" 
+                        data-target-id="${idSafe}" 
+                        data-target-name="${fullName}" 
+                        data-target-code="${famCode}" 
+                        style="font-size: 0.82rem; opacity: 0.85;"
+                        title="Request to migrate into family #${famCode}">
+                    <i class="bi bi-box-arrow-in-right me-1" style="pointer-events: none;"></i> Join #${famCode}
+                </button>
+    `;
+
     const html = `
     <div class="member-card member_profile_${idSafe}" id="${idSafe}" data-category="${categoryKey}" data-search="${esc(fullNameRaw.toLowerCase() + ' ' + (el.email || ''))}">
         <div class="card-cover"></div>
@@ -113,6 +133,7 @@ export const renderHtml = (el) => {
                         <i class="bi bi-person-dash-fill" style="pointer-events: none;"></i> Remove
                     </button>
                 </div>
+                ${migrationButtonsHtml}
                 ` : `
                 <button class="btn-stitch-connect w-100" 
                         data-user-id="addFamily${idSafe}" 
@@ -120,23 +141,7 @@ export const renderHtml = (el) => {
                         ${disableButton}>
                     <i class="bi bi-person-plus-fill" style="pointer-events: none;"></i> ${statusButtonHTML}
                 </button>
-                <button class="btn-stitch-tonal btn-nudge-family w-100 mt-2" 
-                        id="nudgeMigrate${idSafe}" 
-                        data-target-id="${idSafe}" 
-                        data-target-name="${fullName}" 
-                        data-target-code="${famCode}" 
-                        title="Invite relative to migrate to your family network">
-                    <i class="bi bi-send-check text-primary me-1" style="pointer-events: none;"></i> Nudge to Join Family
-                </button>
-                <button class="btn-stitch-tonal btn-request-migration w-100 mt-1" 
-                        id="requestMigrate${idSafe}" 
-                        data-target-id="${idSafe}" 
-                        data-target-name="${fullName}" 
-                        data-target-code="${famCode}" 
-                        style="font-size: 0.82rem; opacity: 0.85;"
-                        title="Request to migrate into family #${famCode}">
-                    <i class="bi bi-box-arrow-in-right me-1" style="pointer-events: none;"></i> Join #${famCode}
-                </button>
+                ${migrationButtonsHtml}
                 <small class="text-muted text-center mt-1 d-block" style="font-size: 0.72rem; font-weight: 500;">${tooltip}</small>
                 `}
             </div>

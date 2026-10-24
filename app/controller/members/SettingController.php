@@ -21,6 +21,8 @@ final class SettingController extends BaseController
 
             $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
             $pendingFamilyRequest = $approvalService->getPendingRequestForUser((string)$accountData['id']);
+            $birthFamily = (new \App\services\BirthFamilyCodeService(\Src\Db::connect2(), $approvalService))->status((string)$accountData['id']);
+            $codeRename = (new \App\services\FamilyCodeRenameService(\Src\Db::connect2()))->statusFor((string)$accountData['id']);
 
             $passkeys = (new \Src\Select())->selectFn1(
                 "SELECT id, credential_id, device_name, created_at, last_used_at FROM user_passkeys WHERE user_id = ? ORDER BY created_at DESC",
@@ -30,6 +32,8 @@ final class SettingController extends BaseController
             Utility::view('/member/accountSetting', [
                 'accountData' => $accountData,
                 'pendingFamilyRequest' => $pendingFamilyRequest,
+                'birthFamily' => $birthFamily,
+                'codeRename' => $codeRename,
                 'passkeys' => $passkeys
             ]);
 
@@ -173,7 +177,7 @@ final class SettingController extends BaseController
                         return;
                     }
 
-                    $cleanTargetCode = strtoupper(trim(str_replace('#', '', $targetCode)));
+                    $cleanTargetCode = \App\services\FamilyCodeRenameService::resolveAlias(\Src\Db::connect2(), $targetCode);
                     $currentCode = strtoupper(trim(str_replace('#', '', (string)($_SESSION['famCode'] ?? ''))));
 
                     if ($cleanTargetCode === $currentCode) {
@@ -291,6 +295,98 @@ final class SettingController extends BaseController
                     return;
                 }
 
+                // 6a. RFC-0005: the code creator opens a family poll to change the family code
+                if ($action === 'proposeFamilyCodeRename') {
+                    $userId = (string)($_SESSION['id'] ?? '');
+                    \Src\Limiter::limit('code_rename_' . $userId);
+                    try {
+                        $proposal = (new \App\services\FamilyCodeRenameService(Db::connect2()))
+                            ->propose($userId, (string)($_POST['new_code'] ?? ''));
+                    } catch (\DomainException $de) {
+                        msgException($de->getCode(), $de->getMessage());
+                        return;
+                    }
+
+                    $msg = $proposal['status'] === 'applied'
+                        ? "Your family code is now #{$proposal['new_code']}."
+                        : "Vote opened. The family code changes to #{$proposal['new_code']} automatically if most of your family agrees.";
+                    msgSuccess(200, $msg, $proposal);
+                    return;
+                }
+
+                if ($action === 'cancelFamilyCodeRename') {
+                    $userId = (string)($_SESSION['id'] ?? '');
+                    try {
+                        (new \App\services\FamilyCodeRenameService(Db::connect2()))->cancel($userId);
+                    } catch (\DomainException $de) {
+                        msgException($de->getCode(), $de->getMessage());
+                        return;
+                    }
+                    msgSuccess(200, 'The family vote was cancelled.');
+                    return;
+                }
+
+                // 6b. RFC-0004: create a brand-new birth / maiden family code from the maiden name
+                if ($action === 'createBirthFamilyCode') {
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
+                    \Src\Limiter::limit('birth_code_' . $userId);
+                    $birthService = new \App\services\BirthFamilyCodeService(Db::connect2());
+                    try {
+                        $created = $birthService->create($userId, (string)($_POST['maiden_name'] ?? ''));
+                    } catch (\DomainException $de) {
+                        msgException($de->getCode(), $de->getMessage());
+                        return;
+                    }
+
+                    msgSuccess(200, "Your birth family code is #{$created['code']}. Invite your parents and siblings with it from the Parents and Siblings tabs.", [
+                        'otherFamCode' => $created['code'],
+                        'origin' => $created['origin'],
+                    ]);
+                    return;
+                }
+
+                // 6c. RFC-0004: ask a verified member of an existing family to link this user as a birth-family member
+                if ($action === 'requestBirthFamilyLink') {
+                    $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
+                    \Src\Limiter::limit('birth_link_' . $userId);
+                    $pdo = Db::connect2();
+                    $birthService = new \App\services\BirthFamilyCodeService($pdo);
+                    try {
+                        $link = $birthService->requestLink(
+                            $userId,
+                            (string)($_POST['family_code'] ?? ''),
+                            trim((string)($_POST['inviter_first_name'] ?? '')),
+                            trim((string)($_POST['inviter_last_name'] ?? '')),
+                            trim((string)($_POST['inviter_email_or_mobile'] ?? ''))
+                        );
+                    } catch (\DomainException $de) {
+                        msgException($de->getCode(), $de->getMessage());
+                        return;
+                    }
+
+                    try {
+                        (new \App\service\NotificationService($pdo))->sendFamilyApprovalNotification(
+                            (string)$link['inviter']['id'],
+                            [
+                                'id' => $userId,
+                                'firstName' => $_SESSION['fName'] ?? '',
+                                'lastName' => $_SESSION['lName'] ?? '',
+                                'email' => $_SESSION['email'] ?? '',
+                                'mobile' => ''
+                            ],
+                            (int)$link['request']['request_id'],
+                            $link['code'],
+                            (string)$link['request']['approval_token']
+                        );
+                    } catch (\Throwable $notifyEx) {
+                        error_log('[SettingController] birth link notification failed: ' . $notifyEx->getMessage());
+                    }
+
+                    $safeInviter = htmlspecialchars(trim(($link['inviter']['firstName'] ?? '') . ' ' . ($link['inviter']['lastName'] ?? '')), ENT_QUOTES, 'UTF-8');
+                    msgSuccess(200, "Request sent! {$safeInviter} has been asked to confirm you belong to #{$link['code']}.", ['family_code' => $link['code']]);
+                    return;
+                }
+
                 // 7. Update Secondary / Maternal / Maiden Family Code (otherFamCode)
                 if ($action === 'updateSecondaryFamilyCode') {
                     $userId = (string)($_POST['id'] ?? $_SESSION['id'] ?? '');
@@ -304,16 +400,17 @@ final class SettingController extends BaseController
                         return;
                     }
 
-                    $db = Db::connect2();
-                    $chkOther = $db->prepare("SELECT id FROM otherFamily WHERE id = ?");
-                    $chkOther->execute([$userId]);
-
-                    if ($chkOther->fetch()) {
-                        $upd = $db->prepare("UPDATE otherFamily SET otherFamCode = ? WHERE id = ?");
-                        $upd->execute([$cleanCode !== '' ? $cleanCode : null, $userId]);
-                    } else {
-                        $ins = $db->prepare("INSERT INTO otherFamily (id, otherFamCode) VALUES (?, ?)");
-                        $ins->execute([$userId, $cleanCode !== '' ? $cleanCode : null]);
+                    // RFC-0004: the code must be one this user verifiably holds; free text is no longer accepted.
+                    $birthService = new \App\services\BirthFamilyCodeService(Db::connect2());
+                    try {
+                        if ($cleanCode === '') {
+                            $birthService->clear($userId);
+                        } else {
+                            $cleanCode = $birthService->select($userId, $cleanCode);
+                        }
+                    } catch (\DomainException $de) {
+                        msgException($de->getCode(), $de->getMessage());
+                        return;
                     }
 
                     if (empty($cleanCode)) {
@@ -521,7 +618,11 @@ final class SettingController extends BaseController
                 $ownRow = $stmtOwn->fetch(\PDO::FETCH_ASSOC);
                 $verifiedMaternalCode = strtoupper(trim((string)($ownRow['otherFamCode'] ?? '')));
 
-                if ($verifiedMaternalCode !== '' && $verifiedMaternalCode === $requestedMaternalCode) {
+                // RFC-0004: the stored code must also be one the user verifiably holds (approved membership).
+                if ($verifiedMaternalCode !== ''
+                    && $verifiedMaternalCode === $requestedMaternalCode
+                    && (new \App\services\BirthFamilyCodeService($dbCheck))->userHoldsCode($userId, $verifiedMaternalCode)
+                ) {
                     $familyCode = $verifiedMaternalCode; // route to maiden/maternal tree
                 } else {
                     // Silently fall back to primary — never write into an unowned family tree

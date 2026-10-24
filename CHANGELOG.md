@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-24 (family code rename)
+### Added
+- **Change the family code by family vote** (RFC-0005): the creator of a family code can propose a new one from Settings → Family Network. A poll opens in the family feed and everyone is notified; when voting closes with more Yes than No votes among those who voted (members who never vote do not count against it, but at least one member besides the creator must vote; over half of the whole family saying Yes applies it at once) the code changes for every member automatically (tree, posts, events, journals, invites, API key scopes) in one transaction and everyone is notified. Voting closes after 7 days, one change per 30 days. Old codes are kept as aliases so shared links, invites and live sessions keep working. Migration `2026_10_24_family_code_rename.sql`, `FamilyCodeRenameService`, Playbook section 4c, PHPUnit `FamilyCodeRenameTest`, Cypress `family_code_rename.cy.js`.
+### Changed
+- The family-code poll vote goes through `FamilyCodeRenameService` (members only, one choice, majority rule); ordinary polls are unchanged.
+
+## 2026-10-24 (composer)
+### Fixed
+- Create Post: once photos were attached the **Post button was hidden** on phones (the PWA tab bar, z-index 9990, covered the modal's bottom edge and the button sat at the end of the scroll area). Post now lives in a sticky footer. The PWA tab bar is now hidden while **any** modal is open (`body.modal-open`), which also stops it covering the bottom of Edit Profile (Save button), Invite Family and Create Announcement.
+### Changed
+- Create Post redesigned as a bottom sheet on phones (dialog on desktop): swipeable topic chips, photo thumbnails in a horizontal strip with count, "Remove all" and a "+" tile, labelled 4-column "Add to your post" tool grid (all targets >= 44px), camera-roll prompt that hides once photos are attached. Element IDs unchanged. Cypress `post_composer_mobile.cy.js`.
+
+## 2026-10-24
+### Added
+- **Birth / Maiden Family Code** (RFC-0004): Settings → Family Network lets a member **create** her birth family code from her maiden name (permanent, one per user) or **link** to an existing family via approval by one of its members. Her primary household code is never changed. New `family_codes` registry (migration `2026_10_24_family_codes_registry.sql`), `BirthFamilyCodeService`, `family_approval_requests.purpose`, Playbook section 4b, PHPUnit `BirthFamilyCodeTest`, Cypress `birth_family_code.cy.js`.
+### Fixed
+- `deleted_at` on `account`, `personal` and `contact` no longer auto-stamps on every UPDATE (RFC-0006, migration `2026_10_24_deleted_at_no_auto_stamp.sql`). Live members stamped as "deleted" could not approve requests and were hidden from Directory/Search; the 30-day erasure grace period could be silently extended. Join/link approver lookup now also checks `account.status`. Guard test `DeletedAtSchemaGuardTest`.
+### Security
+- `otherFamCode` was free text trusted as proof of membership: it routed parent/sibling writes into, and minted invite tokens for, any family whose code a user typed. It is now honoured only while the user holds an approved membership of that code (`user_families`); legacy unverified values show "Unverified" and are ignored.
+### Changed
+- `updateSecondaryFamilyCode` now only clears the code or re-selects a family the user already holds.
+
 ## 2026-10-23
 ### Added
 - **Then & Now v2** (RFC-0003): ghost-overlay camera to match the old pose, "Then & Now" prompt on today's birthdays/anniversaries, year suggested from the photo's EXIF date, a Then & Now timeline on profiles (`GET /api/members/{id}/then-now`, family-scoped). No schema change. (A share-image button was built and then removed: family photos stay inside the private network.)

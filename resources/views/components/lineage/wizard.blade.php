@@ -77,7 +77,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" placeholder="Doe">
+                                <input type="text" name="last_name" class="form-control" placeholder="e.g. Doe" autocomplete="off">
                             </div>
                         </div>
 
@@ -92,11 +92,11 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Email (Optional)</label>
-                                <input type="email" name="email" class="form-control" placeholder="Email for auto-link">
+                                <input type="email" name="email" class="form-control" placeholder="Email to auto-link their account">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Mobile (Optional)</label>
-                                <input type="text" name="mobile" class="form-control" placeholder="Phone number">
+                                <input type="tel" name="mobile" class="form-control" placeholder="Phone number">
                             </div>
                         </div>
                         
@@ -124,12 +124,12 @@
     @include('csrf')
                         <input type="hidden" name="base_node_id" id="childBaseNodeId">
                         
-                        <div class="alert alert-warning small py-2">
+                        <div id="childUnionHint" class="alert alert-warning small py-2">
                             To add a child, you must select which partnership/union they belong to.
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Select Union <span class="text-danger">*</span></label>
+                            <label id="childUnionLabel" for="childUnionSelect" class="form-label fw-bold">Select Union <span class="text-danger">*</span></label>
                             <select name="union_id" id="childUnionSelect" class="form-select" required>
                                 <option value="">Loading unions...</option>
                             </select>
@@ -138,7 +138,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
-                                <input type="text" name="first_name" class="form-control" required placeholder="John">
+                                <input type="text" name="first_name" class="form-control" required placeholder="e.g. John" autocomplete="off">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Last Name</label>

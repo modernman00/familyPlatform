@@ -202,7 +202,9 @@ document.onclick = async (e) => {
             Swal.fire({
               icon: 'success',
               title: 'Nudge Sent!',
-              text: `We have sent a migration invitation to ${targetName}. They will receive a notification to review and accept.`,
+              text: response.data?.email_sent === false
+                ? `${targetName} has been invited and will see it in the app, but the email could not be delivered.`
+                : `We have sent a migration invitation to ${targetName}. They will receive a notification to review and accept.`,
               confirmButtonColor: '#10b981'
             });
           } else {
@@ -285,7 +287,9 @@ document.onclick = async (e) => {
             Swal.fire({
               icon: 'success',
               title: 'Request Submitted!',
-              text: `Your migration request to family #${targetCode} has been sent! You will be notified as soon as a family member approves.`,
+              text: response.data?.email_sent === false
+                ? `Your request to family #${targetCode} was submitted and members will see it in the app, but the email could not be delivered.`
+                : `Your migration request to family #${targetCode} has been sent! You will be notified as soon as a family member approves.`,
               confirmButtonColor: '#2563eb'
             });
           } else {

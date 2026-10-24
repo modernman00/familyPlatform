@@ -224,8 +224,21 @@ class EngagementController
                 return;
             }
 
-            // Cast the vote
-            PollData::castVote($optionId, $userId);
+            // Family-code rename polls are consent votes: eligibility, a single choice and the
+            // majority rule are enforced by the rename service, not the generic multi-choice poll.
+            $renameService = new \App\services\FamilyCodeRenameService(Db::connect2());
+            if ($renameService->requestForOption($optionId) !== null) {
+                try {
+                    $renameService->castConsentVote($userId, $optionId);
+                } catch (\DomainException $de) {
+                    http_response_code($de->getCode() >= 400 && $de->getCode() < 600 ? $de->getCode() : 400);
+                    header('Content-Type: application/json');
+                    echo json_encode(['status' => 'error', 'message' => $de->getMessage()]);
+                    return;
+                }
+            } else {
+                PollData::castVote($optionId, $userId);
+            }
 
             // Return updated poll data so the frontend can refresh it authoritatively
             $pollPostNo = ($postNo > 0) ? $postNo : $targetPost;

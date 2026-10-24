@@ -1,1 +1,32 @@
-"use strict";(self.webpackChunkfamily=self.webpackChunkfamily||[]).push([[966],{5680:function(e,t,r){var o,a=r(5769);try{sessionStorage.removeItem("fromForgot"),localStorage.removeItem("redirect")}catch(e){}var c="/login/code";localStorage.setItem("redirect",c),(0,a.zc)({formId:"login",route:"/login",redirect:c,recaptchaAction:"LOGIN",optionalFields:["rememberMe"]}),null===(o=document.getElementById("button"))||void 0===o||o.setAttribute("data-ready","true")}}]);
+"use strict";
+(self["webpackChunkfamily"] = self["webpackChunkfamily"] || []).push([["login"],{
+
+/***/ "./resources/asset/js/components/acctMgt/login.js":
+/*!********************************************************!*\
+  !*** ./resources/asset/js/components/acctMgt/login.js ***!
+  \********************************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @modernman00/shared-js-lib */ "./node_modules/@modernman00/shared-js-lib/index.js");
+var _document$getElementB;
+
+try {
+  sessionStorage.removeItem('fromForgot');
+  localStorage.removeItem('redirect');
+} catch (e) {}
+var redirect = '/login/code';
+localStorage.setItem('redirect', redirect);
+(0,_modernman00_shared_js_lib__WEBPACK_IMPORTED_MODULE_0__.createAdminLoginHandler)({
+  formId: 'login',
+  route: '/login',
+  redirect: redirect,
+  recaptchaAction: 'LOGIN',
+  optionalFields: ['rememberMe']
+});
+(_document$getElementB = document.getElementById('button')) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.setAttribute('data-ready', 'true');
+
+/***/ })
+
+}]);
+//# sourceMappingURL=login.js.map?v=db28aee9
