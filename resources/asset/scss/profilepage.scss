@@ -876,12 +876,23 @@ body.ghost-cam-open { overflow: hidden; }
 }
 
 .composer-quick-action.then-now-cta {
-    color: #fff;
-    border: 0;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
-    &:hover, &:focus { color: #fff; filter: brightness(1.08); }
+    color: #fff !important;
+    border: 0 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35) !important;
+    &:hover, &:focus { color: #fff !important; filter: brightness(1.08); background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; }
+}
+
+.composer-prompt {
+    background-color: #f1f5f9;
+    border: 1.5px solid #cbd5e1;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+        background-color: #ffffff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

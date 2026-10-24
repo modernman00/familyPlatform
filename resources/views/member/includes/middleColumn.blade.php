@@ -418,8 +418,8 @@
         <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" alt="profile" class="rounded-circle flex-shrink-0" width="44" height="44" style="object-fit: cover;">
 
         <div role="button" tabindex="0" class="composer-prompt flex-grow-1 rounded-pill px-3 py-3 text-truncate" data-bs-toggle="modal" data-bs-target="#postModal"
-          style="background-color: var(--bg-color); border: 1px solid var(--border-color); cursor: text; transition: border-color 0.2s, background-color 0.2s;">
-          <span style="color: var(--text-muted); font-size: 0.95rem;">Share a moment with your family...</span>
+          style="background-color: #f1f5f9; border: 1.5px solid #cbd5e1; cursor: text; transition: all 0.2s ease-in-out;">
+          <span style="color: #64748b; font-size: 0.95rem; font-weight: 500;">Share a moment with your family...</span>
         </div>
       </div>
 
@@ -427,9 +427,10 @@
         <button type="button" class="btn composer-quick-action then-now-cta flex-fill d-flex align-items-center justify-content-center gap-2"
                 data-bs-toggle="modal" data-bs-target="#postModal"
                 onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
-                aria-label="Post a Then and Now photo comparison">
-          <i class="bi bi-hourglass-split" style="font-size: 1.15rem;"></i>
-          <span class="fw-bold" style="font-size: 0.85rem;">Then &amp; Now</span>
+                aria-label="Post a Then and Now photo comparison"
+                style="background: linear-gradient(135deg, #8b5cf6, #6366f1) !important; color: #ffffff !important; border: 0 !important; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35) !important;">
+          <i class="bi bi-hourglass-split" style="font-size: 1.15rem; color: #ffffff !important;"></i>
+          <span class="fw-bold" style="font-size: 0.85rem; color: #ffffff !important;">Then &amp; Now</span>
         </button>
         <button type="button" class="btn composer-quick-action flex-fill d-flex align-items-center justify-content-center gap-2" data-bs-toggle="modal" data-bs-target="#postModal" aria-label="Add a photo to a post">
           <i class="bi bi-camera-fill" style="color: #22c55e; font-size: 1.15rem;"></i>
