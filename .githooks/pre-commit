@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
-# Refuse to commit dev/test webpack bundles. Enable once per clone: git config core.hooksPath .githooks
-exec php "$(git rev-parse --show-toplevel)/scripts/verify_prod_bundles.php" --staged
+# Refuse to commit dev/test webpack bundles (modernman00/shared-lib >= 2.8.0).
+# Enable once per clone: git config core.hooksPath .githooks
+root="$(git rev-parse --show-toplevel)"
+if [ ! -f "$root/vendor/bin/verify-prod-bundles" ]; then
+  echo "⚠️  vendor/bin/verify-prod-bundles missing - run: composer install (shared-lib >= 2.8.0). Bundle check skipped."
+  exit 0
+fi
+exec php "$root/vendor/bin/verify-prod-bundles" --staged

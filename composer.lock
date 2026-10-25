@@ -2316,16 +2316,16 @@
         },
         {
             "name": "modernman00/shared-lib",
-            "version": "v2.7.0",
+            "version": "v2.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/modernman00/shared-lib.git",
-                "reference": "0f2096b3790da489eb2807579ebe5e893a964f1b"
+                "reference": "8e485149cc9e9bf09b29732002ecbabc8ffa71db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/0f2096b3790da489eb2807579ebe5e893a964f1b",
-                "reference": "0f2096b3790da489eb2807579ebe5e893a964f1b",
+                "url": "https://api.github.com/repos/modernman00/shared-lib/zipball/8e485149cc9e9bf09b29732002ecbabc8ffa71db",
+                "reference": "8e485149cc9e9bf09b29732002ecbabc8ffa71db",
                 "shasum": ""
             },
             "require": {
@@ -2358,7 +2358,8 @@
                 "phpunit/phpunit": "^10.0"
             },
             "bin": [
-                "bin/verify-must-haves"
+                "bin/verify-must-haves",
+                "bin/verify-prod-bundles"
             ],
             "type": "library",
             "autoload": {
@@ -2386,10 +2387,10 @@
             ],
             "description": "Shared library for common functions and classes across projects",
             "support": {
-                "source": "https://github.com/modernman00/shared-lib/tree/v2.7.0",
+                "source": "https://github.com/modernman00/shared-lib/tree/v2.8.0",
                 "issues": "https://github.com/modernman00/shared-lib/issues"
             },
-            "time": "2026-10-24T14:28:27+00:00"
+            "time": "2026-10-25T14:41:28+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -13219,16 +13220,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3",
         "ext-gd": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "8.4.3"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
