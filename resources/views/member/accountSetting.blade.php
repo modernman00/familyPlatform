@@ -716,6 +716,27 @@
                       <label class="form-label">Maiden Name</label>
                       <input type="text" class="form-control" id="maiden_name" name="maiden_name" placeholder="Enter maiden name">
                     </div>
+                    {{-- RFC-0008: wedding anniversary (married statuses only; toggled in accountSetting.js) --}}
+                    <div class="col-md-6" id="marriage_date_div" style="display: none;">
+                      <label for="marriage_date" class="form-label">Wedding date <span class="text-muted small">(optional)</span></label>
+                      <input type="date" class="form-control" id="marriage_date" name="marriage_date" value="{{ $weddingDate ?? '' }}" min="1900-01-01" max="{{ date('Y-m-d') }}">
+                    </div>
+                    @php $announceAnniversary = (bool) ($celebrationPrefs['announce_anniversary'] ?? false) || empty($weddingDate); @endphp
+                    <div class="col-12" id="announce_anniversary_div" style="display: none;">
+                      <div class="custom-switch mb-0">
+                        <div class="switch-info">
+                          <h6>Let my family congratulate us each year</h6>
+                          <p>Your family is told the day before and on your anniversary, and can send you private wishes.</p>
+                        </div>
+                        <div class="toggle-group">
+                          <span class="toggle-label">{{ $announceAnniversary ? 'ON' : 'OFF' }}</span>
+                          <label class="switch">
+                            <input type="checkbox" name="announce_anniversary" value="{{ $announceAnniversary ? 'on' : 'off' }}" {{ $announceAnniversary ? 'checked' : '' }} aria-label="Let my family congratulate us each year">
+                            <span class="slider"></span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -808,6 +829,21 @@
                     <span class="toggle-label" id="pushPrefLabel">ON</span>
                     <label class="switch">
                       <input type="checkbox" id="pushPrefToggle" data-standalone="1" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                @php $showAge = (bool) ($celebrationPrefs['show_age'] ?? false); @endphp
+                <div class="custom-switch">
+                  <div class="switch-info">
+                    <h6>Show my age on my birthday</h6>
+                    <p>When on, your family sees "Wale turns 60 today". When off, they just see that it's your birthday.</p>
+                  </div>
+                  <div class="toggle-group">
+                    <span class="toggle-label">{{ $showAge ? 'ON' : 'OFF' }}</span>
+                    <label class="switch">
+                      <input type="checkbox" name="celebrate_show_age" value="{{ $showAge ? 'on' : 'off' }}" {{ $showAge ? 'checked' : '' }} aria-label="Show my age on my birthday">
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -1288,6 +1324,21 @@
         }
       });
     });
+
+    // RFC-0008: the wedding date and anniversary opt-in only apply to a current
+    // marriage. Inline (not in the accountSetting.js bundle) so it works without a rebuild.
+    const maritalForCelebration = document.getElementById('maritalStatus');
+    const syncWeddingFields = function() {
+      const married = ['Yes - Add Husband', 'Yes - Add Wife'].includes(maritalForCelebration?.value || '');
+      ['marriage_date_div', 'announce_anniversary_div'].forEach(function(divId) {
+        const el = document.getElementById(divId);
+        if (el) el.style.display = married ? '' : 'none';
+      });
+    };
+    if (maritalForCelebration) {
+      maritalForCelebration.addEventListener('change', syncWeddingFields);
+      syncWeddingFields();
+    }
 
     // Keep Show My Profile toggle synchronized when Profile Visibility dropdown changes
     const profileVisSelect = document.getElementById('profileVisibilitySelect');

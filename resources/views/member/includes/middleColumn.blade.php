@@ -522,6 +522,11 @@
   <!-- Mobile Highlights & Events Tray (Facebook Mobile UX: horizontal carousel above feed) -->
   @includeIf('member.includes.mobileHighlightsTray')
 
+  <!-- Family Celebrations: Mobile-Only (the desktop copy is in the right column) -->
+  <div class="d-lg-none">
+    @includeIf('member.includes.celebrationsWidget', ['celebrationWidgetId' => 'celebrationsWidgetMobile'])
+  </div>
+
   <!-- Kinship Radar: Mobile-Only (visible < 992px, hidden on desktop where sidebar shows it) -->
   <div class="d-lg-none">
     @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => 'kinshipRadarWidgetMobile'])

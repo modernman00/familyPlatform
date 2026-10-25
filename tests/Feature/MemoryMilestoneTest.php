@@ -108,19 +108,26 @@ final class MemoryMilestoneTest extends SocialFeedTestCase
 
     public function testUpcomingMilestonesDetectsBirthdays(): void
     {
-        $milestones = $this->service->getUpcomingMilestones($this->authorId, [$this->famCode], 7);
-
-        $this->assertNotEmpty($milestones);
-        $found = false;
-        foreach ($milestones as $m) {
-            if ($m['user_id'] === $this->authorId && $m['type'] === 'birthday') {
-                $found = true;
-                $this->assertStringContainsString("TestFirstName", $m['title']);
-                $this->assertSame('Today! 🎉', $m['date_badge']);
-                $this->assertStringContainsString('30th Milestone', $m['subtitle']);
+        $birthdaySubtitle = function (): ?string {
+            foreach ($this->service->getUpcomingMilestones($this->authorId, [$this->famCode], 7) as $m) {
+                if ($m['user_id'] === $this->authorId && $m['type'] === 'birthday') {
+                    $this->assertStringContainsString("TestFirstName", $m['title']);
+                    $this->assertSame('Today! 🎉', $m['date_badge']);
+                    return (string) $m['subtitle'];
+                }
             }
+            return null;
+        };
+
+        try {
+            // RFC-0008: age (and age-based tags) stay hidden unless the member allows it
+            $this->assertSame('Birthday Celebration', $birthdaySubtitle(), 'Birthday milestone for active user was not calculated');
+
+            \App\services\CelebrationService::savePreferences($this->authorId, showAge: true, announceAnniversary: null);
+            $this->assertStringContainsString('30th Milestone', (string) $birthdaySubtitle());
+        } finally {
+            $this->pdo->prepare('DELETE FROM celebration_prefs WHERE user_id = ?')->execute([$this->authorId]);
         }
-        $this->assertTrue($found, 'Birthday milestone for active user was not calculated');
     }
 
     public function testShareMemoryToFeedCreatesNewReflectionPost(): void

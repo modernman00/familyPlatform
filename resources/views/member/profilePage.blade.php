@@ -35,6 +35,7 @@
         @includeIf('member.modals.timeCapsuleModal')
         @includeIf('member.modals.createAnnouncementModal')
         @includeIf('member.modals.inviteFamilyModal')
+        @includeIf('member.modals.celebrationWishModal')
 
 
     </div>

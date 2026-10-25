@@ -138,6 +138,14 @@ class MemoryMilestoneService
         $milestones = [];
         $today = new \DateTimeImmutable('today');
 
+        // Birthday ages and anniversaries honour each member's celebration
+        // choices (RFC-0008), which live in celebration_prefs.
+        try {
+            CelebrationService::ensureTables($this->db);
+        } catch (\Throwable $e) {
+            \error_log('[getUpcomingMilestones] celebration_prefs unavailable: ' . $e->getMessage());
+        }
+
         // 1. Collect birthdays from `personal` table
         $birthdays = $this->fetchPersonalBirthdays($famCodes);
         foreach ($birthdays as $bday) {
@@ -150,7 +158,9 @@ class MemoryMilestoneService
             $calc = $this->calculateMilestoneCountdown($day, $monthNum, (int)($bday['year'] ?? 0), $today, $daysAhead);
             if ($calc !== null) {
                 $name = trim(($bday['firstName'] ?? '') . ' ' . ($bday['lastName'] ?? ''));
-                $age = $calc['target_age'];
+                // Age (and age-based tags such as "50th Golden Jubilee") only
+                // when the member chose "Show my age on my birthday".
+                $age = (int)($bday['show_age'] ?? 0) === 1 ? $calc['target_age'] : null;
                 $milestoneTag = $this->getBirthdayMilestoneTag($age);
 
                 $milestones[] = [
@@ -434,9 +444,11 @@ class MemoryMilestoneService
             }
 
             $inQuery = implode(',', array_fill(0, count($cleanedCodes), '?'));
-            $query = "SELECT p.id, p.firstName, p.lastName, p.day, p.month, p.year, p.famCode, pp.img as profile_img
+            $query = "SELECT p.id, p.firstName, p.lastName, p.day, p.month, p.year, p.famCode, pp.img as profile_img,
+                             COALESCE(cp.show_age, 0) AS show_age
                       FROM personal p
                       LEFT JOIN profilePics pp ON p.id = pp.id
+                      LEFT JOIN celebration_prefs cp ON cp.user_id = p.id
                       WHERE p.famCode IN ($inQuery)
                         AND p.day IS NOT NULL 
                         AND p.month IS NOT NULL";
@@ -471,8 +483,11 @@ class MemoryMilestoneService
                       FROM family_unions fu
                       LEFT JOIN family_nodes fn1 ON fu.partner_1_id = fn1.id
                       LEFT JOIN family_nodes fn2 ON fu.partner_2_id = fn2.id
+                      LEFT JOIN celebration_prefs cp1 ON cp1.user_id = fn1.user_id
+                      LEFT JOIN celebration_prefs cp2 ON cp2.user_id = fn2.user_id
                       WHERE fu.family_code IN ($inQuery)
-                        AND fu.is_current = 1";
+                        AND fu.is_current = 1
+                        AND (COALESCE(cp1.announce_anniversary, 0) = 1 OR COALESCE(cp2.announce_anniversary, 0) = 1)";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute($cleanedCodes);
@@ -521,7 +536,7 @@ class MemoryMilestoneService
     /**
      * Parses diverse month representations (numeric string, full name, short name) to integer 1-12.
      */
-    private function parseMonthToNumber(mixed $month): int
+    public static function parseMonthToNumber(mixed $month): int
     {
         if ($month === null || $month === '') {
             return 0;

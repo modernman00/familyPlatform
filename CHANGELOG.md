@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-25 (family celebrations)
+### Added
+- **Birthdays & wedding anniversaries** (RFC-0008): the family is told the day before ("Wale's birthday is tomorrow") and on the day ("It's Wale's birthday today! Send your wishes"). The person celebrating is never told about their own day, but gets a private "Happy birthday from all of us at Family Platform". New `cron/celebration_cron.php` (daily); each notice is sent once even if the job reruns.
+- **Private wishes**: "Send wishes" from the notification or the new Celebrations card on the profile page. Only the person celebrating sees them, under "Your wishes", with a notification for each. Up to 2 days late; sending again replaces your message. `GET /api/celebrations`, `POST /api/celebrations/wish` (CSRF, rate limit, family-only, 1–500 characters, plain text).
+- Account Settings: **Show my age on my birthday** (Preferences, off by default), and for married members a **wedding date** plus **Let my family congratulate us each year** (Marital Status). Tables `celebration_prefs`, `celebration_wishes`, `celebration_notice_log` are created automatically. Playbook section 4d, PHPUnit `CelebrationTest` (29 cases), Cypress `celebrations.cy.js`.
+### Changed
+- The Memories & Milestones widget and Sunday digest no longer show ages ("Turning 60", "50th Golden Jubilee") unless the member allows it, and only list anniversaries a couple chose to share.
+
 ## 2026-10-24 (family code rename)
 ### Added
 - **Change the family code by family vote** (RFC-0005): the creator of a family code can propose a new one from Settings → Family Network. A poll opens in the family feed and everyone is notified; when voting closes with more Yes than No votes among those who voted (members who never vote do not count against it, but at least one member besides the creator must vote; over half of the whole family saying Yes applies it at once) the code changes for every member automatically (tree, posts, events, journals, invites, API key scopes) in one transaction and everyone is notified. Voting closes after 7 days, one change per 30 days. Old codes are kept as aliases so shared links, invites and live sessions keep working. Migration `2026_10_24_family_code_rename.sql`, `FamilyCodeRenameService`, Playbook section 4c, PHPUnit `FamilyCodeRenameTest`, Cypress `family_code_rename.cy.js`.

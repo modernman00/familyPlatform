@@ -21,3 +21,7 @@ $router->map('POST', '/api/trivia/auto-generate', 'App\controller\members\Family
 $router->map('GET', '/api/capsules', 'App\controller\members\TimeCapsuleController@listCapsules', 'capsules_list');
 $router->map('POST', '/api/capsules/create', 'App\controller\members\TimeCapsuleController@createCapsule', 'capsules_create');
 
+
+// Family Celebrations: birthdays & anniversaries, private wishes (RFC-0008)
+$router->map('GET', '/api/celebrations', 'App\controller\members\CelebrationController@index', 'celebrations_list');
+$router->map('POST', '/api/celebrations/wish', 'App\controller\members\CelebrationController@wish', 'celebrations_wish');

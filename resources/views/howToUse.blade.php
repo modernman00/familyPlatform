@@ -235,6 +235,51 @@
           </div>
         </div>
 
+        <!-- Pillar 4d: Family Celebrations (RFC-0008) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden" id="playbook-celebrations">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(219, 39, 119, 0.12); color: #db2777;">
+                <i class="bi bi-balloon-heart-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">4d. Birthdays &amp; Anniversaries</h3>
+                <span class="badge" style="background:#db2777;">Private Wishes</span>
+              </div>
+            </div>
+            <p class="lead text-secondary">
+              Nobody needs to create an event: your family is told about birthdays automatically, and about wedding anniversaries when a couple chooses to share them. Wishes are private, so only the person celebrating sees them.
+            </p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-primary mb-2">The day before</span>
+                  <h6 class="fw-bold text-dark">A heads-up</h6>
+                  <p class="small text-muted mb-0">Everyone in the family gets "Wale's birthday is tomorrow" (or "Wale &amp; Ade's wedding anniversary is tomorrow"). The person celebrating is not told.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-warning text-dark mb-2">On the day</span>
+                  <h6 class="fw-bold text-dark">Send your wishes</h6>
+                  <p class="small text-muted mb-0">The family gets "It's Wale's birthday today! Send your wishes". The notification and the Celebrations card on the profile page open a short message box. Wishes can be sent up to 2 days late, and sending again replaces your earlier message.</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                  <span class="badge bg-success mb-2">For the person celebrating</span>
+                  <h6 class="fw-bold text-dark">A greeting and your wishes</h6>
+                  <p class="small text-muted mb-0">A private "Happy birthday from all of us at Family Platform", then a notification for each wish. All wishes appear together under <em>Your wishes</em> on the profile page.</p>
+                </div>
+              </div>
+            </div>
+            <div class="p-3 mt-3 border rounded-3 h-100" style="background:#fdf2f8;">
+              <h6 class="fw-bold text-dark mb-1">Your choices (Account Settings)</h6>
+              <p class="small text-muted mb-0"><strong>Preferences &rarr; Show my age on my birthday</strong> (off by default) turns "Wale's birthday" into "Wale turns 60". <strong>Marital Status</strong>, for married members: add your wedding date and choose <em>Let my family congratulate us each year</em>. Without that choice your anniversary is never announced or shown.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 5: Gamified Lineage Quests & WhatsApp Flywheel -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">

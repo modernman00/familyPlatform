@@ -44,6 +44,11 @@ foreach(($eventData ?? []) as $event) {
     <!-- Family Heritage & Weekly Rituals Hub Widget -->
     @includeIf('member.includes.familyHeritageWidget')
 
+    <!-- Family Celebrations: today's birthdays/anniversaries + your private wishes (RFC-0008) -->
+    <div class="d-none d-lg-block">
+        @includeIf('member.includes.celebrationsWidget', ['celebrationWidgetId' => 'celebrationsWidgetDesktop'])
+    </div>
+
     <!-- Family Memories & Milestones Widget -->
     @includeIf('member.includes.memoriesMilestonesWidget')
 

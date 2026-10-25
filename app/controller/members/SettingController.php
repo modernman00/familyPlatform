@@ -29,12 +29,24 @@ final class SettingController extends BaseController
                 [(string)$accountData['id']]
             );
 
+            // RFC-0008: show-my-age / anniversary choices and the wedding date
+            $celebrationPrefs = ['show_age' => false, 'announce_anniversary' => false];
+            $weddingDate = null;
+            try {
+                $celebrationPrefs = \App\services\CelebrationService::preferences((string)$accountData['id']);
+                $weddingDate = \App\services\CelebrationService::weddingDate((string)$accountData['id'], (string)($_SESSION['famCode'] ?? ''));
+            } catch (\Throwable $e) {
+                error_log('[SettingController] Celebration settings unavailable: ' . $e->getMessage());
+            }
+
             Utility::view('/member/accountSetting', [
                 'accountData' => $accountData,
                 'pendingFamilyRequest' => $pendingFamilyRequest,
                 'birthFamily' => $birthFamily,
                 'codeRename' => $codeRename,
-                'passkeys' => $passkeys
+                'passkeys' => $passkeys,
+                'celebrationPrefs' => $celebrationPrefs,
+                'weddingDate' => $weddingDate
             ]);
 
         } catch (\Throwable $th) {
@@ -116,6 +128,13 @@ final class SettingController extends BaseController
                         'sms_notifications' => $normalizeSwitch($_POST['sms_notifications'] ?? 'off'),
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
+                    if (isset($_POST['celebrate_show_age'])) {
+                        \App\services\CelebrationService::savePreferences(
+                            (string) $_POST['id'],
+                            showAge: $normalizeSwitch($_POST['celebrate_show_age']) === 'on',
+                            announceAnniversary: null
+                        );
+                    }
                     msgSuccess(200, "Preferences successfully updated.");
                     return;
                 }
@@ -635,6 +654,12 @@ final class SettingController extends BaseController
             if (empty($familyCode)) {
                 $familyCode = $primaryFamCode;
             }
+            // RFC-0008: reject a bad wedding date before anything is written
+            $weddingDateInput = trim((string)($_POST['marriage_date'] ?? ''));
+            if ($weddingDateInput !== '' && !\App\services\CelebrationService::isValidWeddingDate($weddingDateInput)) {
+                throw new \Src\Exceptions\ValidationException('Please enter a real wedding date that is not in the future.');
+            }
+
             if (!empty($familyCode)) {
                 $db = Db::connect2();
                 $db->beginTransaction();
@@ -808,6 +833,24 @@ final class SettingController extends BaseController
                     }
 
                     $db->commit();
+
+                    // RFC-0008: wedding date + anniversary opt-in, saved after the
+                    // commit (the first preferences write may create its table,
+                    // which would otherwise end the transaction early).
+                    $maritalNow = (string)($_POST['maritalStatus'] ?? '');
+                    if (in_array($maritalNow, ['Yes - Add Husband', 'Yes - Add Wife'], true)) {
+                        $celebrantId = (string)$_POST['id'];
+                        if (isset($_POST['marriage_date'])) {
+                            \App\services\CelebrationService::saveWeddingDate($celebrantId, $familyCode, $weddingDateInput);
+                        }
+                        if (isset($_POST['announce_anniversary'])) {
+                            \App\services\CelebrationService::savePreferences(
+                                $celebrantId,
+                                showAge: null,
+                                announceAnniversary: in_array(strtolower(trim((string)$_POST['announce_anniversary'])), ['on', '1', 'true'], true)
+                            );
+                        }
+                    }
 
                     $requesterName = trim((string)($_SESSION['fName'] ?? '') . ' ' . (string)($_SESSION['lName'] ?? '')) ?: 'A family member';
                     foreach ($relRequests as $rr) {

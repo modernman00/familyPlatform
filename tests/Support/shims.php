@@ -24,6 +24,17 @@ if (!function_exists(__NAMESPACE__ . '\\showError')) {
     }
 }
 
+// Same namespace-shadowing trick: the global releaseSessionLock() calls
+// session_write_close(), and a PHPUnit run cannot start the session again once
+// output has begun, so every later test would see an inactive session (e.g.
+// AllMembersData::isSuperAdmin() checks session_status()). Only unqualified
+// calls from this namespace resolve here (CelebrationController).
+if (!function_exists(__NAMESPACE__ . '\\releaseSessionLock')) {
+    function releaseSessionLock(): void
+    {
+    }
+}
+
 namespace App\controller;
 
 if (!function_exists(__NAMESPACE__ . '\\redirect')) {
