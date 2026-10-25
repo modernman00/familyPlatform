@@ -119,6 +119,11 @@ if [ -f "tests/verify_pwa_optimization.php" ]; then
     php tests/verify_pwa_optimization.php || GATE4_PASSED=0
 fi
 
+# Saved webpack output must be the production build (dev bundles from `mix watch` break pages).
+if [ -f "scripts/verify_prod_bundles.php" ]; then
+    php scripts/verify_prod_bundles.php || GATE4_PASSED=0
+fi
+
 if [ -f "tests/verify_frontend_stability.php" ]; then
     php tests/verify_frontend_stability.php || GATE4_PASSED=0
 fi

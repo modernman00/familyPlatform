@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Refuse to commit dev/test webpack bundles. Enable once per clone: git config core.hooksPath .githooks
+exec php "$(git rev-parse --show-toplevel)/scripts/verify_prod_bundles.php" --staged
