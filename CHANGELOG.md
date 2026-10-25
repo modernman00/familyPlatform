@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-25 (event notifications)
+### Fixed
+- **Event reminders never sent** (RFC-0007): the 7-day, 1-day and on-the-day reminders only ran when a logged-in member opened `/sendEventReminder`; a cron call was redirected to login. New `cron/event_reminder_cron.php` runs `Event::runReminders()`. Each reminder is claimed once per event per day in `event_reminder_log` (created automatically), so reruns send nothing twice. Reminders now skip deleted events and go to the event's own family (`events.eventCode`).
+- New-event notifications: sent by the server only after the event is saved (no alert for an event that failed to save), no longer sent to the event's creator, and no longer duplicated in the bell (the family-wide row is gone).
+- WebPush was sent twice per notification; the app's second push now runs only if the central push was not logged as sent.
+### Security
+- `POST /member/notification/event` let any member push, toast and email arbitrary text to their family with no CSRF check or rate limit. `GET /member/notification/event?notificationNo=N` broadcast any notification row, including other families', to the caller. Both are now deprecated no-ops (CSRF-checked) kept for cached clients.
+- `GET /member/getEventData` returned every family's upcoming events; it now returns only the caller's families.
+### Changed
+- `createEvent.js` makes one request. Removed the routes `/sendEventReminder` and `/member/sendReminders`.
+- PHPUnit `EventNotificationFlowTest` (13 new cases), Cypress `events_and_profiles.cy.js` (single-request check), Playbook stage 5.
+
 ## 2026-10-24 (family code rename)
 ### Added
 - **Change the family code by family vote** (RFC-0005): the creator of a family code can propose a new one from Settings → Family Network. A poll opens in the family feed and everyone is notified; when voting closes with more Yes than No votes among those who voted (members who never vote do not count against it, but at least one member besides the creator must vote; over half of the whole family saying Yes applies it at once) the code changes for every member automatically (tree, posts, events, journals, invites, API key scopes) in one transaction and everyone is notified. Voting closes after 7 days, one change per 30 days. Old codes are kept as aliases so shared links, invites and live sessions keep working. Migration `2026_10_24_family_code_rename.sql`, `FamilyCodeRenameService`, Playbook section 4c, PHPUnit `FamilyCodeRenameTest`, Cypress `family_code_rename.cy.js`.

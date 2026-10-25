@@ -164,19 +164,9 @@ const process = async (e) => {
             return;
         }
 
-        // POST data to create the event and notification in parallel
-        const [eventResponse, notificationResponse] = await Promise.all([
-            axios.post("/member/profilePage/event", eventFormEntries, options),
-            axios.post('/member/notification/event', eventFormEntries, options)
-        ]);
-
-        // Extract and get notificationNo from the responses
-        const { message: notificationNo } = notificationResponse.data || {};
-
-        // update all members of similar famcode on their UIs using Pusher
-        if (notificationNo) {
-            axios.get(`/member/notification/event?notificationNo=${notificationNo}`);
-        }
+        // One request: the server saves the event and only then notifies the
+        // family (in-app, push and email), so a failed save never notifies anyone.
+        const eventResponse = await axios.post("/member/profilePage/event", eventFormEntries, options);
 
         // The sidebar's upcomingEvents component only ever gets seeded once, from the
         // page's initial server render (see sidebarComponents.js) — nothing was telling

@@ -359,20 +359,34 @@ class AllMembersData extends InnerJoin
         return $singleCust->getCustomerData($idString, $table);
     }
 
-    // show information of events within 7 days , 1 days and on the current date
-    public static function getAllEventData(): array
+    /**
+     * Live (not soft-deleted) events falling on the given dates, for the reminder
+     * job. famCode is the family the event was posted to (events.eventCode),
+     * falling back to the creator's primary family for rows that predate it.
+     * Dates are passed in from PHP so PHP and MySQL time zones cannot disagree.
+     *
+     * @param list<string>|null $dates Y-m-d dates; defaults to today, +1 day, +7 days.
+     * @return array<int, array<string, mixed>>
+     */
+    public static function getAllEventData(?array $dates = null): array
     {
         try {
-            $query = "SELECT events.no, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName, personal.famCode 
-            FROM events 
-            INNER JOIN personal ON events.id = personal.id 
-            WHERE events.eventDate BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
-            OR events.eventDate = DATE_ADD(CURDATE(), INTERVAL 1 DAY)
-            OR events.eventDate = CURDATE()
-           
+            $dates ??= [date('Y-m-d'), date('Y-m-d', strtotime('+1 day')), date('Y-m-d', strtotime('+7 days'))];
+            $dates = array_values(array_filter($dates, static fn(string $d): bool => $d !== ''));
+            if ($dates === []) {
+                return [];
+            }
+
+            $placeholders = implode(',', array_fill(0, count($dates), '?'));
+            $query = "SELECT events.no, events.id, events.eventCode, events.eventName, events.eventDate, events.eventType, events.eventFrequency, events.eventDescription, personal.firstName, personal.lastName,
+                COALESCE(NULLIF(events.eventCode, ''), personal.famCode) AS famCode
+            FROM events
+            INNER JOIN personal ON events.id = personal.id
+            WHERE events.eventDate IN ($placeholders)
+            AND events.deleted_at IS NULL
             ORDER BY events.eventDate ASC";
             $result = parent::connect2()->prepare($query);
-            $result->execute();
+            $result->execute($dates);
             return $result->fetchAll();
         } catch (\Throwable $th) {
             showError($th);

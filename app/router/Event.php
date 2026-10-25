@@ -1,13 +1,11 @@
 <?php
 
-$router->map('GET', '/sendEventReminder', 'App\controller\members\Event@sendReminder', 'Send_Event_Reminder');
+// Event reminders run from cron/event_reminder_cron.php (RFC-0007), not over HTTP.
 
 $router->map('GET', '/member/getEventDataByNo', 'App\controller\members\Event@getEventDataByNoController', 'new event no');
 
 $router->map('POST', '/member/profilePage/event', 'App\controller\members\Event@submitEvent', 'PROCESS_EVENT');
 
-
-$router->map('GET', '/member/sendReminders', 'App\controller\members\Event@sendReminder', 'SEND_REMINDER_EVENT');
 
 
 $router->map('GET', '/member/getEventData', 'App\controller\members\Event@getEventData', 'getEventData');

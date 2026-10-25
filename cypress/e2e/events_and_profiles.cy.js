@@ -28,6 +28,30 @@ describe('Events and Profiles', () => {
         cy.get('#createEventModal', { timeout: 15000 }).should('not.be.visible');
     });
 
+    // RFC-0007: the server notifies the family only after the event is saved, so the
+    // client must send exactly one request and never call the retired notification endpoints.
+    it('creates an event with a single request and no separate notification call', () => {
+        let legacyNotificationCalls = 0;
+        cy.intercept('POST', '/member/profilePage/event').as('createEvent');
+        cy.intercept({ method: /GET|POST/, url: '/member/notification/event*' }, (req) => {
+            legacyNotificationCalls++;
+            req.continue();
+        });
+
+        openModal('createEventModal');
+        cy.get('#eventName').type('Cypress Single Request Event');
+        cy.get('#eventDate').type('2026-12-30');
+        cy.get('#eventType').select('Party');
+        cy.get('#eventDescription').type('One request only');
+        cy.get('#eventFrequency').select('One-off');
+        cy.get('#submitEventModal').click();
+
+        cy.wait('@createEvent').its('response.statusCode').should('eq', 200);
+        cy.get('@createEvent.all').should('have.length', 1);
+        cy.get('#createEventModal', { timeout: 15000 }).should('not.be.visible');
+        cy.then(() => expect(legacyNotificationCalls, 'calls to /member/notification/event').to.eq(0));
+    });
+
     it('prevents event creation with missing fields', () => {
         openModal('createEventModal');
 

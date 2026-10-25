@@ -540,11 +540,11 @@
             num: 5,
             title: "Stage 5: Multi-Branch Family Events & Milestone Reminders",
             route: "/events",
-            desc: "Coordinate family reunions, anniversaries, weddings, and birthdays with automated reminders, map directions, and interactive RSVP tracking across family branches.",
+            desc: "Coordinate family reunions, anniversaries, weddings, and birthdays with automated reminders, map directions, and interactive RSVP tracking across family branches. When an event is saved, everyone in that event's family except its creator gets one in-app alert, a push and an email. A daily job sends reminders 7 days before, 1 day before and on the day, once each.",
             controller: "Reunion Organizer & Event Lead",
             state: "MOMENT_PUBLISHED \u2192 EVENT_COORDINATED",
-            db: "Reunion Schedule & Attendance Records",
-            compliance: "Event Privacy & Secure Calendar Feeds"
+            db: "Reunion Schedule & Attendance Records (events, notification, event_reminder_log)",
+            compliance: "Event Privacy & Secure Calendar Feeds \u2014 family-scoped delivery, deleted events never reminded, once-per-day reminder claim (RFC-0007)"
         },
         {
             num: 6,

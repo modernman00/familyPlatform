@@ -116,8 +116,14 @@ final class NotificationOrchestrator
             error_log('[NotificationOrchestrator] In-app table sync failed: ' . $e->getMessage());
         }
 
-        // Guarantee OS WebPush dispatch across all registered push endpoints
+        // Fallback OS WebPush. The central dispatcher already pushes to every
+        // registered device; this second send only runs when it did not log a
+        // successful push (e.g. keys set only under the MIX_VAPID_* names this
+        // class also reads), so devices no longer get every alert twice.
         try {
+            if (self::centralPushDelivered($notifId)) {
+                return $notifId;
+            }
             \App\classes\PushNotificationClass::sendPushNotification(
                 userId: $userId,
                 message: $body,
@@ -131,6 +137,29 @@ final class NotificationOrchestrator
         }
 
         return $notifId;
+    }
+
+    /**
+     * True when the central dispatcher logged a successful WebPush for this
+     * notification. Any lookup failure (missing table, DB error) returns false,
+     * so the caller falls back to sending, which is the behaviour before RFC-0007.
+     */
+    public static function centralPushDelivered(string $notificationId): bool
+    {
+        if ($notificationId === '') {
+            return false;
+        }
+        try {
+            $stmt = \Src\Db::connect2()->prepare("
+                SELECT 1 FROM notification_delivery_logs
+                WHERE notification_id = ? AND channel = 'web_push' AND status = 'sent'
+                LIMIT 1
+            ");
+            $stmt->execute([$notificationId]);
+            return $stmt->fetchColumn() !== false;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     public static function markAsRead(string $notificationId, string $userId): bool

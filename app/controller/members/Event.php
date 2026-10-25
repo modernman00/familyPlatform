@@ -10,10 +10,8 @@ use Src\CheckToken;
 use Src\Exceptions\ForbiddenException;
 use Src\Exceptions\ValidationException;
 use Src\functionality\SubmitPostData;
-use Src\LoginUtility;
 use Src\SelectFn;
 use Src\SendEmail;
-use Src\SubmitForm;
 use Src\UpdateFn;
 
 final class Event extends AllMembersData
@@ -64,10 +62,114 @@ final class Event extends AllMembersData
             }
 
             msgSuccess(200, "Event submitted", $retunLastId);
-
-
         } catch (\Throwable $th) {
             showError($th);
+            return;
+        }
+
+        // Notify only once the event is saved. The response has already been
+        // sent, so a slow mail/push provider never delays the creator, and a
+        // delivery failure can never turn a saved event into an error.
+        self::releaseClient();
+        try {
+            self::notifyFamilyOfNewEvent((string) $retunLastId);
+        } catch (\Throwable $th) {
+            error_log('[Event] New-event notification failed for event ' . $retunLastId . ': ' . $th->getMessage());
+        }
+    }
+
+    /**
+     * Finish the HTTP response so the browser is not kept waiting while the
+     * family is notified (PHP-FPM and LiteSpeed both expose a finish call).
+     */
+    private static function releaseClient(): void
+    {
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        }
+    }
+
+    /**
+     * Tells everyone in the event's family (except its creator) about a newly
+     * saved event: in-app row + real-time toast + WebPush via the orchestrator,
+     * and one bulk email. Reads the saved row, so only persisted, validated
+     * values are ever sent.
+     */
+    private static function notifyFamilyOfNewEvent(string $eventNo): void
+    {
+        $event = SelectFn::selectOneRow('events', 'no', $eventNo);
+        if (!is_array($event) || $event === []) {
+            return;
+        }
+
+        $creatorId = is_scalar($event['id'] ?? null) ? (string) $event['id'] : '';
+        $famCode = is_scalar($event['eventCode'] ?? null) ? (string) $event['eventCode'] : '';
+        if ($famCode === '' || $creatorId === '') {
+            return;
+        }
+
+        $senderName = self::getSenderName();
+        $senderNameStr = is_string($senderName) && trim($senderName) !== '' ? $senderName : 'A family member';
+        $eventName = is_scalar($event['eventName'] ?? null) ? (string) $event['eventName'] : 'Family Event';
+        $eventDate = is_scalar($event['eventDate'] ?? null) ? (string) $event['eventDate'] : '';
+        $eventType = is_scalar($event['eventType'] ?? null) ? (string) $event['eventType'] : 'Event';
+        $eventDescription = is_scalar($event['eventDescription'] ?? null) ? (string) $event['eventDescription'] : '';
+        $formattedDate = $eventDate !== '' ? dateFormat($eventDate) : '';
+
+        $membersToNotify = self::AllMembersEmailByFamCode($famCode, $creatorId);
+
+        foreach ($membersToNotify as $member) {
+            $targetUid = is_scalar($member['id'] ?? null) ? (string) $member['id'] : '';
+            if ($targetUid === '') {
+                continue;
+            }
+            NotificationOrchestrator::dispatch(
+                userId: $targetUid,
+                category: 'social',
+                priority: 'medium',
+                title: "🎉 New Event: {$eventName}",
+                body: "{$senderNameStr} added '{$eventName}' on {$formattedDate}",
+                actionUrl: '/profilePage#eventHeader',
+                tag: 'event-' . $eventNo,
+                familyCode: $famCode,
+                metadata: [
+                    'sender_id' => $creatorId,
+                    'sender_name' => $senderNameStr,
+                    'event_no' => $eventNo,
+                    'eventName' => $eventName,
+                    'eventDate' => $eventDate,
+                    'eventType' => $eventType,
+                    'eventDescription' => $eventDescription,
+                ]
+            );
+        }
+
+        $emailsToNotify = array_values(array_filter(
+            array_map(static fn(mixed $e): string => is_scalar($e) ? (string) $e : '', array_column($membersToNotify, 'email')),
+            static fn(string $e): bool => $e !== ''
+        ));
+        if ($emailsToNotify !== []) {
+            self::sendBulkNotification(
+                data: [
+                    'eventName' => $eventName,
+                    'eventDate' => $eventDate,
+                    'eventType' => $eventType,
+                    'eventDescription' => $eventDescription,
+                    'firstName' => $senderNameStr,
+                    'lastName' => '',
+                    'emailHTMLContent' => "{$senderNameStr} has added a new upcoming family event: {$eventName} scheduled for {$formattedDate}.",
+                ],
+                subject: "New Family Event: {$eventName}",
+                email: $emailsToNotify
+            );
         }
     }
 
@@ -92,148 +194,33 @@ final class Event extends AllMembersData
     }
 
     /**
-     * @throws \Throwable
+     * @deprecated since RFC-0007. submitEvent() now notifies the family once the
+     * event is saved. Kept for one release because a service-worker-cached
+     * createEvent.js still awaits this POST; a 404 would show the user an error
+     * for an event that did save. It sends nothing and returns a null message,
+     * so the old client also skips its follow-up GET broadcast.
+     * POST /member/notification/event
      */
-    /**
-     * Post event notification bar
-     * This PHP function, PostEventNotificationBar, handles posting an event notification to a recipient. It:Sanitizes input data from $_POST and $_SESSION.
-     * Retrieves the sender's name.
-     * Prepares a notification array with sender and event details.
-     * Inserts the notification into the 'notification' table.
-     * Sends a success message with the last inserted ID.
-     * In essence, it creates a new event notification and stores it in the database.
-     * '/member/notification/event
-     *
-     * @return void
-     */
-
     public static function PostEventNotificationBar(): void
     {
         try {
-            $cleanData = LoginUtility::getSanitisedInputData($_POST);
-            $cleanData['id'] = checkInput(data: $_SESSION['id']);
-            $id = is_scalar($cleanData['id']) ? (string)$cleanData['id'] : '';
-
-            // GET THE SENDER'S NAME 
-            $senderName = self::getSenderName();
-            $senderNameStr = is_string($senderName) && $senderName !== '' ? $senderName : 'A family member';
-            $eventFamCode = self::generateFamCode();
-            $eventFamCodeStr = is_string($eventFamCode) ? $eventFamCode : '';
-            $eventName = is_string($cleanData['eventName'] ?? null) ? (string)$cleanData['eventName'] : 'Family Event';
-            $eventDate = is_string($cleanData['eventDate'] ?? null) ? (string)$cleanData['eventDate'] : '';
-            $eventType = is_string($cleanData['eventType'] ?? null) ? (string)$cleanData['eventType'] : 'Event';
-            $eventDescription = is_string($cleanData['eventDescription'] ?? null) ? (string)$cleanData['eventDescription'] : '';
-
-            // Insert to legacy notification table for backward compatibility
-            $cleanDataNotification = [
-                'sender_id' => $id,
-                'receiver_id' => $eventFamCodeStr,
-                'sender_name' => $senderNameStr,
-                'notification_name' => $eventName,
-                'notification_date' => $eventDate,
-                'receiver' => 'everyone filtered',
-                'notification_type' => $eventType,
-                'notification_content' => $eventDescription,
-                'action_url' => '/profilePage#eventHeader',
-                'notification_status' => 'new'
-            ];
-
-            $lastInsertedId = SubmitForm::submitFormDynamicLastId(
-                table: 'notification',
-                field: $cleanDataNotification,
-                lastIdCol: 'no'
-            );
-
-            // Multi-channel notification dispatch across the family network
-            if ($eventFamCodeStr !== '') {
-                $membersToNotify = self::filterMemberByFamCode($eventFamCodeStr);
-                $formattedDate = $eventDate !== '' ? dateFormat($eventDate) : '';
-
-                // 1. Dispatch via Unified NotificationOrchestrator (In-App real-time toast + WebPush OS banner + sync)
-                foreach ($membersToNotify as $member) {
-                    $targetUid = is_scalar($member['id'] ?? null) ? (string)$member['id'] : '';
-                    if ($targetUid !== '') {
-                        NotificationOrchestrator::dispatch(
-                            userId: $targetUid,
-                            category: 'social',
-                            priority: 'medium',
-                            title: "🎉 New Event: {$eventName}",
-                            body: "{$senderNameStr} added '{$eventName}' on {$formattedDate}",
-                            actionUrl: '/profilePage#eventHeader',
-                            tag: 'event-' . ($lastInsertedId ?: 'new'),
-                            familyCode: $eventFamCodeStr,
-                            metadata: [
-                                'sender_id' => $id,
-                                'sender_name' => $senderNameStr,
-                                'event_no' => $lastInsertedId,
-                                'eventName' => $eventName,
-                                'eventDate' => $eventDate,
-                                'eventType' => $eventType,
-                                'eventDescription' => $eventDescription,
-                            ]
-                        );
-                    }
-                }
-
-                // 2. Dispatch HTML Email Notification to family network
-                $emailsToNotify = array_values(array_filter(array_map('strval', array_column($membersToNotify, 'email')), fn($e) => $e !== ''));
-                if (!empty($emailsToNotify)) {
-                    $emailPayload = [
-                        'eventName' => $eventName,
-                        'eventDate' => $eventDate,
-                        'eventType' => $eventType,
-                        'eventDescription' => $eventDescription,
-                        'firstName' => $senderNameStr,
-                        'lastName' => '',
-                        'emailHTMLContent' => "{$senderNameStr} has added a new upcoming family event: {$eventName} scheduled for {$formattedDate}.",
-                    ];
-                    self::sendBulkNotification(
-                        data: $emailPayload,
-                        subject: "New Family Event: {$eventName}",
-                        email: $emailsToNotify
-                    );
-                }
-            }
-
-            msgSuccess(code: 200, msg: $lastInsertedId);
+            CheckToken::tokenCheck();
+            msgSuccess(code: 200, msg: null);
         } catch (\Throwable $th) {
             showError($th);
         }
     }
 
-
     /**
-     * Get a single event notification by notificationNo.
-     * /member/notification/event
-     *
-     * @return void
+     * @deprecated since RFC-0007. It used to load any notification row by number
+     * and broadcast it to the caller's channels (a cross-family leak). The
+     * orchestrator now delivers real-time toasts itself. Kept as a no-op for
+     * cached clients.
+     * GET /member/notification/event
      */
-    public static function GetEventNotificationBar()
+    public static function GetEventNotificationBar(): void
     {
-        try {
-            $notificationNo = self::asString(checkInput(data: $_GET['notificationNo']));
-            $allNotification = SelectFn::selectAllRowsById('notification', 'no', $notificationNo);
-
-            $viewerId = isset($_SESSION['id']) && is_scalar($_SESSION['id']) ? (string) $_SESSION['id'] : '';
-            if ($viewerId !== '') {
-                Pusher::broadcast(
-                    theChannel: Pusher::userChannel($viewerId),
-                    theEvent: 'new-notification',
-                    theData: $allNotification
-                );
-            }
-
-            $eventFamCode = self::generateFamCode();
-            if (is_string($eventFamCode) && $eventFamCode !== '') {
-                Pusher::broadcast(
-                    theChannel: Pusher::familyChannel($eventFamCode),
-                    theEvent: 'new-notification',
-                    theData: $allNotification
-                );
-            }
-        } catch (\Throwable $th) {
-            showError(th: $th);
-        }
+        msgSuccess(code: 200, msg: null);
     }
 
     /**
@@ -262,54 +249,135 @@ final class Event extends AllMembersData
         }
     }
 
+    /** Days-before-event => reminder kind recorded in event_reminder_log. */
+    private const REMINDER_KINDS = [7 => 'week', 1 => 'day', 0 => 'today'];
+
     /**
-     * Sends event reminders to all members whose family code matches the event's family code.
+     * Sends the 7-day, 1-day and on-the-day reminders for every live event to
+     * the members of the event's family. Run once a day by
+     * cron/event_reminder_cron.php.
      *
-     * This method retrieves all members' details and events occurring within the next 7 days,
-     * 1 day, and on the current date. It filters members based on the family code of each event
-     * and sends notifications to those members. If the event data is available, it iterates over
-     * each event, filters the members by family code, and sends reminders to the corresponding
-     * members via email.
+     * Each (event, kind, day) is claimed in event_reminder_log before anything
+     * is sent, so a rerun or an overlapping run sends nothing twice. If the
+     * claim cannot be written, that reminder is skipped (and retried by the
+     * next run) rather than risk a duplicate.
      *
-     * @return void
-     * @throws \Throwable If any error occurs during the operation.
+     * @param \DateTimeImmutable|null $today Reference day (tests pin it); defaults to today.
+     * @param \PDO|null $claimDb Connection used for the idempotency claim (tests inject a failing one).
+     * @return array{events: int, sent: int, skipped: int, failed: int}
+     */
+    public static function runReminders(?\DateTimeImmutable $today = null, ?\PDO $claimDb = null): array
+    {
+        $today ??= new \DateTimeImmutable('today');
+        $todayStr = $today->format('Y-m-d');
+        $result = ['events' => 0, 'sent' => 0, 'skipped' => 0, 'failed' => 0];
+
+        $dates = [];
+        foreach (array_keys(self::REMINDER_KINDS) as $daysAhead) {
+            $dates[] = $today->modify("+{$daysAhead} days")->format('Y-m-d');
+        }
+
+        $allEventData = parent::getAllEventData($dates);
+        $result['events'] = count($allEventData);
+        if ($allEventData === []) {
+            return $result;
+        }
+
+        try {
+            $claimDb ??= \Src\Db::connect2();
+            self::ensureReminderLogTable($claimDb);
+        } catch (\Throwable $th) {
+            error_log('[Event] Reminder claim store unavailable: ' . $th->getMessage());
+            $result['failed'] = $result['events'];
+            return $result;
+        }
+
+        foreach ($allEventData as $eventData) {
+            $eventNo = is_scalar($eventData['no'] ?? null) ? (string) $eventData['no'] : '';
+            $famCode = is_scalar($eventData['famCode'] ?? null) ? (string) $eventData['famCode'] : '';
+            $eventDate = is_scalar($eventData['eventDate'] ?? null) ? (string) $eventData['eventDate'] : '';
+            if ($eventNo === '' || $famCode === '' || $eventDate === '') {
+                $result['skipped']++;
+                continue;
+            }
+
+            $daysAhead = (int) $today->diff(new \DateTimeImmutable($eventDate))->format('%r%a');
+            $kind = self::REMINDER_KINDS[$daysAhead] ?? null;
+            if ($kind === null) {
+                $result['skipped']++;
+                continue;
+            }
+
+            try {
+                if (!self::claimReminder($claimDb, $eventNo, $kind, $todayStr)) {
+                    $result['skipped']++;
+                    continue;
+                }
+            } catch (\Throwable $th) {
+                error_log("[Event] Reminder claim failed for event {$eventNo} ({$kind}): " . $th->getMessage());
+                $result['failed']++;
+                continue;
+            }
+
+            // One event's delivery failure must not stop the others. The claim
+            // stays, so a failed send is not retried today (at most once).
+            try {
+                $membersToNotify = self::filterMemberByFamCode($famCode);
+                self::checkEventDiffAndNotifyAll(
+                    data: $eventData,
+                    email: array_column($membersToNotify, 'email'),
+                    id: array_column($membersToNotify, 'id'),
+                    today: $todayStr
+                );
+                $result['sent']++;
+            } catch (\Throwable $th) {
+                error_log("[Event] Reminder delivery failed for event {$eventNo} ({$kind}): " . $th->getMessage());
+                $result['failed']++;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @deprecated since RFC-0007; the cron script calls runReminders(). Kept so
+     * any other caller still gets the same behaviour, now with a JSON summary.
      */
     public static function sendReminder(): void
     {
         try {
-            // show information of events within 7 days , 1 days and on the current date
-            $allEventData = parent::getAllEventData();
-
-            $notifyCustomer = new EmailData(
-                sender: 'member'
-            );
-
-            if (!defined('PASS')) {
-                $notifyCustomer->getEmailData();
-            }
-
-            if ($allEventData) {
-                // send other event reminders
-                foreach ($allEventData as $eventData) {
-                // Get the famCode of the event
-                $famCodeForEvent = $eventData['famCode'] ?? $eventData['eventCode'] ?? null;
-                if (!$famCodeForEvent) continue;
-
-                $membersToNotify = self::filterMemberByFamCode($famCodeForEvent);
-
-                    // Extract email addresses from the filtered members
-                    $emailsToNotify = array_column($membersToNotify, 'email');
-
-                    // Extract id from the filtered members
-                    $idsToNotify = array_column($membersToNotify, 'id');
-
-
-                    self::checkEventDiffAndNotifyAll(data: $eventData, email: $emailsToNotify, id: $idsToNotify);
-                }
-            }
+            msgSuccess(200, self::runReminders());
         } catch (\Throwable $th) {
             showError($th);
         }
+    }
+
+    private static function ensureReminderLogTable(\PDO $db): void
+    {
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS event_reminder_log (
+                id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                event_no INT NOT NULL,
+                reminder_kind VARCHAR(10) NOT NULL,
+                sent_on DATE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY uq_event_reminder (event_no, reminder_kind, sent_on)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ");
+    }
+
+    /**
+     * Atomically claims one reminder. Returns true only for the single run that
+     * inserted the row; every other run sees the UNIQUE key and gets false.
+     */
+    private static function claimReminder(\PDO $db, string $eventNo, string $kind, string $sentOn): bool
+    {
+        $stmt = $db->prepare('INSERT IGNORE INTO event_reminder_log (event_no, reminder_kind, sent_on) VALUES (?, ?, ?)');
+        if ($stmt === false) {
+            throw new \RuntimeException('Could not prepare reminder claim.');
+        }
+        $stmt->execute([$eventNo, $kind, $sentOn]);
+        return $stmt->rowCount() === 1;
     }
 
     private static function sendBulkNotification(array $data, string $subject, array $email): void
@@ -362,7 +430,8 @@ final class Event extends AllMembersData
                 return match ($data['eventFrequency']) {
                     "Annually" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 year', no: $no),
                     "Monthly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 month', no: $no),
-                    "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no)
+                    "Weekly" => self::processEventUpdate(dateEvent: $eventDate, extendBy: '1 week', no: $no),
+                    default => false,
                 };
             }
         } else {
@@ -383,11 +452,15 @@ final class Event extends AllMembersData
     }
 
     /**
-     * @return void
+     * Upcoming events for the caller's own families only. (It used to return
+     * every family's events for the next 7 days to any logged-in member.)
+     * GET /member/getEventData
      */
     public static function getEventData(): void
     {
-        $allEventData = allMembersData::getAllEventData();
+        $famCode = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
+        $famCodes = $_SESSION['famCodes'] ?? ($famCode !== '' ? [$famCode] : []);
+        $allEventData = allMembersData::getEventDataByFamCode((array) $famCodes);
 
         \msgSuccess(201, $allEventData);
     }
@@ -506,11 +579,11 @@ final class Event extends AllMembersData
      *
      * @return void
      */
-    private static function checkEventDiffAndNotifyAll(array $data, array $email, ?array $id = null): void
+    private static function checkEventDiffAndNotifyAll(array $data, array $email, ?array $id = null, ?string $today = null): void
     {
 
         $diffEventAndTodayDate = dateDifference(
-            date1: date(format: 'Y-m-d'),
+            date1: $today ?? date(format: 'Y-m-d'),
             date2: $data['eventDate']
         );
         $eventDayFormatted = dateFormat($data['eventDate']);
