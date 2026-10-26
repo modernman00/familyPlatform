@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Build(webpack): set exportsPresence to warn for barrel re-exports in shared-js-lib",
+    "title": "Feat(security): Red Team & BRATS comprehensive audit remediation, Family RoundTable, Two Truths, PartyPlatform bridge & Reels parity",
     "notes": [
+        "Feat(security): Red Team & BRATS comprehensive audit remediation, Family RoundTable, Two Truths, PartyPlatform bridge & Reels parity",
         "Build(webpack): set exportsPresence to warn for barrel re-exports in shared-js-lib",
-        "Feat(release): threaded comment replies, @mentions, GIF comments, Family AI Hub, and crimson brand unification",
-        "Fix(ui): restore Then & Now button styling and enhance composer prompt border and background"
+        "Feat(release): threaded comment replies, @mentions, GIF comments, Family AI Hub, and crimson brand unification"
     ],
     "released_at": "2026-10-26",
-    "commit": "1812de4"
+    "commit": "c634801"
 }
